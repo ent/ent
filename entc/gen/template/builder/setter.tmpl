@@ -1,0 +1,69 @@
+{{ define "setter" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+{{ range $_, $f := $.Fields }}
+	{{ $p := lower (printf "%.1s" $f.Type) }}
+	{{ $func := print "Set" (pascal $f.Name) }}
+	// {{ $func }} sets the {{ $f.Name }} field.
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
+		{{ $receiver }}.{{ $f.StructField }} = &{{ $p }}
+		return {{ $receiver }}
+	}
+	{{ if or $f.Optional $f.HasDefault }}
+	{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
+		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
+			if {{ $p }} != nil {
+				{{ $receiver }}.{{ $func }}(*{{ $p }})
+			}
+			return {{ $receiver }}
+		}
+	{{ end }}
+{{ end }}
+
+{{ range $_, $e := $.Edges }}
+	{{ $op := "add" }}{{ if $e.Unique }}{{ $op = "set" }}{{ end }}
+	{{ $idsFunc := print (pascal $op) (singular $e.Name | pascal) "IDs" }}{{ if $e.Unique }}{{ $idsFunc = print (pascal $op) (pascal $e.Name) "ID" }}{{ end }}
+	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
+	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $.ID.Type }}) *{{ $builder }} {
+		if {{ $receiver }}.{{ $e.StructField }} == nil {
+			{{ $receiver }}.{{ $e.StructField }} = make(map[{{ $.ID.Type }}]struct{})
+		}
+		{{ if $e.Unique -}}
+			{{ $receiver }}.{{ $e.StructField }}[id] = struct{}{}
+		{{- else -}}
+			for i := range ids {
+				{{ $receiver }}.{{ $e.StructField }}[ids[i]] = struct{}{}
+			}
+		{{- end }}
+		return {{ $receiver }}
+	}
+	{{ if and $e.Unique $e.Optional }}
+		{{ $nillableIDsFunc := print "SetNillable" (pascal $e.Name) "ID" }}
+		// {{ $nillableIDsFunc }} sets the {{ $e.Name }} edge to {{ $e.Type.Name }} by id if the given value is not nil.
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $.ID.Type }}) *{{ $builder }} {
+			if id != nil {
+				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
+			}
+			return {{ $receiver }}
+		}
+	{{ end }}
+	{{ $p := lower (printf "%.1s" $e.Type.Name) }}
+	{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
+	{{ $func := print (pascal $op) (pascal $e.Name) }}
+	// {{ $func }} {{ $op }}s the {{ $e.Name }} edge{{if not $e.Unique}}s{{ end }} to {{ $e.Type.Name }}.
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
+		{{ if $e.Unique -}}
+			return {{ $receiver }}.{{ $idsFunc }}({{ $p }}.ID)
+		{{- else -}}
+			ids := make([]{{ $.ID.Type }}, len({{ $p }}))
+			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
+			for {{ $i }} := range {{ $p }} {
+				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID
+			}
+			return {{ $receiver }}.{{ $idsFunc }}(ids...)
+		{{- end }}
+	}
+{{ end }}
+{{ end }}

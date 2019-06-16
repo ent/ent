@@ -1,0 +1,224 @@
+{{ define "update" }}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+{{ template "import" $ }}
+
+{{ $builder := print (pascal $.Name) "Update" }}
+{{ $receiver := receiver $builder }}
+// {{ $builder }} is the builder for updating {{ $.Name }} entities.
+type {{ $builder }} struct {
+	config
+	{{- template "update/fields" $ -}}
+	predicates []ent.Predicate
+}
+
+// Where adds a new predicate for the builder.
+func ({{ $receiver}} *{{ $builder }}) Where(ps ...ent.Predicate) *{{ $builder }} {
+	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
+	return {{ $receiver }}
+}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "setter" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "update/edges" . }}
+{{ end }}
+
+// Save executes the query and returns the number of rows/vertices matched by this operation.
+func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
+	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" 0 -}}
+		{{ template "update/validators" . }}
+	{{- end -}}
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlSave(ctx)
+	case dialect.Neptune:
+		vertices, err := {{ $receiver }}.gremlinSave(ctx)
+		return len(vertices), err
+	default:
+		return 0, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// SaveX is like Save, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) int {
+	affected, err := {{ $receiver }}.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return affected
+}
+
+// Exec executes the query.
+func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) error {
+	_, err := {{ $receiver }}.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
+	if err := {{ $receiver }}.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+{{ with extend $ "Builder" $builder "Package" $pkg }}
+	{{ template "dialect/sql/update" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "dialect/gremlin/update" . }}
+{{ end }}
+
+{{ $onebuilder := printf "%sOne" $builder }}
+{{ $receiver = receiver $onebuilder }}
+
+// {{ $onebuilder }} is the builder for updating a single {{ $.Name }} entity.
+type {{ $onebuilder }} struct {
+	config
+	id {{ $.ID.Type }}
+	{{- template "update/fields" $ }}
+}
+
+{{ with extend $ "Builder" $onebuilder }}
+	{{ template "setter" . }}
+{{ end }}
+
+
+{{ with extend $ "Builder" $onebuilder }}
+	{{ template "update/edges" . }}
+{{ end }}
+
+// Save executes the query and returns the updated entity.
+func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {
+	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" "nil" -}}
+		{{ template "update/validators" . }}
+	{{- end -}}
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlSave(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinSave(ctx)
+	default:
+		return nil, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// SaveX is like Save, but panics if an error occurs.
+func ({{ $receiver }} *{{ $onebuilder }}) SaveX(ctx context.Context) *{{ $.Name }} {
+	{{ $.Receiver }}, err := {{ $receiver }}.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return {{ $.Receiver }}
+}
+
+// Exec executes the query on the entity.
+func ({{ $receiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
+	_, err := {{ $receiver }}.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
+	if err := {{ $receiver }}.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+{{ with extend $ "Builder" $onebuilder "Package" $pkg }}
+	{{ template "dialect/sql/update" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $onebuilder }}
+	{{ template "dialect/gremlin/update" . }}
+{{ end }}
+
+{{ end }}
+
+{{/* shared struct fields between the twp updaters */}}
+{{ define "update/fields"}}
+{{ range $_, $f := $.Fields }}
+	{{- $f.StructField }} *{{ $f.Type }}
+{{ end }}
+{{- range $_, $e := $.Edges }}
+	{{- $e.StructField }} map[{{ $.ID.Type }}]struct{}
+{{ end }}
+{{- range $_, $e := $.Edges }}
+	{{- $p := "removed" }}{{ if $e.Unique }}{{ $p = "cleared" }}{{ end }}
+	{{- print $p (pascal $e.Name) }} {{ if $e.Unique }}bool{{ else }}map[{{ $.ID.Type }}]struct{}{{ end }}
+{{ end -}}
+{{ end }}
+
+{{/* shared edges removal between the two updaters */}}
+{{ define "update/edges" }}
+{{ $builder := pascal .Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+{{ range $_, $e := $.Edges }}
+	{{ if $e.Unique }}
+		{{ $func := print "Clear" (pascal $e.Name) }}
+		// {{ $func }} clears the {{ $e.Name }} edge to {{ $e.Type.Name }}.
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
+			{{ $receiver }}.cleared{{ pascal $e.Name }} = true
+			return {{ $receiver }}
+		}
+	{{ else }}
+		{{ $p := lower (printf "%.1s" $e.Type.Name) }}
+		{{/* if the name of the parameter conflicts with the receiver name */}}
+		{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
+		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
+		// {{ $idsFunc }} removes the {{ $e.Name }} edge to {{ $e.Type.Name }} by ids.
+		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $.ID.Type }}) *{{ $builder }} {
+			if {{ $receiver }}.removed{{ pascal $e.Name }} == nil {
+				{{ $receiver }}.removed{{ pascal $e.Name }} = make(map[{{ $.ID.Type }}]struct{})
+			}
+			for i := range ids {
+				{{ $receiver }}.removed{{ pascal $e.Name }}[ids[i]] = struct{}{}
+			}
+			return {{ $receiver }}
+		}
+		{{ $func := print "Remove" (pascal $e.Name) }}
+		// {{ $func }} removes {{ $e.Name }} edges to {{ $e.Type.Name }}.
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} ...*{{ $e.Type.Name }}) *{{ $builder }} {
+			ids := make([]{{ $.ID.Type }}, len({{ $p }}))
+			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
+			for {{ $i }} := range {{ $p }} {
+				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID
+			}
+			return {{ $receiver }}.{{ $idsFunc }}(ids...)
+		}
+	{{ end }}
+{{ end }}
+{{ end }}
+
+{{/* shared templates for validators. */}}
+{{ define "update/validators" }}
+{{- $pkg := .Scope.Package -}}
+{{- $zero := .Scope.ZeroValue }}
+{{- $receiver := .Scope.Receiver -}}
+{{- range $_, $f := $.Fields -}}
+	{{ with $f.Validators -}}
+		if {{ $receiver }}.{{ $f.StructField }} != nil {
+			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {
+				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
+			}
+		}
+	{{ end -}}
+{{ end -}}
+{{- range $_, $e := $.Edges }}
+	{{- if $e.Unique -}}
+		if len({{ $receiver }}.{{ $e.StructField }}) > 1 {
+			return {{ $zero }}, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
+		}
+		{{ if not $e.Optional -}}
+			if {{ $receiver }}.cleared{{ pascal $e.Name }} && {{ $receiver }}.{{ $e.StructField }} == nil {
+				return {{ $zero }}, errors.New("{{ $pkg }}: clearing a unique edge \"{{ $e.Name }}\"")
+			}
+		{{ end -}}
+	{{ end -}}
+{{ end -}}
+{{ end }}

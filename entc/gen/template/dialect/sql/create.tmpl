@@ -1,0 +1,149 @@
+{{ define "dialect/sql/create" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
+	var (
+		res sql.Result
+		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
+	)
+	tx, err := {{ $receiver }}.driver.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	builder := sql.Insert({{ $.Package }}.Table).Default({{ $receiver }}.driver.Dialect())
+	{{- range $_, $f := $.Fields }}
+		if {{ $receiver }}.{{- $f.StructField }} != nil {
+			builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+			{{ if $f.Nullable }}*{{ end }}{{ $.Receiver }}.{{ pascal $f.Name }} = *{{ $receiver }}.{{ $f.StructField }}
+		}
+	{{- end }}
+	query, args := builder.Query()
+	if err := tx.Exec(ctx, query, args, &res); err != nil {
+		return nil, rollback(tx, err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, rollback(tx, err)
+	}
+	{{ $.Receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}id{{ end }}
+	{{- range $_, $e := $.Edges }}
+		if len({{ $receiver }}.{{ $e.StructField }}) > 0 {
+			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}
+				for eid := range {{ $receiver }}.{{ $e.StructField }} {
+					{{- template "dialect/sql/create/convertid" $e -}}
+					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+							Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
+							Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id)).Query()
+					if err := tx.Exec(ctx, query, args, &res); err != nil {
+						return nil, rollback(tx, err)
+					}
+					query, args = sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+							Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
+							Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).Query()
+					if err := tx.Exec(ctx, query, args, &res); err != nil {
+						return nil, rollback(tx, err)
+					}
+					affected, err := res.RowsAffected()
+					if err != nil {
+						return nil, rollback(tx, err)
+					}
+					if int(affected) < len({{ $receiver }}.{{ $e.StructField }}) {
+						return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("\"{{ $e.Name }}\" (%v) already connected to a different \"{{ $.Name }}\"", eid)})
+					}
+				}
+			{{- else if $e.M2M  }}
+				for eid := range {{ $receiver }}.{{ $e.StructField }} {
+					{{- template "dialect/sql/create/convertid" $e -}}
+					{{ $a := 0 }}{{ $b := 1 }}{{- if $e.IsInverse }}{{ $a = 1 }}{{ $b = 0 }}{{ end }}
+					query, args := sql.Insert({{ $.Package }}.{{ $e.TableConstant }}).
+							Columns({{ $.Package }}.{{ $e.PKConstant }}[{{ $a }}], {{ $.Package }}.{{ $e.PKConstant }}[{{ $b }}]).
+							Values(id, eid).
+							{{- if $e.SelfRef }}{{/* self-ref creates the edges in both ways. */}}
+								Values(eid, id).
+							{{- end }}
+							Query()
+					if err := tx.Exec(ctx, query, args, &res); err != nil {
+						return nil, rollback(tx, err)
+					}
+				}
+			{{- else if $e.M2O }}
+				for eid := range {{ $receiver }}.{{ $e.StructField }} {
+					{{- template "dialect/sql/create/convertid" $e -}}
+					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
+						Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id)).
+						Query()
+					if err := tx.Exec(ctx, query, args, &res); err != nil {
+						return nil, rollback(tx, err)
+					}
+				}
+			{{- else if $e.O2M }}
+				p := sql.P()
+				for eid := range {{ $receiver }}.{{ $e.StructField }} {
+					{{- template "dialect/sql/create/convertid" $e -}}
+					p.Or().EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid)
+				}
+				query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+					Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
+					Where(sql.And(p, sql.IsNull({{ $.Package }}.{{ $e.ColumnConstant }}))).
+					Query()
+				if err := tx.Exec(ctx, query, args, &res); err != nil {
+					return nil, rollback(tx, err)
+				}
+				affected, err := res.RowsAffected()
+				if err != nil {
+					return nil, rollback(tx, err)
+				}
+				if int(affected) < len({{ $receiver }}.{{ $e.StructField }}) {
+					return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.StructField }}))})
+				}
+			{{- else }}{{/* O2O */}}
+				{{- if $.Type.ID.IsString }}
+					eid, err := strconv.Atoi(keys({{ $receiver }}.{{ $e.StructField }})[0])
+					if err != nil {
+						return nil, err
+					}
+				{{- else }}
+					eid := keys({{ $receiver }}.{{ $e.StructField }})[0]
+				{{- end }}
+				{{- if $e.IsInverse }}
+					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
+						Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
+						Query()
+				{{- else }}
+					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+						Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
+						Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
+						Query()
+				{{- end }}
+				if err := tx.Exec(ctx, query, args, &res); err != nil {
+					return nil, rollback(tx, err)
+				}
+				affected, err := res.RowsAffected()
+				if err != nil {
+					return nil, rollback(tx, err)
+				}
+				if int(affected) < len({{ $receiver }}.{{ $e.StructField }}) {
+					return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.StructField }}))})
+				}
+			{{- end }}
+		}
+	{{- end }}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return {{ $.Receiver }}, nil
+}
+
+{{ end }}
+
+{{ define "dialect/sql/create/convertid" }}
+	{{- if $.Type.ID.IsString }}
+		eid, err := strconv.Atoi(eid)
+		if err != nil {
+			return nil, err
+		}
+	{{- end }}
+{{ end }}

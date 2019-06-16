@@ -1,0 +1,15 @@
+{{ define "dialect/sql/delete" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) error {
+	var res sql.Result
+	selector := sql.Select().From(sql.Table({{ $.Package }}.Table))
+	for _, p := range {{ $receiver }}.predicates {
+		p.SQL(selector)
+	}
+	query, args := sql.Delete({{ $.Package }}.Table).FromSelect(selector).Query()
+	return {{ $receiver }}.driver.Exec(ctx, query, args, &res)
+}
+
+{{ end }}

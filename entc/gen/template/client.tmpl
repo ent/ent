@@ -1,0 +1,158 @@
+{{ define "client" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+import (
+	"log"
+
+	"{{ $.Config.Package }}/migrate"
+	{{ range $_, $n := $.Nodes }}
+		"{{ $n.Config.Package }}/{{ $n.Package }}"
+	{{- end }}
+)
+
+// Client is the client that holds all ent builders.
+type Client struct {
+	config
+	// Schema is the client for creating, migrating and dropping schema.
+	Schema *migrate.Schema
+	{{ range $_, $n := $.Nodes -}}
+		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
+		{{ $n.Name }} *{{ $n.Name }}Client
+	{{ end }}
+}
+
+// NewClient creates a new client configured with the given options.
+func NewClient(opts ...Option) *Client {
+	c := config{log: log.Println}
+	c.options(opts...)
+	return &Client{
+		config: c,
+		Schema: migrate.NewSchema(c.driver),
+		{{ range $_, $n := $.Nodes -}}
+			{{ $n.Name }}: New{{ $n.Name }}Client(c),
+		{{ end -}}
+	}
+}
+
+// Tx returns a new transactional client.
+func (c *Client) Tx(ctx context.Context) (*Tx, error) {
+	if _, ok := c.driver.(*txDriver); ok {
+		return nil, fmt.Errorf("{{ $pkg }}: cannot start a transaction within a transaction")
+	}
+	tx, err := newTx(ctx, c.driver)
+	if err != nil {
+		return nil, fmt.Errorf("{{ $pkg }}: starting a transaction: %v", err)
+	}
+	cfg := config{driver: tx, log: c.log, verbose: c.verbose}
+	return &Tx{
+		config: cfg,
+		{{ range $_, $n := $.Nodes -}}
+			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
+		{{ end -}}
+	}, nil
+}
+
+{{ range $_, $n := $.Nodes -}}
+{{ $client := print $n.Name "Client" }}
+// {{ $client }} is a client for the {{ $n.Name }} schema.
+type {{ $client }} struct {
+	config
+}
+
+{{ $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end }}
+
+// New{{ $client }} returns a client for the {{ $n.Name }} from the given config.
+func New{{ $client }}(c config) *{{ $client }} {
+	return &{{ $client }}{config: c}
+}
+
+// Create returns a create builder for {{ $n.Name }}.
+func (c *{{ $client }}) Create() *{{ $n.Name }}Create {
+	return &{{ $n.Name }}Create{config: c.config}
+}
+
+// Update returns an update builder for {{ $n.Name }}.
+func (c *{{ $client }}) Update() *{{ $n.Name }}Update {
+	return &{{ $n.Name }}Update{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}UpdateOne {
+	return c.UpdateOneID({{ $rec }}.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}UpdateOne {
+	return &{{ $n.Name }}UpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for {{ $n.Name }}.
+func (c *{{ $client }}) Delete() *{{ $n.Name }}Delete {
+	return &{{ $n.Name }}Delete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}DeleteOne {
+	return c.DeleteOneID({{ $rec }}.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}DeleteOne {
+	return &{{ $n.Name }}DeleteOne{c.Delete().Where({{ $n.Package }}.ID(id))}
+}
+
+// Create returns a query builder for {{ $n.Name }}.
+func (c *{{ $client }}) Query() *{{ $n.Name }}Query {
+	return &{{ $n.Name }}Query{config: c.config}
+}
+
+{{ range $_, $e := $n.Edges }}
+{{ $builder := print (pascal $e.Type.Name) "Query" }}
+// Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
+func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
+	query := &{{ $e.Type.Name }}Query{config: c.config}
+	switch c.driver.Dialect() {
+		case dialect.MySQL, dialect.SQLite:
+			id := {{ $rec }}.{{- if $n.ID.IsString }}id(){{ else }}ID{{ end }}
+			{{- if $e.M2M  }}
+				{{ $i := 1 }}{{ $j := 0 }}{{- if $e.IsInverse }}{{ $i = 0 }}{{ $j = 1 }}{{ end -}}
+				t1 := sql.Table({{ $e.Type.Package }}.Table)
+				t2 := sql.Table({{ $n.Package }}.Table)
+				t3 := sql.Table({{ $n.Package }}.{{ $e.TableConstant }})
+				t4 := sql.Select(t3.C({{ $n.Package }}.{{ $e.PKConstant }}[{{ $i }}])).
+						From(t3).
+						Join(t2).
+						On(t3.C({{ $n.Package }}.{{ $e.PKConstant }}[{{ $j }}]), t2.C({{ $n.Package }}.{{ $n.ID.Constant }})).
+						Where(sql.EQ(t2.C({{ $n.Package }}.{{ $n.ID.Constant }}), id))
+				query.sql = sql.Select().
+					From(t1).
+					Join(t4).
+					On(t1.C({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}), t4.C({{ $n.Package }}.{{ $e.PKConstant }}[{{ $i }}]))
+			{{- else if or $e.M2O (and $e.O2O $e.IsInverse) }}{{/* M2O || (O2O with inverse edge) */}}
+				t1 := sql.Table({{ $e.Type.Package }}.Table)
+				t2 := sql.Select({{ $n.Package }}.{{ $e.ColumnConstant }}).
+					From(sql.Table({{ $n.Package }}.{{ $e.TableConstant }})).
+					Where(sql.EQ({{ $n.Package }}.{{ $n.ID.Constant }}, id))
+				query.sql = sql.Select().From(t1).Join(t2).On(t1.C({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}), t2.C({{ $n.Package }}.{{ $e.ColumnConstant }}))
+			{{- else }}{{/* O2M || (O2O with assoc edge) */}}
+				query.sql = sql.Select().From(sql.Table({{ $e.Type.Package }}.Table)).
+					Where(sql.EQ({{ $n.Package }}.{{ $e.ColumnConstant }}, id))
+			{{- end }}
+		case dialect.Neptune:
+			{{- if $e.SelfRef }}
+				query.gremlin = g.V({{ $rec }}.ID).Both({{ $n.Package }}.{{ $e.Constant }})
+			{{- else if $e.IsInverse }}
+				query.gremlin = g.V({{ $rec }}.ID).InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
+			{{- else }}
+				query.gremlin = g.V({{ $rec }}.ID).OutE({{ $n.Package }}.{{ $e.Constant }}).InV()
+			{{- end }}
+	}
+	return query
+}
+{{ end }}
+
+{{ end }}
+{{ end }}
+

@@ -1,0 +1,129 @@
+{{ define "dialect/gremlin/update" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+{{ $one := hasSuffix $builder "One" }}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if not $one }}[]{{ end }}*{{ $.Name }}, error) {
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlin({{- if $one }}{{ $receiver }}.id{{ end }}).Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return nil, err
+	}
+	if err, ok := isConstantError(res); ok {
+		return nil, err
+	}
+	{{- $r := plural $.Receiver }}
+	{{- if $one }}
+		{{- $r = $.Receiver }}
+		{{ $r }} := &{{ $.Name }}{config: {{ $receiver }}.config}
+	{{- else }}
+		var {{ $r }} {{ plural $.Name }}
+		{{ $r }}.config({{ $receiver }}.config)
+	{{- end }}
+	if err := {{ $r }}.FromResponse(res); err != nil {
+		return nil, err
+	}
+	return {{ $r }}, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{ end }}) *dsl.Traversal {
+	{{- with .NumConstraint }}
+		type constraint struct {
+			pred *dsl.Traversal // constraint predicate.
+			test *dsl.Traversal // test matches and its constant.
+		}
+		constraints := make([]*constraint, 0, {{ . }})
+	{{- end }}
+	{{- /* case of update specific vertex */}}
+	{{- if $one }}
+		v := g.V(id)
+	{{- /* general update for N vertices */}}
+	{{- else }}
+		v := g.V().HasLabel({{ $.Package }}.Label)
+		for _, p := range {{ $receiver }}.predicates {
+			p.Gremlin(v)
+		}
+	{{- end }}
+	var (
+		{{ if or .NumConstraint (len $.Edges) }}rv = v.Clone(){{ end }}
+		trs []*dsl.Traversal
+	)
+	{{- range $_, $f := $.Fields }}
+	if {{ $receiver }}.{{ $f.StructField }} != nil {
+		{{- if $f.Unique }}
+			constraints = append(constraints, &constraint{
+				pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }}).Count(),
+				test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})),
+			})
+		{{- end }}
+		v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+	}
+	{{- end }}
+	{{- range $_, $e := $.Edges }}
+		{{- $direction := "In" }}
+		{{- $name := printf "%s.%s" $.Package $e.Constant }}
+		{{- if $e.IsInverse }}
+			{{- $direction = "Out" }}
+			{{- $name = printf "%s.%s" $e.Type.Package $e.Constant }}
+		{{- end }}
+		{{- /* remove edges */}}
+		{{- if $e.Unique }}
+		if {{ $receiver }}.cleared{{ pascal $e.Name }} {
+		{{- else }}
+		for id := range {{ $receiver }}.removed{{ pascal $e.Name }} {
+		{{- end }}
+		{{- if $e.SelfRef }}
+			tr := rv.Clone().BothE({{ $name }}){{ if not $e.Unique }}.Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))){{ end }}.Drop().Iterate()
+		{{- else if $e.IsInverse }}
+			tr := rv.Clone().InE({{ $name }}){{ if not $e.Unique }}.Where(__.OtherV().HasID(id)){{ end }}.Drop().Iterate()
+		{{- else }}
+			tr := rv.Clone().OutE({{ $name }}){{ if not $e.Unique }}.Where(__.OtherV().HasID(id)){{ end }}.Drop().Iterate()
+		{{- end }}
+			trs = append(trs, tr)
+		}
+		{{- /* update edges */}}
+		for id := range {{ $receiver }}.{{ $e.StructField }} {
+		{{- if $e.IsInverse }}
+			v.AddE({{ $name }}).From(g.V(id)).InV()
+		{{- else }}
+			v.AddE({{ $name }}).To(g.V(id)).OutV()
+		{{- end }}
+		{{- if $e.HasConstraint }}
+			{{- if $e.SelfRef }}
+				constraints = append(constraints, &constraint{
+					pred: rv.Clone().Both({{ $name }}).Count(),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+				})
+				constraints = append(constraints, &constraint{
+					pred: g.E().HasLabel({{ $name }}).Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))).Count(),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+				})
+			{{- else }}
+				constraints = append(constraints, &constraint{
+					pred: g.E().HasLabel({{ $name }}).{{ $direction }}V().HasID(id).Count(),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+				})
+			{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	v.ValueMap(true)
+	{{- with .NumConstraint }}
+		if len(constraints) > 0 {
+			{{- /* make sure the traversal does not contain more than one vertex if we have constraint */}}
+			{{- if not $one }}
+				constraints = append(constraints, &constraint{
+					pred: rv.Count(),
+					test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
+				})
+			{{- end }}
+			v = constraints[0].pred.Coalesce(constraints[0].test, v)
+			for _, cr := range constraints[1:] {
+				v = cr.pred.Coalesce(cr.test, v)
+			}
+		}
+	{{- end }}
+	trs = append(trs, v)
+	return dsl.Join(trs...)
+}
+{{ end }}

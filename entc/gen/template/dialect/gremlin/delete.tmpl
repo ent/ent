@@ -1,0 +1,19 @@
+{{ define "dialect/gremlin/delete" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) error {
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlin().Query()
+	return {{ $receiver }}.driver.Exec(ctx, query, bindings, res)
+}
+
+
+func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
+	t := g.V().HasLabel({{ $.Package }}.Label)
+	for _, p := range {{ $receiver }}.predicates {
+		p.Gremlin(t)
+	}
+	return t.Drop()
+}
+{{ end }}

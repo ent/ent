@@ -1,0 +1,73 @@
+{{ define "dialect/gremlin/create" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
+    res := &gremlin.Response{}
+    query, bindings := {{ $receiver }}.gremlin().Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return nil, err
+	}
+	if err, ok := isConstantError(res); ok {
+		return nil, err
+	}
+	{{ $.Receiver }} := &{{ $.Name }}{config: {{ $receiver }}.config}
+	if err := {{ $.Receiver }}.FromResponse(res); err != nil {
+		return nil, err
+	}
+	return {{ $.Receiver }}, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
+	{{- with .NumConstraint }}
+		type constraint struct {
+			pred *dsl.Traversal // constraint predicate.
+			test *dsl.Traversal // test matches and its constant.
+		}
+		constraints := make([]*constraint, 0, {{ . }})
+	{{- end }}
+	v := g.AddV({{ $.Package }}.Label)
+	{{- range $_, $f := $.Fields }}
+		if {{ $receiver }}.{{- $f.StructField }} != nil {
+			{{- if $f.Unique }}
+				constraints = append(constraints, &constraint{
+					pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }}).Count(),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})),
+				})
+			{{- end }}
+			v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+		}
+	{{- end }}
+	{{- range $_, $e := $.Edges }}
+		{{- $direction := "In" }}
+		{{- $name := printf "%s.%s" $.Package $e.Constant }}
+		for id := range {{ $receiver }}.{{ $e.StructField }} {
+			{{- if $e.IsInverse }}
+				{{- $direction = "Out" }}
+				{{- $name = printf "%s.%s" $e.Type.Package $e.Constant }}
+				v.AddE({{ $name }}).From(g.V(id)).InV()
+			{{- else }}
+				v.AddE({{ $name }}).To(g.V(id)).OutV()
+			{{- end }}
+			{{- if $e.HasConstraint }}
+				constraints = append(constraints, &constraint{
+					pred: g.E().HasLabel({{ $name }}).{{ $direction }}V().HasID(id).Count(),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+				})
+			{{- end }}
+		}
+	{{- end }}
+	{{- with .NumConstraint }}
+		if len(constraints) == 0 {
+			return v.ValueMap(true)
+		}
+		tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
+		for _, cr := range constraints[1:] {
+			tr = cr.pred.Coalesce(cr.test, tr)
+		}
+		return tr
+	{{- else }}
+		return v.ValueMap(true)
+	{{- end }}
+}
+{{ end }}

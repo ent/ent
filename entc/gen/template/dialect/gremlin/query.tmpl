@@ -1,0 +1,76 @@
+{{ define "dialect/gremlin/query" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinIDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlinQuery().Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return nil, err
+	}
+	vertices, err := res.ReadVertices()
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]{{ $.ID.Type }}, 0, len(vertices))
+	for _, vertex := range vertices {
+		ids = append(ids, vertex.ID.({{ $.ID.Type }}))
+	}
+	return ids, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.Name }}, error) {
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlinQuery().ValueMap(true).Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return nil, err
+	}
+	var {{ plural $.Receiver }} {{ plural $.Name  }}
+	if err := {{ plural $.Receiver }}.FromResponse(res); err != nil {
+		return nil, err
+	}
+	{{ plural $.Receiver }}.config({{ $receiver }}.config)
+	return {{ plural $.Receiver }}, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlinQuery().Count().Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return 0, err
+	}
+	return res.ReadInt()
+}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinExist(ctx context.Context) (bool, error) {
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlinQuery().HasNext().Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return false, err
+	}
+	return res.ReadBool()
+}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
+	v := g.V().HasLabel({{ $.Package }}.Label)
+	if {{ $receiver }}.gremlin != nil {
+		v = {{ $receiver }}.gremlin.Clone()
+	}
+	for _, p := range {{ $receiver }}.predicates {
+		p.Gremlin(v)
+	}
+	if len({{ $receiver }}.order) > 0 {
+		v.Order()
+		for _, p := range {{ $receiver }}.order {
+			p.Gremlin(v)
+		}
+	}
+	if limit := {{ $receiver }}.limit; limit != nil {
+		v.Limit(*limit)
+	}
+	if unique := {{ $receiver }}.unique; len(unique) == 0 {
+		v.Dedup()
+	}
+	return v
+}
+{{ end }}

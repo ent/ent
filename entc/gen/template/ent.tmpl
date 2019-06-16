@@ -1,0 +1,192 @@
+{{ define "model" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+{{ template "import" $ }}
+
+// {{ $.Name }} is the model entity for the {{ $.Name }} schema.
+type {{ $.Name }} struct {
+	config
+	// ID of the ent.
+	ID {{ $.ID.Type }} `json:"id,omitempty"`
+	{{ range $_, $f := $.Fields -}}
+		// {{ pascal $f.Name }} holds the value of the "{{ $f.Name }}" field.
+    	{{ pascal $f.Name }} {{ if $f.Nullable }}*{{ end }}{{ $f.Type }} `{{ $f.StructTag }}`
+	{{ end -}}
+	{{ range $_, $e := $.Edges -}}
+		{{/* ignore generating edge fields */}}
+		{{- with $e.StructTag -}}
+			// {{ pascal $e.Name }} holds the value of the {{ $e.Name }} edge. The value set to nil, and should be updated manually.
+			{{ pascal $e.Name }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} `{{ $e.StructTag }}`
+		{{ end -}}
+	{{ end -}}
+}
+
+{{ $receiver := $.Receiver }}
+
+// FromResponse scans the gremlin response data into {{ $.Name }}.
+func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	{{- $scan := print "v" $receiver }}
+	var {{ $scan }} struct {
+		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
+		{{ range $_, $f := $.Fields }}
+			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
+		{{ end }}
+	}
+	if err := vmap.Decode(&{{ $scan }}); err != nil {
+		return err
+	}
+	{{ $receiver }}.ID = {{ $scan }}.ID
+	{{ range $_, $f := $.Fields }}
+		{{- $receiver }}.{{ pascal $f.Name }} = {{- if $f.IsTime }}time.Unix({{ $scan }}.{{- pascal $f.Name }}, 0) {{ else }}{{- $scan }}.{{- pascal $f.Name }}{{ end }}
+	{{ end -}}
+	return nil
+}
+
+// FromRows scans the sql response data into {{ $.Name }}.
+func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
+	{{- $scan = print "v" $receiver }}
+	var {{ $scan }} struct {
+		ID   {{ if $.ID.IsString }}int{{ else }}{{ $.ID.Type }}{{ end }}
+		{{ range $_, $f := $.Fields }}
+			{{- pascal $f.Name }} {{ if or $f.Nullable $f.Optional }}{{ $f.NullType }}{{ else }}{{ $f.Type }}{{ end }}
+		{{ end }}
+	}
+	// the order here should be the same as in the `{{ $.Package }}.Columns`.
+	if err := rows.Scan(
+			&{{ $scan }}.ID,
+			{{- range $_, $f := $.Fields }}
+				&{{ $scan }}.{{- pascal $f.Name }},
+			{{- end }}
+	); err != nil {
+		return err
+	}
+	{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.Itoa({{ $scan }}.ID){{ else }}{{ $scan }}.ID{{ end }}
+	{{- range $_, $f := $.Fields }}
+		{{- if $f.Nullable }}
+			{{- if $f.IsTime }}
+				{{ $receiver }}.{{ pascal $f.Name }} = &{{ $scan }}.{{ pascal $f.Name }}
+			{{- else }}
+				if {{ $scan }}.{{- pascal $f.Name }}.Valid {
+					{{ $receiver }}.{{ pascal $f.Name }} = &{{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
+				}
+			{{- end }}
+		{{- else if $f.Optional }}
+			{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
+		{{- else }}
+			{{ $receiver }}.{{ pascal $f.Name }} = {{ $scan }}.{{ pascal $f.Name }}
+		{{- end }}
+	{{- end }}
+	return nil
+}
+
+{{ range $_, $e := $.Edges }}
+	{{ $func := print "Query" (pascal $e.Name) }}
+	// {{ $func }} queries the {{ $e.Name }} edge of the {{ $.Name }}.
+	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.Name}}Query {
+		return (&{{ $.Name }}Client{ {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
+	}
+{{ end }}
+
+// Update returns a builder for updating this {{ $.Name }}.
+// Note that, you need to call {{ $.Name }}.Unwrap() before calling this method, if this {{ $.Name }}
+// was returned from a transaction, and the transaction was committed or rolled back.
+func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.Name }}UpdateOne {
+	return (&{{ $.Name }}Client{ {{ $receiver }}.config}).UpdateOne({{ $receiver }})
+}
+
+// Unwrap unwraps the entity that was returned from a transaction after it was closed,
+// so that all next queries will be executed through the driver which created the transaction.
+func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
+	tx, ok := {{ $receiver }}.config.driver.(*txDriver)
+	if !ok {
+		panic("{{ $pkg }}: {{ $.Name }} is not a transactional entity")
+	}
+	{{ $receiver }}.config.driver = tx.drv
+	return {{ $receiver }}
+}
+
+// String implements the fmt.Stringer.
+func ({{ $receiver }} *{{ $.Name }}) String() string {
+	buf := bytes.NewBuffer(nil)
+	buf.WriteString("{{ $.Name }}(")
+	buf.WriteString(fmt.Sprintf("id=%v,", {{ $receiver }}.ID))
+	{{- range $i, $f := $.Fields }}
+		{{- if gt $i 0 }}
+			buf.WriteString(", ")
+		{{- end }}
+		{{- if $f.Nullable }}
+			if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
+				buf.WriteString(fmt.Sprintf("{{ $f.Name }}=%v", *v))
+			}
+		{{- else }}
+			buf.WriteString(fmt.Sprintf("{{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
+		{{- end }}
+	{{- end }}
+	buf.WriteString(")")
+	return buf.String()
+}
+
+{{- if $.ID.IsString }}
+// id returns the int representation of the ID field.
+func ({{ $receiver }} *{{ $.Name }}) id() int {
+	id, _ := strconv.Atoi({{ $receiver }}.ID)
+	return id
+}
+{{- end }}
+
+{{ $slice := plural $.Name }}
+// {{ $slice }} is a parsable slice of {{ $.Name }}.
+type {{ $slice }} []*{{ $.Name }}
+
+// FromResponse scans the gremlin response data into {{ $slice }}.
+func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	{{- $scan = print "v" $receiver }}
+	var {{ $scan }} []struct {
+		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
+		{{ range $_, $f := $.Fields }}
+			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
+		{{ end }}
+	}
+	if err := vmap.Decode(&{{ $scan }}); err != nil {
+		return err
+	}
+	for _, v := range {{ $scan }} {
+		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
+			ID: v.ID,
+			{{ range $_, $f := $.Fields }}
+				{{- pascal $f.Name }}: {{- if $f.IsTime }}time.Unix(v.{{ pascal $f.Name }}, 0) {{ else }}v.{{ pascal $f.Name }}{{ end }},
+			{{ end -}}
+		})
+	}
+	return nil
+}
+
+// FromRows scans the sql response data into {{ $slice }}.
+func ({{ $receiver }} *{{ $slice }}) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		{{- $scan = print "v" $receiver }}
+		{{ $scan }} := &{{ $.Name }}{}
+		if err := {{ $scan }}.FromRows(rows); err != nil {
+			return err
+		}
+		*{{ $receiver }} = append(*{{ $receiver }}, {{ $scan }})
+	}
+	return nil
+}
+
+func ({{ $receiver }} {{ $slice }}) config(cfg config) {
+	for i := range {{ $receiver }} {
+		{{ $receiver }}[i].config = cfg
+	}
+}
+{{ end }}

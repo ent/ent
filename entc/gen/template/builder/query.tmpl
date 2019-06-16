@@ -1,0 +1,397 @@
+{{ define "query" }}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+{{ template "import" $ }}
+
+{{ $builder := print (pascal $.Name) "Query" }}
+{{ $receiver := receiver $builder }}
+
+// {{ $builder }} is the builder for querying {{ pascal $.Name }} entities.
+type {{ $builder }} struct {
+	config
+	limit *int
+	order  []Order
+	unique []string
+	predicates []ent.Predicate
+	// intermediate queries.
+	sql     *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Where adds a new predicate for the builder.
+func ({{ $receiver }} *{{ $builder }}) Where(ps ...ent.Predicate) *{{ $builder }} {
+	{{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...)
+	return {{ $receiver }}
+}
+
+// Limit adds a limit step to the query.
+func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
+	{{ $receiver }}.limit = &limit
+	return {{ $receiver }}
+}
+
+// Order adds an order step to the query.
+func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
+	{{ $receiver }}.order = append({{ $receiver }}.order, o...)
+	return {{ $receiver }}
+}
+
+{{/* this code has similarity with edge queries in client.tmpl */}}
+{{ range $_, $e := $.Edges }}
+	{{ $edge_builder := print (pascal $e.Type.Name) "Query" }}
+	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
+	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
+		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
+		switch {{ $receiver }}.driver.Dialect() {
+		case dialect.MySQL, dialect.SQLite:
+			{{- if $e.M2M  }}
+				{{ $i := 1 }}{{ $j := 0 }}{{- if $e.IsInverse }}{{ $i = 0 }}{{ $j = 1 }}{{ end -}}
+				t1 := sql.Table({{ $e.Type.Package }}.Table)
+				t2 := {{ $receiver }}.sqlQuery()
+				t2.Select(t2.C({{ $.Package }}.{{ $.ID.Constant }}))
+				t3 := sql.Table({{ $.Package }}.{{ $e.TableConstant }})
+				t4 := sql.Select(t3.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $i }}])).
+						From(t3).
+						Join(t2).
+						On(t3.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $j }}]), t2.C({{ $.Package }}.{{ $.ID.Constant }}))
+				query.sql = sql.Select().
+					From(t1).
+					Join(t4).
+					On(t1.C({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}), t4.C({{ $.Package }}.{{ $e.PKConstant }}[{{ $i }}]))
+			{{- else if or $e.M2O (and $e.O2O $e.IsInverse) }}{{/* M2O || (O2O with inverse edge) */}}
+				t1 := sql.Table({{ $e.Type.Package }}.Table)
+				t2 := {{ $receiver }}.sqlQuery()
+				t2.Select(t2.C({{ $.Package }}.{{ $e.ColumnConstant }}))
+				query.sql = sql.Select(t1.Columns({{ $e.Type.Package }}.Columns...)...).
+					From(t1).
+					Join(t2).
+					On(t1.C({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}), t2.C({{ $.Package }}.{{ $e.ColumnConstant }}))
+			{{- else }}{{/* O2M || (O2O with assoc edge) */}}
+				t1 := sql.Table({{ $e.Type.Package }}.Table)
+				t2 := {{ $receiver }}.sqlQuery()
+				t2.Select(t2.C({{ $.Package }}.{{ $.ID.Constant }}))
+				query.sql = sql.Select().
+					From(t1).
+					Join(t2).
+					On(t1.C({{ $.Package }}.{{ $e.ColumnConstant }}), t2.C({{ $.Package }}.{{ $.ID.Constant }}))
+			{{- end }}
+		case dialect.Neptune:
+			gremlin := {{ $receiver }}.gremlinQuery()
+			{{- if $e.SelfRef }}
+				query.gremlin = gremlin.Both({{ $.Package }}.{{ $e.Constant }})
+			{{- else if $e.IsInverse }}
+				query.gremlin = gremlin.InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
+			{{- else }}
+				query.gremlin = gremlin.OutE({{ $.Package }}.{{ $e.Constant }}).InV()
+			{{- end }}
+		}
+		return query
+	}
+{{ end }}
+
+
+// Get returns a {{ $.Name }} entity by its id.
+func ({{ $receiver }} *{{ $builder }}) Get(ctx context.Context, id {{ $.ID.Type }}) (*{{ $.Name }}, error) {
+	return {{ $receiver }}.Where({{ $.Package }}.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) GetX(ctx context.Context, id {{ $.ID.Type }}) *{{ $.Name }} {
+	{{ $.Receiver }}, err := {{ $receiver }}.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return {{ $.Receiver }}
+}
+
+// First returns the first {{ $.Name }} entity in the query. Returns *ErrNotFound when no {{ lower $.Name }} was found.
+func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
+	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(1).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len({{ plural $.Receiver }}) == 0 {
+		return nil, &ErrNotFound{ {{ $.Package }}.Label}
+	}
+	return {{ plural $.Receiver }}[0], nil
+}
+
+// FirstX is like First, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }} {
+	{{ $.Receiver }}, err := {{ $receiver }}.First(ctx)
+	if err != nil && !IsNotFound(err) {
+		panic(err)
+	}
+	return {{ $.Receiver }}
+}
+
+// FirstID returns the first {{ $.Name }} id in the query. Returns *ErrNotFound when no id was found.
+func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+	var ids []{{ $.ID.Type }}
+	if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
+		return
+	}
+	if len(ids) == 0 {
+		err = &ErrNotFound{ {{ $.Package }}.Label}
+		return
+	}
+	return ids[0], nil
+}
+
+// FirstXID is like FirstID, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) FirstXID(ctx context.Context) {{ $.ID.Type }} {
+	id, err := {{ $receiver }}.FirstID(ctx)
+	if err != nil && !IsNotFound(err) {
+		panic(err)
+	}
+	return id
+}
+
+// Only returns the only {{ $.Name }} entity in the query, returns an error if not exactly one entity was returned.
+func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
+	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(2).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	switch len({{ plural $.Receiver }}) {
+	case 1:
+		return {{ plural $.Receiver }}[0], nil
+	case 0:
+		return nil, &ErrNotFound{ {{ $.Package }}.Label}
+	default:
+		return nil, &ErrNotSingular{ {{ $.Package }}.Label}
+	}
+}
+
+// OnlyX is like Only, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} {
+	{{ $.Receiver }}, err := {{ $receiver }}.Only(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return {{ $.Receiver }}
+}
+
+// OnlyID returns the only {{ $.Name }} id in the query, returns an error if not exactly one id was returned.
+func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+	var ids []{{ $.ID.Type }}
+	if ids, err = {{ $receiver }}.Limit(2).IDs(ctx); err != nil {
+		return
+	}
+	switch len(ids) {
+	case 1:
+		id = ids[0]
+	case 0:
+		err = &ErrNotFound{ {{ $.Package }}.Label}
+	default:
+		err = &ErrNotSingular{ {{ $.Package }}.Label}
+	}
+	return
+}
+
+// OnlyXID is like OnlyID, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type }} {
+	id, err := {{ $receiver }}.OnlyID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
+// All executes the query and returns a list of {{ plural $.Name }}.
+func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlAll(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinAll(ctx)
+	default:
+		return nil, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// AllX is like All, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }} {
+	{{ plural $.Receiver }}, err := {{ $receiver }}.All(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return {{ plural $.Receiver }}
+}
+
+// IDs executes the query and returns a list of {{ $.Name }} ids.
+func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlIDs(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinIDs(ctx)
+	default:
+		return nil, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// IDsX is like IDs, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
+	ids, err := {{ $receiver }}.IDs(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return ids
+}
+
+// Count returns the count of the given query.
+func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlCount(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinCount(ctx)
+	default:
+		return 0, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// CountX is like Count, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
+	count, err := {{ $receiver }}.Count(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return count
+}
+
+// Exist returns true if the query has elements in the graph.
+func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlExist(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinExist(ctx)
+	default:
+		return false, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// ExistX is like Exist, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) ExistX(ctx context.Context) bool {
+	exist, err := {{ $receiver }}.Exist(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return exist
+}
+
+{{ $groupBuilder := pascal $.Name | printf "%sGroupBy" }}
+
+// GroupBy used to group vertices by one or more fields/columns.
+// It is often used with aggregate functions, like: {{ join (keys aggregate) ", " }}.
+{{- with len $.Fields }}
+{{- $f := index $.Fields 0 }}
+//
+// Example:
+//
+//	var v []struct {
+//		{{ pascal $f.Name }} {{ $f.Type }} `{{ $f.StructTag }}`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.{{ pascal $.Name }}.Query().
+//		GroupBy({{ $.Package }}.{{ $f.Constant }}).
+//		Aggregate({{ $pkg }}.Count()).
+//		Scan(ctx, &v)
+//
+{{- end }}
+func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
+	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
+	group.fields = append([]string{field}, fields...)
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		group.sql = {{ $receiver }}.sqlQuery()
+	case dialect.Neptune:
+		group.gremlin = {{ $receiver }}.gremlinQuery()
+	}
+	return group
+}
+
+
+{{ with extend $ "Builder" $builder "Package" $pkg }}
+	{{ template "dialect/sql/query" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "dialect/gremlin/query" . }}
+{{ end }}
+
+
+{{ $groupReceiver := receiver $groupBuilder }}
+
+// {{ $builder }} is the builder for group-by {{ pascal $.Name }} entities.
+type {{ $groupBuilder }} struct {
+	config
+	fields []string
+	fns    []Aggregate
+	// intermediate queries.
+	sql      *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Aggregate adds the given aggregation functions to the group-by query.
+func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{ $groupBuilder }} {
+	{{ $groupReceiver }}.fns = append({{ $groupReceiver }}.fns, fns...)
+	return {{ $groupReceiver }}
+}
+
+// Scan applies the group-by query and scan the result into the given value.
+func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	switch {{ $groupReceiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $groupReceiver }}.sqlScan(ctx, v)
+	case dialect.Neptune:
+		return {{ $groupReceiver }}.gremlinScan(ctx, v)
+	default:
+		return errors.New("{{ $groupReceiver }}: unsupported dialect")
+	}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v interface{}) {
+	if err := {{ $groupReceiver }}.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+{{ range $_, $t := primitives }}
+	{{ $f := pascal $t | plural }}
+	// {{ $f }} returns list of {{ plural $t }} from group-by. It is only allowed when querying group-by with one field.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $f }}(ctx context.Context) ([]{{ $t }}, error) {
+		if len({{ $groupReceiver }}.fields) > 1 {
+			return nil, errors.New("{{ $pkg }}: {{ $groupBuilder }}.{{ $f }} is not achievable when grouping more than 1 field")
+		}
+		var v []{{ $t }}
+		if err := {{ $groupReceiver }}.Scan(ctx, &v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
+	// {{ $f }}X is like {{ $f }}, but panics if an error occurs.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $f }}X(ctx context.Context) []{{ $t }} {
+		v, err := {{ $groupReceiver }}.{{ $f }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+{{ end }}
+
+{{ with extend $ "Builder" $groupBuilder }}
+	{{ template "dialect/sql/group" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $groupBuilder }}
+	{{ template "dialect/gremlin/group" . }}
+{{ end }}
+
+{{ end }}

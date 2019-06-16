@@ -1,0 +1,91 @@
+{{ define "example" }}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+import (
+	"log"
+	"testing"
+	"os"
+	"net/url"
+
+	{{ range $_, $n := $.Nodes }}
+		"{{ $n.Config.Package }}/{{ $n.Package }}"
+	{{- end }}
+
+	"fbc/ent/dialect"
+	"fbc/lib/go/gremlin"
+)
+
+{{ $env := upper $pkg | printf "%s_INTEGRATION_ENDPOINT" }}
+
+// endpoint for the database. In order to run the tests locally, run the following command:
+//
+//	 {{ $env }}="http://localhost:8182" go test -v
+//
+var endpoint *gremlin.Endpoint
+
+func init() {
+	if e, ok := os.LookupEnv("{{ $env }}"); ok {
+		if u, err := url.Parse(e); err == nil {
+			endpoint = &gremlin.Endpoint{u}
+		}
+	}
+}
+
+{{ range $_, $n := $.Nodes -}}
+func Example{{ pascal $n.Name }}() {
+	if endpoint == nil {
+		return
+	}
+	ctx := context.Background()
+	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	client := NewClient(Driver(dialect.NewGremlin(conn)))
+
+	// creating vertices for the {{ lower $n.Name }}'s edges.
+	{{ range $i, $e := $n.Edges }}
+		{{- if not $e.IsInverse }}
+			{{- $v := printf "%s%d" $e.Type.Receiver $i }}
+			{{- $v }} := client.{{ $e.Type.Name }}.
+					Create().
+				{{ range $_, $f := $e.Type.Fields }}
+					{{- pascal $f.Name | printf "Set%s" }}({{ $f.ExampleCode }}).
+				{{ end }}
+					SaveX(ctx)
+			log.Println("{{ lower $e.Type.Name }} created:", {{ $v }})
+		{{ end }}
+	{{- end }}
+	// create {{ lower $n.Name }} vertex with its edges.
+	{{ $n.Receiver }} := client.{{ $n.Name }}.
+		Create().
+	{{ range $_, $f := $n.Fields }}
+		{{- pascal $f.Name | printf "Set%s" }}({{ $f.ExampleCode }}).
+	{{ end }}
+	{{ range $i, $e := $n.Edges }}
+		{{- if not $e.IsInverse }}
+			{{- $op := "add" }}{{ if $e.Unique }}{{ $op = "set" }}{{ end }}
+			{{- $func := print (pascal $op) (pascal $e.Name) }}
+			{{- $func }}({{ printf "%s%d" $e.Type.Receiver $i }}).
+		{{ end }}
+	{{ end }}
+		SaveX(ctx)
+	log.Println("{{ lower $n.Name }} created:", {{ $n.Receiver }})
+
+	// query edges.
+	{{ range $i, $e := $n.Edges }}
+		{{- if not $e.IsInverse }}
+			{{- $v := printf "%s%d" $e.Type.Receiver $i }}
+			{{- $v }}, err = {{ $n.Receiver }}.{{ pascal $e.Name | printf "Query%s" }}().First(ctx)
+			if err != nil {
+				log.Fatalf("failed querying {{ $e.Name }}: %v", err)
+			}
+			log.Println("{{ $e.Name }} found:", {{ $v }})
+		{{ end }}
+	{{ end }}
+	// Output:
+}
+{{ end }}
+
+{{ end }}

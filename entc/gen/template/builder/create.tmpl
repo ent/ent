@@ -1,0 +1,87 @@
+{{ define "create" }}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+{{ template "import" $ }}
+
+{{ $builder := print (pascal $.Name) "Create" }}
+{{ $receiver := receiver $builder }}
+
+// {{ $builder }} is the builder for creating a {{ $.Name }} entity.
+type {{ $builder }} struct {
+	config
+	{{ range $_, $f := $.Fields }}
+		{{- $f.StructField }} *{{ $f.Type }}
+	{{ end }}
+	{{- range $_, $e := $.Edges }}
+		{{- $e.StructField }} map[{{ $.ID.Type }}]struct{}
+	{{ end -}}
+}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "setter" . }}
+{{ end }}
+
+// Save creates the {{ $.Name }} in the database.
+func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
+	{{ range $_, $f := $.Fields -}}
+		{{- if or $f.HasDefault (not $f.Optional) -}}
+			if {{ $receiver }}.{{ $f.StructField }} == nil {
+				{{ if $f.HasDefault -}}
+					v := {{ $.Package }}.{{ $f.DefaultConstant }}
+					{{ $receiver }}.{{ $f.StructField }} = &v
+				{{ else -}}
+					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")
+				{{ end -}}
+			}
+		{{ end -}}
+		{{ with $f.Validators -}}
+			{{/* add nullable check only for optional fields without default value */ -}}
+			{{ $nullable := and $f.Optional (not $f.HasDefault) -}}
+			{{- if $nullable }} if {{ $receiver }}.{{ $f.StructField }} != nil { {{ end -}}
+				if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {
+					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
+				}
+			{{- if $nullable }} } {{ end }}
+		{{ end -}}
+	{{ end -}}
+	{{- range $_, $e := $.Edges }}
+		{{- if $e.Unique -}}
+			if len({{ $receiver }}.{{ $e.StructField }}) > 1 {
+				return nil, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
+			}
+		{{ end -}}
+		{{- if not $e.Optional -}}
+			if {{ $receiver }}.{{ $e.StructField }} == nil {
+				return nil, errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")
+			}
+		{{ end -}}
+	{{ end -}}
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlSave(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinSave(ctx)
+	default:
+		return nil, errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} {
+	v, err := {{ $receiver }}.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "dialect/sql/create" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "dialect/gremlin/create" . }}
+{{ end }}
+
+{{ end }}

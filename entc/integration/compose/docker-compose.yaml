@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysql -ppass -e "show databases"
+    ports:
+      - 3306:3306
+
+  neptune:
+    build: gremlin-server
+    restart: on-failure
+    ports:
+      - 8182:8182

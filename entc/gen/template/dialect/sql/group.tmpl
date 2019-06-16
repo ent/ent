@@ -1,0 +1,25 @@
+{{ define "dialect/sql/group" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := {{ $receiver }}.sqlQuery().Query()
+	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+
+func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
+	selector := {{ $receiver }}.sql
+	columns := make([]string, 0, len({{ $receiver }}.fields) + len({{ $receiver}}.fns))
+	columns = append(columns, {{ $receiver }}.fields...)
+	for _, fn := range {{ $receiver }}.fns {
+		columns = append(columns, fn.SQL(selector))
+	}
+	return selector.Select(columns...).GroupBy({{ $receiver }}.fields...)
+}
+{{ end }}

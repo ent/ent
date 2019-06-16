@@ -1,0 +1,67 @@
+{{ define "delete" }}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $pkg }}
+
+{{ template "import" $ }}
+
+{{ $builder := print (pascal $.Name) "Delete" }}
+{{ $receiver := receiver $builder }}
+// {{ $builder }} is the builder for deleting a {{ pascal $.Name }} entity.
+type {{ $builder }} struct {
+	config
+	predicates []ent.Predicate
+}
+
+
+// Where adds a new predicate for the builder.
+func ({{ $receiver}} *{{ $builder }}) Where(ps ...ent.Predicate) *{{ $builder }} {
+	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
+	return {{ $receiver }}
+}
+
+// Exec executes the deletion query.
+func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) error {
+	switch {{ $receiver }}.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return {{ $receiver }}.sqlExec(ctx)
+	case dialect.Neptune:
+		return {{ $receiver }}.gremlinExec(ctx)
+	default:
+		return errors.New("{{ $pkg }}: unsupported dialect")
+	}
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
+	if err := {{ $receiver }}.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "dialect/sql/delete" . }}
+{{ end }}
+
+{{ with extend $ "Builder" $builder }}
+	{{ template "dialect/gremlin/delete" . }}
+{{ end }}
+
+{{ $onebuilder := print $builder "One" }}
+{{ $oneReceiver := receiver $onebuilder }}
+
+// {{ $onebuilder }} is the builder for deleting a single {{ $.Name }} entity.
+type {{ $onebuilder }} struct {
+	{{ $receiver }} *{{ $builder }}
+}
+
+// Exec executes the deletion query.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
+	return {{ $oneReceiver }}.{{ $receiver }}.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
+	{{ $oneReceiver }}.{{ $receiver }}.ExecX(ctx)
+}
+
+{{ end }}
