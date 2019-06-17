@@ -50,7 +50,7 @@ func TestBuilder(t *testing.T) {
 					Reference(Reference().Table("groups").Columns("id")).
 					OnDelete("CASCADE"),
 				),
-			wantQuery: "ALTER TABLE `users` ADD `group_id` int UNIQUE, ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`) ON DELETE CASCADE",
+			wantQuery: "ALTER TABLE `users` ADD COLUMN `group_id` int UNIQUE, ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`) ON DELETE CASCADE",
 		},
 		{
 			input: AlterTable("users").
@@ -58,13 +58,13 @@ func TestBuilder(t *testing.T) {
 				AddForeignKey(ForeignKey().Columns("group_id").
 					Reference(Reference().Table("groups").Columns("id")),
 				),
-			wantQuery: "ALTER TABLE `users` ADD `group_id` int UNIQUE, ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`)",
+			wantQuery: "ALTER TABLE `users` ADD COLUMN `group_id` int UNIQUE, ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`)",
 		},
 		{
 			input: AlterTable("users").
 				AddColumn(Column("age").Type("int")).
 				AddColumn(Column("name").Type("varchar(255)")),
-			wantQuery: "ALTER TABLE `users` ADD `age` int, ADD `name` varchar(255)",
+			wantQuery: "ALTER TABLE `users` ADD COLUMN `age` int, ADD COLUMN `name` varchar(255)",
 		},
 		{
 			input: AlterTable("users").

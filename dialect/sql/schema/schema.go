@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"fbc/ent/dialect/sql"
@@ -70,17 +71,40 @@ func (t *Table) SQLite() *sql.TableBuilder {
 	return b
 }
 
+// column returns a table column by its name.
+// faster than map lookup for most cases.
+func (t *Table) column(name string) (*Column, bool) {
+	for _, c := range t.Columns {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return nil, false
+}
+
+// index returns a table index by its name.
+// faster than map lookup for most cases.
+func (t *Table) index(name string) (*Index, bool) {
+	for _, idx := range t.Indexes {
+		if idx.Name == name {
+			return idx, true
+		}
+	}
+	return nil, false
+}
+
 // Column schema definition for SQL dialects.
 type Column struct {
 	Name      string     // column name.
 	Type      field.Type // column type.
+	typ       string     // row column type (used for Rows.Scan).
 	Attr      string     // extra attributes.
-	Default   string     // default value.
-	Nullable  *bool      // null or not null attribute.
 	Size      int        // max size parameter for string, blob, etc.
 	Key       string     // key definition (PRI, UNI or MUL).
 	Unique    bool       // column with unique constraint.
 	Increment bool       // auto increment attribute.
+	Nullable  *bool      // null or not null attribute.
+	Default   string     // default value.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -182,6 +206,52 @@ func (c *Column) SQLiteType() (t string) {
 	return t
 }
 
+// ScanMySQL scans the information from MySQL column description.
+func (c *Column) ScanMySQL(rows *sql.Rows) error {
+	var (
+		nullable sql.NullString
+		defaults sql.NullString
+	)
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr); err != nil {
+		return fmt.Errorf("scanning column description: %v", err)
+	}
+	c.Unique = c.UniqueKey()
+	c.Default = defaults.String
+	if nullable.Valid {
+		null := nullable.String == "YES"
+		c.Nullable = &null
+	}
+	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
+		return r == '(' || r == ')' || r == ' '
+	}); parts[0] {
+	case "int":
+		c.Type = field.TypeInt
+	case "timestamp":
+		c.Type = field.TypeTime
+	case "tinyint":
+		size, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return fmt.Errorf("converting varchar size to int: %v", err)
+		}
+		switch {
+		case size == 1:
+			c.Type = field.TypeBool
+		case len(parts) == 3: // tinyint(3) unsigned.
+			c.Type = field.TypeUint8
+		default:
+			c.Type = field.TypeInt8
+		}
+	case "varchar":
+		c.Type = field.TypeString
+		size, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return fmt.Errorf("converting varchar size to int: %v", err)
+		}
+		c.Size = size
+	}
+	return nil
+}
+
 // unique adds the `UNIQUE` attribute if the column is a unique type.
 // it is exist in a different function to share the common declaration
 // between the two dialects.
@@ -257,10 +327,11 @@ func (r ReferenceOption) ConstName() string {
 
 // Index definition for table index.
 type Index struct {
-	Key    string // key name.
-	Column string // column name.
+	Name    string
+	Unique  bool
+	Columns []*Column
 }
 
 // Primary indicates if this index is a primary key.
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
-func (i *Index) Primary() bool { return i.Key == "PRIMARY" }
+func (i *Index) Primary() bool { return i.Name == "PRIMARY" }
