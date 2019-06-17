@@ -274,7 +274,7 @@ func AlterTable(name string) *TableAlter { return &TableAlter{b: Builder{}, name
 
 // AddColumn appends the `ADD COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
-	t.nodes = append(t.nodes, &Wrapper{"ADD %s", c})
+	t.nodes = append(t.nodes, &Wrapper{"ADD COLUMN %s", c})
 	return t
 }
 
