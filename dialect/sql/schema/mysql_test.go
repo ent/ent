@@ -22,6 +22,13 @@ func TestMySQL_Create(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "tx failed",
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin().WillReturnError(sqlmock.ErrCancelled)
+			},
+			wantErr: true,
+		},
+		{
 			name: "no tables",
 			before: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
