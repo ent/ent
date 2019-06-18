@@ -22,18 +22,25 @@ func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
 	if err != nil {
 		return err
 	}
+	if err := d.create(ctx, tx, tables...); err != nil {
+		return rollback(tx, fmt.Errorf("dialect/mysql: %v", err))
+	}
+	return tx.Commit()
+}
+
+func (d *MySQL) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
 		switch exist, err := d.tableExist(ctx, tx, t.Name); {
 		case err != nil:
-			return rollback(tx, err)
+			return err
 		case exist:
 			curr, err := d.table(ctx, tx, t.Name)
 			if err != nil {
-				return rollback(tx, err)
+				return err
 			}
 			changes, err := changeSet(curr, t)
 			if err != nil {
-				return rollback(tx, err)
+				return err
 			}
 			if len(changes.Columns) > 0 {
 				b := sql.AlterTable(curr.Name)
@@ -42,7 +49,7 @@ func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
 				}
 				query, args := b.Query()
 				if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-					return rollback(tx, fmt.Errorf("sql/mysql: alter table %q: %v", t.Name, err))
+					return fmt.Errorf("alter table %q: %v", t.Name, err)
 				}
 			}
 			if len(changes.Indexes) > 0 {
@@ -51,7 +58,7 @@ func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
 		default: // !exist
 			query, args := t.DSL().Query()
 			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-				return rollback(tx, fmt.Errorf("sql/mysql: create table %q: %v", t.Name, err))
+				return fmt.Errorf("create table %q: %v", t.Name, err)
 			}
 		}
 	}
@@ -66,7 +73,7 @@ func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
 			fk.Symbol = symbol(fk.Symbol)
 			exist, err := d.fkExist(ctx, tx, fk.Symbol)
 			if err != nil {
-				return rollback(tx, err)
+				return err
 			}
 			if !exist {
 				fks = append(fks, fk)
@@ -81,10 +88,10 @@ func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
 		}
 		query, args := b.Query()
 		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-			return rollback(tx, fmt.Errorf("sql/mysql: create foreign keys for %q: %v", t.Name, err))
+			return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
