@@ -4,6 +4,7 @@ replace fbc/lib/go/gremlin => ../lib/go/gremlin
 
 require (
 	fbc/lib/go/gremlin v0.0.0
+	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/didi/gendry v1.1.1
 	github.com/go-openapi/inflect v0.18.0
 	github.com/go-sql-driver/mysql v1.4.1-0.20190510102335-877a9775f068
