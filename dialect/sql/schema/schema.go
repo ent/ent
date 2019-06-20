@@ -226,6 +226,8 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 	}); parts[0] {
 	case "int":
 		c.Type = field.TypeInt
+	case "double":
+		c.Type = field.TypeFloat64
 	case "timestamp":
 		c.Type = field.TypeTime
 	case "tinyint":

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"strings"
 	"time"
 
 	"fbc/ent/dialect"
@@ -31,7 +32,15 @@ func OpenDB(driver string, db *sql.DB) *Driver {
 }
 
 // Dialect implements the dialect.Dialect method.
-func (d Driver) Dialect() string { return d.dialect }
+func (d Driver) Dialect() string {
+	// if the underlying driver is wrapped with opencensus driver.
+	for _, name := range []string{dialect.MySQL, dialect.SQLite} {
+		if strings.HasPrefix(d.dialect, name) {
+			return name
+		}
+	}
+	return d.dialect
+}
 
 // Tx starts and returns a transaction.
 func (d *Driver) Tx(ctx context.Context) (dialect.Tx, error) {
