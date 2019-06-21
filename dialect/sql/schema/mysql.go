@@ -170,7 +170,7 @@ func changeSet(curr, new *Table) (*Table, error) {
 		case !ok:
 			changes.Columns = append(changes.Columns, c1)
 		case c1.Type != c2.Type:
-			return nil, fmt.Errorf("changing column type for %q is invalid", c1.Name)
+			return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, c1.Type, c2.Type)
 		case c1.Unique != c2.Unique:
 			return nil, fmt.Errorf("changing column cardinality for %q is invalid", c1.Name)
 		}
