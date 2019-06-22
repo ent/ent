@@ -151,7 +151,7 @@ func TestMySQL_Create(t *testing.T) {
 						AND TABLE_NAME = ?`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
-				mock.ExpectQuery("DESCRIBE users").
+				mock.ExpectQuery("DESCRIBE `users`").
 					WillReturnRows(sqlmock.NewRows([]string{"Field", "Type", "Null", "Key", "Default", "Extra"}).
 						AddRow("id", "int(11)", "NO", "PRI", "NULL", "auto_increment").
 						AddRow("name", "varchar(255)", "NO", "YES", "NULL", ""))
@@ -194,7 +194,7 @@ func TestMySQL_Create(t *testing.T) {
 						AND TABLE_NAME = ?`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
-				mock.ExpectQuery("DESCRIBE users").
+				mock.ExpectQuery("DESCRIBE `users`").
 					WillReturnRows(sqlmock.NewRows([]string{"Field", "Type", "Null", "Key", "Default", "Extra"}).
 						AddRow("id", "int(11)", "NO", "PRI", "NULL", "auto_increment").
 						AddRow("name", "varchar(255)", "NO", "YES", "NULL", ""))

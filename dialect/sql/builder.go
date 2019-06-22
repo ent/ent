@@ -257,6 +257,25 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 	return t.b.String(), t.b.args
 }
 
+// DescribeBuilder is a query builder for `DESCRIBE` statement.
+type DescribeBuilder struct {
+	b    Builder
+	name string // table name.
+}
+
+// Describe returns a query builder for the `DESCRIBE` statement.
+//
+//	Describe("users")
+//
+func Describe(name string) *DescribeBuilder { return &DescribeBuilder{b: Builder{}, name: name} }
+
+// Query returns query representation of a `DESCRIBE` statement.
+func (t *DescribeBuilder) Query() (string, []interface{}) {
+	t.b.WriteString("DESCRIBE ")
+	t.b.Append(t.name)
+	return t.b.String(), nil
+}
+
 // TableAlter is a query builder for `ALTER TABLE` statement.
 type TableAlter struct {
 	b     Builder
