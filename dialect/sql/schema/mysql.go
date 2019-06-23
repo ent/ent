@@ -131,7 +131,8 @@ func (d *MySQL) exist(ctx context.Context, tx dialect.Tx, query string, args ...
 // table loads the current table description from the database.
 func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
-	if err := tx.Query(ctx, "DESCRIBE "+name, []interface{}{}, rows); err != nil {
+	query, args := sql.Describe(name).Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("dialect/mysql: reading table description %v", err)
 	}
 	defer rows.Close()

@@ -14,6 +14,10 @@ func TestBuilder(t *testing.T) {
 		wantArgs  []interface{}
 	}{
 		{
+			input:     Describe("users"),
+			wantQuery: "DESCRIBE `users`",
+		},
+		{
 			input: CreateTable("users").
 				Columns(
 					Column("id").Type("int").Attr("auto_increment"),
