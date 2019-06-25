@@ -36,6 +36,11 @@ func OpenDB(driver string, db *sql.DB) *Driver {
 	return &Driver{conn{db}, driver}
 }
 
+// DB returns underlying *sql.DB instance.
+func (d Driver) DB() *sql.DB {
+	return d.conn.ExecQuerier.(*sql.DB)
+}
+
 // Dialect implements the dialect.Dialect method.
 func (d Driver) Dialect() string {
 	// if the underlying driver is wrapped with opencensus driver.
