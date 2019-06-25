@@ -11,6 +11,10 @@ import (
 	"fbc/ent/dialect"
 )
 
+// DefaultConnLifeTime to set the maximum amount of time a connection may be reused.
+// MySQL server default values are: connect_timeout=10s and wait_timeout=28800s.
+var DefaultConnLifeTime = 10 * time.Second
+
 // Driver is a dialect.Driver implementation for SQL based databases.
 type Driver struct {
 	conn
@@ -23,6 +27,7 @@ func Open(driver, source string) (*Driver, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.SetConnMaxLifetime(DefaultConnLifeTime)
 	return &Driver{conn{db}, driver}, nil
 }
 
@@ -71,7 +76,7 @@ type ExecQuerier interface {
 	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 }
 
-// shared connection ExecQuerier between Gremlin and Tx.
+// shared connection ExecQuerier between Driver and Tx.
 type conn struct {
 	ExecQuerier
 }
