@@ -80,6 +80,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	for _, p := range {{ $receiver }}.order {
 		p.SQL(selector)
 	}
+	if offset := {{ $receiver }}.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := {{ $receiver }}.limit; limit != nil {
 		selector.Limit(*limit)
 	}

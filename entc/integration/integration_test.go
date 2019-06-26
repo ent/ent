@@ -96,6 +96,7 @@ func TestGremlin(t *testing.T) {
 var tests = []func(*testing.T, *ent.Client){
 	Tx,
 	Sanity,
+	Paging,
 	Relation,
 	UniqueConstraint,
 	O2OTwoTypes,
@@ -192,6 +193,30 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Empty(ids)
 	// nop.
 	client.User.Delete().Where(user.IDIn(ids...)).ExecX(ctx)
+}
+
+func Paging(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	for i := 1; i <= 10; i++ {
+		client.User.Create().SetName(fmt.Sprintf("name-%d", i)).SetAge(i).SaveX(ctx)
+	}
+
+	require.Equal(10, client.User.Query().CountX(ctx))
+	require.Len(client.User.Query().Offset(5).AllX(ctx), 5)
+	require.Len(client.User.Query().Offset(6).AllX(ctx), 4)
+	require.Equal(
+		[]int{7, 8},
+		client.User.Query().
+			Offset(6).
+			Limit(2).
+			Order(ent.Asc(user.FieldAge)).
+			GroupBy(user.FieldAge).
+			IntsX(ctx),
+	)
+	for i := 0; i < 10; i++ {
+		require.Equal(i+1, client.User.Query().Order(ent.Asc(user.FieldAge)).Offset(i).Limit(1).AllX(ctx)[0].Age)
+	}
 }
 
 func Relation(t *testing.T, client *ent.Client) {

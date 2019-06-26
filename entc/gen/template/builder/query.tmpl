@@ -10,10 +10,11 @@
 // {{ $builder }} is the builder for querying {{ pascal $.Name }} entities.
 type {{ $builder }} struct {
 	config
-	limit *int
-	order  []Order
-	unique []string
-	predicates []ent.Predicate
+	limit		*int
+	offset		*int
+	order		[]Order
+	unique		[]string
+	predicates 	[]ent.Predicate
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
@@ -28,6 +29,12 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...ent.Predicate) *{{ $builder }
 // Limit adds a limit step to the query.
 func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
 	{{ $receiver }}.limit = &limit
+	return {{ $receiver }}
+}
+
+// Offset adds an offset step to the query.
+func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
+	{{ $receiver }}.offset = &offset
 	return {{ $receiver }}
 }
 

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"fbc/ent/entc/integration/ent/card"
 	"fbc/ent/entc/integration/ent/user"
@@ -24,6 +25,7 @@ import (
 type CardQuery struct {
 	config
 	limit      *int
+	offset     *int
 	order      []Order
 	unique     []string
 	predicates []ent.Predicate
@@ -41,6 +43,12 @@ func (cq *CardQuery) Where(ps ...ent.Predicate) *CardQuery {
 // Limit adds a limit step to the query.
 func (cq *CardQuery) Limit(limit int) *CardQuery {
 	cq.limit = &limit
+	return cq
+}
+
+// Offset adds an offset step to the query.
+func (cq *CardQuery) Offset(offset int) *CardQuery {
+	cq.offset = &offset
 	return cq
 }
 
@@ -363,6 +371,11 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 	for _, p := range cq.order {
 		p.SQL(selector)
 	}
+	if offset := cq.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := cq.limit; limit != nil {
 		selector.Limit(*limit)
 	}
@@ -432,7 +445,12 @@ func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := cq.limit; limit != nil {
+	switch limit, offset := cq.limit, cq.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset+*limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := cq.unique; len(unique) == 0 {

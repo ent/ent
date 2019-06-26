@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"fbc/ent/entc/integration/ent/node"
 
@@ -23,6 +24,7 @@ import (
 type NodeQuery struct {
 	config
 	limit      *int
+	offset     *int
 	order      []Order
 	unique     []string
 	predicates []ent.Predicate
@@ -40,6 +42,12 @@ func (nq *NodeQuery) Where(ps ...ent.Predicate) *NodeQuery {
 // Limit adds a limit step to the query.
 func (nq *NodeQuery) Limit(limit int) *NodeQuery {
 	nq.limit = &limit
+	return nq
+}
+
+// Offset adds an offset step to the query.
+func (nq *NodeQuery) Offset(offset int) *NodeQuery {
+	nq.offset = &offset
 	return nq
 }
 
@@ -381,6 +389,11 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 	for _, p := range nq.order {
 		p.SQL(selector)
 	}
+	if offset := nq.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := nq.limit; limit != nil {
 		selector.Limit(*limit)
 	}
@@ -450,7 +463,12 @@ func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := nq.limit; limit != nil {
+	switch limit, offset := nq.limit, nq.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset+*limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := nq.unique; len(unique) == 0 {

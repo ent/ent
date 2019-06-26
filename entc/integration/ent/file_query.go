@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"fbc/ent/entc/integration/ent/file"
 
@@ -23,6 +24,7 @@ import (
 type FileQuery struct {
 	config
 	limit      *int
+	offset     *int
 	order      []Order
 	unique     []string
 	predicates []ent.Predicate
@@ -40,6 +42,12 @@ func (fq *FileQuery) Where(ps ...ent.Predicate) *FileQuery {
 // Limit adds a limit step to the query.
 func (fq *FileQuery) Limit(limit int) *FileQuery {
 	fq.limit = &limit
+	return fq
+}
+
+// Offset adds an offset step to the query.
+func (fq *FileQuery) Offset(offset int) *FileQuery {
+	fq.offset = &offset
 	return fq
 }
 
@@ -343,6 +351,11 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 	for _, p := range fq.order {
 		p.SQL(selector)
 	}
+	if offset := fq.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := fq.limit; limit != nil {
 		selector.Limit(*limit)
 	}
@@ -412,7 +425,12 @@ func (fq *FileQuery) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := fq.limit; limit != nil {
+	switch limit, offset := fq.limit, fq.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset+*limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := fq.unique; len(unique) == 0 {

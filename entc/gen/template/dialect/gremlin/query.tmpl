@@ -65,7 +65,12 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := {{ $receiver }}.limit; limit != nil {
+	switch limit, offset := {{ $receiver }}.limit, {{ $receiver }}.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset + *limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := {{ $receiver }}.unique; len(unique) == 0 {

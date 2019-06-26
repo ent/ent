@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"fbc/ent/entc/integration/ent/card"
 	"fbc/ent/entc/integration/ent/file"
@@ -27,6 +28,7 @@ import (
 type UserQuery struct {
 	config
 	limit      *int
+	offset     *int
 	order      []Order
 	unique     []string
 	predicates []ent.Predicate
@@ -44,6 +46,12 @@ func (uq *UserQuery) Where(ps ...ent.Predicate) *UserQuery {
 // Limit adds a limit step to the query.
 func (uq *UserQuery) Limit(limit int) *UserQuery {
 	uq.limit = &limit
+	return uq
+}
+
+// Offset adds an offset step to the query.
+func (uq *UserQuery) Offset(offset int) *UserQuery {
+	uq.offset = &offset
 	return uq
 }
 
@@ -576,6 +584,11 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 	for _, p := range uq.order {
 		p.SQL(selector)
 	}
+	if offset := uq.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := uq.limit; limit != nil {
 		selector.Limit(*limit)
 	}
@@ -645,7 +658,12 @@ func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := uq.limit; limit != nil {
+	switch limit, offset := uq.limit, uq.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset+*limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := uq.unique; len(unique) == 0 {

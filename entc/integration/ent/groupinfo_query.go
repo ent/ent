@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"fbc/ent/entc/integration/ent/group"
 	"fbc/ent/entc/integration/ent/groupinfo"
@@ -24,6 +25,7 @@ import (
 type GroupInfoQuery struct {
 	config
 	limit      *int
+	offset     *int
 	order      []Order
 	unique     []string
 	predicates []ent.Predicate
@@ -41,6 +43,12 @@ func (giq *GroupInfoQuery) Where(ps ...ent.Predicate) *GroupInfoQuery {
 // Limit adds a limit step to the query.
 func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
 	giq.limit = &limit
+	return giq
+}
+
+// Offset adds an offset step to the query.
+func (giq *GroupInfoQuery) Offset(offset int) *GroupInfoQuery {
+	giq.offset = &offset
 	return giq
 }
 
@@ -363,6 +371,11 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 	for _, p := range giq.order {
 		p.SQL(selector)
 	}
+	if offset := giq.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := giq.limit; limit != nil {
 		selector.Limit(*limit)
 	}
@@ -432,7 +445,12 @@ func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := giq.limit; limit != nil {
+	switch limit, offset := giq.limit, giq.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset+*limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := giq.unique; len(unique) == 0 {
