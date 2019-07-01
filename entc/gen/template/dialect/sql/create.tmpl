@@ -143,7 +143,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	{{- if $.Type.ID.IsString }}
 		eid, err := strconv.Atoi(eid)
 		if err != nil {
-			return nil, err
+			return nil, rollback(tx, err)
 		}
 	{{- end }}
 {{ end }}

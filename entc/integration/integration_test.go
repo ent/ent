@@ -50,7 +50,7 @@ func TestSQLite(t *testing.T) {
 
 func TestMySQL(t *testing.T) {
 	var drv dialect.Driver
-	drv, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test?charset=utf8&parseTime=True")
+	drv, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test?parseTime=True")
 	require.NoError(t, err)
 	defer drv.Close()
 	if testing.Verbose() {
@@ -97,6 +97,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Tx,
 	Sanity,
 	Paging,
+	Charset,
 	Relation,
 	UniqueConstraint,
 	O2OTwoTypes,
@@ -217,6 +218,19 @@ func Paging(t *testing.T, client *ent.Client) {
 	for i := 0; i < 10; i++ {
 		require.Equal(i+1, client.User.Query().Order(ent.Asc(user.FieldAge)).Offset(i).Limit(1).AllX(ctx)[0].Age)
 	}
+}
+
+func Charset(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	f1 := client.File.Create().SetName("אריאל").SetSize(10).SaveX(ctx)
+	f2 := client.File.Create().SetName("נטי").SetSize(10).SaveX(ctx)
+	f3 := client.File.Create().SetName("Ariel").SetSize(10).SaveX(ctx)
+	f4 := client.File.Create().SetName("Nati").SetSize(10).SaveX(ctx)
+	require.Equal("אריאל", f1.Name)
+	require.Equal("נטי", f2.Name)
+	require.Equal("Ariel", f3.Name)
+	require.Equal("Nati", f4.Name)
 }
 
 func Relation(t *testing.T, client *ent.Client) {

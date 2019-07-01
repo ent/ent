@@ -184,7 +184,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range giu.removedGroups {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -204,7 +204,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range giu.groups {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(group.FieldID, eid)
@@ -454,7 +454,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		for eid := range giuo.removedGroups {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -474,7 +474,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 			for eid := range giuo.groups {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(group.FieldID, eid)

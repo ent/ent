@@ -261,7 +261,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		for eid := range gc.files {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			p.Or().EQ(file.FieldID, eid)
 		}
@@ -285,7 +285,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		for eid := range gc.blocked {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			p.Or().EQ(user.FieldID, eid)
 		}
@@ -308,7 +308,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		for eid := range gc.users {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 
 			query, args := sql.Insert(group.UsersTable).
@@ -324,7 +324,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		for eid := range gc.info {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(group.InfoTable).
 				Set(group.InfoColumn, eid).

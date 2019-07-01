@@ -156,7 +156,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		for eid := range pc.owner {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(pet.OwnerTable).
 				Set(pet.OwnerColumn, eid).

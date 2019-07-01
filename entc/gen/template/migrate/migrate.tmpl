@@ -19,7 +19,8 @@ var (
 				{{- if $c.Nullable }} Nullable: &nullable,{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
-				{{- with $c.Default }} Default: "{{ . }}",{{ end }} },
+				{{- with $c.Default }} Default: "{{ . }}",{{ end }}
+				{{- with $c.Charset }} Charset: "{{ . }}",{{ end }} },
 			{{- end }}
 		}
 		{{- $table := pascal $t.Name | printf "%sTable" }}

@@ -197,7 +197,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(pu.team)[0])
 			if serr != nil {
-				return 0, err
+				return 0, rollback(tx, err)
 			}
 			query, args := sql.Update(pet.TeamTable).
 				Set(pet.TeamColumn, eid).
@@ -228,7 +228,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range pu.owner {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(pet.OwnerTable).
@@ -485,7 +485,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(puo.team)[0])
 			if serr != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(pet.TeamTable).
 				Set(pet.TeamColumn, eid).
@@ -516,7 +516,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		for eid := range puo.owner {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(pet.OwnerTable).

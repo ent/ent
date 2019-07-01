@@ -28,6 +28,27 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: CreateTable("users").
+				Columns(
+					Column("id").Type("int").Attr("auto_increment"),
+					Column("name").Type("varchar(255)"),
+				).
+				PrimaryKey("id").
+				Charset("utf8mb4"),
+			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`)) CHARACTER SET utf8mb4",
+		},
+		{
+			input: CreateTable("users").
+				Columns(
+					Column("id").Type("int").Attr("auto_increment"),
+					Column("name").Type("varchar(255)"),
+				).
+				PrimaryKey("id").
+				Charset("utf8mb4").
+				Collate("utf8mb4_general_ci"),
+			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci",
+		},
+		{
+			input: CreateTable("users").
 				IfNotExists().
 				Columns(
 					Column("id").Type("int").Attr("auto_increment"),
@@ -79,6 +100,11 @@ func TestBuilder(t *testing.T) {
 					Reference(Reference().Table("locations").Columns("id")),
 				),
 			wantQuery: "ALTER TABLE `users` ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`), ADD CONSTRAINT FOREIGN KEY(`location_id`) REFERENCES `locations`(`id`)",
+		},
+		{
+			input: AlterTable("users").
+				ModifyColumn(Column("age").Type("int")),
+			wantQuery: "ALTER TABLE `users` MODIFY COLUMN `age` int",
 		},
 		{
 			input:     Insert("users").Columns("age").Values(1),
@@ -194,6 +220,10 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Select().From(Table("users")),
 			wantQuery: "SELECT * FROM `users`",
+		},
+		{
+			input:     Select().From(Table("users").Unquote()),
+			wantQuery: "SELECT * FROM users",
 		},
 		{
 			input:     Select().From(Table("users").As("u")),

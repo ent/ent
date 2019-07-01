@@ -627,7 +627,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(uu.card)[0])
 			if serr != nil {
-				return 0, err
+				return 0, rollback(tx, err)
 			}
 			query, args := sql.Update(user.CardTable).
 				Set(user.CardColumn, id).
@@ -650,7 +650,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedPets {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -670,7 +670,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.pets {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(pet.FieldID, eid)
@@ -696,7 +696,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedFiles {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -716,7 +716,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.files {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(file.FieldID, eid)
@@ -742,7 +742,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedGroups {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -761,7 +761,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.groups {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -782,7 +782,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedFriends {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -808,7 +808,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.friends {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid}, []int{eid, id})
@@ -829,7 +829,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedFollowers {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -848,7 +848,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.followers {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -869,7 +869,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedFollowing {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -888,7 +888,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.following {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -917,7 +917,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(uu.team)[0])
 			if serr != nil {
-				return 0, err
+				return 0, rollback(tx, err)
 			}
 			query, args := sql.Update(user.TeamTable).
 				Set(user.TeamColumn, id).
@@ -958,7 +958,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.spouse {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(user.SpouseTable).
@@ -987,7 +987,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedChildren {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -1007,7 +1007,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.children {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(user.FieldID, eid)
@@ -1041,7 +1041,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.parent {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(user.ParentTable).
@@ -1837,7 +1837,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(uuo.card)[0])
 			if serr != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(user.CardTable).
 				Set(user.CardColumn, id).
@@ -1860,7 +1860,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedPets {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -1880,7 +1880,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.pets {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(pet.FieldID, eid)
@@ -1906,7 +1906,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedFiles {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -1926,7 +1926,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.files {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(file.FieldID, eid)
@@ -1952,7 +1952,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedGroups {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -1971,7 +1971,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.groups {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -1992,7 +1992,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedFriends {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -2018,7 +2018,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.friends {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid}, []int{eid, id})
@@ -2039,7 +2039,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedFollowers {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -2058,7 +2058,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.followers {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -2079,7 +2079,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedFollowing {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -2098,7 +2098,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.following {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -2127,7 +2127,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(uuo.team)[0])
 			if serr != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(user.TeamTable).
 				Set(user.TeamColumn, id).
@@ -2168,7 +2168,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.spouse {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(user.SpouseTable).
@@ -2197,7 +2197,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedChildren {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -2217,7 +2217,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.children {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(user.FieldID, eid)
@@ -2251,7 +2251,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.parent {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(user.ParentTable).

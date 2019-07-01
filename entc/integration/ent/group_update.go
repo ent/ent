@@ -363,7 +363,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range gu.removedFiles {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -383,7 +383,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range gu.files {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(file.FieldID, eid)
@@ -409,7 +409,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range gu.removedBlocked {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -429,7 +429,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range gu.blocked {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(user.FieldID, eid)
@@ -455,7 +455,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range gu.removedUsers {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -474,7 +474,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range gu.users {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -503,7 +503,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range gu.info {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(group.InfoTable).
@@ -957,7 +957,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for eid := range guo.removedFiles {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -977,7 +977,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			for eid := range guo.files {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(file.FieldID, eid)
@@ -1003,7 +1003,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for eid := range guo.removedBlocked {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -1023,7 +1023,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			for eid := range guo.blocked {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				p.Or().EQ(user.FieldID, eid)
@@ -1049,7 +1049,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for eid := range guo.removedUsers {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			eids = append(eids, eid)
@@ -1068,7 +1068,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			for eid := range guo.users {
 				eid, serr := strconv.Atoi(eid)
 				if serr != nil {
-					err = serr
+					err = rollback(tx, serr)
 					return
 				}
 				values = append(values, []int{id, eid})
@@ -1097,7 +1097,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for eid := range guo.info {
 			eid, serr := strconv.Atoi(eid)
 			if serr != nil {
-				err = serr
+				err = rollback(tx, serr)
 				return
 			}
 			query, args := sql.Update(group.InfoTable).

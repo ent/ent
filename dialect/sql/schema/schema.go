@@ -34,15 +34,18 @@ func (t *Table) AddForeignKey(fk *ForeignKey) *Table {
 	return t
 }
 
-// DSL returns the default DSL query for table creation.
-func (t *Table) DSL() *sql.TableBuilder {
+// MySQL returns the MySQL DSL query for table creation.
+func (t *Table) MySQL(version string) *sql.TableBuilder {
 	b := sql.CreateTable(t.Name).IfNotExists()
 	for _, c := range t.Columns {
-		b.Column(c.DSL())
+		b.Column(c.MySQL(version))
 	}
 	for _, pk := range t.PrimaryKey {
 		b.PrimaryKey(pk.Name)
 	}
+	// default character set to MySQL table.
+	// columns can be override using the "Charset" field.
+	b.Charset("utf8mb4")
 	return b
 }
 
@@ -105,6 +108,8 @@ type Column struct {
 	Increment bool       // auto increment attribute.
 	Nullable  *bool      // null or not null attribute.
 	Default   string     // default value.
+	Charset   string     // column character set.
+	Collation string     // column collation.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -115,12 +120,19 @@ func (c *Column) UniqueKey() bool { return c.Key == "UNI" }
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
 func (c *Column) PrimaryKey() bool { return c.Key == "PRI" }
 
-// DSL returns the default DSL query for table creation.
-func (c *Column) DSL() *sql.ColumnBuilder {
-	b := sql.Column(c.Name).Type(c.MySQLType()).Attr(c.Attr)
+// MySQL returns the MySQL DSL query for table creation.
+// The syntax/order is: datatype [Charset] [Unique|Increment] [Collation] [Nullable].
+func (c *Column) MySQL(version string) *sql.ColumnBuilder {
+	b := sql.Column(c.Name).Type(c.MySQLType(version)).Attr(c.Attr)
+	if c.Charset != "" {
+		b.Attr("CHARSET " + c.Charset)
+	}
 	c.unique(b)
 	if c.Increment {
 		b.Attr("AUTO_INCREMENT")
+	}
+	if c.Collation != "" {
+		b.Attr("COLLATE " + c.Collation)
 	}
 	c.nullable(b)
 	return b
@@ -138,7 +150,7 @@ func (c *Column) SQLite() *sql.ColumnBuilder {
 }
 
 // MySQLType returns the MySQL string type for this column.
-func (c *Column) MySQLType() (t string) {
+func (c *Column) MySQLType(version string) (t string) {
 	switch c.Type {
 	case field.TypeBool:
 		t = "boolean"
@@ -157,7 +169,7 @@ func (c *Column) MySQLType() (t string) {
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
-			size = 255
+			size = c.defaultSize(version)
 		}
 		if size < 1<<16 {
 			t = fmt.Sprintf("varchar(%d)", size)
@@ -209,14 +221,18 @@ func (c *Column) SQLiteType() (t string) {
 // ScanMySQL scans the information from MySQL column description.
 func (c *Column) ScanMySQL(rows *sql.Rows) error {
 	var (
+		charset  sql.NullString
+		collate  sql.NullString
 		nullable sql.NullString
 		defaults sql.NullString
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &charset, &collate); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
 	}
 	c.Unique = c.UniqueKey()
+	c.Charset = charset.String
 	c.Default = defaults.String
+	c.Collation = collate.String
 	if nullable.Valid {
 		null := nullable.String == "YES"
 		c.Nullable = &null
@@ -273,6 +289,21 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 		}
 		b.Attr(attr)
 	}
+}
+
+// defaultSize returns the default size for MySQL varchar
+// type based on column size, charset and table indexes.
+func (c *Column) defaultSize(version string) int {
+	size := 255
+	parts := strings.Split(version, ".")
+	// non-unique or invalid version.
+	if !c.Unique || len(parts) == 1 || parts[0] == "" || parts[1] == "" {
+		return size
+	}
+	if major, minor := parts[0], parts[1]; major > "5" || minor > "6" {
+		return size
+	}
+	return 191
 }
 
 // ForeignKey definition for creation.

@@ -31,6 +31,8 @@ type (
 
 	// Field holds the information of a type field used for the templates.
 	Field struct {
+		// field definition.
+		def ent.Field
 		// Name is the name of this field in the database schema.
 		Name string
 		// Type holds the type information of the field.
@@ -108,6 +110,7 @@ func NewType(c Config, schema ent.Schema) (*Type, error) {
 			return nil, fmt.Errorf("invalid type for field %s", f.Name())
 		}
 		typ.Fields = append(typ.Fields, &Field{
+			def:        f,
 			Name:       f.Name(),
 			Type:       f.Type(),
 			Unique:     f.IsUnique(),
@@ -214,9 +217,9 @@ func (t Type) Describe(w io.Writer) {
 	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nullable", "Default", "StructTag", "Validators"})
 	for _, f := range append([]*Field{t.ID}, t.Fields...) {
 		v := reflect.ValueOf(*f)
-		row := make([]string, v.NumField())
+		row := make([]string, v.NumField()-1)
 		for i := range row {
-			row[i] = fmt.Sprint(v.Field(i).Interface())
+			row[i] = fmt.Sprint(v.Field(i + 1).Interface())
 		}
 		table.Append(row)
 	}
@@ -304,6 +307,9 @@ func (f Field) Column() *schema.Column {
 	if f.Name == "id" {
 		c.Type = field.TypeInt
 		c.Increment = true
+	}
+	if cs, ok := f.def.(field.Charseter); ok {
+		c.Charset = cs.Charset()
 	}
 	return c
 }

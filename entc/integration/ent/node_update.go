@@ -204,7 +204,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(nu.prev)[0])
 			if serr != nil {
-				return 0, err
+				return 0, rollback(tx, err)
 			}
 			query, args := sql.Update(node.PrevTable).
 				Set(node.PrevColumn, eid).
@@ -235,7 +235,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(nu.next)[0])
 			if serr != nil {
-				return 0, err
+				return 0, rollback(tx, err)
 			}
 			query, args := sql.Update(node.NextTable).
 				Set(node.NextColumn, id).
@@ -510,7 +510,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(nuo.prev)[0])
 			if serr != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(node.PrevTable).
 				Set(node.PrevColumn, eid).
@@ -541,7 +541,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(nuo.next)[0])
 			if serr != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(node.NextTable).
 				Set(node.NextColumn, id).

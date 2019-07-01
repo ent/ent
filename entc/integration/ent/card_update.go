@@ -169,7 +169,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(cu.owner)[0])
 			if serr != nil {
-				return 0, err
+				return 0, rollback(tx, err)
 			}
 			query, args := sql.Update(card.OwnerTable).
 				Set(card.OwnerColumn, eid).
@@ -397,7 +397,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		for _, id := range ids {
 			eid, serr := strconv.Atoi(keys(cuo.owner)[0])
 			if serr != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(card.OwnerTable).
 				Set(card.OwnerColumn, eid).

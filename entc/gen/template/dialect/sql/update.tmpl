@@ -223,7 +223,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					{{- if $.Type.ID.IsString }}
 						eid, serr := strconv.Atoi(keys({{ $receiver }}.{{ $e.StructField }})[0])
 						if serr != nil {
-							return {{ $zero }}, err
+							return {{ $zero }}, rollback(tx, err)
 						}
 					{{- else }}
 						eid := keys({{ $receiver }}.{{ $e.StructField }})[0]
@@ -265,7 +265,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- if $.Type.ID.IsString }}
 		eid, serr := strconv.Atoi(eid)
 		if serr != nil {
-			err = serr
+			err = rollback(tx, serr)
 			return {{/* return is not knwon at this point. */}}
 		}
 	{{- end }}

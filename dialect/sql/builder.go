@@ -63,8 +63,13 @@ func (b *Builder) AppendComma(s ...string) *Builder {
 
 // Arg appends an argument to the builder.
 func (b *Builder) Arg(a interface{}) *Builder {
-	b.WriteString("?")
-	b.args = append(b.args, a)
+	switch a := a.(type) {
+	case *raw:
+		b.WriteString(a.s)
+	default:
+		b.WriteString("?")
+		b.args = append(b.args, a)
+	}
 	return b
 }
 
@@ -168,6 +173,8 @@ type TableBuilder struct {
 	b           Builder
 	name        string           // table name.
 	exists      bool             // check existence.
+	charset     string           // table charset.
+	collation   string           // table collation.
 	columns     []*ColumnBuilder // table columns.
 	primary     []string         // primary key.
 	constraints []Node           // foreign keys and indices.
@@ -230,6 +237,18 @@ func (t *TableBuilder) Constraints(fks ...*ForeignKeyBuilder) *TableBuilder {
 	return t
 }
 
+// Charset appends the `CHARACTER SET` clause to the statement. MySQL only.
+func (t *TableBuilder) Charset(s string) *TableBuilder {
+	t.charset = s
+	return t
+}
+
+// Collate appends the `COLLATE` clause to the statement. MySQL only.
+func (t *TableBuilder) Collate(s string) *TableBuilder {
+	t.collation = s
+	return t
+}
+
 // Query returns query representation of a `CREATE TABLE` statement.
 func (t *TableBuilder) Query() (string, []interface{}) {
 	t.b.WriteString("CREATE TABLE ")
@@ -254,6 +273,12 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 			b.Comma().JoinComma(t.constraints...)
 		}
 	})
+	if t.charset != "" {
+		t.b.WriteString(" CHARACTER SET " + t.charset)
+	}
+	if t.collation != "" {
+		t.b.WriteString(" COLLATE " + t.collation)
+	}
 	return t.b.String(), t.b.args
 }
 
@@ -294,6 +319,12 @@ func AlterTable(name string) *TableAlter { return &TableAlter{b: Builder{}, name
 // AddColumn appends the `ADD COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
 	t.nodes = append(t.nodes, &Wrapper{"ADD COLUMN %s", c})
+	return t
+}
+
+// Modify appends the `MODIFY COLUMN` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
+	t.nodes = append(t.nodes, &Wrapper{"MODIFY COLUMN %s", c})
 	return t
 }
 
@@ -938,8 +969,9 @@ func Distinct(columns ...string) string {
 
 // SelectTable is a table selector.
 type SelectTable struct {
-	name string
-	as   string
+	quote bool
+	name  string
+	as    string
 }
 
 // Table returns a new table selector.
@@ -948,7 +980,7 @@ type SelectTable struct {
 //	return Select(t1.C("name"))
 //
 func Table(name string) *SelectTable {
-	return &SelectTable{name: name}
+	return &SelectTable{quote: true, name: name}
 }
 
 // As adds the AS clause to the table selector.
@@ -975,12 +1007,24 @@ func (s *SelectTable) Columns(columns ...string) []string {
 	return names
 }
 
+// Unquote makes the table name to be formatted as raw string (unquoted).
+// It is useful whe you don't want to query tables under the current database.
+// For example: "INFORMATION_SCHEMA.TABLE_CONSTRAINTS" in MySQL.
+func (s *SelectTable) Unquote() *SelectTable {
+	s.quote = false
+	return s
+}
+
 // ref returns the table reference.
 func (s *SelectTable) ref() string {
-	if s.as == "" {
+	switch {
+	case !s.quote:
+		return s.name
+	case s.as == "":
 		return fmt.Sprintf("`%s`", s.name)
+	default:
+		return fmt.Sprintf("`%s` AS `%s`", s.name, s.as)
 	}
-	return fmt.Sprintf("`%s` AS `%s`", s.name, s.as)
 }
 
 // implement the table view.
@@ -1202,7 +1246,7 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString("*")
 	}
 	b.WriteString(" FROM ")
-	b.Append(s.from.ref())
+	b.WriteString(s.from.ref())
 	if len(s.joins) > 0 {
 		for _, join := range s.joins {
 			b.WriteString(fmt.Sprintf(" %s ", join.kind))
@@ -1304,6 +1348,13 @@ func (w *Wrapper) Query() (string, []interface{}) {
 	query, args := w.wrapped.Query()
 	return fmt.Sprintf(w.format, query), args
 }
+
+// Raw returns a raw sql node that is placed as-is in the query.
+func Raw(s string) Node { return &raw{s} }
+
+type raw struct{ s string }
+
+func (r *raw) Query() (string, []interface{}) { return r.s, nil }
 
 func isFunc(s string) bool {
 	return strings.Contains(s, "(") && strings.Contains(s, ")")

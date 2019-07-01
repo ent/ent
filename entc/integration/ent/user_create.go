@@ -433,7 +433,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.pets {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			p.Or().EQ(pet.FieldID, eid)
 		}
@@ -457,7 +457,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.files {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			p.Or().EQ(file.FieldID, eid)
 		}
@@ -480,7 +480,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.groups {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 
 			query, args := sql.Insert(user.GroupsTable).
@@ -496,7 +496,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.friends {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 
 			query, args := sql.Insert(user.FriendsTable).
@@ -513,7 +513,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.followers {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 
 			query, args := sql.Insert(user.FollowersTable).
@@ -529,7 +529,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.following {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 
 			query, args := sql.Insert(user.FollowingTable).
@@ -565,7 +565,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.spouse {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
@@ -593,7 +593,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.children {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			p.Or().EQ(user.FieldID, eid)
 		}
@@ -616,7 +616,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.parent {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			query, args := sql.Update(user.ParentTable).
 				Set(user.ParentColumn, eid).

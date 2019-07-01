@@ -77,6 +77,7 @@ type Field struct {
 	tag        string
 	name       string
 	comment    string
+	charset    string
 	unique     bool
 	nullable   bool
 	optional   bool
@@ -383,6 +384,16 @@ func (b *stringBuilder) StructTag(s string) *stringBuilder {
 	return b
 }
 
+// SetCharset sets the character set attribute for character fields.
+// For example, utf8 or utf8mb4 in MySQL.
+func (b *stringBuilder) SetCharset(s string) *stringBuilder {
+	b.charset = s
+	return b
+}
+
+// Charset returns the character set of the field.
+func (b stringBuilder) Charset() string { return b.charset }
+
 // timeBuilder is the builder for time fields.
 type timeBuilder struct {
 	Field
@@ -449,4 +460,9 @@ func (b *boolBuilder) Comment(c string) *boolBuilder {
 func (b *boolBuilder) StructTag(s string) *boolBuilder {
 	b.tag = s
 	return b
+}
+
+// Charseter is the interface that wraps the Charset method.
+type Charseter interface {
+	Charset() string
 }

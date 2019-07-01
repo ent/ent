@@ -129,7 +129,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		for eid := range gic.groups {
 			eid, err := strconv.Atoi(eid)
 			if err != nil {
-				return nil, err
+				return nil, rollback(tx, err)
 			}
 			p.Or().EQ(group.FieldID, eid)
 		}

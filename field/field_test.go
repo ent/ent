@@ -1,10 +1,11 @@
 package field_test
 
 import (
-	"fbc/ent/field"
-	"github.com/stretchr/testify/require"
 	"regexp"
 	"testing"
+
+	"fbc/ent"
+	"fbc/ent/field"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -53,6 +54,13 @@ func TestString(t *testing.T) {
 	assert.Len(t, f.Validators(), 2)
 }
 
+func TestCharset(t *testing.T) {
+	var f ent.Field = field.String("name").SetCharset("utf8")
+	cs, ok := f.(field.Charseter)
+	assert.True(t, ok, "string field implements the Charseter interface")
+	assert.Equal(t, "utf8", cs.Charset())
+}
+
 func TestTime(t *testing.T) {
 	f := field.Time("created_at")
 	assert.Equal(t, "created_at", f.Name())
@@ -62,5 +70,5 @@ func TestTime(t *testing.T) {
 
 func TestField_Tag(t *testing.T) {
 	f := field.Bool("expired").StructTag(`json:"expired,omitempty"`)
-	require.Equal(t, `json:"expired,omitempty"`, f.Tag())
+	assert.Equal(t, `json:"expired,omitempty"`, f.Tag())
 }
