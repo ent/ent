@@ -11,10 +11,6 @@ import (
 	"fbc/ent/dialect"
 )
 
-// DefaultConnLifeTime to set the maximum amount of time a connection may be reused.
-// MySQL server default values are: connect_timeout=10s and wait_timeout=28800s.
-var DefaultConnLifeTime = 10 * time.Second
-
 // Driver is a dialect.Driver implementation for SQL based databases.
 type Driver struct {
 	conn
@@ -27,7 +23,6 @@ func Open(driver, source string) (*Driver, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.SetConnMaxLifetime(DefaultConnLifeTime)
 	return &Driver{conn{db}, driver}, nil
 }
 
@@ -36,7 +31,7 @@ func OpenDB(driver string, db *sql.DB) *Driver {
 	return &Driver{conn{db}, driver}
 }
 
-// DB returns underlying *sql.DB instance.
+// DB returns the underlying *sql.DB instance.
 func (d Driver) DB() *sql.DB {
 	return d.conn.ExecQuerier.(*sql.DB)
 }
