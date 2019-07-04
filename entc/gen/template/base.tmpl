@@ -134,6 +134,14 @@ func IsNotFound(err error) bool {
 	return ok
 }
 
+// MaskNotFound masks nor found error.
+func MaskNotFound(err error) error {
+	if IsNotFound(err) {
+		return nil
+	}
+	return err
+}
+
 // ErrNotSingular returns when trying to fetch a singular entity and more then one was found in the database.
 type ErrNotSingular struct {
 	label string
