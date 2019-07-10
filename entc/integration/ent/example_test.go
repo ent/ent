@@ -74,6 +74,44 @@ func ExampleComment() {
 
 	// Output:
 }
+func ExampleFieldType() {
+	if endpoint == nil {
+		return
+	}
+	ctx := context.Background()
+	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	client := NewClient(Driver(dialect.NewGremlin(conn)))
+
+	// creating vertices for the fieldtype's edges.
+
+	// create fieldtype vertex with its edges.
+	ft := client.FieldType.
+		Create().
+		SetInt(1).
+		SetInt8(1).
+		SetInt16(1).
+		SetInt32(1).
+		SetInt64(1).
+		SetOptionalInt(1).
+		SetOptionalInt8(1).
+		SetOptionalInt16(1).
+		SetOptionalInt32(1).
+		SetOptionalInt64(1).
+		SetNullableInt(1).
+		SetNullableInt8(1).
+		SetNullableInt16(1).
+		SetNullableInt32(1).
+		SetNullableInt64(1).
+		SaveX(ctx)
+	log.Println("fieldtype created:", ft)
+
+	// query edges.
+
+	// Output:
+}
 func ExampleFile() {
 	if endpoint == nil {
 		return

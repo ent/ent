@@ -1,6 +1,6 @@
 // Code generated (@generated) by entc, DO NOT EDIT.
 
-package ent
+package entv2
 
 import (
 	"bytes"
@@ -20,11 +20,7 @@ type User struct {
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
-	Name string `json:"first_name" graphql:"first_name"`
-	// Last holds the value of the "last" field.
-	Last string `json:"last,omitempty" graphql:"last_name"`
-	// Nickname holds the value of the "nickname" field.
-	Nickname string `json:"nickname,omitempty"`
+	Name string `json:"name,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
 }
@@ -36,12 +32,10 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vu struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
+		ID    string `json:"id,omitempty"`
+		Age   int    `json:"age,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Phone string `json:"phone,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
@@ -49,8 +43,6 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.ID = vu.ID
 	u.Age = vu.Age
 	u.Name = vu.Name
-	u.Last = vu.Last
-	u.Nickname = vu.Nickname
 	u.Phone = vu.Phone
 	return nil
 }
@@ -58,20 +50,16 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
-		ID       int
-		Age      int
-		Name     string
-		Last     string
-		Nickname sql.NullString
-		Phone    sql.NullString
+		ID    int
+		Age   int
+		Name  string
+		Phone string
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
 		&vu.ID,
 		&vu.Age,
 		&vu.Name,
-		&vu.Last,
-		&vu.Nickname,
 		&vu.Phone,
 	); err != nil {
 		return err
@@ -79,65 +67,8 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.ID = strconv.Itoa(vu.ID)
 	u.Age = vu.Age
 	u.Name = vu.Name
-	u.Last = vu.Last
-	u.Nickname = vu.Nickname.String
-	u.Phone = vu.Phone.String
+	u.Phone = vu.Phone
 	return nil
-}
-
-// QueryCard queries the card edge of the User.
-func (u *User) QueryCard() *CardQuery {
-	return (&UserClient{u.config}).QueryCard(u)
-}
-
-// QueryPets queries the pets edge of the User.
-func (u *User) QueryPets() *PetQuery {
-	return (&UserClient{u.config}).QueryPets(u)
-}
-
-// QueryFiles queries the files edge of the User.
-func (u *User) QueryFiles() *FileQuery {
-	return (&UserClient{u.config}).QueryFiles(u)
-}
-
-// QueryGroups queries the groups edge of the User.
-func (u *User) QueryGroups() *GroupQuery {
-	return (&UserClient{u.config}).QueryGroups(u)
-}
-
-// QueryFriends queries the friends edge of the User.
-func (u *User) QueryFriends() *UserQuery {
-	return (&UserClient{u.config}).QueryFriends(u)
-}
-
-// QueryFollowers queries the followers edge of the User.
-func (u *User) QueryFollowers() *UserQuery {
-	return (&UserClient{u.config}).QueryFollowers(u)
-}
-
-// QueryFollowing queries the following edge of the User.
-func (u *User) QueryFollowing() *UserQuery {
-	return (&UserClient{u.config}).QueryFollowing(u)
-}
-
-// QueryTeam queries the team edge of the User.
-func (u *User) QueryTeam() *PetQuery {
-	return (&UserClient{u.config}).QueryTeam(u)
-}
-
-// QuerySpouse queries the spouse edge of the User.
-func (u *User) QuerySpouse() *UserQuery {
-	return (&UserClient{u.config}).QuerySpouse(u)
-}
-
-// QueryChildren queries the children edge of the User.
-func (u *User) QueryChildren() *UserQuery {
-	return (&UserClient{u.config}).QueryChildren(u)
-}
-
-// QueryParent queries the parent edge of the User.
-func (u *User) QueryParent() *UserQuery {
-	return (&UserClient{u.config}).QueryParent(u)
 }
 
 // Update returns a builder for updating this User.
@@ -152,7 +83,7 @@ func (u *User) Update() *UserUpdateOne {
 func (u *User) Unwrap() *User {
 	tx, ok := u.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: User is not a transactional entity")
+		panic("entv2: User is not a transactional entity")
 	}
 	u.config.driver = tx.drv
 	return u
@@ -165,8 +96,6 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf("id=%v,", u.ID))
 	buf.WriteString(fmt.Sprintf("age=%v", u.Age))
 	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
-	buf.WriteString(fmt.Sprintf(", last=%v", u.Last))
-	buf.WriteString(fmt.Sprintf(", nickname=%v", u.Nickname))
 	buf.WriteString(fmt.Sprintf(", phone=%v", u.Phone))
 	buf.WriteString(")")
 	return buf.String()
@@ -188,24 +117,20 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vu []struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
+		ID    string `json:"id,omitempty"`
+		Age   int    `json:"age,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Phone string `json:"phone,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
 	}
 	for _, v := range vu {
 		*u = append(*u, &User{
-			ID:       v.ID,
-			Age:      v.Age,
-			Name:     v.Name,
-			Last:     v.Last,
-			Nickname: v.Nickname,
-			Phone:    v.Phone,
+			ID:    v.ID,
+			Age:   v.Age,
+			Name:  v.Name,
+			Phone: v.Phone,
 		})
 	}
 	return nil

@@ -95,6 +95,7 @@ func TestGremlin(t *testing.T) {
 // tests for all drivers to run.
 var tests = []func(*testing.T, *ent.Client){
 	Tx,
+	Types,
 	Sanity,
 	Paging,
 	Charset,
@@ -1754,4 +1755,5 @@ func drop(t *testing.T, client *ent.Client) {
 	client.Group.Delete().ExecX(ctx)
 	client.Comment.Delete().ExecX(ctx)
 	client.GroupInfo.Delete().ExecX(ctx)
+	client.FieldType.Delete().ExecX(ctx)
 }

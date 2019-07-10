@@ -81,7 +81,8 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 	gr.Active = vgr.Active
 	gr.Expire = vgr.Expire
 	if vgr.Type.Valid {
-		gr.Type = &vgr.Type.String
+		gr.Type = new(string)
+		*gr.Type = vgr.Type.String
 	}
 	gr.MaxUsers = int(vgr.MaxUsers.Int64)
 	gr.Name = vgr.Name
@@ -132,16 +133,13 @@ func (gr *Group) String() string {
 	buf.WriteString("Group(")
 	buf.WriteString(fmt.Sprintf("id=%v,", gr.ID))
 	buf.WriteString(fmt.Sprintf("active=%v", gr.Active))
-	buf.WriteString(", ")
-	buf.WriteString(fmt.Sprintf("expire=%v", gr.Expire))
-	buf.WriteString(", ")
+	buf.WriteString(fmt.Sprintf(", expire=%v", gr.Expire))
 	if v := gr.Type; v != nil {
+		buf.WriteString(", ")
 		buf.WriteString(fmt.Sprintf("type=%v", *v))
 	}
-	buf.WriteString(", ")
-	buf.WriteString(fmt.Sprintf("max_users=%v", gr.MaxUsers))
-	buf.WriteString(", ")
-	buf.WriteString(fmt.Sprintf("name=%v", gr.Name))
+	buf.WriteString(fmt.Sprintf(", max_users=%v", gr.MaxUsers))
+	buf.WriteString(fmt.Sprintf(", name=%v", gr.Name))
 	buf.WriteString(")")
 	return buf.String()
 }

@@ -14,6 +14,7 @@ import (
 
 	"fbc/ent/entc/integration/ent/card"
 	"fbc/ent/entc/integration/ent/comment"
+	"fbc/ent/entc/integration/ent/fieldtype"
 	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/group"
 	"fbc/ent/entc/integration/ent/groupinfo"
@@ -31,6 +32,8 @@ type Client struct {
 	Card *CardClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// FieldType is the client for interacting with the FieldType builders.
+	FieldType *FieldTypeClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
 	// Group is the client for interacting with the Group builders.
@@ -54,6 +57,7 @@ func NewClient(opts ...Option) *Client {
 		Schema:    migrate.NewSchema(c.driver),
 		Card:      NewCardClient(c),
 		Comment:   NewCommentClient(c),
+		FieldType: NewFieldTypeClient(c),
 		File:      NewFileClient(c),
 		Group:     NewGroupClient(c),
 		GroupInfo: NewGroupInfoClient(c),
@@ -77,6 +81,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:    cfg,
 		Card:      NewCardClient(cfg),
 		Comment:   NewCommentClient(cfg),
+		FieldType: NewFieldTypeClient(cfg),
 		File:      NewFileClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
@@ -201,6 +206,56 @@ func (c *CommentClient) DeleteOneID(id string) *CommentDeleteOne {
 // Create returns a query builder for Comment.
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{config: c.config}
+}
+
+// FieldTypeClient is a client for the FieldType schema.
+type FieldTypeClient struct {
+	config
+}
+
+// NewFieldTypeClient returns a client for the FieldType from the given config.
+func NewFieldTypeClient(c config) *FieldTypeClient {
+	return &FieldTypeClient{config: c}
+}
+
+// Create returns a create builder for FieldType.
+func (c *FieldTypeClient) Create() *FieldTypeCreate {
+	return &FieldTypeCreate{config: c.config}
+}
+
+// Update returns an update builder for FieldType.
+func (c *FieldTypeClient) Update() *FieldTypeUpdate {
+	return &FieldTypeUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FieldTypeClient) UpdateOne(ft *FieldType) *FieldTypeUpdateOne {
+	return c.UpdateOneID(ft.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FieldTypeClient) UpdateOneID(id string) *FieldTypeUpdateOne {
+	return &FieldTypeUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for FieldType.
+func (c *FieldTypeClient) Delete() *FieldTypeDelete {
+	return &FieldTypeDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *FieldTypeClient) DeleteOne(ft *FieldType) *FieldTypeDeleteOne {
+	return c.DeleteOneID(ft.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *FieldTypeClient) DeleteOneID(id string) *FieldTypeDeleteOne {
+	return &FieldTypeDeleteOne{c.Delete().Where(fieldtype.ID(id))}
+}
+
+// Create returns a query builder for FieldType.
+func (c *FieldTypeClient) Query() *FieldTypeQuery {
+	return &FieldTypeQuery{config: c.config}
 }
 
 // FileClient is a client for the File schema.

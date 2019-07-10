@@ -16,7 +16,11 @@ type MySQL struct {
 }
 
 // Create creates all schema resources in the database. It works in an "append-only"
-// mode, which means, it won't delete or change any existing resource in the database.
+// mode, which means, it only create tables, append column to tables or modifying column type.
+//
+// Column can be modified by turning into a NULL from NOT NULL, or having a type conversion not
+// resulting data altering. From example, changing varchar(255) to varchar(120) is invalid, but
+// changing varchar(120) to varchar(255) is valid. For more info, see the convert function below.
 func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
 	tx, err := d.Tx(ctx)
 	if err != nil {
@@ -42,7 +46,7 @@ func (d *MySQL) create(ctx context.Context, tx dialect.Tx, tables ...*Table) err
 			if err != nil {
 				return err
 			}
-			change, err := changeSet(curr, t)
+			change, err := changeSet(curr, t, version)
 			if err != nil {
 				return err
 			}
@@ -178,7 +182,7 @@ type changes struct {
 
 // changeSet returns a changes object to be applied on existing table.
 // It fails if one of the changes is invalid.
-func changeSet(curr, new *Table) (*changes, error) {
+func changeSet(curr, new *Table, version string) (*changes, error) {
 	change := &changes{}
 	// pks.
 	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
@@ -196,10 +200,13 @@ func changeSet(curr, new *Table) (*changes, error) {
 		switch c2, ok := curr.column(c1.Name); {
 		case !ok:
 			change.add = append(change.add, c1)
-		case c1.Type != c2.Type:
-			return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, c1.Type, c2.Type)
 		case c1.Unique != c2.Unique:
 			return nil, fmt.Errorf("changing column cardinality for %q is invalid", c1.Name)
+		case c1.MySQLType(version) != c2.MySQLType(version):
+			if !c2.ConvertibleTo(c1) {
+				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, c1.MySQLType(version), c2.MySQLType(version))
+			}
+			fallthrough
 		case c1.Charset != "" && c1.Charset != c2.Charset || c1.Collation != "" && c1.Charset != c2.Collation:
 			change.modify = append(change.modify, c1)
 		}

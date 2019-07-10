@@ -1,34 +1,18 @@
 // Code generated (@generated) by entc, DO NOT EDIT.
 
-package ent
+package entv2
 
 import (
 	"context"
 	"sync"
 
 	"fbc/ent/dialect"
-	"fbc/ent/entc/integration/ent/migrate"
+	"fbc/ent/entc/integration/migrate/entv2/migrate"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Card is the client for interacting with the Card builders.
-	Card *CardClient
-	// Comment is the client for interacting with the Comment builders.
-	Comment *CommentClient
-	// FieldType is the client for interacting with the FieldType builders.
-	FieldType *FieldTypeClient
-	// File is the client for interacting with the File builders.
-	File *FileClient
-	// Group is the client for interacting with the Group builders.
-	Group *GroupClient
-	// GroupInfo is the client for interacting with the GroupInfo builders.
-	GroupInfo *GroupInfoClient
-	// Node is the client for interacting with the Node builders.
-	Node *NodeClient
-	// Pet is the client for interacting with the Pet builders.
-	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -46,17 +30,9 @@ func (tx *Tx) Rollback() error {
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
 	return &Client{
-		config:    tx.config,
-		Schema:    migrate.NewSchema(tx.driver),
-		Card:      NewCardClient(tx.config),
-		Comment:   NewCommentClient(tx.config),
-		FieldType: NewFieldTypeClient(tx.config),
-		File:      NewFileClient(tx.config),
-		Group:     NewGroupClient(tx.config),
-		GroupInfo: NewGroupInfoClient(tx.config),
-		Node:      NewNodeClient(tx.config),
-		Pet:       NewPetClient(tx.config),
-		User:      NewUserClient(tx.config),
+		config: tx.config,
+		Schema: migrate.NewSchema(tx.driver),
+		User:   NewUserClient(tx.config),
 	}
 }
 
@@ -67,7 +43,7 @@ func (tx *Tx) Client() *Client {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Card.QueryXXX(), the query will be executed
+// applies a query, for example: User.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that this driver is safe for concurrent usage, however, it executes only one query

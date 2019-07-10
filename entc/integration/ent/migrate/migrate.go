@@ -41,6 +41,32 @@ var (
 		PrimaryKey:  []*schema.Column{CommentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// FieldTypesColumns holds the columns for the "field_types" table.
+	FieldTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "int", Type: field.TypeInt},
+		{Name: "int8", Type: field.TypeInt8},
+		{Name: "int16", Type: field.TypeInt16},
+		{Name: "int32", Type: field.TypeInt32},
+		{Name: "int64", Type: field.TypeInt64},
+		{Name: "optional_int", Type: field.TypeInt},
+		{Name: "optional_int8", Type: field.TypeInt8},
+		{Name: "optional_int16", Type: field.TypeInt16},
+		{Name: "optional_int32", Type: field.TypeInt32},
+		{Name: "optional_int64", Type: field.TypeInt64},
+		{Name: "nullable_int", Type: field.TypeInt},
+		{Name: "nullable_int8", Type: field.TypeInt8},
+		{Name: "nullable_int16", Type: field.TypeInt16},
+		{Name: "nullable_int32", Type: field.TypeInt32},
+		{Name: "nullable_int64", Type: field.TypeInt64},
+	}
+	// FieldTypesTable holds the schema information for the "field_types" table.
+	FieldTypesTable = &schema.Table{
+		Name:        "field_types",
+		Columns:     FieldTypesColumns,
+		PrimaryKey:  []*schema.Column{FieldTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -285,6 +311,7 @@ var (
 	Tables = []*schema.Table{
 		CardsTable,
 		CommentsTable,
+		FieldTypesTable,
 		FilesTable,
 		GroupsTable,
 		GroupInfosTable,

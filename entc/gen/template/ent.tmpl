@@ -73,7 +73,8 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 				{{ $receiver }}.{{ pascal $f.Name }} = &{{ $scan }}.{{ pascal $f.Name }}
 			{{- else }}
 				if {{ $scan }}.{{- pascal $f.Name }}.Valid {
-					{{ $receiver }}.{{ pascal $f.Name }} = &{{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
+					{{ $receiver }}.{{ pascal $f.Name }} = new({{ $f.Type }})
+					*{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
 				}
 			{{- end }}
 		{{- else if $f.Optional }}
@@ -117,15 +118,13 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 	buf.WriteString("{{ $.Name }}(")
 	buf.WriteString(fmt.Sprintf("id=%v,", {{ $receiver }}.ID))
 	{{- range $i, $f := $.Fields }}
-		{{- if gt $i 0 }}
-			buf.WriteString(", ")
-		{{- end }}
 		{{- if $f.Nullable }}
 			if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
+				{{- if gt $i 0 }}buf.WriteString(", "){{ end }}
 				buf.WriteString(fmt.Sprintf("{{ $f.Name }}=%v", *v))
 			}
 		{{- else }}
-			buf.WriteString(fmt.Sprintf("{{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
+			buf.WriteString(fmt.Sprintf("{{ if gt $i 0 }}, {{ end }}{{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
 		{{- end }}
 	{{- end }}
 	buf.WriteString(")")

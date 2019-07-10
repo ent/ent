@@ -88,8 +88,7 @@ func (f *File) String() string {
 	buf.WriteString("File(")
 	buf.WriteString(fmt.Sprintf("id=%v,", f.ID))
 	buf.WriteString(fmt.Sprintf("size=%v", f.Size))
-	buf.WriteString(", ")
-	buf.WriteString(fmt.Sprintf("name=%v", f.Name))
+	buf.WriteString(fmt.Sprintf(", name=%v", f.Name))
 	buf.WriteString(")")
 	return buf.String()
 }
