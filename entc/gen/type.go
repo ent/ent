@@ -279,7 +279,7 @@ func (f Field) NullType() string {
 		return "sql.NullBool"
 	case field.TypeTime:
 		return "sql.NullTime"
-	case field.TypeInt, field.TypeInt64:
+	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32, field.TypeInt64:
 		return "sql.NullInt64"
 	case field.TypeFloat64:
 		return "sql.NullFloat64"
@@ -293,10 +293,12 @@ func (f Field) NullTypeField(rec string) string {
 	switch f.Type {
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
 		return fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.String()))
-	case field.TypeInt:
-		return fmt.Sprintf("int(%s.Int64)", rec)
 	case field.TypeTime:
 		return fmt.Sprintf("%s.Time", rec)
+	case field.TypeFloat32:
+		return fmt.Sprintf("%s(%s.Float32)", f.Type.String(), rec)
+	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32:
+		return fmt.Sprintf("%s(%s.Int64)", f.Type.String(), rec)
 	}
 	return rec
 }
@@ -307,6 +309,9 @@ func (f Field) Column() *schema.Column {
 	if f.Name == "id" {
 		c.Type = field.TypeInt
 		c.Increment = true
+	}
+	if cs, ok := f.def.(field.Sizer); ok {
+		c.Size = cs.Size()
 	}
 	if cs, ok := f.def.(field.Charseter); ok {
 		c.Charset = cs.Charset()

@@ -237,7 +237,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	}
 	if gc._type != nil {
 		builder.Set(group.FieldType, *gc._type)
-		*gr.Type = *gc._type
+		gr.Type = gc._type
 	}
 	if gc.max_users != nil {
 		builder.Set(group.FieldMaxUsers, *gc.max_users)

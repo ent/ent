@@ -158,14 +158,18 @@ func (c *Column) MySQLType(version string) (t string) {
 		t = "tinyint"
 	case field.TypeUint8:
 		t = "tinyint unsigned"
-	case field.TypeInt64:
-		t = "bigint"
-	case field.TypeUint64:
-		t = "bigint unsigned"
-	case field.TypeInt, field.TypeInt16, field.TypeInt32:
+	case field.TypeInt16:
+		t = "smallint"
+	case field.TypeUint16:
+		t = "smallint unsigned"
+	case field.TypeInt32:
 		t = "int"
-	case field.TypeUint, field.TypeUint16, field.TypeUint32:
+	case field.TypeUint32:
 		t = "int unsigned"
+	case field.TypeInt, field.TypeInt64:
+		t = "bigint"
+	case field.TypeUint, field.TypeUint64:
+		t = "bigint unsigned"
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
@@ -187,7 +191,7 @@ func (c *Column) MySQLType(version string) (t string) {
 			c.Nullable = &nullable
 		}
 	default:
-		panic("unsupported type " + c.Type.String())
+		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}
 	return t
 }
@@ -241,11 +245,17 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		return r == '(' || r == ')' || r == ' '
 	}); parts[0] {
 	case "int":
-		c.Type = field.TypeInt
-	case "double":
-		c.Type = field.TypeFloat64
-	case "timestamp":
-		c.Type = field.TypeTime
+		c.Type = field.TypeInt32
+	case "smallint":
+		c.Type = field.TypeInt16
+		if len(parts) == 3 { // smallint(5) unsigned.
+			c.Type = field.TypeUint16
+		}
+	case "bigint":
+		c.Type = field.TypeInt64
+		if len(parts) == 3 { // bigint(20) unsigned.
+			c.Type = field.TypeUint64
+		}
 	case "tinyint":
 		size, err := strconv.Atoi(parts[1])
 		if err != nil {
@@ -259,6 +269,10 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		default:
 			c.Type = field.TypeInt8
 		}
+	case "double":
+		c.Type = field.TypeFloat64
+	case "timestamp":
+		c.Type = field.TypeTime
 	case "varchar":
 		c.Type = field.TypeString
 		size, err := strconv.Atoi(parts[1])
@@ -269,6 +283,29 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 	}
 	return nil
 }
+
+// ConvertibleTo reports whether a column can be converted to the new column without altering its data.
+func (c *Column) ConvertibleTo(d *Column) bool {
+	switch {
+	case c.Type == d.Type:
+		return c.Size <= d.Size
+	case c.IntType() && d.IntType() || c.UintType() && d.UintType():
+		return c.Type <= d.Type
+	case c.UintType() && d.IntType():
+		// uintX can not be converted to intY, when X > Y.
+		return c.Type-field.TypeUint8 <= d.Type-field.TypeInt8
+	}
+	return c.FloatType() && d.FloatType()
+}
+
+// IntType reports whether the column is an int type (int8 ... int64).
+func (c Column) IntType() bool { return c.Type >= field.TypeInt8 && c.Type <= field.TypeInt64 }
+
+// UintType reports of the given type is a uint type (int8 ... int64).
+func (c Column) UintType() bool { return c.Type >= field.TypeUint8 && c.Type <= field.TypeUint64 }
+
+// FloatType reports of the given type is a float type (float32, float64).
+func (c Column) FloatType() bool { return c.Type == field.TypeFloat32 || c.Type == field.TypeFloat64 }
 
 // unique adds the `UNIQUE` attribute if the column is a unique type.
 // it is exist in a different function to share the common declaration

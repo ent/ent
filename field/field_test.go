@@ -25,6 +25,11 @@ func TestInt(t *testing.T) {
 	assert.False(t, f.HasDefault())
 	assert.True(t, f.IsNullable())
 	assert.Len(t, f.Validators(), 1)
+
+	assert.Equal(t, field.TypeInt8, field.Int8("age").Type())
+	assert.Equal(t, field.TypeInt16, field.Int16("age").Type())
+	assert.Equal(t, field.TypeInt32, field.Int32("age").Type())
+	assert.Equal(t, field.TypeInt64, field.Int64("age").Type())
 }
 
 func TestFloat(t *testing.T) {

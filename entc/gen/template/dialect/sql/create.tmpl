@@ -15,7 +15,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	{{- range $_, $f := $.Fields }}
 		if {{ $receiver }}.{{- $f.StructField }} != nil {
 			builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
-			{{ if $f.Nullable }}*{{ end }}{{ $.Receiver }}.{{ pascal $f.Name }} = *{{ $receiver }}.{{ $f.StructField }}
+			{{ $.Receiver }}.{{ pascal $f.Name }} = {{ if not $f.Nullable }}*{{ end }}{{ $receiver }}.{{ $f.StructField }}
 		}
 	{{- end }}
 	query, args := builder.Query()

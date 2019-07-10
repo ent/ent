@@ -2,6 +2,7 @@ package field
 
 import (
 	"errors"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,15 +17,15 @@ const (
 	TypeBool
 	TypeTime
 	TypeString
-	TypeInt
 	TypeInt8
 	TypeInt16
 	TypeInt32
+	TypeInt
 	TypeInt64
-	TypeUint
 	TypeUint8
 	TypeUint16
 	TypeUint32
+	TypeUint
 	TypeUint64
 	TypeFloat32
 	TypeFloat64
@@ -75,6 +76,7 @@ var typeNames = [...]string{
 type Field struct {
 	typ        Type
 	tag        string
+	size       int
 	name       string
 	comment    string
 	charset    string
@@ -89,11 +91,29 @@ type Field struct {
 // Int returns a new Field with type int.
 func Int(name string) *intBuilder { return &intBuilder{Field{typ: TypeInt, name: name}} }
 
+// Int8 returns a new Field with type int8.
+func Int8(name string) *intBuilder { return &intBuilder{Field{typ: TypeInt8, name: name}} }
+
+// Int16 returns a new Field with type int16.
+func Int16(name string) *intBuilder { return &intBuilder{Field{typ: TypeInt16, name: name}} }
+
+// Int32 returns a new Field with type int32.
+func Int32(name string) *intBuilder { return &intBuilder{Field{typ: TypeInt32, name: name}} }
+
+// Int64 returns a new Field with type int64.
+func Int64(name string) *intBuilder { return &intBuilder{Field{typ: TypeInt64, name: name}} }
+
 // Float returns a new Field with type float.
 func Float(name string) *floatBuilder { return &floatBuilder{Field{typ: TypeFloat64, name: name}} }
 
 // String returns a new Field with type string.
 func String(name string) *stringBuilder { return &stringBuilder{Field{typ: TypeString, name: name}} }
+
+// Text returns a new string field without limitation on the size.
+// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has not effect.
+func Text(name string) *stringBuilder {
+	return &stringBuilder{Field{typ: TypeString, name: name, size: math.MaxInt32}}
+}
 
 // Bool returns a new Field with type bool.
 func Bool(name string) *boolBuilder { return &boolBuilder{Field{typ: TypeBool, name: name}} }
@@ -337,6 +357,7 @@ func (b *stringBuilder) MinLen(i int) *stringBuilder {
 // MaxLen adds a length validator for this field.
 // Operation fails if the length of the string is greater than the given value.
 func (b *stringBuilder) MaxLen(i int) *stringBuilder {
+	b.size = i
 	b.validators = append(b.validators, func(v string) error {
 		if len(v) > i {
 			return errors.New("value is less than the required length")
@@ -390,6 +411,10 @@ func (b *stringBuilder) SetCharset(s string) *stringBuilder {
 	b.charset = s
 	return b
 }
+
+// Size returns the maximum size of a string.
+// In SQL dialects this is parameter for varchar.
+func (b stringBuilder) Size() int { return b.size }
 
 // Charset returns the character set of the field.
 func (b stringBuilder) Charset() string { return b.charset }
@@ -465,4 +490,9 @@ func (b *boolBuilder) StructTag(s string) *boolBuilder {
 // Charseter is the interface that wraps the Charset method.
 type Charseter interface {
 	Charset() string
+}
+
+// Sizer is the interface that wraps the Size method.
+type Sizer interface {
+	Size() int
 }
