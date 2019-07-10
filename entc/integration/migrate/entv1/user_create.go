@@ -21,8 +21,9 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age  *int32
-	name *string
+	age     *int32
+	name    *string
+	address *string
 }
 
 // SetAge sets the age field.
@@ -34,6 +35,20 @@ func (uc *UserCreate) SetAge(i int32) *UserCreate {
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.name = &s
+	return uc
+}
+
+// SetAddress sets the address field.
+func (uc *UserCreate) SetAddress(s string) *UserCreate {
+	uc.address = &s
+	return uc
+}
+
+// SetNillableAddress sets the address field if the given value is not nil.
+func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
+	if s != nil {
+		uc.SetAddress(*s)
+	}
 	return uc
 }
 
@@ -85,6 +100,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		builder.Set(user.FieldName, *uc.name)
 		u.Name = *uc.name
 	}
+	if uc.address != nil {
+		builder.Set(user.FieldAddress, *uc.address)
+		u.Address = *uc.address
+	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)
@@ -123,6 +142,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	if uc.name != nil {
 		v.Property(dsl.Single, user.FieldName, *uc.name)
+	}
+	if uc.address != nil {
+		v.Property(dsl.Single, user.FieldAddress, *uc.address)
 	}
 	return v.ValueMap(true)
 }

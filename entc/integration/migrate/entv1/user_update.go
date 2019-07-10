@@ -23,6 +23,7 @@ type UserUpdate struct {
 	config
 	age        *int32
 	name       *string
+	address    *string
 	predicates []ent.Predicate
 }
 
@@ -41,6 +42,20 @@ func (uu *UserUpdate) SetAge(i int32) *UserUpdate {
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.name = &s
+	return uu
+}
+
+// SetAddress sets the address field.
+func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
+	uu.address = &s
+	return uu
+}
+
+// SetNillableAddress sets the address field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetAddress(*s)
+	}
 	return uu
 }
 
@@ -124,6 +139,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldName, *uu.name)
 	}
+	if uu.address != nil {
+		update = true
+		builder.Set(user.FieldAddress, *uu.address)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -167,6 +186,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	if uu.name != nil {
 		v.Property(dsl.Single, user.FieldName, *uu.name)
 	}
+	if uu.address != nil {
+		v.Property(dsl.Single, user.FieldAddress, *uu.address)
+	}
 	v.ValueMap(true)
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -175,9 +197,10 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id   string
-	age  *int32
-	name *string
+	id      string
+	age     *int32
+	name    *string
+	address *string
 }
 
 // SetAge sets the age field.
@@ -189,6 +212,20 @@ func (uuo *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.name = &s
+	return uuo
+}
+
+// SetAddress sets the address field.
+func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
+	uuo.address = &s
+	return uuo
+}
+
+// SetNillableAddress sets the address field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetAddress(*s)
+	}
 	return uuo
 }
 
@@ -276,6 +313,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		builder.Set(user.FieldName, *uuo.name)
 		u.Name = *uuo.name
 	}
+	if uuo.address != nil {
+		update = true
+		builder.Set(user.FieldAddress, *uuo.address)
+		u.Address = *uuo.address
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -314,6 +356,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if uuo.name != nil {
 		v.Property(dsl.Single, user.FieldName, *uuo.name)
+	}
+	if uuo.address != nil {
+		v.Property(dsl.Single, user.FieldAddress, *uuo.address)
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

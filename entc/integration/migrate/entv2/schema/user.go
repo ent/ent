@@ -19,5 +19,6 @@ func (User) Fields() []ent.Field {
 		field.Text("name"),
 		// adding new column.
 		field.String("phone"),
+		// deleting the address column.
 	}
 }

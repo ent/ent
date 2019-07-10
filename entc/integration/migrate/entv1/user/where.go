@@ -179,6 +179,18 @@ func Name(v string) ent.Predicate {
 	}
 }
 
+// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
+func Address(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.EQ(v))
+		},
+	}
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v int32) ent.Predicate {
 	return ent.Predicate{
@@ -443,6 +455,158 @@ func NameHasSuffix(v string) ent.Predicate {
 		},
 		Gremlin: func(t *dsl.Traversal) {
 			t.Has(Label, FieldName, p.EndingWith(v))
+		},
+	}
+}
+
+// AddressEQ applies the EQ predicate on the "address" field.
+func AddressEQ(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.EQ(v))
+		},
+	}
+}
+
+// AddressNEQ applies the NEQ predicate on the "address" field.
+func AddressNEQ(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.NEQ(v))
+		},
+	}
+}
+
+// AddressGT applies the GT predicate on the "address" field.
+func AddressGT(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.GT(v))
+		},
+	}
+}
+
+// AddressGTE applies the GTE predicate on the "address" field.
+func AddressGTE(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.GTE(v))
+		},
+	}
+}
+
+// AddressLT applies the LT predicate on the "address" field.
+func AddressLT(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.LT(v))
+		},
+	}
+}
+
+// AddressLTE applies the LTE predicate on the "address" field.
+func AddressLTE(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.LTE(v))
+		},
+	}
+}
+
+// AddressIn applies the In predicate on the "address" field.
+func AddressIn(vs ...string) ent.Predicate {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldAddress), v...))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.Within(v...))
+		},
+	}
+}
+
+// AddressNotIn applies the NotIn predicate on the "address" field.
+func AddressNotIn(vs ...string) ent.Predicate {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldAddress), v...))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.Without(v...))
+		},
+	}
+}
+
+// AddressContains applies the Contains predicate on the "address" field.
+func AddressContains(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.Contains(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.Containing(v))
+		},
+	}
+}
+
+// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
+func AddressHasPrefix(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.HasPrefix(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.StartingWith(v))
+		},
+	}
+}
+
+// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
+func AddressHasSuffix(v string) ent.Predicate {
+	return ent.Predicate{
+		SQL: func(s *sql.Selector) {
+			s.Where(sql.HasSuffix(s.C(FieldAddress), v))
+		},
+		Gremlin: func(t *dsl.Traversal) {
+			t.Has(Label, FieldAddress, p.EndingWith(v))
 		},
 	}
 }

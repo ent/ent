@@ -21,6 +21,8 @@ type User struct {
 	Age int32 `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Address holds the value of the "address" field.
+	Address string `json:"address,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into User.
@@ -30,9 +32,10 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vu struct {
-		ID   string `json:"id,omitempty"`
-		Age  int32  `json:"age,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID      string `json:"id,omitempty"`
+		Age     int32  `json:"age,omitempty"`
+		Name    string `json:"name,omitempty"`
+		Address string `json:"address,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
@@ -40,27 +43,31 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.ID = vu.ID
 	u.Age = vu.Age
 	u.Name = vu.Name
+	u.Address = vu.Address
 	return nil
 }
 
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
-		ID   int
-		Age  int32
-		Name string
+		ID      int
+		Age     int32
+		Name    string
+		Address sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
 		&vu.ID,
 		&vu.Age,
 		&vu.Name,
+		&vu.Address,
 	); err != nil {
 		return err
 	}
 	u.ID = strconv.Itoa(vu.ID)
 	u.Age = vu.Age
 	u.Name = vu.Name
+	u.Address = vu.Address.String
 	return nil
 }
 
@@ -89,6 +96,7 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf("id=%v,", u.ID))
 	buf.WriteString(fmt.Sprintf("age=%v", u.Age))
 	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
+	buf.WriteString(fmt.Sprintf(", address=%v", u.Address))
 	buf.WriteString(")")
 	return buf.String()
 }
@@ -109,18 +117,20 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vu []struct {
-		ID   string `json:"id,omitempty"`
-		Age  int32  `json:"age,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID      string `json:"id,omitempty"`
+		Age     int32  `json:"age,omitempty"`
+		Name    string `json:"name,omitempty"`
+		Address string `json:"address,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
 	}
 	for _, v := range vu {
 		*u = append(*u, &User{
-			ID:   v.ID,
-			Age:  v.Age,
-			Name: v.Name,
+			ID:      v.ID,
+			Age:     v.Age,
+			Name:    v.Name,
+			Address: v.Address,
 		})
 	}
 	return nil
