@@ -8,7 +8,7 @@ require (
 	github.com/didi/gendry v1.1.1
 	github.com/go-openapi/inflect v0.18.0
 	github.com/go-sql-driver/mysql v1.4.1-0.20190510102335-877a9775f068
-	github.com/google/uuid v1.1.0
+	github.com/google/uuid v1.1.1
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
