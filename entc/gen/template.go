@@ -58,6 +58,10 @@ var (
 			Format: "client.go",
 		},
 		{
+			Name:   "context",
+			Format: "context.go",
+		},
+		{
 			Name:   "tx",
 			Format: "tx.go",
 		},
