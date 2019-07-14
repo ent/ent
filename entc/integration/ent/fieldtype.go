@@ -192,8 +192,8 @@ func (ft *FieldType) Unwrap() *FieldType {
 func (ft *FieldType) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("FieldType(")
-	buf.WriteString(fmt.Sprintf("id=%v,", ft.ID))
-	buf.WriteString(fmt.Sprintf("int=%v", ft.Int))
+	buf.WriteString(fmt.Sprintf("id=%v", ft.ID))
+	buf.WriteString(fmt.Sprintf(", int=%v", ft.Int))
 	buf.WriteString(fmt.Sprintf(", int8=%v", ft.Int8))
 	buf.WriteString(fmt.Sprintf(", int16=%v", ft.Int16))
 	buf.WriteString(fmt.Sprintf(", int32=%v", ft.Int32))
@@ -204,24 +204,19 @@ func (ft *FieldType) String() string {
 	buf.WriteString(fmt.Sprintf(", optional_int32=%v", ft.OptionalInt32))
 	buf.WriteString(fmt.Sprintf(", optional_int64=%v", ft.OptionalInt64))
 	if v := ft.NullableInt; v != nil {
-		buf.WriteString(", ")
-		buf.WriteString(fmt.Sprintf("nullable_int=%v", *v))
+		buf.WriteString(fmt.Sprintf(", nullable_int=%v", *v))
 	}
 	if v := ft.NullableInt8; v != nil {
-		buf.WriteString(", ")
-		buf.WriteString(fmt.Sprintf("nullable_int8=%v", *v))
+		buf.WriteString(fmt.Sprintf(", nullable_int8=%v", *v))
 	}
 	if v := ft.NullableInt16; v != nil {
-		buf.WriteString(", ")
-		buf.WriteString(fmt.Sprintf("nullable_int16=%v", *v))
+		buf.WriteString(fmt.Sprintf(", nullable_int16=%v", *v))
 	}
 	if v := ft.NullableInt32; v != nil {
-		buf.WriteString(", ")
-		buf.WriteString(fmt.Sprintf("nullable_int32=%v", *v))
+		buf.WriteString(fmt.Sprintf(", nullable_int32=%v", *v))
 	}
 	if v := ft.NullableInt64; v != nil {
-		buf.WriteString(", ")
-		buf.WriteString(fmt.Sprintf("nullable_int64=%v", *v))
+		buf.WriteString(fmt.Sprintf(", nullable_int64=%v", *v))
 	}
 	buf.WriteString(")")
 	return buf.String()

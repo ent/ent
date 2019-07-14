@@ -1,43 +1,85 @@
 {{ define "schema" }}
 {{ template "header" "migrate" }}
-{{ $pkg := base $.Config.Package }}
-
 
 import (
-	"context"
-	"fmt"
-
-	"fbc/ent/dialect"
+	"fbc/ent/field"
 	"fbc/ent/dialect/sql/schema"
 )
 
-// SQLDialect wraps the dialect.Driver with additional migration methods.
-type SQLDriver interface {
-	Create(context.Context, ...*schema.Table) error
-}
-
-// Schema is the API for creating, migrating and dropping a schema.
-type Schema struct {
-	drv SQLDriver
-}
-
-// NewSchema creates a new schema client.
-func NewSchema(drv dialect.Driver) *Schema {
-	s := &Schema{}
-	switch drv.Dialect() {
-	case dialect.MySQL:
-		s.drv = &schema.MySQL{Driver: drv}
-	case dialect.SQLite:
-		s.drv = &schema.SQLite{Driver: drv}
+var (
+	nullable = true
+	{{- range $_, $t := $.Tables }}
+		{{- $columns := pascal $t.Name | printf "%sColumns" }}
+		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
+		{{ $columns }} = []*schema.Column{
+			{{- range $_, $c := $t.Columns }}
+				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }},
+				{{- if $c.Unique }} Unique: true,{{ end }}
+				{{- if $c.Increment }} Increment: true,{{ end }}
+				{{- if $c.Nullable }} Nullable: &nullable,{{ end }}
+				{{- with $c.Size }} Size: {{ . }},{{ end }}
+				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
+				{{- with $c.Default }} Default: "{{ . }}",{{ end }}
+				{{- with $c.Charset }} Charset: "{{ . }}",{{ end }} },
+			{{- end }}
+		}
+		{{- $table := pascal $t.Name | printf "%sTable" }}
+		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
+		{{ $table }} = &schema.Table{
+			Name: "{{ $t.Name }}",
+			Columns: {{ $columns }},
+			PrimaryKey: []*schema.Column{
+				{{- range $_, $pk := $t.PrimaryKey }}
+					{{- range $i, $c := $t.Columns }}
+						{{- if eq $pk.Name $c.Name }}{{ $columns }}[{{ $i }}],{{ end }}
+					{{- end }}
+				{{- end }}
+			},
+			ForeignKeys: []*schema.ForeignKey{
+				{{- range $_, $fk := $t.ForeignKeys }}
+					{
+						Symbol: "{{ $fk.Symbol }}",
+						Columns: []*schema.Column{
+					  		{{- range $_, $c1 := $fk.Columns }}
+								{{- range $i, $c2 := $t.Columns }}
+									{{- if eq $c1.Name $c2.Name }}{{ $columns }}[{{ $i }}],{{ end }}
+								{{- end }}
+							{{- end }}
+						},
+						{{/* postpone refrencing to avoid typechecking loops */}}
+						RefColumns: []*schema.Column{
+					  		{{- range $_, $c1 := $fk.RefColumns }}
+								{{- range $i, $c2 := $fk.RefTable.Columns }}
+									{{- if eq $c1.Name $c2.Name }}{{ pascal $fk.RefTable.Name | printf "%sColumns" }}[{{ $i }}],{{ end }}
+								{{- end }}
+							{{- end }}
+						},
+						{{- with $fk.OnUpdate.ConstName }}
+							OnUpdate: schema.{{ . }},
+						{{- end }}
+						{{- with $fk.OnDelete.ConstName }}
+							OnDelete: schema.{{ . }},
+						{{- end }}
+					},
+				{{- end }}
+			},
+		}
+	{{- end }}
+	// Tables holds all the tables in the schema.
+	Tables = []*schema.Table{
+		{{- range $_, $t := $.Tables }}
+			{{ pascal $t.Name | printf "%sTable" }},
+		{{- end }}
 	}
-	return s
+)
+
+func init() {
+	{{- range $_, $t := $.Tables }}
+		{{- $table := pascal $t.Name | printf "%sTable" }}
+		{{- range $i, $fk := $t.ForeignKeys }}
+			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ pascal $fk.RefTable.Name | printf "%sTable" }}
+		{{- end }}
+	{{- end }}
 }
 
-// Create creates all schema resources.
-func (s *Schema) Create(ctx context.Context) error {
-	if s.drv == nil {
-		return fmt.Errorf("{{ $pkg }}/migrate: dialect does not support migration")
-	}
-	return s.drv.Create(ctx, Tables...)
-}
 {{ end }}

@@ -2,9 +2,7 @@ package schema
 
 import (
 	"context"
-	"crypto/md5"
 	"fmt"
-	"sort"
 
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
@@ -13,140 +11,37 @@ import (
 // MySQL is a mysql migration driver.
 type MySQL struct {
 	dialect.Driver
+	version string
 }
 
-// Create creates all schema resources in the database. It works in an "append-only"
-// mode, which means, it only create tables, append column to tables or modifying column type.
-//
-// Column can be modified by turning into a NULL from NOT NULL, or having a type conversion not
-// resulting data altering. From example, changing varchar(255) to varchar(120) is invalid, but
-// changing varchar(120) to varchar(255) is valid. For more info, see the convert function below.
-func (d *MySQL) Create(ctx context.Context, tables ...*Table) error {
-	tx, err := d.Tx(ctx)
-	if err != nil {
-		return err
-	}
-	if err := d.create(ctx, tx, tables...); err != nil {
-		return rollback(tx, fmt.Errorf("dialect/mysql: %v", err))
-	}
-	return tx.Commit()
-}
-
-func (d *MySQL) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
-	version, err := d.version(ctx, tx)
-	if err != nil {
-		return err
-	}
-	for _, t := range tables {
-		switch exist, err := d.tableExist(ctx, tx, t.Name); {
-		case err != nil:
-			return err
-		case exist:
-			curr, err := d.table(ctx, tx, t.Name)
-			if err != nil {
-				return err
-			}
-			change, err := changeSet(curr, t, version)
-			if err != nil {
-				return err
-			}
-			if len(change.add) != 0 || len(change.modify) != 0 {
-				b := sql.AlterTable(curr.Name)
-				for _, c := range change.add {
-					b.AddColumn(c.MySQL(version))
-				}
-				for _, c := range change.modify {
-					b.ModifyColumn(c.MySQL(version))
-				}
-				query, args := b.Query()
-				if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-					return fmt.Errorf("alter table %q: %v", t.Name, err)
-				}
-			}
-			if len(change.indexes) > 0 {
-				panic("missing implementation")
-			}
-		default: // !exist
-			query, args := t.MySQL(version).Query()
-			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-				return fmt.Errorf("create table %q: %v", t.Name, err)
-			}
-		}
-	}
-	// create foreign keys after tables were created/altered,
-	// because circular foreign-key constraints are possible.
-	for _, t := range tables {
-		if len(t.ForeignKeys) == 0 {
-			continue
-		}
-		fks := make([]*ForeignKey, 0, len(t.ForeignKeys))
-		for _, fk := range t.ForeignKeys {
-			fk.Symbol = symbol(fk.Symbol)
-			exist, err := d.fkExist(ctx, tx, fk.Symbol)
-			if err != nil {
-				return err
-			}
-			if !exist {
-				fks = append(fks, fk)
-			}
-		}
-		if len(fks) == 0 {
-			continue
-		}
-		b := sql.AlterTable(t.Name)
-		for _, fk := range fks {
-			b.AddForeignKey(fk.DSL())
-		}
-		query, args := b.Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-			return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
-		}
-	}
-	return nil
-}
-
-func (d *MySQL) version(ctx context.Context, tx dialect.Tx) (string, error) {
+// init loads the MySQL version from the database for later use in the migration process.
+func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, "SHOW VARIABLES LIKE 'version'", []interface{}{}, rows); err != nil {
-		return "", fmt.Errorf("dialect/mysql: querying mysql version %v", err)
+		return fmt.Errorf("mysql: querying mysql version %v", err)
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return "", fmt.Errorf("dialect/mysql: version variable was not found")
+		return fmt.Errorf("mysql: version variable was not found")
 	}
 	version := make([]string, 2)
 	if err := rows.Scan(&version[0], &version[1]); err != nil {
-		return "", fmt.Errorf("dialect/mysql: scanning mysql version: %v", err)
+		return fmt.Errorf("mysql: scanning mysql version: %v", err)
 	}
-	return version[1], nil
+	d.version = version[1]
+	return nil
 }
 
 func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
 		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).Query()
-	return d.exist(ctx, tx, query, args...)
+	return exist(ctx, tx, query, args...)
 }
 
 func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
 		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("CONSTRAINT_TYPE", "FOREIGN KEY").And().EQ("CONSTRAINT_NAME", name)).Query()
-	return d.exist(ctx, tx, query, args...)
-}
-
-func (d *MySQL) exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}) (bool, error) {
-	rows := &sql.Rows{}
-	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return false, fmt.Errorf("dialect/mysql: reading schema information %v", err)
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return false, fmt.Errorf("dialect/mysql: no rows returned")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return false, fmt.Errorf("dialect/mysql: scanning count")
-	}
-	return n > 0, nil
+	return exist(ctx, tx, query, args...)
 }
 
 // table loads the current table description from the database.
@@ -156,14 +51,14 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
 		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("dialect/mysql: reading table description %v", err)
+		return nil, fmt.Errorf("mysql: reading table description %v", err)
 	}
 	defer rows.Close()
 	t := &Table{Name: name}
 	for rows.Next() {
 		c := &Column{}
 		if err := c.ScanMySQL(rows); err != nil {
-			return nil, fmt.Errorf("dialect/mysql: %v", err)
+			return nil, fmt.Errorf("mysql: %v", err)
 		}
 		if c.PrimaryKey() {
 			t.PrimaryKey = append(t.PrimaryKey, c)
@@ -173,68 +68,10 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	return t, nil
 }
 
-// changes to apply on existing table.
-type changes struct {
-	add     []*Column
-	modify  []*Column
-	indexes []*Index
+func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {
+	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", name, value), []interface{}{}, new(sql.Result))
 }
 
-// changeSet returns a changes object to be applied on existing table.
-// It fails if one of the changes is invalid.
-func changeSet(curr, new *Table, version string) (*changes, error) {
-	change := &changes{}
-	// pks.
-	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
-		return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
-	}
-	sort.Slice(new.PrimaryKey, func(i, j int) bool { return new.PrimaryKey[i].Name < new.PrimaryKey[j].Name })
-	sort.Slice(curr.PrimaryKey, func(i, j int) bool { return curr.PrimaryKey[i].Name < curr.PrimaryKey[j].Name })
-	for i := range curr.PrimaryKey {
-		if curr.PrimaryKey[i].Name != new.PrimaryKey[i].Name {
-			return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
-		}
-	}
-	// columns.
-	for _, c1 := range new.Columns {
-		switch c2, ok := curr.column(c1.Name); {
-		case !ok:
-			change.add = append(change.add, c1)
-		case c1.Unique != c2.Unique:
-			return nil, fmt.Errorf("changing column cardinality for %q is invalid", c1.Name)
-		case c1.MySQLType(version) != c2.MySQLType(version):
-			if !c2.ConvertibleTo(c1) {
-				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, c1.MySQLType(version), c2.MySQLType(version))
-			}
-			fallthrough
-		case c1.Charset != "" && c1.Charset != c2.Charset || c1.Collation != "" && c1.Charset != c2.Collation:
-			change.modify = append(change.modify, c1)
-		}
-	}
-	// indexes.
-	for _, idx1 := range new.Indexes {
-		switch idx2, ok := curr.index(idx1.Name); {
-		case !ok:
-			change.indexes = append(change.indexes, idx1)
-		case idx1.Unique != idx2.Unique:
-			return nil, fmt.Errorf("changing index %q uniqness is invalid", idx1.Name)
-		}
-	}
-	return change, nil
-}
-
-// symbol makes sure the symbol length is not longer than the maxlength in MySQL standard (64).
-func symbol(name string) string {
-	if len(name) <= 64 {
-		return name
-	}
-	return fmt.Sprintf("%s_%x", name[:31], md5.Sum([]byte(name)))
-}
-
-// rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
-func rollback(tx dialect.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%s: %v", err.Error(), rerr)
-	}
-	return err
-}
+func (d *MySQL) cType(c *Column) string                { return c.MySQLType(d.version) }
+func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder   { return t.MySQL(d.version) }
+func (d *MySQL) cBuilder(c *Column) *sql.ColumnBuilder { return c.MySQL(d.version) }

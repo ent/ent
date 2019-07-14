@@ -29,9 +29,7 @@ import (
 
 func TestSQLite(t *testing.T) {
 	db, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	if err != nil {
-		t.Skipf("sqlite is not available: %v", err)
-	}
+	require.NoError(t, err)
 	defer db.Close()
 	drv := dialect.Driver(db)
 	if testing.Verbose() {

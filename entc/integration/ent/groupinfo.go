@@ -91,8 +91,8 @@ func (gi *GroupInfo) Unwrap() *GroupInfo {
 func (gi *GroupInfo) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("GroupInfo(")
-	buf.WriteString(fmt.Sprintf("id=%v,", gi.ID))
-	buf.WriteString(fmt.Sprintf("desc=%v", gi.Desc))
+	buf.WriteString(fmt.Sprintf("id=%v", gi.ID))
+	buf.WriteString(fmt.Sprintf(", desc=%v", gi.Desc))
 	buf.WriteString(fmt.Sprintf(", max_users=%v", gi.MaxUsers))
 	buf.WriteString(")")
 	return buf.String()

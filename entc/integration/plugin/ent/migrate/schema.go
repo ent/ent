@@ -3,39 +3,28 @@
 package migrate
 
 import (
-	"context"
-	"fmt"
-
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/field"
 )
 
-// SQLDialect wraps the dialect.Driver with additional migration methods.
-type SQLDriver interface {
-	Create(context.Context, ...*schema.Table) error
-}
-
-// Schema is the API for creating, migrating and dropping a schema.
-type Schema struct {
-	drv SQLDriver
-}
-
-// NewSchema creates a new schema client.
-func NewSchema(drv dialect.Driver) *Schema {
-	s := &Schema{}
-	switch drv.Dialect() {
-	case dialect.MySQL:
-		s.drv = &schema.MySQL{Driver: drv}
-	case dialect.SQLite:
-		s.drv = &schema.SQLite{Driver: drv}
+var (
+	nullable = true
+	// BoringsColumns holds the columns for the "borings" table.
+	BoringsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
 	}
-	return s
-}
-
-// Create creates all schema resources.
-func (s *Schema) Create(ctx context.Context) error {
-	if s.drv == nil {
-		return fmt.Errorf("ent/migrate: dialect does not support migration")
+	// BoringsTable holds the schema information for the "borings" table.
+	BoringsTable = &schema.Table{
+		Name:        "borings",
+		Columns:     BoringsColumns,
+		PrimaryKey:  []*schema.Column{BoringsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
-	return s.drv.Create(ctx, Tables...)
+	// Tables holds all the tables in the schema.
+	Tables = []*schema.Table{
+		BoringsTable,
+	}
+)
+
+func init() {
 }

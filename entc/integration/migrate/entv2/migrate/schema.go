@@ -3,39 +3,55 @@
 package migrate
 
 import (
-	"context"
-	"fmt"
-
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/field"
 )
 
-// SQLDialect wraps the dialect.Driver with additional migration methods.
-type SQLDriver interface {
-	Create(context.Context, ...*schema.Table) error
-}
-
-// Schema is the API for creating, migrating and dropping a schema.
-type Schema struct {
-	drv SQLDriver
-}
-
-// NewSchema creates a new schema client.
-func NewSchema(drv dialect.Driver) *Schema {
-	s := &Schema{}
-	switch drv.Dialect() {
-	case dialect.MySQL:
-		s.drv = &schema.MySQL{Driver: drv}
-	case dialect.SQLite:
-		s.drv = &schema.SQLite{Driver: drv}
+var (
+	nullable = true
+	// GroupsColumns holds the columns for the "groups" table.
+	GroupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
 	}
-	return s
-}
-
-// Create creates all schema resources.
-func (s *Schema) Create(ctx context.Context) error {
-	if s.drv == nil {
-		return fmt.Errorf("entv2/migrate: dialect does not support migration")
+	// GroupsTable holds the schema information for the "groups" table.
+	GroupsTable = &schema.Table{
+		Name:        "groups",
+		Columns:     GroupsColumns,
+		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
-	return s.drv.Create(ctx, Tables...)
+	// PetsColumns holds the columns for the "pets" table.
+	PetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// PetsTable holds the schema information for the "pets" table.
+	PetsTable = &schema.Table{
+		Name:        "pets",
+		Columns:     PetsColumns,
+		PrimaryKey:  []*schema.Column{PetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "age", Type: field.TypeInt},
+		{Name: "name", Type: field.TypeString, Size: 2147483647},
+		{Name: "phone", Type: field.TypeString},
+	}
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:        "users",
+		Columns:     UsersColumns,
+		PrimaryKey:  []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// Tables holds all the tables in the schema.
+	Tables = []*schema.Table{
+		GroupsTable,
+		PetsTable,
+		UsersTable,
+	}
+)
+
+func init() {
 }

@@ -13,6 +13,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Group is the client for interacting with the Group builders.
+	Group *GroupClient
+	// Pet is the client for interacting with the Pet builders.
+	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -32,6 +36,8 @@ func (tx *Tx) Client() *Client {
 	return &Client{
 		config: tx.config,
 		Schema: migrate.NewSchema(tx.driver),
+		Group:  NewGroupClient(tx.config),
+		Pet:    NewPetClient(tx.config),
 		User:   NewUserClient(tx.config),
 	}
 }
@@ -43,7 +49,7 @@ func (tx *Tx) Client() *Client {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: User.QueryXXX(), the query will be executed
+// applies a query, for example: Group.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that this driver is safe for concurrent usage, however, it executes only one query

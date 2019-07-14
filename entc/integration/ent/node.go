@@ -89,8 +89,8 @@ func (n *Node) Unwrap() *Node {
 func (n *Node) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("Node(")
-	buf.WriteString(fmt.Sprintf("id=%v,", n.ID))
-	buf.WriteString(fmt.Sprintf("value=%v", n.Value))
+	buf.WriteString(fmt.Sprintf("id=%v", n.ID))
+	buf.WriteString(fmt.Sprintf(", value=%v", n.Value))
 	buf.WriteString(")")
 	return buf.String()
 }

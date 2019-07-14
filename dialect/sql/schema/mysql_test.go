@@ -18,6 +18,7 @@ func TestMySQL_Create(t *testing.T) {
 	tests := []struct {
 		name    string
 		tables  []*Table
+		options []MigrateOption
 		before  func(sqlmock.Sqlmock)
 		wantErr bool
 	}{
@@ -261,14 +262,135 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectCommit()
 			},
 		},
+		{
+			name: "universal id for all tables",
+			tables: []*Table{
+				NewTable("users").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
+				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
+			},
+			options: []MigrateOption{WithGlobalUniqueID(true)},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("ent_types").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				// create ent_types table.
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint AUTO_INCREMENT, `type` varchar(255) UNIQUE, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// set users id range.
+				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
+					WithArgs("users").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 0")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("groups").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// set groups id range.
+				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
+					WithArgs("groups").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("ALTER TABLE `groups` AUTO_INCREMENT = 4294967296")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "universal id for new tables",
+			tables: []*Table{
+				NewTable("users").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
+				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
+			},
+			options: []MigrateOption{WithGlobalUniqueID(true)},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("ent_types").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				// query ent_types table.
+				mock.ExpectQuery(escape("SELECT `type` FROM `ent_types` ORDER BY `id` ASC")).
+					WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow("users"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				// users table has no changes.
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", ""))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("groups").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// set groups id range.
+				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
+					WithArgs("groups").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("ALTER TABLE `groups` AUTO_INCREMENT = 4294967296")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "universal id for restored tables",
+			tables: []*Table{
+				NewTable("users").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
+				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
+			},
+			options: []MigrateOption{WithGlobalUniqueID(true)},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("ent_types").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				// query ent_types table.
+				mock.ExpectQuery(escape("SELECT `type` FROM `ent_types` ORDER BY `id` ASC")).
+					WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow("users"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// set users id range (without inserting to ent_types).
+				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 0")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("groups").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// set groups id range.
+				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
+					WithArgs("groups").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("ALTER TABLE `groups` AUTO_INCREMENT = 4294967296")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			tt.before(mock)
-			mysql := &MySQL{sql.OpenDB("mysql", db)}
-			err = mysql.Create(context.Background(), tt.tables...)
+			migrate, err := NewMigrate(sql.OpenDB("mysql", db), tt.options...)
+			require.NoError(t, err)
+			err = migrate.Create(context.Background(), tt.tables...)
 			require.Equal(t, tt.wantErr, err != nil, err)
 		})
 	}

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"fbc/ent/entc/integration/plugin/ent/boring"
 
@@ -23,6 +24,7 @@ import (
 type BoringQuery struct {
 	config
 	limit      *int
+	offset     *int
 	order      []Order
 	unique     []string
 	predicates []ent.Predicate
@@ -40,6 +42,12 @@ func (bq *BoringQuery) Where(ps ...ent.Predicate) *BoringQuery {
 // Limit adds a limit step to the query.
 func (bq *BoringQuery) Limit(limit int) *BoringQuery {
 	bq.limit = &limit
+	return bq
+}
+
+// Offset adds an offset step to the query.
+func (bq *BoringQuery) Offset(offset int) *BoringQuery {
+	bq.offset = &offset
 	return bq
 }
 
@@ -330,6 +338,11 @@ func (bq *BoringQuery) sqlQuery() *sql.Selector {
 	for _, p := range bq.order {
 		p.SQL(selector)
 	}
+	if offset := bq.offset; offset != nil {
+		// limit is mandatory for offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(*offset).Limit(math.MaxInt64)
+	}
 	if limit := bq.limit; limit != nil {
 		selector.Limit(*limit)
 	}
@@ -399,7 +412,12 @@ func (bq *BoringQuery) gremlinQuery() *dsl.Traversal {
 			p.Gremlin(v)
 		}
 	}
-	if limit := bq.limit; limit != nil {
+	switch limit, offset := bq.limit, bq.offset; {
+	case limit != nil && offset != nil:
+		v.Range(*offset, *offset+*limit)
+	case offset != nil:
+		v.Range(*offset, math.MaxInt64)
+	case limit != nil:
 		v.Limit(*limit)
 	}
 	if unique := bq.unique; len(unique) == 0 {

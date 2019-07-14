@@ -34,6 +34,12 @@ func (t *Table) AddForeignKey(fk *ForeignKey) *Table {
 	return t
 }
 
+// AddColumn adds a new column to the table.
+func (t *Table) AddColumn(c *Column) *Table {
+	t.Columns = append(t.Columns, c)
+	return t
+}
+
 // MySQL returns the MySQL DSL query for table creation.
 func (t *Table) MySQL(version string) *sql.TableBuilder {
 	b := sql.CreateTable(t.Name).IfNotExists()

@@ -72,7 +72,7 @@ func (b *Boring) Unwrap() *Boring {
 func (b *Boring) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("Boring(")
-	buf.WriteString(fmt.Sprintf("id=%v,", b.ID))
+	buf.WriteString(fmt.Sprintf("id=%v", b.ID))
 	buf.WriteString(")")
 	return buf.String()
 }

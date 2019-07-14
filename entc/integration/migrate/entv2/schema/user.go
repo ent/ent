@@ -22,3 +22,11 @@ func (User) Fields() []ent.Field {
 		// deleting the address column.
 	}
 }
+
+// Additional types to be added to the schema.
+type (
+	// Pet schema.
+	Pet struct{ ent.Schema }
+	// Group schema.
+	Group struct{ ent.Schema }
+)

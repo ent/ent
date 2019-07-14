@@ -3,39 +3,31 @@
 package migrate
 
 import (
-	"context"
-	"fmt"
-
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/field"
 )
 
-// SQLDialect wraps the dialect.Driver with additional migration methods.
-type SQLDriver interface {
-	Create(context.Context, ...*schema.Table) error
-}
-
-// Schema is the API for creating, migrating and dropping a schema.
-type Schema struct {
-	drv SQLDriver
-}
-
-// NewSchema creates a new schema client.
-func NewSchema(drv dialect.Driver) *Schema {
-	s := &Schema{}
-	switch drv.Dialect() {
-	case dialect.MySQL:
-		s.drv = &schema.MySQL{Driver: drv}
-	case dialect.SQLite:
-		s.drv = &schema.SQLite{Driver: drv}
+var (
+	nullable = true
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "age", Type: field.TypeInt32},
+		{Name: "name", Type: field.TypeString, Size: 10},
+		{Name: "address", Type: field.TypeString},
 	}
-	return s
-}
-
-// Create creates all schema resources.
-func (s *Schema) Create(ctx context.Context) error {
-	if s.drv == nil {
-		return fmt.Errorf("entv1/migrate: dialect does not support migration")
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:        "users",
+		Columns:     UsersColumns,
+		PrimaryKey:  []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
-	return s.drv.Create(ctx, Tables...)
+	// Tables holds all the tables in the schema.
+	Tables = []*schema.Table{
+		UsersTable,
+	}
+)
+
+func init() {
 }

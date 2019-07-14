@@ -13,40 +13,16 @@ type SQLite struct {
 	dialect.Driver
 }
 
-// Create creates all tables resources in the database.
-func (d *SQLite) Create(ctx context.Context, tables ...*Table) error {
-	tx, err := d.Tx(ctx)
+// init makes sure that foreign_keys support is enabled.
+func (d *SQLite) init(ctx context.Context, tx dialect.Tx) error {
+	on, err := exist(ctx, tx, "PRAGMA foreign_keys")
 	if err != nil {
-		return err
-	}
-	if err := d.create(ctx, tx, tables...); err != nil {
-		return rollback(tx, fmt.Errorf("dialect/sqlite: %v", err))
-	}
-	return tx.Commit()
-}
-
-func (d *SQLite) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
-	on, err := d.fkEnabled(ctx, tx)
-	if err != nil {
-		return fmt.Errorf("check foreign_keys pragma: %v", err)
+		return fmt.Errorf("sqlite: check foreign_keys pragma: %v", err)
 	}
 	if !on {
 		// foreign_keys pragma is off, either enable it by execute "PRAGMA foreign_keys=ON"
 		// or add the following parameter in the connection string "_fk=1".
-		return fmt.Errorf("foreign_keys pragma is off: missing %q is the connection string", "_fk=1")
-	}
-	for _, t := range tables {
-		exist, err := d.tableExist(ctx, tx, t.Name)
-		if err != nil {
-			return err
-		}
-		if exist {
-			continue
-		}
-		query, args := t.SQLite().Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-			return fmt.Errorf("create table %q: %v", t.Name, err)
-		}
+		return fmt.Errorf("sqlite: foreign_keys pragma is off: missing %q is the connection string", "_fk=1")
 	}
 	return nil
 }
@@ -56,25 +32,35 @@ func (d *SQLite) tableExist(ctx context.Context, tx dialect.Tx, name string) (bo
 		From(sql.Table("sqlite_master")).
 		Where(sql.EQ("type", "table").And().EQ("name", name)).
 		Query()
-	return d.exist(ctx, tx, query, args...)
+	return exist(ctx, tx, query, args...)
 }
 
-func (d *SQLite) fkEnabled(ctx context.Context, tx dialect.Tx) (bool, error) {
-	return d.exist(ctx, tx, "PRAGMA foreign_keys")
+// setRange sets the start value of table PK.
+// SQLite tracks the AUTOINCREMENT in the "sqlite_sequence" table that is created and initialized automatically
+// whenever a table that contains an AUTOINCREMENT column is created. However, it populates to it a rows (for tables)
+// only after the first insertion. Therefore, we check. If a record (for the given table) already exists in the "sqlite_sequence"
+// table, we updated it. Otherwise, we insert a new value.
+func (d *SQLite) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {
+	query, args := sql.Select().Count().
+		From(sql.Table("sqlite_sequence")).
+		Where(sql.EQ("name", name)).
+		Query()
+	exists, err := exist(ctx, tx, query, args...)
+	switch {
+	case err != nil:
+		return err
+	case exists:
+		query, args = sql.Update("sqlite_sequence").Set("seq", value).Where(sql.EQ("name", name)).Query()
+	default: // !exists
+		query, args = sql.Insert("sqlite_sequence").Columns("name", "seq").Values(name, value).Query()
+	}
+	return tx.Exec(ctx, query, args, new(sql.Result))
 }
 
-func (d *SQLite) exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}) (bool, error) {
-	rows := &sql.Rows{}
-	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return false, fmt.Errorf("reading schema information %v", err)
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return false, fmt.Errorf("no rows returned")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return false, fmt.Errorf("scanning count")
-	}
-	return n > 0, nil
-}
+func (d *SQLite) cType(c *Column) string                { return c.SQLiteType() }
+func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder   { return t.SQLite() }
+func (d *SQLite) cBuilder(c *Column) *sql.ColumnBuilder { return c.SQLite() }
+
+// fkExist returns always tru to disable foreign-keys creation after the table was created.
+func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
+func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }
