@@ -26,6 +26,52 @@ func init() {
 	}
 }
 
+func ExampleGroup() {
+	if endpoint == nil {
+		return
+	}
+	ctx := context.Background()
+	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	client := NewClient(Driver(dialect.NewGremlin(conn)))
+
+	// creating vertices for the group's edges.
+
+	// create group vertex with its edges.
+	gr := client.Group.
+		Create().
+		SaveX(ctx)
+	log.Println("group created:", gr)
+
+	// query edges.
+
+	// Output:
+}
+func ExamplePet() {
+	if endpoint == nil {
+		return
+	}
+	ctx := context.Background()
+	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	client := NewClient(Driver(dialect.NewGremlin(conn)))
+
+	// creating vertices for the pet's edges.
+
+	// create pet vertex with its edges.
+	pe := client.Pet.
+		Create().
+		SaveX(ctx)
+	log.Println("pet created:", pe)
+
+	// query edges.
+
+	// Output:
+}
 func ExampleUser() {
 	if endpoint == nil {
 		return

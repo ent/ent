@@ -162,8 +162,8 @@ func (u *User) Unwrap() *User {
 func (u *User) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("User(")
-	buf.WriteString(fmt.Sprintf("id=%v,", u.ID))
-	buf.WriteString(fmt.Sprintf("age=%v", u.Age))
+	buf.WriteString(fmt.Sprintf("id=%v", u.ID))
+	buf.WriteString(fmt.Sprintf(", age=%v", u.Age))
 	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
 	buf.WriteString(fmt.Sprintf(", last=%v", u.Last))
 	buf.WriteString(fmt.Sprintf(", nickname=%v", u.Nickname))

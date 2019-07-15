@@ -72,7 +72,7 @@ func (c *Comment) Unwrap() *Comment {
 func (c *Comment) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("Comment(")
-	buf.WriteString(fmt.Sprintf("id=%v,", c.ID))
+	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
 	buf.WriteString(")")
 	return buf.String()
 }

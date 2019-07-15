@@ -86,8 +86,8 @@ func (f *File) Unwrap() *File {
 func (f *File) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("File(")
-	buf.WriteString(fmt.Sprintf("id=%v,", f.ID))
-	buf.WriteString(fmt.Sprintf("size=%v", f.Size))
+	buf.WriteString(fmt.Sprintf("id=%v", f.ID))
+	buf.WriteString(fmt.Sprintf(", size=%v", f.Size))
 	buf.WriteString(fmt.Sprintf(", name=%v", f.Name))
 	buf.WriteString(")")
 	return buf.String()

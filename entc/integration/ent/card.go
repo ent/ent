@@ -84,8 +84,8 @@ func (c *Card) Unwrap() *Card {
 func (c *Card) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("Card(")
-	buf.WriteString(fmt.Sprintf("id=%v,", c.ID))
-	buf.WriteString(fmt.Sprintf("number=%v", c.Number))
+	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
+	buf.WriteString(fmt.Sprintf(", number=%v", c.Number))
 	buf.WriteString(")")
 	return buf.String()
 }

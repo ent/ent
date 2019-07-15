@@ -3,31 +3,27 @@
 package migrate
 
 import (
+	"context"
+	"fmt"
+
+	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql/schema"
-	"fbc/ent/field"
 )
 
-var (
-	nullable = true
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "age", Type: field.TypeInt32},
-		{Name: "name", Type: field.TypeString, Size: 10},
-		{Name: "address", Type: field.TypeString},
-	}
-	// UsersTable holds the schema information for the "users" table.
-	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// Tables holds all the tables in the schema.
-	Tables = []*schema.Table{
-		UsersTable,
-	}
-)
+// Schema is the API for creating, migrating and dropping a schema.
+type Schema struct {
+	drv         dialect.Driver
+	universalID bool
+}
 
-func init() {
+// NewSchema creates a new schema client.
+func NewSchema(drv dialect.Driver) *Schema { return &Schema{drv: drv} }
+
+// Create creates all schema resources.
+func (s *Schema) Create(ctx context.Context, opts ...schema.MigrateOption) error {
+	migrate, err := schema.NewMigrate(s.drv, opts...)
+	if err != nil {
+		return fmt.Errorf("ent/migrate: %v", err)
+	}
+	return migrate.Create(ctx, Tables...)
 }

@@ -116,15 +116,14 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 func ({{ $receiver }} *{{ $.Name }}) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("{{ $.Name }}(")
-	buf.WriteString(fmt.Sprintf("id=%v,", {{ $receiver }}.ID))
+	buf.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
 	{{- range $i, $f := $.Fields }}
 		{{- if $f.Nullable }}
 			if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
-				{{- if gt $i 0 }}buf.WriteString(", "){{ end }}
-				buf.WriteString(fmt.Sprintf("{{ $f.Name }}=%v", *v))
+				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", *v))
 			}
 		{{- else }}
-			buf.WriteString(fmt.Sprintf("{{ if gt $i 0 }}, {{ end }}{{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
+			buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
 		{{- end }}
 	{{- end }}
 	buf.WriteString(")")
