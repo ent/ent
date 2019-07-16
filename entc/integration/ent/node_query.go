@@ -287,6 +287,22 @@ func (nq *NodeQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func (nq *NodeQuery) Clone() *NodeQuery {
+	return &NodeQuery{
+		config:     nq.config,
+		limit:      nq.limit,
+		offset:     nq.offset,
+		order:      append([]Order{}, nq.order...),
+		unique:     append([]string{}, nq.unique...),
+		predicates: append([]ent.Predicate{}, nq.predicates...),
+		// clone intermediate queries.
+		sql:     nq.sql.Clone(),
+		gremlin: nq.gremlin.Clone(),
+	}
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //

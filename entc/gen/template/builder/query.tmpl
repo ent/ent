@@ -290,6 +290,22 @@ func ({{ $receiver }} *{{ $builder }}) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
+	return &{{ $builder }}{
+		config: 	{{ $receiver }}.config,
+		limit: 		{{ $receiver }}.limit,
+		offset: 	{{ $receiver }}.offset,
+		order: 		append([]Order{}, {{ $receiver }}.order...),
+		unique: 	append([]string{}, {{ $receiver }}.unique...),
+		predicates: append([]ent.Predicate{}, {{ $receiver }}.predicates...),
+		// clone intermediate queries.
+		sql: 		{{ $receiver }}.sql.Clone(),
+		gremlin:	{{ $receiver}}.gremlin.Clone(),
+	}
+}
+
 {{ $groupBuilder := pascal $.Name | printf "%sGroupBy" }}
 
 // GroupBy used to group vertices by one or more fields/columns.

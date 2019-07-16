@@ -269,6 +269,22 @@ func (cq *CardQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func (cq *CardQuery) Clone() *CardQuery {
+	return &CardQuery{
+		config:     cq.config,
+		limit:      cq.limit,
+		offset:     cq.offset,
+		order:      append([]Order{}, cq.order...),
+		unique:     append([]string{}, cq.unique...),
+		predicates: append([]ent.Predicate{}, cq.predicates...),
+		// clone intermediate queries.
+		sql:     cq.sql.Clone(),
+		gremlin: cq.gremlin.Clone(),
+	}
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //

@@ -249,6 +249,22 @@ func (pq *PetQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func (pq *PetQuery) Clone() *PetQuery {
+	return &PetQuery{
+		config:     pq.config,
+		limit:      pq.limit,
+		offset:     pq.offset,
+		order:      append([]Order{}, pq.order...),
+		unique:     append([]string{}, pq.unique...),
+		predicates: append([]ent.Predicate{}, pq.predicates...),
+		// clone intermediate queries.
+		sql:     pq.sql.Clone(),
+		gremlin: pq.gremlin.Clone(),
+	}
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {

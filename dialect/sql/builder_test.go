@@ -9,7 +9,7 @@ import (
 
 func TestBuilder(t *testing.T) {
 	tests := []struct {
-		input     Node
+		input     Querier
 		wantQuery string
 		wantArgs  []interface{}
 	}{
@@ -230,7 +230,7 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "SELECT * FROM `users` AS `u`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				t2 := Table("groups").As("g")
 				return Select(t1.C("id"), t2.C("name")).From(t1).Join(t2)
@@ -238,7 +238,7 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "SELECT `u`.`id`, `g`.`name` FROM `users` AS `u` JOIN `groups` AS `g`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				t2 := Table("groups").As("g")
 				return Select(t1.C("id"), t2.C("name")).
@@ -249,7 +249,7 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "SELECT `u`.`id`, `g`.`name` FROM `users` AS `u` JOIN `groups` AS `g` ON `u`.`id` = `g`.`user_id`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				t2 := Table("groups").As("g")
 				return Select(t1.C("id"), t2.C("name")).
@@ -262,14 +262,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar"},
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				return Select(t1.Columns("name", "age")...).From(t1)
 			}(),
 			wantQuery: "SELECT `u`.`name`, `u`.`age` FROM `users` AS `u`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				t2 := Select().From(Table("groups")).Where(EQ("user_id", 10)).As("g")
 				return Select(t1.C("id"), t2.C("name")).
@@ -281,7 +281,7 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{10},
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				selector := Select().Where(EQ("name", "foo").Or().EQ("name", "bar"))
 				return Delete("users").FromSelect(selector)
 			}(),
@@ -289,14 +289,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				selector := Select().From(Table("users")).As("t")
 				return selector.Select(selector.C("name"))
 			}(),
 			wantQuery: "SELECT `t`.`name` FROM `users`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				selector := Select().From(Table("groups")).Where(EQ("name", "foo"))
 				return Delete("users").FromSelect(selector)
 			}(),
@@ -304,7 +304,7 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				selector := Select()
 				return Delete("users").FromSelect(selector)
 			}(),
@@ -316,7 +316,7 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users")
 				return Select().
 					From(t1).
@@ -326,7 +326,7 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users")
 				return Select().
 					From(t1).
@@ -344,7 +344,7 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "SELECT COUNT(DISTINCT `id`) FROM `users`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users")
 				t2 := Select().From(Table("groups"))
 				t3 := Select().Count().From(t1).Join(t1).On(t2.C("id"), t1.C("blocked_id"))
@@ -357,7 +357,7 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "SELECT SUM(`age`), MIN(`age`) FROM `users`",
 		},
 		{
-			input: func() Node {
+			input: func() Querier {
 				t1 := Table("users").As("u")
 				return Select(As(Max(t1.C("age")), "max_age")).From(t1)
 			}(),
@@ -402,8 +402,16 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
-			input:     Nodes{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))},
+			input:     Queries{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))},
 			wantQuery: "WITH users_view AS (SELECT * FROM `users`) SELECT * FROM `users_view`",
+		},
+		{
+			input: func() Querier {
+				base := Select("*").From(Table("groups"))
+				return Queries{With("groups").As(base.Clone().Where(EQ("name", "bar"))), base.Select("age")}
+			}(),
+			wantQuery: "WITH groups AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
+			wantArgs:  []interface{}{"bar"},
 		},
 	}
 	for i, tt := range tests {

@@ -249,6 +249,22 @@ func (bq *BoringQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func (bq *BoringQuery) Clone() *BoringQuery {
+	return &BoringQuery{
+		config:     bq.config,
+		limit:      bq.limit,
+		offset:     bq.offset,
+		order:      append([]Order{}, bq.order...),
+		unique:     append([]string{}, bq.unique...),
+		predicates: append([]ent.Predicate{}, bq.predicates...),
+		// clone intermediate queries.
+		sql:     bq.sql.Clone(),
+		gremlin: bq.gremlin.Clone(),
+	}
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (bq *BoringQuery) GroupBy(field string, fields ...string) *BoringGroupBy {

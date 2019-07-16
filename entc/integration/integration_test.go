@@ -15,6 +15,7 @@ import (
 	"fbc/ent/dialect/sql"
 	"fbc/ent/entc/integration/ent"
 	"fbc/ent/entc/integration/ent/card"
+	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/group"
 	"fbc/ent/entc/integration/ent/groupinfo"
 	"fbc/ent/entc/integration/ent/node"
@@ -94,6 +95,7 @@ func TestGremlin(t *testing.T) {
 var tests = []func(*testing.T, *ent.Client){
 	Tx,
 	Types,
+	Clone,
 	Sanity,
 	Paging,
 	Charset,
@@ -193,6 +195,15 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Empty(ids)
 	// nop.
 	client.User.Delete().Where(user.IDIn(ids...)).ExecX(ctx)
+}
+
+func Clone(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	f1 := client.File.Create().SetName("foo").SetSize(10).SaveX(ctx)
+	f2 := client.File.Create().SetName("foo").SetSize(20).SaveX(ctx)
+	base := client.File.Query().Where(file.Name("foo"))
+	require.Equal(t, f1.Size, base.Clone().Where(file.Size(f1.Size)).OnlyX(ctx).Size)
+	require.Equal(t, f2.Size, base.Clone().Where(file.Size(f2.Size)).OnlyX(ctx).Size)
 }
 
 func Paging(t *testing.T, client *ent.Client) {
@@ -1747,6 +1758,7 @@ func drop(t *testing.T, client *ent.Client) {
 	t.Log("drop data from database")
 	ctx := context.Background()
 	client.Pet.Delete().ExecX(ctx)
+	client.File.Delete().ExecX(ctx)
 	client.Card.Delete().ExecX(ctx)
 	client.Node.Delete().ExecX(ctx)
 	client.User.Delete().ExecX(ctx)
