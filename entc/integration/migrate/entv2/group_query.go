@@ -249,6 +249,22 @@ func (gq *GroupQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func (gq *GroupQuery) Clone() *GroupQuery {
+	return &GroupQuery{
+		config:     gq.config,
+		limit:      gq.limit,
+		offset:     gq.offset,
+		order:      append([]Order{}, gq.order...),
+		unique:     append([]string{}, gq.unique...),
+		predicates: append([]ent.Predicate{}, gq.predicates...),
+		// clone intermediate queries.
+		sql:     gq.sql.Clone(),
+		gremlin: gq.gremlin.Clone(),
+	}
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {

@@ -249,6 +249,22 @@ func (ftq *FieldTypeQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
+// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// used to prepare common query builders and use them differently after the clone is made.
+func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
+	return &FieldTypeQuery{
+		config:     ftq.config,
+		limit:      ftq.limit,
+		offset:     ftq.offset,
+		order:      append([]Order{}, ftq.order...),
+		unique:     append([]string{}, ftq.unique...),
+		predicates: append([]ent.Predicate{}, ftq.predicates...),
+		// clone intermediate queries.
+		sql:     ftq.sql.Clone(),
+		gremlin: ftq.gremlin.Clone(),
+	}
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
