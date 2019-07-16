@@ -8,7 +8,7 @@ If it is the first time you work with `entc`, you need to compile it manually,
 since we don't have any official binary distribution.
 
 ```
-cd fbc/ent/entc/cmd/entc
+cd fbsource/fbcode/fbc/ent/entc/cmd/entc
 go build
 sudo mv entc /usr/local/bin
 ```
