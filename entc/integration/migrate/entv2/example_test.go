@@ -8,8 +8,7 @@ import (
 	"net/url"
 	"os"
 
-	"fbc/ent/dialect"
-	"fbc/lib/go/gremlin"
+	"fbc/ent/dialect/gremlin"
 )
 
 // endpoint for the database. In order to run the tests locally, run the following command:
@@ -35,7 +34,7 @@ func ExampleGroup() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the group's edges.
 
@@ -58,7 +57,7 @@ func ExamplePet() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the pet's edges.
 
@@ -81,7 +80,7 @@ func ExampleUser() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the user's edges.
 

@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
-
-	"fbc/lib/go/gremlin"
 )
 
 // GroupInfo is the model entity for the GroupInfo schema.

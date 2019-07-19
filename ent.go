@@ -2,13 +2,10 @@
 package ent
 
 import (
-	"context"
-
+	"fbc/ent/dialect/gremlin/graph/dsl"
 	"fbc/ent/dialect/sql"
 	"fbc/ent/edge"
 	"fbc/ent/field"
-	"fbc/lib/go/gremlin"
-	"fbc/lib/go/gremlin/graph/dsl"
 )
 
 type (
@@ -43,11 +40,6 @@ type (
 		IsInverse() bool
 		IsRequired() bool
 		Assoc() *edge.Edge
-	}
-
-	// Execer is the driver for executing gremlin requests.
-	Execer interface {
-		Exec(context.Context, string, interface{}) (*gremlin.Response, error)
 	}
 
 	// Predicate applies condition changes on either graph traversal or sql selector.

@@ -9,8 +9,7 @@ import (
 	"os"
 	"time"
 
-	"fbc/ent/dialect"
-	"fbc/lib/go/gremlin"
+	"fbc/ent/dialect/gremlin"
 )
 
 // endpoint for the database. In order to run the tests locally, run the following command:
@@ -36,7 +35,7 @@ func ExampleCard() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the card's edges.
 
@@ -60,7 +59,7 @@ func ExampleComment() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the comment's edges.
 
@@ -83,7 +82,7 @@ func ExampleFieldType() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the fieldtype's edges.
 
@@ -121,7 +120,7 @@ func ExampleFile() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the file's edges.
 
@@ -146,7 +145,7 @@ func ExampleGroup() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the group's edges.
 	f0 := client.File.
@@ -215,7 +214,7 @@ func ExampleGroupInfo() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the groupinfo's edges.
 
@@ -240,7 +239,7 @@ func ExampleNode() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the node's edges.
 	n1 := client.Node.
@@ -276,7 +275,7 @@ func ExamplePet() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the pet's edges.
 
@@ -300,7 +299,7 @@ func ExampleUser() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the user's edges.
 	c0 := client.Card.

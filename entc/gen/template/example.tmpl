@@ -13,7 +13,7 @@ import (
 	{{- end }}
 
 	"fbc/ent/dialect"
-	"fbc/lib/go/gremlin"
+	"fbc/ent/dialect/gremlin"
 )
 
 {{ $env := upper $pkg | printf "%s_INTEGRATION_ENDPOINT" }}
@@ -42,7 +42,7 @@ func Example{{ pascal $n.Name }}() {
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(dialect.NewGremlin(conn)))
+	client := NewClient(Driver(gremlin.NewDriver(conn)))
 
 	// creating vertices for the {{ lower $n.Name }}'s edges.
 	{{ range $i, $e := $n.Edges }}
