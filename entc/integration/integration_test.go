@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"fbc/ent/dialect"
+	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
 	"fbc/ent/entc/integration/ent"
 	"fbc/ent/entc/integration/ent/card"
@@ -21,7 +22,6 @@ import (
 	"fbc/ent/entc/integration/ent/node"
 	"fbc/ent/entc/integration/ent/pet"
 	"fbc/ent/entc/integration/ent/user"
-	"fbc/lib/go/gremlin"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
@@ -76,7 +76,7 @@ func TestGremlin(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	var drv dialect.Driver = dialect.NewGremlin(c)
+	var drv dialect.Driver = gremlin.NewDriver(c)
 	if testing.Verbose() {
 		drv = dialect.Debug(drv, t.Log)
 	}

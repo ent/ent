@@ -10,11 +10,10 @@ import (
 	"fbc/ent/entc/integration/ent/comment"
 
 	"fbc/ent/dialect"
+	"fbc/ent/dialect/gremlin"
+	"fbc/ent/dialect/gremlin/graph/dsl"
+	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
-
-	"fbc/lib/go/gremlin"
-	"fbc/lib/go/gremlin/graph/dsl"
-	"fbc/lib/go/gremlin/graph/dsl/g"
 )
 
 // CommentCreate is the builder for creating a Comment entity.

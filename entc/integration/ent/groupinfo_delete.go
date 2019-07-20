@@ -10,11 +10,10 @@ import (
 
 	"fbc/ent"
 	"fbc/ent/dialect"
+	"fbc/ent/dialect/gremlin"
+	"fbc/ent/dialect/gremlin/graph/dsl"
+	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
-
-	"fbc/lib/go/gremlin"
-	"fbc/lib/go/gremlin/graph/dsl"
-	"fbc/lib/go/gremlin/graph/dsl/g"
 )
 
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.

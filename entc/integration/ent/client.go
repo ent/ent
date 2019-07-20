@@ -8,9 +8,9 @@ import (
 	"log"
 
 	"fbc/ent/dialect"
+	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 	"fbc/ent/entc/integration/ent/migrate"
-	"fbc/lib/go/gremlin/graph/dsl/g"
 
 	"fbc/ent/entc/integration/ent/card"
 	"fbc/ent/entc/integration/ent/comment"

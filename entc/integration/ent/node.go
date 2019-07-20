@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
-
-	"fbc/lib/go/gremlin"
 )
 
 // Node is the model entity for the Node schema.

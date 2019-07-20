@@ -1,0 +1,58 @@
+package graph
+
+import (
+	"fmt"
+
+	"fbc/ent/dialect/gremlin/encoding/graphson"
+)
+
+// Vertex represents a graph vertex.
+type Vertex struct {
+	Element
+}
+
+// NewVertex create a new graph vertex.
+func NewVertex(id interface{}, label string) Vertex {
+	if label == "" {
+		label = "vertex"
+	}
+	return Vertex{
+		Element: NewElement(id, label),
+	}
+}
+
+// GraphsonType implements graphson.Typer interface.
+func (Vertex) GraphsonType() graphson.Type {
+	return "g:Vertex"
+}
+
+// String implements fmt.Stringer interface.
+func (v Vertex) String() string {
+	return fmt.Sprintf("v[%v]", v.ID)
+}
+
+// VertexProperty denotes a key/value pair associated with a vertex.
+type VertexProperty struct {
+	ID    interface{} `json:"id"`
+	Key   string      `json:"label"`
+	Value interface{} `json:"value"`
+}
+
+// NewVertexProperty create a new graph vertex property.
+func NewVertexProperty(id interface{}, key string, value interface{}) VertexProperty {
+	return VertexProperty{
+		ID:    id,
+		Key:   key,
+		Value: value,
+	}
+}
+
+// GraphsonType implements graphson.Typer interface.
+func (VertexProperty) GraphsonType() graphson.Type {
+	return "g:VertexProperty"
+}
+
+// String implements fmt.Stringer interface.
+func (vp VertexProperty) String() string {
+	return fmt.Sprintf("vp[%s->%v]", vp.Key, vp.Value)
+}

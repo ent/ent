@@ -6,10 +6,9 @@ import (
 	"strconv"
 
 	"fbc/ent"
+	"fbc/ent/dialect/gremlin/graph/dsl"
+	"fbc/ent/dialect/gremlin/graph/dsl/p"
 	"fbc/ent/dialect/sql"
-
-	"fbc/lib/go/gremlin/graph/dsl"
-	"fbc/lib/go/gremlin/graph/dsl/p"
 )
 
 // ID filters vertices based on their identifier.

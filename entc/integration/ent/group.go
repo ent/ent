@@ -8,9 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
-
-	"fbc/lib/go/gremlin"
 )
 
 // Group is the model entity for the Group schema.

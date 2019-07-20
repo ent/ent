@@ -1,0 +1,131 @@
+package gremlin
+
+import (
+	"encoding/json"
+	"testing"
+	"time"
+
+	"fbc/ent/dialect/gremlin/encoding/graphson"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestEvaluateRequestEncode(t *testing.T) {
+	req := NewEvalRequest("g.V(x)",
+		WithBindings(map[string]interface{}{"x": 1}),
+		WithEvalTimeout(time.Second),
+	)
+	data, err := graphson.Marshal(req)
+	require.NoError(t, err)
+
+	var got map[string]interface{}
+	err = json.Unmarshal(data, &got)
+	require.NoError(t, err)
+
+	assert.Equal(t, map[string]interface{}{
+		"@type":  "g:UUID",
+		"@value": req.RequestID,
+	}, got["requestId"])
+	assert.Equal(t, req.Operation, got["op"])
+	assert.Equal(t, req.Processor, got["processor"])
+
+	args := got["args"].(map[string]interface{})
+	assert.Equal(t, "g:Map", args["@type"])
+	assert.ElementsMatch(t, args["@value"], []interface{}{
+		"gremlin", "g.V(x)", "language", "gremlin-groovy",
+		"scriptEvaluationTimeout", map[string]interface{}{
+			"@type":  "g:Int64",
+			"@value": float64(1000),
+		},
+		"bindings", map[string]interface{}{
+			"@type": "g:Map",
+			"@value": []interface{}{
+				"x",
+				map[string]interface{}{
+					"@type":  "g:Int64",
+					"@value": float64(1),
+				},
+			},
+		},
+	})
+}
+
+func TestEvaluateRequestWithoutBindingsEncode(t *testing.T) {
+	req := NewEvalRequest("g.E()")
+	got, err := graphson.MarshalToString(req)
+	require.NoError(t, err)
+	assert.NotContains(t, got, "bindings")
+}
+
+func TestAuthenticateRequestEncode(t *testing.T) {
+	req := NewAuthRequest("41d2e28a-20a4-4ab0-b379-d810dede3786", "user", "pass")
+	data, err := graphson.Marshal(req)
+	require.NoError(t, err)
+
+	var got map[string]interface{}
+	err = json.Unmarshal(data, &got)
+	require.NoError(t, err)
+
+	assert.Equal(t, map[string]interface{}{
+		"@type":  "g:UUID",
+		"@value": req.RequestID,
+	}, got["requestId"])
+	assert.Equal(t, req.Operation, got["op"])
+	assert.Equal(t, req.Processor, got["processor"])
+
+	args := got["args"].(map[string]interface{})
+	assert.Equal(t, "g:Map", args["@type"])
+	assert.ElementsMatch(t, args["@value"], []interface{}{
+		"sasl", "AHVzZXIAcGFzcw==", "saslMechanism", "PLAIN",
+	})
+}
+
+func TestCredentialsMarshaling(t *testing.T) {
+	want := Credentials{
+		Username: "username",
+		Password: "password",
+	}
+
+	text, err := want.MarshalText()
+	assert.NoError(t, err)
+	assert.Equal(t, "AHVzZXJuYW1lAHBhc3N3b3Jk", string(text))
+
+	var got Credentials
+	err = got.UnmarshalText(text)
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
+}
+
+func TestCredentialsBadEncodingMarshaling(t *testing.T) {
+	tests := []struct {
+		name string
+		text []byte
+	}{
+		{
+			name: "BadBase64",
+			text: []byte{0x12},
+		},
+		{
+			name: "Empty",
+			text: []byte{},
+		},
+		{
+			name: "BadPrefix",
+			text: []byte("Kg=="),
+		},
+		{
+			name: "NoSeperator",
+			text: []byte("AHVzZXI="),
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			var creds Credentials
+			err := creds.UnmarshalText(tc.text)
+			assert.Error(t, err)
+		})
+	}
+}

@@ -1,0 +1,92 @@
+package graph
+
+import (
+	"fmt"
+
+	"fbc/ent/dialect/gremlin/encoding/graphson"
+
+	"github.com/pkg/errors"
+)
+
+type (
+	// An Edge between two vertices.
+	Edge struct {
+		Element
+		OutV, InV Vertex
+	}
+
+	// graphson edge repr.
+	edge struct {
+		Element
+		OutV      interface{} `json:"outV"`
+		OutVLabel string      `json:"outVLabel"`
+		InV       interface{} `json:"inV"`
+		InVLabel  string      `json:"inVLabel"`
+	}
+)
+
+// NewEdge create a new graph edge.
+func NewEdge(id interface{}, label string, outV, inV Vertex) Edge {
+	return Edge{
+		Element: NewElement(id, label),
+		OutV:    outV,
+		InV:     inV,
+	}
+}
+
+// String implements fmt.Stringer interface.
+func (e Edge) String() string {
+	return fmt.Sprintf("e[%v][%v-%s->%v]", e.ID, e.OutV.ID, e.Label, e.InV.ID)
+}
+
+// MarshalGraphson implements graphson.Marshaler interface.
+func (e Edge) MarshalGraphson() ([]byte, error) {
+	return graphson.Marshal(edge{
+		Element:   e.Element,
+		OutV:      e.OutV.ID,
+		OutVLabel: e.OutV.Label,
+		InV:       e.InV.ID,
+		InVLabel:  e.InV.Label,
+	})
+}
+
+// UnmarshalGraphson implements graphson.Unmarshaler interface.
+func (e *Edge) UnmarshalGraphson(data []byte) error {
+	var edge edge
+	if err := graphson.Unmarshal(data, &edge); err != nil {
+		return errors.Wrap(err, "unmarshaling edge")
+	}
+
+	*e = NewEdge(
+		edge.ID, edge.Label,
+		NewVertex(edge.OutV, edge.OutVLabel),
+		NewVertex(edge.InV, edge.InVLabel),
+	)
+	return nil
+}
+
+// GraphsonType implements graphson.Typer interface.
+func (edge) GraphsonType() graphson.Type {
+	return "g:Edge"
+}
+
+// Property denotes a key/value pair associated with an edge.
+type Property struct {
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
+}
+
+// NewProperty create a new graph edge property.
+func NewProperty(key string, value interface{}) Property {
+	return Property{key, value}
+}
+
+// GraphsonType implements graphson.Typer interface.
+func (Property) GraphsonType() graphson.Type {
+	return "g:Property"
+}
+
+// String implements fmt.Stringer interface.
+func (p Property) String() string {
+	return fmt.Sprintf("p[%s->%v]", p.Key, p.Value)
+}
