@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"sync"
 
 	"fbc/ent/dialect"
 	"fbc/ent/entc/integration/ent/migrate"
@@ -70,13 +69,10 @@ func (tx *Tx) Client() *Client {
 // applies a query, for example: Card.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
-// Note that this driver is safe for concurrent usage, however, it executes only one query
-// at the time.
+// Note that txDriver is not goroutine safe.
 type txDriver struct {
 	// the driver we started the transaction from.
 	drv dialect.Driver
-	// protects the tx below from concurrent execution.
-	mu sync.Mutex
 	// tx is the underlying transaction.
 	tx dialect.Tx
 }
@@ -110,15 +106,11 @@ func (*txDriver) Rollback() error { return nil }
 
 // Exec calls tx.Exec.
 func (tx *txDriver) Exec(ctx context.Context, query string, args interface{}, v interface{}) error {
-	tx.mu.Lock()
-	defer tx.mu.Unlock()
 	return tx.tx.Exec(ctx, query, args, v)
 }
 
 // Query calls tx.Query.
 func (tx *txDriver) Query(ctx context.Context, query string, args interface{}, v interface{}) error {
-	tx.mu.Lock()
-	defer tx.mu.Unlock()
 	return tx.tx.Query(ctx, query, args, v)
 }
 
