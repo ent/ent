@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/ent/file"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // FileDelete is the builder for deleting a File entity.
 type FileDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.File
 }
 
 // Where adds a new predicate for the builder.
-func (fd *FileDelete) Where(ps ...ent.Predicate) *FileDelete {
+func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
 	fd.predicates = append(fd.predicates, ps...)
 	return fd
 }
@@ -51,7 +51,7 @@ func (fd *FileDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(file.Table))
 	for _, p := range fd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(file.Table).FromSelect(selector).Query()
 	return fd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (fd *FileDelete) gremlinExec(ctx context.Context) error {
 func (fd *FileDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(file.Label)
 	for _, p := range fd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

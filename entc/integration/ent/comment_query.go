@@ -9,8 +9,8 @@ import (
 	"math"
 
 	"fbc/ent/entc/integration/ent/comment"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -26,14 +26,14 @@ type CommentQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.Comment
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (cq *CommentQuery) Where(ps ...ent.Predicate) *CommentQuery {
+func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
 }
@@ -257,7 +257,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		offset:     cq.offset,
 		order:      append([]Order{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
-		predicates: append([]ent.Predicate{}, cq.predicates...),
+		predicates: append([]predicate.Comment{}, cq.predicates...),
 		// clone intermediate queries.
 		sql:     cq.sql.Clone(),
 		gremlin: cq.gremlin.Clone(),
@@ -348,7 +348,7 @@ func (cq *CommentQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(comment.Columns...)...)
 	}
 	for _, p := range cq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range cq.order {
 		p.SQL(selector)
@@ -419,7 +419,7 @@ func (cq *CommentQuery) gremlinQuery() *dsl.Traversal {
 		v = cq.gremlin.Clone()
 	}
 	for _, p := range cq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(cq.order) > 0 {
 		v.Order()

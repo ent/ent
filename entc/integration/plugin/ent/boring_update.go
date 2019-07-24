@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"fbc/ent/entc/integration/plugin/ent/boring"
+	"fbc/ent/entc/integration/plugin/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -20,11 +20,11 @@ import (
 // BoringUpdate is the builder for updating Boring entities.
 type BoringUpdate struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Boring
 }
 
 // Where adds a new predicate for the builder.
-func (bu *BoringUpdate) Where(ps ...ent.Predicate) *BoringUpdate {
+func (bu *BoringUpdate) Where(ps ...predicate.Boring) *BoringUpdate {
 	bu.predicates = append(bu.predicates, ps...)
 	return bu
 }
@@ -67,7 +67,7 @@ func (bu *BoringUpdate) ExecX(ctx context.Context) {
 func (bu *BoringUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(boring.FieldID).From(sql.Table(boring.Table))
 	for _, p := range bu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -117,7 +117,7 @@ func (bu *BoringUpdate) gremlinSave(ctx context.Context) ([]*Boring, error) {
 func (bu *BoringUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(boring.Label)
 	for _, p := range bu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
@@ -169,7 +169,7 @@ func (buo *BoringUpdateOne) ExecX(ctx context.Context) {
 
 func (buo *BoringUpdateOne) sqlSave(ctx context.Context) (b *Boring, err error) {
 	selector := sql.Select(boring.Columns...).From(sql.Table(boring.Table))
-	boring.ID(buo.id).SQL(selector)
+	boring.ID(buo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = buo.driver.Query(ctx, query, args, rows); err != nil {

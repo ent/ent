@@ -2,8 +2,6 @@
 package ent
 
 import (
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/sql"
 	"fbc/ent/edge"
 	"fbc/ent/field"
 )
@@ -40,12 +38,6 @@ type (
 		IsInverse() bool
 		IsRequired() bool
 		Assoc() *edge.Edge
-	}
-
-	// Predicate applies condition changes on either graph traversal or sql selector.
-	Predicate struct {
-		SQL     func(*sql.Selector)  // common sql.
-		Gremlin func(*dsl.Traversal) // common gremlin.
 	}
 )
 

@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/ent/fieldtype"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // FieldTypeDelete is the builder for deleting a FieldType entity.
 type FieldTypeDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
-func (ftd *FieldTypeDelete) Where(ps ...ent.Predicate) *FieldTypeDelete {
+func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
 	ftd.predicates = append(ftd.predicates, ps...)
 	return ftd
 }
@@ -51,7 +51,7 @@ func (ftd *FieldTypeDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(fieldtype.Table))
 	for _, p := range ftd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(fieldtype.Table).FromSelect(selector).Query()
 	return ftd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (ftd *FieldTypeDelete) gremlinExec(ctx context.Context) error {
 func (ftd *FieldTypeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(fieldtype.Label)
 	for _, p := range ftd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

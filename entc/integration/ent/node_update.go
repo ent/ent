@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"fbc/ent/entc/integration/ent/node"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -28,11 +28,11 @@ type NodeUpdate struct {
 	next        map[string]struct{}
 	clearedPrev bool
 	clearedNext bool
-	predicates  []ent.Predicate
+	predicates  []predicate.Node
 }
 
 // Where adds a new predicate for the builder.
-func (nu *NodeUpdate) Where(ps ...ent.Predicate) *NodeUpdate {
+func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 	nu.predicates = append(nu.predicates, ps...)
 	return nu
 }
@@ -151,7 +151,7 @@ func (nu *NodeUpdate) ExecX(ctx context.Context) {
 func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(node.FieldID).From(sql.Table(node.Table))
 	for _, p := range nu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -283,7 +283,7 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(node.Label)
 	for _, p := range nu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		rv  = v.Clone()
@@ -452,7 +452,7 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 
 func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	selector := sql.Select(node.Columns...).From(sql.Table(node.Table))
-	node.ID(nuo.id).SQL(selector)
+	node.ID(nuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = nuo.driver.Query(ctx, query, args, rows); err != nil {

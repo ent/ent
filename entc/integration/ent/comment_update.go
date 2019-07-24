@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"fbc/ent/entc/integration/ent/comment"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -20,11 +20,11 @@ import (
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Comment
 }
 
 // Where adds a new predicate for the builder.
-func (cu *CommentUpdate) Where(ps ...ent.Predicate) *CommentUpdate {
+func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	cu.predicates = append(cu.predicates, ps...)
 	return cu
 }
@@ -67,7 +67,7 @@ func (cu *CommentUpdate) ExecX(ctx context.Context) {
 func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(comment.FieldID).From(sql.Table(comment.Table))
 	for _, p := range cu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -117,7 +117,7 @@ func (cu *CommentUpdate) gremlinSave(ctx context.Context) ([]*Comment, error) {
 func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(comment.Label)
 	for _, p := range cu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
@@ -169,7 +169,7 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 
 func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error) {
 	selector := sql.Select(comment.Columns...).From(sql.Table(comment.Table))
-	comment.ID(cuo.id).SQL(selector)
+	comment.ID(cuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = cuo.driver.Query(ctx, query, args, rows); err != nil {

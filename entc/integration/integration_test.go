@@ -141,7 +141,7 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Len(usr.QueryGroups().AllX(ctx), 1)
 	require.Len(client.User.Query().Where(user.HasPets()).AllX(ctx), 1)
 	require.Len(client.User.Query().Where(user.HasSpouse()).AllX(ctx), 2)
-	require.Len(client.User.Query().Where(ent.Not(user.HasSpouse())).AllX(ctx), 1)
+	require.Len(client.User.Query().Where(user.Not(user.HasSpouse())).AllX(ctx), 1)
 	require.Len(client.User.Query().Where(user.HasGroups()).AllX(ctx), 2)
 	require.Len(client.Group.Query().Where(group.HasUsers()).AllX(ctx), 1)
 	require.Len(client.Group.Query().Where(group.HasUsersWith(user.Name("foo"))).AllX(ctx), 1)
@@ -360,9 +360,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	t.Log("blocked:", blocked)
 
 	t.Log("query users with or condition")
-	require.Len(client.User.Query().Where(ent.Or(user.Name("a8m"), user.Name("neta"))).AllX(ctx), 2)
-	require.Len(client.User.Query().Where(ent.Or(user.Name("a8m"), user.Name("noam"))).AllX(ctx), 1)
-	require.Zero(client.User.Query().Where(ent.Or(user.Name("alex"), user.Name("noam"))).AllX(ctx))
+	require.Len(client.User.Query().Where(user.Or(user.Name("a8m"), user.Name("neta"))).AllX(ctx), 2)
+	require.Len(client.User.Query().Where(user.Or(user.Name("a8m"), user.Name("noam"))).AllX(ctx), 1)
+	require.Zero(client.User.Query().Where(user.Or(user.Name("alex"), user.Name("noam"))).AllX(ctx))
 
 	t.Log("query using the in predicate")
 	require.Len(client.User.Query().Where(user.NameIn("a8m", "neta")).AllX(ctx), 2)
@@ -375,7 +375,7 @@ func Relation(t *testing.T, client *ent.Client) {
 
 	t.Log("query using get")
 	require.Equal(usr.Name, client.User.Query().GetX(ctx, usr.ID).Name)
-	uid, err := client.User.Query().Where(ent.Not(user.Name(usr.Name))).Get(ctx, usr.ID)
+	uid, err := client.User.Query().Where(user.Not(user.Name(usr.Name))).Get(ctx, usr.ID)
 	require.Error(err)
 	require.Nil(uid)
 
@@ -402,7 +402,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	t.Logf("query path using edge-with predicate")
 	require.Len(client.GroupInfo.Query().Where(groupinfo.HasGroupsWith(group.HasUsersWith(user.Name("a8m")))).AllX(ctx), 1)
 	require.Empty(client.GroupInfo.Query().Where(groupinfo.HasGroupsWith(group.HasUsersWith(user.Name("alex")))).AllX(ctx))
-	require.Len(client.GroupInfo.Query().Where(ent.Or(groupinfo.Desc("group info"), groupinfo.HasGroupsWith(group.HasUsersWith(user.Name("alex"))))).AllX(ctx), 1)
+	require.Len(client.GroupInfo.Query().Where(groupinfo.Or(groupinfo.Desc("group info"), groupinfo.HasGroupsWith(group.HasUsersWith(user.Name("alex"))))).AllX(ctx), 1)
 
 	t.Log("query with ordering")
 	u1 := client.User.Query().Order(ent.Asc(user.FieldName)).FirstXID(ctx)
@@ -429,7 +429,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.NotNil(client.User.Query().Where(user.HasParentWith(user.NameIn("a8m", "neta"))).OnlyX(ctx))
 	require.Len(client.User.Query().Where(user.NameContains("a8")).AllX(ctx), 1)
 	require.Len(client.User.Query().Where(user.NameHasPrefix("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(ent.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).AllX(ctx), 2)
+	require.Len(client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).AllX(ctx), 2)
 
 	t.Log("group-by one field")
 	names, err := client.User.Query().GroupBy(user.FieldName).Strings(ctx)
@@ -605,27 +605,27 @@ func O2OTwoTypes(t *testing.T, client *ent.Client) {
 	t.Log("query with side lookup on inverse")
 	ocrd := client.Card.Create().SetNumber("orphan card").SaveX(ctx)
 	require.Equal(crd.Number, client.Card.Query().Where(card.HasOwner()).OnlyX(ctx).Number)
-	require.Equal(ocrd.Number, client.Card.Query().Where(ent.Not(card.HasOwner())).OnlyX(ctx).Number)
+	require.Equal(ocrd.Number, client.Card.Query().Where(card.Not(card.HasOwner())).OnlyX(ctx).Number)
 
 	t.Log("query with side lookup on assoc")
 	ousr := client.User.Create().SetAge(10).SetName("user without card").SaveX(ctx)
 	require.Equal(usr.Name, client.User.Query().Where(user.HasCard()).OnlyX(ctx).Name)
-	require.Equal(ousr.Name, client.User.Query().Where(ent.Not(user.HasCard())).OnlyX(ctx).Name)
+	require.Equal(ousr.Name, client.User.Query().Where(user.Not(user.HasCard())).OnlyX(ctx).Name)
 
 	t.Log("query with side lookup condition on inverse")
 	require.Equal(crd.Number, client.Card.Query().Where(card.HasOwnerWith(user.Name(usr.Name))).OnlyX(ctx).Number)
 	// has owner, but with name != "bar".
-	require.Zero(client.Card.Query().Where(card.HasOwnerWith(ent.Not(user.Name(usr.Name)))).CountX(ctx))
+	require.Zero(client.Card.Query().Where(card.HasOwnerWith(user.Not(user.Name(usr.Name)))).CountX(ctx))
 	// either has no owner, or has owner with name != "bar".
 	require.Equal(
 		ocrd.Number,
 		client.Card.Query().
 			Where(
-				ent.Or(
+				card.Or(
 					// has no owner.
-					ent.Not(card.HasOwner()),
+					card.Not(card.HasOwner()),
 					// has owner with name != "bar".
-					card.HasOwnerWith(ent.Not(user.Name(usr.Name))),
+					card.HasOwnerWith(user.Not(user.Name(usr.Name))),
 				),
 			).
 			OnlyX(ctx).Number,
@@ -633,17 +633,17 @@ func O2OTwoTypes(t *testing.T, client *ent.Client) {
 
 	t.Log("query with side lookup condition on assoc")
 	require.Equal(usr.Name, client.User.Query().Where(user.HasCardWith(card.Number(crd.Number))).OnlyX(ctx).Name)
-	require.Zero(client.User.Query().Where(user.HasCardWith(ent.Not(card.Number(crd.Number)))).CountX(ctx))
+	require.Zero(client.User.Query().Where(user.HasCardWith(card.Not(card.Number(crd.Number)))).CountX(ctx))
 	// either has no card, or has card with number != "10".
 	require.Equal(
 		ousr.Name,
 		client.User.Query().
 			Where(
-				ent.Or(
+				user.Or(
 					// has no card.
-					ent.Not(user.HasCard()),
+					user.Not(user.HasCard()),
 					// has card with number != "10".
-					user.HasCardWith(ent.Not(card.Number(crd.Number))),
+					user.HasCardWith(card.Not(card.Number(crd.Number))),
 				),
 			).
 			OnlyX(ctx).Name,
@@ -877,7 +877,7 @@ func O2OSelfRef(t *testing.T, client *ent.Client) {
 	require.Equal(
 		baz.Name,
 		client.User.Query().
-			Where(ent.Not(user.HasSpouse())).
+			Where(user.Not(user.HasSpouse())).
 			OnlyX(ctx).Name,
 	)
 	// has spouse that has a spouse with name "foo" (which actually means itself).
@@ -1002,31 +1002,31 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 
 	t.Log("query with side lookup on inverse")
 	opet := client.Pet.Create().SetName("orphan pet").SaveX(ctx)
-	require.Equal(opet.Name, client.Pet.Query().Where(ent.Not(pet.HasOwner())).OnlyX(ctx).Name)
+	require.Equal(opet.Name, client.Pet.Query().Where(pet.Not(pet.HasOwner())).OnlyX(ctx).Name)
 	require.Equal(2, client.Pet.Query().Where(pet.HasOwner()).CountX(ctx))
 
 	t.Log("query with side lookup on assoc")
-	require.Zero(client.User.Query().Where(ent.Not(user.HasPets())).CountX(ctx))
+	require.Zero(client.User.Query().Where(user.Not(user.HasPets())).CountX(ctx))
 	ousr := client.User.Create().SetAge(10).SetName("user without pet").SaveX(ctx)
 	require.Equal(2, client.User.Query().Where(user.HasPets()).CountX(ctx))
-	require.Equal(ousr.Name, client.User.Query().Where(ent.Not(user.HasPets())).OnlyX(ctx).Name)
+	require.Equal(ousr.Name, client.User.Query().Where(user.Not(user.HasPets())).OnlyX(ctx).Name)
 
 	t.Log("query with side lookup condition on inverse")
 	require.Equal(pedro.Name, client.Pet.Query().Where(pet.HasOwnerWith(user.Name(usr.Name))).OnlyX(ctx).Name)
 	// has owner, but with name != "a8m".
-	require.Equal(xabi.Name, client.Pet.Query().Where(pet.HasOwnerWith(ent.Not(user.Name(usr.Name)))).OnlyX(ctx).Name)
+	require.Equal(xabi.Name, client.Pet.Query().Where(pet.HasOwnerWith(user.Not(user.Name(usr.Name)))).OnlyX(ctx).Name)
 	// either has no owner, or has owner with name != "alex" and name != "a8m".
 	require.Equal(
 		opet.Name,
 		client.Pet.Query().
 			Where(
-				ent.Or(
+				pet.Or(
 					// has no owner.
-					ent.Not(pet.HasOwner()),
+					pet.Not(pet.HasOwner()),
 					// has owner with name != "a8m" and name != "alex".
 					pet.HasOwnerWith(
-						ent.Not(user.Name(usr.Name)),
-						ent.Not(user.Name(usr2.Name)),
+						user.Not(user.Name(usr.Name)),
+						user.Not(user.Name(usr2.Name)),
 					),
 				),
 			).
@@ -1040,8 +1040,8 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 		client.User.Query().
 			Where(
 				user.HasPetsWith(
-					ent.Not(pet.Name(xabi.Name)),
-					ent.Not(pet.Name(pedro.Name)),
+					pet.Not(pet.Name(xabi.Name)),
+					pet.Not(pet.Name(pedro.Name)),
 				),
 			).CountX(ctx),
 	)
@@ -1050,13 +1050,13 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 		ousr.Name,
 		client.User.Query().
 			Where(
-				ent.Or(
+				user.Or(
 					// has no pet.
-					ent.Not(user.HasPets()),
+					user.Not(user.HasPets()),
 					// has pet with name != "pedro" and name != "xabi".
 					user.HasPetsWith(
-						ent.Not(pet.Name(xabi.Name)),
-						ent.Not(pet.Name(pedro.Name)),
+						pet.Not(pet.Name(xabi.Name)),
+						pet.Not(pet.Name(pedro.Name)),
 					),
 				),
 			).
@@ -1095,7 +1095,7 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 		client.User.Query().
 			// alex matches this query (not a8m, and have a pet).
 			Where(
-				ent.Not(user.Name(usr.Name)),
+				user.Not(user.Name(usr.Name)),
 				user.HasPets(),
 			).
 			QueryPets().  // xabi
@@ -1175,13 +1175,13 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("query with side lookup on inverse")
 	ochd := client.User.Create().SetAge(1).SetName("orphan user").SaveX(ctx)
-	require.Equal(3, client.User.Query().Where(ent.Not(user.HasParent())).CountX(ctx))
+	require.Equal(3, client.User.Query().Where(user.Not(user.HasParent())).CountX(ctx))
 	require.Equal(
 		ochd.Name,
 		client.User.Query().
 			Where(
-				ent.Not(user.HasParent()),
-				ent.Not(user.HasChildren()),
+				user.Not(user.HasParent()),
+				user.Not(user.HasChildren()),
 			).
 			OnlyX(ctx).Name,
 		"3 orphan users, but only one does not have children",
@@ -1190,23 +1190,23 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("query with side lookup on assoc")
 	require.Equal(2, client.User.Query().Where(user.HasChildren()).CountX(ctx))
-	require.Equal(3, client.User.Query().Where(ent.Not(user.HasChildren())).CountX(ctx))
+	require.Equal(3, client.User.Query().Where(user.Not(user.HasChildren())).CountX(ctx))
 
 	t.Log("query with side lookup condition on inverse")
 	require.Equal(chd.Name, client.User.Query().Where(user.HasParentWith(user.Name(prt.Name))).OnlyX(ctx).Name)
 	// has parent, but with name != "a8m".
-	require.Equal(chd2.Name, client.User.Query().Where(user.HasParentWith(ent.Not(user.Name(prt.Name)))).OnlyX(ctx).Name)
+	require.Equal(chd2.Name, client.User.Query().Where(user.HasParentWith(user.Not(user.Name(prt.Name)))).OnlyX(ctx).Name)
 	// either has no parent, or has parent with name != "alex".
 	require.Equal(
 		4,
 		client.User.Query().
 			Where(
-				ent.Or(
+				user.Or(
 					// has no parent.
-					ent.Not(user.HasParent()),
+					user.Not(user.HasParent()),
 					// has parent with name != "alex".
 					user.HasParentWith(
-						ent.Not(user.Name(prt2.Name)),
+						user.Not(user.Name(prt2.Name)),
 					),
 				),
 			).
@@ -1218,12 +1218,12 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 		4,
 		client.User.Query().
 			Where(
-				ent.Or(
+				user.Or(
 					// has no parent.
-					ent.Not(user.HasParent()),
+					user.Not(user.HasParent()),
 					// has parent with name != "a8m".
 					user.HasParentWith(
-						ent.Not(user.Name(prt.Name)),
+						user.Not(user.Name(prt.Name)),
 					),
 				),
 			).
@@ -1239,8 +1239,8 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 		client.User.Query().
 			Where(
 				user.HasChildrenWith(
-					pet.Name(chd.Name),
-					pet.Name(chd2.Name),
+					user.Name(chd.Name),
+					user.Name(chd2.Name),
 				),
 			).
 			CountX(ctx),
@@ -1250,9 +1250,9 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 		3,
 		client.User.Query().
 			Where(
-				ent.Or(
+				user.Or(
 					// has no children.
-					ent.Not(user.HasChildren()),
+					user.Not(user.HasChildren()),
 					// has 2 children: "child" and "child2".
 					user.HasChildrenWith(
 						user.Name(chd.Name),
@@ -1296,7 +1296,7 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 		client.User.Query().
 			// "alex" matches this query (not "a8m", and have a child).
 			Where(
-				ent.Not(user.Name(prt.Name)),
+				user.Not(user.Name(prt.Name)),
 				user.HasChildren(),
 			).
 			QueryChildren(). // child
@@ -1380,14 +1380,14 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 	require.Equal(
 		foo.Name,
 		client.User.Query().
-			Where(ent.Not(user.HasFriendsWith(user.Name(foo.Name)))).
+			Where(user.Not(user.HasFriendsWith(user.Name(foo.Name)))).
 			OnlyX(ctx).Name,
 		"foo does not have friendship with foo",
 	)
 	require.Equal(
 		[]string{bar.Name, baz.Name},
 		client.User.Query().
-			Where(ent.Not(user.HasFriendsWith(user.Name(baz.Name)))).
+			Where(user.Not(user.HasFriendsWith(user.Name(baz.Name)))).
 			Order(ent.Asc(user.FieldName)).
 			GroupBy(user.FieldName).
 			StringsX(ctx),
@@ -1416,9 +1416,9 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 	require.Equal(
 		baz.Name,
 		foo.
-			QueryFriends().Where(user.Name(bar.Name)).          // bar
-			QueryFriends().                                     // foo
-			QueryFriends().Where(ent.Not(user.Name(bar.Name))). // baz
+			QueryFriends().Where(user.Name(bar.Name)).           // bar
+			QueryFriends().                                      // foo
+			QueryFriends().Where(user.Not(user.Name(bar.Name))). // baz
 			OnlyX(ctx).Name,
 	)
 
@@ -1440,7 +1440,7 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 			// foo has a friend (bar) that does not have a friend named baz.
 			Where(
 				user.HasFriendsWith(
-					ent.Not(
+					user.Not(
 						user.HasFriendsWith(user.Name(baz.Name)),
 					),
 				),
@@ -1448,7 +1448,7 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 			// bar and baz.
 			QueryFriends().
 			// filter baz out.
-			Where(ent.Not(user.Name(baz.Name))).
+			Where(user.Not(user.Name(baz.Name))).
 			OnlyX(ctx).Name,
 	)
 }
@@ -1525,7 +1525,7 @@ func M2MSameType(t *testing.T, client *ent.Client) {
 			GroupBy(user.FieldName).
 			StringsX(ctx),
 		foo.QueryFollowers().
-			Where(ent.Not(user.Name(bar.Name))).
+			Where(user.Not(user.Name(bar.Name))).
 			Order(ent.Asc(user.FieldName)).
 			GroupBy(user.FieldName).
 			StringsX(ctx),
@@ -1669,7 +1669,7 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 
 	t.Log("query with side lookup from inverse")
 	require.Equal(hub.Name, hub.QueryUsers().QueryGroups().Where(group.Name(hub.Name)).OnlyX(ctx).Name, "should get itself")
-	require.Equal(bar.Name, lab.QueryUsers().QueryGroups().Where(ent.Not(group.Name(hub.Name))).QueryUsers().OnlyX(ctx).Name, "should get its user")
+	require.Equal(bar.Name, lab.QueryUsers().QueryGroups().Where(group.Not(group.Name(hub.Name))).QueryUsers().OnlyX(ctx).Name, "should get its user")
 
 	t.Log("query with side lookup from assoc")
 	require.Equal(bar.Name, bar.QueryGroups().Where(group.Name(lab.Name)).QueryUsers().OnlyX(ctx).Name, "should get itself")
@@ -1687,7 +1687,7 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 			// foo (not having group with name "lab").
 			QueryUsers().
 			Where(
-				ent.Not(
+				user.Not(
 					user.HasGroupsWith(group.Name(lab.Name)),
 				),
 			).
@@ -1708,7 +1708,7 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 			// foo (not having group with name "lab").
 			QueryUsers().
 			Where(
-				ent.Not(
+				user.Not(
 					user.HasGroupsWith(group.Name(lab.Name)),
 				),
 			).

@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/ent/groupinfo"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.GroupInfo
 }
 
 // Where adds a new predicate for the builder.
-func (gid *GroupInfoDelete) Where(ps ...ent.Predicate) *GroupInfoDelete {
+func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 	gid.predicates = append(gid.predicates, ps...)
 	return gid
 }
@@ -51,7 +51,7 @@ func (gid *GroupInfoDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(groupinfo.Table))
 	for _, p := range gid.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(groupinfo.Table).FromSelect(selector).Query()
 	return gid.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (gid *GroupInfoDelete) gremlinExec(ctx context.Context) error {
 func (gid *GroupInfoDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(groupinfo.Label)
 	for _, p := range gid.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

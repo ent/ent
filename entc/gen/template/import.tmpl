@@ -10,6 +10,7 @@ import (
 
 	{{/* ignore generting on graph templates */}}
 	{{ if not (eq $.Config.Package $.Package) }}
+		"{{ $.Config.Package }}/predicate"
 		"{{ $.Config.Package }}/{{ $.Package }}"
 		{{ with $.Config.Schema  }} "{{ . }}" {{ end }}
 	{{ end }}

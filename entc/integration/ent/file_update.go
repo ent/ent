@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"fbc/ent/entc/integration/ent/file"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -22,11 +22,11 @@ type FileUpdate struct {
 	config
 	size       *int
 	name       *string
-	predicates []ent.Predicate
+	predicates []predicate.File
 }
 
 // Where adds a new predicate for the builder.
-func (fu *FileUpdate) Where(ps ...ent.Predicate) *FileUpdate {
+func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	fu.predicates = append(fu.predicates, ps...)
 	return fu
 }
@@ -86,7 +86,7 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(file.FieldID).From(sql.Table(file.Table))
 	for _, p := range fu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -155,7 +155,7 @@ func (fu *FileUpdate) gremlinSave(ctx context.Context) ([]*File, error) {
 func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(file.Label)
 	for _, p := range fu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
@@ -232,7 +232,7 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 
 func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 	selector := sql.Select(file.Columns...).From(sql.Table(file.Table))
-	file.ID(fuo.id).SQL(selector)
+	file.ID(fuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = fuo.driver.Query(ctx, query, args, rows); err != nil {

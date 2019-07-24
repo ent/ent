@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/encoding/graphson"
@@ -16,48 +15,11 @@ import (
 	"fbc/ent/dialect/sql"
 )
 
-// Predicate is an alias to ent.Predicate.
-type Predicate = ent.Predicate
-
-// Or groups list of predicates with the or operator between them.
-func Or(predicates ...ent.Predicate) ent.Predicate {
-	return ent.Predicate{
-		SQL: func(s *sql.Selector) {
-			for i, p := range predicates {
-				if i > 0 {
-					s.Or()
-				}
-				p.SQL(s)
-			}
-		},
-		Gremlin: func(tr *dsl.Traversal) {
-			trs := make([]interface{}, 0, len(predicates))
-			for _, p := range predicates {
-				t := __.New()
-				p.Gremlin(t)
-				trs = append(trs, t)
-			}
-			tr.Where(__.Or(trs...))
-		},
-	}
+// Order applies an ordering on either graph traversal or sql selector.
+type Order struct {
+	SQL     func(*sql.Selector)
+	Gremlin func(*dsl.Traversal)
 }
-
-// Not applies the not operator on the given predicate.
-func Not(p ent.Predicate) ent.Predicate {
-	return ent.Predicate{
-		SQL: func(s *sql.Selector) {
-			p.SQL(s.Not())
-		},
-		Gremlin: func(tr *dsl.Traversal) {
-			t := __.New()
-			p.Gremlin(t)
-			tr.Where(__.Not(t))
-		},
-	}
-}
-
-// Order applies an ordering on the traversal.
-type Order ent.Predicate
 
 // Asc applies the given fields in ASC order.
 func Asc(fields ...string) Order {

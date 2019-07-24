@@ -9,8 +9,8 @@ import (
 	"math"
 
 	"fbc/ent/entc/integration/plugin/ent/boring"
+	"fbc/ent/entc/integration/plugin/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -26,14 +26,14 @@ type BoringQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.Boring
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (bq *BoringQuery) Where(ps ...ent.Predicate) *BoringQuery {
+func (bq *BoringQuery) Where(ps ...predicate.Boring) *BoringQuery {
 	bq.predicates = append(bq.predicates, ps...)
 	return bq
 }
@@ -257,7 +257,7 @@ func (bq *BoringQuery) Clone() *BoringQuery {
 		offset:     bq.offset,
 		order:      append([]Order{}, bq.order...),
 		unique:     append([]string{}, bq.unique...),
-		predicates: append([]ent.Predicate{}, bq.predicates...),
+		predicates: append([]predicate.Boring{}, bq.predicates...),
 		// clone intermediate queries.
 		sql:     bq.sql.Clone(),
 		gremlin: bq.gremlin.Clone(),
@@ -348,7 +348,7 @@ func (bq *BoringQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(boring.Columns...)...)
 	}
 	for _, p := range bq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range bq.order {
 		p.SQL(selector)
@@ -419,7 +419,7 @@ func (bq *BoringQuery) gremlinQuery() *dsl.Traversal {
 		v = bq.gremlin.Clone()
 	}
 	for _, p := range bq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(bq.order) > 0 {
 		v.Order()

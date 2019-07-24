@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/ent/card"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // CardDelete is the builder for deleting a Card entity.
 type CardDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Card
 }
 
 // Where adds a new predicate for the builder.
-func (cd *CardDelete) Where(ps ...ent.Predicate) *CardDelete {
+func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
 	cd.predicates = append(cd.predicates, ps...)
 	return cd
 }
@@ -51,7 +51,7 @@ func (cd *CardDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(card.Table))
 	for _, p := range cd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(card.Table).FromSelect(selector).Query()
 	return cd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (cd *CardDelete) gremlinExec(ctx context.Context) error {
 func (cd *CardDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(card.Label)
 	for _, p := range cd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

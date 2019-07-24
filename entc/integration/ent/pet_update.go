@@ -9,9 +9,9 @@ import (
 	"strconv"
 
 	"fbc/ent/entc/integration/ent/pet"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -29,11 +29,11 @@ type PetUpdate struct {
 	owner        map[string]struct{}
 	clearedTeam  bool
 	clearedOwner bool
-	predicates   []ent.Predicate
+	predicates   []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
-func (pu *PetUpdate) Where(ps ...ent.Predicate) *PetUpdate {
+func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	pu.predicates = append(pu.predicates, ps...)
 	return pu
 }
@@ -144,7 +144,7 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(pet.FieldID).From(sql.Table(pet.Table))
 	for _, p := range pu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -270,7 +270,7 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(pet.Label)
 	for _, p := range pu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		rv  = v.Clone()
@@ -427,7 +427,7 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	selector := sql.Select(pet.Columns...).From(sql.Table(pet.Table))
-	pet.ID(puo.id).SQL(selector)
+	pet.ID(puo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = puo.driver.Query(ctx, query, args, rows); err != nil {

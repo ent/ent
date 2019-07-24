@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/ent/node"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Node
 }
 
 // Where adds a new predicate for the builder.
-func (nd *NodeDelete) Where(ps ...ent.Predicate) *NodeDelete {
+func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
 	nd.predicates = append(nd.predicates, ps...)
 	return nd
 }
@@ -51,7 +51,7 @@ func (nd *NodeDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(node.Table))
 	for _, p := range nd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(node.Table).FromSelect(selector).Query()
 	return nd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (nd *NodeDelete) gremlinExec(ctx context.Context) error {
 func (nd *NodeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(node.Label)
 	for _, p := range nd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

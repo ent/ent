@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math"
 
+	"fbc/ent/entc/integration/migrate/entv1/predicate"
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -26,14 +26,14 @@ type UserQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.User
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (uq *UserQuery) Where(ps ...ent.Predicate) *UserQuery {
+func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
 	uq.predicates = append(uq.predicates, ps...)
 	return uq
 }
@@ -257,7 +257,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		offset:     uq.offset,
 		order:      append([]Order{}, uq.order...),
 		unique:     append([]string{}, uq.unique...),
-		predicates: append([]ent.Predicate{}, uq.predicates...),
+		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate queries.
 		sql:     uq.sql.Clone(),
 		gremlin: uq.gremlin.Clone(),
@@ -361,7 +361,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(user.Columns...)...)
 	}
 	for _, p := range uq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range uq.order {
 		p.SQL(selector)
@@ -432,7 +432,7 @@ func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
 		v = uq.gremlin.Clone()
 	}
 	for _, p := range uq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(uq.order) > 0 {
 		v.Order()

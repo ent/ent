@@ -11,9 +11,9 @@ import (
 	"fbc/ent/entc/integration/ent/card"
 	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/pet"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -53,11 +53,11 @@ type UserUpdate struct {
 	clearedSpouse    bool
 	removedChildren  map[string]struct{}
 	clearedParent    bool
-	predicates       []ent.Predicate
+	predicates       []predicate.User
 }
 
 // Where adds a new predicate for the builder.
-func (uu *UserUpdate) Where(ps ...ent.Predicate) *UserUpdate {
+func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.predicates = append(uu.predicates, ps...)
 	return uu
 }
@@ -558,7 +558,7 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(user.FieldID).From(sql.Table(user.Table))
 	for _, p := range uu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -1083,7 +1083,7 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	constraints := make([]*constraint, 0, 8)
 	v := g.V().HasLabel(user.Label)
 	for _, p := range uu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		rv  = v.Clone()
@@ -1759,7 +1759,7 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	selector := sql.Select(user.Columns...).From(sql.Table(user.Table))
-	user.ID(uuo.id).SQL(selector)
+	user.ID(uuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = uuo.driver.Query(ctx, query, args, rows); err != nil {

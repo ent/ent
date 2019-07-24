@@ -75,7 +75,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns({{ $.Package }}.Columns...)...)
 	}
 	for _, p := range {{ $receiver }}.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range {{ $receiver }}.order {
 		p.SQL(selector)

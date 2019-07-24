@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"fbc/ent/entc/integration/ent/fieldtype"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -35,11 +35,11 @@ type FieldTypeUpdate struct {
 	nullable_int16 *int16
 	nullable_int32 *int32
 	nullable_int64 *int64
-	predicates     []ent.Predicate
+	predicates     []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
-func (ftu *FieldTypeUpdate) Where(ps ...ent.Predicate) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 	ftu.predicates = append(ftu.predicates, ps...)
 	return ftu
 }
@@ -252,7 +252,7 @@ func (ftu *FieldTypeUpdate) ExecX(ctx context.Context) {
 func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(fieldtype.FieldID).From(sql.Table(fieldtype.Table))
 	for _, p := range ftu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -373,7 +373,7 @@ func (ftu *FieldTypeUpdate) gremlinSave(ctx context.Context) ([]*FieldType, erro
 func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(fieldtype.Label)
 	for _, p := range ftu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
@@ -655,7 +655,7 @@ func (ftuo *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 
 func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err error) {
 	selector := sql.Select(fieldtype.Columns...).From(sql.Table(fieldtype.Table))
-	fieldtype.ID(ftuo.id).SQL(selector)
+	fieldtype.ID(ftuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = ftuo.driver.Query(ctx, query, args, rows); err != nil {

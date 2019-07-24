@@ -41,7 +41,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- else }}
 		v := g.V().HasLabel({{ $.Package }}.Label)
 		for _, p := range {{ $receiver }}.predicates {
-			p.Gremlin(v)
+			p(v)
 		}
 	{{- end }}
 	var (

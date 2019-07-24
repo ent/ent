@@ -9,8 +9,8 @@ import (
 	"math"
 
 	"fbc/ent/entc/integration/ent/fieldtype"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -26,14 +26,14 @@ type FieldTypeQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.FieldType
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (ftq *FieldTypeQuery) Where(ps ...ent.Predicate) *FieldTypeQuery {
+func (ftq *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
 	ftq.predicates = append(ftq.predicates, ps...)
 	return ftq
 }
@@ -257,7 +257,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		offset:     ftq.offset,
 		order:      append([]Order{}, ftq.order...),
 		unique:     append([]string{}, ftq.unique...),
-		predicates: append([]ent.Predicate{}, ftq.predicates...),
+		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate queries.
 		sql:     ftq.sql.Clone(),
 		gremlin: ftq.gremlin.Clone(),
@@ -361,7 +361,7 @@ func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(fieldtype.Columns...)...)
 	}
 	for _, p := range ftq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range ftq.order {
 		p.SQL(selector)
@@ -432,7 +432,7 @@ func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
 		v = ftq.gremlin.Clone()
 	}
 	for _, p := range ftq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(ftq.order) > 0 {
 		v.Order()

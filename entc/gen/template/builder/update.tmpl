@@ -10,11 +10,11 @@
 type {{ $builder }} struct {
 	config
 	{{- template "update/fields" $ -}}
-	predicates []ent.Predicate
+	predicates []predicate.{{ $.Name }}
 }
 
 // Where adds a new predicate for the builder.
-func ({{ $receiver}} *{{ $builder }}) Where(ps ...ent.Predicate) *{{ $builder }} {
+func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
 	return {{ $receiver }}
 }

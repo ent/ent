@@ -11,9 +11,9 @@ import (
 	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/group"
 	"fbc/ent/entc/integration/ent/groupinfo"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -29,14 +29,14 @@ type GroupQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.Group
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (gq *GroupQuery) Where(ps ...ent.Predicate) *GroupQuery {
+func (gq *GroupQuery) Where(ps ...predicate.Group) *GroupQuery {
 	gq.predicates = append(gq.predicates, ps...)
 	return gq
 }
@@ -341,7 +341,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		offset:     gq.offset,
 		order:      append([]Order{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
-		predicates: append([]ent.Predicate{}, gq.predicates...),
+		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate queries.
 		sql:     gq.sql.Clone(),
 		gremlin: gq.gremlin.Clone(),
@@ -445,7 +445,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(group.Columns...)...)
 	}
 	for _, p := range gq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range gq.order {
 		p.SQL(selector)
@@ -516,7 +516,7 @@ func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
 		v = gq.gremlin.Clone()
 	}
 	for _, p := range gq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(gq.order) > 0 {
 		v.Order()

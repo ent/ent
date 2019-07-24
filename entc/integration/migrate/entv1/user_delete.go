@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 
+	"fbc/ent/entc/integration/migrate/entv1/predicate"
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // UserDelete is the builder for deleting a User entity.
 type UserDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.User
 }
 
 // Where adds a new predicate for the builder.
-func (ud *UserDelete) Where(ps ...ent.Predicate) *UserDelete {
+func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 	ud.predicates = append(ud.predicates, ps...)
 	return ud
 }
@@ -51,7 +51,7 @@ func (ud *UserDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(user.Table))
 	for _, p := range ud.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(user.Table).FromSelect(selector).Query()
 	return ud.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (ud *UserDelete) gremlinExec(ctx context.Context) error {
 func (ud *UserDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(user.Label)
 	for _, p := range ud.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

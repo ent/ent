@@ -1,0 +1,23 @@
+{{ define "predicate" }}
+
+{{ template "header" "predicate" }}
+
+{{ range $_, $n := $.Nodes -}}
+// {{ $n.Name }} is the predicate function for {{ $n.Package }} builders.
+type {{ $n.Name }} func(interface{})
+
+// {{ $n.Name }}PerDialect construct a predicate for both gremlin traversal and sql selector.
+func {{ $n.Name }}PerDialect(f1 func(*sql.Selector), f2 func(*dsl.Traversal)) {{ $n.Name }} {
+	return {{ $n.Name }}(func (v interface{}) {
+		switch v := v.(type) {
+		case *sql.Selector:
+			f1(v)
+		case *dsl.Traversal:
+			f2(v)
+		default:
+			panic(fmt.Sprintf("unknown type for predicate: %T", v))
+		}
+	})
+}
+{{ end }}
+{{ end }}

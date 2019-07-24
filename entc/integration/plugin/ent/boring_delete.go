@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/plugin/ent/boring"
+	"fbc/ent/entc/integration/plugin/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // BoringDelete is the builder for deleting a Boring entity.
 type BoringDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Boring
 }
 
 // Where adds a new predicate for the builder.
-func (bd *BoringDelete) Where(ps ...ent.Predicate) *BoringDelete {
+func (bd *BoringDelete) Where(ps ...predicate.Boring) *BoringDelete {
 	bd.predicates = append(bd.predicates, ps...)
 	return bd
 }
@@ -51,7 +51,7 @@ func (bd *BoringDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(boring.Table))
 	for _, p := range bd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(boring.Table).FromSelect(selector).Query()
 	return bd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (bd *BoringDelete) gremlinExec(ctx context.Context) error {
 func (bd *BoringDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(boring.Label)
 	for _, p := range bd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

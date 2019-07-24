@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/ent/comment"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // CommentDelete is the builder for deleting a Comment entity.
 type CommentDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Comment
 }
 
 // Where adds a new predicate for the builder.
-func (cd *CommentDelete) Where(ps ...ent.Predicate) *CommentDelete {
+func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
 	cd.predicates = append(cd.predicates, ps...)
 	return cd
 }
@@ -51,7 +51,7 @@ func (cd *CommentDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(comment.Table))
 	for _, p := range cd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(comment.Table).FromSelect(selector).Query()
 	return cd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (cd *CommentDelete) gremlinExec(ctx context.Context) error {
 func (cd *CommentDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(comment.Label)
 	for _, p := range cd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

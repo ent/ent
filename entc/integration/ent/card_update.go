@@ -9,9 +9,9 @@ import (
 	"strconv"
 
 	"fbc/ent/entc/integration/ent/card"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -27,11 +27,11 @@ type CardUpdate struct {
 	number       *string
 	owner        map[string]struct{}
 	clearedOwner bool
-	predicates   []ent.Predicate
+	predicates   []predicate.Card
 }
 
 // Where adds a new predicate for the builder.
-func (cu *CardUpdate) Where(ps ...ent.Predicate) *CardUpdate {
+func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.predicates = append(cu.predicates, ps...)
 	return cu
 }
@@ -116,7 +116,7 @@ func (cu *CardUpdate) ExecX(ctx context.Context) {
 func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(card.FieldID).From(sql.Table(card.Table))
 	for _, p := range cu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -217,7 +217,7 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(card.Label)
 	for _, p := range cu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		rv  = v.Clone()
@@ -339,7 +339,7 @@ func (cuo *CardUpdateOne) ExecX(ctx context.Context) {
 
 func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	selector := sql.Select(card.Columns...).From(sql.Table(card.Table))
-	card.ID(cuo.id).SQL(selector)
+	card.ID(cuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = cuo.driver.Query(ctx, query, args, rows); err != nil {

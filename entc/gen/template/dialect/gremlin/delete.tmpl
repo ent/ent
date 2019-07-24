@@ -12,7 +12,7 @@ func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) error {
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel({{ $.Package }}.Label)
 	for _, p := range {{ $receiver }}.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

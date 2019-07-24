@@ -9,9 +9,9 @@ import (
 	"math"
 
 	"fbc/ent/entc/integration/ent/pet"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -27,14 +27,14 @@ type PetQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.Pet
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (pq *PetQuery) Where(ps ...ent.Predicate) *PetQuery {
+func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 	pq.predicates = append(pq.predicates, ps...)
 	return pq
 }
@@ -296,7 +296,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		offset:     pq.offset,
 		order:      append([]Order{}, pq.order...),
 		unique:     append([]string{}, pq.unique...),
-		predicates: append([]ent.Predicate{}, pq.predicates...),
+		predicates: append([]predicate.Pet{}, pq.predicates...),
 		// clone intermediate queries.
 		sql:     pq.sql.Clone(),
 		gremlin: pq.gremlin.Clone(),
@@ -400,7 +400,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(pet.Columns...)...)
 	}
 	for _, p := range pq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range pq.order {
 		p.SQL(selector)
@@ -471,7 +471,7 @@ func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
 		v = pq.gremlin.Clone()
 	}
 	for _, p := range pq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(pq.order) > 0 {
 		v.Order()

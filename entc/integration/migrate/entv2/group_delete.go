@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv2/group"
+	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Group
 }
 
 // Where adds a new predicate for the builder.
-func (gd *GroupDelete) Where(ps ...ent.Predicate) *GroupDelete {
+func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 	gd.predicates = append(gd.predicates, ps...)
 	return gd
 }
@@ -51,7 +51,7 @@ func (gd *GroupDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(group.Table))
 	for _, p := range gd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(group.Table).FromSelect(selector).Query()
 	return gd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (gd *GroupDelete) gremlinExec(ctx context.Context) error {
 func (gd *GroupDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(group.Label)
 	for _, p := range gd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

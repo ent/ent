@@ -78,6 +78,10 @@ var (
 			Format: "migrate/schema.go",
 		},
 		{
+			Name:   "predicate",
+			Format: "predicate/predicate.go",
+		},
+		{
 			Name:   "example",
 			Format: "example_test.go",
 		},

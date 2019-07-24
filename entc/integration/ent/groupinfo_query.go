@@ -10,8 +10,8 @@ import (
 
 	"fbc/ent/entc/integration/ent/group"
 	"fbc/ent/entc/integration/ent/groupinfo"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -27,14 +27,14 @@ type GroupInfoQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.GroupInfo
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (giq *GroupInfoQuery) Where(ps ...ent.Predicate) *GroupInfoQuery {
+func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
 	giq.predicates = append(giq.predicates, ps...)
 	return giq
 }
@@ -277,7 +277,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		offset:     giq.offset,
 		order:      append([]Order{}, giq.order...),
 		unique:     append([]string{}, giq.unique...),
-		predicates: append([]ent.Predicate{}, giq.predicates...),
+		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		// clone intermediate queries.
 		sql:     giq.sql.Clone(),
 		gremlin: giq.gremlin.Clone(),
@@ -381,7 +381,7 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(groupinfo.Columns...)...)
 	}
 	for _, p := range giq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range giq.order {
 		p.SQL(selector)
@@ -452,7 +452,7 @@ func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
 		v = giq.gremlin.Clone()
 	}
 	for _, p := range giq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(giq.order) > 0 {
 		v.Order()

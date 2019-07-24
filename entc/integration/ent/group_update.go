@@ -12,9 +12,9 @@ import (
 	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/group"
 	"fbc/ent/entc/integration/ent/groupinfo"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -40,11 +40,11 @@ type GroupUpdate struct {
 	removedBlocked map[string]struct{}
 	removedUsers   map[string]struct{}
 	clearedInfo    bool
-	predicates     []ent.Predicate
+	predicates     []predicate.Group
 }
 
 // Where adds a new predicate for the builder.
-func (gu *GroupUpdate) Where(ps ...ent.Predicate) *GroupUpdate {
+func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	gu.predicates = append(gu.predicates, ps...)
 	return gu
 }
@@ -302,7 +302,7 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(group.FieldID).From(sql.Table(group.Table))
 	for _, p := range gu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -545,7 +545,7 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(group.Label)
 	for _, p := range gu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		rv  = v.Clone()
@@ -887,7 +887,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	selector := sql.Select(group.Columns...).From(sql.Table(group.Table))
-	group.ID(guo.id).SQL(selector)
+	group.ID(guo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = guo.driver.Query(ctx, query, args, rows); err != nil {

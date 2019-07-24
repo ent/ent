@@ -9,10 +9,10 @@
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
 	selector := sql.Select({{ $.Package }}.{{ if $one }}Columns...{{ else }}{{ $.ID.Constant }}{{ end }}).From(sql.Table({{ $.Package }}.Table))
 	{{- if $one }}
-		{{ $.Package }}.ID({{ $receiver }}.id).SQL(selector)
+		{{ $.Package }}.ID({{ $receiver }}.id)(selector)
 	{{- else }}
 		for _, p := range {{ $receiver }}.predicates {
-			p.SQL(selector)
+			p(selector)
 		}
 	{{- end }}
 	rows := &sql.Rows{}

@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv2/pet"
+	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -19,11 +19,11 @@ import (
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
-func (pd *PetDelete) Where(ps ...ent.Predicate) *PetDelete {
+func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 	pd.predicates = append(pd.predicates, ps...)
 	return pd
 }
@@ -51,7 +51,7 @@ func (pd *PetDelete) sqlExec(ctx context.Context) error {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(pet.Table))
 	for _, p := range pd.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	query, args := sql.Delete(pet.Table).FromSelect(selector).Query()
 	return pd.driver.Exec(ctx, query, args, &res)
@@ -66,7 +66,7 @@ func (pd *PetDelete) gremlinExec(ctx context.Context) error {
 func (pd *PetDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(pet.Label)
 	for _, p := range pd.predicates {
-		p.Gremlin(t)
+		p(t)
 	}
 	return t.Drop()
 }

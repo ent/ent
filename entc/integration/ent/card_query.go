@@ -9,9 +9,9 @@ import (
 	"math"
 
 	"fbc/ent/entc/integration/ent/card"
+	"fbc/ent/entc/integration/ent/predicate"
 	"fbc/ent/entc/integration/ent/user"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -27,14 +27,14 @@ type CardQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.Card
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (cq *CardQuery) Where(ps ...ent.Predicate) *CardQuery {
+func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
 }
@@ -277,7 +277,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 		offset:     cq.offset,
 		order:      append([]Order{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
-		predicates: append([]ent.Predicate{}, cq.predicates...),
+		predicates: append([]predicate.Card{}, cq.predicates...),
 		// clone intermediate queries.
 		sql:     cq.sql.Clone(),
 		gremlin: cq.gremlin.Clone(),
@@ -381,7 +381,7 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(card.Columns...)...)
 	}
 	for _, p := range cq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range cq.order {
 		p.SQL(selector)
@@ -452,7 +452,7 @@ func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
 		v = cq.gremlin.Clone()
 	}
 	for _, p := range cq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(cq.order) > 0 {
 		v.Order()

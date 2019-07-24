@@ -57,7 +57,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 		v = {{ $receiver }}.gremlin.Clone()
 	}
 	for _, p := range {{ $receiver }}.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len({{ $receiver }}.order) > 0 {
 		v.Order()

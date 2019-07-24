@@ -14,14 +14,14 @@ type {{ $builder }} struct {
 	offset		*int
 	order		[]Order
 	unique		[]string
-	predicates 	[]ent.Predicate
+	predicates 	[]predicate.{{ $.Name }}
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func ({{ $receiver }} *{{ $builder }}) Where(ps ...ent.Predicate) *{{ $builder }} {
+func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...)
 	return {{ $receiver }}
 }
@@ -299,7 +299,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		offset: 	{{ $receiver }}.offset,
 		order: 		append([]Order{}, {{ $receiver }}.order...),
 		unique: 	append([]string{}, {{ $receiver }}.unique...),
-		predicates: append([]ent.Predicate{}, {{ $receiver }}.predicates...),
+		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		// clone intermediate queries.
 		sql: 		{{ $receiver }}.sql.Clone(),
 		gremlin:	{{ $receiver}}.gremlin.Clone(),

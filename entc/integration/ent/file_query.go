@@ -9,8 +9,8 @@ import (
 	"math"
 
 	"fbc/ent/entc/integration/ent/file"
+	"fbc/ent/entc/integration/ent/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -26,14 +26,14 @@ type FileQuery struct {
 	offset     *int
 	order      []Order
 	unique     []string
-	predicates []ent.Predicate
+	predicates []predicate.File
 	// intermediate queries.
 	sql     *sql.Selector
 	gremlin *dsl.Traversal
 }
 
 // Where adds a new predicate for the builder.
-func (fq *FileQuery) Where(ps ...ent.Predicate) *FileQuery {
+func (fq *FileQuery) Where(ps ...predicate.File) *FileQuery {
 	fq.predicates = append(fq.predicates, ps...)
 	return fq
 }
@@ -257,7 +257,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 		offset:     fq.offset,
 		order:      append([]Order{}, fq.order...),
 		unique:     append([]string{}, fq.unique...),
-		predicates: append([]ent.Predicate{}, fq.predicates...),
+		predicates: append([]predicate.File{}, fq.predicates...),
 		// clone intermediate queries.
 		sql:     fq.sql.Clone(),
 		gremlin: fq.gremlin.Clone(),
@@ -361,7 +361,7 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 		selector.Select(selector.Columns(file.Columns...)...)
 	}
 	for _, p := range fq.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	for _, p := range fq.order {
 		p.SQL(selector)
@@ -432,7 +432,7 @@ func (fq *FileQuery) gremlinQuery() *dsl.Traversal {
 		v = fq.gremlin.Clone()
 	}
 	for _, p := range fq.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	if len(fq.order) > 0 {
 		v.Order()

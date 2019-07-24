@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"fbc/ent/entc/integration/migrate/entv2/group"
+	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent"
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/gremlin/graph/dsl"
@@ -20,11 +20,11 @@ import (
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
-	predicates []ent.Predicate
+	predicates []predicate.Group
 }
 
 // Where adds a new predicate for the builder.
-func (gu *GroupUpdate) Where(ps ...ent.Predicate) *GroupUpdate {
+func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	gu.predicates = append(gu.predicates, ps...)
 	return gu
 }
@@ -67,7 +67,7 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	selector := sql.Select(group.FieldID).From(sql.Table(group.Table))
 	for _, p := range gu.predicates {
-		p.SQL(selector)
+		p(selector)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -117,7 +117,7 @@ func (gu *GroupUpdate) gremlinSave(ctx context.Context) ([]*Group, error) {
 func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(group.Label)
 	for _, p := range gu.predicates {
-		p.Gremlin(v)
+		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
@@ -169,7 +169,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	selector := sql.Select(group.Columns...).From(sql.Table(group.Table))
-	group.ID(guo.id).SQL(selector)
+	group.ID(guo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err = guo.driver.Query(ctx, query, args, rows); err != nil {
