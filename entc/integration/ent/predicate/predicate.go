@@ -3,9 +3,10 @@
 package predicate
 
 import (
+	"fmt"
+
 	"fbc/ent/dialect/gremlin/graph/dsl"
 	"fbc/ent/dialect/sql"
-	"fmt"
 )
 
 // Card is the predicate function for card builders.

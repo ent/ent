@@ -2,6 +2,13 @@
 
 {{ template "header" "predicate" }}
 
+import (
+	"fmt"
+
+	"fbc/ent/dialect/gremlin/graph/dsl"
+	"fbc/ent/dialect/sql"
+)
+
 {{ range $_, $n := $.Nodes -}}
 // {{ $n.Name }} is the predicate function for {{ $n.Package }} builders.
 type {{ $n.Name }} func(interface{})

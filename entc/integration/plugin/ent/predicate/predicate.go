@@ -3,9 +3,10 @@
 package predicate
 
 import (
+	"fmt"
+
 	"fbc/ent/dialect/gremlin/graph/dsl"
 	"fbc/ent/dialect/sql"
-	"fmt"
 )
 
 // Boring is the predicate function for boring builders.
