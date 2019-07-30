@@ -70,10 +70,10 @@ func (T2) Edges() []ent.Edge {
 
 func TestNewGraph(t *testing.T) {
 	require := require.New(t)
-	graph, err := NewGraph(Config{Package: "entc/gen"}, T1{})
+	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1{})
 	require.Error(err, "should fail due to missing types")
 
-	graph, err = NewGraph(Config{Package: "entc/gen"}, T1{}, T2{})
+	graph, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1{}, T2{})
 	require.NoError(err)
 	require.NotNil(graph)
 	require.Len(graph.Nodes, 2)
@@ -130,10 +130,10 @@ func TestNewGraph(t *testing.T) {
 
 func TestRelation(t *testing.T) {
 	require := require.New(t)
-	graph, err := NewGraph(Config{Package: "entc/gen"}, T1{})
+	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1{})
 	require.Error(err, "should fail due to missing types")
 
-	graph, err = NewGraph(Config{Package: "entc/gen"}, T1{}, T2{})
+	graph, err := NewGraph(Config{Package: "entc/gen"}, T1{}, T2{})
 	require.NoError(err)
 	require.NotNil(graph)
 	require.Len(graph.Nodes, 2)
@@ -166,7 +166,7 @@ func TestGraph_Gen(t *testing.T) {
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.Remove(target)
-	graph, err := NewGraph(Config{Package: "entc/gen", Target: target}, T1{}, T2{})
+	graph, err := NewGraph(Config{Package: "entc/gen", Target: target, Storage: drivers}, T1{}, T2{})
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())

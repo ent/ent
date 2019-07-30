@@ -99,7 +99,6 @@ func init() {
 	for _, asset := range AssetNames() {
 		templates = template.Must(templates.Parse(string(MustAsset(asset))))
 	}
-	return
 }
 
 func pkgf(s string) func(t *Type) string {

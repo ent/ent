@@ -20,7 +20,7 @@ type Queries []Querier
 
 // Query returns query representation of Queriers.
 func (n Queries) Query() (string, []interface{}) {
-	b := Builder{}
+	var b Builder
 	for i := range n {
 		if i > 0 {
 			b.Pad()
@@ -196,7 +196,7 @@ type TableBuilder struct {
 //		).
 //		PrimaryKey("id")
 //
-func CreateTable(name string) *TableBuilder { return &TableBuilder{b: Builder{}, name: name} }
+func CreateTable(name string) *TableBuilder { return &TableBuilder{name: name} }
 
 // IfNotExists appends the `IF NOT EXISTS` clause to the `CREATE TABLE` statement.
 func (t *TableBuilder) IfNotExists() *TableBuilder {
@@ -224,23 +224,23 @@ func (t *TableBuilder) PrimaryKey(column ...string) *TableBuilder {
 
 // ForeignKeys adds a list of foreign-keys to the statement (without constraints).
 func (t *TableBuilder) ForeignKeys(fks ...*ForeignKeyBuilder) *TableBuilder {
-	Queriers := make([]Querier, len(fks))
+	queries := make([]Querier, len(fks))
 	for i := range fks {
 		// erase the constraint symbol/name.
 		fks[i].symbol = ""
-		Queriers[i] = fks[i]
+		queries[i] = fks[i]
 	}
-	t.constraints = append(t.constraints, Queriers...)
+	t.constraints = append(t.constraints, queries...)
 	return t
 }
 
 // Constraints adds a list of foreign-key constraints to the statement.
 func (t *TableBuilder) Constraints(fks ...*ForeignKeyBuilder) *TableBuilder {
-	Queriers := make([]Querier, len(fks))
+	queries := make([]Querier, len(fks))
 	for i := range fks {
-		Queriers[i] = &Wrapper{"CONSTRAINT %s", fks[i]}
+		queries[i] = &Wrapper{"CONSTRAINT %s", fks[i]}
 	}
-	t.constraints = append(t.constraints, Queriers...)
+	t.constraints = append(t.constraints, queries...)
 	return t
 }
 
@@ -299,7 +299,7 @@ type DescribeBuilder struct {
 //
 //	Describe("users")
 //
-func Describe(name string) *DescribeBuilder { return &DescribeBuilder{b: Builder{}, name: name} }
+func Describe(name string) *DescribeBuilder { return &DescribeBuilder{name: name} }
 
 // Query returns query representation of a `DESCRIBE` statement.
 func (t *DescribeBuilder) Query() (string, []interface{}) {
@@ -321,7 +321,7 @@ type TableAlter struct {
 //		AddColumn(Column("group_id").Type("int").Attr("UNIQUE")).
 //		AddForeignKey(ForeignKey().Columns("group_id"). Reference(Reference().Table("groups").Columns("id")).OnDelete("CASCADE"))
 //
-func AlterTable(name string) *TableAlter { return &TableAlter{b: Builder{}, name: name} }
+func AlterTable(name string) *TableAlter { return &TableAlter{name: name} }
 
 // AddColumn appends the `ADD COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
@@ -426,7 +426,6 @@ type ReferenceBuilder struct {
 	b       Builder
 	table   string   // referenced table.
 	columns []string // referenced columns.
-	actions []string // reference actions.
 }
 
 // Reference create a reference builder for the reference_option clause.
@@ -968,7 +967,7 @@ func Avg(column string) string {
 
 // As suffixed the given column with an alias (`a` AS `b`).
 func As(column string, as string) string {
-	b := Builder{}
+	var b Builder
 	b.Append(column).Pad().WriteString("AS")
 	b.Pad().Append(as)
 	return b.String()
@@ -976,7 +975,7 @@ func As(column string, as string) string {
 
 // Distinct prefixed the given columns with the `DISTINCT` keyword (DISTINCT `id`).
 func Distinct(columns ...string) string {
-	b := Builder{}
+	var b Builder
 	b.WriteString("DISTINCT")
 	b.Pad().AppendComma(columns...)
 	return b.String()
@@ -1208,7 +1207,7 @@ func (s *Selector) As(alias string) *Selector {
 func (s *Selector) Count(columns ...string) *Selector {
 	column := "*"
 	if len(columns) > 0 {
-		b := Builder{}
+		var b Builder
 		b.AppendComma(columns...)
 		column = b.String()
 	}
@@ -1241,14 +1240,14 @@ func (s *Selector) Clone() *Selector {
 
 // Asc adds the ASC suffix for the given column.
 func Asc(column string) string {
-	b := Builder{}
+	var b Builder
 	b.Append(column).WriteString(" ASC")
 	return b.String()
 }
 
 // Desc adds the DESC suffix for the given column.
 func Desc(column string) string {
-	b := Builder{}
+	var b Builder
 	b.Append(column).WriteString(" DESC")
 	return b.String()
 }
@@ -1273,7 +1272,7 @@ func (s *Selector) Having(p *Predicate) *Selector {
 
 // Query returns query representation of a `SELECT` statement.
 func (s *Selector) Query() (string, []interface{}) {
-	b := &Builder{}
+	var b Builder
 	b.WriteString("SELECT ")
 	if s.distinct {
 		b.WriteString("DISTINCT ")
@@ -1285,21 +1284,19 @@ func (s *Selector) Query() (string, []interface{}) {
 	}
 	b.WriteString(" FROM ")
 	b.WriteString(s.from.ref())
-	if len(s.joins) > 0 {
-		for _, join := range s.joins {
-			b.WriteString(fmt.Sprintf(" %s ", join.kind))
-			switch view := join.table.(type) {
-			case *SelectTable:
-				b.WriteString(view.ref())
-			case *Selector:
-				query, args := view.Query()
-				b.WriteString(fmt.Sprintf("(%s) AS `%s`", query, view.as))
-				b.args = append(b.args, args...)
-			}
-			if join.on != "" {
-				b.WriteString(" ON ")
-				b.WriteString(join.on)
-			}
+	for _, join := range s.joins {
+		b.WriteString(fmt.Sprintf(" %s ", join.kind))
+		switch view := join.table.(type) {
+		case *SelectTable:
+			b.WriteString(view.ref())
+		case *Selector:
+			query, args := view.Query()
+			b.WriteString(fmt.Sprintf("(%s) AS `%s`", query, view.as))
+			b.args = append(b.args, args...)
+		}
+		if join.on != "" {
+			b.WriteString(" ON ")
+			b.WriteString(join.on)
 		}
 	}
 	if s.where != nil {
@@ -1408,7 +1405,7 @@ func isModifier(s string) bool {
 }
 
 func agg(fn, column string) string {
-	b := Builder{}
+	var b Builder
 	b.WriteString(fn)
 	b.Nested(func(b *Builder) {
 		b.Append(column)

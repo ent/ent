@@ -78,13 +78,11 @@ type Field struct {
 	tag        string
 	size       int
 	name       string
-	comment    string
 	charset    string
 	unique     bool
 	nullable   bool
 	optional   bool
 	value      interface{}
-	matchers   []*regexp.Regexp
 	validators []interface{}
 }
 
@@ -211,7 +209,6 @@ func (b *intBuilder) Nullable() *intBuilder {
 
 // Comment sets the comment of the field.
 func (b *intBuilder) Comment(c string) *intBuilder {
-	b.comment = c
 	return b
 }
 
@@ -297,7 +294,6 @@ func (b *floatBuilder) Nullable() *floatBuilder {
 
 // Comment sets the comment of the field.
 func (b *floatBuilder) Comment(c string) *floatBuilder {
-	b.comment = c
 	return b
 }
 
@@ -395,7 +391,6 @@ func (b *stringBuilder) Optional() *stringBuilder {
 
 // Comment sets the comment of the field.
 func (b *stringBuilder) Comment(c string) *stringBuilder {
-	b.comment = c
 	return b
 }
 
@@ -440,7 +435,6 @@ func (b *timeBuilder) Optional() *timeBuilder {
 
 // Comment sets the comment of the field.
 func (b *timeBuilder) Comment(c string) *timeBuilder {
-	b.comment = c
 	return b
 }
 
@@ -477,7 +471,6 @@ func (b *boolBuilder) Optional() *boolBuilder {
 
 // Comment sets the comment of the field.
 func (b *boolBuilder) Comment(c string) *boolBuilder {
-	b.comment = c
 	return b
 }
 
