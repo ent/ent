@@ -62,7 +62,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	if len({{ $receiver }}.order) > 0 {
 		v.Order()
 		for _, p := range {{ $receiver }}.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := {{ $receiver }}.limit, {{ $receiver }}.offset; {
@@ -78,4 +78,34 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	}
 	return v
 }
+{{ end }}
+
+{{/* query/path defines the query generation for path of a given edge. */}}
+{{ define "dialect/gremlin/query/path" }}
+	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $receiver := $.Scope.Receiver }}
+	gremlin := {{ $receiver }}.gremlinQuery()
+	{{- if $e.SelfRef }}
+		query.gremlin = gremlin.Both({{ $.Package }}.{{ $e.Constant }})
+	{{- else if $e.IsInverse }}
+		query.gremlin = gremlin.InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
+	{{- else }}
+		query.gremlin = gremlin.OutE({{ $.Package }}.{{ $e.Constant }}).InV()
+	{{- end }}
+{{ end }}
+
+
+{{/* query/from defines the query generation for an edge query from a given node. */}}
+{{ define "dialect/gremlin/query/from" }}
+	{{- $n := $ }} {{/* the node we start the query from. */}}
+	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $receiver := $.Scope.Receiver }}
+
+	{{- if $e.SelfRef }}
+		query.gremlin = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.Constant }})
+	{{- else if $e.IsInverse }}
+		query.gremlin = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
+	{{- else }}
+		query.gremlin = g.V({{ $receiver }}.ID).OutE({{ $n.Package }}.{{ $e.Constant }}).InV()
+	{{- end }}
 {{ end }}

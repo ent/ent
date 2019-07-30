@@ -364,7 +364,7 @@ func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ftq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := ftq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -437,7 +437,7 @@ func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
 	if len(ftq.order) > 0 {
 		v.Order()
 		for _, p := range ftq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := ftq.limit, ftq.offset; {

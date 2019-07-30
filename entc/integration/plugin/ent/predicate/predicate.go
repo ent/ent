@@ -12,14 +12,14 @@ import (
 // Boring is the predicate function for boring builders.
 type Boring func(interface{})
 
-// BoringPerDialect construct a predicate for both gremlin traversal and sql selector.
-func BoringPerDialect(f1 func(*sql.Selector), f2 func(*dsl.Traversal)) Boring {
+// BoringPerDialect construct a predicate for graph traversals based on dialect type.
+func BoringPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Boring {
 	return Boring(func(v interface{}) {
 		switch v := v.(type) {
 		case *sql.Selector:
-			f1(v)
+			f0(v)
 		case *dsl.Traversal:
-			f2(v)
+			f1(v)
 		default:
 			panic(fmt.Sprintf("unknown type for predicate: %T", v))
 		}

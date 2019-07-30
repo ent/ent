@@ -1,0 +1,21 @@
+{{/* custom errors and errors handlers from sql dialects */}}
+{{ define "dialect/sql/errors" }}
+func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
+	// Error number 1062 is ER_DUP_ENTRY in mysql, and "UNIQUE constraint failed" is SQLite prefix.
+	if msg := err.Error(); strings.HasPrefix(msg, "Error 1062") || strings.HasPrefix(msg, "UNIQUE constraint failed") {
+		return &ErrConstraintFailed{msg, err}, true
+	}
+	return nil, false
+}
+
+// rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
+func rollback(tx dialect.Tx, err error) error {
+	if rerr := tx.Rollback(); rerr != nil {
+		err = fmt.Errorf("%s: %v", err.Error(), rerr)
+	}
+	if err, ok := isSQLConstraintError(err); ok {
+		return err
+	}
+	return err
+}
+{{ end }}

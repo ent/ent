@@ -403,7 +403,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range pq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := pq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -476,7 +476,7 @@ func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
 	if len(pq.order) > 0 {
 		v.Order()
 		for _, p := range pq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := pq.limit, pq.offset; {

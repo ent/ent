@@ -103,8 +103,7 @@ func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return giu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := giu.gremlinSave(ctx)
-		return len(vertices), err
+		return giu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -230,21 +229,16 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (giu *GroupInfoUpdate) gremlinSave(ctx context.Context) ([]*GroupInfo, error) {
+func (giu *GroupInfoUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := giu.gremlin().Query()
 	if err := giu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var gis GroupInfos
-	gis.config(giu.config)
-	if err := gis.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return gis, nil
+	return res.ReadInt()
 }
 
 func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
@@ -278,7 +272,7 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(groupinfo.Label, group.InfoLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
 			pred: rv.Count(),

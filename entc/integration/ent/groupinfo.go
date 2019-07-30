@@ -22,26 +22,6 @@ type GroupInfo struct {
 	MaxUsers int `json:"max_users,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into GroupInfo.
-func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vgi struct {
-		ID       string `json:"id,omitempty"`
-		Desc     string `json:"desc,omitempty"`
-		MaxUsers int    `json:"max_users,omitempty"`
-	}
-	if err := vmap.Decode(&vgi); err != nil {
-		return err
-	}
-	gi.ID = vgi.ID
-	gi.Desc = vgi.Desc
-	gi.MaxUsers = vgi.MaxUsers
-	return nil
-}
-
 // FromRows scans the sql response data into GroupInfo.
 func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
 	var vgi struct {
@@ -58,6 +38,26 @@ func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	gi.ID = strconv.Itoa(vgi.ID)
+	gi.Desc = vgi.Desc
+	gi.MaxUsers = vgi.MaxUsers
+	return nil
+}
+
+// FromResponse scans the gremlin response data into GroupInfo.
+func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vgi struct {
+		ID       string `json:"id,omitempty"`
+		Desc     string `json:"desc,omitempty"`
+		MaxUsers int    `json:"max_users,omitempty"`
+	}
+	if err := vmap.Decode(&vgi); err != nil {
+		return err
+	}
+	gi.ID = vgi.ID
 	gi.Desc = vgi.Desc
 	gi.MaxUsers = vgi.MaxUsers
 	return nil
@@ -106,6 +106,18 @@ func (gi *GroupInfo) id() int {
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
 
+// FromRows scans the sql response data into GroupInfos.
+func (gi *GroupInfos) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vgi := &GroupInfo{}
+		if err := vgi.FromRows(rows); err != nil {
+			return err
+		}
+		*gi = append(*gi, vgi)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into GroupInfos.
 func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -126,18 +138,6 @@ func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 			Desc:     v.Desc,
 			MaxUsers: v.MaxUsers,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into GroupInfos.
-func (gi *GroupInfos) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vgi := &GroupInfo{}
-		if err := vgi.FromRows(rows); err != nil {
-			return err
-		}
-		*gi = append(*gi, vgi)
 	}
 	return nil
 }

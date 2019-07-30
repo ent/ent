@@ -10,9 +10,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -33,8 +30,6 @@ func (gd *GroupDelete) Exec(ctx context.Context) error {
 	switch gd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gd.sqlExec(ctx)
-	case dialect.Neptune:
-		return gd.gremlinExec(ctx)
 	default:
 		return errors.New("entv2: unsupported dialect")
 	}
@@ -55,20 +50,6 @@ func (gd *GroupDelete) sqlExec(ctx context.Context) error {
 	}
 	query, args := sql.Delete(group.Table).FromSelect(selector).Query()
 	return gd.driver.Exec(ctx, query, args, &res)
-}
-
-func (gd *GroupDelete) gremlinExec(ctx context.Context) error {
-	res := &gremlin.Response{}
-	query, bindings := gd.gremlin().Query()
-	return gd.driver.Exec(ctx, query, bindings, res)
-}
-
-func (gd *GroupDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(group.Label)
-	for _, p := range gd.predicates {
-		p(t)
-	}
-	return t.Drop()
 }
 
 // GroupDeleteOne is the builder for deleting a single Group entity.

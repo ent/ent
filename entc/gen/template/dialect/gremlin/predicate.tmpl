@@ -1,0 +1,107 @@
+{{ define "dialect/gremlin/predicate/id" -}}
+	func(t *dsl.Traversal) {
+		t.HasID(id)
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/id/ops" -}}
+{{- $op := $.Scope.Op -}}
+{{- $arg := $.Scope.Arg -}}
+	func(t *dsl.Traversal) {
+		{{- if $op.Variadic }}
+			v := make([]interface{}, len({{ $arg }}))
+			for i := range v {
+				v[i] = {{ $arg }}[i]
+			}
+		{{- end }}
+		t.HasID(p.{{ $op.Gremlin }}({{ if $op.Variadic }}v...{{ else }}{{ $arg }}{{ end }}))
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/field" -}}
+	{{- $f := $.Scope.Field -}}
+	func(t *dsl.Traversal) {
+		t.Has(Label, {{ $f.Constant }}, p.EQ(v))
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/field/ops" -}}
+	{{- $f := $.Scope.Field -}}
+	{{- $op := $.Scope.Op -}}
+	func(t *dsl.Traversal) {
+		t.Has(Label, {{ $f.Constant }}, p.{{ $op.Gremlin }}(v{{ if $op.Variadic }}...{{ end }}))
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/edge/has" -}}
+	{{- $e := $.Scope.Edge -}}
+	{{- $label := $e.Constant -}}
+	{{- $direction := "Out" -}}
+	{{- if $e.IsInverse -}}
+		{{- $direction = "In" -}}
+		{{/* avoid circular dependecies */}}
+		{{- $label = $e.InverseConstant -}}
+	{{- end -}}
+	func(t *dsl.Traversal) {
+		{{- /* if it's an edge with self-reference, take the two vertices */}}
+		{{- if $e.SelfRef }}
+			t.Both({{ $label }})
+		{{- else }}
+			t.{{ $direction }}E({{ $label }}).{{ $direction }}V()
+		{{- end }}
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/edge/haswith" -}}
+	{{- $e := $.Scope.Edge -}}
+	{{- $label := $e.Constant -}}
+	{{- $direction := "Out" -}}
+	{{- $inverse_direction := "In" -}}
+	{{- if $e.IsInverse -}}
+		{{- $direction = "In" -}}
+		{{- $inverse_direction = "Out" -}}
+		{{/* avoid circular dependecies */}}
+		{{- $label = $e.InverseConstant -}}
+	{{- end -}}
+	func(t *dsl.Traversal) {
+		{{- if $e.SelfRef }}{{/* selfref means it should be true in one of the directions */}}
+			in, out := __.InV(), __.OutV()
+			for _, p := range preds {
+				p(in)
+				p(out)
+			}
+			t.Where(
+				__.Or(
+					__.OutE({{ $label }}).Where(in),
+					__.InE({{ $label }}).Where(out),
+				),
+			)
+		{{- else }}
+			tr := __.{{ $inverse_direction }}V()
+			for _, p := range preds {
+				p(tr)
+			}
+			t.{{ $direction }}E({{ $label }}).Where(tr).{{ $direction }}V()
+		{{- end }}
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/or" -}}
+	func(tr *dsl.Traversal) {
+		trs := make([]interface{}, 0, len(predicates))
+		for _, p := range predicates {
+			t := __.New()
+			p(t)
+			trs = append(trs, t)
+		}
+		tr.Where(__.Or(trs...))
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/predicate/not" -}}
+	func(tr *dsl.Traversal) {
+		t := __.New()
+		p(t)
+		tr.Where(__.Not(t))
+	}
+{{- end }}

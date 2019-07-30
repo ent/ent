@@ -48,6 +48,7 @@ var (
 	GraphTemplates = []struct {
 		Name   string
 		Format string
+		Skip   func(*Graph) bool
 	}{
 		{
 			Name:   "base",
@@ -72,10 +73,12 @@ var (
 		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
+			Skip:   func(g *Graph) bool { return g.migrateSupport() },
 		},
 		{
 			Name:   "schema",
 			Format: "migrate/schema.go",
+			Skip:   func(g *Graph) bool { return g.migrateSupport() },
 		},
 		{
 			Name:   "predicate",
@@ -87,15 +90,16 @@ var (
 		},
 	}
 	// templates holds the Go templates for the code generation.
-	templates = tmpl()
+	// the init function below initializes the templates and its funcs.
+	templates = template.New("templates")
 )
 
-func tmpl() *template.Template {
-	t := template.New("templates").Funcs(funcs)
+func init() {
+	templates.Funcs(funcs)
 	for _, asset := range AssetNames() {
-		t = template.Must(t.Parse(string(MustAsset(asset))))
+		templates = template.Must(templates.Parse(string(MustAsset(asset))))
 	}
-	return t
+	return
 }
 
 func pkgf(s string) func(t *Type) string {

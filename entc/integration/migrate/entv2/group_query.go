@@ -12,10 +12,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -28,8 +24,7 @@ type GroupQuery struct {
 	unique     []string
 	predicates []predicate.Group
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -169,8 +164,6 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlAll(ctx)
-	case dialect.Neptune:
-		return gq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -190,8 +183,6 @@ func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlIDs(ctx)
-	case dialect.Neptune:
-		return gq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -211,8 +202,6 @@ func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlCount(ctx)
-	case dialect.Neptune:
-		return gq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("entv2: unsupported dialect")
 	}
@@ -232,8 +221,6 @@ func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlExist(ctx)
-	case dialect.Neptune:
-		return gq.gremlinExist(ctx)
 	default:
 		return false, errors.New("entv2: unsupported dialect")
 	}
@@ -259,8 +246,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate queries.
-		sql:     gq.sql.Clone(),
-		gremlin: gq.gremlin.Clone(),
+		sql: gq.sql.Clone(),
 	}
 }
 
@@ -272,8 +258,6 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = gq.sqlQuery()
-	case dialect.Neptune:
-		group.gremlin = gq.gremlinQuery()
 	}
 	return group
 }
@@ -351,7 +335,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -364,91 +348,13 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (gq *GroupQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().Query()
-	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
-}
-
-func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
-	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().ValueMap(true).Query()
-	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var grs Groups
-	if err := grs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	grs.config(gq.config)
-	return grs, nil
-}
-
-func (gq *GroupQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().Count().Query()
-	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (gq *GroupQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().HasNext().Query()
-	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(group.Label)
-	if gq.gremlin != nil {
-		v = gq.gremlin.Clone()
-	}
-	for _, p := range gq.predicates {
-		p(v)
-	}
-	if len(gq.order) > 0 {
-		v.Order()
-		for _, p := range gq.order {
-			p.Gremlin(v)
-		}
-	}
-	switch limit, offset := gq.limit, gq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt64)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := gq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // GroupQuery is the builder for group-by Group entities.
 type GroupGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -462,8 +368,6 @@ func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ggb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ggb.sqlScan(ctx, v)
-	case dialect.Neptune:
-		return ggb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ggb: unsupported dialect")
 	}
@@ -578,41 +482,4 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
-}
-
-func (ggb *GroupGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := ggb.gremlinQuery().Query()
-	if err := ggb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ggb.fields)+len(ggb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range ggb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range ggb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return ggb.gremlin.Group().
-		By(__.Values(ggb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }

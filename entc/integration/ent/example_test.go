@@ -5,38 +5,28 @@ package ent
 import (
 	"context"
 	"log"
-	"net/url"
-	"os"
 	"time"
 
-	"fbc/ent/dialect/gremlin"
+	"fbc/ent/dialect/sql"
 )
 
-// endpoint for the database. In order to run the tests locally, run the following command:
+// dsn for the database. In order to run the tests locally, run the following command:
 //
-//	 ENT_INTEGRATION_ENDPOINT="http://localhost:8182" go test -v
+//	 ENT_INTEGRATION_ENDPOINT="root:pass@tcp(localhost:3306)/test?parseTime=True" go test -v
 //
-var endpoint *gremlin.Endpoint
-
-func init() {
-	if e, ok := os.LookupEnv("ENT_INTEGRATION_ENDPOINT"); ok {
-		if u, err := url.Parse(e); err == nil {
-			endpoint = &gremlin.Endpoint{u}
-		}
-	}
-}
+var dsn string
 
 func ExampleCard() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the card's edges.
 
 	// create card vertex with its edges.
@@ -51,16 +41,16 @@ func ExampleCard() {
 	// Output:
 }
 func ExampleComment() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the comment's edges.
 
 	// create comment vertex with its edges.
@@ -74,16 +64,16 @@ func ExampleComment() {
 	// Output:
 }
 func ExampleFieldType() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the fieldtype's edges.
 
 	// create fieldtype vertex with its edges.
@@ -112,16 +102,16 @@ func ExampleFieldType() {
 	// Output:
 }
 func ExampleFile() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the file's edges.
 
 	// create file vertex with its edges.
@@ -137,16 +127,16 @@ func ExampleFile() {
 	// Output:
 }
 func ExampleGroup() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the group's edges.
 	f0 := client.File.
 		Create().
@@ -206,16 +196,16 @@ func ExampleGroup() {
 	// Output:
 }
 func ExampleGroupInfo() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the groupinfo's edges.
 
 	// create groupinfo vertex with its edges.
@@ -231,16 +221,16 @@ func ExampleGroupInfo() {
 	// Output:
 }
 func ExampleNode() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the node's edges.
 	n1 := client.Node.
 		Create().
@@ -267,16 +257,16 @@ func ExampleNode() {
 	// Output:
 }
 func ExamplePet() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the pet's edges.
 
 	// create pet vertex with its edges.
@@ -291,16 +281,16 @@ func ExamplePet() {
 	// Output:
 }
 func ExampleUser() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the user's edges.
 	c0 := client.Card.
 		Create().

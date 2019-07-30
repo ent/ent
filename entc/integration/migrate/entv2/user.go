@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
 )
 
@@ -22,28 +21,6 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
-}
-
-// FromResponse scans the gremlin response data into User.
-func (u *User) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vu struct {
-		ID    string `json:"id,omitempty"`
-		Age   int    `json:"age,omitempty"`
-		Name  string `json:"name,omitempty"`
-		Phone string `json:"phone,omitempty"`
-	}
-	if err := vmap.Decode(&vu); err != nil {
-		return err
-	}
-	u.ID = vu.ID
-	u.Age = vu.Age
-	u.Name = vu.Name
-	u.Phone = vu.Phone
-	return nil
 }
 
 // FromRows scans the sql response data into User.
@@ -108,32 +85,6 @@ func (u *User) id() int {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-// FromResponse scans the gremlin response data into Users.
-func (u *Users) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vu []struct {
-		ID    string `json:"id,omitempty"`
-		Age   int    `json:"age,omitempty"`
-		Name  string `json:"name,omitempty"`
-		Phone string `json:"phone,omitempty"`
-	}
-	if err := vmap.Decode(&vu); err != nil {
-		return err
-	}
-	for _, v := range vu {
-		*u = append(*u, &User{
-			ID:    v.ID,
-			Age:   v.Age,
-			Name:  v.Name,
-			Phone: v.Phone,
-		})
-	}
-	return nil
-}
 
 // FromRows scans the sql response data into Users.
 func (u *Users) FromRows(rows *sql.Rows) error {

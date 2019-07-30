@@ -5,14 +5,11 @@ package pet
 const (
 	// Label holds the string label denoting the pet type in the database.
 	Label = "pet"
-	// TeamInverseLabel holds the string label denoting the team inverse edge type in the database.
-	TeamInverseLabel = "user_team"
-	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "user_pets"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldName holds the string denoting the name vertex property in the database.
+	FieldName = "name"
+
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
 	// TeamTable is the table the holds the team relation/edge.
@@ -29,6 +26,11 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "owner_id"
+
+	// TeamInverseLabel holds the string label denoting the team inverse edge type in the database.
+	TeamInverseLabel = "user_team"
+	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
+	OwnerInverseLabel = "user_pets"
 )
 
 // Columns holds all SQL columns are pet fields.

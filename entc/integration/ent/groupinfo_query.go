@@ -384,7 +384,7 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range giq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := giq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -457,7 +457,7 @@ func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
 	if len(giq.order) > 0 {
 		v.Order()
 		for _, p := range giq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := giq.limit, giq.offset; {

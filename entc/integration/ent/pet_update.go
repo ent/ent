@@ -112,8 +112,7 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return pu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := pu.gremlinSave(ctx)
-		return len(vertices), err
+		return pu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -245,21 +244,16 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (pu *PetUpdate) gremlinSave(ctx context.Context) ([]*Pet, error) {
+func (pu *PetUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := pu.gremlin().Query()
 	if err := pu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var pes Pets
-	pes.config(pu.config)
-	if err := pes.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return pes, nil
+	return res.ReadInt()
 }
 
 func (pu *PetUpdate) gremlin() *dsl.Traversal {
@@ -297,7 +291,7 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	for id := range pu.owner {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
-	v.ValueMap(true)
+	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
 			pred: rv.Count(),

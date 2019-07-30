@@ -18,6 +18,21 @@ type Boring struct {
 	ID string `json:"id,omitempty"`
 }
 
+// FromRows scans the sql response data into Boring.
+func (b *Boring) FromRows(rows *sql.Rows) error {
+	var vb struct {
+		ID int
+	}
+	// the order here should be the same as in the `boring.Columns`.
+	if err := rows.Scan(
+		&vb.ID,
+	); err != nil {
+		return err
+	}
+	b.ID = strconv.Itoa(vb.ID)
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Boring.
 func (b *Boring) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -31,21 +46,6 @@ func (b *Boring) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	b.ID = vb.ID
-	return nil
-}
-
-// FromRows scans the sql response data into Boring.
-func (b *Boring) FromRows(rows *sql.Rows) error {
-	var vb struct {
-		ID int
-	}
-	// the order here should be the same as in the `boring.Columns`.
-	if err := rows.Scan(
-		&vb.ID,
-	); err != nil {
-		return err
-	}
-	b.ID = strconv.Itoa(vb.ID)
 	return nil
 }
 
@@ -85,6 +85,18 @@ func (b *Boring) id() int {
 // Borings is a parsable slice of Boring.
 type Borings []*Boring
 
+// FromRows scans the sql response data into Borings.
+func (b *Borings) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vb := &Boring{}
+		if err := vb.FromRows(rows); err != nil {
+			return err
+		}
+		*b = append(*b, vb)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Borings.
 func (b *Borings) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -101,18 +113,6 @@ func (b *Borings) FromResponse(res *gremlin.Response) error {
 		*b = append(*b, &Boring{
 			ID: v.ID,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Borings.
-func (b *Borings) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vb := &Boring{}
-		if err := vb.FromRows(rows); err != nil {
-			return err
-		}
-		*b = append(*b, vb)
 	}
 	return nil
 }

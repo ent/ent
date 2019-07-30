@@ -20,24 +20,6 @@ type Node struct {
 	Value int `json:"value,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into Node.
-func (n *Node) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vn struct {
-		ID    string `json:"id,omitempty"`
-		Value int    `json:"value,omitempty"`
-	}
-	if err := vmap.Decode(&vn); err != nil {
-		return err
-	}
-	n.ID = vn.ID
-	n.Value = vn.Value
-	return nil
-}
-
 // FromRows scans the sql response data into Node.
 func (n *Node) FromRows(rows *sql.Rows) error {
 	var vn struct {
@@ -53,6 +35,24 @@ func (n *Node) FromRows(rows *sql.Rows) error {
 	}
 	n.ID = strconv.Itoa(vn.ID)
 	n.Value = int(vn.Value.Int64)
+	return nil
+}
+
+// FromResponse scans the gremlin response data into Node.
+func (n *Node) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vn struct {
+		ID    string `json:"id,omitempty"`
+		Value int    `json:"value,omitempty"`
+	}
+	if err := vmap.Decode(&vn); err != nil {
+		return err
+	}
+	n.ID = vn.ID
+	n.Value = vn.Value
 	return nil
 }
 
@@ -103,6 +103,18 @@ func (n *Node) id() int {
 // Nodes is a parsable slice of Node.
 type Nodes []*Node
 
+// FromRows scans the sql response data into Nodes.
+func (n *Nodes) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vn := &Node{}
+		if err := vn.FromRows(rows); err != nil {
+			return err
+		}
+		*n = append(*n, vn)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Nodes.
 func (n *Nodes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -121,18 +133,6 @@ func (n *Nodes) FromResponse(res *gremlin.Response) error {
 			ID:    v.ID,
 			Value: v.Value,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Nodes.
-func (n *Nodes) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vn := &Node{}
-		if err := vn.FromRows(rows); err != nil {
-			return err
-		}
-		*n = append(*n, vn)
 	}
 	return nil
 }

@@ -54,8 +54,7 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return fu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := fu.gremlinSave(ctx)
-		return len(vertices), err
+		return fu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -135,21 +134,16 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (fu *FileUpdate) gremlinSave(ctx context.Context) ([]*File, error) {
+func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := fu.gremlin().Query()
 	if err := fu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var fs Files
-	fs.config(fu.config)
-	if err := fs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return fs, nil
+	return res.ReadInt()
 }
 
 func (fu *FileUpdate) gremlin() *dsl.Traversal {
@@ -166,7 +160,7 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if fu.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fu.name)
 	}
-	v.ValueMap(true)
+	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

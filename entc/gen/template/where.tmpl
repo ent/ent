@@ -6,49 +6,26 @@
 
 // ID filters vertices based on their identifier.
 func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}PerDialect(
-		func(s *sql.Selector) {
-			{{- if $.ID.IsString }}id, _ := strconv.Atoi(id){{- end }}
-			s.Where(sql.EQ(s.C({{ $.ID.Constant }}), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(id)
-		},
+	return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+		{{ range $_, $storage := $.Storage -}}
+			{{ $tmpl := printf "dialect/%s/predicate/id" $storage }}
+			{{- xtemplate $tmpl $ }},
+		{{ end -}}
 	)
 }
 
 {{ range $_, $op := ops $.ID }}
-	{{ $r := "id" }}{{ if $op.Variadic }}{{ $r = "ids" }}{{ end }}
+	{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
 	{{ $func := printf "ID%s" $op.Name }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
-	func {{ $func }}({{ $r }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}PerDialect(
-			func(s *sql.Selector) {
-				{{- if $op.Variadic }}
-					// if not arguments were provided, append the FALSE constants,
-					// since we can't apply "IN ()". This will make this predicate falsy.
-					if len({{ $r }}) == 0 {
-						s.Where(sql.False())
-						return
-					}
-					v := make([]interface{}, len({{ $r }}))
-					for i := range v {
-						{{ if $.ID.IsString }}v[i], _ = strconv.Atoi({{ $r }}[i]){{ else }}v[i] = {{ $r }}[i]{{ end }}
-					}
-				{{- else if $.ID.IsString }}
-					v, _ := strconv.Atoi({{ $r }})
-				{{- end }}
-				s.Where(sql.{{ $op.Name }}(s.C({{ $.ID.Constant }}), v{{ if $op.Variadic }}...{{ end }}))
-			},
-			func(t *dsl.Traversal) {
-				{{- if $op.Variadic }}
-					v := make([]interface{}, len({{ $r }}))
-					for i := range v {
-						v[i] = {{ $r }}[i]
-					}
-				{{- end }}
-				t.HasID(p.{{ $op.Gremlin }}({{ if $op.Variadic }}v...{{ else }}{{ $r }}{{ end }}))
-			},
+	func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend $ "Arg" $arg "Op" $op -}}
+					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $storage }}
+					{{- xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
 		)
 	}
 {{ end }}
@@ -57,44 +34,36 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ $func := pascal $f.Name }}
 	// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 	func {{ $func }}(v {{ $f.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}PerDialect(
-			func(s *sql.Selector) {
-				s.Where(sql.EQ(s.C({{ $f.Constant }}), v))
-			},
-			func(t *dsl.Traversal) {
-				t.Has(Label, {{ $f.Constant }}, p.EQ(v))
-			},
+		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend $ "Field" $f -}}
+					{{ $tmpl := printf "dialect/%s/predicate/field" $storage }}
+					{{- xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
 		)
 	}
 {{ end }}
 
 {{ range $_, $f := $.Fields }}
 	{{ range $_, $op := (ops $f) }}
-	{{ $r := "v" }}{{ if $op.Variadic }}{{ $r = "vs" }}{{ end }}
+	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 	{{ $func := print (pascal $f.Name) ($op.Name) }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
-	func {{ $func }}({{ $r }} {{ if $op.Variadic }}...{{ end }}{{ $f.Type }}) predicate.{{ $.Name }} {
+	func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $f.Type }}) predicate.{{ $.Name }} {
 		{{- if $op.Variadic }}
-			v := make([]interface{}, len({{ $r }}))
+			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
-				v[i] = {{ $r }}[i]
+				v[i] = {{ $arg }}[i]
 			}
 		{{- end }}
-		return predicate.{{ $.Name }}PerDialect(
-			func(s *sql.Selector) {
-				{{- if $op.Variadic }}
-					// if not arguments were provided, append the FALSE constants,
-					// since we can't apply "IN ()". This will make this predicate falsy.
-					if len({{ $r }}) == 0 {
-						s.Where(sql.False())
-						return
-					}
-				{{- end }}
-				s.Where(sql.{{ $op.Name }}(s.C({{ $f.Constant }}), v{{ if $op.Variadic }}...{{ end }}))
-			},
-			func(t *dsl.Traversal) {
-				t.Has(Label, {{ $f.Constant }}, p.{{ $op.Gremlin }}(v{{ if $op.Variadic }}...{{ end }}))
-			},
+		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend $ "Arg" $arg "Field" $f "Op" $op -}}
+					{{ $tmpl := printf "dialect/%s/predicate/field/ops" $storage }}
+					{{- xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
 		)
 	}
 	{{ end }}
@@ -102,121 +71,27 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 
 {{ range $_, $e := $.Edges }}
 	{{ $func := pascal $e.Name | printf "Has%s" }}
-	{{ $label := $e.Constant }}
-	{{ $direction := "Out" }}
-	{{ $inverse_direction := "In" }}
-	{{ if $e.IsInverse }}
-		{{	$direction = "In" }}
-		{{ $inverse_direction = "Out" }}
-		{{/* avoid circular dependecies */}}
-		{{ $label = $e.InverseConstant }}
-	{{ end }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
 	func {{ $func }}() predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}PerDialect(
-			func(s *sql.Selector) {
-				{{- if $e.M2M  }}
-					t1 := s.Table()
-					s.Where(
-						sql.In(
-							t1.C({{ $.ID.Constant }}),
-							sql.Select({{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}]).From(sql.Table({{ $e.TableConstant }})),
-						),
-					)
-				{{- else if or $e.M2O (and $e.O2O $e.IsInverse) }}{{/* M2O || (O2O with inverse edge) */}}
-					t1 := s.Table()
-					s.Where(sql.NotNull(t1.C({{ $e.ColumnConstant }})))
-				{{- else }}{{/* O2M || (O2O with assoc edge) */}}
-					t1 := s.Table()
-					s.Where(
-						sql.In(
-							t1.C({{ $.ID.Constant }}),
-							sql.Select({{ $e.ColumnConstant }}).
-								From(sql.Table({{ $e.TableConstant }})).
-								Where(sql.NotNull({{ $e.ColumnConstant }})),
-						),
-					)
-				{{- end }}
-			},
-			func(t *dsl.Traversal) {
-				{{- /* if it's an edge with self-reference, take the two vertices */}}
-				{{- if $e.SelfRef }}
-					t.Both({{ $label }})
-				{{- else }}
-					t.{{ $direction }}E({{ $label }}).{{ $direction }}V()
-				{{- end }}
-			},
+		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend $ "Edge" $e -}}
+					{{ $tmpl := printf "dialect/%s/predicate/edge/has" $storage }}
+					{{- xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
 		)
 	}
 	{{ $func = printf "%sWith" $func }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge with a given conditions (other predicates).
 	func {{ $func }}(preds ...predicate.{{ $e.Type.Name }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}PerDialect(
-			func(s *sql.Selector) {
-				{{- if $e.M2M  }}
-					{{ $i := 1 }}{{ $j := 0 }}{{- if $e.IsInverse }}{{ $i = 0 }}{{ $j = 1 }}{{ end -}}
-					t1 := s.Table()
-					t2 := sql.Table(
-						{{- if ne $.Table $e.Type.Table -}}
-							{{ $e.InverseTableConstant }}
-						{{- else -}}
-							Table
-						{{- end -}}
-					)
-					t3 := sql.Table({{ $e.TableConstant }})
-					t4 := sql.Select(t3.C({{ $e.PKConstant }}[{{ $j }}])).
-						From(t3).
-						Join(t2).
-						On(t3.C({{ $e.PKConstant }}[{{ $i }}]), t2.C({{ $e.Type.ID.Constant }}))
-					t5 := sql.Select().From(t2)
-					for _, p := range preds {
-						p(t5)
-					}
-					t4.FromSelect(t5)
-					s.Where(sql.In(t1.C({{ $.ID.Constant }}), t4))
-				{{- else if or $e.M2O (and $e.O2O $e.IsInverse) }}{{/* M2O || (O2O with inverse edge) */}}
-					t1 := s.Table()
-					t2 := sql.Select({{ $e.Type.ID.Constant }}).From(sql.Table(
-						{{- if ne $.Table $e.Type.Table -}}
-							{{ $e.InverseTableConstant }}
-						{{- else -}}
-							{{ $e.TableConstant }}
-						{{- end -}}
-					))
-					for _, p := range preds {
-						p(t2)
-					}
-					s.Where(sql.In(t1.C({{ $e.ColumnConstant }}), t2))
-				{{- else }}{{/* O2M || (O2O with assoc edge) */}}
-					t1 := s.Table()
-					t2 := sql.Select({{ $e.ColumnConstant }}).From(sql.Table({{ $e.TableConstant }}))
-					for _, p := range preds {
-						p(t2)
-					}
-					s.Where(sql.In(t1.C({{ $.ID.Constant }}), t2))
-				{{- end }}
-			},
-			func(t *dsl.Traversal) {
-				{{- if $e.SelfRef }}{{/* selfref means it should be true in one of the directions */}}
-					in, out := __.InV(), __.OutV()
-					for _, p := range preds {
-						p(in)
-						p(out)
-					}
-					t.Where(
-						__.Or(
-							__.OutE({{ $label }}).Where(in),
-							__.InE({{ $label }}).Where(out),
-						),
-					)
-				{{- else }}
-					tr := __.{{ $inverse_direction }}V()
-					for _, p := range preds {
-						p(tr)
-					}
-					t.{{ $direction }}E({{ $label }}).Where(tr).{{ $direction }}V()
-				{{- end }}
-			},
+		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend $ "Edge" $e -}}
+					{{ $tmpl := printf "dialect/%s/predicate/edge/haswith" $storage }}
+					{{- xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
 		)
 	}
 {{ end }}
@@ -224,38 +99,21 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 
 // Or groups list of predicates with the or operator between them.
 func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}PerDialect(
-		func(s *sql.Selector) {
-			for i, p := range predicates {
-				if i > 0 {
-					s.Or()
-				}
-				p(s)
-			}
-		},
-		func(tr *dsl.Traversal) {
-			trs := make([]interface{}, 0, len(predicates))
-			for _, p := range predicates {
-				t := __.New()
-				p(t)
-				trs = append(trs, t)
-			}
-			tr.Where(__.Or(trs...))
-		},
+	return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+		{{ range $_, $storage := $.Storage -}}
+			{{ $tmpl := printf "dialect/%s/predicate/or" $storage }}
+			{{- xtemplate $tmpl . }},
+		{{ end -}}
 	)
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}PerDialect(
-		func(s *sql.Selector) {
-			p(s.Not())
-		},
-		func(tr *dsl.Traversal) {
-			t := __.New()
-			p(t)
-			tr.Where(__.Not(t))
-		},
+	return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+		{{ range $_, $storage := $.Storage -}}
+			{{ $tmpl := printf "dialect/%s/predicate/not" $storage }}
+			{{- xtemplate $tmpl . }},
+		{{ end -}}
 	)
 }
 

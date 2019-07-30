@@ -35,8 +35,7 @@ func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return cu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := cu.gremlinSave(ctx)
-		return len(vertices), err
+		return cu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -97,21 +96,16 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (cu *CommentUpdate) gremlinSave(ctx context.Context) ([]*Comment, error) {
+func (cu *CommentUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := cu.gremlin().Query()
 	if err := cu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var cs Comments
-	cs.config(cu.config)
-	if err := cs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return cs, nil
+	return res.ReadInt()
 }
 
 func (cu *CommentUpdate) gremlin() *dsl.Traversal {
@@ -122,7 +116,7 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	var (
 		trs []*dsl.Traversal
 	)
-	v.ValueMap(true)
+	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

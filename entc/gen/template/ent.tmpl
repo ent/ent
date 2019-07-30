@@ -23,68 +23,12 @@ type {{ $.Name }} struct {
 	{{ end -}}
 }
 
+{{ range $_, $storage := $.Storage }}
+	{{ $tmpl := printf "dialect/%s/decode/one" $storage }}
+	{{ xtemplate $tmpl $ }}
+{{ end }}
+
 {{ $receiver := $.Receiver }}
-
-// FromResponse scans the gremlin response data into {{ $.Name }}.
-func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	{{- $scan := print "v" $receiver }}
-	var {{ $scan }} struct {
-		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
-		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
-		{{ end }}
-	}
-	if err := vmap.Decode(&{{ $scan }}); err != nil {
-		return err
-	}
-	{{ $receiver }}.ID = {{ $scan }}.ID
-	{{ range $_, $f := $.Fields }}
-		{{- $receiver }}.{{ pascal $f.Name }} = {{- if $f.IsTime }}time.Unix({{ $scan }}.{{- pascal $f.Name }}, 0) {{ else }}{{- $scan }}.{{- pascal $f.Name }}{{ end }}
-	{{ end -}}
-	return nil
-}
-
-// FromRows scans the sql response data into {{ $.Name }}.
-func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
-	{{- $scan = print "v" $receiver }}
-	var {{ $scan }} struct {
-		ID   {{ if $.ID.IsString }}int{{ else }}{{ $.ID.Type }}{{ end }}
-		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ if or $f.Nullable $f.Optional }}{{ $f.NullType }}{{ else }}{{ $f.Type }}{{ end }}
-		{{ end }}
-	}
-	// the order here should be the same as in the `{{ $.Package }}.Columns`.
-	if err := rows.Scan(
-			&{{ $scan }}.ID,
-			{{- range $_, $f := $.Fields }}
-				&{{ $scan }}.{{- pascal $f.Name }},
-			{{- end }}
-	); err != nil {
-		return err
-	}
-	{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.Itoa({{ $scan }}.ID){{ else }}{{ $scan }}.ID{{ end }}
-	{{- range $_, $f := $.Fields }}
-		{{- if $f.Nullable }}
-			{{- if $f.IsTime }}
-				{{ $receiver }}.{{ pascal $f.Name }} = &{{ $scan }}.{{ pascal $f.Name }}
-			{{- else }}
-				if {{ $scan }}.{{- pascal $f.Name }}.Valid {
-					{{ $receiver }}.{{ pascal $f.Name }} = new({{ $f.Type }})
-					*{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
-				}
-			{{- end }}
-		{{- else if $f.Optional }}
-			{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
-		{{- else }}
-			{{ $receiver }}.{{ pascal $f.Name }} = {{ $scan }}.{{ pascal $f.Name }}
-		{{- end }}
-	{{- end }}
-	return nil
-}
 
 {{ range $_, $e := $.Edges }}
 	{{ $func := print "Query" (pascal $e.Name) }}
@@ -142,45 +86,12 @@ func ({{ $receiver }} *{{ $.Name }}) id() int {
 // {{ $slice }} is a parsable slice of {{ $.Name }}.
 type {{ $slice }} []*{{ $.Name }}
 
-// FromResponse scans the gremlin response data into {{ $slice }}.
-func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	{{- $scan = print "v" $receiver }}
-	var {{ $scan }} []struct {
-		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
-		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
-		{{ end }}
-	}
-	if err := vmap.Decode(&{{ $scan }}); err != nil {
-		return err
-	}
-	for _, v := range {{ $scan }} {
-		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
-			ID: v.ID,
-			{{ range $_, $f := $.Fields }}
-				{{- pascal $f.Name }}: {{- if $f.IsTime }}time.Unix(v.{{ pascal $f.Name }}, 0) {{ else }}v.{{ pascal $f.Name }}{{ end }},
-			{{ end -}}
-		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into {{ $slice }}.
-func ({{ $receiver }} *{{ $slice }}) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		{{- $scan = print "v" $receiver }}
-		{{ $scan }} := &{{ $.Name }}{}
-		if err := {{ $scan }}.FromRows(rows); err != nil {
-			return err
-		}
-		*{{ $receiver }} = append(*{{ $receiver }}, {{ $scan }})
-	}
-	return nil
-}
+{{ range $_, $storage := $.Storage }}
+	{{ with extend $ "Slice" $slice }}
+		{{ $tmpl := printf "dialect/%s/decode/many" $storage }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
+{{ end }}
 
 func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	for i := range {{ $receiver }} {

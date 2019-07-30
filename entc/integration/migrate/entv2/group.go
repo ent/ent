@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
 )
 
@@ -16,22 +15,6 @@ type Group struct {
 	config
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-}
-
-// FromResponse scans the gremlin response data into Group.
-func (gr *Group) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vgr struct {
-		ID string `json:"id,omitempty"`
-	}
-	if err := vmap.Decode(&vgr); err != nil {
-		return err
-	}
-	gr.ID = vgr.ID
-	return nil
 }
 
 // FromRows scans the sql response data into Group.
@@ -84,26 +67,6 @@ func (gr *Group) id() int {
 
 // Groups is a parsable slice of Group.
 type Groups []*Group
-
-// FromResponse scans the gremlin response data into Groups.
-func (gr *Groups) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vgr []struct {
-		ID string `json:"id,omitempty"`
-	}
-	if err := vmap.Decode(&vgr); err != nil {
-		return err
-	}
-	for _, v := range vgr {
-		*gr = append(*gr, &Group{
-			ID: v.ID,
-		})
-	}
-	return nil
-}
 
 // FromRows scans the sql response data into Groups.
 func (gr *Groups) FromRows(rows *sql.Rows) error {

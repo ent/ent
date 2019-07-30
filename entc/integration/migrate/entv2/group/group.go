@@ -7,6 +7,7 @@ const (
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 )

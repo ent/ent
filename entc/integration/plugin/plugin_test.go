@@ -20,7 +20,7 @@ func TestPlugin(t *testing.T) {
 	defer os.Remove(plg)
 
 	// execute entc generate and expect the plugin to be executed.
-	cmd = exec.Command("go", "run", "../../cmd/entc/entc.go", "generate", "--plugin", plg, "./ent/schema")
+	cmd = exec.Command("go", "run", "../../cmd/entc/entc.go", "generate", "--storage", "sql,gremlin", "--plugin", plg, "./ent/schema")
 	out, err := run(cmd)
 	require.NoError(t, err)
 	require.Equal(t, "Boring\n", out, "printer plugin should print node names")

@@ -22,26 +22,6 @@ type File struct {
 	Name string `json:"name,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into File.
-func (f *File) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vf struct {
-		ID   string `json:"id,omitempty"`
-		Size int    `json:"size,omitempty"`
-		Name string `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&vf); err != nil {
-		return err
-	}
-	f.ID = vf.ID
-	f.Size = vf.Size
-	f.Name = vf.Name
-	return nil
-}
-
 // FromRows scans the sql response data into File.
 func (f *File) FromRows(rows *sql.Rows) error {
 	var vf struct {
@@ -58,6 +38,26 @@ func (f *File) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	f.ID = strconv.Itoa(vf.ID)
+	f.Size = vf.Size
+	f.Name = vf.Name
+	return nil
+}
+
+// FromResponse scans the gremlin response data into File.
+func (f *File) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vf struct {
+		ID   string `json:"id,omitempty"`
+		Size int    `json:"size,omitempty"`
+		Name string `json:"name,omitempty"`
+	}
+	if err := vmap.Decode(&vf); err != nil {
+		return err
+	}
+	f.ID = vf.ID
 	f.Size = vf.Size
 	f.Name = vf.Name
 	return nil
@@ -101,6 +101,18 @@ func (f *File) id() int {
 // Files is a parsable slice of File.
 type Files []*File
 
+// FromRows scans the sql response data into Files.
+func (f *Files) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vf := &File{}
+		if err := vf.FromRows(rows); err != nil {
+			return err
+		}
+		*f = append(*f, vf)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Files.
 func (f *Files) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -121,18 +133,6 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 			Size: v.Size,
 			Name: v.Name,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Files.
-func (f *Files) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vf := &File{}
-		if err := vf.FromRows(rows); err != nil {
-			return err
-		}
-		*f = append(*f, vf)
 	}
 	return nil
 }

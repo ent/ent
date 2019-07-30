@@ -402,7 +402,7 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range nq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := nq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -475,7 +475,7 @@ func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
 	if len(nq.order) > 0 {
 		v.Order()
 		for _, p := range nq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := nq.limit, nq.offset; {

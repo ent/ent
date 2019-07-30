@@ -5,6 +5,8 @@ package fieldtype
 const (
 	// Label holds the string label denoting the fieldtype type in the database.
 	Label = "field_type"
+	// FieldID holds the string denoting the id field in the database.
+	FieldID = "id"
 	// FieldInt holds the string denoting the int vertex property in the database.
 	FieldInt = "int"
 	// FieldInt8 holds the string denoting the int8 vertex property in the database.
@@ -35,8 +37,7 @@ const (
 	FieldNullableInt32 = "nullable_int32"
 	// FieldNullableInt64 holds the string denoting the nullable_int64 vertex property in the database.
 	FieldNullableInt64 = "nullable_int64"
-	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
 )

@@ -35,8 +35,7 @@ func (bu *BoringUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return bu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := bu.gremlinSave(ctx)
-		return len(vertices), err
+		return bu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -97,21 +96,16 @@ func (bu *BoringUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (bu *BoringUpdate) gremlinSave(ctx context.Context) ([]*Boring, error) {
+func (bu *BoringUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := bu.gremlin().Query()
 	if err := bu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var bs Borings
-	bs.config(bu.config)
-	if err := bs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return bs, nil
+	return res.ReadInt()
 }
 
 func (bu *BoringUpdate) gremlin() *dsl.Traversal {
@@ -122,7 +116,7 @@ func (bu *BoringUpdate) gremlin() *dsl.Traversal {
 	var (
 		trs []*dsl.Traversal
 	)
-	v.ValueMap(true)
+	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

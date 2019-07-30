@@ -29,32 +29,6 @@ type Group struct {
 	Name string `json:"name,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into Group.
-func (gr *Group) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vgr struct {
-		ID       string  `json:"id,omitempty"`
-		Active   bool    `json:"active,omitempty"`
-		Expire   int64   `json:"expire,omitempty"`
-		Type     *string `json:"type,omitempty"`
-		MaxUsers int     `json:"max_users,omitempty"`
-		Name     string  `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&vgr); err != nil {
-		return err
-	}
-	gr.ID = vgr.ID
-	gr.Active = vgr.Active
-	gr.Expire = time.Unix(vgr.Expire, 0)
-	gr.Type = vgr.Type
-	gr.MaxUsers = vgr.MaxUsers
-	gr.Name = vgr.Name
-	return nil
-}
-
 // FromRows scans the sql response data into Group.
 func (gr *Group) FromRows(rows *sql.Rows) error {
 	var vgr struct {
@@ -84,6 +58,32 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 		*gr.Type = vgr.Type.String
 	}
 	gr.MaxUsers = int(vgr.MaxUsers.Int64)
+	gr.Name = vgr.Name
+	return nil
+}
+
+// FromResponse scans the gremlin response data into Group.
+func (gr *Group) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vgr struct {
+		ID       string  `json:"id,omitempty"`
+		Active   bool    `json:"active,omitempty"`
+		Expire   int64   `json:"expire,omitempty"`
+		Type     *string `json:"type,omitempty"`
+		MaxUsers int     `json:"max_users,omitempty"`
+		Name     string  `json:"name,omitempty"`
+	}
+	if err := vmap.Decode(&vgr); err != nil {
+		return err
+	}
+	gr.ID = vgr.ID
+	gr.Active = vgr.Active
+	gr.Expire = time.Unix(vgr.Expire, 0)
+	gr.Type = vgr.Type
+	gr.MaxUsers = vgr.MaxUsers
 	gr.Name = vgr.Name
 	return nil
 }
@@ -151,6 +151,18 @@ func (gr *Group) id() int {
 // Groups is a parsable slice of Group.
 type Groups []*Group
 
+// FromRows scans the sql response data into Groups.
+func (gr *Groups) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vgr := &Group{}
+		if err := vgr.FromRows(rows); err != nil {
+			return err
+		}
+		*gr = append(*gr, vgr)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Groups.
 func (gr *Groups) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -177,18 +189,6 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 			MaxUsers: v.MaxUsers,
 			Name:     v.Name,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Groups.
-func (gr *Groups) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vgr := &Group{}
-		if err := vgr.FromRows(rows); err != nil {
-			return err
-		}
-		*gr = append(*gr, vgr)
 	}
 	return nil
 }

@@ -1,0 +1,44 @@
+{{ define "dialect/gremlin/order" -}}
+	{{- $order := $.Scope.Order -}}
+	func(tr *dsl.Traversal) {
+		for _, f := range fields {
+			tr.By(f, dsl.{{ pascal $order }})
+		}
+	}
+{{- end }}
+
+{{/* custom signature for group-by function */}}
+{{ define "dialect/gremlin/group/signature" -}}
+	// Gremlin gets two labels as parameters. The first used in the `As` step for the predicate,
+	// and the second is an optional name for the next predicates (or for later usage).
+	Gremlin func(string, string) (string, *dsl.Traversal)
+{{- end }}
+
+{{ define "dialect/gremlin/group/as" -}}
+	func(start, _ string) (string, *dsl.Traversal) {
+		return fn.Gremlin(start, end)
+	}
+{{- end }}
+
+{{ define "dialect/gremlin/group/func" -}}
+	{{- $fn := $.Scope.Func }}
+	{{- $withField := $.Scope.WithField }}
+	func(start, end string) (string, *dsl.Traversal) {
+		if end == "" {
+			end = Default{{ $fn }}Label
+		}
+		return end, __.As(start).{{ if $withField }}Unfold().Values(field).{{ $fn }}(){{ else }}{{ $fn }}(dsl.Local){{ end }}.As(end)
+	}
+{{- end }}
+
+{{/* optional constants for group-by default values. */}}
+{{ define "dialect/gremlin/group/const" -}}
+	{{- $fn := $.Scope.Func }}
+	{{- $name := $.Scope.Name }}
+	{{- $pkg := base $.Config.Package }}
+	// Default{{ $fn }}Label is the default label name for the {{ $fn }} aggregation function.
+	// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
+	// In order to {{ quote $name }} 2 or more fields and avoid conflicting, use the `{{ $pkg }}.As({{ $pkg }}.{{ $fn }}(field), "custom_name")`
+	// function with custom name in order to override it.
+	const Default{{ $fn }}Label = {{ quote $name }}
+{{- end }}

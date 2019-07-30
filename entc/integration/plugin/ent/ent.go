@@ -16,41 +16,52 @@ import (
 )
 
 // Order applies an ordering on either graph traversal or sql selector.
-type Order struct {
-	SQL     func(*sql.Selector)
-	Gremlin func(*dsl.Traversal)
+type Order func(interface{})
+
+// OrderPerDialect construct the "order by" clause for graph traversals based on dialect type.
+func OrderPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Order {
+	return Order(func(v interface{}) {
+		switch v := v.(type) {
+		case *sql.Selector:
+			f0(v)
+		case *dsl.Traversal:
+			f1(v)
+		default:
+			panic(fmt.Sprintf("unknown type for order: %T", v))
+		}
+	})
 }
 
 // Asc applies the given fields in ASC order.
 func Asc(fields ...string) Order {
-	return Order{
-		SQL: func(s *sql.Selector) {
+	return OrderPerDialect(
+		func(s *sql.Selector) {
 			for _, f := range fields {
 				s.OrderBy(sql.Asc(f))
 			}
 		},
-		Gremlin: func(tr *dsl.Traversal) {
+		func(tr *dsl.Traversal) {
 			for _, f := range fields {
 				tr.By(f, dsl.Incr)
 			}
 		},
-	}
+	)
 }
 
 // Desc applies the given fields in DESC order.
 func Desc(fields ...string) Order {
-	return Order{
-		SQL: func(s *sql.Selector) {
+	return OrderPerDialect(
+		func(s *sql.Selector) {
 			for _, f := range fields {
 				s.OrderBy(sql.Desc(f))
 			}
 		},
-		Gremlin: func(tr *dsl.Traversal) {
+		func(tr *dsl.Traversal) {
 			for _, f := range fields {
 				tr.By(f, dsl.Decr)
 			}
 		},
-	}
+	)
 }
 
 // Aggregate applies an aggregation step on the group-by traversal/selector.
@@ -241,6 +252,31 @@ func (e *ErrConstraintFailed) Unwrap() error {
 	return e.wrap
 }
 
+// IsConstraintFailure returns a boolean indicating whether the error is a constraint failure.
+func IsConstraintFailure(err error) bool {
+	_, ok := err.(*ErrConstraintFailed)
+	return ok
+}
+
+func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
+	// Error number 1062 is ER_DUP_ENTRY in mysql, and "UNIQUE constraint failed" is SQLite prefix.
+	if msg := err.Error(); strings.HasPrefix(msg, "Error 1062") || strings.HasPrefix(msg, "UNIQUE constraint failed") {
+		return &ErrConstraintFailed{msg, err}, true
+	}
+	return nil, false
+}
+
+// rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
+func rollback(tx dialect.Tx, err error) error {
+	if rerr := tx.Rollback(); rerr != nil {
+		err = fmt.Errorf("%s: %v", err.Error(), rerr)
+	}
+	if err, ok := isSQLConstraintError(err); ok {
+		return err
+	}
+	return err
+}
+
 // Code implements the dsl.Node interface.
 func (e ErrConstraintFailed) Code() (string, []interface{}) {
 	return strconv.Quote(e.prefix() + e.msg), nil
@@ -274,12 +310,6 @@ func NewErrUniqueEdge(label, edge, id string) *ErrConstraintFailed {
 	return &ErrConstraintFailed{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
 }
 
-// IsConstraintFailure returns a boolean indicating whether the error is a constraint failure.
-func IsConstraintFailure(err error) bool {
-	_, ok := err.(*ErrConstraintFailed)
-	return ok
-}
-
 // isConstantError indicates if the given response holds a gremlin constant containing an error.
 func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
 	e := &ErrConstraintFailed{}
@@ -287,25 +317,6 @@ func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
 		return nil, false
 	}
 	return e, true
-}
-
-func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
-	// Error number 1062 is ER_DUP_ENTRY in mysql, and "UNIQUE constraint failed" is SQLite prefix.
-	if msg := err.Error(); strings.HasPrefix(msg, "Error 1062") || strings.HasPrefix(msg, "UNIQUE constraint failed") {
-		return &ErrConstraintFailed{msg, err}, true
-	}
-	return nil, false
-}
-
-// rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
-func rollback(tx dialect.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%s: %v", err.Error(), rerr)
-	}
-	if err, ok := isSQLConstraintError(err); ok {
-		return err
-	}
-	return err
 }
 
 // keys returns the keys/ids from the edge map.

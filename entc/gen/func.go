@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"bytes"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -19,25 +20,27 @@ var (
 	rules   = ruleset()
 	acronym = make(map[string]bool)
 	funcs   = template.FuncMap{
-		"ops":        ops,
-		"add":        add,
-		"order":      order,
-		"snake":      snake,
-		"pascal":     pascal,
-		"extend":     extend,
-		"xrange":     xrange,
-		"receiver":   receiver,
-		"plural":     plural,
-		"aggregate":  aggregate,
-		"primitives": primitives,
-		"singular":   rules.Singularize,
-		"quote":      strconv.Quote,
-		"base":       filepath.Base,
-		"keys":       keys,
-		"join":       join,
-		"lower":      strings.ToLower,
-		"upper":      strings.ToUpper,
-		"hasSuffix":  strings.HasSuffix,
+		"ops":         ops,
+		"add":         add,
+		"order":       order,
+		"snake":       snake,
+		"pascal":      pascal,
+		"extend":      extend,
+		"xrange":      xrange,
+		"receiver":    receiver,
+		"plural":      plural,
+		"aggregate":   aggregate,
+		"primitives":  primitives,
+		"singular":    rules.Singularize,
+		"quote":       strconv.Quote,
+		"base":        filepath.Base,
+		"keys":        keys,
+		"join":        join,
+		"lower":       strings.ToLower,
+		"upper":       strings.ToUpper,
+		"hasSuffix":   strings.HasSuffix,
+		"xtemplate":   xtemplate,
+		"hasTemplate": hasTemplate,
 	}
 )
 
@@ -212,4 +215,23 @@ func primitives() []string {
 func join(a []string, sep string) string {
 	sort.Strings(a)
 	return strings.Join(a, sep)
+}
+
+// xtemplate dynamically executes templates by their names.
+func xtemplate(name string, v interface{}) (string, error) {
+	buf := bytes.NewBuffer(nil)
+	if err := templates.ExecuteTemplate(buf, name, v); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+// hasTemplate checks whether a template exists in the loaded templates.
+func hasTemplate(name string) bool {
+	for _, t := range templates.Templates() {
+		if t.Name() == name {
+			return true
+		}
+	}
+	return false
 }

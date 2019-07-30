@@ -12,10 +12,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -28,8 +24,7 @@ type UserQuery struct {
 	unique     []string
 	predicates []predicate.User
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -169,8 +164,6 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlAll(ctx)
-	case dialect.Neptune:
-		return uq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("entv1: unsupported dialect")
 	}
@@ -190,8 +183,6 @@ func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlIDs(ctx)
-	case dialect.Neptune:
-		return uq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("entv1: unsupported dialect")
 	}
@@ -211,8 +202,6 @@ func (uq *UserQuery) Count(ctx context.Context) (int, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlCount(ctx)
-	case dialect.Neptune:
-		return uq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("entv1: unsupported dialect")
 	}
@@ -232,8 +221,6 @@ func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlExist(ctx)
-	case dialect.Neptune:
-		return uq.gremlinExist(ctx)
 	default:
 		return false, errors.New("entv1: unsupported dialect")
 	}
@@ -259,8 +246,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate queries.
-		sql:     uq.sql.Clone(),
-		gremlin: uq.gremlin.Clone(),
+		sql: uq.sql.Clone(),
 	}
 }
 
@@ -285,8 +271,6 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = uq.sqlQuery()
-	case dialect.Neptune:
-		group.gremlin = uq.gremlinQuery()
 	}
 	return group
 }
@@ -364,7 +348,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -377,91 +361,13 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (uq *UserQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
-}
-
-func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().ValueMap(true).Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var us Users
-	if err := us.FromResponse(res); err != nil {
-		return nil, err
-	}
-	us.config(uq.config)
-	return us, nil
-}
-
-func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().Count().Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (uq *UserQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().HasNext().Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(user.Label)
-	if uq.gremlin != nil {
-		v = uq.gremlin.Clone()
-	}
-	for _, p := range uq.predicates {
-		p(v)
-	}
-	if len(uq.order) > 0 {
-		v.Order()
-		for _, p := range uq.order {
-			p.Gremlin(v)
-		}
-	}
-	switch limit, offset := uq.limit, uq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt64)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := uq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // UserQuery is the builder for group-by User entities.
 type UserGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -475,8 +381,6 @@ func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ugb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ugb.sqlScan(ctx, v)
-	case dialect.Neptune:
-		return ugb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ugb: unsupported dialect")
 	}
@@ -591,41 +495,4 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
-}
-
-func (ugb *UserGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := ugb.gremlinQuery().Query()
-	if err := ugb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ugb.fields)+len(ugb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ugb *UserGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range ugb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range ugb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return ugb.gremlin.Group().
-		By(__.Values(ugb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }

@@ -10,9 +10,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/group"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -26,8 +23,6 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	switch gc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gc.sqlSave(ctx)
-	case dialect.Neptune:
-		return gc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -65,25 +60,4 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	return gr, nil
-}
-
-func (gc *GroupCreate) gremlinSave(ctx context.Context) (*Group, error) {
-	res := &gremlin.Response{}
-	query, bindings := gc.gremlin().Query()
-	if err := gc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	gr := &Group{config: gc.config}
-	if err := gr.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return gr, nil
-}
-
-func (gc *GroupCreate) gremlin() *dsl.Traversal {
-	v := g.AddV(group.Label)
-	return v.ValueMap(true)
 }

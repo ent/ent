@@ -7,6 +7,7 @@ const (
 	Label = "comment"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
 )

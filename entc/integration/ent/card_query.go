@@ -384,7 +384,7 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -457,7 +457,7 @@ func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
 	if len(cq.order) > 0 {
 		v.Order()
 		for _, p := range cq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := cq.limit, cq.offset; {

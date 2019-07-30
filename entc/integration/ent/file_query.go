@@ -364,7 +364,7 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range fq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := fq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -437,7 +437,7 @@ func (fq *FileQuery) gremlinQuery() *dsl.Traversal {
 	if len(fq.order) > 0 {
 		v.Order()
 		for _, p := range fq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := fq.limit, fq.offset; {

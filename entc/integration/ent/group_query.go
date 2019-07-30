@@ -448,7 +448,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -521,7 +521,7 @@ func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
 	if len(gq.order) > 0 {
 		v.Order()
 		for _, p := range gq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := gq.limit, gq.offset; {

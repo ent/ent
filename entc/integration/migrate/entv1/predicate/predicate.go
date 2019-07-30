@@ -3,25 +3,8 @@
 package predicate
 
 import (
-	"fmt"
-
-	"fbc/ent/dialect/gremlin/graph/dsl"
 	"fbc/ent/dialect/sql"
 )
 
 // User is the predicate function for user builders.
-type User func(interface{})
-
-// UserPerDialect construct a predicate for both gremlin traversal and sql selector.
-func UserPerDialect(f1 func(*sql.Selector), f2 func(*dsl.Traversal)) User {
-	return User(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f1(v)
-		case *dsl.Traversal:
-			f2(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type User func(*sql.Selector)

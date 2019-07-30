@@ -5,37 +5,27 @@ package entv1
 import (
 	"context"
 	"log"
-	"net/url"
-	"os"
 
-	"fbc/ent/dialect/gremlin"
+	"fbc/ent/dialect/sql"
 )
 
-// endpoint for the database. In order to run the tests locally, run the following command:
+// dsn for the database. In order to run the tests locally, run the following command:
 //
-//	 ENTV1_INTEGRATION_ENDPOINT="http://localhost:8182" go test -v
+//	 ENTV1_INTEGRATION_ENDPOINT="root:pass@tcp(localhost:3306)/test?parseTime=True" go test -v
 //
-var endpoint *gremlin.Endpoint
-
-func init() {
-	if e, ok := os.LookupEnv("ENTV1_INTEGRATION_ENDPOINT"); ok {
-		if u, err := url.Parse(e); err == nil {
-			endpoint = &gremlin.Endpoint{u}
-		}
-	}
-}
+var dsn string
 
 func ExampleUser() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the user's edges.
 
 	// create user vertex with its edges.

@@ -18,6 +18,21 @@ type Comment struct {
 	ID string `json:"id,omitempty"`
 }
 
+// FromRows scans the sql response data into Comment.
+func (c *Comment) FromRows(rows *sql.Rows) error {
+	var vc struct {
+		ID int
+	}
+	// the order here should be the same as in the `comment.Columns`.
+	if err := rows.Scan(
+		&vc.ID,
+	); err != nil {
+		return err
+	}
+	c.ID = strconv.Itoa(vc.ID)
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Comment.
 func (c *Comment) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -31,21 +46,6 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	c.ID = vc.ID
-	return nil
-}
-
-// FromRows scans the sql response data into Comment.
-func (c *Comment) FromRows(rows *sql.Rows) error {
-	var vc struct {
-		ID int
-	}
-	// the order here should be the same as in the `comment.Columns`.
-	if err := rows.Scan(
-		&vc.ID,
-	); err != nil {
-		return err
-	}
-	c.ID = strconv.Itoa(vc.ID)
 	return nil
 }
 
@@ -85,6 +85,18 @@ func (c *Comment) id() int {
 // Comments is a parsable slice of Comment.
 type Comments []*Comment
 
+// FromRows scans the sql response data into Comments.
+func (c *Comments) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vc := &Comment{}
+		if err := vc.FromRows(rows); err != nil {
+			return err
+		}
+		*c = append(*c, vc)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Comments.
 func (c *Comments) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -101,18 +113,6 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		*c = append(*c, &Comment{
 			ID: v.ID,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Comments.
-func (c *Comments) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vc := &Comment{}
-		if err := vc.FromRows(rows); err != nil {
-			return err
-		}
-		*c = append(*c, vc)
 	}
 	return nil
 }

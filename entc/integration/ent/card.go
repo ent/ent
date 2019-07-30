@@ -20,24 +20,6 @@ type Card struct {
 	Number string `json:"number,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into Card.
-func (c *Card) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vc struct {
-		ID     string `json:"id,omitempty"`
-		Number string `json:"number,omitempty"`
-	}
-	if err := vmap.Decode(&vc); err != nil {
-		return err
-	}
-	c.ID = vc.ID
-	c.Number = vc.Number
-	return nil
-}
-
 // FromRows scans the sql response data into Card.
 func (c *Card) FromRows(rows *sql.Rows) error {
 	var vc struct {
@@ -52,6 +34,24 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	c.ID = strconv.Itoa(vc.ID)
+	c.Number = vc.Number
+	return nil
+}
+
+// FromResponse scans the gremlin response data into Card.
+func (c *Card) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vc struct {
+		ID     string `json:"id,omitempty"`
+		Number string `json:"number,omitempty"`
+	}
+	if err := vmap.Decode(&vc); err != nil {
+		return err
+	}
+	c.ID = vc.ID
 	c.Number = vc.Number
 	return nil
 }
@@ -98,6 +98,18 @@ func (c *Card) id() int {
 // Cards is a parsable slice of Card.
 type Cards []*Card
 
+// FromRows scans the sql response data into Cards.
+func (c *Cards) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vc := &Card{}
+		if err := vc.FromRows(rows); err != nil {
+			return err
+		}
+		*c = append(*c, vc)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Cards.
 func (c *Cards) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -116,18 +128,6 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 			ID:     v.ID,
 			Number: v.Number,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Cards.
-func (c *Cards) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vc := &Card{}
-		if err := vc.FromRows(rows); err != nil {
-			return err
-		}
-		*c = append(*c, vc)
 	}
 	return nil
 }

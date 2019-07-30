@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
 )
 
@@ -16,22 +15,6 @@ type Pet struct {
 	config
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-}
-
-// FromResponse scans the gremlin response data into Pet.
-func (pe *Pet) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vpe struct {
-		ID string `json:"id,omitempty"`
-	}
-	if err := vmap.Decode(&vpe); err != nil {
-		return err
-	}
-	pe.ID = vpe.ID
-	return nil
 }
 
 // FromRows scans the sql response data into Pet.
@@ -84,26 +67,6 @@ func (pe *Pet) id() int {
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
-
-// FromResponse scans the gremlin response data into Pets.
-func (pe *Pets) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vpe []struct {
-		ID string `json:"id,omitempty"`
-	}
-	if err := vmap.Decode(&vpe); err != nil {
-		return err
-	}
-	for _, v := range vpe {
-		*pe = append(*pe, &Pet{
-			ID: v.ID,
-		})
-	}
-	return nil
-}
 
 // FromRows scans the sql response data into Pets.
 func (pe *Pets) FromRows(rows *sql.Rows) error {

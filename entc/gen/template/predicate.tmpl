@@ -11,20 +11,22 @@ import (
 
 {{ range $_, $n := $.Nodes -}}
 // {{ $n.Name }} is the predicate function for {{ $n.Package }} builders.
-type {{ $n.Name }} func(interface{})
+type {{ $n.Name }} func({{ if gt (len $.Storage) 1 }}interface{}{{ else }}{{ (index $.Storage 0).Builder }}{{ end }})
 
-// {{ $n.Name }}PerDialect construct a predicate for both gremlin traversal and sql selector.
-func {{ $n.Name }}PerDialect(f1 func(*sql.Selector), f2 func(*dsl.Traversal)) {{ $n.Name }} {
+{{ if gt (len $.Storage) 1 }}
+// {{ $n.Name }}PerDialect construct a predicate for graph traversals based on dialect type.
+func {{ $n.Name }}PerDialect({{ range $i, $storage := $.Storage }}{{ if $i }},{{ end }}f{{ $i }} func({{ $storage.Builder }}){{ end }}) {{ $n.Name }} {
 	return {{ $n.Name }}(func (v interface{}) {
 		switch v := v.(type) {
-		case *sql.Selector:
-			f1(v)
-		case *dsl.Traversal:
-			f2(v)
+		{{- range $i, $storage := $.Storage }}
+		case {{ $storage.Builder }}:
+			f{{ $i }}(v)
+		{{- end }}
 		default:
 			panic(fmt.Sprintf("unknown type for predicate: %T", v))
 		}
 	})
 }
+{{ end }}
 {{ end }}
 {{ end }}

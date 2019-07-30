@@ -29,6 +29,8 @@ type (
 		Package string
 		// Header is an optional header signature for generated files.
 		Header string
+		// Storage to support in codegen.
+		Storage []*Storage
 		// imports are the import packages used for code generation.
 		imports map[string]string
 	}
@@ -75,6 +77,9 @@ func (g *Graph) Gen() (err error) {
 		}
 	}
 	for _, tmpl := range GraphTemplates {
+		if tmpl.Skip != nil && tmpl.Skip(g) {
+			continue
+		}
 		if dir := filepath.Dir(tmpl.Format); dir != "." {
 			path := filepath.Join(g.Config.Target, dir)
 			check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
@@ -325,6 +330,16 @@ func (g *Graph) Tables() (all []*schema.Table) {
 	return
 }
 
+// migrateSupport reports if the codegen needs to support schema migratio.
+func (g *Graph) migrateSupport() bool {
+	for _, storage := range g.Storage {
+		if storage.SchemaMode.Support(Migrate) {
+			return true
+		}
+	}
+	return false
+}
+
 func (g *Graph) typ(name string) (*Type, bool) {
 	for _, n := range g.Nodes {
 		if name == n.Name {
@@ -346,6 +361,11 @@ func imports() map[string]string {
 		path, err := strconv.Unquote(spec.Path.Value)
 		check(err, "unquote import path")
 		specs[filepath.Base(path)] = path
+	}
+	for _, s := range drivers {
+		for _, path := range s.Imports {
+			specs[filepath.Base(path)] = path
+		}
 	}
 	return specs
 }

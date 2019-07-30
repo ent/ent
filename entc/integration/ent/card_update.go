@@ -84,8 +84,7 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return cu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := cu.gremlinSave(ctx)
-		return len(vertices), err
+		return cu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -192,21 +191,16 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (cu *CardUpdate) gremlinSave(ctx context.Context) ([]*Card, error) {
+func (cu *CardUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := cu.gremlin().Query()
 	if err := cu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var cs Cards
-	cs.config(cu.config)
-	if err := cs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return cs, nil
+	return res.ReadInt()
 }
 
 func (cu *CardUpdate) gremlin() *dsl.Traversal {
@@ -237,7 +231,7 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
 			pred: rv.Count(),

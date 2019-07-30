@@ -10,9 +10,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -33,8 +30,6 @@ func (pd *PetDelete) Exec(ctx context.Context) error {
 	switch pd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pd.sqlExec(ctx)
-	case dialect.Neptune:
-		return pd.gremlinExec(ctx)
 	default:
 		return errors.New("entv2: unsupported dialect")
 	}
@@ -55,20 +50,6 @@ func (pd *PetDelete) sqlExec(ctx context.Context) error {
 	}
 	query, args := sql.Delete(pet.Table).FromSelect(selector).Query()
 	return pd.driver.Exec(ctx, query, args, &res)
-}
-
-func (pd *PetDelete) gremlinExec(ctx context.Context) error {
-	res := &gremlin.Response{}
-	query, bindings := pd.gremlin().Query()
-	return pd.driver.Exec(ctx, query, bindings, res)
-}
-
-func (pd *PetDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(pet.Label)
-	for _, p := range pd.predicates {
-		p(t)
-	}
-	return t.Drop()
 }
 
 // PetDeleteOne is the builder for deleting a single Pet entity.

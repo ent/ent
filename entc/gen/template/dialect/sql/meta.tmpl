@@ -1,0 +1,42 @@
+{{/* constants needed for sql dialects. */}}
+{{ define "dialect/sql/meta/constants" }}
+	// Table holds the table name of the {{ lower $.Name }} in the database.
+	Table = "{{ $.Table }}"
+	{{- range $_, $e := $.Edges }}
+		// {{ $e.TableConstant }} is the table the holds the {{ $e.Name }} relation/edge.
+		{{- if $e.M2M }} The primary key declared below.{{ end }}
+		{{ $e.TableConstant }} = "{{ $e.Rel.Table }}"
+		{{- if eq $.Table $e.Type.Table | not }}
+			// {{ $e.InverseTableConstant }} is the table name for the {{ $e.Type.Name }} entity.
+			// It exists in this package in order to avoid circular dependency with the "{{ $e.Type.Package }}" package.
+			{{ $e.InverseTableConstant }} = "{{ $e.Type.Table }}"
+		{{- end }}
+		{{- if not $e.M2M }}
+			// {{ $e.ColumnConstant }} is the table column denoting the {{ $e.Name }} relation/edge.
+			{{ $e.ColumnConstant }} = "{{ $e.Rel.Column }}"
+		{{- end }}
+	{{- end }}
+{{ end }}
+
+{{/* variables needed for sql dialects. */}}
+{{ define "dialect/sql/meta/variables" }}
+	// Columns holds all SQL columns are {{ lower $.Name }} fields.
+	var Columns = []string{
+		{{ $.ID.Constant }},
+		{{- range $_, $f := $.Fields }}
+			{{ $f.Constant }},
+		{{- end }}
+	}
+
+	{{ with $.NumM2M }}
+		var (
+			{{- range $_, $e := $.Edges }}
+				{{- if $e.M2M }}
+					// {{ $e.PKConstant }} and {{ $e.ColumnConstant }}2 are the table columns denoting the
+					// primary key for the {{ $e.Name }} relation (M2M).
+					{{ $e.PKConstant }} = []string{"{{ index $e.Rel.Columns 0 }}", "{{ index $e.Rel.Columns 1 }}"}
+				{{- end }}
+			{{- end }}
+		)
+	{{ end }}
+{{ end }}

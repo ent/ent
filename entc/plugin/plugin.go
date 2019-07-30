@@ -41,6 +41,8 @@ func (f GeneratorFunc) Gen(g *gen.Graph) error { return f(g) }
 // and construct a *gen.Graph. The path can be either a package
 // path (e.g github.com/a8m/x) or a filepath.
 //
+// The second argument is an optional config for the graph creation.
+//
 // This function used to create a standalone plugin programs that
 // want to interact with the ent schemas. An example for usage:
 //
@@ -53,7 +55,7 @@ func (f GeneratorFunc) Gen(g *gen.Graph) error { return f(g) }
 //	)
 //
 //	func main() {
-//		graph, err := plugin.LoadGraph("./ent/schema")
+//		graph, err := plugin.LoadGraph("./ent/schema", gen.Config{})
 //		if err != nil {
 //			log.Fatal(err)
 //		}
@@ -62,25 +64,25 @@ func (f GeneratorFunc) Gen(g *gen.Graph) error { return f(g) }
 //		}
 //	}
 //
-func LoadGraph(path string) (*gen.Graph, error) {
+func LoadGraph(path string, cfg gen.Config) (*gen.Graph, error) {
 	plg, err := (&build.Config{Path: path}).Build()
 	if err != nil {
 		return nil, err
 	}
 	defer os.Remove(plg.Path)
-
 	schemas, err := plg.Load()
 	if err != nil {
 		return nil, err
 	}
-
-	return gen.NewGraph(gen.Config{Schema: plg.PkgPath, Package: filepath.Dir(plg.PkgPath)}, schemas...)
+	cfg.Schema = plg.PkgPath
+	cfg.Package = filepath.Dir(plg.PkgPath)
+	return gen.NewGraph(cfg, schemas...)
 }
 
 // MustLoadGraph is like LoadGraph but panics if LoadGraph returns an error.
 // It simplifies safe initialization of global variables holding a *gen.Graph.
-func MustLoadGraph(path string) *gen.Graph {
-	graph, err := LoadGraph(path)
+func MustLoadGraph(path string, cfg gen.Config) *gen.Graph {
+	graph, err := LoadGraph(path, cfg)
 	if err != nil {
 		panic(err)
 	}

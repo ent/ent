@@ -9,12 +9,11 @@ import (
 const (
 	// Label holds the string label denoting the card type in the database.
 	Label = "card"
-	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "user_card"
-	// FieldNumber holds the string denoting the number vertex property in the database.
-	FieldNumber = "number"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldNumber holds the string denoting the number vertex property in the database.
+	FieldNumber = "number"
+
 	// Table holds the table name of the card in the database.
 	Table = "cards"
 	// OwnerTable is the table the holds the owner relation/edge.
@@ -24,6 +23,9 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "owner_id"
+
+	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
+	OwnerInverseLabel = "user_card"
 )
 
 // Columns holds all SQL columns are card fields.

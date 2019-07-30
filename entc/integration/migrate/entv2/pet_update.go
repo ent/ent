@@ -11,9 +11,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -34,9 +31,6 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	switch pu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pu.sqlSave(ctx)
-	case dialect.Neptune:
-		vertices, err := pu.gremlinSave(ctx)
-		return len(vertices), err
 	default:
 		return 0, errors.New("entv2: unsupported dialect")
 	}
@@ -97,36 +91,6 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (pu *PetUpdate) gremlinSave(ctx context.Context) ([]*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := pu.gremlin().Query()
-	if err := pu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	var pes Pets
-	pes.config(pu.config)
-	if err := pes.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return pes, nil
-}
-
-func (pu *PetUpdate) gremlin() *dsl.Traversal {
-	v := g.V().HasLabel(pet.Label)
-	for _, p := range pu.predicates {
-		p(v)
-	}
-	var (
-		trs []*dsl.Traversal
-	)
-	v.ValueMap(true)
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
@@ -138,8 +102,6 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	switch puo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return puo.sqlSave(ctx)
-	case dialect.Neptune:
-		return puo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -201,30 +163,4 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		return nil, err
 	}
 	return pe, nil
-}
-
-func (puo *PetUpdateOne) gremlinSave(ctx context.Context) (*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := puo.gremlin(puo.id).Query()
-	if err := puo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	pe := &Pet{config: puo.config}
-	if err := pe.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return pe, nil
-}
-
-func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
-	v := g.V(id)
-	var (
-		trs []*dsl.Traversal
-	)
-	v.ValueMap(true)
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

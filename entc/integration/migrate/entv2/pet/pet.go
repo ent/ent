@@ -7,6 +7,7 @@ const (
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
 )

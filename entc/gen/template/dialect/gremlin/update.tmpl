@@ -2,28 +2,27 @@
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 {{ $one := hasSuffix $builder "One" }}
+{{ $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if not $one }}[]{{ end }}*{{ $.Name }}, error) {
+func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if $one }}*{{ $.Name }}{{ else }}int{{ end }}, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlin({{- if $one }}{{ $receiver }}.id{{ end }}).Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return {{ $zero }}, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return {{ $zero }}, err
 	}
-	{{- $r := plural $.Receiver }}
 	{{- if $one }}
-		{{- $r = $.Receiver }}
+		{{- $r := $.Receiver }}
 		{{ $r }} := &{{ $.Name }}{config: {{ $receiver }}.config}
+		if err := {{ $r }}.FromResponse(res); err != nil {
+			return nil, err
+		}
+		return {{ $r }}, nil
 	{{- else }}
-		var {{ $r }} {{ plural $.Name }}
-		{{ $r }}.config({{ $receiver }}.config)
+		return res.ReadInt()
 	{{- end }}
-	if err := {{ $r }}.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return {{ $r }}, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{ end }}) *dsl.Traversal {
@@ -107,7 +106,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{- end }}
 		}
 	{{- end }}
-	v.ValueMap(true)
+	{{ if $one }}v.ValueMap(true){{ else }}v.Count(){{ end }}
 	{{- with .NumConstraint }}
 		if len(constraints) > 0 {
 			{{- /* make sure the traversal does not contain more than one vertex if we have constraint */}}

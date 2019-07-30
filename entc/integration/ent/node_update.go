@@ -119,8 +119,7 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return nu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := nu.gremlinSave(ctx)
-		return len(vertices), err
+		return nu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -258,21 +257,16 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (nu *NodeUpdate) gremlinSave(ctx context.Context) ([]*Node, error) {
+func (nu *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := nu.gremlin().Query()
 	if err := nu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var ns Nodes
-	ns.config(nu.config)
-	if err := ns.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return ns, nil
+	return res.ReadInt()
 }
 
 func (nu *NodeUpdate) gremlin() *dsl.Traversal {
@@ -314,7 +308,7 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
 			pred: rv.Count(),

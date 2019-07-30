@@ -28,32 +28,6 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into User.
-func (u *User) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vu struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-	}
-	if err := vmap.Decode(&vu); err != nil {
-		return err
-	}
-	u.ID = vu.ID
-	u.Age = vu.Age
-	u.Name = vu.Name
-	u.Last = vu.Last
-	u.Nickname = vu.Nickname
-	u.Phone = vu.Phone
-	return nil
-}
-
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
@@ -81,6 +55,32 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Last = vu.Last
 	u.Nickname = vu.Nickname.String
 	u.Phone = vu.Phone.String
+	return nil
+}
+
+// FromResponse scans the gremlin response data into User.
+func (u *User) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vu struct {
+		ID       string `json:"id,omitempty"`
+		Age      int    `json:"age,omitempty"`
+		Name     string `json:"name,omitempty"`
+		Last     string `json:"last,omitempty"`
+		Nickname string `json:"nickname,omitempty"`
+		Phone    string `json:"phone,omitempty"`
+	}
+	if err := vmap.Decode(&vu); err != nil {
+		return err
+	}
+	u.ID = vu.ID
+	u.Age = vu.Age
+	u.Name = vu.Name
+	u.Last = vu.Last
+	u.Nickname = vu.Nickname
+	u.Phone = vu.Phone
 	return nil
 }
 
@@ -180,6 +180,18 @@ func (u *User) id() int {
 // Users is a parsable slice of User.
 type Users []*User
 
+// FromRows scans the sql response data into Users.
+func (u *Users) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vu := &User{}
+		if err := vu.FromRows(rows); err != nil {
+			return err
+		}
+		*u = append(*u, vu)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into Users.
 func (u *Users) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -206,18 +218,6 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Nickname: v.Nickname,
 			Phone:    v.Phone,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into Users.
-func (u *Users) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vu := &User{}
-		if err := vu.FromRows(rows); err != nil {
-			return err
-		}
-		*u = append(*u, vu)
 	}
 	return nil
 }

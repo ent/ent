@@ -5,28 +5,8 @@ package user
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
-	// CardLabel holds the string label denoting the card edge type in the database.
-	CardLabel = "user_card"
-	// PetsLabel holds the string label denoting the pets edge type in the database.
-	PetsLabel = "user_pets"
-	// FilesLabel holds the string label denoting the files edge type in the database.
-	FilesLabel = "user_files"
-	// GroupsLabel holds the string label denoting the groups edge type in the database.
-	GroupsLabel = "user_groups"
-	// FriendsLabel holds the string label denoting the friends edge type in the database.
-	FriendsLabel = "user_friends"
-	// FollowersInverseLabel holds the string label denoting the followers inverse edge type in the database.
-	FollowersInverseLabel = "user_following"
-	// FollowingLabel holds the string label denoting the following edge type in the database.
-	FollowingLabel = "user_following"
-	// TeamLabel holds the string label denoting the team edge type in the database.
-	TeamLabel = "user_team"
-	// SpouseLabel holds the string label denoting the spouse edge type in the database.
-	SpouseLabel = "user_spouse"
-	// ChildrenInverseLabel holds the string label denoting the children inverse edge type in the database.
-	ChildrenInverseLabel = "user_parent"
-	// ParentLabel holds the string label denoting the parent edge type in the database.
-	ParentLabel = "user_parent"
+	// FieldID holds the string denoting the id field in the database.
+	FieldID = "id"
 	// FieldAge holds the string denoting the age vertex property in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name vertex property in the database.
@@ -39,8 +19,7 @@ const (
 	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone vertex property in the database.
 	FieldPhone = "phone"
-	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CardTable is the table the holds the card relation/edge.
@@ -94,6 +73,29 @@ const (
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "parent_id"
+
+	// CardLabel holds the string label denoting the card edge type in the database.
+	CardLabel = "user_card"
+	// PetsLabel holds the string label denoting the pets edge type in the database.
+	PetsLabel = "user_pets"
+	// FilesLabel holds the string label denoting the files edge type in the database.
+	FilesLabel = "user_files"
+	// GroupsLabel holds the string label denoting the groups edge type in the database.
+	GroupsLabel = "user_groups"
+	// FriendsLabel holds the string label denoting the friends edge type in the database.
+	FriendsLabel = "user_friends"
+	// FollowersInverseLabel holds the string label denoting the followers inverse edge type in the database.
+	FollowersInverseLabel = "user_following"
+	// FollowingLabel holds the string label denoting the following edge type in the database.
+	FollowingLabel = "user_following"
+	// TeamLabel holds the string label denoting the team edge type in the database.
+	TeamLabel = "user_team"
+	// SpouseLabel holds the string label denoting the spouse edge type in the database.
+	SpouseLabel = "user_spouse"
+	// ChildrenInverseLabel holds the string label denoting the children inverse edge type in the database.
+	ChildrenInverseLabel = "user_parent"
+	// ParentLabel holds the string label denoting the parent edge type in the database.
+	ParentLabel = "user_parent"
 )
 
 // Columns holds all SQL columns are user fields.

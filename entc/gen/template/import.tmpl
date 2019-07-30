@@ -17,12 +17,10 @@ import (
 
 	"fbc/ent"
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/sql"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/gremlin/graph/dsl/p"
-	"fbc/ent/dialect/gremlin/encoding/graphson"
+	{{ range $_, $storage := $.Storage -}}
+		{{ range $_, $import := $storage.Imports -}}
+			"{{ $import }}"
+		{{ end -}}
+	{{ end -}}
 )
 {{ end }}

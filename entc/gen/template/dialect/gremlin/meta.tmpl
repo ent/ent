@@ -1,0 +1,11 @@
+{{/* constants needed for gremlin dialects. */}}
+{{ define "dialect/gremlin/meta/constants" }}
+	{{ range $_, $e := $.Edges }}{{ $label := $e.Constant -}}
+		{{ if $e.IsInverse }}{{- $label = $e.InverseConstant -}}
+			// {{ $label }} holds the string label denoting the {{ lower $e.Name }} inverse edge type in the database.
+		{{ else -}}
+			// {{ $label }} holds the string label denoting the {{ lower $e.Name }} edge type in the database.
+		{{ end -}}
+		{{ $label }} = "{{ $e.Label }}"
+	{{ end -}}
+{{ end }}

@@ -220,8 +220,7 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return ftu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := ftu.gremlinSave(ctx)
-		return len(vertices), err
+		return ftu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -353,21 +352,16 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (ftu *FieldTypeUpdate) gremlinSave(ctx context.Context) ([]*FieldType, error) {
+func (ftu *FieldTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ftu.gremlin().Query()
 	if err := ftu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var fts FieldTypes
-	fts.config(ftu.config)
-	if err := fts.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return fts, nil
+	return res.ReadInt()
 }
 
 func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
@@ -423,7 +417,7 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.nullable_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldNullableInt64, *ftu.nullable_int64)
 	}
-	v.ValueMap(true)
+	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

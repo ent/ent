@@ -10,9 +10,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -33,8 +30,6 @@ func (ud *UserDelete) Exec(ctx context.Context) error {
 	switch ud.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ud.sqlExec(ctx)
-	case dialect.Neptune:
-		return ud.gremlinExec(ctx)
 	default:
 		return errors.New("entv1: unsupported dialect")
 	}
@@ -55,20 +50,6 @@ func (ud *UserDelete) sqlExec(ctx context.Context) error {
 	}
 	query, args := sql.Delete(user.Table).FromSelect(selector).Query()
 	return ud.driver.Exec(ctx, query, args, &res)
-}
-
-func (ud *UserDelete) gremlinExec(ctx context.Context) error {
-	res := &gremlin.Response{}
-	query, bindings := ud.gremlin().Query()
-	return ud.driver.Exec(ctx, query, bindings, res)
-}
-
-func (ud *UserDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(user.Label)
-	for _, p := range ud.predicates {
-		p(t)
-	}
-	return t.Drop()
 }
 
 // UserDeleteOne is the builder for deleting a single User entity.

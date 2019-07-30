@@ -58,10 +58,10 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		{{ end -}}
 	{{ end -}}
 	switch {{ $receiver }}.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return {{ $receiver }}.sqlSave(ctx)
-	case dialect.Neptune:
-		return {{ $receiver }}.gremlinSave(ctx)
+	{{- range $_, $storage := $.Storage }}
+	case {{ join $storage.Dialects ", " }}:
+		return {{ $receiver }}.{{ $storage }}Save(ctx)
+	{{- end }}
 	default:
 		return nil, errors.New("{{ $pkg }}: unsupported dialect")
 	}
@@ -76,12 +76,11 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} 
 	return v
 }
 
-{{ with extend $ "Builder" $builder }}
-	{{ template "dialect/sql/create" . }}
-{{ end }}
-
-{{ with extend $ "Builder" $builder }}
-	{{ template "dialect/gremlin/create" . }}
+{{- range $_, $storage := $.Storage }}
+	{{ with extend $ "Builder" $builder }}
+		{{ $tmpl := printf "dialect/%s/create" $storage }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
 {{ end }}
 
 {{ end }}

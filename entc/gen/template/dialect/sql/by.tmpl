@@ -1,0 +1,28 @@
+{{ define "dialect/sql/order" -}}
+	{{- $f := $.Scope.Func -}}
+	func(s *sql.Selector) {
+		for _, f := range fields {
+			s.OrderBy(sql.{{ $f }}(f))
+		}
+	}
+{{- end }}
+
+{{/* custom signature for group-by function */}}
+{{ define "dialect/sql/group/signature" -}}
+	// SQL the column wrapped with the aggregation function.
+	SQL     func(*sql.Selector) string
+{{- end }}
+
+{{ define "dialect/sql/group/as" -}}
+	func(s *sql.Selector) string {
+			return sql.As(fn.SQL(s), end)
+	}
+{{- end }}
+
+{{ define "dialect/sql/group/func" -}}
+	{{- $fn := $.Scope.Func }}
+	{{- $withField := $.Scope.WithField }}
+	func(s *sql.Selector) string {
+		return sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})
+	}
+{{- end }}

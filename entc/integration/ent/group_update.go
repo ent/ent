@@ -270,8 +270,7 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return gu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := gu.gremlinSave(ctx)
-		return len(vertices), err
+		return gu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -520,21 +519,16 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (gu *GroupUpdate) gremlinSave(ctx context.Context) ([]*Group, error) {
+func (gu *GroupUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := gu.gremlin().Query()
 	if err := gu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var grs Groups
-	grs.config(gu.config)
-	if err := grs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return grs, nil
+	return res.ReadInt()
 }
 
 func (gu *GroupUpdate) gremlin() *dsl.Traversal {
@@ -602,7 +596,7 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 	for id := range gu.info {
 		v.AddE(group.InfoLabel).To(g.V(id)).OutV()
 	}
-	v.ValueMap(true)
+	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
 			pred: rv.Count(),

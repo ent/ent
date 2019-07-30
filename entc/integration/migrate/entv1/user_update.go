@@ -11,9 +11,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -68,9 +65,6 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	switch uu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uu.sqlSave(ctx)
-	case dialect.Neptune:
-		vertices, err := uu.gremlinSave(ctx)
-		return len(vertices), err
 	default:
 		return 0, errors.New("entv1: unsupported dialect")
 	}
@@ -154,45 +148,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (uu *UserUpdate) gremlinSave(ctx context.Context) ([]*User, error) {
-	res := &gremlin.Response{}
-	query, bindings := uu.gremlin().Query()
-	if err := uu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	var us Users
-	us.config(uu.config)
-	if err := us.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return us, nil
-}
-
-func (uu *UserUpdate) gremlin() *dsl.Traversal {
-	v := g.V().HasLabel(user.Label)
-	for _, p := range uu.predicates {
-		p(v)
-	}
-	var (
-		trs []*dsl.Traversal
-	)
-	if uu.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uu.age)
-	}
-	if uu.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uu.name)
-	}
-	if uu.address != nil {
-		v.Property(dsl.Single, user.FieldAddress, *uu.address)
-	}
-	v.ValueMap(true)
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
@@ -238,8 +193,6 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	switch uuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uuo.sqlSave(ctx)
-	case dialect.Neptune:
-		return uuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("entv1: unsupported dialect")
 	}
@@ -327,39 +280,4 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, err
 	}
 	return u, nil
-}
-
-func (uuo *UserUpdateOne) gremlinSave(ctx context.Context) (*User, error) {
-	res := &gremlin.Response{}
-	query, bindings := uuo.gremlin(uuo.id).Query()
-	if err := uuo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	u := &User{config: uuo.config}
-	if err := u.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
-	v := g.V(id)
-	var (
-		trs []*dsl.Traversal
-	)
-	if uuo.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uuo.age)
-	}
-	if uuo.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uuo.name)
-	}
-	if uuo.address != nil {
-		v.Property(dsl.Single, user.FieldAddress, *uuo.address)
-	}
-	v.ValueMap(true)
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

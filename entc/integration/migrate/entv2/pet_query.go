@@ -12,10 +12,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -28,8 +24,7 @@ type PetQuery struct {
 	unique     []string
 	predicates []predicate.Pet
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -169,8 +164,6 @@ func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlAll(ctx)
-	case dialect.Neptune:
-		return pq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -190,8 +183,6 @@ func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlIDs(ctx)
-	case dialect.Neptune:
-		return pq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -211,8 +202,6 @@ func (pq *PetQuery) Count(ctx context.Context) (int, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlCount(ctx)
-	case dialect.Neptune:
-		return pq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("entv2: unsupported dialect")
 	}
@@ -232,8 +221,6 @@ func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlExist(ctx)
-	case dialect.Neptune:
-		return pq.gremlinExist(ctx)
 	default:
 		return false, errors.New("entv2: unsupported dialect")
 	}
@@ -259,8 +246,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		// clone intermediate queries.
-		sql:     pq.sql.Clone(),
-		gremlin: pq.gremlin.Clone(),
+		sql: pq.sql.Clone(),
 	}
 }
 
@@ -272,8 +258,6 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = pq.sqlQuery()
-	case dialect.Neptune:
-		group.gremlin = pq.gremlinQuery()
 	}
 	return group
 }
@@ -351,7 +335,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range pq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := pq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -364,91 +348,13 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (pq *PetQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
-}
-
-func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().ValueMap(true).Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var pes Pets
-	if err := pes.FromResponse(res); err != nil {
-		return nil, err
-	}
-	pes.config(pq.config)
-	return pes, nil
-}
-
-func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().Count().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (pq *PetQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().HasNext().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(pet.Label)
-	if pq.gremlin != nil {
-		v = pq.gremlin.Clone()
-	}
-	for _, p := range pq.predicates {
-		p(v)
-	}
-	if len(pq.order) > 0 {
-		v.Order()
-		for _, p := range pq.order {
-			p.Gremlin(v)
-		}
-	}
-	switch limit, offset := pq.limit, pq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt64)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := pq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // PetQuery is the builder for group-by Pet entities.
 type PetGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -462,8 +368,6 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch pgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pgb.sqlScan(ctx, v)
-	case dialect.Neptune:
-		return pgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("pgb: unsupported dialect")
 	}
@@ -578,41 +482,4 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(pgb.fields...)
-}
-
-func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := pgb.gremlinQuery().Query()
-	if err := pgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(pgb.fields)+len(pgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range pgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range pgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return pgb.gremlin.Group().
-		By(__.Values(pgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }

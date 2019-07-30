@@ -48,52 +48,6 @@ type FieldType struct {
 	NullableInt64 *int64 `json:"nullable_int64,omitempty"`
 }
 
-// FromResponse scans the gremlin response data into FieldType.
-func (ft *FieldType) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var vft struct {
-		ID            string `json:"id,omitempty"`
-		Int           int    `json:"int,omitempty"`
-		Int8          int8   `json:"int8,omitempty"`
-		Int16         int16  `json:"int16,omitempty"`
-		Int32         int32  `json:"int32,omitempty"`
-		Int64         int64  `json:"int64,omitempty"`
-		OptionalInt   int    `json:"optional_int,omitempty"`
-		OptionalInt8  int8   `json:"optional_int8,omitempty"`
-		OptionalInt16 int16  `json:"optional_int16,omitempty"`
-		OptionalInt32 int32  `json:"optional_int32,omitempty"`
-		OptionalInt64 int64  `json:"optional_int64,omitempty"`
-		NullableInt   *int   `json:"nullable_int,omitempty"`
-		NullableInt8  *int8  `json:"nullable_int8,omitempty"`
-		NullableInt16 *int16 `json:"nullable_int16,omitempty"`
-		NullableInt32 *int32 `json:"nullable_int32,omitempty"`
-		NullableInt64 *int64 `json:"nullable_int64,omitempty"`
-	}
-	if err := vmap.Decode(&vft); err != nil {
-		return err
-	}
-	ft.ID = vft.ID
-	ft.Int = vft.Int
-	ft.Int8 = vft.Int8
-	ft.Int16 = vft.Int16
-	ft.Int32 = vft.Int32
-	ft.Int64 = vft.Int64
-	ft.OptionalInt = vft.OptionalInt
-	ft.OptionalInt8 = vft.OptionalInt8
-	ft.OptionalInt16 = vft.OptionalInt16
-	ft.OptionalInt32 = vft.OptionalInt32
-	ft.OptionalInt64 = vft.OptionalInt64
-	ft.NullableInt = vft.NullableInt
-	ft.NullableInt8 = vft.NullableInt8
-	ft.NullableInt16 = vft.NullableInt16
-	ft.NullableInt32 = vft.NullableInt32
-	ft.NullableInt64 = vft.NullableInt64
-	return nil
-}
-
 // FromRows scans the sql response data into FieldType.
 func (ft *FieldType) FromRows(rows *sql.Rows) error {
 	var vft struct {
@@ -169,6 +123,52 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 	return nil
 }
 
+// FromResponse scans the gremlin response data into FieldType.
+func (ft *FieldType) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	var vft struct {
+		ID            string `json:"id,omitempty"`
+		Int           int    `json:"int,omitempty"`
+		Int8          int8   `json:"int8,omitempty"`
+		Int16         int16  `json:"int16,omitempty"`
+		Int32         int32  `json:"int32,omitempty"`
+		Int64         int64  `json:"int64,omitempty"`
+		OptionalInt   int    `json:"optional_int,omitempty"`
+		OptionalInt8  int8   `json:"optional_int8,omitempty"`
+		OptionalInt16 int16  `json:"optional_int16,omitempty"`
+		OptionalInt32 int32  `json:"optional_int32,omitempty"`
+		OptionalInt64 int64  `json:"optional_int64,omitempty"`
+		NullableInt   *int   `json:"nullable_int,omitempty"`
+		NullableInt8  *int8  `json:"nullable_int8,omitempty"`
+		NullableInt16 *int16 `json:"nullable_int16,omitempty"`
+		NullableInt32 *int32 `json:"nullable_int32,omitempty"`
+		NullableInt64 *int64 `json:"nullable_int64,omitempty"`
+	}
+	if err := vmap.Decode(&vft); err != nil {
+		return err
+	}
+	ft.ID = vft.ID
+	ft.Int = vft.Int
+	ft.Int8 = vft.Int8
+	ft.Int16 = vft.Int16
+	ft.Int32 = vft.Int32
+	ft.Int64 = vft.Int64
+	ft.OptionalInt = vft.OptionalInt
+	ft.OptionalInt8 = vft.OptionalInt8
+	ft.OptionalInt16 = vft.OptionalInt16
+	ft.OptionalInt32 = vft.OptionalInt32
+	ft.OptionalInt64 = vft.OptionalInt64
+	ft.NullableInt = vft.NullableInt
+	ft.NullableInt8 = vft.NullableInt8
+	ft.NullableInt16 = vft.NullableInt16
+	ft.NullableInt32 = vft.NullableInt32
+	ft.NullableInt64 = vft.NullableInt64
+	return nil
+}
+
 // Update returns a builder for updating this FieldType.
 // Note that, you need to call FieldType.Unwrap() before calling this method, if this FieldType
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -230,6 +230,18 @@ func (ft *FieldType) id() int {
 // FieldTypes is a parsable slice of FieldType.
 type FieldTypes []*FieldType
 
+// FromRows scans the sql response data into FieldTypes.
+func (ft *FieldTypes) FromRows(rows *sql.Rows) error {
+	for rows.Next() {
+		vft := &FieldType{}
+		if err := vft.FromRows(rows); err != nil {
+			return err
+		}
+		*ft = append(*ft, vft)
+	}
+	return nil
+}
+
 // FromResponse scans the gremlin response data into FieldTypes.
 func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -276,18 +288,6 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			NullableInt32: v.NullableInt32,
 			NullableInt64: v.NullableInt64,
 		})
-	}
-	return nil
-}
-
-// FromRows scans the sql response data into FieldTypes.
-func (ft *FieldTypes) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		vft := &FieldType{}
-		if err := vft.FromRows(rows); err != nil {
-			return err
-		}
-		*ft = append(*ft, vft)
 	}
 	return nil
 }

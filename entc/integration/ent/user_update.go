@@ -526,8 +526,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	case dialect.MySQL, dialect.SQLite:
 		return uu.sqlSave(ctx)
 	case dialect.Neptune:
-		vertices, err := uu.gremlinSave(ctx)
-		return len(vertices), err
+		return uu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
 	}
@@ -1058,21 +1057,16 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (uu *UserUpdate) gremlinSave(ctx context.Context) ([]*User, error) {
+func (uu *UserUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := uu.gremlin().Query()
 	if err := uu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
+		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
-		return nil, err
+		return 0, err
 	}
-	var us Users
-	us.config(uu.config)
-	if err := us.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return us, nil
+	return res.ReadInt()
 }
 
 func (uu *UserUpdate) gremlin() *dsl.Traversal {
@@ -1217,7 +1211,7 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	for id := range uu.parent {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
-	v.ValueMap(true)
+	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
 			pred: rv.Count(),

@@ -33,11 +33,10 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 		{{ template "update/validators" . }}
 	{{- end -}}
 	switch {{ $receiver }}.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return {{ $receiver }}.sqlSave(ctx)
-	case dialect.Neptune:
-		vertices, err := {{ $receiver }}.gremlinSave(ctx)
-		return len(vertices), err
+	{{- range $_, $storage := $.Storage }}
+	case {{ join $storage.Dialects ", " }}:
+		return {{ $receiver }}.{{ $storage }}Save(ctx)
+	{{- end }}
 	default:
 		return 0, errors.New("{{ $pkg }}: unsupported dialect")
 	}
@@ -65,12 +64,11 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{ with extend $ "Builder" $builder "Package" $pkg }}
-	{{ template "dialect/sql/update" . }}
-{{ end }}
-
-{{ with extend $ "Builder" $builder }}
-	{{ template "dialect/gremlin/update" . }}
+{{- range $_, $storage := $.Storage }}
+	{{ with extend $ "Builder" $builder "Package" $pkg }}
+		{{ $tmpl := printf "dialect/%s/update" $storage }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
 {{ end }}
 
 {{ $onebuilder := printf "%sOne" $builder }}
@@ -98,10 +96,10 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 		{{ template "update/validators" . }}
 	{{- end -}}
 	switch {{ $receiver }}.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return {{ $receiver }}.sqlSave(ctx)
-	case dialect.Neptune:
-		return {{ $receiver }}.gremlinSave(ctx)
+	{{- range $_, $storage := $.Storage }}
+	case {{ join $storage.Dialects ", " }}:
+		return {{ $receiver }}.{{ $storage }}Save(ctx)
+	{{- end }}
 	default:
 		return nil, errors.New("{{ $pkg }}: unsupported dialect")
 	}
@@ -129,12 +127,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{ with extend $ "Builder" $onebuilder "Package" $pkg }}
-	{{ template "dialect/sql/update" . }}
-{{ end }}
-
-{{ with extend $ "Builder" $onebuilder }}
-	{{ template "dialect/gremlin/update" . }}
+{{- range $_, $storage := $.Storage }}
+	{{ with extend $ "Builder" $onebuilder "Package" $pkg }}
+		{{ $tmpl := printf "dialect/%s/update" $storage }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
 {{ end }}
 
 {{ end }}

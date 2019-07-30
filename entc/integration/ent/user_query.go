@@ -597,7 +597,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -670,7 +670,7 @@ func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
 	if len(uq.order) > 0 {
 		v.Order()
 		for _, p := range uq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := uq.limit, uq.offset; {

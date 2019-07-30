@@ -11,9 +11,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -65,8 +62,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	switch uc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uc.sqlSave(ctx)
-	case dialect.Neptune:
-		return uc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("entv1: unsupported dialect")
 	}
@@ -116,34 +111,4 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	return u, nil
-}
-
-func (uc *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
-	res := &gremlin.Response{}
-	query, bindings := uc.gremlin().Query()
-	if err := uc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	u := &User{config: uc.config}
-	if err := u.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (uc *UserCreate) gremlin() *dsl.Traversal {
-	v := g.AddV(user.Label)
-	if uc.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uc.age)
-	}
-	if uc.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uc.name)
-	}
-	if uc.address != nil {
-		v.Property(dsl.Single, user.FieldAddress, *uc.address)
-	}
-	return v.ValueMap(true)
 }

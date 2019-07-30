@@ -1,0 +1,58 @@
+{{ define "dialect/gremlin/decode/one" }}
+{{ $receiver := $.Receiver }}
+
+// FromResponse scans the gremlin response data into {{ $.Name }}.
+func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	{{- $scan := print "v" $receiver }}
+	var {{ $scan }} struct {
+		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
+		{{ range $_, $f := $.Fields }}
+			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
+		{{ end }}
+	}
+	if err := vmap.Decode(&{{ $scan }}); err != nil {
+		return err
+	}
+	{{ $receiver }}.ID = {{ $scan }}.ID
+	{{ range $_, $f := $.Fields }}
+		{{- $receiver }}.{{ pascal $f.Name }} = {{- if $f.IsTime }}time.Unix({{ $scan }}.{{- pascal $f.Name }}, 0) {{ else }}{{- $scan }}.{{- pascal $f.Name }}{{ end }}
+	{{ end -}}
+	return nil
+}
+{{ end }}
+
+{{ define "dialect/gremlin/decode/many" }}
+{{ $receiver := $.Receiver }}
+{{ $slice := $.Scope.Slice }}
+
+// FromResponse scans the gremlin response data into {{ $slice }}.
+func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
+	vmap, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	{{- $scan := print "v" $receiver }}
+	var {{ $scan }} []struct {
+		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
+		{{ range $_, $f := $.Fields }}
+			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
+		{{ end }}
+	}
+	if err := vmap.Decode(&{{ $scan }}); err != nil {
+		return err
+	}
+	for _, v := range {{ $scan }} {
+		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
+			ID: v.ID,
+			{{ range $_, $f := $.Fields }}
+				{{- pascal $f.Name }}: {{- if $f.IsTime }}time.Unix(v.{{ pascal $f.Name }}, 0) {{ else }}v.{{ pascal $f.Name }}{{ end }},
+			{{ end -}}
+		})
+	}
+	return nil
+}
+{{ end }}

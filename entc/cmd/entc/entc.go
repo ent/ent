@@ -10,6 +10,7 @@ import (
 	"text/template"
 	"unicode"
 
+	"fbc/ent/entc/gen"
 	"fbc/ent/entc/plugin"
 
 	"github.com/spf13/cobra"
@@ -58,16 +59,17 @@ func main() {
 			),
 			Args: cobra.ExactArgs(1),
 			Run: func(cmd *cobra.Command, path []string) {
-				graph, err := plugin.LoadGraph(path[0])
+				graph, err := plugin.LoadGraph(path[0], gen.Config{})
 				failOnErr(err)
 				graph.Describe(os.Stdout)
 			},
 		},
 		func() *cobra.Command {
 			var (
-				plugins        []string
-				header, target string
-				cmd            = &cobra.Command{
+				cfg     gen.Config
+				storage []string
+				plugins []string
+				cmd     = &cobra.Command{
 					Use:   "generate [flags] path",
 					Short: "generate go code for the schema directory",
 					Example: examples(
@@ -76,16 +78,18 @@ func main() {
 					),
 					Args: cobra.ExactArgs(1),
 					Run: func(cmd *cobra.Command, path []string) {
-						graph, err := plugin.LoadGraph(path[0])
-						failOnErr(err)
-
-						if target == "" {
+						if cfg.Target == "" {
 							abs, err := filepath.Abs(path[0])
 							failOnErr(err)
-							target = filepath.Dir(abs)
+							cfg.Target = filepath.Dir(abs)
 						}
-						graph.Target = target
-						graph.Header = header
+						for _, s := range storage {
+							sr, err := gen.NewStorage(s)
+							failOnErr(err)
+							cfg.Storage = append(cfg.Storage, sr)
+						}
+						graph, err := plugin.LoadGraph(path[0], cfg)
+						failOnErr(err)
 						failOnErr(graph.Gen())
 
 						// execute additional plugins.
@@ -95,9 +99,10 @@ func main() {
 					},
 				}
 			)
-			cmd.Flags().StringVar(&header, "header", "", "override codegen header")
-			cmd.Flags().StringVar(&target, "target", "", "target directory for codegen")
+			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
+			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 			cmd.Flags().StringSliceVarP(&plugins, "plugin", "", nil, "specifies additional plugin to execute")
+			cmd.Flags().StringSliceVarP(&storage, "storage", "", []string{"sql"}, "list of storage drivers to support")
 			return cmd
 		}(),
 	)

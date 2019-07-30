@@ -8,42 +8,32 @@ import (
 	"os"
 	"net/url"
 
+	"fbc/ent/dialect/sql"
 	{{ range $_, $n := $.Nodes }}
 		"{{ $n.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
-
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
 )
 
 {{ $env := upper $pkg | printf "%s_INTEGRATION_ENDPOINT" }}
 
-// endpoint for the database. In order to run the tests locally, run the following command:
+// dsn for the database. In order to run the tests locally, run the following command:
 //
-//	 {{ $env }}="http://localhost:8182" go test -v
+//	 {{ $env }}="root:pass@tcp(localhost:3306)/test?parseTime=True" go test -v
 //
-var endpoint *gremlin.Endpoint
-
-func init() {
-	if e, ok := os.LookupEnv("{{ $env }}"); ok {
-		if u, err := url.Parse(e); err == nil {
-			endpoint = &gremlin.Endpoint{u}
-		}
-	}
-}
+var dsn string
 
 {{ range $_, $n := $.Nodes -}}
 func Example{{ pascal $n.Name }}() {
-	if endpoint == nil {
+	if dsn == "" {
 		return
 	}
 	ctx := context.Background()
-	conn, err := gremlin.NewClient(gremlin.Config{Endpoint: *endpoint})
+	drv, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("failed creating database client: %v", err)
 	}
-	client := NewClient(Driver(gremlin.NewDriver(conn)))
-
+	defer drv.Close()
+	client := NewClient(Driver(drv))
 	// creating vertices for the {{ lower $n.Name }}'s edges.
 	{{ range $i, $e := $n.Edges }}
 		{{- if not $e.IsInverse }}

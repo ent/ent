@@ -6,37 +6,45 @@
 {{ template "import" $ }}
 
 // Order applies an ordering on either graph traversal or sql selector.
-type Order struct {
-	SQL     func(*sql.Selector)
-	Gremlin func(*dsl.Traversal)
+type Order func({{ if gt (len $.Storage) 1 }}interface{}{{ else }}{{ (index $.Storage 0).Builder }}{{ end }})
+
+{{ if gt (len $.Storage) 1 }}
+// OrderPerDialect construct the "order by" clause for graph traversals based on dialect type.
+func OrderPerDialect({{ range $i, $storage := $.Storage }}{{ if $i }},{{ end }}f{{ $i }} func({{ $storage.Builder }}){{ end }}) Order {
+	return Order(func (v interface{}) {
+		switch v := v.(type) {
+		{{- range $i, $storage := $.Storage }}
+		case {{ $storage.Builder }}:
+			f{{ $i }}(v)
+		{{- end }}
+		default:
+			panic(fmt.Sprintf("unknown type for order: %T", v))
+		}
+	})
 }
+{{ end }}
 
 {{ range $f, $order := order }}
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
 	func {{ $f }}(fields ...string) Order {
-		return Order{
-			SQL: func(s *sql.Selector) {
-				for _, f := range fields {
-					s.OrderBy(sql.{{ $f }}(f))
-				}
-			},
-			Gremlin: func(tr *dsl.Traversal) {
-				for _, f := range fields {
-					tr.By(f, dsl.{{ pascal $order }})
-				}
-			},
-		}
+		return Order{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
+					{{ $tmpl := printf "dialect/%s/order" $storage }}
+					{{- xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
+		)
 	}
 {{ end }}
 
 // Aggregate applies an aggregation step on the group-by traversal/selector.
 type Aggregate struct {
-	// SQL the column wrapped with the aggregation function.
-	SQL     func(*sql.Selector) string
-	// Gremlin gets two labels as parameters. The first used in the `As` step for the predicate,
-	// and the second is an optional name for the next predicates (or for later usage).
-	Gremlin func(string, string) (string, *dsl.Traversal)
+	{{ range $_, $storage := $.Storage -}}
+		{{ $tmpl := printf "dialect/%s/group/signature" $storage }}
+		{{- xtemplate $tmpl . }}
+	{{ end -}}
 }
 
 
@@ -48,35 +56,33 @@ type Aggregate struct {
 //
 func As(fn Aggregate, end string) Aggregate {
 	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.As(fn.SQL(s), end)
-		},
-		Gremlin: func(start, _ string) (string, *dsl.Traversal) {
-			return fn.Gremlin(start, end)
-		},
+		{{ range $_, $storage := $.Storage -}}
+			{{ $tmpl := printf "dialect/%s/group/as" $storage }}
+			{{- $storage.IdentName }}: {{ xtemplate $tmpl . }},
+		{{ end -}}
 	}
 }
 
 {{ range $name, $withField := aggregate }}
 	{{ $fn := pascal $name }}
-	// Default{{ $fn }}Label is the default label name for the {{ $fn }} aggregation function.
-	// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
-	// In order to {{ quote $name }} 2 or more fields and avoid conflicting, use the `{{ $pkg }}.As({{ $pkg }}.{{ $fn }}(field), "custom_name")`
-	// function with custom name in order to override it.
-	const Default{{ $fn }}Label = {{ quote $name }}
+	{{ range $_, $storage := $.Storage -}}
+		{{ $tmpl := printf "dialect/%s/group/const" $storage }}
+		{{ if hasTemplate $tmpl }}
+			{{ with extend (index $.Nodes 0) "Name" $name "Func" $fn -}}
+				{{ xtemplate $tmpl . }}
+			{{ end }}
+		{{ end }}
+	{{ end }}
 
 	// {{ $fn }} applies the {{ quote $name }} aggregation function on {{ if $withField }}the given field of {{ end }}each group.
 	func {{ $fn }}({{ if $withField }}field string{{ end }}) Aggregate {
 		return Aggregate {
-			SQL: func(s *sql.Selector) string {
-				return sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})
-			},
-			Gremlin: func(start, end string) (string, *dsl.Traversal) {
-				if end == "" {
-					end = Default{{ $fn }}Label
-				}
-				return end, __.As(start).{{ if $withField }}Unfold().Values(field).{{ $fn }}(){{ else }}{{ $fn }}(dsl.Local){{ end }}.As(end)
-			},
+			{{ range $_, $storage := $.Storage -}}
+				{{- with extend (index $.Nodes 0) "Func" $fn "WithField" $withField -}}
+					{{ $tmpl := printf "dialect/%s/group/func" $storage }}
+					{{- $storage.IdentName }}: {{ xtemplate $tmpl . }},
+				{{ end -}}
+			{{ end -}}
 		}
 	}
 {{ end }}
@@ -139,72 +145,18 @@ func (e *ErrConstraintFailed) Unwrap() error {
 	return e.wrap
 }
 
-// Code implements the dsl.Node interface.
-func (e ErrConstraintFailed) Code() (string, []interface{}) {
-	return strconv.Quote(e.prefix() + e.msg), nil
-}
-
-func (e *ErrConstraintFailed) UnmarshalGraphson(b []byte) error {
-	var v [1]*string
-	if err := graphson.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	if v[0] == nil {
-		return fmt.Errorf("{{ $pkg }}: missing string value")
-	}
-	if !strings.HasPrefix(*v[0], e.prefix()) {
-		return fmt.Errorf("{{ $pkg }}: invalid string for error: %s", *v[0])
-	}
-	e.msg = strings.TrimPrefix(*v[0], e.prefix())
-	return nil
-}
-
-// prefix returns the prefix used for gremlin constants.
-func (ErrConstraintFailed) prefix() string { return "Error: " }
-
-// NewErrUniqueField creates a constraint error for unique fields.
-func NewErrUniqueField(label, field string, v interface{}) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
-}
-
-// NewErrUniqueEdge creates a constraint error for unique edges.
-func NewErrUniqueEdge(label, edge, id string) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
-}
-
 // IsConstraintFailure returns a boolean indicating whether the error is a constraint failure.
 func IsConstraintFailure(err error) bool {
 	_, ok := err.(*ErrConstraintFailed)
 	return ok
 }
 
-// isConstantError indicates if the given response holds a gremlin constant containing an error.
-func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
-	e := &ErrConstraintFailed{}
-	if err := graphson.Unmarshal(r.Result.Data, e); err != nil {
-		return nil, false
-	}
-	return e, true
-}
-
-func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
-	// Error number 1062 is ER_DUP_ENTRY in mysql, and "UNIQUE constraint failed" is SQLite prefix.
-	if msg := err.Error(); strings.HasPrefix(msg, "Error 1062") || strings.HasPrefix(msg, "UNIQUE constraint failed") {
-		return &ErrConstraintFailed{msg, err}, true
-	}
-	return nil, false
-}
-
-// rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
-func rollback(tx dialect.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%s: %v", err.Error(), rerr)
-	}
-	if err, ok := isSQLConstraintError(err); ok {
-		return err
-	}
-	return err
-}
+{{ range $_, $storage := $.Storage -}}
+	{{ $tmpl := printf "dialect/%s/errors" $storage }}
+	{{ if hasTemplate $tmpl }}
+		{{ xtemplate $tmpl $ }}
+	{{ end }}
+{{ end -}}
 
 {{ $id := (index $.Nodes 0).ID.Type }}
 // keys returns the keys/ids from the edge map.

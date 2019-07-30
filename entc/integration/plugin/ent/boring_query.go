@@ -351,7 +351,7 @@ func (bq *BoringQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range bq.order {
-		p.SQL(selector)
+		p(selector)
 	}
 	if offset := bq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -424,7 +424,7 @@ func (bq *BoringQuery) gremlinQuery() *dsl.Traversal {
 	if len(bq.order) > 0 {
 		v.Order()
 		for _, p := range bq.order {
-			p.Gremlin(v)
+			p(v)
 		}
 	}
 	switch limit, offset := bq.limit, bq.offset; {

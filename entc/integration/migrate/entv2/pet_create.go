@@ -10,9 +10,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/pet"
 
 	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
 	"fbc/ent/dialect/sql"
 )
 
@@ -26,8 +23,6 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	switch pc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pc.sqlSave(ctx)
-	case dialect.Neptune:
-		return pc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("entv2: unsupported dialect")
 	}
@@ -65,25 +60,4 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	return pe, nil
-}
-
-func (pc *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := pc.gremlin().Query()
-	if err := pc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	pe := &Pet{config: pc.config}
-	if err := pe.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return pe, nil
-}
-
-func (pc *PetCreate) gremlin() *dsl.Traversal {
-	v := g.AddV(pet.Label)
-	return v.ValueMap(true)
 }
