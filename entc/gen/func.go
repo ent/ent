@@ -117,15 +117,30 @@ func snake(s string) string {
 
 // receiver returns the receiver name of the given type.
 //
+//	[]T       => t
 //	User      => u
 //	UserQuery => uq
 //
 func receiver(s string) (r string) {
-	words := strings.Split(snake(s), "_")
-	for _, w := range words {
-		r += w[:1]
+	// trim optional operators.
+	s = strings.Trim(s, "[]*&")
+	parts := strings.Split(snake(s), "_")
+	min := len(parts[0])
+	for _, w := range parts[1:] {
+		if len(w) < min {
+			min = len(w)
+		}
 	}
-	return
+	for i := 1; i < min; i++ {
+		r := parts[0][:i]
+		for _, w := range parts[1:] {
+			r += w[:i]
+		}
+		if _, ok := imports[r]; !ok {
+			return r
+		}
+	}
+	return strings.ToLower(s)
 }
 
 // scope wraps the Type object with extended context.

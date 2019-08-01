@@ -68,9 +68,10 @@ func TestType_Receiver(t *testing.T) {
 		{"PHBUser", "pu"},
 		{"PHBOrg", "po"},
 		{"DomainSpecificLang", "dospla"},
+		{"[]byte", "b"},
 	}
 	for _, tt := range tests {
-		typ := &Type{Name: tt.name, Config: Config{Package: "entc/gen", imports: imports()}}
+		typ := &Type{Name: tt.name, Config: Config{Package: "entc/gen"}}
 		require.Equal(t, tt.receiver, typ.Receiver())
 	}
 }

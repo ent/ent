@@ -145,6 +145,15 @@ func Phone(v string) predicate.User {
 	)
 }
 
+// Buffer applies equality check predicate on the "buffer" field. It's identical to BufferEQ.
+func Buffer(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldBuffer), v))
+		},
+	)
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v int) predicate.User {
 	return predicate.User(
@@ -471,6 +480,98 @@ func PhoneHasSuffix(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.HasSuffix(s.C(FieldPhone), v))
+		},
+	)
+}
+
+// BufferEQ applies the EQ predicate on the "buffer" field.
+func BufferEQ(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferNEQ applies the NEQ predicate on the "buffer" field.
+func BufferNEQ(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferGT applies the GT predicate on the "buffer" field.
+func BufferGT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferGTE applies the GTE predicate on the "buffer" field.
+func BufferGTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferLT applies the LT predicate on the "buffer" field.
+func BufferLT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferLTE applies the LTE predicate on the "buffer" field.
+func BufferLTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferIn applies the In predicate on the "buffer" field.
+func BufferIn(vs ...[]byte) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldBuffer), v...))
+		},
+	)
+}
+
+// BufferNotIn applies the NotIn predicate on the "buffer" field.
+func BufferNotIn(vs ...[]byte) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldBuffer), v...))
 		},
 	)
 }

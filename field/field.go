@@ -16,6 +16,7 @@ const (
 	TypeInvalid Type = iota
 	TypeBool
 	TypeTime
+	TypeBytes
 	TypeString
 	TypeInt8
 	TypeInt16
@@ -42,21 +43,29 @@ func (t Type) String() string {
 // Valid reports if the given type if known type.
 func (t Type) Valid() bool { return t > TypeInvalid && t < endTypes }
 
-// Numeric reports of the given type is a numeric type.
+// Numeric reports if the given type is a numeric type.
 func (t Type) Numeric() bool { return t >= TypeInt && t < endTypes }
+
+// Slice reports if the given type is a slice type.
+func (t Type) Slice() bool { return t == TypeBytes }
 
 // ConstName returns the constant name of a type. It's used by entc for printing the constant name in templates.
 func (t Type) ConstName() string {
-	if t == TypeTime {
+	switch t {
+	case TypeTime:
 		return "TypeTime"
+	case TypeBytes:
+		return "TypeBytes"
+	default:
+		return "Type" + strings.Title(t.String())
 	}
-	return "Type" + strings.Title(t.String())
 }
 
 var typeNames = [...]string{
 	TypeInvalid: "invalid",
 	TypeBool:    "bool",
 	TypeTime:    "time.Time",
+	TypeBytes:   "[]byte",
 	TypeString:  "string",
 	TypeInt:     "int",
 	TypeInt8:    "int8",
@@ -112,6 +121,10 @@ func String(name string) *stringBuilder { return &stringBuilder{Field{typ: TypeS
 func Text(name string) *stringBuilder {
 	return &stringBuilder{Field{typ: TypeString, name: name, size: math.MaxInt32}}
 }
+
+// Bytes returns a new Field with type bytes/buffer.
+// In MySQL and SQLite, it is the "BLOB" type, and it does not support for Gremlin.
+func Bytes(name string) *bytesBuilder { return &bytesBuilder{Field{typ: TypeBytes, name: name}} }
 
 // Bool returns a new Field with type bool.
 func Bool(name string) *boolBuilder { return &boolBuilder{Field{typ: TypeBool, name: name}} }
@@ -476,6 +489,42 @@ func (b *boolBuilder) Comment(c string) *boolBuilder {
 
 // StructTag sets the struct tag of the field.
 func (b *boolBuilder) StructTag(s string) *boolBuilder {
+	b.tag = s
+	return b
+}
+
+// bytesBuilder is the builder for bytes fields.
+type bytesBuilder struct {
+	Field
+}
+
+// Default sets the default value of the field.
+func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
+	b.value = v
+	return b
+}
+
+// Nullable indicates that this field is nullable.
+// Unlike "Optional", nullable fields are pointers in the generated field.
+func (b *bytesBuilder) Nullable() *bytesBuilder {
+	b.nullable = true
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *bytesBuilder) Optional() *bytesBuilder {
+	b.optional = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *bytesBuilder) Comment(c string) *bytesBuilder {
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 	b.tag = s
 	return b
 }

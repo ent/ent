@@ -16,9 +16,10 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age   *int
-	name  *string
-	phone *string
+	age    *int
+	name   *string
+	phone  *string
+	buffer *[]byte
 }
 
 // SetAge sets the age field.
@@ -39,6 +40,12 @@ func (uc *UserCreate) SetPhone(s string) *UserCreate {
 	return uc
 }
 
+// SetBuffer sets the buffer field.
+func (uc *UserCreate) SetBuffer(b []byte) *UserCreate {
+	uc.buffer = &b
+	return uc
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.age == nil {
@@ -49,6 +56,10 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	}
 	if uc.phone == nil {
 		return nil, errors.New("entv2: missing required field \"phone\"")
+	}
+	if uc.buffer == nil {
+		v := user.DefaultBuffer
+		uc.buffer = &v
 	}
 	switch uc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -88,6 +99,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.phone != nil {
 		builder.Set(user.FieldPhone, *uc.phone)
 		u.Phone = *uc.phone
+	}
+	if uc.buffer != nil {
+		builder.Set(user.FieldBuffer, *uc.buffer)
+		u.Buffer = *uc.buffer
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

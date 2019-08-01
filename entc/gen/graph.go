@@ -3,14 +3,11 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"go/parser"
-	"go/token"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 
 	"fbc/ent/dialect/sql/schema"
 	"fbc/ent/entc/load"
@@ -30,8 +27,6 @@ type (
 		Header string
 		// Storage to support in codegen.
 		Storage []*Storage
-		// imports are the import packages used for code generation.
-		imports map[string]string
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -48,7 +43,6 @@ type (
 // It fails if one of the schemas is invalid.
 func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
-	c.imports = imports()
 	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
 	for _, schema := range schemas {
 		g.addNode(schema)
@@ -346,27 +340,6 @@ func (g *Graph) typ(name string) (*Type, bool) {
 		}
 	}
 	return nil, false
-}
-
-func imports() map[string]string {
-	var (
-		specs = make(map[string]string)
-		b     = bytes.NewBuffer([]byte("package main\n"))
-	)
-	check(templates.ExecuteTemplate(b, "import", Type{}), "load imports")
-	f, err := parser.ParseFile(token.NewFileSet(), "", b, parser.ImportsOnly)
-	check(err, "parse imports")
-	for _, spec := range f.Imports {
-		path, err := strconv.Unquote(spec.Path.Value)
-		check(err, "unquote import path")
-		specs[filepath.Base(path)] = path
-	}
-	for _, s := range drivers {
-		for _, path := range s.Imports {
-			specs[filepath.Base(path)] = path
-		}
-	}
-	return specs
 }
 
 // expect panic if the condition is false.

@@ -21,15 +21,18 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
+	// Buffer holds the value of the "buffer" field.
+	Buffer []byte `json:"buffer,omitempty"`
 }
 
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
-		ID    int
-		Age   int
-		Name  string
-		Phone string
+		ID     int
+		Age    int
+		Name   string
+		Phone  string
+		Buffer []byte
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
@@ -37,6 +40,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		&vu.Age,
 		&vu.Name,
 		&vu.Phone,
+		&vu.Buffer,
 	); err != nil {
 		return err
 	}
@@ -44,6 +48,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Age = vu.Age
 	u.Name = vu.Name
 	u.Phone = vu.Phone
+	u.Buffer = vu.Buffer
 	return nil
 }
 
@@ -73,6 +78,7 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf(", age=%v", u.Age))
 	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
 	buf.WriteString(fmt.Sprintf(", phone=%v", u.Phone))
+	buf.WriteString(fmt.Sprintf(", buffer=%v", u.Buffer))
 	buf.WriteString(")")
 	return buf.String()
 }

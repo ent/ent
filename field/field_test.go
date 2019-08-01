@@ -50,6 +50,14 @@ func TestBool(t *testing.T) {
 	assert.Equal(t, true, f.Value())
 }
 
+func TestBytes(t *testing.T) {
+	f := field.Bytes("active").Default([]byte("{}"))
+	assert.Equal(t, "active", f.Name())
+	assert.Equal(t, field.TypeBytes, f.Type())
+	assert.True(t, f.HasDefault())
+	assert.Equal(t, []byte("{}"), f.Value())
+}
+
 func TestString(t *testing.T) {
 	re := regexp.MustCompile("[a-zA-Z0-9]")
 	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil })

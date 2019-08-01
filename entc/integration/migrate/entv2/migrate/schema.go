@@ -37,6 +37,7 @@ var (
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "phone", Type: field.TypeString},
+		{Name: "buffer", Type: field.TypeBytes},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

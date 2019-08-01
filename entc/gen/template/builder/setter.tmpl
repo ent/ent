@@ -3,14 +3,15 @@
 {{ $receiver := receiver $builder }}
 
 {{ range $_, $f := $.Fields }}
-	{{ $p := lower (printf "%.1s" $f.Type) }}
+	{{ $p := receiver $f.Type.String }}
 	{{ $func := print "Set" (pascal $f.Name) }}
 	// {{ $func }} sets the {{ $f.Name }} field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{ $receiver }}.{{ $f.StructField }} = &{{ $p }}
 		return {{ $receiver }}
 	}
-	{{ if or $f.Optional $f.Nullable $f.HasDefault }}
+	{{/* avoid generting nillable setters for slices because the nil value for slice is valid */}}
+	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Nullable $f.HasDefault) }}
 		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
 		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {

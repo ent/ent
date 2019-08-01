@@ -136,23 +136,7 @@ func (t Type) Package() string { return strings.ToLower(t.Name) }
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
 func (t Type) Receiver() string {
-	parts := strings.Split(snake(t.Name), "_")
-	min := len(parts[0])
-	for _, w := range parts[1:] {
-		if len(w) < min {
-			min = len(w)
-		}
-	}
-	for i := 1; i < min; i++ {
-		r := parts[0][:i]
-		for _, w := range parts[1:] {
-			r += w[:i]
-		}
-		if _, ok := t.Config.imports[r]; !ok {
-			return r
-		}
-	}
-	return strings.ToLower(t.Name)
+	return receiver(t.Name)
 }
 
 // HasAssoc returns true if this type has an assoc edge with the given name.
@@ -317,11 +301,13 @@ func (f Field) Column() *schema.Column {
 		c.Type = field.TypeInt
 		c.Increment = true
 	}
-	if f.def.Size != nil {
-		c.Size = *f.def.Size
-	}
-	if f.def.Charset != nil {
-		c.Charset = *f.def.Charset
+	if f.def != nil {
+		if f.def.Size != nil {
+			c.Size = *f.def.Size
+		}
+		if f.def.Charset != nil {
+			c.Charset = *f.def.Charset
+		}
 	}
 	return c
 }

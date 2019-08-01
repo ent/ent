@@ -74,6 +74,9 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	u := client.User.Create().SetAge(1).SetName("bar").SetPhone("100").SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
+	require.Equal(t, []byte("{}"), u.Buffer)
+	u = u.Update().SetBuffer([]byte("[]")).SaveX(ctx)
+	require.Equal(t, []byte("[]"), u.Buffer)
 
 	_, err := client.User.Create().SetAge(1).SetName("foobarbazqux").SetPhone("100").Save(ctx)
 	require.NoError(t, err, "name is not limited to 10 chars")

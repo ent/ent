@@ -176,6 +176,8 @@ func (c *Column) MySQLType(version string) (t string) {
 		t = "bigint"
 	case field.TypeUint, field.TypeUint64:
 		t = "bigint unsigned"
+	case field.TypeBytes:
+		t = "blob"
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
@@ -211,6 +213,8 @@ func (c *Column) SQLiteType() (t string) {
 		t = "integer"
 	case field.TypeInt64, field.TypeUint64:
 		t = "bigint"
+	case field.TypeBytes:
+		t = "blob"
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
@@ -279,6 +283,8 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		c.Type = field.TypeFloat64
 	case "timestamp":
 		c.Type = field.TypeTime
+	case "blob":
+		c.Type = field.TypeBytes
 	case "varchar":
 		c.Type = field.TypeString
 		size, err := strconv.Atoi(parts[1])

@@ -17,8 +17,10 @@ func (User) Fields() []ent.Field {
 		field.Int("age"),
 		// extending name field to longtext.
 		field.Text("name"),
-		// adding new column.
+		// adding new columns.
 		field.String("phone"),
+		field.Bytes("buffer").
+			Default([]byte("{}")),
 		// deleting the address column.
 	}
 }

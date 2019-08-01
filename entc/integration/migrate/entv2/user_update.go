@@ -20,6 +20,7 @@ type UserUpdate struct {
 	age        *int
 	name       *string
 	phone      *string
+	buffer     *[]byte
 	predicates []predicate.User
 }
 
@@ -44,6 +45,12 @@ func (uu *UserUpdate) SetName(s string) *UserUpdate {
 // SetPhone sets the phone field.
 func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
 	uu.phone = &s
+	return uu
+}
+
+// SetBuffer sets the buffer field.
+func (uu *UserUpdate) SetBuffer(b []byte) *UserUpdate {
+	uu.buffer = &b
 	return uu
 }
 
@@ -123,6 +130,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldPhone, *uu.phone)
 	}
+	if uu.buffer != nil {
+		update = true
+		builder.Set(user.FieldBuffer, *uu.buffer)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -138,10 +149,11 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id    string
-	age   *int
-	name  *string
-	phone *string
+	id     string
+	age    *int
+	name   *string
+	phone  *string
+	buffer *[]byte
 }
 
 // SetAge sets the age field.
@@ -159,6 +171,12 @@ func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 // SetPhone sets the phone field.
 func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
 	uuo.phone = &s
+	return uuo
+}
+
+// SetBuffer sets the buffer field.
+func (uuo *UserUpdateOne) SetBuffer(b []byte) *UserUpdateOne {
+	uuo.buffer = &b
 	return uuo
 }
 
@@ -243,6 +261,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		update = true
 		builder.Set(user.FieldPhone, *uuo.phone)
 		u.Phone = *uuo.phone
+	}
+	if uuo.buffer != nil {
+		update = true
+		builder.Set(user.FieldBuffer, *uuo.buffer)
+		u.Buffer = *uuo.buffer
 	}
 	if update {
 		query, args := builder.Query()

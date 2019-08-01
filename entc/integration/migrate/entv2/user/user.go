@@ -2,6 +2,10 @@
 
 package user
 
+import (
+	"fbc/ent/entc/integration/migrate/entv2/schema"
+)
+
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
@@ -13,6 +17,8 @@ const (
 	FieldName = "name"
 	// FieldPhone holds the string denoting the phone vertex property in the database.
 	FieldPhone = "phone"
+	// FieldBuffer holds the string denoting the buffer vertex property in the database.
+	FieldBuffer = "buffer"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -24,4 +30,11 @@ var Columns = []string{
 	FieldAge,
 	FieldName,
 	FieldPhone,
+	FieldBuffer,
 }
+
+var (
+	fields = schema.User{}.Fields()
+	// DefaultBuffer holds the default value for the buffer field.
+	DefaultBuffer = fields[3].Value().([]byte)
+)
