@@ -10,8 +10,8 @@
 		{{ $receiver }}.{{ $f.StructField }} = &{{ $p }}
 		return {{ $receiver }}
 	}
-	{{ if or $f.Optional $f.HasDefault }}
-	{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
+	{{ if or $f.Optional $f.Nullable $f.HasDefault }}
+		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
 		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
 			if {{ $p }} != nil {
