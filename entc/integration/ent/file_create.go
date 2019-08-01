@@ -30,6 +30,14 @@ func (fc *FileCreate) SetSize(i int) *FileCreate {
 	return fc
 }
 
+// SetNillableSize sets the size field if the given value is not nil.
+func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
+	if i != nil {
+		fc.SetSize(*i)
+	}
+	return fc
+}
+
 // SetName sets the name field.
 func (fc *FileCreate) SetName(s string) *FileCreate {
 	fc.name = &s
@@ -39,7 +47,8 @@ func (fc *FileCreate) SetName(s string) *FileCreate {
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if fc.size == nil {
-		return nil, errors.New("ent: missing required field \"size\"")
+		v := file.DefaultSize
+		fc.size = &v
 	}
 	if err := file.SizeValidator(*fc.size); err != nil {
 		return nil, fmt.Errorf("ent: validator failed for field \"size\": %v", err)

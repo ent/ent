@@ -6,74 +6,62 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fbc/ent"
-	"fbc/ent/edge"
+	"fbc/ent/entc/load"
 	"fbc/ent/field"
 
 	"github.com/stretchr/testify/require"
 )
 
-type T1 struct {
-	ent.Schema
-}
-
-func (T1) Fields() []ent.Field {
-	return []ent.Field{
-		field.Int("age").Optional(),
-		field.Time("expired_at").Nullable(),
-		field.String("name").Default("hello"),
+var (
+	T1 = &load.Schema{
+		Name: "T1",
+		Fields: []*load.Field{
+			{Name: "age", Type: field.TypeInt, Optional: true},
+			{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+			{Name: "name", Type: field.TypeString, Default: true},
+		},
+		Edges: []*load.Edge{
+			{Name: "t2", Type: "T2", Required: true},
+			{Name: "t1", Type: "T1", Unique: true},
+			// Bidirectional unique edge (unique/"has-a" in both sides).
+			{Name: "t2_o2o", Type: "T2", Unique: true},
+			// Unidirectional non-unique edge ("has-many"). The reference is on the "many" side.
+			// For example: A user "has-many" books, but a book "has-an" owner (and only one).
+			{Name: "o2m", Type: "T2"},
+			// Unidirectional unique edge ("has-one").
+			// For example: A user "has-an" address (and only one), but an address "has-many" users.
+			{Name: "m2o", Type: "T2", Unique: true},
+			// Bidirectional unique edge ("has-one" in T1 side, and "has-many" in T2 side).
+			{Name: "t2_m2o", Type: "T2", Unique: true},
+			// Bidirectional non-unique edge ("has-many" in T1 side, and "has-one" in T2 side).
+			{Name: "t2_o2m", Type: "T2"},
+			// Bidirectional non-unique edge ("has-many" in both side).
+			{Name: "t2_m2m", Type: "T2"},
+			// Unidirectional non-unique edge for the same type.
+			{Name: "t1_m2m", Type: "T1"},
+		},
 	}
-}
-
-func (T1) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("t2", T2.Type).Required(),
-		edge.To("t1", T1.Type).Unique(),
-		// Bidirectional unique edge (unique/"has-a" in both sides).
-		edge.To("t2_o2o", T2.Type).Unique(),
-		// Unidirectional non-unique edge ("has-many"). The reference is on the "many" side.
-		// For example: A user "has-many" books, but a book "has-an" owner (and only one).
-		edge.To("o2m", T2.Type),
-		// Unidirectional unique edge ("has-one").
-		// For example: A user "has-an" address (and only one), but an address "has-many" users.
-		edge.To("m2o", T2.Type).Unique(),
-		// Bidirectional unique edge ("has-one" in T1 side, and "has-many" in T2 side).
-		edge.To("t2_m2o", T2.Type).Unique(),
-		// Bidirectional non-unique edge ("has-many" in T1 side, and "has-one" in T2 side).
-		edge.To("t2_o2m", T2.Type),
-		// Bidirectional non-unique edge ("has-many" in both side).
-		edge.To("t2_m2m", T2.Type),
-		// Unidirectional non-unique edge for the same type.
-		edge.To("t1_m2m", T1.Type),
+	T2 = &load.Schema{
+		Name: "T2",
+		Fields: []*load.Field{
+			{Name: "active", Type: field.TypeBool},
+		},
+		Edges: []*load.Edge{
+			{Name: "t1", Type: "T1", RefName: "t2", Inverse: true},
+			{Name: "t1_o2o", Type: "T1", RefName: "t2_o2o", Unique: true, Inverse: true},
+			{Name: "t1_o2m", Type: "T1", RefName: "t2_m2o", Inverse: true},
+			{Name: "t1_m2o", Type: "T1", RefName: "t2_o2m", Unique: true, Inverse: true},
+			{Name: "t1_m2m", Type: "T1", RefName: "t2_m2m", Inverse: true},
+		},
 	}
-}
-
-type T2 struct {
-	ent.Schema
-}
-
-func (T2) Fields() []ent.Field {
-	return []ent.Field{
-		field.Bool("active"),
-	}
-}
-
-func (T2) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("t1", T1.Type).Ref("t2"),
-		edge.From("t1_o2o", T1.Type).Unique().Ref("t2_o2o"),
-		edge.From("t1_o2m", T1.Type).Ref("t2_m2o"),
-		edge.From("t1_m2o", T1.Type).Ref("t2_o2m").Unique(),
-		edge.From("t1_m2m", T1.Type).Ref("t2_m2m"),
-	}
-}
+)
 
 func TestNewGraph(t *testing.T) {
 	require := require.New(t)
-	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1{})
+	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1)
 	require.Error(err, "should fail due to missing types")
 
-	graph, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1{}, T2{})
+	graph, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1, T2)
 	require.NoError(err)
 	require.NotNil(graph)
 	require.Len(graph.Nodes, 2)
@@ -95,9 +83,8 @@ func TestNewGraph(t *testing.T) {
 	for i, nullable := range []bool{false, true, false} {
 		require.Equal(nullable, t1.Fields[i].Nullable)
 	}
-	for i, value := range []interface{}{nil, nil, "hello"} {
-		require.Equal(value, t1.Fields[i].Default)
-		require.Equal(value != nil, t1.Fields[i].HasDefault())
+	for i, value := range []bool{false, false, true} {
+		require.Equal(value, t1.Fields[i].HasDefault)
 	}
 
 	// check edges.
@@ -130,10 +117,10 @@ func TestNewGraph(t *testing.T) {
 
 func TestRelation(t *testing.T) {
 	require := require.New(t)
-	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1{})
+	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1)
 	require.Error(err, "should fail due to missing types")
 
-	graph, err := NewGraph(Config{Package: "entc/gen"}, T1{}, T2{})
+	graph, err := NewGraph(Config{Package: "entc/gen"}, T1, T2)
 	require.NoError(err)
 	require.NotNil(graph)
 	require.Len(graph.Nodes, 2)
@@ -166,7 +153,17 @@ func TestGraph_Gen(t *testing.T) {
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.Remove(target)
-	graph, err := NewGraph(Config{Package: "entc/gen", Target: target, Storage: drivers}, T1{}, T2{})
+	graph, err := NewGraph(Config{Package: "entc/gen", Target: target, Storage: drivers}, &load.Schema{
+		Name: "T1",
+		Fields: []*load.Field{
+			{Name: "age", Type: field.TypeInt, Optional: true},
+			{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+			{Name: "name", Type: field.TypeString},
+		},
+		Edges: []*load.Edge{
+			{Name: "t1", Type: "T1", Unique: true},
+		},
+	})
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
@@ -177,9 +174,7 @@ func TestGraph_Gen(t *testing.T) {
 	}
 	// ensure entity files were generated.
 	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
-		for _, name := range []string{"t1", "t2"} {
-			_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), name))
-			require.NoError(err)
-		}
+		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
+		require.NoError(err)
 	}
 }

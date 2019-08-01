@@ -29,6 +29,8 @@ var Columns = []string{
 
 var (
 	fields = schema.File{}.Fields()
+	// DefaultSize holds the default value for the size field.
+	DefaultSize = fields[0].Value().(int)
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator = fields[0].Validators()[0].(func(int) error)
 )

@@ -37,6 +37,14 @@ func (fu *FileUpdate) SetSize(i int) *FileUpdate {
 	return fu
 }
 
+// SetNillableSize sets the size field if the given value is not nil.
+func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
+	if i != nil {
+		fu.SetSize(*i)
+	}
+	return fu
+}
+
 // SetName sets the name field.
 func (fu *FileUpdate) SetName(s string) *FileUpdate {
 	fu.name = &s
@@ -176,6 +184,14 @@ type FileUpdateOne struct {
 // SetSize sets the size field.
 func (fuo *FileUpdateOne) SetSize(i int) *FileUpdateOne {
 	fuo.size = &i
+	return fuo
+}
+
+// SetNillableSize sets the size field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
+	if i != nil {
+		fuo.SetSize(*i)
+	}
 	return fuo
 }
 

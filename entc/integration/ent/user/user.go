@@ -2,6 +2,10 @@
 
 package user
 
+import (
+	"fbc/ent/entc/integration/ent/schema"
+)
+
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
@@ -13,8 +17,6 @@ const (
 	FieldName = "name"
 	// FieldLast holds the string denoting the last vertex property in the database.
 	FieldLast = "last"
-	// DefaultLast holds the default value for the last field.
-	DefaultLast = "unknown"
 	// FieldNickname holds the string denoting the nickname vertex property in the database.
 	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone vertex property in the database.
@@ -121,4 +123,10 @@ var (
 	// FollowingPrimaryKey and FollowingColumn2 are the table columns denoting the
 	// primary key for the following relation (M2M).
 	FollowingPrimaryKey = []string{"user_id", "follower_id"}
+)
+
+var (
+	fields = schema.User{}.Fields()
+	// DefaultLast holds the default value for the last field.
+	DefaultLast = fields[2].Value().(string)
 )

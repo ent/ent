@@ -12,7 +12,7 @@ import (
 
 func TestType(t *testing.T) {
 	require := require.New(t)
-	typ, err := NewType(Config{Package: "entc/gen"}, T1{})
+	typ, err := NewType(Config{Package: "entc/gen"}, T1)
 	require.NoError(err)
 	require.NotNil(typ)
 	require.Equal("T1", typ.Name)
@@ -165,13 +165,13 @@ func TestType_Describe(t *testing.T) {
 			},
 			out: `
 User:
-	+-------+--------+--------+----------+----------+---------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nullable | Default | StructTag | Validators |
-	+-------+--------+--------+----------+----------+---------+-----------+------------+
-	| id    | int    | false  | false    | false    | <nil>   |           |          0 |
-	| name  | string | false  | false    | false    | <nil>   |           |          1 |
-	| age   | int    | false  | false    | true     | <nil>   |           |          0 |
-	+-------+--------+--------+----------+----------+---------+-----------+------------+
+	+-------+--------+--------+----------+----------+------------+-----------+------------+
+	| Field |  Type  | Unique | Optional | Nullable | HasDefault | StructTag | Validators |
+	+-------+--------+--------+----------+----------+------------+-----------+------------+
+	| id    | int    | false  | false    | false    | false      |           |          0 |
+	| name  | string | false  | false    | false    | false      |           |          1 |
+	| age   | int    | false  | false    | true     | false      |           |          0 |
+	+-------+--------+--------+----------+----------+------------+-----------+------------+
 	
 `,
 		},
@@ -186,11 +186,11 @@ User:
 			},
 			out: `
 User:
-	+-------+------+--------+----------+----------+---------+-----------+------------+
-	| Field | Type | Unique | Optional | Nullable | Default | StructTag | Validators |
-	+-------+------+--------+----------+----------+---------+-----------+------------+
-	| id    | int  | false  | false    | false    | <nil>   |           |          0 |
-	+-------+------+--------+----------+----------+---------+-----------+------------+
+	+-------+------+--------+----------+----------+------------+-----------+------------+
+	| Field | Type | Unique | Optional | Nullable | HasDefault | StructTag | Validators |
+	+-------+------+--------+----------+----------+------------+-----------+------------+
+	| id    | int  | false  | false    | false    | false      |           |          0 |
+	+-------+------+--------+----------+----------+------------+-----------+------------+
 	+--------+-------+---------+---------+----------+--------+----------+
 	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
 	+--------+-------+---------+---------+----------+--------+----------+
@@ -215,13 +215,13 @@ User:
 			},
 			out: `
 User:
-	+-------+--------+--------+----------+----------+---------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nullable | Default | StructTag | Validators |
-	+-------+--------+--------+----------+----------+---------+-----------+------------+
-	| id    | int    | false  | false    | false    | <nil>   |           |          0 |
-	| name  | string | false  | false    | false    | <nil>   |           |          1 |
-	| age   | int    | false  | false    | true     | <nil>   |           |          0 |
-	+-------+--------+--------+----------+----------+---------+-----------+------------+
+	+-------+--------+--------+----------+----------+------------+-----------+------------+
+	| Field |  Type  | Unique | Optional | Nullable | HasDefault | StructTag | Validators |
+	+-------+--------+--------+----------+----------+------------+-----------+------------+
+	| id    | int    | false  | false    | false    | false      |           |          0 |
+	| name  | string | false  | false    | false    | false      |           |          1 |
+	| age   | int    | false  | false    | true     | false      |           |          0 |
+	+-------+--------+--------+----------+----------+------------+-----------+------------+
 	+--------+-------+---------+---------+----------+--------+----------+
 	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
 	+--------+-------+---------+---------+----------+--------+----------+

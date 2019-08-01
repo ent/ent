@@ -33,11 +33,10 @@ type (
 		Type() string
 		Name() string
 		RefName() string
-		IsAssoc() bool
+		Assoc() *edge.Edge
 		IsUnique() bool
 		IsInverse() bool
 		IsRequired() bool
-		Assoc() *edge.Edge
 	}
 )
 

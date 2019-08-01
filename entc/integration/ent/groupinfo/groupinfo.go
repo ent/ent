@@ -2,6 +2,10 @@
 
 package groupinfo
 
+import (
+	"fbc/ent/entc/integration/ent/schema"
+)
+
 const (
 	// Label holds the string label denoting the groupinfo type in the database.
 	Label = "group_info"
@@ -11,8 +15,6 @@ const (
 	FieldDesc = "desc"
 	// FieldMaxUsers holds the string denoting the max_users vertex property in the database.
 	FieldMaxUsers = "max_users"
-	// DefaultMaxUsers holds the default value for the max_users field.
-	DefaultMaxUsers int = 10000
 
 	// Table holds the table name of the groupinfo in the database.
 	Table = "group_infos"
@@ -34,3 +36,9 @@ var Columns = []string{
 	FieldDesc,
 	FieldMaxUsers,
 }
+
+var (
+	fields = schema.GroupInfo{}.Fields()
+	// DefaultMaxUsers holds the default value for the max_users field.
+	DefaultMaxUsers = fields[1].Value().(int)
+)

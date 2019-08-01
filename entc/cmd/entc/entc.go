@@ -11,7 +11,7 @@ import (
 	"unicode"
 
 	"fbc/ent/entc/gen"
-	"fbc/ent/entc/plugin"
+	"fbc/ent/entc/load"
 
 	"github.com/spf13/cobra"
 )
@@ -59,7 +59,7 @@ func main() {
 			),
 			Args: cobra.ExactArgs(1),
 			Run: func(cmd *cobra.Command, path []string) {
-				graph, err := plugin.LoadGraph(path[0], gen.Config{})
+				graph, err := loadGraph(path[0], gen.Config{})
 				failOnErr(err)
 				graph.Describe(os.Stdout)
 			},
@@ -68,7 +68,6 @@ func main() {
 			var (
 				cfg     gen.Config
 				storage []string
-				plugins []string
 				cmd     = &cobra.Command{
 					Use:   "generate [flags] path",
 					Short: "generate go code for the schema directory",
@@ -88,25 +87,34 @@ func main() {
 							failOnErr(err)
 							cfg.Storage = append(cfg.Storage, sr)
 						}
-						graph, err := plugin.LoadGraph(path[0], cfg)
+						graph, err := loadGraph(path[0], cfg)
 						failOnErr(err)
 						failOnErr(graph.Gen())
-
-						// execute additional plugins.
-						for _, plg := range plugins {
-							failOnErr(plugin.Exec(plg, graph))
-						}
 					},
 				}
 			)
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
-			cmd.Flags().StringSliceVarP(&plugins, "plugin", "", nil, "specifies additional plugin to execute")
 			cmd.Flags().StringSliceVarP(&storage, "storage", "", []string{"sql"}, "list of storage drivers to support")
 			return cmd
 		}(),
 	)
 	cmd.Execute()
+}
+
+// loadGraph loads the given schema package from the given path
+// and construct a *gen.Graph. The path can be either a package
+// path (e.g github.com/a8m/x) or a filepath.
+//
+// The second argument is an optional config for the graph creation.
+func loadGraph(path string, cfg gen.Config) (*gen.Graph, error) {
+	spec, err := (&load.Config{Path: path}).Load()
+	if err != nil {
+		return nil, err
+	}
+	cfg.Schema = spec.PkgPath
+	cfg.Package = filepath.Dir(spec.PkgPath)
+	return gen.NewGraph(cfg, spec.Schemas...)
 }
 
 // schema template for the "init" command.

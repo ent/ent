@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"fbc/ent"
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/entc/load"
 	"fbc/ent/field"
 
 	"github.com/olekukonko/tablewriter"
@@ -32,7 +32,7 @@ type (
 	// Field holds the information of a type field used for the templates.
 	Field struct {
 		// field definition.
-		def ent.Field
+		def *load.Field
 		// Name is the name of this field in the database schema.
 		Name string
 		// Type holds the type information of the field.
@@ -43,8 +43,8 @@ type (
 		Optional bool
 		// Nullable indicates that this field can be null.
 		Nullable bool
-		// Default holds the default value of this field on creation.
-		Default interface{}
+		// HasDefault indicates if this field a default value.
+		HasDefault bool
 		// StructTag of the field. default to "json".
 		StructTag string
 		// Validators holds the number of validators this field have.
@@ -95,30 +95,30 @@ type (
 )
 
 // NewType creates a new type and its fields from the given schema.
-func NewType(c Config, schema ent.Schema) (*Type, error) {
+func NewType(c Config, schema *load.Schema) (*Type, error) {
 	typ := &Type{
 		Config: c,
-		Name:   reflect.TypeOf(schema).Name(),
+		Name:   schema.Name,
 		ID: &Field{
 			Name:      "id",
 			Type:      field.TypeString,
 			StructTag: `json:"id,omitempty"`,
 		},
 	}
-	for _, f := range schema.Fields() {
-		if !f.Type().Valid() {
-			return nil, fmt.Errorf("invalid type for field %s", f.Name())
+	for _, f := range schema.Fields {
+		if !f.Type.Valid() {
+			return nil, fmt.Errorf("invalid type for field %s", f.Name)
 		}
 		typ.Fields = append(typ.Fields, &Field{
 			def:        f,
-			Name:       f.Name(),
-			Type:       f.Type(),
-			Unique:     f.IsUnique(),
-			Default:    f.Value(),
-			Nullable:   f.IsNullable(),
-			Optional:   f.IsOptional(),
-			StructTag:  structTag(f.Name(), f.Tag()),
-			Validators: len(f.Validators()),
+			Name:       f.Name,
+			Type:       f.Type,
+			Unique:     f.Unique,
+			Nullable:   f.Nullable,
+			Optional:   f.Optional,
+			HasDefault: f.Default,
+			StructTag:  structTag(f.Name, f.Tag),
+			Validators: f.Validators,
 		})
 	}
 	return typ, nil
@@ -165,10 +165,20 @@ func (t Type) HasAssoc(name string) (*Edge, bool) {
 	return nil, false
 }
 
-// HasValidators indicates if any of this field has validators.
+// HasValidators indicates if any of the type's field has validators.
 func (t Type) HasValidators() bool {
 	for _, f := range t.Fields {
 		if f.Validators > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// HasDefault indicates if any of this type's fields has default value.
+func (t Type) HasDefault() bool {
+	for _, f := range t.Fields {
+		if f.HasDefault {
 			return true
 		}
 	}
@@ -214,7 +224,7 @@ func (t Type) Describe(w io.Writer) {
 	b.WriteString(t.Name + ":\n")
 	table := tablewriter.NewWriter(b)
 	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nullable", "Default", "StructTag", "Validators"})
+	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nullable", "HasDefault", "StructTag", "Validators"})
 	for _, f := range append([]*Field{t.ID}, t.Fields...) {
 		v := reflect.ValueOf(*f)
 		row := make([]string, v.NumField()-1)
@@ -243,9 +253,6 @@ func (t Type) Describe(w io.Writer) {
 	}
 	io.WriteString(w, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
 }
-
-// HasDefault returns if this field has a default value.
-func (f Field) HasDefault() bool { return f.Default != nil }
 
 // Constant returns the constant name of the field.
 func (f Field) Constant() string { return "Field" + pascal(f.Name) }
@@ -310,11 +317,11 @@ func (f Field) Column() *schema.Column {
 		c.Type = field.TypeInt
 		c.Increment = true
 	}
-	if cs, ok := f.def.(field.Sizer); ok {
-		c.Size = cs.Size()
+	if f.def.Size != nil {
+		c.Size = *f.def.Size
 	}
-	if cs, ok := f.def.(field.Charseter); ok {
-		c.Charset = cs.Charset()
+	if f.def.Charset != nil {
+		c.Charset = *f.def.Charset
 	}
 	return c
 }

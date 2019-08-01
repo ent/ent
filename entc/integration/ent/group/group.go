@@ -13,16 +13,12 @@ const (
 	FieldID = "id"
 	// FieldActive holds the string denoting the active vertex property in the database.
 	FieldActive = "active"
-	// DefaultActive holds the default value for the active field.
-	DefaultActive = true
 	// FieldExpire holds the string denoting the expire vertex property in the database.
 	FieldExpire = "expire"
 	// FieldType holds the string denoting the type vertex property in the database.
 	FieldType = "type"
 	// FieldMaxUsers holds the string denoting the max_users vertex property in the database.
 	FieldMaxUsers = "max_users"
-	// DefaultMaxUsers holds the default value for the max_users field.
-	DefaultMaxUsers int = 10
 	// FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
 
@@ -83,8 +79,12 @@ var (
 
 var (
 	fields = schema.Group{}.Fields()
+	// DefaultActive holds the default value for the active field.
+	DefaultActive = fields[0].Value().(bool)
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	TypeValidator = fields[2].Validators()[0].(func(string) error)
+	// DefaultMaxUsers holds the default value for the max_users field.
+	DefaultMaxUsers = fields[3].Value().(int)
 	// MaxUsersValidator is a validator for the "max_users" field. It is called by the builders before save.
 	MaxUsersValidator = fields[3].Validators()[0].(func(int) error)
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.

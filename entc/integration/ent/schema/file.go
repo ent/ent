@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"math"
+
 	"fbc/ent"
 	"fbc/ent/field"
 )
@@ -14,6 +16,7 @@ type File struct {
 func (File) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("size").
+			Default(math.MaxInt32).
 			Positive(),
 		field.String("name"),
 	}

@@ -10,11 +10,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"strconv"
 
-	"fbc/ent"
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/entc/load"
 	"fbc/ent/field"
 )
 
@@ -41,13 +40,13 @@ type (
 		// Nodes are list of Go types that mapped to the types in the loaded schema.
 		Nodes []*Type
 		// Schemas holds the raw interfaces for the loaded schemas.
-		Schemas []ent.Schema
+		Schemas []*load.Schema
 	}
 )
 
 // NewGraph creates a new Graph for the code generation from the given schema definitions.
 // It fails if one of the schemas is invalid.
-func NewGraph(c Config, schemas ...ent.Schema) (g *Graph, err error) {
+func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
 	c.imports = imports()
 	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
@@ -100,58 +99,58 @@ func (g *Graph) Describe(w io.Writer) {
 }
 
 // addNode creates a new Type/Node/Ent to the graph.
-func (g *Graph) addNode(schema ent.Schema) {
+func (g *Graph) addNode(schema *load.Schema) {
 	t, err := NewType(g.Config, schema)
 	check(err, "create type")
 	g.Nodes = append(g.Nodes, t)
 }
 
 // addEdges adds the node edges to the graph.
-func (g *Graph) addEdges(schema ent.Schema) {
-	t, _ := g.typ(reflect.TypeOf(schema).Name())
-	for _, e := range schema.Edges() {
-		typ, ok := g.typ(e.Type())
-		expect(ok, "type %q does not exist for edge", e.Type())
+func (g *Graph) addEdges(schema *load.Schema) {
+	t, _ := g.typ(schema.Name)
+	for _, e := range schema.Edges {
+		typ, ok := g.typ(e.Type)
+		expect(ok, "type %q does not exist for edge", e.Type)
 		switch {
 		// assoc only.
-		case e.IsAssoc():
+		case !e.Inverse:
 			t.Edges = append(t.Edges, &Edge{
 				Type:     typ,
-				Name:     e.Name(),
+				Name:     e.Name,
 				Owner:    t,
-				Unique:   e.IsUnique(),
-				Optional: !e.IsRequired(),
+				Unique:   e.Unique,
+				Optional: !e.Required,
 			})
 		// inverse only.
-		case e.IsInverse() && e.Assoc() == nil:
-			expect(!e.IsRequired(), "inverse edge can not be required: \"%s.%s\"", t.Name, e.Name())
-			expect(e.RefName() != "", "missing reference name for inverse edge: \"%s.%s\"", t.Name, e.Name())
+		case e.Inverse && e.Ref == nil:
+			expect(!e.Required, `inverse edge can not be required: %s.%s`, t.Name, e.Name)
+			expect(e.RefName != "", `missing reference name for inverse edge: %s.%s`, t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
 				Type:     typ,
-				Name:     e.Name(),
+				Name:     e.Name,
 				Owner:    typ,
-				Inverse:  e.RefName(),
-				Unique:   e.IsUnique(),
-				Optional: !e.IsRequired(),
+				Inverse:  e.RefName,
+				Unique:   e.Unique,
+				Optional: !e.Required,
 			})
 		// inverse and assoc.
-		case e.IsInverse():
-			ref := e.Assoc()
-			expect(e.RefName() == "", "reference name is derived from the assoc name: \"%s.%s\" <-> \"%s.%s\"", t.Name, ref.Name(), t.Name, e.Name())
-			expect(ref.Type() == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
+		case e.Inverse:
+			ref := e.Ref
+			expect(e.RefName == "", `reference name is derived from the assoc name: %s.%s <-> %s.%s`, t.Name, ref.Name, t.Name, e.Name)
+			expect(ref.Type == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
 			t.Edges = append(t.Edges, &Edge{
 				Type:     typ,
-				Name:     e.Name(),
+				Name:     e.Name,
 				Owner:    t,
-				Inverse:  ref.Name(),
-				Unique:   e.IsUnique(),
-				Optional: !e.IsRequired(),
+				Inverse:  ref.Name,
+				Unique:   e.Unique,
+				Optional: !e.Required,
 			}, &Edge{
 				Type:     typ,
 				Owner:    t,
-				Name:     ref.Name(),
-				Unique:   ref.IsUnique(),
-				Optional: !ref.IsRequired(),
+				Name:     ref.Name,
+				Unique:   ref.Unique,
+				Optional: !ref.Required,
 			})
 		default:
 			panic(graphError{"edge must be either an assoc or inverse edge"})
@@ -187,7 +186,7 @@ func (g *Graph) resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf("assoc is missing for inverse edge: \"%s.%s\"", e.Type.Name, e.Name)
+				return fmt.Errorf(`assoc is missing for inverse edge: %s.%s`, e.Type.Name, e.Name)
 			}
 			table := t.Table()
 			// The name of the column is how we identify the other side. For example "A Parent has Children"

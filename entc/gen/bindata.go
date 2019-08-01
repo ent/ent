@@ -119,7 +119,7 @@ func templateBaseTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/base.tmpl", size: 5024, mode: os.FileMode(420), modTime: time.Unix(1564435014, 0)}
+	info := bindataFileInfo{name: "template/base.tmpl", size: 5024, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -139,7 +139,7 @@ func templateBuilderCreateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/create.tmpl", size: 2706, mode: os.FileMode(420), modTime: time.Unix(1564164430, 0)}
+	info := bindataFileInfo{name: "template/builder/create.tmpl", size: 2706, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -159,7 +159,7 @@ func templateBuilderDeleteTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/delete.tmpl", size: 1921, mode: os.FileMode(420), modTime: time.Unix(1564193299, 0)}
+	info := bindataFileInfo{name: "template/builder/delete.tmpl", size: 1921, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -179,7 +179,7 @@ func templateBuilderQueryTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/query.tmpl", size: 12221, mode: os.FileMode(420), modTime: time.Unix(1564244317, 0)}
+	info := bindataFileInfo{name: "template/builder/query.tmpl", size: 12221, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -199,7 +199,7 @@ func templateBuilderSetterTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/setter.tmpl", size: 2911, mode: os.FileMode(420), modTime: time.Unix(1555862705, 0)}
+	info := bindataFileInfo{name: "template/builder/setter.tmpl", size: 2911, mode: os.FileMode(420), modTime: time.Unix(1564496459, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -219,7 +219,7 @@ func templateBuilderUpdateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/update.tmpl", size: 7086, mode: os.FileMode(420), modTime: time.Unix(1564232317, 0)}
+	info := bindataFileInfo{name: "template/builder/update.tmpl", size: 7086, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -239,7 +239,7 @@ func templateClientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/client.tmpl", size: 3958, mode: os.FileMode(420), modTime: time.Unix(1564245006, 0)}
+	info := bindataFileInfo{name: "template/client.tmpl", size: 3958, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -299,7 +299,7 @@ func templateDialectGremlinByTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/by.tmpl", size: 1679, mode: os.FileMode(420), modTime: time.Unix(1564430374, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/by.tmpl", size: 1679, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -339,7 +339,7 @@ func templateDialectGremlinDecodeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/decode.tmpl", size: 1924, mode: os.FileMode(420), modTime: time.Unix(1564245606, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/decode.tmpl", size: 1924, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -379,7 +379,7 @@ func templateDialectGremlinErrorsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/errors.tmpl", size: 1608, mode: os.FileMode(420), modTime: time.Unix(1564431021, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/errors.tmpl", size: 1608, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -419,7 +419,7 @@ func templateDialectGremlinMetaTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/meta.tmpl", size: 508, mode: os.FileMode(420), modTime: time.Unix(1564435028, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/meta.tmpl", size: 508, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -439,7 +439,7 @@ func templateDialectGremlinPredicateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/predicate.tmpl", size: 2640, mode: os.FileMode(420), modTime: time.Unix(1564400962, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/predicate.tmpl", size: 2640, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -459,7 +459,7 @@ func templateDialectGremlinQueryTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/query.tmpl", size: 3733, mode: os.FileMode(420), modTime: time.Unix(1564425528, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/query.tmpl", size: 3733, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -479,7 +479,7 @@ func templateDialectGremlinUpdateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/update.tmpl", size: 4741, mode: os.FileMode(420), modTime: time.Unix(1564232679, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/update.tmpl", size: 4741, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -499,7 +499,7 @@ func templateDialectSqlByTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/by.tmpl", size: 753, mode: os.FileMode(420), modTime: time.Unix(1564430114, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/by.tmpl", size: 753, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -539,7 +539,7 @@ func templateDialectSqlDecodeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/decode.tmpl", size: 1991, mode: os.FileMode(420), modTime: time.Unix(1564245687, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/decode.tmpl", size: 1991, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -579,7 +579,7 @@ func templateDialectSqlErrorsTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/errors.tmpl", size: 771, mode: os.FileMode(420), modTime: time.Unix(1564430869, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/errors.tmpl", size: 771, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -619,7 +619,7 @@ func templateDialectSqlMetaTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/meta.tmpl", size: 1586, mode: os.FileMode(420), modTime: time.Unix(1564391955, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/meta.tmpl", size: 1586, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -639,7 +639,7 @@ func templateDialectSqlPredicateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/predicate.tmpl", size: 4051, mode: os.FileMode(420), modTime: time.Unix(1564423643, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/predicate.tmpl", size: 4051, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -659,7 +659,7 @@ func templateDialectSqlQueryTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/query.tmpl", size: 6186, mode: os.FileMode(420), modTime: time.Unix(1564425510, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/query.tmpl", size: 6186, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -699,7 +699,7 @@ func templateEntTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/ent.tmpl", size: 3372, mode: os.FileMode(420), modTime: time.Unix(1564245932, 0)}
+	info := bindataFileInfo{name: "template/ent.tmpl", size: 3372, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -719,7 +719,7 @@ func templateExampleTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/example.tmpl", size: 2206, mode: os.FileMode(420), modTime: time.Unix(1564434704, 0)}
+	info := bindataFileInfo{name: "template/example.tmpl", size: 2206, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -759,12 +759,12 @@ func templateImportTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/import.tmpl", size: 506, mode: os.FileMode(420), modTime: time.Unix(1564432120, 0)}
+	info := bindataFileInfo{name: "template/import.tmpl", size: 506, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _templateMetaTmpl = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x8c\x54\x5d\x6b\xdb\x3c\x14\xbe\x76\x7e\xc5\x79\xfd\xba\x60\x43\xea\x6c\xb7\x1d\xb9\x5a\x19\x2b\x8c\x32\x58\xd9\x4d\x29\x45\xb1\x8f\x1a\xb5\x8a\xec\x49\x4a\xda\x60\xf4\xdf\x87\xbe\x1c\x39\x4d\xd7\x5e\xd9\xd2\xf9\x78\x9e\xe7\x7c\x68\x18\xa0\x45\xca\x04\x42\xbe\x41\x4d\x72\x30\x66\x36\x1b\x06\xd0\xb8\xe9\x39\xd1\x08\xf9\x1a\x49\x8b\x32\x87\xa2\xfe\x49\x9a\x27\xf2\x80\xaf\x5d\xd8\xa6\xef\xa4\xce\xa1\x70\xa6\xa6\x13\x4a\x43\x39\xcb\x16\x0b\xf8\x41\x56\xc8\x61\xdd\xf1\x56\x81\x5e\x23\x28\x2d\x99\x78\x00\xee\xae\x5b\x14\x9d\xb6\x47\x6b\x19\x06\xe0\xdd\x33\x4a\x28\xea\x6b\xb2\xb1\x20\xa0\xf7\x3d\x02\x13\xce\xdc\x12\x4d\x56\x44\x61\x3d\xcb\x7c\xce\x25\xe4\xc3\x00\x45\xed\x4f\xc6\xe4\x0e\xcf\x5d\x5d\x5d\xd6\x5f\x2d\x07\x22\xb4\x4d\xf3\x0a\x7d\x82\xcb\x5a\xa0\x0c\x79\x7b\x02\xe8\x54\x32\x0f\xab\x04\x79\x42\x6f\x0c\x64\x73\xe7\x2e\x89\x78\x40\x28\xee\xe7\x50\x50\xb8\x58\x42\x51\x7f\xb3\xb9\x15\x9c\x1b\x63\xb3\x79\x24\x6b\xa0\x87\xac\xe7\xc6\xcc\xb2\x48\xde\x7b\xbc\xcb\xfa\x50\x2d\x3a\x96\x6b\x87\x52\xe3\x0b\xf4\xb2\xeb\x51\xea\xfd\x09\x41\xd9\x04\x61\x22\x85\x26\x42\xac\x1b\xa3\xf6\xee\x3b\x51\x97\x48\xc9\x96\x5b\xed\xce\x70\x0e\x45\x1b\x6e\xbc\x8c\x60\x3f\xad\xa6\x1d\x83\x13\x3d\xf1\x72\x47\xf8\x16\x81\x76\x32\x2a\x4a\xb4\x38\x92\x91\x71\x92\x65\x64\x76\xb3\xef\xb1\xbe\xde\x6e\x50\xb2\x26\x18\xc2\x6d\x38\xa1\x08\x22\x87\x01\x7a\xc9\x84\xa6\x90\x9f\xfd\xbf\xcb\x13\xce\x51\x93\xf3\x75\xbc\x8f\xfe\x93\x76\x2a\xdd\x49\x3b\xfb\xae\xa9\xbf\xc2\x21\xc6\x17\x7a\xd3\x73\x6b\x8a\x40\x2d\x23\x1c\x1b\xbd\x38\x53\x0b\xbb\x55\x8b\x26\x54\x47\xe5\x87\x4c\x31\xf8\x65\xdc\x23\x9f\xc6\x2d\x51\x36\x2a\x98\x55\x6e\xd9\x3e\x42\xe5\x23\x4c\x76\x44\x32\xb2\xe2\x78\xcc\xc4\x17\x76\x4d\xd4\xcd\x94\xcd\x47\x59\x1e\xfe\x66\xa1\x47\x76\x78\x7e\x13\xce\x5a\xa2\x3b\xa9\xac\x65\x47\xa4\x7d\x16\xa8\x5f\x09\xd7\x19\x3b\x98\x56\x45\xb3\xc6\x0d\x01\x63\x6a\xb7\x73\x61\x0a\x06\x13\xd6\xa7\xac\xd2\x76\xb0\x53\xdb\xe5\x59\x3e\x33\xbd\xb6\x0d\x4e\x70\xbd\xcd\xd5\x46\xd8\xb4\x7e\x6a\x47\x87\xd4\xee\xde\x9b\x8b\x25\x8c\xc5\xa3\x5b\xd1\x40\x79\xa6\x2a\x40\x29\x3b\x99\x8f\x23\x16\x82\xc2\x94\x8b\x30\xb4\x4c\x01\xb1\x53\x1d\x32\xc7\xc9\xce\x27\xa3\x9d\x87\xd9\x86\x2b\x6d\x03\x1a\xc2\x39\xb6\xb0\xda\x3b\xd7\xd5\x96\xf1\x16\xa5\x82\x15\xd2\x4e\x22\x28\xb2\x73\x7b\x1b\xda\x83\x7f\x8e\xc4\x7d\x8e\x4c\xb2\x94\xc7\xd2\x43\xa8\x5b\x7b\xc9\xc0\x98\xbb\x24\xa6\xac\x6e\x3f\xdd\xd5\xe5\xa8\xd7\x98\x2a\x00\x20\x57\xf8\x56\xbe\xad\x68\xca\x0a\x92\x20\x18\x9c\x5b\xb6\x3b\x90\xb9\x78\x07\xd7\x07\x50\xe1\x3c\x6f\xeb\xba\xbe\x73\x69\x27\x9b\x1b\x2a\x1d\xb3\xbb\x07\x27\xb4\xfd\x71\x0e\x85\xb0\xa1\x2f\xe1\x62\x52\x89\x40\x7b\xc2\xc8\xf1\x78\x74\x3c\xca\x37\xa1\xaa\x79\x02\x15\x46\xd8\x9d\xc3\x47\xa2\xde\x4a\x01\x49\x7c\x7c\xa3\xfe\x49\xdc\x36\xff\x7e\x0e\xd4\x31\xf6\x84\xad\xf2\x68\xce\x6c\x37\xa5\x74\x35\x13\xd3\xbc\xd5\x17\x67\xf9\x6f\x09\x82\xf1\x43\x40\x24\x82\x52\xc6\xab\x28\x39\x7e\x83\x87\x60\x3c\x55\x60\xca\xb1\xc1\xf1\x69\x7b\xeb\xcd\xab\x8e\xd6\xd8\xff\xfe\x0d\x00\x00\xff\xff\xce\x02\xbd\xcc\x23\x08\x00\x00")
+var _templateMetaTmpl = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x55\x4f\x6b\xdb\x4e\x10\x3d\xcb\x9f\x62\x7e\x42\x01\x09\x6c\xf9\xd7\x6b\x8a\x4f\x0d\xa5\x81\x52\x0a\x0d\xb9\x84\x10\xd6\xd2\x6c\xbc\xc9\x7a\xe5\xee\xae\x9d\x04\xb1\xdf\xbd\xcc\xfe\xb1\x25\xc7\x69\xd2\x93\xb5\x3b\x33\x6f\xde\x9b\x79\x92\xfb\x1e\x5a\xe4\x42\x21\xe4\x6b\xb4\x2c\x07\xe7\x26\x93\xbe\x07\x8b\xeb\x8d\x64\x16\x21\x5f\x21\x6b\x51\xe7\x50\xd4\x3f\x59\xf3\xc8\xee\xf1\x75\x8a\x58\x6f\x3a\x6d\x73\x28\x7c\xa8\xe9\x94\xb1\x50\x4e\xb2\xf9\x1c\xbe\xb3\x25\x4a\x58\x75\xb2\x35\x60\x57\x08\xc6\x6a\xa1\xee\x41\xfa\xeb\x16\x55\x67\xe9\x48\x91\xbe\x07\xd9\x3d\xa1\x86\xa2\xfe\xc1\xd6\xd4\x04\xec\xcb\x06\x41\x28\x1f\x6e\x99\x65\x4b\x66\xb0\x9e\x64\x01\x73\x01\x79\xdf\x43\x51\x87\x93\x73\xb9\xef\xe7\xaf\x2e\x2f\xea\x2f\xc4\x81\x29\x4b\x30\xaf\xba\x8f\xfa\x8a\x16\xb8\x40\xd9\x9e\x68\x74\x0a\x2c\xb4\x35\x8a\x3d\x62\x08\x46\xb2\xb9\x4f\xd7\x4c\xdd\x23\x14\x77\x53\x28\x38\x9c\x2f\xa0\xa8\xbf\x12\xb6\x81\x99\x73\x84\x16\x3a\x51\x80\x1f\x50\x67\xce\x4d\xb2\x44\x3e\x64\xbc\xcb\xfa\x30\x2d\xbe\x1f\xd7\x0e\xb5\xc5\x67\xd8\xe8\x6e\x83\xda\xbe\x9c\x10\x94\x8d\x3a\x8c\xa4\xf0\xb1\x10\x54\x6d\xe0\x35\x16\x65\x6c\xa7\xc9\x01\x5e\xda\xaf\x78\xf0\xf4\x09\xd9\xae\x37\x92\x42\x1b\x2d\x94\xe5\x90\xb7\x82\x49\x6c\xec\xfc\xcc\xcc\xc9\x5b\xf3\x26\x2a\x36\xf9\x01\x29\x15\x3f\xef\xdd\x14\x60\xbc\x95\x12\x13\xe7\x26\x95\xb7\xdc\x47\xa8\x7c\x84\xc9\x8e\x69\xc1\x96\x12\x8f\x99\xf4\x3d\x08\x0e\x2b\x66\xae\xc6\x6c\x3e\xca\xf2\xf0\x34\x09\x50\x1d\xf9\xf9\x1b\x33\x17\xc8\xd9\x56\xda\x70\xb8\x66\x52\xb4\xcc\x76\xda\xa4\xcc\x7f\x2e\xda\x31\x4d\x6f\x18\x0f\xee\x5a\x90\x1f\x68\xc7\x34\x8a\x66\x85\x6b\x06\xce\xd5\xde\xbe\x71\xab\xbd\x8b\x4e\x2c\xab\xe1\x4e\xc5\x29\xa3\x06\xa9\x82\x93\x29\x06\x2c\x7c\x20\xeb\xfb\x19\x14\x6d\xbc\x0a\x46\x8e\x09\x47\x7e\x4e\x86\x6e\xf7\xe5\x03\x4b\xa7\xcb\x1d\x93\x5b\x04\xde\xe9\x64\xea\x81\x9d\xbd\xb6\x3a\xf4\x1c\xc1\x2c\x42\xc8\xdc\xd0\xbd\x00\xe7\x6e\xeb\x6b\xc2\x29\xab\xba\x0c\x10\x57\xf4\xe1\x70\xae\x0a\x4a\xf6\x5e\xa6\xc3\x93\xb0\x2b\x4a\x19\x8c\x73\x96\x94\x41\xa1\xa8\x77\x50\xb5\x4f\x18\xc6\xfd\x17\xe9\x7c\x01\x7b\x63\xf1\xad\x6a\xa0\x3c\x33\x15\xa0\xd6\x1d\x7d\x25\x63\xf7\xf1\x10\x54\xd4\x24\x0c\x30\x12\x1d\x91\x93\xf0\x7c\xa4\x3c\x8f\xd2\xe1\xd2\x52\x41\xc3\xa4\xc4\x16\x96\x2f\x3e\x75\xb9\x15\xb2\x45\x6d\x60\x89\xbc\xd3\x08\x86\xed\x30\x0d\x49\x70\xc0\xdf\x47\xe2\x3e\x25\x26\xd9\x90\xc7\xe9\x11\xc6\x9a\xb2\xba\xf9\xff\x36\x8c\xd2\x1e\x06\xe9\x27\x29\x0d\xbe\x85\xb7\x55\x4d\x59\xc1\xa0\x08\x7a\x9f\x96\xed\x0e\x64\xce\xdf\xe9\x1b\x0a\xb8\xf2\x99\x37\x75\x5d\xdf\x7a\xd8\xf1\x52\xc3\xa4\x13\xba\x37\x64\x74\xf3\xc3\x14\x0a\x45\xa5\xcf\xf1\x62\x34\x89\x48\x7b\xc4\xc8\xf3\x78\xf0\x3c\xca\x37\x5b\x55\xd3\x41\xab\xf8\xa6\xfa\x73\xfc\xd1\x68\xb7\x5a\xc1\xa0\x3e\x59\xf8\xaf\xc4\x69\xf9\x77\x53\xe0\x9e\x71\x20\x4c\xca\x53\x38\xa3\x6d\x6a\xed\x67\xa6\xc6\xb8\xd5\x67\x1f\xf9\x6f\x01\x4a\xc8\x43\x41\x22\x82\x5a\xa7\xab\x24\x39\xfd\xc6\x0c\x25\xe4\x50\x81\x2b\xf7\x0b\x1e\xbe\x2a\xc3\xff\x80\xf4\x5c\x1d\x7d\xad\xc2\xe3\x9f\x00\x00\x00\xff\xff\xc3\x9a\x56\xd2\x45\x08\x00\x00")
 
 func templateMetaTmplBytes() ([]byte, error) {
 	return bindataRead(
@@ -779,7 +779,7 @@ func templateMetaTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/meta.tmpl", size: 2083, mode: os.FileMode(420), modTime: time.Unix(1564435072, 0)}
+	info := bindataFileInfo{name: "template/meta.tmpl", size: 2117, mode: os.FileMode(420), modTime: time.Unix(1564496470, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -839,7 +839,7 @@ func templatePredicateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/predicate.tmpl", size: 922, mode: os.FileMode(420), modTime: time.Unix(1564434863, 0)}
+	info := bindataFileInfo{name: "template/predicate.tmpl", size: 922, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -879,7 +879,7 @@ func templateWhereTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/where.tmpl", size: 4195, mode: os.FileMode(420), modTime: time.Unix(1564425091, 0)}
+	info := bindataFileInfo{name: "template/where.tmpl", size: 4195, mode: os.FileMode(420), modTime: time.Unix(1564480239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

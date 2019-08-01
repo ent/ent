@@ -38,9 +38,6 @@ func (e Edge) IsUnique() bool { return e.unique }
 // AssocName returns the edge name.
 func (e Edge) Name() string { return e.name }
 
-// IsAssoc returns is the edge is assoc type.
-func (e Edge) IsAssoc() bool { return !e.inverse }
-
 // IsInverse returns is the edge is inverse type.
 func (e Edge) IsInverse() bool { return e.inverse }
 

@@ -1,17 +1,20 @@
-// Package build is the interface for loading schema package into a Go plugin.
-package build
+// Package load is the interface for loading schema package into a Go program.
+package load
 
 import (
 	"bytes"
+	"encoding/json"
 	"fbc/ent"
 	"fmt"
+	"go/ast"
 	"go/format"
+	"go/parser"
+	"go/token"
 	"go/types"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"plugin"
 	"reflect"
 	"sort"
 	"strings"
@@ -22,30 +25,14 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// Symbol is the exported "Symbol" of the plugin.
-const Symbol = "Names"
-
-// Plugin holds the plugin build info.
-type Plugin struct {
-	// Path is the path for the Go plugin.
-	Path string
+// A SchemaSpec holds an ent.schema package that created by Load.
+type SchemaSpec struct {
+	// Schemas are the schema descriptors.
+	Schemas []*Schema
 	// PkgPath is the path where the schema package reside.
 	// Note that path can be either a package path (e.g. github.com/a8m/x)
 	// or a filepath (e.g. ./ent/schema).
 	PkgPath string
-}
-
-// Load loads the schemas from the generated plugin.
-func (p *Plugin) Load() ([]ent.Schema, error) {
-	plg, err := plugin.Open(p.Path)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "open plugin %s", p.Path)
-	}
-	schemas, err := plg.Lookup(Symbol)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "find schemas in plugin")
-	}
-	return *schemas.(*[]ent.Schema), nil
 }
 
 // Config holds the configuration for package building.
@@ -58,7 +45,7 @@ type Config struct {
 }
 
 // Build loads the schemas package and build the Go plugin with this info.
-func (c *Config) Build() (*Plugin, error) {
+func (c *Config) Load() (*SchemaSpec, error) {
 	pkgPath, err := c.load()
 	if err != nil {
 		return nil, errors.WithMessage(err, "load schemas dir")
@@ -67,10 +54,10 @@ func (c *Config) Build() (*Plugin, error) {
 		return nil, errors.Errorf("no schema found in: %s", c.Path)
 	}
 	b := bytes.NewBuffer(nil)
-	err = templates.ExecuteTemplate(b, "main", struct {
+	err = buildTmpl.ExecuteTemplate(b, "main", struct {
 		*Config
-		Symbol, Package string
-	}{c, Symbol, pkgPath})
+		Package string
+	}{c, pkgPath})
 	if err != nil {
 		return nil, errors.WithMessage(err, "execute template")
 	}
@@ -83,12 +70,19 @@ func (c *Config) Build() (*Plugin, error) {
 		return nil, errors.WithMessagef(err, "write file %s", target)
 	}
 	defer os.Remove(target)
-	plg := filepath.Join(os.TempDir(), fmt.Sprintf("%s.so", filename(pkgPath)))
-	cmd := exec.Command("go", "build", "-o", plg, "-buildmode", "plugin", target)
-	if err := run(cmd); err != nil {
+	out, err := run(target)
+	if err != nil {
 		return nil, err
 	}
-	return &Plugin{PkgPath: pkgPath, Path: plg}, nil
+	spec := &SchemaSpec{PkgPath: pkgPath}
+	for _, line := range strings.Split(out, "\n") {
+		schema := &Schema{}
+		if err := json.Unmarshal([]byte(line), schema); err != nil {
+			return nil, errors.WithMessagef(err, "unmarshal schema %s", line)
+		}
+		spec.Schemas = append(spec.Schemas, schema)
+	}
+	return spec, nil
 }
 
 // load loads the schemas info.
@@ -120,16 +114,52 @@ func (c *Config) load() (string, error) {
 	return pkg.PkgPath, err
 }
 
-//go:generate go-bindata -pkg=build ./template/...
+//go:generate go-bindata -pkg=load ./template/... schema.go
 
-var templates = tmpl()
+var buildTmpl = templates()
 
-func tmpl() *template.Template {
-	t := template.New("templates").Funcs(template.FuncMap{"base": filepath.Base})
-	for _, asset := range AssetNames() {
-		t = template.Must(t.Parse(string(MustAsset(asset))))
+func templates() *template.Template {
+	tmpl := template.New("templates").Funcs(template.FuncMap{"base": filepath.Base})
+	tmpl = template.Must(tmpl.Parse(string(MustAsset("template/main.tmpl"))))
+	// turns the schema file and its imports into templates.
+	tmpls, err := schemaTemplates()
+	if err != nil {
+		panic(err)
 	}
-	return t
+	for _, t := range tmpls {
+		tmpl = template.Must(tmpl.Parse(t))
+	}
+	return tmpl
+}
+
+// schemaTemplates returns the templates needed for loading the schema.go file.
+func schemaTemplates() ([]string, error) {
+	const name = "schema.go"
+	var (
+		imports []string
+		code    bytes.Buffer
+		fset    = token.NewFileSet()
+	)
+	f, err := parser.ParseFile(fset, name, string(MustAsset(name)), parser.AllErrors)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "parse file: %s", name)
+	}
+	for _, decl := range f.Decls {
+		if decl, ok := decl.(*ast.GenDecl); ok && decl.Tok == token.IMPORT {
+			for _, spec := range decl.Specs {
+				imports = append(imports, spec.(*ast.ImportSpec).Path.Value)
+			}
+			continue
+		}
+		if err := format.Node(&code, fset, decl); err != nil {
+			return nil, errors.WithMessage(err, "format node")
+		}
+		code.WriteByte('\n')
+	}
+	return []string{
+		fmt.Sprintf(`{{ define "schema" }} %s {{ end }}`, code.String()),
+		fmt.Sprintf(`{{ define "imports" }} %s {{ end }}`, strings.Join(imports, "\n")),
+	}, nil
 }
 
 func filename(pkg string) string {
@@ -137,12 +167,15 @@ func filename(pkg string) string {
 	return fmt.Sprintf("entc_%s_%d", name, time.Now().Unix())
 }
 
-// Run runs an exec command and returns the stderr if it failed.
-func run(cmd *exec.Cmd) error {
-	out := bytes.NewBuffer(nil)
-	cmd.Stderr = out
+// run 'go run' command and return its output.
+func run(target string) (string, error) {
+	cmd := exec.Command("go", "run", target)
+	stdout := bytes.NewBuffer(nil)
+	stderr := bytes.NewBuffer(nil)
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("entc/internal/build: %s", out)
+		return "", fmt.Errorf("entc/load: %s", stderr)
 	}
-	return nil
+	return stdout.String(), nil
 }

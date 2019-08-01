@@ -12,11 +12,6 @@ const (
 	{{ range $_, $f := $.Fields -}}{{ $field := $f.Constant -}}
 		// {{ $field }} holds the string denoting the {{ lower $f.Name }} vertex property in the database.
 		{{ $field }} = "{{ snake $f.Name }}"
-		{{ if $f.HasDefault }}
-		{{- $default := $f.DefaultConstant -}}
-		// {{ $default }} holds the default value for the {{ $f.Name }} field.
-		{{ $default }} {{ if $f.Type.Numeric }} {{ $f.Type }} {{ end }} = {{ printf "%#v" $f.Default }}
-		{{ end -}}
 	{{ end -}}
 	{{ range $_, $storage := $.Storage }}
 		{{ $tmpl := printf "dialect/%s/meta/constants" $storage }}
@@ -31,10 +26,19 @@ const (
 	{{ end }}
 {{ end }}
 
-{{ if $.HasValidators }}
+{{ if or $.HasDefault $.HasValidators }}
+
+{{ end }}
+
+{{ if or $.HasDefault $.HasValidators }}
 var (
 	fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
 	{{ range $i, $f := $.Fields -}}
+		{{ if $f.HasDefault }}
+			{{- $default := $f.DefaultConstant -}}
+			// {{ $default }} holds the default value for the {{ $f.Name }} field.
+			{{ $default }} = fields[{{ $i }}].Value().({{ $f.Type }})
+		{{ end -}}
 		{{ with $f.Validators -}}
 			{{ $name := $f.Validator -}}
 			{{ $type :=  printf "func (%s) error" $f.Type -}}
