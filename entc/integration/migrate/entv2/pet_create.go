@@ -5,7 +5,6 @@ package entv2
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"fbc/ent/entc/integration/migrate/entv2/pet"
 
@@ -55,7 +54,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
-	pe.ID = strconv.FormatInt(id, 10)
+	pe.ID = int(id)
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}

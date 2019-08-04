@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 	"fbc/ent/entc/gen"
 	"fbc/ent/entc/load"
+	"fbc/ent/field"
 
 	"github.com/spf13/cobra"
 )
@@ -68,6 +70,7 @@ func main() {
 			var (
 				cfg     gen.Config
 				storage []string
+				idtype  = idType(field.TypeInt)
 				cmd     = &cobra.Command{
 					Use:   "generate [flags] path",
 					Short: "generate go code for the schema directory",
@@ -87,12 +90,14 @@ func main() {
 							failOnErr(err)
 							cfg.Storage = append(cfg.Storage, sr)
 						}
+						cfg.IDType = field.Type(idtype)
 						graph, err := loadGraph(path[0], cfg)
 						failOnErr(err)
 						failOnErr(graph.Gen())
 					},
 				}
 			)
+			cmd.Flags().Var(&idtype, "idtype", "type of the id field")
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 			cmd.Flags().StringSliceVarP(&storage, "storage", "", []string{"sql"}, "list of storage drivers to support")
@@ -138,6 +143,32 @@ func ({{ . }}) Edges() []ent.Edge {
 	return nil
 }
 `))
+
+// custom implementation for pflag.
+type idType field.Type
+
+// Set implements the Set method of the flag.Value interface.
+func (t *idType) Set(s string) error {
+	switch s {
+	case field.TypeInt.String():
+		*t = idType(field.TypeInt)
+	case field.TypeString.String():
+		*t = idType(field.TypeString)
+	default:
+		return errors.New("invalid type")
+	}
+	return nil
+}
+
+// Type returns the type representation of the id option for help command.
+func (idType) Type() string {
+	return fmt.Sprintf("[%s %s]", field.TypeInt, field.TypeString)
+}
+
+// String returns the default value for the help command.
+func (idType) String() string {
+	return field.TypeInt.String()
+}
 
 func failOnErr(err error) {
 	if err != nil {

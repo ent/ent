@@ -5,7 +5,6 @@ package entv2
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"fbc/ent/entc/integration/migrate/entv2/group"
 
@@ -55,7 +54,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
-	gr.ID = strconv.FormatInt(id, 10)
+	gr.ID = int(id)
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}

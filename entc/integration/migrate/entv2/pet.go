@@ -5,7 +5,6 @@ package entv2
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 
 	"fbc/ent/dialect/sql"
 )
@@ -14,7 +13,7 @@ import (
 type Pet struct {
 	config
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 }
 
 // FromRows scans the sql response data into Pet.
@@ -28,7 +27,7 @@ func (pe *Pet) FromRows(rows *sql.Rows) error {
 	); err != nil {
 		return err
 	}
-	pe.ID = strconv.Itoa(vpe.ID)
+	pe.ID = vpe.ID
 	return nil
 }
 
@@ -57,12 +56,6 @@ func (pe *Pet) String() string {
 	buf.WriteString(fmt.Sprintf("id=%v", pe.ID))
 	buf.WriteString(")")
 	return buf.String()
-}
-
-// id returns the int representation of the ID field.
-func (pe *Pet) id() int {
-	id, _ := strconv.Atoi(pe.ID)
-	return id
 }
 
 // Pets is a parsable slice of Pet.

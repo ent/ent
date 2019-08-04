@@ -52,12 +52,12 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (uq *UserQuery) Get(ctx context.Context, id string) (*User, error) {
+func (uq *UserQuery) Get(ctx context.Context, id int) (*User, error) {
 	return uq.Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (uq *UserQuery) GetX(ctx context.Context, id string) *User {
+func (uq *UserQuery) GetX(ctx context.Context, id int) *User {
 	u, err := uq.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -87,8 +87,8 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 }
 
 // FirstID returns the first User id in the query. Returns *ErrNotFound when no id was found.
-func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +100,7 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstXID(ctx context.Context) string {
+func (uq *UserQuery) FirstXID(ctx context.Context) int {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -134,8 +134,8 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 }
 
 // OnlyID returns the only User id in the query, returns an error if not exactly one id was returned.
-func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = uq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyXID(ctx context.Context) string {
+func (uq *UserQuery) OnlyXID(ctx context.Context) int {
 	id, err := uq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,7 +179,7 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User ids.
-func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
+func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlIDs(ctx)
@@ -189,7 +189,7 @@ func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (uq *UserQuery) IDsX(ctx context.Context) []string {
+func (uq *UserQuery) IDsX(ctx context.Context) []int {
 	ids, err := uq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -325,12 +325,12 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (uq *UserQuery) sqlIDs(ctx context.Context) ([]string, error) {
+func (uq *UserQuery) sqlIDs(ctx context.Context) ([]int, error) {
 	vs, err := uq.sqlAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var ids []string
+	var ids []int
 	for _, v := range vs {
 		ids = append(ids, v.ID)
 	}

@@ -94,7 +94,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id string
+	id int
 }
 
 // Save executes the query and returns the updated entity.
@@ -145,7 +145,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		if err := pe.FromRows(rows); err != nil {
 			return nil, fmt.Errorf("entv2: failed scanning row into Pet: %v", err)
 		}
-		id = pe.id()
+		id = pe.ID
 		ids = append(ids, id)
 	}
 	switch n := len(ids); {

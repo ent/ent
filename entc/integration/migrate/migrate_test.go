@@ -2,7 +2,6 @@ package migrate
 
 import (
 	"context"
-	"strconv"
 	"testing"
 
 	"fbc/ent/dialect/sql"
@@ -82,8 +81,6 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	require.NoError(t, err, "name is not limited to 10 chars")
 }
 
-func idRange(t *testing.T, s string, l, h int) {
-	id, err := strconv.Atoi(s)
-	require.NoError(t, err)
-	require.Truef(t, id > l && id < h, "id %s should be between %d to %d", s, l, h)
+func idRange(t *testing.T, id, l, h int) {
+	require.Truef(t, id > l && id < h, "id %s should be between %d to %d", id, l, h)
 }

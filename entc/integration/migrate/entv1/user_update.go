@@ -151,7 +151,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id      string
+	id      int
 	age     *int32
 	name    *string
 	address *string
@@ -236,7 +236,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		if err := u.FromRows(rows); err != nil {
 			return nil, fmt.Errorf("entv1: failed scanning row into User: %v", err)
 		}
-		id = u.id()
+		id = u.ID
 		ids = append(ids, id)
 	}
 	switch n := len(ids); {

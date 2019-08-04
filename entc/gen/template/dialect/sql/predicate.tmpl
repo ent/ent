@@ -21,9 +21,9 @@
 				{{ if $.ID.IsString }}v[i], _ = strconv.Atoi({{ $arg }}[i]){{ else }}v[i] = {{ $arg }}[i]{{ end }}
 			}
 		{{- else if $.ID.IsString }}
-			v, _ := strconv.Atoi({{ $arg }})
+			id, _ := strconv.Atoi({{ $arg }})
 		{{- end }}
-		s.Where(sql.{{ $op.Name }}(s.C({{ $.ID.Constant }}), v{{ if $op.Variadic }}...{{ end }}))
+		s.Where(sql.{{ $op.Name }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
 	}
 {{- end }}
 

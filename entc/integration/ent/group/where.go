@@ -31,8 +31,8 @@ func ID(id string) predicate.Group {
 func IDEQ(id string) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			v, _ := strconv.Atoi(id)
-			s.Where(sql.EQ(s.C(FieldID), v))
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.EQ(s.C(FieldID), id))
 		},
 		func(t *dsl.Traversal) {
 			t.HasID(p.EQ(id))
@@ -44,8 +44,8 @@ func IDEQ(id string) predicate.Group {
 func IDNEQ(id string) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			v, _ := strconv.Atoi(id)
-			s.Where(sql.NEQ(s.C(FieldID), v))
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.NEQ(s.C(FieldID), id))
 		},
 		func(t *dsl.Traversal) {
 			t.HasID(p.NEQ(id))
@@ -57,8 +57,8 @@ func IDNEQ(id string) predicate.Group {
 func IDGT(id string) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			v, _ := strconv.Atoi(id)
-			s.Where(sql.GT(s.C(FieldID), v))
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GT(s.C(FieldID), id))
 		},
 		func(t *dsl.Traversal) {
 			t.HasID(p.GT(id))
@@ -70,8 +70,8 @@ func IDGT(id string) predicate.Group {
 func IDGTE(id string) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			v, _ := strconv.Atoi(id)
-			s.Where(sql.GTE(s.C(FieldID), v))
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GTE(s.C(FieldID), id))
 		},
 		func(t *dsl.Traversal) {
 			t.HasID(p.GTE(id))
@@ -83,8 +83,8 @@ func IDGTE(id string) predicate.Group {
 func IDLT(id string) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			v, _ := strconv.Atoi(id)
-			s.Where(sql.LT(s.C(FieldID), v))
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LT(s.C(FieldID), id))
 		},
 		func(t *dsl.Traversal) {
 			t.HasID(p.LT(id))
@@ -96,8 +96,8 @@ func IDLT(id string) predicate.Group {
 func IDLTE(id string) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			v, _ := strconv.Atoi(id)
-			s.Where(sql.LTE(s.C(FieldID), v))
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LTE(s.C(FieldID), id))
 		},
 		func(t *dsl.Traversal) {
 			t.HasID(p.LTE(id))

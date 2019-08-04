@@ -52,12 +52,12 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 }
 
 // Get returns a Pet entity by its id.
-func (pq *PetQuery) Get(ctx context.Context, id string) (*Pet, error) {
+func (pq *PetQuery) Get(ctx context.Context, id int) (*Pet, error) {
 	return pq.Where(pet.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (pq *PetQuery) GetX(ctx context.Context, id string) *Pet {
+func (pq *PetQuery) GetX(ctx context.Context, id int) *Pet {
 	pe, err := pq.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -87,8 +87,8 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 }
 
 // FirstID returns the first Pet id in the query. Returns *ErrNotFound when no id was found.
-func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (pq *PetQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +100,7 @@ func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (pq *PetQuery) FirstXID(ctx context.Context) string {
+func (pq *PetQuery) FirstXID(ctx context.Context) int {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -134,8 +134,8 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 }
 
 // OnlyID returns the only Pet id in the query, returns an error if not exactly one id was returned.
-func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (pq *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (pq *PetQuery) OnlyXID(ctx context.Context) string {
+func (pq *PetQuery) OnlyXID(ctx context.Context) int {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,7 +179,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 }
 
 // IDs executes the query and returns a list of Pet ids.
-func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
+func (pq *PetQuery) IDs(ctx context.Context) ([]int, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlIDs(ctx)
@@ -189,7 +189,7 @@ func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *PetQuery) IDsX(ctx context.Context) []string {
+func (pq *PetQuery) IDsX(ctx context.Context) []int {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -312,12 +312,12 @@ func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (pq *PetQuery) sqlIDs(ctx context.Context) ([]string, error) {
+func (pq *PetQuery) sqlIDs(ctx context.Context) ([]int, error) {
 	vs, err := pq.sqlAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var ids []string
+	var ids []int
 	for _, v := range vs {
 		ids = append(ids, v.ID)
 	}

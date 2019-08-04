@@ -101,7 +101,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 		Name:   schema.Name,
 		ID: &Field{
 			Name:      "id",
-			Type:      field.TypeString,
+			Type:      c.IDType,
 			StructTag: `json:"id,omitempty"`,
 		},
 	}

@@ -5,7 +5,6 @@ package entv2
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 
 	"fbc/ent/dialect/sql"
 )
@@ -14,7 +13,7 @@ import (
 type User struct {
 	config
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
@@ -44,7 +43,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	); err != nil {
 		return err
 	}
-	u.ID = strconv.Itoa(vu.ID)
+	u.ID = vu.ID
 	u.Age = vu.Age
 	u.Name = vu.Name
 	u.Phone = vu.Phone
@@ -81,12 +80,6 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf(", buffer=%v", u.Buffer))
 	buf.WriteString(")")
 	return buf.String()
-}
-
-// id returns the int representation of the ID field.
-func (u *User) id() int {
-	id, _ := strconv.Atoi(u.ID)
-	return id
 }
 
 // Users is a parsable slice of User.

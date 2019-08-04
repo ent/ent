@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
@@ -106,7 +105,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
-	u.ID = strconv.FormatInt(id, 10)
+	u.ID = int(id)
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}

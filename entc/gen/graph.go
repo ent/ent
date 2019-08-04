@@ -27,6 +27,9 @@ type (
 		Header string
 		// Storage to support in codegen.
 		Storage []*Storage
+		// IDType specifies the type of the id field in the codegen.
+		// The supported types are string and int, which also the default.
+		IDType field.Type
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.

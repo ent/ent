@@ -52,12 +52,12 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 }
 
 // Get returns a Group entity by its id.
-func (gq *GroupQuery) Get(ctx context.Context, id string) (*Group, error) {
+func (gq *GroupQuery) Get(ctx context.Context, id int) (*Group, error) {
 	return gq.Where(group.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (gq *GroupQuery) GetX(ctx context.Context, id string) *Group {
+func (gq *GroupQuery) GetX(ctx context.Context, id int) *Group {
 	gr, err := gq.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -87,8 +87,8 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 }
 
 // FirstID returns the first Group id in the query. Returns *ErrNotFound when no id was found.
-func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (gq *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +100,7 @@ func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (gq *GroupQuery) FirstXID(ctx context.Context) string {
+func (gq *GroupQuery) FirstXID(ctx context.Context) int {
 	id, err := gq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -134,8 +134,8 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 }
 
 // OnlyID returns the only Group id in the query, returns an error if not exactly one id was returned.
-func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (gq *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
+func (gq *GroupQuery) OnlyXID(ctx context.Context) int {
 	id, err := gq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,7 +179,7 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 }
 
 // IDs executes the query and returns a list of Group ids.
-func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
+func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlIDs(ctx)
@@ -189,7 +189,7 @@ func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (gq *GroupQuery) IDsX(ctx context.Context) []string {
+func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 	ids, err := gq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -312,12 +312,12 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (gq *GroupQuery) sqlIDs(ctx context.Context) ([]string, error) {
+func (gq *GroupQuery) sqlIDs(ctx context.Context) ([]int, error) {
 	vs, err := gq.sqlAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var ids []string
+	var ids []int
 	for _, v := range vs {
 		ids = append(ids, v.ID)
 	}
