@@ -317,6 +317,8 @@ func (f Field) ExampleCode() string {
 	switch f.Type {
 	case field.TypeString:
 		return "\"string\""
+	case field.TypeBytes:
+		return "[]byte{}"
 	case field.TypeBool:
 		return "true"
 	case field.TypeTime:

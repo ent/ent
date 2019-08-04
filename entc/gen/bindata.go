@@ -519,7 +519,7 @@ func templateDialectSqlCreateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/create.tmpl", size: 6066, mode: os.FileMode(420), modTime: time.Unix(1564676394, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/create.tmpl", size: 6066, mode: os.FileMode(420), modTime: time.Unix(1564868040, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -639,7 +639,7 @@ func templateDialectSqlPredicateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/predicate.tmpl", size: 4064, mode: os.FileMode(420), modTime: time.Unix(1564676224, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/predicate.tmpl", size: 4064, mode: os.FileMode(420), modTime: time.Unix(1564868040, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

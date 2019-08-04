@@ -378,14 +378,15 @@ func catch(err *error) {
 
 // goimports runs goimports on the given target.
 func goimports(target string) error {
-	if _, err := exec.LookPath("goimports"); err != nil {
-		return fmt.Errorf("entc/gen: goimports was not found in $PATH")
-	}
 	cmd := exec.Command("goimports", "-w", target)
 	out := bytes.NewBuffer(nil)
 	cmd.Stderr = out
-	if err := cmd.Run(); err != nil {
+	switch err := cmd.Run(); err.(type) {
+	case nil:
+		return nil
+	case *exec.ExitError:
 		return fmt.Errorf("entc/gen: goimports: %s", out)
+	default:
+		return fmt.Errorf("entc/gen: %s", err)
 	}
-	return nil
 }
