@@ -85,7 +85,7 @@ func (g *Graph) Gen() (err error) {
 		target := filepath.Join(g.Config.Target, tmpl.Format)
 		check(ioutil.WriteFile(target, b.Bytes(), 0644), "create file %q", target)
 	}
-	return run(exec.Command("goimports", "-w", g.Config.Target))
+	return goimports(g.Config.Target)
 }
 
 // Describe writes a description of the graph to the given writer.
@@ -376,12 +376,16 @@ func catch(err *error) {
 	}
 }
 
-// run runs an exec command and returns the stderr if it failed.
-func run(cmd *exec.Cmd) error {
+// goimports runs goimports on the given target.
+func goimports(target string) error {
+	if _, err := exec.LookPath("goimports"); err != nil {
+		return fmt.Errorf("entc/gen: goimports was not found in $PATH")
+	}
+	cmd := exec.Command("goimports", "-w", target)
 	out := bytes.NewBuffer(nil)
 	cmd.Stderr = out
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("entc/gen: %s", out)
+		return fmt.Errorf("entc/gen: goimports: %s", out)
 	}
 	return nil
 }
