@@ -1,6 +1,8 @@
 {{ define "predicate" }}
 
-{{ template "header" "predicate" }}
+{{- with extend $ "Package" "predicate" -}}
+	{{ template "header" . }}
+{{ end }}
 
 import (
 	"fmt"

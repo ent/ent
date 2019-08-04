@@ -1,6 +1,8 @@
 {{ define "where" }}
 
-{{ template "header" $.Package }}
+{{- with extend $ "Package" $.Package -}}
+	{{ template "header" . }}
+{{ end }}
 
 {{ template "import" $ }}
 

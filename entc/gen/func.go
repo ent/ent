@@ -38,6 +38,7 @@ var (
 		"join":        join,
 		"lower":       strings.ToLower,
 		"upper":       strings.ToUpper,
+		"hasField":    hasField,
 		"hasSuffix":   strings.HasSuffix,
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
@@ -143,9 +144,15 @@ func receiver(s string) (r string) {
 	return strings.ToLower(s)
 }
 
-// scope wraps the Type object with extended context.
-type scope struct {
+// typeScope wraps the Type object with extended scope.
+type typeScope struct {
 	*Type
+	Scope map[interface{}]interface{}
+}
+
+// graphScope wraps the Graph object with extended scope.
+type graphScope struct {
+	*Graph
 	Scope map[interface{}]interface{}
 }
 
@@ -155,15 +162,22 @@ type scope struct {
 //		{{ template "setters" $scope }}
 //	{{ end}}
 //
-func extend(t *Type, kv ...interface{}) *scope {
-	s := &scope{Type: t, Scope: make(map[interface{}]interface{})}
+func extend(v interface{}, kv ...interface{}) (interface{}, error) {
+	scope := make(map[interface{}]interface{})
 	if len(kv)%2 != 0 {
-		panic("invalid number of parameters")
+		return nil, fmt.Errorf("invalid number of parameters: %d", len(kv))
 	}
 	for i := 0; i < len(kv); i += 2 {
-		s.Scope[kv[i]] = kv[i+1]
+		scope[kv[i]] = kv[i+1]
 	}
-	return s
+	switch v := v.(type) {
+	case *Type:
+		return &typeScope{Type: v, Scope: scope}, nil
+	case *Graph:
+		return &graphScope{Graph: v, Scope: scope}, nil
+	default:
+		return nil, fmt.Errorf("invalid type for extend: %T", v)
+	}
 }
 
 // add calculates summarize list of variables.
@@ -249,4 +263,10 @@ func hasTemplate(name string) bool {
 		}
 	}
 	return false
+}
+
+// hasField determines if a struct has a field with the given name.
+func hasField(v interface{}, name string) bool {
+	vr := reflect.Indirect(reflect.ValueOf(v))
+	return vr.FieldByName(name).IsValid()
 }

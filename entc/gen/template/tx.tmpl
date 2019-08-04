@@ -1,7 +1,6 @@
 {{ define "tx" }}
 
-{{ $pkg := base $.Config.Package }}
-{{ template "header" $pkg }}
+{{ template "header" $ }}
 
 import (
 	"context"

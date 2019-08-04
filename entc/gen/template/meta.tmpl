@@ -1,6 +1,8 @@
 {{ define "meta" }}
 
-{{ template "header" $.Package }}
+{{- with extend $ "Package" $.Package -}}
+	{{ template "header" . }}
+{{ end }}
 
 {{ template "import" $ }}
 

@@ -1,5 +1,8 @@
 {{ define "schema" }}
-{{ template "header" "migrate" }}
+
+{{- with extend $ "Package" "migrate" -}}
+	{{ template "header" . }}
+{{ end }}
 
 import (
 	"fbc/ent/field"
