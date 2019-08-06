@@ -100,6 +100,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Paging,
 	Charset,
 	Relation,
+	Predicate,
 	UniqueConstraint,
 	O2OTwoTypes,
 	O2OSameType,
@@ -241,6 +242,37 @@ func Charset(t *testing.T, client *ent.Client) {
 	require.Equal("נטי", f2.Name)
 	require.Equal("Ariel", f3.Name)
 	require.Equal("Nati", f4.Name)
+}
+
+func Predicate(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	f1 := client.File.Create().SetName("1").SetSize(10).SaveX(ctx)
+	f2 := client.File.Create().SetName("2").SetSize(20).SaveX(ctx)
+	f3 := client.File.Create().SetName("3").SetSize(30).SaveX(ctx)
+	f4 := client.File.Create().SetName("4").SetSize(40).SaveX(ctx)
+	files := client.File.Query().
+		Where(
+			file.Or(
+				file.Name(f1.Name),
+				file.And(file.Name(f2.Name), file.Size(f2.Size)),
+			),
+		).
+		Order(ent.Asc(file.FieldName)).
+		AllX(ctx)
+	require.Equal(f1.Name, files[0].Name)
+	require.Equal(f2.Name, files[1].Name)
+	files = client.File.Query().
+		Where(
+			file.Or(
+				file.Name(f4.Name),
+				file.And(file.Name(f3.Name), file.Size(f3.Size)),
+			),
+		).
+		Order(ent.Asc(file.FieldName)).
+		AllX(ctx)
+	require.Equal(f3.Name, files[0].Name)
+	require.Equal(f4.Name, files[1].Name)
 }
 
 func Relation(t *testing.T, client *ent.Client) {

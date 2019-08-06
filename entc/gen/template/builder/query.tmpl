@@ -68,7 +68,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 				{{ $tmpl := printf "dialect/%s/query/path" (index $.Storage 0) }}
 				{{- xtemplate $tmpl . -}}
 			{{ end -}}
-		{{- end -}}
+		{{- end }}
 		return query
 	}
 {{ end }}

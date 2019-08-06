@@ -127,6 +127,14 @@
 	}
 {{- end }}
 
+{{ define "dialect/sql/predicate/and" -}}
+	func(s *sql.Selector) {
+		for _, p := range predicates {
+			p(s)
+		}
+	}
+{{- end }}
+
 {{ define "dialect/sql/predicate/or" -}}
 	func(s *sql.Selector) {
 		for i, p := range predicates {

@@ -156,7 +156,27 @@ func IDNotIn(ids ...string) predicate.Comment {
 	)
 }
 
-// Or groups list of predicates with the or operator between them.
+// And groups list of predicates with the AND operator between them.
+func And(predicates ...predicate.Comment) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			for _, p := range predicates {
+				p(s)
+			}
+		},
+		func(tr *dsl.Traversal) {
+			trs := make([]interface{}, 0, len(predicates))
+			for _, p := range predicates {
+				t := __.New()
+				p(t)
+				trs = append(trs, t)
+			}
+			tr.Where(__.And(trs...))
+		},
+	)
+}
+
+// Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.CommentPerDialect(
 		func(s *sql.Selector) {

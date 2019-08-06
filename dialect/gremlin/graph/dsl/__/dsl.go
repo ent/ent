@@ -17,6 +17,9 @@ func Has(args ...interface{}) *dsl.Traversal { return New().Has(args...) }
 // Or is the api for calling __.Or().
 func Or(args ...interface{}) *dsl.Traversal { return New().Or(args...) }
 
+// And is the api for calling __.And().
+func And(args ...interface{}) *dsl.Traversal { return New().And(args...) }
+
 // In is the api for calling __.In().
 func In(args ...interface{}) *dsl.Traversal { return New().In(args...) }
 

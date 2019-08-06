@@ -109,7 +109,18 @@ func IDNotIn(ids ...int) predicate.Group {
 	)
 }
 
-// Or groups list of predicates with the or operator between them.
+// And groups list of predicates with the AND operator between them.
+func And(predicates ...predicate.Group) predicate.Group {
+	return predicate.Group(
+		func(s *sql.Selector) {
+			for _, p := range predicates {
+				p(s)
+			}
+		},
+	)
+}
+
+// Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.Group) predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {

@@ -98,8 +98,17 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	}
 {{ end }}
 
+// And groups list of predicates with the AND operator between them.
+func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
+	return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+		{{ range $_, $storage := $.Storage -}}
+			{{ $tmpl := printf "dialect/%s/predicate/and" $storage }}
+			{{- xtemplate $tmpl . }},
+		{{ end -}}
+	)
+}
 
-// Or groups list of predicates with the or operator between them.
+// Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
 		{{ range $_, $storage := $.Storage -}}
