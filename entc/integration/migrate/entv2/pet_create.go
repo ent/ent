@@ -4,11 +4,9 @@ package entv2
 
 import (
 	"context"
-	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv2/pet"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -19,12 +17,7 @@ type PetCreate struct {
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	switch pc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pc.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return pc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.

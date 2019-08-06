@@ -4,12 +4,10 @@ package entv2
 
 import (
 	"context"
-	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv2/pet"
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -27,12 +25,7 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 
 // Exec executes the deletion query.
 func (pd *PetDelete) Exec(ctx context.Context) error {
-	switch pd.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pd.sqlExec(ctx)
-	default:
-		return errors.New("entv2: unsupported dialect")
-	}
+	return pd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

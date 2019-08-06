@@ -4,12 +4,10 @@ package entv1
 
 import (
 	"context"
-	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv1/predicate"
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -27,12 +25,7 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 
 // Exec executes the deletion query.
 func (ud *UserDelete) Exec(ctx context.Context) error {
-	switch ud.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return ud.sqlExec(ctx)
-	default:
-		return errors.New("entv1: unsupported dialect")
-	}
+	return ud.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

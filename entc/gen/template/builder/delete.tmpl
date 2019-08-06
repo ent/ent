@@ -22,14 +22,18 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 
 // Exec executes the deletion query.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) error {
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}Exec(ctx)
+	{{- if gt (len $.Storage) 1 -}}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}Exec(ctx)
+		{{- end }}
+		default:
+			return errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else -}}
+		return {{ $receiver }}.{{ index $.Storage 0 }}Exec(ctx)
 	{{- end }}
-	default:
-		return errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.

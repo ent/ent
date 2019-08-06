@@ -9,7 +9,6 @@ import (
 
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -58,12 +57,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if err := user.NameValidator(*uc.name); err != nil {
 		return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
 	}
-	switch uc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uc.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv1: unsupported dialect")
-	}
+	return uc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.

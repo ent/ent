@@ -4,13 +4,11 @@ package entv1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"fbc/ent/entc/integration/migrate/entv1/predicate"
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -62,12 +60,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
 		}
 	}
-	switch uu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uu.sqlSave(ctx)
-	default:
-		return 0, errors.New("entv1: unsupported dialect")
-	}
+	return uu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -190,12 +183,7 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
 		}
 	}
-	switch uuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uuo.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv1: unsupported dialect")
-	}
+	return uuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.

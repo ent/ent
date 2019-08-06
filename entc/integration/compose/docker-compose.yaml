@@ -8,11 +8,11 @@ services:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
     healthcheck:
-      test: mysql -ppass -e "show databases"
+      test: mysqladmin ping -ppass
     ports:
       - 3306:3306
 
-  neptune:
+  gremlin:
     build: gremlin-server
     restart: on-failure
     ports:

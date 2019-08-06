@@ -4,13 +4,11 @@ package entv2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"fbc/ent/entc/integration/migrate/entv2/group"
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -28,12 +26,7 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	switch gu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gu.sqlSave(ctx)
-	default:
-		return 0, errors.New("entv2: unsupported dialect")
-	}
+	return gu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -99,12 +92,7 @@ type GroupUpdateOne struct {
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	switch guo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return guo.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return guo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.

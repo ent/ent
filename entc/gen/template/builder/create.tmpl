@@ -58,14 +58,18 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			}
 		{{ end -}}
 	{{ end -}}
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}Save(ctx)
+	{{- if gt (len $.Storage) 1 -}}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}Save(ctx)
+		{{- end }}
+		default:
+			return nil, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else -}}
+		return {{ $receiver }}.{{ index $.Storage 0 }}Save(ctx)
 	{{- end }}
-	default:
-		return nil, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // SaveX calls Save and panics if Save returns an error.

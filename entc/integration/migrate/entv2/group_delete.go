@@ -4,12 +4,10 @@ package entv2
 
 import (
 	"context"
-	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv2/group"
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -27,12 +25,7 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 
 // Exec executes the deletion query.
 func (gd *GroupDelete) Exec(ctx context.Context) error {
-	switch gd.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gd.sqlExec(ctx)
-	default:
-		return errors.New("entv2: unsupported dialect")
-	}
+	return gd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

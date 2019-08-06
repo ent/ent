@@ -11,7 +11,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv1/predicate"
 	"fbc/ent/entc/integration/migrate/entv1/user"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -161,12 +160,7 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uq.sqlAll(ctx)
-	default:
-		return nil, errors.New("entv1: unsupported dialect")
-	}
+	return uq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -180,12 +174,7 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 
 // IDs executes the query and returns a list of User ids.
 func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uq.sqlIDs(ctx)
-	default:
-		return nil, errors.New("entv1: unsupported dialect")
-	}
+	return uq.sqlIDs(ctx)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -199,12 +188,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uq.sqlCount(ctx)
-	default:
-		return 0, errors.New("entv1: unsupported dialect")
-	}
+	return uq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -218,12 +202,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uq.sqlExist(ctx)
-	default:
-		return false, errors.New("entv1: unsupported dialect")
-	}
+	return uq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -268,10 +247,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	group := &UserGroupBy{config: uq.config}
 	group.fields = append([]string{field}, fields...)
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		group.sql = uq.sqlQuery()
-	}
+	group.sql = uq.sqlQuery()
 	return group
 }
 
@@ -378,12 +354,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch ugb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return ugb.sqlScan(ctx, v)
-	default:
-		return errors.New("ugb: unsupported dialect")
-	}
+	return ugb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.

@@ -7,6 +7,8 @@
 
 {{ $builder := print (pascal $.Name) "Update" }}
 {{ $receiver := receiver $builder }}
+{{ $multistorage := gt (len $.Storage) 1 }}
+
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
 	config
@@ -33,14 +35,18 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" 0 -}}
 		{{ template "update/validators" . }}
 	{{- end -}}
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}Save(ctx)
+	{{- if $multistorage -}}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}Save(ctx)
+		{{- end }}
+		default:
+			return 0, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else -}}
+		return {{ $receiver }}.{{ index $.Storage 0 }}Save(ctx)
 	{{- end }}
-	default:
-		return 0, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -96,14 +102,18 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" "nil" -}}
 		{{ template "update/validators" . }}
 	{{- end -}}
+	{{- if $multistorage -}}
 	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}Save(ctx)
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}Save(ctx)
+		{{- end }}
+		default:
+			return nil, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else -}}
+		return {{ $receiver }}.{{ index $.Storage 0 }}Save(ctx)
 	{{- end }}
-	default:
-		return nil, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // SaveX is like Save, but panics if an error occurs.
