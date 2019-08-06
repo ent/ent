@@ -4,13 +4,11 @@ package entv2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 	"fbc/ent/entc/integration/migrate/entv2/user"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -56,12 +54,7 @@ func (uu *UserUpdate) SetBuffer(b []byte) *UserUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	switch uu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uu.sqlSave(ctx)
-	default:
-		return 0, errors.New("entv2: unsupported dialect")
-	}
+	return uu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -182,12 +175,7 @@ func (uuo *UserUpdateOne) SetBuffer(b []byte) *UserUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	switch uuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uuo.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return uuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.

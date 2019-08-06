@@ -11,7 +11,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/pet"
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -161,12 +160,7 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pq.sqlAll(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return pq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -180,12 +174,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 
 // IDs executes the query and returns a list of Pet ids.
 func (pq *PetQuery) IDs(ctx context.Context) ([]int, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pq.sqlIDs(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return pq.sqlIDs(ctx)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -199,12 +188,7 @@ func (pq *PetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pq.sqlCount(ctx)
-	default:
-		return 0, errors.New("entv2: unsupported dialect")
-	}
+	return pq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -218,12 +202,7 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pq.sqlExist(ctx)
-	default:
-		return false, errors.New("entv2: unsupported dialect")
-	}
+	return pq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -255,10 +234,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	group := &PetGroupBy{config: pq.config}
 	group.fields = append([]string{field}, fields...)
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		group.sql = pq.sqlQuery()
-	}
+	group.sql = pq.sqlQuery()
 	return group
 }
 
@@ -365,12 +341,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch pgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pgb.sqlScan(ctx, v)
-	default:
-		return errors.New("pgb: unsupported dialect")
-	}
+	return pgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.

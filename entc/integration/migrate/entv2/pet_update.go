@@ -4,13 +4,11 @@ package entv2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"fbc/ent/entc/integration/migrate/entv2/pet"
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -28,12 +26,7 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	switch pu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return pu.sqlSave(ctx)
-	default:
-		return 0, errors.New("entv2: unsupported dialect")
-	}
+	return pu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -99,12 +92,7 @@ type PetUpdateOne struct {
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	switch puo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return puo.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return puo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -11,7 +11,6 @@ import (
 	"fbc/ent/entc/integration/migrate/entv2/group"
 	"fbc/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -161,12 +160,7 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
-	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gq.sqlAll(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return gq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -180,12 +174,7 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 
 // IDs executes the query and returns a list of Group ids.
 func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
-	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gq.sqlIDs(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return gq.sqlIDs(ctx)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -199,12 +188,7 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
-	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gq.sqlCount(ctx)
-	default:
-		return 0, errors.New("entv2: unsupported dialect")
-	}
+	return gq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -218,12 +202,7 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
-	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gq.sqlExist(ctx)
-	default:
-		return false, errors.New("entv2: unsupported dialect")
-	}
+	return gq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -255,10 +234,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	group := &GroupGroupBy{config: gq.config}
 	group.fields = append([]string{field}, fields...)
-	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		group.sql = gq.sqlQuery()
-	}
+	group.sql = gq.sqlQuery()
 	return group
 }
 
@@ -365,12 +341,7 @@ func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch ggb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return ggb.sqlScan(ctx, v)
-	default:
-		return errors.New("ggb: unsupported dialect")
-	}
+	return ggb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.

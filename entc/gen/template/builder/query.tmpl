@@ -7,6 +7,7 @@
 
 {{ $builder := print (pascal $.Name) "Query" }}
 {{ $receiver := receiver $builder }}
+{{ $multistorage := gt (len $.Storage) 1 }}
 
 // {{ $builder }} is the builder for querying {{ pascal $.Name }} entities.
 type {{ $builder }} struct {
@@ -52,15 +53,22 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
 		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
-		switch {{ $receiver }}.driver.Dialect() {
-		{{- range $_, $storage := $.Storage -}}
-		case {{ join $storage.Dialects ", " }}:
+		{{- if $multistorage }}
+			switch {{ $receiver }}.driver.Dialect() {
+			{{- range $_, $storage := $.Storage -}}
+			case {{ join $storage.Dialects ", " }}:
+				{{- with extend $ "Receiver" $receiver "Edge" $e -}}
+					{{ $tmpl := printf "dialect/%s/query/path" $storage }}
+					{{- xtemplate $tmpl . -}}
+				{{ end -}}
+			{{ end -}}
+			}
+		{{- else }}
 			{{- with extend $ "Receiver" $receiver "Edge" $e -}}
-				{{ $tmpl := printf "dialect/%s/query/path" $storage }}
+				{{ $tmpl := printf "dialect/%s/query/path" (index $.Storage 0) }}
 				{{- xtemplate $tmpl . -}}
 			{{ end -}}
-		{{ end -}}
-		}
+		{{- end -}}
 		return query
 	}
 {{ end }}
@@ -176,14 +184,18 @@ func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}All(ctx)
+	{{- if $multistorage }}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}All(ctx)
+		{{- end }}
+		default:
+			return nil, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else }}
+		return {{ $receiver }}.{{ index $.Storage 0 }}All(ctx)
 	{{- end }}
-	default:
-		return nil, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -197,14 +209,18 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // IDs executes the query and returns a list of {{ $.Name }} ids.
 func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}IDs(ctx)
+	{{- if $multistorage }}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}IDs(ctx)
+		{{- end }}
+		default:
+			return nil, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else }}
+		return {{ $receiver }}.{{ index $.Storage 0 }}IDs(ctx)
 	{{- end }}
-	default:
-		return nil, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -218,14 +234,18 @@ func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type 
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}Count(ctx)
+	{{- if $multistorage }}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}Count(ctx)
+		{{- end }}
+		default:
+			return 0, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else }}
+		return {{ $receiver }}.{{ index $.Storage 0 }}Count(ctx)
 	{{- end }}
-	default:
-		return 0, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -239,14 +259,18 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $receiver }}.{{ $storage }}Exist(ctx)
+	{{- if $multistorage }}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $receiver }}.{{ $storage }}Exist(ctx)
+		{{- end }}
+		default:
+			return false, errors.New("{{ $pkg }}: unsupported dialect")
+		}
+	{{- else }}
+		return {{ $receiver }}.{{ index $.Storage 0 }}Exist(ctx)
 	{{- end }}
-	default:
-		return false, errors.New("{{ $pkg }}: unsupported dialect")
-	}
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -298,12 +322,16 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
 	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
 	group.fields = append([]string{field}, fields...)
-	switch {{ $receiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		group.{{ $storage }} = {{ $receiver }}.{{ $storage }}Query()
+	{{- if $multistorage }}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			group.{{ $storage }} = {{ $receiver }}.{{ $storage }}Query()
+		{{- end }}
+		}
+	{{- else }}
+		group.{{ index $.Storage 0 }} = {{ $receiver }}.{{ index $.Storage 0 }}Query()
 	{{- end }}
-	}
 	return group
 }
 
@@ -335,14 +363,18 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{
 
 // Scan applies the group-by query and scan the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
-	switch {{ $groupReceiver }}.driver.Dialect() {
-	{{- range $_, $storage := $.Storage }}
-	case {{ join $storage.Dialects ", " }}:
-		return {{ $groupReceiver }}.{{ $storage }}Scan(ctx, v)
+	{{- if $multistorage }}
+		switch {{ $groupReceiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $groupReceiver }}.{{ $storage }}Scan(ctx, v)
+		{{- end }}
+		default:
+			return errors.New("{{ $groupReceiver }}: unsupported dialect")
+		}
+	{{- else }}
+		return {{ $groupReceiver }}.{{ index $.Storage 0 }}Scan(ctx, v)
 	{{- end }}
-	default:
-		return errors.New("{{ $groupReceiver }}: unsupported dialect")
-	}
 }
 
 // ScanX is like Scan, but panics if an error occurs.

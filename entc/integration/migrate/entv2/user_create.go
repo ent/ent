@@ -8,7 +8,6 @@ import (
 
 	"fbc/ent/entc/integration/migrate/entv2/user"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -60,12 +59,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		v := user.DefaultBuffer
 		uc.buffer = &v
 	}
-	switch uc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return uc.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return uc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.

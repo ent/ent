@@ -4,11 +4,9 @@ package entv2
 
 import (
 	"context"
-	"errors"
 
 	"fbc/ent/entc/integration/migrate/entv2/group"
 
-	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
 )
 
@@ -19,12 +17,7 @@ type GroupCreate struct {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	switch gc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gc.sqlSave(ctx)
-	default:
-		return nil, errors.New("entv2: unsupported dialect")
-	}
+	return gc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
