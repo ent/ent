@@ -10,6 +10,13 @@ import (
 	{{ range $_, $n := $.Nodes }}
 		"{{ $n.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
+
+	"fbc/ent/dialect"
+	{{ range $_, $storage := $.Storage -}}
+		{{ range $_, $import := $storage.Imports -}}
+			"{{ $import }}"
+		{{ end -}}
+	{{ end -}}
 )
 
 // Client is the client that holds all ent builders.
@@ -113,15 +120,22 @@ func (c *{{ $client }}) Query() *{{ $n.Name }}Query {
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
 	query := &{{ $e.Type.Name }}Query{config: c.config}
-	switch c.driver.Dialect() {
-		{{- range $_, $storage := $.Storage -}}
+	{{ if gt (len $.Storage) 1 -}}
+		switch c.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
 			{{- with extend $n "Receiver" $rec "Edge" $e -}}
 				{{ $tmpl := printf "dialect/%s/query/from" $storage }}
 				{{- xtemplate $tmpl . -}}
 			{{ end -}}
+		{{- end }}
+		}
+	{{- else -}}
+		{{- with extend $n "Receiver" $rec "Edge" $e -}}
+			{{ $tmpl := printf "dialect/%s/query/from" (index $.Storage 0) }}
+			{{- xtemplate $tmpl . -}}
 		{{ end -}}
-	}
+	{{- end }}
 	return query
 }
 {{ end }}

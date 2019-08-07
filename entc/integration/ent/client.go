@@ -7,9 +7,6 @@ import (
 	"fmt"
 	"log"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/sql"
 	"fbc/ent/entc/integration/ent/migrate"
 
 	"fbc/ent/entc/integration/ent/card"
@@ -21,6 +18,10 @@ import (
 	"fbc/ent/entc/integration/ent/node"
 	"fbc/ent/entc/integration/ent/pet"
 	"fbc/ent/entc/integration/ent/user"
+
+	"fbc/ent/dialect"
+	"fbc/ent/dialect/gremlin/graph/dsl/g"
+	"fbc/ent/dialect/sql"
 )
 
 // Client is the client that holds all ent builders.
@@ -152,8 +153,10 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 			From(sql.Table(card.OwnerTable)).
 			Where(sql.EQ(card.FieldID, id))
 		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(ca.ID).InE(user.CardLabel).OutV()
+
 	}
 	return query
 }
@@ -366,8 +369,10 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 		id := gr.id()
 		query.sql = sql.Select().From(sql.Table(file.Table)).
 			Where(sql.EQ(group.FilesColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(gr.ID).OutE(group.FilesLabel).InV()
+
 	}
 	return query
 }
@@ -380,8 +385,10 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 		id := gr.id()
 		query.sql = sql.Select().From(sql.Table(user.Table)).
 			Where(sql.EQ(group.BlockedColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(gr.ID).OutE(group.BlockedLabel).InV()
+
 	}
 	return query
 }
@@ -404,8 +411,10 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[0]))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(gr.ID).InE(user.GroupsLabel).OutV()
+
 	}
 	return query
 }
@@ -421,8 +430,10 @@ func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 			From(sql.Table(group.InfoTable)).
 			Where(sql.EQ(group.FieldID, id))
 		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(groupinfo.FieldID), t2.C(group.InfoColumn))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(gr.ID).OutE(group.InfoLabel).InV()
+
 	}
 	return query
 }
@@ -485,8 +496,10 @@ func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 		id := gi.id()
 		query.sql = sql.Select().From(sql.Table(group.Table)).
 			Where(sql.EQ(groupinfo.GroupsColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(gi.ID).InE(group.InfoLabel).OutV()
+
 	}
 	return query
 }
@@ -552,8 +565,10 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 			From(sql.Table(node.PrevTable)).
 			Where(sql.EQ(node.FieldID, id))
 		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(node.FieldID), t2.C(node.PrevColumn))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(n.ID).InE(node.NextLabel).OutV()
+
 	}
 	return query
 }
@@ -566,8 +581,10 @@ func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 		id := n.id()
 		query.sql = sql.Select().From(sql.Table(node.Table)).
 			Where(sql.EQ(node.NextColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(n.ID).OutE(node.NextLabel).InV()
+
 	}
 	return query
 }
@@ -633,8 +650,10 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 			From(sql.Table(pet.TeamTable)).
 			Where(sql.EQ(pet.FieldID, id))
 		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.TeamColumn))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(pe.ID).InE(user.TeamLabel).OutV()
+
 	}
 	return query
 }
@@ -650,8 +669,10 @@ func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 			From(sql.Table(pet.OwnerTable)).
 			Where(sql.EQ(pet.FieldID, id))
 		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(pe.ID).InE(user.PetsLabel).OutV()
+
 	}
 	return query
 }
@@ -714,8 +735,10 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(card.Table)).
 			Where(sql.EQ(user.CardColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.CardLabel).InV()
+
 	}
 	return query
 }
@@ -728,8 +751,10 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(pet.Table)).
 			Where(sql.EQ(user.PetsColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.PetsLabel).InV()
+
 	}
 	return query
 }
@@ -742,8 +767,10 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(file.Table)).
 			Where(sql.EQ(user.FilesColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.FilesLabel).InV()
+
 	}
 	return query
 }
@@ -766,8 +793,10 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[1]))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.GroupsLabel).InV()
+
 	}
 	return query
 }
@@ -790,8 +819,10 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).Both(user.FriendsLabel)
+
 	}
 	return query
 }
@@ -814,8 +845,10 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).InE(user.FollowingLabel).OutV()
+
 	}
 	return query
 }
@@ -838,8 +871,10 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.FollowingLabel).InV()
+
 	}
 	return query
 }
@@ -852,8 +887,10 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(pet.Table)).
 			Where(sql.EQ(user.TeamColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.TeamLabel).InV()
+
 	}
 	return query
 }
@@ -866,8 +903,10 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(user.Table)).
 			Where(sql.EQ(user.SpouseColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).Both(user.SpouseLabel)
+
 	}
 	return query
 }
@@ -880,8 +919,10 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(user.Table)).
 			Where(sql.EQ(user.ChildrenColumn, id))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).InE(user.ParentLabel).OutV()
+
 	}
 	return query
 }
@@ -897,8 +938,10 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 			From(sql.Table(user.ParentTable)).
 			Where(sql.EQ(user.FieldID, id))
 		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(user.ParentColumn))
+
 	case dialect.Neptune:
 		query.gremlin = g.V(u.ID).OutE(user.ParentLabel).InV()
+
 	}
 	return query
 }
