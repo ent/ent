@@ -72,6 +72,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "size", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
+		{Name: "user", Type: field.TypeString},
+		{Name: "group", Type: field.TypeString},
 		{Name: "group_file_id", Type: field.TypeInt, Nullable: &nullable},
 		{Name: "user_file_id", Type: field.TypeInt, Nullable: &nullable},
 	}
@@ -83,14 +85,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "files_groups_files",
-				Columns: []*schema.Column{FilesColumns[3]},
+				Columns: []*schema.Column{FilesColumns[5]},
 
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "files_users_files",
-				Columns: []*schema.Column{FilesColumns[4]},
+				Columns: []*schema.Column{FilesColumns[6]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,

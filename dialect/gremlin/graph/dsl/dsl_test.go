@@ -131,6 +131,11 @@ func TestTraverse(t *testing.T) {
 			wantBinds: dsl.Bindings{},
 		},
 		{
+			input:     g.V().HasNot("age"),
+			wantQuery: "g.V().hasNot($0)",
+			wantBinds: dsl.Bindings{"$0": "age"},
+		},
+		{
 			input: func() *dsl.Traversal {
 				v := g.V().HasID(1)
 				u := v.Clone().InE().Drop()

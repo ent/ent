@@ -47,7 +47,7 @@
 				return
 			}
 		{{- end }}
-		s.Where(sql.{{ $op.Name }}(s.C({{ $f.Constant }}), v{{ if $op.Variadic }}...{{ end }}))
+		s.Where(sql.{{ $op.Name }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, v{{ if $op.Variadic }}...{{ end }}{{ end }}))
 	}
 {{- end }}
 

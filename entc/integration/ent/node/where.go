@@ -284,6 +284,30 @@ func ValueNotIn(vs ...int) predicate.Node {
 	)
 }
 
+// ValueIsNull applies the IsNull predicate on the "value" field.
+func ValueIsNull() predicate.Node {
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldValue)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldValue)
+		},
+	)
+}
+
+// ValueNotNull applies the NotNull predicate on the "value" field.
+func ValueNotNull() predicate.Node {
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldValue)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldValue)
+		},
+	)
+}
+
 // HasPrev applies the HasEdge predicate on the "prev" edge.
 func HasPrev() predicate.Node {
 	return predicate.NodePerDialect(

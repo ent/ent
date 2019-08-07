@@ -29,7 +29,11 @@
 	{{- $f := $.Scope.Field -}}
 	{{- $op := $.Scope.Op -}}
 	func(t *dsl.Traversal) {
+		{{- if not $op.Niladic }}
 		t.Has(Label, {{ $f.Constant }}, p.{{ $op.Gremlin }}(v{{ if $op.Variadic }}...{{ end }}))
+		{{- else }}
+		t.HasLabel(Label).{{ $op.Gremlin }}({{ $f.Constant }})
+		{{- end }}
 	}
 {{- end }}
 

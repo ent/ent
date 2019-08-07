@@ -1032,6 +1032,30 @@ func OptionalIntNotIn(vs ...int) predicate.FieldType {
 	)
 }
 
+// OptionalIntIsNull applies the IsNull predicate on the "optional_int" field.
+func OptionalIntIsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldOptionalInt)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldOptionalInt)
+		},
+	)
+}
+
+// OptionalIntNotNull applies the NotNull predicate on the "optional_int" field.
+func OptionalIntNotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldOptionalInt)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldOptionalInt)
+		},
+	)
+}
+
 // OptionalInt8EQ applies the EQ predicate on the "optional_int8" field.
 func OptionalInt8EQ(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1144,6 +1168,30 @@ func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt8, p.Without(v...))
+		},
+	)
+}
+
+// OptionalInt8IsNull applies the IsNull predicate on the "optional_int8" field.
+func OptionalInt8IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldOptionalInt8)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldOptionalInt8)
+		},
+	)
+}
+
+// OptionalInt8NotNull applies the NotNull predicate on the "optional_int8" field.
+func OptionalInt8NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldOptionalInt8)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldOptionalInt8)
 		},
 	)
 }
@@ -1264,6 +1312,30 @@ func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
 	)
 }
 
+// OptionalInt16IsNull applies the IsNull predicate on the "optional_int16" field.
+func OptionalInt16IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldOptionalInt16)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldOptionalInt16)
+		},
+	)
+}
+
+// OptionalInt16NotNull applies the NotNull predicate on the "optional_int16" field.
+func OptionalInt16NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldOptionalInt16)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldOptionalInt16)
+		},
+	)
+}
+
 // OptionalInt32EQ applies the EQ predicate on the "optional_int32" field.
 func OptionalInt32EQ(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1376,6 +1448,30 @@ func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt32, p.Without(v...))
+		},
+	)
+}
+
+// OptionalInt32IsNull applies the IsNull predicate on the "optional_int32" field.
+func OptionalInt32IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldOptionalInt32)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldOptionalInt32)
+		},
+	)
+}
+
+// OptionalInt32NotNull applies the NotNull predicate on the "optional_int32" field.
+func OptionalInt32NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldOptionalInt32)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldOptionalInt32)
 		},
 	)
 }
@@ -1496,6 +1592,30 @@ func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
 	)
 }
 
+// OptionalInt64IsNull applies the IsNull predicate on the "optional_int64" field.
+func OptionalInt64IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldOptionalInt64)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldOptionalInt64)
+		},
+	)
+}
+
+// OptionalInt64NotNull applies the NotNull predicate on the "optional_int64" field.
+func OptionalInt64NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldOptionalInt64)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldOptionalInt64)
+		},
+	)
+}
+
 // NullableIntEQ applies the EQ predicate on the "nullable_int" field.
 func NullableIntEQ(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1608,6 +1728,30 @@ func NullableIntNotIn(vs ...int) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNullableInt, p.Without(v...))
+		},
+	)
+}
+
+// NullableIntIsNull applies the IsNull predicate on the "nullable_int" field.
+func NullableIntIsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNullableInt)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNullableInt)
+		},
+	)
+}
+
+// NullableIntNotNull applies the NotNull predicate on the "nullable_int" field.
+func NullableIntNotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNullableInt)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNullableInt)
 		},
 	)
 }
@@ -1728,6 +1872,30 @@ func NullableInt8NotIn(vs ...int8) predicate.FieldType {
 	)
 }
 
+// NullableInt8IsNull applies the IsNull predicate on the "nullable_int8" field.
+func NullableInt8IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNullableInt8)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNullableInt8)
+		},
+	)
+}
+
+// NullableInt8NotNull applies the NotNull predicate on the "nullable_int8" field.
+func NullableInt8NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNullableInt8)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNullableInt8)
+		},
+	)
+}
+
 // NullableInt16EQ applies the EQ predicate on the "nullable_int16" field.
 func NullableInt16EQ(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1840,6 +2008,30 @@ func NullableInt16NotIn(vs ...int16) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNullableInt16, p.Without(v...))
+		},
+	)
+}
+
+// NullableInt16IsNull applies the IsNull predicate on the "nullable_int16" field.
+func NullableInt16IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNullableInt16)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNullableInt16)
+		},
+	)
+}
+
+// NullableInt16NotNull applies the NotNull predicate on the "nullable_int16" field.
+func NullableInt16NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNullableInt16)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNullableInt16)
 		},
 	)
 }
@@ -1960,6 +2152,30 @@ func NullableInt32NotIn(vs ...int32) predicate.FieldType {
 	)
 }
 
+// NullableInt32IsNull applies the IsNull predicate on the "nullable_int32" field.
+func NullableInt32IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNullableInt32)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNullableInt32)
+		},
+	)
+}
+
+// NullableInt32NotNull applies the NotNull predicate on the "nullable_int32" field.
+func NullableInt32NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNullableInt32)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNullableInt32)
+		},
+	)
+}
+
 // NullableInt64EQ applies the EQ predicate on the "nullable_int64" field.
 func NullableInt64EQ(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -2072,6 +2288,30 @@ func NullableInt64NotIn(vs ...int64) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNullableInt64, p.Without(v...))
+		},
+	)
+}
+
+// NullableInt64IsNull applies the IsNull predicate on the "nullable_int64" field.
+func NullableInt64IsNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNullableInt64)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNullableInt64)
+		},
+	)
+}
+
+// NullableInt64NotNull applies the NotNull predicate on the "nullable_int64" field.
+func NullableInt64NotNull() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNullableInt64)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNullableInt64)
 		},
 	)
 }

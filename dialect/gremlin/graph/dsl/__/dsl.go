@@ -14,6 +14,9 @@ func Not(args ...interface{}) *dsl.Traversal { return New().Not(args...) }
 // Has is the api for calling __.Has().
 func Has(args ...interface{}) *dsl.Traversal { return New().Has(args...) }
 
+// HasNot is the api for calling __.HasNot().
+func HasNot(args ...interface{}) *dsl.Traversal { return New().HasNot(args...) }
+
 // Or is the api for calling __.Or().
 func Or(args ...interface{}) *dsl.Traversal { return New().Or(args...) }
 

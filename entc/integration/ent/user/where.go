@@ -788,6 +788,30 @@ func NicknameHasSuffix(v string) predicate.User {
 	)
 }
 
+// NicknameIsNull applies the IsNull predicate on the "nickname" field.
+func NicknameIsNull() predicate.User {
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNickname)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNickname)
+		},
+	)
+}
+
+// NicknameNotNull applies the NotNull predicate on the "nickname" field.
+func NicknameNotNull() predicate.User {
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNickname)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNickname)
+		},
+	)
+}
+
 // PhoneEQ applies the EQ predicate on the "phone" field.
 func PhoneEQ(v string) predicate.User {
 	return predicate.UserPerDialect(
@@ -936,6 +960,30 @@ func PhoneHasSuffix(v string) predicate.User {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldPhone, p.EndingWith(v))
+		},
+	)
+}
+
+// PhoneIsNull applies the IsNull predicate on the "phone" field.
+func PhoneIsNull() predicate.User {
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldPhone)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldPhone)
+		},
+	)
+}
+
+// PhoneNotNull applies the NotNull predicate on the "phone" field.
+func PhoneNotNull() predicate.User {
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldPhone)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldPhone)
 		},
 	)
 }

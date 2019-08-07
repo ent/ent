@@ -273,6 +273,41 @@ func Predicate(t *testing.T, client *ent.Client) {
 		AllX(ctx)
 	require.Equal(f3.Name, files[0].Name)
 	require.Equal(f4.Name, files[1].Name)
+
+	require.Zero(client.File.Query().Where(file.UserNotNull()).CountX(ctx))
+	require.Equal(4, client.File.Query().Where(file.UserIsNull()).CountX(ctx))
+	require.Zero(client.File.Query().Where(file.GroupNotNull()).CountX(ctx))
+	require.Equal(4, client.File.Query().Where(file.GroupIsNull()).CountX(ctx))
+
+	f1 = f1.Update().SetUser("a8m").SaveX(ctx)
+	require.NotNil(f1.User)
+	require.Equal("a8m", *f1.User)
+	require.Equal(3, client.File.Query().Where(file.UserIsNull()).CountX(ctx))
+	require.Equal(f1.Name, client.File.Query().Where(file.UserNotNull()).OnlyX(ctx).Name)
+	f5 := client.File.Create().SetName("5").SetSize(40).SetUser("mashraki").SaveX(ctx)
+	require.NotNil(f5.User)
+	require.Equal("mashraki", *f5.User)
+	require.Equal(3, client.File.Query().Where(file.UserIsNull()).CountX(ctx))
+	require.Equal(2, client.File.Query().Where(file.UserNotNull()).CountX(ctx))
+
+	require.Equal(5, client.File.Query().Where(file.GroupIsNull()).CountX(ctx))
+	f4 = f4.Update().SetGroup("fbc").SaveX(ctx)
+	require.Equal(1, client.File.Query().Where(file.GroupNotNull()).CountX(ctx))
+	require.Equal(4, client.File.Query().Where(file.GroupIsNull()).CountX(ctx))
+	require.Equal(
+		5,
+		client.File.Query().
+			Where(
+				file.Or(
+					file.GroupIsNull(),
+					file.And(
+						file.GroupNotNull(),
+						file.Name(f4.Name),
+					),
+				),
+			).
+			CountX(ctx),
+	)
 }
 
 func Relation(t *testing.T, client *ent.Client) {

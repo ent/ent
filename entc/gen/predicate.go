@@ -11,6 +11,8 @@ const (
 	GTE                 // >=
 	LT                  // <
 	LTE                 // <=
+	IsNull              // IS NULL / has
+	NotNull             // IS NOT NULL / hasNot
 	In                  // within
 	NotIn               // without
 	Contains            // containing
@@ -39,6 +41,11 @@ func (o Op) Variadic() bool {
 	return o == In || o == NotIn
 }
 
+// Niladic reports if the predicate is a niladic predicate.
+func (o Op) Niladic() bool {
+	return o == IsNull || o == NotNull
+}
+
 var (
 	// operations text.
 	opText = [...]string{
@@ -48,6 +55,8 @@ var (
 		GTE:       "GTE",
 		LT:        "LT",
 		LTE:       "LTE",
+		IsNull:    "IsNull",
+		NotNull:   "NotNull",
 		Contains:  "Contains",
 		HasPrefix: "HasPrefix",
 		HasSuffix: "HasSuffix",
@@ -56,6 +65,8 @@ var (
 	}
 	// operations code in gremlin.
 	gremlinCode = [...]string{
+		IsNull:    "HasNot",
+		NotNull:   "Has",
 		In:        "Within",
 		NotIn:     "Without",
 		Contains:  "Containing",
@@ -63,7 +74,8 @@ var (
 		HasSuffix: "EndingWith",
 	}
 	// operations per type.
-	boolOps    = []Op{EQ, NEQ}
-	numericOps = append(boolOps[:], GT, GTE, LT, LTE, In, NotIn)
-	stringOps  = append(numericOps[:], Contains, HasPrefix, HasSuffix)
+	boolOps     = []Op{EQ, NEQ}
+	numericOps  = append(boolOps[:], GT, GTE, LT, LTE, In, NotIn)
+	stringOps   = append(numericOps[:], Contains, HasPrefix, HasSuffix)
+	nillableOps = []Op{IsNull, NotNull}
 )

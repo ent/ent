@@ -112,6 +112,12 @@ func (t *Traversal) Has(args ...interface{}) *Traversal {
 	return t.Add(Dot, NewFunc("has", args...))
 }
 
+// HasNot filters vertices, edges and vertex properties based on the non-existence of properties.
+// See: http://tinkerpop.apache.org/docs/current/reference/#has-step.
+func (t *Traversal) HasNot(args ...interface{}) *Traversal {
+	return t.Add(Dot, NewFunc("hasNot", args...))
+}
+
 // HasID filters vertices, edges and vertex properties based on their identifier.
 func (t *Traversal) HasID(args ...interface{}) *Traversal {
 	return t.Add(Dot, NewFunc("hasId", args...))

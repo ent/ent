@@ -193,6 +193,17 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: Delete("users").
+				Where(IsNull("parent_id")),
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL",
+		},
+		{
+			input: Delete("users").
+				Where(IsNull("parent_id").And().NotIn("name", "foo", "bar")),
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NULL AND `name` NOT IN (?, ?)",
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: Delete("users").
 				Where(False().And().False()),
 			wantQuery: "DELETE FROM `users` WHERE FALSE AND FALSE",
 		},

@@ -466,6 +466,24 @@ func AddressHasSuffix(v string) predicate.User {
 	)
 }
 
+// AddressIsNull applies the IsNull predicate on the "address" field.
+func AddressIsNull() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldAddress)))
+		},
+	)
+}
+
+// AddressNotNull applies the NotNull predicate on the "address" field.
+func AddressNotNull() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldAddress)))
+		},
+	)
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(

@@ -19,5 +19,10 @@ func (File) Fields() []ent.Field {
 			Default(math.MaxInt32).
 			Positive(),
 		field.String("name"),
+		field.String("user").
+			Optional().
+			Nullable(),
+		field.String("group").
+			Optional(),
 	}
 }

@@ -735,27 +735,27 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	if ftuo.nullable_int != nil {
 		update = true
 		builder.Set(fieldtype.FieldNullableInt, *ftuo.nullable_int)
-		*ft.NullableInt = *ftuo.nullable_int
+		ft.NullableInt = ftuo.nullable_int
 	}
 	if ftuo.nullable_int8 != nil {
 		update = true
 		builder.Set(fieldtype.FieldNullableInt8, *ftuo.nullable_int8)
-		*ft.NullableInt8 = *ftuo.nullable_int8
+		ft.NullableInt8 = ftuo.nullable_int8
 	}
 	if ftuo.nullable_int16 != nil {
 		update = true
 		builder.Set(fieldtype.FieldNullableInt16, *ftuo.nullable_int16)
-		*ft.NullableInt16 = *ftuo.nullable_int16
+		ft.NullableInt16 = ftuo.nullable_int16
 	}
 	if ftuo.nullable_int32 != nil {
 		update = true
 		builder.Set(fieldtype.FieldNullableInt32, *ftuo.nullable_int32)
-		*ft.NullableInt32 = *ftuo.nullable_int32
+		ft.NullableInt32 = ftuo.nullable_int32
 	}
 	if ftuo.nullable_int64 != nil {
 		update = true
 		builder.Set(fieldtype.FieldNullableInt64, *ftuo.nullable_int64)
-		*ft.NullableInt64 = *ftuo.nullable_int64
+		ft.NullableInt64 = ftuo.nullable_int64
 	}
 	if update {
 		query, args := builder.Query()

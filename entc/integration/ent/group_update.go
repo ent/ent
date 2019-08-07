@@ -927,7 +927,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	if guo._type != nil {
 		update = true
 		builder.Set(group.FieldType, *guo._type)
-		*gr.Type = *guo._type
+		gr.Type = guo._type
 	}
 	if guo.max_users != nil {
 		update = true

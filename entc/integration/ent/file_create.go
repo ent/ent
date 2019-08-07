@@ -20,8 +20,10 @@ import (
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	config
-	size *int
-	name *string
+	size  *int
+	name  *string
+	user  *string
+	group *string
 }
 
 // SetSize sets the size field.
@@ -41,6 +43,34 @@ func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
 // SetName sets the name field.
 func (fc *FileCreate) SetName(s string) *FileCreate {
 	fc.name = &s
+	return fc
+}
+
+// SetUser sets the user field.
+func (fc *FileCreate) SetUser(s string) *FileCreate {
+	fc.user = &s
+	return fc
+}
+
+// SetNillableUser sets the user field if the given value is not nil.
+func (fc *FileCreate) SetNillableUser(s *string) *FileCreate {
+	if s != nil {
+		fc.SetUser(*s)
+	}
+	return fc
+}
+
+// SetGroup sets the group field.
+func (fc *FileCreate) SetGroup(s string) *FileCreate {
+	fc.group = &s
+	return fc
+}
+
+// SetNillableGroup sets the group field if the given value is not nil.
+func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
+	if s != nil {
+		fc.SetGroup(*s)
+	}
 	return fc
 }
 
@@ -93,6 +123,14 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		builder.Set(file.FieldName, *fc.name)
 		f.Name = *fc.name
 	}
+	if fc.user != nil {
+		builder.Set(file.FieldUser, *fc.user)
+		f.User = fc.user
+	}
+	if fc.group != nil {
+		builder.Set(file.FieldGroup, *fc.group)
+		f.Group = *fc.group
+	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)
@@ -131,6 +169,12 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	if fc.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fc.name)
+	}
+	if fc.user != nil {
+		v.Property(dsl.Single, file.FieldUser, *fc.user)
+	}
+	if fc.group != nil {
+		v.Property(dsl.Single, file.FieldGroup, *fc.group)
 	}
 	return v.ValueMap(true)
 }

@@ -22,6 +22,8 @@ type FileUpdate struct {
 	config
 	size       *int
 	name       *string
+	user       *string
+	group      *string
 	predicates []predicate.File
 }
 
@@ -48,6 +50,34 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 // SetName sets the name field.
 func (fu *FileUpdate) SetName(s string) *FileUpdate {
 	fu.name = &s
+	return fu
+}
+
+// SetUser sets the user field.
+func (fu *FileUpdate) SetUser(s string) *FileUpdate {
+	fu.user = &s
+	return fu
+}
+
+// SetNillableUser sets the user field if the given value is not nil.
+func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
+	if s != nil {
+		fu.SetUser(*s)
+	}
+	return fu
+}
+
+// SetGroup sets the group field.
+func (fu *FileUpdate) SetGroup(s string) *FileUpdate {
+	fu.group = &s
+	return fu
+}
+
+// SetNillableGroup sets the group field if the given value is not nil.
+func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
+	if s != nil {
+		fu.SetGroup(*s)
+	}
 	return fu
 }
 
@@ -130,6 +160,14 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(file.FieldName, *fu.name)
 	}
+	if fu.user != nil {
+		update = true
+		builder.Set(file.FieldUser, *fu.user)
+	}
+	if fu.group != nil {
+		update = true
+		builder.Set(file.FieldGroup, *fu.group)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -168,6 +206,12 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if fu.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fu.name)
 	}
+	if fu.user != nil {
+		v.Property(dsl.Single, file.FieldUser, *fu.user)
+	}
+	if fu.group != nil {
+		v.Property(dsl.Single, file.FieldGroup, *fu.group)
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -176,9 +220,11 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 // FileUpdateOne is the builder for updating a single File entity.
 type FileUpdateOne struct {
 	config
-	id   string
-	size *int
-	name *string
+	id    string
+	size  *int
+	name  *string
+	user  *string
+	group *string
 }
 
 // SetSize sets the size field.
@@ -198,6 +244,34 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 // SetName sets the name field.
 func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
 	fuo.name = &s
+	return fuo
+}
+
+// SetUser sets the user field.
+func (fuo *FileUpdateOne) SetUser(s string) *FileUpdateOne {
+	fuo.user = &s
+	return fuo
+}
+
+// SetNillableUser sets the user field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
+	if s != nil {
+		fuo.SetUser(*s)
+	}
+	return fuo
+}
+
+// SetGroup sets the group field.
+func (fuo *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
+	fuo.group = &s
+	return fuo
+}
+
+// SetNillableGroup sets the group field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
+	if s != nil {
+		fuo.SetGroup(*s)
+	}
 	return fuo
 }
 
@@ -285,6 +359,16 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		builder.Set(file.FieldName, *fuo.name)
 		f.Name = *fuo.name
 	}
+	if fuo.user != nil {
+		update = true
+		builder.Set(file.FieldUser, *fuo.user)
+		f.User = fuo.user
+	}
+	if fuo.group != nil {
+		update = true
+		builder.Set(file.FieldGroup, *fuo.group)
+		f.Group = *fuo.group
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -323,6 +407,12 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if fuo.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fuo.name)
+	}
+	if fuo.user != nil {
+		v.Property(dsl.Single, file.FieldUser, *fuo.user)
+	}
+	if fuo.group != nil {
+		v.Property(dsl.Single, file.FieldGroup, *fuo.group)
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

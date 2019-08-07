@@ -45,16 +45,20 @@ var (
 	}
 )
 
-// ops returns all operations for given type.
-func ops(f *Field) []Op {
+// ops returns all operations for given field.
+func ops(f *Field) (op []Op) {
 	switch t := f.Type; {
 	case t == field.TypeBool:
-		return boolOps
+		op = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
-		return stringOps
+		op = stringOps
 	default:
-		return numericOps
+		op = numericOps
 	}
+	if f.Nullable || f.Optional {
+		op = append(op, nillableOps...)
+	}
+	return op
 }
 
 // xrange generates a slice of len n.

@@ -15,6 +15,10 @@ const (
 	FieldSize = "size"
 	// FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+	// FieldUser holds the string denoting the user vertex property in the database.
+	FieldUser = "user"
+	// FieldGroup holds the string denoting the group vertex property in the database.
+	FieldGroup = "group"
 
 	// Table holds the table name of the file in the database.
 	Table = "files"
@@ -25,6 +29,8 @@ var Columns = []string{
 	FieldID,
 	FieldSize,
 	FieldName,
+	FieldUser,
+	FieldGroup,
 }
 
 var (

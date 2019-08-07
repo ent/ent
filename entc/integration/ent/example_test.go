@@ -119,6 +119,8 @@ func ExampleFile() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetUser("string").
+		SetGroup("string").
 		SaveX(ctx)
 	log.Println("file created:", f)
 
@@ -142,6 +144,8 @@ func ExampleGroup() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetUser("string").
+		SetGroup("string").
 		SaveX(ctx)
 	log.Println("file created:", f0)
 	u1 := client.User.
@@ -306,6 +310,8 @@ func ExampleUser() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetUser("string").
+		SetGroup("string").
 		SaveX(ctx)
 	log.Println("file created:", f2)
 	gr3 := client.Group.

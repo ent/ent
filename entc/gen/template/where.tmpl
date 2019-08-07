@@ -52,7 +52,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 	{{ $func := print (pascal $f.Name) ($op.Name) }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
-	func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $f.Type }}) predicate.{{ $.Name }} {
+	func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $f.Type }}{{ end }}) predicate.{{ $.Name }} {
 		{{- if $op.Variadic }}
 			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
