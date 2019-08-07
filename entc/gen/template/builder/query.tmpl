@@ -63,12 +63,12 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 				{{ end -}}
 			{{ end -}}
 			}
-		{{- else }}
+		{{ else }}
 			{{- with extend $ "Receiver" $receiver "Edge" $e -}}
 				{{ $tmpl := printf "dialect/%s/query/path" (index $.Storage 0) }}
-				{{- xtemplate $tmpl . -}}
-			{{ end -}}
-		{{- end }}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
+		{{- end -}}
 		return query
 	}
 {{ end }}
