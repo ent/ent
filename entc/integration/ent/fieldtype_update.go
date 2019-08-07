@@ -30,11 +30,11 @@ type FieldTypeUpdate struct {
 	optional_int16 *int16
 	optional_int32 *int32
 	optional_int64 *int64
-	nullable_int   *int
-	nullable_int8  *int8
-	nullable_int16 *int16
-	nullable_int32 *int32
-	nullable_int64 *int64
+	nillable_int   *int
+	nillable_int8  *int8
+	nillable_int16 *int16
+	nillable_int32 *int32
+	nillable_int64 *int64
 	predicates     []predicate.FieldType
 }
 
@@ -144,72 +144,72 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt64(i *int64) *FieldTypeUpdate 
 	return ftu
 }
 
-// SetNullableInt sets the nullable_int field.
-func (ftu *FieldTypeUpdate) SetNullableInt(i int) *FieldTypeUpdate {
-	ftu.nullable_int = &i
+// SetNillableInt sets the nillable_int field.
+func (ftu *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
+	ftu.nillable_int = &i
 	return ftu
 }
 
-// SetNillableNullableInt sets the nullable_int field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNullableInt(i *int) *FieldTypeUpdate {
+// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
 	if i != nil {
-		ftu.SetNullableInt(*i)
+		ftu.SetNillableInt(*i)
 	}
 	return ftu
 }
 
-// SetNullableInt8 sets the nullable_int8 field.
-func (ftu *FieldTypeUpdate) SetNullableInt8(i int8) *FieldTypeUpdate {
-	ftu.nullable_int8 = &i
+// SetNillableInt8 sets the nillable_int8 field.
+func (ftu *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
+	ftu.nillable_int8 = &i
 	return ftu
 }
 
-// SetNillableNullableInt8 sets the nullable_int8 field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNullableInt8(i *int8) *FieldTypeUpdate {
+// SetNillableNillableInt8 sets the nillable_int8 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
 	if i != nil {
-		ftu.SetNullableInt8(*i)
+		ftu.SetNillableInt8(*i)
 	}
 	return ftu
 }
 
-// SetNullableInt16 sets the nullable_int16 field.
-func (ftu *FieldTypeUpdate) SetNullableInt16(i int16) *FieldTypeUpdate {
-	ftu.nullable_int16 = &i
+// SetNillableInt16 sets the nillable_int16 field.
+func (ftu *FieldTypeUpdate) SetNillableInt16(i int16) *FieldTypeUpdate {
+	ftu.nillable_int16 = &i
 	return ftu
 }
 
-// SetNillableNullableInt16 sets the nullable_int16 field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNullableInt16(i *int16) *FieldTypeUpdate {
+// SetNillableNillableInt16 sets the nillable_int16 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate {
 	if i != nil {
-		ftu.SetNullableInt16(*i)
+		ftu.SetNillableInt16(*i)
 	}
 	return ftu
 }
 
-// SetNullableInt32 sets the nullable_int32 field.
-func (ftu *FieldTypeUpdate) SetNullableInt32(i int32) *FieldTypeUpdate {
-	ftu.nullable_int32 = &i
+// SetNillableInt32 sets the nillable_int32 field.
+func (ftu *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
+	ftu.nillable_int32 = &i
 	return ftu
 }
 
-// SetNillableNullableInt32 sets the nullable_int32 field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNullableInt32(i *int32) *FieldTypeUpdate {
+// SetNillableNillableInt32 sets the nillable_int32 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate {
 	if i != nil {
-		ftu.SetNullableInt32(*i)
+		ftu.SetNillableInt32(*i)
 	}
 	return ftu
 }
 
-// SetNullableInt64 sets the nullable_int64 field.
-func (ftu *FieldTypeUpdate) SetNullableInt64(i int64) *FieldTypeUpdate {
-	ftu.nullable_int64 = &i
+// SetNillableInt64 sets the nillable_int64 field.
+func (ftu *FieldTypeUpdate) SetNillableInt64(i int64) *FieldTypeUpdate {
+	ftu.nillable_int64 = &i
 	return ftu
 }
 
-// SetNillableNullableInt64 sets the nullable_int64 field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNullableInt64(i *int64) *FieldTypeUpdate {
+// SetNillableNillableInt64 sets the nillable_int64 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate {
 	if i != nil {
-		ftu.SetNullableInt64(*i)
+		ftu.SetNillableInt64(*i)
 	}
 	return ftu
 }
@@ -320,25 +320,25 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt64, *ftu.optional_int64)
 	}
-	if ftu.nullable_int != nil {
+	if ftu.nillable_int != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt, *ftu.nullable_int)
+		builder.Set(fieldtype.FieldNillableInt, *ftu.nillable_int)
 	}
-	if ftu.nullable_int8 != nil {
+	if ftu.nillable_int8 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt8, *ftu.nullable_int8)
+		builder.Set(fieldtype.FieldNillableInt8, *ftu.nillable_int8)
 	}
-	if ftu.nullable_int16 != nil {
+	if ftu.nillable_int16 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt16, *ftu.nullable_int16)
+		builder.Set(fieldtype.FieldNillableInt16, *ftu.nillable_int16)
 	}
-	if ftu.nullable_int32 != nil {
+	if ftu.nillable_int32 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt32, *ftu.nullable_int32)
+		builder.Set(fieldtype.FieldNillableInt32, *ftu.nillable_int32)
 	}
-	if ftu.nullable_int64 != nil {
+	if ftu.nillable_int64 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt64, *ftu.nullable_int64)
+		builder.Set(fieldtype.FieldNillableInt64, *ftu.nillable_int64)
 	}
 	if update {
 		query, args := builder.Query()
@@ -402,20 +402,20 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.optional_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, *ftu.optional_int64)
 	}
-	if ftu.nullable_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt, *ftu.nullable_int)
+	if ftu.nillable_int != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt, *ftu.nillable_int)
 	}
-	if ftu.nullable_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt8, *ftu.nullable_int8)
+	if ftu.nillable_int8 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt8, *ftu.nillable_int8)
 	}
-	if ftu.nullable_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt16, *ftu.nullable_int16)
+	if ftu.nillable_int16 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt16, *ftu.nillable_int16)
 	}
-	if ftu.nullable_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt32, *ftu.nullable_int32)
+	if ftu.nillable_int32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt32, *ftu.nillable_int32)
 	}
-	if ftu.nullable_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt64, *ftu.nullable_int64)
+	if ftu.nillable_int64 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftu.nillable_int64)
 	}
 	v.Count()
 	trs = append(trs, v)
@@ -436,11 +436,11 @@ type FieldTypeUpdateOne struct {
 	optional_int16 *int16
 	optional_int32 *int32
 	optional_int64 *int64
-	nullable_int   *int
-	nullable_int8  *int8
-	nullable_int16 *int16
-	nullable_int32 *int32
-	nullable_int64 *int64
+	nillable_int   *int
+	nillable_int8  *int8
+	nillable_int16 *int16
+	nillable_int32 *int32
+	nillable_int64 *int64
 }
 
 // SetInt sets the int field.
@@ -543,72 +543,72 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt64(i *int64) *FieldTypeUpd
 	return ftuo
 }
 
-// SetNullableInt sets the nullable_int field.
-func (ftuo *FieldTypeUpdateOne) SetNullableInt(i int) *FieldTypeUpdateOne {
-	ftuo.nullable_int = &i
+// SetNillableInt sets the nillable_int field.
+func (ftuo *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
+	ftuo.nillable_int = &i
 	return ftuo
 }
 
-// SetNillableNullableInt sets the nullable_int field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNullableInt(i *int) *FieldTypeUpdateOne {
+// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateOne {
 	if i != nil {
-		ftuo.SetNullableInt(*i)
+		ftuo.SetNillableInt(*i)
 	}
 	return ftuo
 }
 
-// SetNullableInt8 sets the nullable_int8 field.
-func (ftuo *FieldTypeUpdateOne) SetNullableInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.nullable_int8 = &i
+// SetNillableInt8 sets the nillable_int8 field.
+func (ftuo *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
+	ftuo.nillable_int8 = &i
 	return ftuo
 }
 
-// SetNillableNullableInt8 sets the nullable_int8 field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNullableInt8(i *int8) *FieldTypeUpdateOne {
+// SetNillableNillableInt8 sets the nillable_int8 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdateOne {
 	if i != nil {
-		ftuo.SetNullableInt8(*i)
+		ftuo.SetNillableInt8(*i)
 	}
 	return ftuo
 }
 
-// SetNullableInt16 sets the nullable_int16 field.
-func (ftuo *FieldTypeUpdateOne) SetNullableInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.nullable_int16 = &i
+// SetNillableInt16 sets the nillable_int16 field.
+func (ftuo *FieldTypeUpdateOne) SetNillableInt16(i int16) *FieldTypeUpdateOne {
+	ftuo.nillable_int16 = &i
 	return ftuo
 }
 
-// SetNillableNullableInt16 sets the nullable_int16 field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNullableInt16(i *int16) *FieldTypeUpdateOne {
+// SetNillableNillableInt16 sets the nillable_int16 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpdateOne {
 	if i != nil {
-		ftuo.SetNullableInt16(*i)
+		ftuo.SetNillableInt16(*i)
 	}
 	return ftuo
 }
 
-// SetNullableInt32 sets the nullable_int32 field.
-func (ftuo *FieldTypeUpdateOne) SetNullableInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.nullable_int32 = &i
+// SetNillableInt32 sets the nillable_int32 field.
+func (ftuo *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
+	ftuo.nillable_int32 = &i
 	return ftuo
 }
 
-// SetNillableNullableInt32 sets the nullable_int32 field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNullableInt32(i *int32) *FieldTypeUpdateOne {
+// SetNillableNillableInt32 sets the nillable_int32 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpdateOne {
 	if i != nil {
-		ftuo.SetNullableInt32(*i)
+		ftuo.SetNillableInt32(*i)
 	}
 	return ftuo
 }
 
-// SetNullableInt64 sets the nullable_int64 field.
-func (ftuo *FieldTypeUpdateOne) SetNullableInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.nullable_int64 = &i
+// SetNillableInt64 sets the nillable_int64 field.
+func (ftuo *FieldTypeUpdateOne) SetNillableInt64(i int64) *FieldTypeUpdateOne {
+	ftuo.nillable_int64 = &i
 	return ftuo
 }
 
-// SetNillableNullableInt64 sets the nullable_int64 field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNullableInt64(i *int64) *FieldTypeUpdateOne {
+// SetNillableNillableInt64 sets the nillable_int64 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpdateOne {
 	if i != nil {
-		ftuo.SetNullableInt64(*i)
+		ftuo.SetNillableInt64(*i)
 	}
 	return ftuo
 }
@@ -732,30 +732,30 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		builder.Set(fieldtype.FieldOptionalInt64, *ftuo.optional_int64)
 		ft.OptionalInt64 = *ftuo.optional_int64
 	}
-	if ftuo.nullable_int != nil {
+	if ftuo.nillable_int != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt, *ftuo.nullable_int)
-		ft.NullableInt = ftuo.nullable_int
+		builder.Set(fieldtype.FieldNillableInt, *ftuo.nillable_int)
+		ft.NillableInt = ftuo.nillable_int
 	}
-	if ftuo.nullable_int8 != nil {
+	if ftuo.nillable_int8 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt8, *ftuo.nullable_int8)
-		ft.NullableInt8 = ftuo.nullable_int8
+		builder.Set(fieldtype.FieldNillableInt8, *ftuo.nillable_int8)
+		ft.NillableInt8 = ftuo.nillable_int8
 	}
-	if ftuo.nullable_int16 != nil {
+	if ftuo.nillable_int16 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt16, *ftuo.nullable_int16)
-		ft.NullableInt16 = ftuo.nullable_int16
+		builder.Set(fieldtype.FieldNillableInt16, *ftuo.nillable_int16)
+		ft.NillableInt16 = ftuo.nillable_int16
 	}
-	if ftuo.nullable_int32 != nil {
+	if ftuo.nillable_int32 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt32, *ftuo.nullable_int32)
-		ft.NullableInt32 = ftuo.nullable_int32
+		builder.Set(fieldtype.FieldNillableInt32, *ftuo.nillable_int32)
+		ft.NillableInt32 = ftuo.nillable_int32
 	}
-	if ftuo.nullable_int64 != nil {
+	if ftuo.nillable_int64 != nil {
 		update = true
-		builder.Set(fieldtype.FieldNullableInt64, *ftuo.nullable_int64)
-		ft.NullableInt64 = ftuo.nullable_int64
+		builder.Set(fieldtype.FieldNillableInt64, *ftuo.nillable_int64)
+		ft.NillableInt64 = ftuo.nillable_int64
 	}
 	if update {
 		query, args := builder.Query()
@@ -820,20 +820,20 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if ftuo.optional_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, *ftuo.optional_int64)
 	}
-	if ftuo.nullable_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt, *ftuo.nullable_int)
+	if ftuo.nillable_int != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt, *ftuo.nillable_int)
 	}
-	if ftuo.nullable_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt8, *ftuo.nullable_int8)
+	if ftuo.nillable_int8 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt8, *ftuo.nillable_int8)
 	}
-	if ftuo.nullable_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt16, *ftuo.nullable_int16)
+	if ftuo.nillable_int16 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt16, *ftuo.nillable_int16)
 	}
-	if ftuo.nullable_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt32, *ftuo.nullable_int32)
+	if ftuo.nillable_int32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt32, *ftuo.nillable_int32)
 	}
-	if ftuo.nullable_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt64, *ftuo.nullable_int64)
+	if ftuo.nillable_int64 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftuo.nillable_int64)
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

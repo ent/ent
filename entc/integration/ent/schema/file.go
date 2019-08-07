@@ -21,7 +21,7 @@ func (File) Fields() []ent.Field {
 		field.String("name"),
 		field.String("user").
 			Optional().
-			Nullable(),
+			Nillable(),
 		field.String("group").
 			Optional(),
 	}

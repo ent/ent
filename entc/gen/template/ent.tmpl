@@ -12,7 +12,7 @@ type {{ $.Name }} struct {
 	ID {{ $.ID.Type }} `json:"id,omitempty"`
 	{{ range $_, $f := $.Fields -}}
 		// {{ pascal $f.Name }} holds the value of the "{{ $f.Name }}" field.
-    	{{ pascal $f.Name }} {{ if $f.Nullable }}*{{ end }}{{ $f.Type }} `{{ $f.StructTag }}`
+    	{{ pascal $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} `{{ $f.StructTag }}`
 	{{ end -}}
 	{{ range $_, $e := $.Edges -}}
 		{{/* ignore generating edge fields */}}
@@ -62,7 +62,7 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 	buf.WriteString("{{ $.Name }}(")
 	buf.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
 	{{- range $i, $f := $.Fields }}
-		{{- if $f.Nullable }}
+		{{- if $f.Nillable }}
 			if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
 				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", *v))
 			}

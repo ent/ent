@@ -19,7 +19,7 @@ var (
 				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }},
 				{{- if $c.Unique }} Unique: true,{{ end }}
 				{{- if $c.Increment }} Increment: true,{{ end }}
-				{{- if $c.Nullable }} Nullable: &nullable,{{ end }}
+				{{- if or $c.Nullable }} Nullable: &nullable,{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Default }} Default: "{{ . }}",{{ end }}

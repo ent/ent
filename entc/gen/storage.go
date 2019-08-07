@@ -27,12 +27,13 @@ func (m SchemaMode) Support(mode SchemaMode) bool { return m&mode != 0 }
 
 // Storage driver type for codegen.
 type Storage struct {
-	Name       string       // storage name.
-	Builder    reflect.Type // query builder type.
-	Dialects   []string     // supported dialects.
-	IdentName  string       // identifier name (fields and funcs).
-	Imports    []string     // import packages needed.
-	SchemaMode SchemaMode   // schema mode support.
+	Name       string          // storage name.
+	Builder    reflect.Type    // query builder type.
+	Dialects   []string        // supported dialects.
+	IdentName  string          // identifier name (fields and funcs).
+	Imports    []string        // import packages needed.
+	SchemaMode SchemaMode      // schema mode support.
+	OpCode     func(Op) string // operation code for predicates.
 }
 
 // StorageDrivers holds the storage driver options for entc.
@@ -46,6 +47,7 @@ var drivers = []*Storage{
 			"fbc/ent/dialect/sql",
 		},
 		SchemaMode: Unique | Cascade | Migrate,
+		OpCode:     opCodes(sqlCode[:]),
 	},
 	{
 		Name:      "gremlin",
@@ -61,6 +63,7 @@ var drivers = []*Storage{
 			"fbc/ent/dialect/gremlin/encoding/graphson",
 		},
 		SchemaMode: Unique,
+		OpCode:     opCodes(gremlinCode[:]),
 	},
 }
 
@@ -78,3 +81,30 @@ func NewStorage(s string) (*Storage, error) {
 
 // String implements the fmt.Stringer interface for template usage.
 func (s *Storage) String() string { return s.Name }
+
+var (
+	// exceptional operation names in sql.
+	sqlCode = [...]string{
+		IsNil:  "IsNull",
+		NotNil: "NotNull",
+	}
+	// exceptional operation names in gremlin.
+	gremlinCode = [...]string{
+		IsNil:     "HasNot",
+		NotNil:    "Has",
+		In:        "Within",
+		NotIn:     "Without",
+		Contains:  "Containing",
+		HasPrefix: "StartingWith",
+		HasSuffix: "EndingWith",
+	}
+)
+
+func opCodes(codes []string) func(Op) string {
+	return func(o Op) string {
+		if int(o) < len(codes) && codes[o] != "" {
+			return codes[o]
+		}
+		return o.Name()
+	}
+}

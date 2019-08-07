@@ -17,7 +17,7 @@ var (
 		Name: "T1",
 		Fields: []*load.Field{
 			{Name: "age", Type: field.TypeInt, Optional: true},
-			{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+			{Name: "expired_at", Type: field.TypeTime, Nillable: true},
 			{Name: "name", Type: field.TypeString, Default: true},
 		},
 		Edges: []*load.Edge{
@@ -81,7 +81,7 @@ func TestNewGraph(t *testing.T) {
 		require.Equal(optional, t1.Fields[i].Optional)
 	}
 	for i, nullable := range []bool{false, true, false} {
-		require.Equal(nullable, t1.Fields[i].Nullable)
+		require.Equal(nullable, t1.Fields[i].Nillable)
 	}
 	for i, value := range []bool{false, false, true} {
 		require.Equal(value, t1.Fields[i].HasDefault)
@@ -157,7 +157,7 @@ func TestGraph_Gen(t *testing.T) {
 		Name: "T1",
 		Fields: []*load.Field{
 			{Name: "age", Type: field.TypeInt, Optional: true},
-			{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+			{Name: "expired_at", Type: field.TypeTime, Nillable: true},
 			{Name: "name", Type: field.TypeString},
 		},
 		Edges: []*load.Edge{

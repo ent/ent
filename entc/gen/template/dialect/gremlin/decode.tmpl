@@ -11,7 +11,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
+			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
@@ -39,7 +39,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nullable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
+			{{- pascal $f.Name }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.Name }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {

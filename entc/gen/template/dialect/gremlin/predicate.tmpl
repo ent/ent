@@ -5,8 +5,9 @@
 {{- end }}
 
 {{ define "dialect/gremlin/predicate/id/ops" -}}
-{{- $op := $.Scope.Op -}}
-{{- $arg := $.Scope.Arg -}}
+	{{- $op := $.Scope.Op -}}
+	{{- $arg := $.Scope.Arg -}}
+	{{- $storage := $.Scope.Storage -}}
 	func(t *dsl.Traversal) {
 		{{- if $op.Variadic }}
 			v := make([]interface{}, len({{ $arg }}))
@@ -14,7 +15,7 @@
 				v[i] = {{ $arg }}[i]
 			}
 		{{- end }}
-		t.HasID(p.{{ $op.Gremlin }}({{ if $op.Variadic }}v...{{ else }}{{ $arg }}{{ end }}))
+		t.HasID(p.{{ call $storage.OpCode $op }}({{ if $op.Variadic }}v...{{ else }}{{ $arg }}{{ end }}))
 	}
 {{- end }}
 
@@ -28,11 +29,12 @@
 {{ define "dialect/gremlin/predicate/field/ops" -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $op := $.Scope.Op -}}
+	{{- $storage := $.Scope.Storage -}}
 	func(t *dsl.Traversal) {
 		{{- if not $op.Niladic }}
-		t.Has(Label, {{ $f.Constant }}, p.{{ $op.Gremlin }}(v{{ if $op.Variadic }}...{{ end }}))
+		t.Has(Label, {{ $f.Constant }}, p.{{ call $storage.OpCode $op }}(v{{ if $op.Variadic }}...{{ end }}))
 		{{- else }}
-		t.HasLabel(Label).{{ $op.Gremlin }}({{ $f.Constant }})
+		t.HasLabel(Label).{{ call $storage.OpCode $op }}({{ $f.Constant }})
 		{{- end }}
 	}
 {{- end }}

@@ -49,16 +49,16 @@ var (
 		{Name: "int16", Type: field.TypeInt16},
 		{Name: "int32", Type: field.TypeInt32},
 		{Name: "int64", Type: field.TypeInt64},
-		{Name: "optional_int", Type: field.TypeInt},
-		{Name: "optional_int8", Type: field.TypeInt8},
-		{Name: "optional_int16", Type: field.TypeInt16},
-		{Name: "optional_int32", Type: field.TypeInt32},
-		{Name: "optional_int64", Type: field.TypeInt64},
-		{Name: "nullable_int", Type: field.TypeInt},
-		{Name: "nullable_int8", Type: field.TypeInt8},
-		{Name: "nullable_int16", Type: field.TypeInt16},
-		{Name: "nullable_int32", Type: field.TypeInt32},
-		{Name: "nullable_int64", Type: field.TypeInt64},
+		{Name: "optional_int", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "optional_int8", Type: field.TypeInt8, Nullable: &nullable},
+		{Name: "optional_int16", Type: field.TypeInt16, Nullable: &nullable},
+		{Name: "optional_int32", Type: field.TypeInt32, Nullable: &nullable},
+		{Name: "optional_int64", Type: field.TypeInt64, Nullable: &nullable},
+		{Name: "nillable_int", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "nillable_int8", Type: field.TypeInt8, Nullable: &nullable},
+		{Name: "nillable_int16", Type: field.TypeInt16, Nullable: &nullable},
+		{Name: "nillable_int32", Type: field.TypeInt32, Nullable: &nullable},
+		{Name: "nillable_int64", Type: field.TypeInt64, Nullable: &nullable},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
 	FieldTypesTable = &schema.Table{
@@ -72,8 +72,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "size", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
-		{Name: "user", Type: field.TypeString},
-		{Name: "group", Type: field.TypeString},
+		{Name: "user", Type: field.TypeString, Nullable: &nullable},
+		{Name: "group", Type: field.TypeString, Nullable: &nullable},
 		{Name: "group_file_id", Type: field.TypeInt, Nullable: &nullable},
 		{Name: "user_file_id", Type: field.TypeInt, Nullable: &nullable},
 	}
@@ -104,8 +104,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "active", Type: field.TypeBool},
 		{Name: "expire", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeString},
-		{Name: "max_users", Type: field.TypeInt},
+		{Name: "type", Type: field.TypeString, Nullable: &nullable},
+		{Name: "max_users", Type: field.TypeInt, Nullable: &nullable},
 		{Name: "name", Type: field.TypeString},
 		{Name: "info_id", Type: field.TypeInt, Nullable: &nullable},
 	}
@@ -140,7 +140,7 @@ var (
 	// NodesColumns holds the columns for the "nodes" table.
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "value", Type: field.TypeInt},
+		{Name: "value", Type: field.TypeInt, Nullable: &nullable},
 		{Name: "prev_id", Type: field.TypeInt, Unique: true, Nullable: &nullable},
 	}
 	// NodesTable holds the schema information for the "nodes" table.
@@ -193,8 +193,8 @@ var (
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
 		{Name: "last", Type: field.TypeString},
-		{Name: "nickname", Type: field.TypeString, Unique: true},
-		{Name: "phone", Type: field.TypeString, Unique: true},
+		{Name: "nickname", Type: field.TypeString, Unique: true, Nullable: &nullable},
+		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: &nullable},
 		{Name: "group_blocked_id", Type: field.TypeInt, Nullable: &nullable},
 		{Name: "user_spouse_id", Type: field.TypeInt, Unique: true, Nullable: &nullable},
 		{Name: "parent_id", Type: field.TypeInt, Nullable: &nullable},

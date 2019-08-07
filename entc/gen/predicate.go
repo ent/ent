@@ -11,8 +11,8 @@ const (
 	GTE                 // >=
 	LT                  // <
 	LTE                 // <=
-	IsNull              // IS NULL / has
-	NotNull             // IS NOT NULL / hasNot
+	IsNil               // IS NULL / has
+	NotNil              // IS NOT NULL / hasNot
 	In                  // within
 	NotIn               // without
 	Contains            // containing
@@ -20,20 +20,12 @@ const (
 	HasSuffix           // endingWith
 )
 
-// Name returns the string representation of an operator.
+// Name returns the string representation of an predicate.
 func (o Op) Name() string {
 	if int(o) < len(opText) {
 		return opText[o]
 	}
 	return "Unknown"
-}
-
-// Gremlin returns the gremlin code representation of an operator.
-func (o Op) Gremlin() string {
-	if code := gremlinCode[o]; code != "" {
-		return code
-	}
-	return o.Name()
 }
 
 // Variadic reports if the predicate is a variadic function.
@@ -43,7 +35,7 @@ func (o Op) Variadic() bool {
 
 // Niladic reports if the predicate is a niladic predicate.
 func (o Op) Niladic() bool {
-	return o == IsNull || o == NotNull
+	return o == IsNil || o == NotNil
 }
 
 var (
@@ -55,27 +47,17 @@ var (
 		GTE:       "GTE",
 		LT:        "LT",
 		LTE:       "LTE",
-		IsNull:    "IsNull",
-		NotNull:   "NotNull",
+		IsNil:     "IsNil",
+		NotNil:    "NotNil",
 		Contains:  "Contains",
 		HasPrefix: "HasPrefix",
 		HasSuffix: "HasSuffix",
 		In:        "In",
 		NotIn:     "NotIn",
 	}
-	// operations code in gremlin.
-	gremlinCode = [...]string{
-		IsNull:    "HasNot",
-		NotNull:   "Has",
-		In:        "Within",
-		NotIn:     "Without",
-		Contains:  "Containing",
-		HasPrefix: "StartingWith",
-		HasSuffix: "EndingWith",
-	}
 	// operations per type.
 	boolOps     = []Op{EQ, NEQ}
 	numericOps  = append(boolOps[:], GT, GTE, LT, LTE, In, NotIn)
 	stringOps   = append(numericOps[:], Contains, HasPrefix, HasSuffix)
-	nillableOps = []Op{IsNull, NotNull}
+	nillableOps = []Op{IsNil, NotNil}
 )

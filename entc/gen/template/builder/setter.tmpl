@@ -11,7 +11,7 @@
 		return {{ $receiver }}
 	}
 	{{/* avoid generting nillable setters for slices because the nil value for slice is valid */}}
-	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Nullable $f.HasDefault) }}
+	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Nillable $f.HasDefault) }}
 		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
 		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {

@@ -624,8 +624,8 @@ func UserHasSuffix(v string) predicate.File {
 	)
 }
 
-// UserIsNull applies the IsNull predicate on the "user" field.
-func UserIsNull() predicate.File {
+// UserIsNil applies the IsNil predicate on the "user" field.
+func UserIsNil() predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldUser)))
@@ -636,8 +636,8 @@ func UserIsNull() predicate.File {
 	)
 }
 
-// UserNotNull applies the NotNull predicate on the "user" field.
-func UserNotNull() predicate.File {
+// UserNotNil applies the NotNil predicate on the "user" field.
+func UserNotNil() predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldUser)))
@@ -800,8 +800,8 @@ func GroupHasSuffix(v string) predicate.File {
 	)
 }
 
-// GroupIsNull applies the IsNull predicate on the "group" field.
-func GroupIsNull() predicate.File {
+// GroupIsNil applies the IsNil predicate on the "group" field.
+func GroupIsNil() predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldGroup)))
@@ -812,8 +812,8 @@ func GroupIsNull() predicate.File {
 	)
 }
 
-// GroupNotNull applies the NotNull predicate on the "group" field.
-func GroupNotNull() predicate.File {
+// GroupNotNil applies the NotNil predicate on the "group" field.
+func GroupNotNil() predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldGroup)))

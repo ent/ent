@@ -36,16 +36,16 @@ type FieldType struct {
 	OptionalInt32 int32 `json:"optional_int32,omitempty"`
 	// OptionalInt64 holds the value of the "optional_int64" field.
 	OptionalInt64 int64 `json:"optional_int64,omitempty"`
-	// NullableInt holds the value of the "nullable_int" field.
-	NullableInt *int `json:"nullable_int,omitempty"`
-	// NullableInt8 holds the value of the "nullable_int8" field.
-	NullableInt8 *int8 `json:"nullable_int8,omitempty"`
-	// NullableInt16 holds the value of the "nullable_int16" field.
-	NullableInt16 *int16 `json:"nullable_int16,omitempty"`
-	// NullableInt32 holds the value of the "nullable_int32" field.
-	NullableInt32 *int32 `json:"nullable_int32,omitempty"`
-	// NullableInt64 holds the value of the "nullable_int64" field.
-	NullableInt64 *int64 `json:"nullable_int64,omitempty"`
+	// NillableInt holds the value of the "nillable_int" field.
+	NillableInt *int `json:"nillable_int,omitempty"`
+	// NillableInt8 holds the value of the "nillable_int8" field.
+	NillableInt8 *int8 `json:"nillable_int8,omitempty"`
+	// NillableInt16 holds the value of the "nillable_int16" field.
+	NillableInt16 *int16 `json:"nillable_int16,omitempty"`
+	// NillableInt32 holds the value of the "nillable_int32" field.
+	NillableInt32 *int32 `json:"nillable_int32,omitempty"`
+	// NillableInt64 holds the value of the "nillable_int64" field.
+	NillableInt64 *int64 `json:"nillable_int64,omitempty"`
 }
 
 // FromRows scans the sql response data into FieldType.
@@ -62,11 +62,11 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 		OptionalInt16 sql.NullInt64
 		OptionalInt32 sql.NullInt64
 		OptionalInt64 sql.NullInt64
-		NullableInt   sql.NullInt64
-		NullableInt8  sql.NullInt64
-		NullableInt16 sql.NullInt64
-		NullableInt32 sql.NullInt64
-		NullableInt64 sql.NullInt64
+		NillableInt   sql.NullInt64
+		NillableInt8  sql.NullInt64
+		NillableInt16 sql.NullInt64
+		NillableInt32 sql.NullInt64
+		NillableInt64 sql.NullInt64
 	}
 	// the order here should be the same as in the `fieldtype.Columns`.
 	if err := rows.Scan(
@@ -81,11 +81,11 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 		&vft.OptionalInt16,
 		&vft.OptionalInt32,
 		&vft.OptionalInt64,
-		&vft.NullableInt,
-		&vft.NullableInt8,
-		&vft.NullableInt16,
-		&vft.NullableInt32,
-		&vft.NullableInt64,
+		&vft.NillableInt,
+		&vft.NillableInt8,
+		&vft.NillableInt16,
+		&vft.NillableInt32,
+		&vft.NillableInt64,
 	); err != nil {
 		return err
 	}
@@ -100,25 +100,25 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 	ft.OptionalInt16 = int16(vft.OptionalInt16.Int64)
 	ft.OptionalInt32 = int32(vft.OptionalInt32.Int64)
 	ft.OptionalInt64 = vft.OptionalInt64.Int64
-	if vft.NullableInt.Valid {
-		ft.NullableInt = new(int)
-		*ft.NullableInt = int(vft.NullableInt.Int64)
+	if vft.NillableInt.Valid {
+		ft.NillableInt = new(int)
+		*ft.NillableInt = int(vft.NillableInt.Int64)
 	}
-	if vft.NullableInt8.Valid {
-		ft.NullableInt8 = new(int8)
-		*ft.NullableInt8 = int8(vft.NullableInt8.Int64)
+	if vft.NillableInt8.Valid {
+		ft.NillableInt8 = new(int8)
+		*ft.NillableInt8 = int8(vft.NillableInt8.Int64)
 	}
-	if vft.NullableInt16.Valid {
-		ft.NullableInt16 = new(int16)
-		*ft.NullableInt16 = int16(vft.NullableInt16.Int64)
+	if vft.NillableInt16.Valid {
+		ft.NillableInt16 = new(int16)
+		*ft.NillableInt16 = int16(vft.NillableInt16.Int64)
 	}
-	if vft.NullableInt32.Valid {
-		ft.NullableInt32 = new(int32)
-		*ft.NullableInt32 = int32(vft.NullableInt32.Int64)
+	if vft.NillableInt32.Valid {
+		ft.NillableInt32 = new(int32)
+		*ft.NillableInt32 = int32(vft.NillableInt32.Int64)
 	}
-	if vft.NullableInt64.Valid {
-		ft.NullableInt64 = new(int64)
-		*ft.NullableInt64 = vft.NullableInt64.Int64
+	if vft.NillableInt64.Valid {
+		ft.NillableInt64 = new(int64)
+		*ft.NillableInt64 = vft.NillableInt64.Int64
 	}
 	return nil
 }
@@ -141,11 +141,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		OptionalInt16 int16  `json:"optional_int16,omitempty"`
 		OptionalInt32 int32  `json:"optional_int32,omitempty"`
 		OptionalInt64 int64  `json:"optional_int64,omitempty"`
-		NullableInt   *int   `json:"nullable_int,omitempty"`
-		NullableInt8  *int8  `json:"nullable_int8,omitempty"`
-		NullableInt16 *int16 `json:"nullable_int16,omitempty"`
-		NullableInt32 *int32 `json:"nullable_int32,omitempty"`
-		NullableInt64 *int64 `json:"nullable_int64,omitempty"`
+		NillableInt   *int   `json:"nillable_int,omitempty"`
+		NillableInt8  *int8  `json:"nillable_int8,omitempty"`
+		NillableInt16 *int16 `json:"nillable_int16,omitempty"`
+		NillableInt32 *int32 `json:"nillable_int32,omitempty"`
+		NillableInt64 *int64 `json:"nillable_int64,omitempty"`
 	}
 	if err := vmap.Decode(&vft); err != nil {
 		return err
@@ -161,11 +161,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.OptionalInt16 = vft.OptionalInt16
 	ft.OptionalInt32 = vft.OptionalInt32
 	ft.OptionalInt64 = vft.OptionalInt64
-	ft.NullableInt = vft.NullableInt
-	ft.NullableInt8 = vft.NullableInt8
-	ft.NullableInt16 = vft.NullableInt16
-	ft.NullableInt32 = vft.NullableInt32
-	ft.NullableInt64 = vft.NullableInt64
+	ft.NillableInt = vft.NillableInt
+	ft.NillableInt8 = vft.NillableInt8
+	ft.NillableInt16 = vft.NillableInt16
+	ft.NillableInt32 = vft.NillableInt32
+	ft.NillableInt64 = vft.NillableInt64
 	return nil
 }
 
@@ -202,20 +202,20 @@ func (ft *FieldType) String() string {
 	buf.WriteString(fmt.Sprintf(", optional_int16=%v", ft.OptionalInt16))
 	buf.WriteString(fmt.Sprintf(", optional_int32=%v", ft.OptionalInt32))
 	buf.WriteString(fmt.Sprintf(", optional_int64=%v", ft.OptionalInt64))
-	if v := ft.NullableInt; v != nil {
-		buf.WriteString(fmt.Sprintf(", nullable_int=%v", *v))
+	if v := ft.NillableInt; v != nil {
+		buf.WriteString(fmt.Sprintf(", nillable_int=%v", *v))
 	}
-	if v := ft.NullableInt8; v != nil {
-		buf.WriteString(fmt.Sprintf(", nullable_int8=%v", *v))
+	if v := ft.NillableInt8; v != nil {
+		buf.WriteString(fmt.Sprintf(", nillable_int8=%v", *v))
 	}
-	if v := ft.NullableInt16; v != nil {
-		buf.WriteString(fmt.Sprintf(", nullable_int16=%v", *v))
+	if v := ft.NillableInt16; v != nil {
+		buf.WriteString(fmt.Sprintf(", nillable_int16=%v", *v))
 	}
-	if v := ft.NullableInt32; v != nil {
-		buf.WriteString(fmt.Sprintf(", nullable_int32=%v", *v))
+	if v := ft.NillableInt32; v != nil {
+		buf.WriteString(fmt.Sprintf(", nillable_int32=%v", *v))
 	}
-	if v := ft.NullableInt64; v != nil {
-		buf.WriteString(fmt.Sprintf(", nullable_int64=%v", *v))
+	if v := ft.NillableInt64; v != nil {
+		buf.WriteString(fmt.Sprintf(", nillable_int64=%v", *v))
 	}
 	buf.WriteString(")")
 	return buf.String()
@@ -260,11 +260,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		OptionalInt16 int16  `json:"optional_int16,omitempty"`
 		OptionalInt32 int32  `json:"optional_int32,omitempty"`
 		OptionalInt64 int64  `json:"optional_int64,omitempty"`
-		NullableInt   *int   `json:"nullable_int,omitempty"`
-		NullableInt8  *int8  `json:"nullable_int8,omitempty"`
-		NullableInt16 *int16 `json:"nullable_int16,omitempty"`
-		NullableInt32 *int32 `json:"nullable_int32,omitempty"`
-		NullableInt64 *int64 `json:"nullable_int64,omitempty"`
+		NillableInt   *int   `json:"nillable_int,omitempty"`
+		NillableInt8  *int8  `json:"nillable_int8,omitempty"`
+		NillableInt16 *int16 `json:"nillable_int16,omitempty"`
+		NillableInt32 *int32 `json:"nillable_int32,omitempty"`
+		NillableInt64 *int64 `json:"nillable_int64,omitempty"`
 	}
 	if err := vmap.Decode(&vft); err != nil {
 		return err
@@ -282,11 +282,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			OptionalInt16: v.OptionalInt16,
 			OptionalInt32: v.OptionalInt32,
 			OptionalInt64: v.OptionalInt64,
-			NullableInt:   v.NullableInt,
-			NullableInt8:  v.NullableInt8,
-			NullableInt16: v.NullableInt16,
-			NullableInt32: v.NullableInt32,
-			NullableInt64: v.NullableInt64,
+			NillableInt:   v.NillableInt,
+			NillableInt8:  v.NillableInt8,
+			NillableInt16: v.NillableInt16,
+			NillableInt32: v.NillableInt32,
+			NillableInt64: v.NillableInt64,
 		})
 	}
 	return nil

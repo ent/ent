@@ -276,62 +276,62 @@ func OptionalInt64(v int64) predicate.FieldType {
 	)
 }
 
-// NullableInt applies equality check predicate on the "nullable_int" field. It's identical to NullableIntEQ.
-func NullableInt(v int) predicate.FieldType {
+// NillableInt applies equality check predicate on the "nillable_int" field. It's identical to NillableIntEQ.
+func NillableInt(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.EQ(v))
+			t.Has(Label, FieldNillableInt, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt8 applies equality check predicate on the "nullable_int8" field. It's identical to NullableInt8EQ.
-func NullableInt8(v int8) predicate.FieldType {
+// NillableInt8 applies equality check predicate on the "nillable_int8" field. It's identical to NillableInt8EQ.
+func NillableInt8(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt8), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.EQ(v))
+			t.Has(Label, FieldNillableInt8, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt16 applies equality check predicate on the "nullable_int16" field. It's identical to NullableInt16EQ.
-func NullableInt16(v int16) predicate.FieldType {
+// NillableInt16 applies equality check predicate on the "nillable_int16" field. It's identical to NillableInt16EQ.
+func NillableInt16(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt16), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.EQ(v))
+			t.Has(Label, FieldNillableInt16, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt32 applies equality check predicate on the "nullable_int32" field. It's identical to NullableInt32EQ.
-func NullableInt32(v int32) predicate.FieldType {
+// NillableInt32 applies equality check predicate on the "nillable_int32" field. It's identical to NillableInt32EQ.
+func NillableInt32(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt32), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.EQ(v))
+			t.Has(Label, FieldNillableInt32, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt64 applies equality check predicate on the "nullable_int64" field. It's identical to NullableInt64EQ.
-func NullableInt64(v int64) predicate.FieldType {
+// NillableInt64 applies equality check predicate on the "nillable_int64" field. It's identical to NillableInt64EQ.
+func NillableInt64(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt64), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.EQ(v))
+			t.Has(Label, FieldNillableInt64, p.EQ(v))
 		},
 	)
 }
@@ -1032,8 +1032,8 @@ func OptionalIntNotIn(vs ...int) predicate.FieldType {
 	)
 }
 
-// OptionalIntIsNull applies the IsNull predicate on the "optional_int" field.
-func OptionalIntIsNull() predicate.FieldType {
+// OptionalIntIsNil applies the IsNil predicate on the "optional_int" field.
+func OptionalIntIsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldOptionalInt)))
@@ -1044,8 +1044,8 @@ func OptionalIntIsNull() predicate.FieldType {
 	)
 }
 
-// OptionalIntNotNull applies the NotNull predicate on the "optional_int" field.
-func OptionalIntNotNull() predicate.FieldType {
+// OptionalIntNotNil applies the NotNil predicate on the "optional_int" field.
+func OptionalIntNotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldOptionalInt)))
@@ -1172,8 +1172,8 @@ func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
 	)
 }
 
-// OptionalInt8IsNull applies the IsNull predicate on the "optional_int8" field.
-func OptionalInt8IsNull() predicate.FieldType {
+// OptionalInt8IsNil applies the IsNil predicate on the "optional_int8" field.
+func OptionalInt8IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldOptionalInt8)))
@@ -1184,8 +1184,8 @@ func OptionalInt8IsNull() predicate.FieldType {
 	)
 }
 
-// OptionalInt8NotNull applies the NotNull predicate on the "optional_int8" field.
-func OptionalInt8NotNull() predicate.FieldType {
+// OptionalInt8NotNil applies the NotNil predicate on the "optional_int8" field.
+func OptionalInt8NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldOptionalInt8)))
@@ -1312,8 +1312,8 @@ func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
 	)
 }
 
-// OptionalInt16IsNull applies the IsNull predicate on the "optional_int16" field.
-func OptionalInt16IsNull() predicate.FieldType {
+// OptionalInt16IsNil applies the IsNil predicate on the "optional_int16" field.
+func OptionalInt16IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldOptionalInt16)))
@@ -1324,8 +1324,8 @@ func OptionalInt16IsNull() predicate.FieldType {
 	)
 }
 
-// OptionalInt16NotNull applies the NotNull predicate on the "optional_int16" field.
-func OptionalInt16NotNull() predicate.FieldType {
+// OptionalInt16NotNil applies the NotNil predicate on the "optional_int16" field.
+func OptionalInt16NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldOptionalInt16)))
@@ -1452,8 +1452,8 @@ func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	)
 }
 
-// OptionalInt32IsNull applies the IsNull predicate on the "optional_int32" field.
-func OptionalInt32IsNull() predicate.FieldType {
+// OptionalInt32IsNil applies the IsNil predicate on the "optional_int32" field.
+func OptionalInt32IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldOptionalInt32)))
@@ -1464,8 +1464,8 @@ func OptionalInt32IsNull() predicate.FieldType {
 	)
 }
 
-// OptionalInt32NotNull applies the NotNull predicate on the "optional_int32" field.
-func OptionalInt32NotNull() predicate.FieldType {
+// OptionalInt32NotNil applies the NotNil predicate on the "optional_int32" field.
+func OptionalInt32NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldOptionalInt32)))
@@ -1592,8 +1592,8 @@ func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
 	)
 }
 
-// OptionalInt64IsNull applies the IsNull predicate on the "optional_int64" field.
-func OptionalInt64IsNull() predicate.FieldType {
+// OptionalInt64IsNil applies the IsNil predicate on the "optional_int64" field.
+func OptionalInt64IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldOptionalInt64)))
@@ -1604,8 +1604,8 @@ func OptionalInt64IsNull() predicate.FieldType {
 	)
 }
 
-// OptionalInt64NotNull applies the NotNull predicate on the "optional_int64" field.
-func OptionalInt64NotNull() predicate.FieldType {
+// OptionalInt64NotNil applies the NotNil predicate on the "optional_int64" field.
+func OptionalInt64NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldOptionalInt64)))
@@ -1616,80 +1616,80 @@ func OptionalInt64NotNull() predicate.FieldType {
 	)
 }
 
-// NullableIntEQ applies the EQ predicate on the "nullable_int" field.
-func NullableIntEQ(v int) predicate.FieldType {
+// NillableIntEQ applies the EQ predicate on the "nillable_int" field.
+func NillableIntEQ(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.EQ(v))
+			t.Has(Label, FieldNillableInt, p.EQ(v))
 		},
 	)
 }
 
-// NullableIntNEQ applies the NEQ predicate on the "nullable_int" field.
-func NullableIntNEQ(v int) predicate.FieldType {
+// NillableIntNEQ applies the NEQ predicate on the "nillable_int" field.
+func NillableIntNEQ(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldNullableInt), v))
+			s.Where(sql.NEQ(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.NEQ(v))
+			t.Has(Label, FieldNillableInt, p.NEQ(v))
 		},
 	)
 }
 
-// NullableIntGT applies the GT predicate on the "nullable_int" field.
-func NullableIntGT(v int) predicate.FieldType {
+// NillableIntGT applies the GT predicate on the "nillable_int" field.
+func NillableIntGT(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNullableInt), v))
+			s.Where(sql.GT(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.GT(v))
+			t.Has(Label, FieldNillableInt, p.GT(v))
 		},
 	)
 }
 
-// NullableIntGTE applies the GTE predicate on the "nullable_int" field.
-func NullableIntGTE(v int) predicate.FieldType {
+// NillableIntGTE applies the GTE predicate on the "nillable_int" field.
+func NillableIntGTE(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNullableInt), v))
+			s.Where(sql.GTE(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.GTE(v))
+			t.Has(Label, FieldNillableInt, p.GTE(v))
 		},
 	)
 }
 
-// NullableIntLT applies the LT predicate on the "nullable_int" field.
-func NullableIntLT(v int) predicate.FieldType {
+// NillableIntLT applies the LT predicate on the "nillable_int" field.
+func NillableIntLT(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNullableInt), v))
+			s.Where(sql.LT(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.LT(v))
+			t.Has(Label, FieldNillableInt, p.LT(v))
 		},
 	)
 }
 
-// NullableIntLTE applies the LTE predicate on the "nullable_int" field.
-func NullableIntLTE(v int) predicate.FieldType {
+// NillableIntLTE applies the LTE predicate on the "nillable_int" field.
+func NillableIntLTE(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNullableInt), v))
+			s.Where(sql.LTE(s.C(FieldNillableInt), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.LTE(v))
+			t.Has(Label, FieldNillableInt, p.LTE(v))
 		},
 	)
 }
 
-// NullableIntIn applies the In predicate on the "nullable_int" field.
-func NullableIntIn(vs ...int) predicate.FieldType {
+// NillableIntIn applies the In predicate on the "nillable_int" field.
+func NillableIntIn(vs ...int) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1702,16 +1702,16 @@ func NullableIntIn(vs ...int) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldNullableInt), v...))
+			s.Where(sql.In(s.C(FieldNillableInt), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.Within(v...))
+			t.Has(Label, FieldNillableInt, p.Within(v...))
 		},
 	)
 }
 
-// NullableIntNotIn applies the NotIn predicate on the "nullable_int" field.
-func NullableIntNotIn(vs ...int) predicate.FieldType {
+// NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
+func NillableIntNotIn(vs ...int) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1724,112 +1724,112 @@ func NullableIntNotIn(vs ...int) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldNullableInt), v...))
+			s.Where(sql.NotIn(s.C(FieldNillableInt), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt, p.Without(v...))
+			t.Has(Label, FieldNillableInt, p.Without(v...))
 		},
 	)
 }
 
-// NullableIntIsNull applies the IsNull predicate on the "nullable_int" field.
-func NullableIntIsNull() predicate.FieldType {
+// NillableIntIsNil applies the IsNil predicate on the "nillable_int" field.
+func NillableIntIsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldNullableInt)))
+			s.Where(sql.IsNull(s.C(FieldNillableInt)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldNullableInt)
+			t.HasLabel(Label).HasNot(FieldNillableInt)
 		},
 	)
 }
 
-// NullableIntNotNull applies the NotNull predicate on the "nullable_int" field.
-func NullableIntNotNull() predicate.FieldType {
+// NillableIntNotNil applies the NotNil predicate on the "nillable_int" field.
+func NillableIntNotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldNullableInt)))
+			s.Where(sql.NotNull(s.C(FieldNillableInt)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldNullableInt)
+			t.HasLabel(Label).Has(FieldNillableInt)
 		},
 	)
 }
 
-// NullableInt8EQ applies the EQ predicate on the "nullable_int8" field.
-func NullableInt8EQ(v int8) predicate.FieldType {
+// NillableInt8EQ applies the EQ predicate on the "nillable_int8" field.
+func NillableInt8EQ(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt8), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.EQ(v))
+			t.Has(Label, FieldNillableInt8, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt8NEQ applies the NEQ predicate on the "nullable_int8" field.
-func NullableInt8NEQ(v int8) predicate.FieldType {
+// NillableInt8NEQ applies the NEQ predicate on the "nillable_int8" field.
+func NillableInt8NEQ(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldNullableInt8), v))
+			s.Where(sql.NEQ(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.NEQ(v))
+			t.Has(Label, FieldNillableInt8, p.NEQ(v))
 		},
 	)
 }
 
-// NullableInt8GT applies the GT predicate on the "nullable_int8" field.
-func NullableInt8GT(v int8) predicate.FieldType {
+// NillableInt8GT applies the GT predicate on the "nillable_int8" field.
+func NillableInt8GT(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNullableInt8), v))
+			s.Where(sql.GT(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.GT(v))
+			t.Has(Label, FieldNillableInt8, p.GT(v))
 		},
 	)
 }
 
-// NullableInt8GTE applies the GTE predicate on the "nullable_int8" field.
-func NullableInt8GTE(v int8) predicate.FieldType {
+// NillableInt8GTE applies the GTE predicate on the "nillable_int8" field.
+func NillableInt8GTE(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNullableInt8), v))
+			s.Where(sql.GTE(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.GTE(v))
+			t.Has(Label, FieldNillableInt8, p.GTE(v))
 		},
 	)
 }
 
-// NullableInt8LT applies the LT predicate on the "nullable_int8" field.
-func NullableInt8LT(v int8) predicate.FieldType {
+// NillableInt8LT applies the LT predicate on the "nillable_int8" field.
+func NillableInt8LT(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNullableInt8), v))
+			s.Where(sql.LT(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.LT(v))
+			t.Has(Label, FieldNillableInt8, p.LT(v))
 		},
 	)
 }
 
-// NullableInt8LTE applies the LTE predicate on the "nullable_int8" field.
-func NullableInt8LTE(v int8) predicate.FieldType {
+// NillableInt8LTE applies the LTE predicate on the "nillable_int8" field.
+func NillableInt8LTE(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNullableInt8), v))
+			s.Where(sql.LTE(s.C(FieldNillableInt8), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.LTE(v))
+			t.Has(Label, FieldNillableInt8, p.LTE(v))
 		},
 	)
 }
 
-// NullableInt8In applies the In predicate on the "nullable_int8" field.
-func NullableInt8In(vs ...int8) predicate.FieldType {
+// NillableInt8In applies the In predicate on the "nillable_int8" field.
+func NillableInt8In(vs ...int8) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1842,16 +1842,16 @@ func NullableInt8In(vs ...int8) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldNullableInt8), v...))
+			s.Where(sql.In(s.C(FieldNillableInt8), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.Within(v...))
+			t.Has(Label, FieldNillableInt8, p.Within(v...))
 		},
 	)
 }
 
-// NullableInt8NotIn applies the NotIn predicate on the "nullable_int8" field.
-func NullableInt8NotIn(vs ...int8) predicate.FieldType {
+// NillableInt8NotIn applies the NotIn predicate on the "nillable_int8" field.
+func NillableInt8NotIn(vs ...int8) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1864,112 +1864,112 @@ func NullableInt8NotIn(vs ...int8) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldNullableInt8), v...))
+			s.Where(sql.NotIn(s.C(FieldNillableInt8), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt8, p.Without(v...))
+			t.Has(Label, FieldNillableInt8, p.Without(v...))
 		},
 	)
 }
 
-// NullableInt8IsNull applies the IsNull predicate on the "nullable_int8" field.
-func NullableInt8IsNull() predicate.FieldType {
+// NillableInt8IsNil applies the IsNil predicate on the "nillable_int8" field.
+func NillableInt8IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldNullableInt8)))
+			s.Where(sql.IsNull(s.C(FieldNillableInt8)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldNullableInt8)
+			t.HasLabel(Label).HasNot(FieldNillableInt8)
 		},
 	)
 }
 
-// NullableInt8NotNull applies the NotNull predicate on the "nullable_int8" field.
-func NullableInt8NotNull() predicate.FieldType {
+// NillableInt8NotNil applies the NotNil predicate on the "nillable_int8" field.
+func NillableInt8NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldNullableInt8)))
+			s.Where(sql.NotNull(s.C(FieldNillableInt8)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldNullableInt8)
+			t.HasLabel(Label).Has(FieldNillableInt8)
 		},
 	)
 }
 
-// NullableInt16EQ applies the EQ predicate on the "nullable_int16" field.
-func NullableInt16EQ(v int16) predicate.FieldType {
+// NillableInt16EQ applies the EQ predicate on the "nillable_int16" field.
+func NillableInt16EQ(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt16), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.EQ(v))
+			t.Has(Label, FieldNillableInt16, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt16NEQ applies the NEQ predicate on the "nullable_int16" field.
-func NullableInt16NEQ(v int16) predicate.FieldType {
+// NillableInt16NEQ applies the NEQ predicate on the "nillable_int16" field.
+func NillableInt16NEQ(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldNullableInt16), v))
+			s.Where(sql.NEQ(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.NEQ(v))
+			t.Has(Label, FieldNillableInt16, p.NEQ(v))
 		},
 	)
 }
 
-// NullableInt16GT applies the GT predicate on the "nullable_int16" field.
-func NullableInt16GT(v int16) predicate.FieldType {
+// NillableInt16GT applies the GT predicate on the "nillable_int16" field.
+func NillableInt16GT(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNullableInt16), v))
+			s.Where(sql.GT(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.GT(v))
+			t.Has(Label, FieldNillableInt16, p.GT(v))
 		},
 	)
 }
 
-// NullableInt16GTE applies the GTE predicate on the "nullable_int16" field.
-func NullableInt16GTE(v int16) predicate.FieldType {
+// NillableInt16GTE applies the GTE predicate on the "nillable_int16" field.
+func NillableInt16GTE(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNullableInt16), v))
+			s.Where(sql.GTE(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.GTE(v))
+			t.Has(Label, FieldNillableInt16, p.GTE(v))
 		},
 	)
 }
 
-// NullableInt16LT applies the LT predicate on the "nullable_int16" field.
-func NullableInt16LT(v int16) predicate.FieldType {
+// NillableInt16LT applies the LT predicate on the "nillable_int16" field.
+func NillableInt16LT(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNullableInt16), v))
+			s.Where(sql.LT(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.LT(v))
+			t.Has(Label, FieldNillableInt16, p.LT(v))
 		},
 	)
 }
 
-// NullableInt16LTE applies the LTE predicate on the "nullable_int16" field.
-func NullableInt16LTE(v int16) predicate.FieldType {
+// NillableInt16LTE applies the LTE predicate on the "nillable_int16" field.
+func NillableInt16LTE(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNullableInt16), v))
+			s.Where(sql.LTE(s.C(FieldNillableInt16), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.LTE(v))
+			t.Has(Label, FieldNillableInt16, p.LTE(v))
 		},
 	)
 }
 
-// NullableInt16In applies the In predicate on the "nullable_int16" field.
-func NullableInt16In(vs ...int16) predicate.FieldType {
+// NillableInt16In applies the In predicate on the "nillable_int16" field.
+func NillableInt16In(vs ...int16) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1982,16 +1982,16 @@ func NullableInt16In(vs ...int16) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldNullableInt16), v...))
+			s.Where(sql.In(s.C(FieldNillableInt16), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.Within(v...))
+			t.Has(Label, FieldNillableInt16, p.Within(v...))
 		},
 	)
 }
 
-// NullableInt16NotIn applies the NotIn predicate on the "nullable_int16" field.
-func NullableInt16NotIn(vs ...int16) predicate.FieldType {
+// NillableInt16NotIn applies the NotIn predicate on the "nillable_int16" field.
+func NillableInt16NotIn(vs ...int16) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -2004,112 +2004,112 @@ func NullableInt16NotIn(vs ...int16) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldNullableInt16), v...))
+			s.Where(sql.NotIn(s.C(FieldNillableInt16), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt16, p.Without(v...))
+			t.Has(Label, FieldNillableInt16, p.Without(v...))
 		},
 	)
 }
 
-// NullableInt16IsNull applies the IsNull predicate on the "nullable_int16" field.
-func NullableInt16IsNull() predicate.FieldType {
+// NillableInt16IsNil applies the IsNil predicate on the "nillable_int16" field.
+func NillableInt16IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldNullableInt16)))
+			s.Where(sql.IsNull(s.C(FieldNillableInt16)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldNullableInt16)
+			t.HasLabel(Label).HasNot(FieldNillableInt16)
 		},
 	)
 }
 
-// NullableInt16NotNull applies the NotNull predicate on the "nullable_int16" field.
-func NullableInt16NotNull() predicate.FieldType {
+// NillableInt16NotNil applies the NotNil predicate on the "nillable_int16" field.
+func NillableInt16NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldNullableInt16)))
+			s.Where(sql.NotNull(s.C(FieldNillableInt16)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldNullableInt16)
+			t.HasLabel(Label).Has(FieldNillableInt16)
 		},
 	)
 }
 
-// NullableInt32EQ applies the EQ predicate on the "nullable_int32" field.
-func NullableInt32EQ(v int32) predicate.FieldType {
+// NillableInt32EQ applies the EQ predicate on the "nillable_int32" field.
+func NillableInt32EQ(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt32), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.EQ(v))
+			t.Has(Label, FieldNillableInt32, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt32NEQ applies the NEQ predicate on the "nullable_int32" field.
-func NullableInt32NEQ(v int32) predicate.FieldType {
+// NillableInt32NEQ applies the NEQ predicate on the "nillable_int32" field.
+func NillableInt32NEQ(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldNullableInt32), v))
+			s.Where(sql.NEQ(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.NEQ(v))
+			t.Has(Label, FieldNillableInt32, p.NEQ(v))
 		},
 	)
 }
 
-// NullableInt32GT applies the GT predicate on the "nullable_int32" field.
-func NullableInt32GT(v int32) predicate.FieldType {
+// NillableInt32GT applies the GT predicate on the "nillable_int32" field.
+func NillableInt32GT(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNullableInt32), v))
+			s.Where(sql.GT(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.GT(v))
+			t.Has(Label, FieldNillableInt32, p.GT(v))
 		},
 	)
 }
 
-// NullableInt32GTE applies the GTE predicate on the "nullable_int32" field.
-func NullableInt32GTE(v int32) predicate.FieldType {
+// NillableInt32GTE applies the GTE predicate on the "nillable_int32" field.
+func NillableInt32GTE(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNullableInt32), v))
+			s.Where(sql.GTE(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.GTE(v))
+			t.Has(Label, FieldNillableInt32, p.GTE(v))
 		},
 	)
 }
 
-// NullableInt32LT applies the LT predicate on the "nullable_int32" field.
-func NullableInt32LT(v int32) predicate.FieldType {
+// NillableInt32LT applies the LT predicate on the "nillable_int32" field.
+func NillableInt32LT(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNullableInt32), v))
+			s.Where(sql.LT(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.LT(v))
+			t.Has(Label, FieldNillableInt32, p.LT(v))
 		},
 	)
 }
 
-// NullableInt32LTE applies the LTE predicate on the "nullable_int32" field.
-func NullableInt32LTE(v int32) predicate.FieldType {
+// NillableInt32LTE applies the LTE predicate on the "nillable_int32" field.
+func NillableInt32LTE(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNullableInt32), v))
+			s.Where(sql.LTE(s.C(FieldNillableInt32), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.LTE(v))
+			t.Has(Label, FieldNillableInt32, p.LTE(v))
 		},
 	)
 }
 
-// NullableInt32In applies the In predicate on the "nullable_int32" field.
-func NullableInt32In(vs ...int32) predicate.FieldType {
+// NillableInt32In applies the In predicate on the "nillable_int32" field.
+func NillableInt32In(vs ...int32) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -2122,16 +2122,16 @@ func NullableInt32In(vs ...int32) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldNullableInt32), v...))
+			s.Where(sql.In(s.C(FieldNillableInt32), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.Within(v...))
+			t.Has(Label, FieldNillableInt32, p.Within(v...))
 		},
 	)
 }
 
-// NullableInt32NotIn applies the NotIn predicate on the "nullable_int32" field.
-func NullableInt32NotIn(vs ...int32) predicate.FieldType {
+// NillableInt32NotIn applies the NotIn predicate on the "nillable_int32" field.
+func NillableInt32NotIn(vs ...int32) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -2144,112 +2144,112 @@ func NullableInt32NotIn(vs ...int32) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldNullableInt32), v...))
+			s.Where(sql.NotIn(s.C(FieldNillableInt32), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt32, p.Without(v...))
+			t.Has(Label, FieldNillableInt32, p.Without(v...))
 		},
 	)
 }
 
-// NullableInt32IsNull applies the IsNull predicate on the "nullable_int32" field.
-func NullableInt32IsNull() predicate.FieldType {
+// NillableInt32IsNil applies the IsNil predicate on the "nillable_int32" field.
+func NillableInt32IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldNullableInt32)))
+			s.Where(sql.IsNull(s.C(FieldNillableInt32)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldNullableInt32)
+			t.HasLabel(Label).HasNot(FieldNillableInt32)
 		},
 	)
 }
 
-// NullableInt32NotNull applies the NotNull predicate on the "nullable_int32" field.
-func NullableInt32NotNull() predicate.FieldType {
+// NillableInt32NotNil applies the NotNil predicate on the "nillable_int32" field.
+func NillableInt32NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldNullableInt32)))
+			s.Where(sql.NotNull(s.C(FieldNillableInt32)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldNullableInt32)
+			t.HasLabel(Label).Has(FieldNillableInt32)
 		},
 	)
 }
 
-// NullableInt64EQ applies the EQ predicate on the "nullable_int64" field.
-func NullableInt64EQ(v int64) predicate.FieldType {
+// NillableInt64EQ applies the EQ predicate on the "nillable_int64" field.
+func NillableInt64EQ(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldNullableInt64), v))
+			s.Where(sql.EQ(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.EQ(v))
+			t.Has(Label, FieldNillableInt64, p.EQ(v))
 		},
 	)
 }
 
-// NullableInt64NEQ applies the NEQ predicate on the "nullable_int64" field.
-func NullableInt64NEQ(v int64) predicate.FieldType {
+// NillableInt64NEQ applies the NEQ predicate on the "nillable_int64" field.
+func NillableInt64NEQ(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldNullableInt64), v))
+			s.Where(sql.NEQ(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.NEQ(v))
+			t.Has(Label, FieldNillableInt64, p.NEQ(v))
 		},
 	)
 }
 
-// NullableInt64GT applies the GT predicate on the "nullable_int64" field.
-func NullableInt64GT(v int64) predicate.FieldType {
+// NillableInt64GT applies the GT predicate on the "nillable_int64" field.
+func NillableInt64GT(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNullableInt64), v))
+			s.Where(sql.GT(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.GT(v))
+			t.Has(Label, FieldNillableInt64, p.GT(v))
 		},
 	)
 }
 
-// NullableInt64GTE applies the GTE predicate on the "nullable_int64" field.
-func NullableInt64GTE(v int64) predicate.FieldType {
+// NillableInt64GTE applies the GTE predicate on the "nillable_int64" field.
+func NillableInt64GTE(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNullableInt64), v))
+			s.Where(sql.GTE(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.GTE(v))
+			t.Has(Label, FieldNillableInt64, p.GTE(v))
 		},
 	)
 }
 
-// NullableInt64LT applies the LT predicate on the "nullable_int64" field.
-func NullableInt64LT(v int64) predicate.FieldType {
+// NillableInt64LT applies the LT predicate on the "nillable_int64" field.
+func NillableInt64LT(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNullableInt64), v))
+			s.Where(sql.LT(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.LT(v))
+			t.Has(Label, FieldNillableInt64, p.LT(v))
 		},
 	)
 }
 
-// NullableInt64LTE applies the LTE predicate on the "nullable_int64" field.
-func NullableInt64LTE(v int64) predicate.FieldType {
+// NillableInt64LTE applies the LTE predicate on the "nillable_int64" field.
+func NillableInt64LTE(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNullableInt64), v))
+			s.Where(sql.LTE(s.C(FieldNillableInt64), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.LTE(v))
+			t.Has(Label, FieldNillableInt64, p.LTE(v))
 		},
 	)
 }
 
-// NullableInt64In applies the In predicate on the "nullable_int64" field.
-func NullableInt64In(vs ...int64) predicate.FieldType {
+// NillableInt64In applies the In predicate on the "nillable_int64" field.
+func NillableInt64In(vs ...int64) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -2262,16 +2262,16 @@ func NullableInt64In(vs ...int64) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldNullableInt64), v...))
+			s.Where(sql.In(s.C(FieldNillableInt64), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.Within(v...))
+			t.Has(Label, FieldNillableInt64, p.Within(v...))
 		},
 	)
 }
 
-// NullableInt64NotIn applies the NotIn predicate on the "nullable_int64" field.
-func NullableInt64NotIn(vs ...int64) predicate.FieldType {
+// NillableInt64NotIn applies the NotIn predicate on the "nillable_int64" field.
+func NillableInt64NotIn(vs ...int64) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -2284,34 +2284,34 @@ func NullableInt64NotIn(vs ...int64) predicate.FieldType {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldNullableInt64), v...))
+			s.Where(sql.NotIn(s.C(FieldNillableInt64), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNullableInt64, p.Without(v...))
+			t.Has(Label, FieldNillableInt64, p.Without(v...))
 		},
 	)
 }
 
-// NullableInt64IsNull applies the IsNull predicate on the "nullable_int64" field.
-func NullableInt64IsNull() predicate.FieldType {
+// NillableInt64IsNil applies the IsNil predicate on the "nillable_int64" field.
+func NillableInt64IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldNullableInt64)))
+			s.Where(sql.IsNull(s.C(FieldNillableInt64)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldNullableInt64)
+			t.HasLabel(Label).HasNot(FieldNillableInt64)
 		},
 	)
 }
 
-// NullableInt64NotNull applies the NotNull predicate on the "nullable_int64" field.
-func NullableInt64NotNull() predicate.FieldType {
+// NillableInt64NotNil applies the NotNil predicate on the "nillable_int64" field.
+func NillableInt64NotNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldNullableInt64)))
+			s.Where(sql.NotNull(s.C(FieldNillableInt64)))
 		},
 		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldNullableInt64)
+			t.HasLabel(Label).Has(FieldNillableInt64)
 		},
 	)
 }

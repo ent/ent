@@ -509,8 +509,8 @@ func TypeHasSuffix(v string) predicate.Group {
 	)
 }
 
-// TypeIsNull applies the IsNull predicate on the "type" field.
-func TypeIsNull() predicate.Group {
+// TypeIsNil applies the IsNil predicate on the "type" field.
+func TypeIsNil() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldType)))
@@ -521,8 +521,8 @@ func TypeIsNull() predicate.Group {
 	)
 }
 
-// TypeNotNull applies the NotNull predicate on the "type" field.
-func TypeNotNull() predicate.Group {
+// TypeNotNil applies the NotNil predicate on the "type" field.
+func TypeNotNil() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldType)))
@@ -649,8 +649,8 @@ func MaxUsersNotIn(vs ...int) predicate.Group {
 	)
 }
 
-// MaxUsersIsNull applies the IsNull predicate on the "max_users" field.
-func MaxUsersIsNull() predicate.Group {
+// MaxUsersIsNil applies the IsNil predicate on the "max_users" field.
+func MaxUsersIsNil() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldMaxUsers)))
@@ -661,8 +661,8 @@ func MaxUsersIsNull() predicate.Group {
 	)
 }
 
-// MaxUsersNotNull applies the NotNull predicate on the "max_users" field.
-func MaxUsersNotNull() predicate.Group {
+// MaxUsersNotNil applies the NotNil predicate on the "max_users" field.
+func MaxUsersNotNil() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldMaxUsers)))

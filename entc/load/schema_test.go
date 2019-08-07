@@ -19,8 +19,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("age"),
 		field.String("name"),
-		field.String("nullable").
-			Nullable(),
+		field.String("nillable").
+			Nillable(),
 		field.String("optional").
 			Optional(),
 	}
@@ -62,14 +62,14 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "name", schema.Fields[1].Name)
 		require.Equal(t, field.TypeString, schema.Fields[1].Type)
 
-		require.Equal(t, "nullable", schema.Fields[2].Name)
+		require.Equal(t, "nillable", schema.Fields[2].Name)
 		require.Equal(t, field.TypeString, schema.Fields[2].Type)
-		require.True(t, schema.Fields[2].Nullable)
+		require.True(t, schema.Fields[2].Nillable)
 		require.False(t, schema.Fields[2].Optional)
 
 		require.Equal(t, "optional", schema.Fields[3].Name)
 		require.Equal(t, field.TypeString, schema.Fields[3].Type)
-		require.False(t, schema.Fields[3].Nullable)
+		require.False(t, schema.Fields[3].Nillable)
 		require.True(t, schema.Fields[3].Optional)
 
 		require.Len(t, schema.Edges, 2)

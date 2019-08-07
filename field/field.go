@@ -89,7 +89,7 @@ type Field struct {
 	name       string
 	charset    string
 	unique     bool
-	nullable   bool
+	nillable   bool
 	optional   bool
 	value      interface{}
 	validators []interface{}
@@ -144,8 +144,8 @@ func (f Field) HasDefault() bool { return f.value != nil }
 // Value returns the default value of the field.
 func (f Field) Value() interface{} { return f.value }
 
-// IsNullable returns if this field is an nullable field. Basically, wraps the value with pointer.
-func (f Field) IsNullable() bool { return f.nullable }
+// IsNillable returns if this field is an nillable field. Basically, wraps the value with pointer.
+func (f Field) IsNillable() bool { return f.nillable }
 
 // IsOptional returns is this field is an optional field.
 func (f Field) IsOptional() bool { return f.optional }
@@ -213,10 +213,10 @@ func (b *intBuilder) Default(i int) *intBuilder {
 	return b
 }
 
-// Nullable indicates that this field is nullable.
-// Unlike "Optional", nullable fields are pointers in the generated field.
-func (b *intBuilder) Nullable() *intBuilder {
-	b.nullable = true
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *intBuilder) Nillable() *intBuilder {
+	b.nillable = true
 	return b
 }
 
@@ -298,10 +298,10 @@ func (b *floatBuilder) Default(i float64) *floatBuilder {
 	return b
 }
 
-// Nullable indicates that this field is nullable.
-// Unlike "Optional", nullable fields are pointers in the generated field.
-func (b *floatBuilder) Nullable() *floatBuilder {
-	b.nullable = true
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *floatBuilder) Nillable() *floatBuilder {
+	b.nillable = true
 	return b
 }
 
@@ -388,10 +388,10 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 	return b
 }
 
-// Nullable indicates that this field is nullable.
-// Unlike "Optional", nullable fields are pointers in the generated field.
-func (b *stringBuilder) Nullable() *stringBuilder {
-	b.nullable = true
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *stringBuilder) Nillable() *stringBuilder {
+	b.nillable = true
 	return b
 }
 
@@ -432,10 +432,10 @@ type timeBuilder struct {
 	Field
 }
 
-// Nullable indicates that this field is nullable.
-// Unlike "Optional", nullable fields are pointers in the generated field.
-func (b *timeBuilder) Nullable() *timeBuilder {
-	b.nullable = true
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *timeBuilder) Nillable() *timeBuilder {
+	b.nillable = true
 	return b
 }
 
@@ -468,10 +468,10 @@ func (b *boolBuilder) Default(v bool) *boolBuilder {
 	return b
 }
 
-// Nullable indicates that this field is nullable.
-// Unlike "Optional", nullable fields are pointers in the generated field.
-func (b *boolBuilder) Nullable() *boolBuilder {
-	b.nullable = true
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *boolBuilder) Nillable() *boolBuilder {
+	b.nillable = true
 	return b
 }
 
@@ -504,10 +504,10 @@ func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 	return b
 }
 
-// Nullable indicates that this field is nullable.
-// Unlike "Optional", nullable fields are pointers in the generated field.
-func (b *bytesBuilder) Nullable() *bytesBuilder {
-	b.nullable = true
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *bytesBuilder) Nillable() *bytesBuilder {
+	b.nillable = true
 	return b
 }
 

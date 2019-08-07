@@ -29,11 +29,11 @@ type FieldTypeCreate struct {
 	optional_int16 *int16
 	optional_int32 *int32
 	optional_int64 *int64
-	nullable_int   *int
-	nullable_int8  *int8
-	nullable_int16 *int16
-	nullable_int32 *int32
-	nullable_int64 *int64
+	nillable_int   *int
+	nillable_int8  *int8
+	nillable_int16 *int16
+	nillable_int32 *int32
+	nillable_int64 *int64
 }
 
 // SetInt sets the int field.
@@ -136,72 +136,72 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt64(i *int64) *FieldTypeCreate 
 	return ftc
 }
 
-// SetNullableInt sets the nullable_int field.
-func (ftc *FieldTypeCreate) SetNullableInt(i int) *FieldTypeCreate {
-	ftc.nullable_int = &i
+// SetNillableInt sets the nillable_int field.
+func (ftc *FieldTypeCreate) SetNillableInt(i int) *FieldTypeCreate {
+	ftc.nillable_int = &i
 	return ftc
 }
 
-// SetNillableNullableInt sets the nullable_int field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullableInt(i *int) *FieldTypeCreate {
+// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
 	if i != nil {
-		ftc.SetNullableInt(*i)
+		ftc.SetNillableInt(*i)
 	}
 	return ftc
 }
 
-// SetNullableInt8 sets the nullable_int8 field.
-func (ftc *FieldTypeCreate) SetNullableInt8(i int8) *FieldTypeCreate {
-	ftc.nullable_int8 = &i
+// SetNillableInt8 sets the nillable_int8 field.
+func (ftc *FieldTypeCreate) SetNillableInt8(i int8) *FieldTypeCreate {
+	ftc.nillable_int8 = &i
 	return ftc
 }
 
-// SetNillableNullableInt8 sets the nullable_int8 field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullableInt8(i *int8) *FieldTypeCreate {
+// SetNillableNillableInt8 sets the nillable_int8 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
 	if i != nil {
-		ftc.SetNullableInt8(*i)
+		ftc.SetNillableInt8(*i)
 	}
 	return ftc
 }
 
-// SetNullableInt16 sets the nullable_int16 field.
-func (ftc *FieldTypeCreate) SetNullableInt16(i int16) *FieldTypeCreate {
-	ftc.nullable_int16 = &i
+// SetNillableInt16 sets the nillable_int16 field.
+func (ftc *FieldTypeCreate) SetNillableInt16(i int16) *FieldTypeCreate {
+	ftc.nillable_int16 = &i
 	return ftc
 }
 
-// SetNillableNullableInt16 sets the nullable_int16 field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullableInt16(i *int16) *FieldTypeCreate {
+// SetNillableNillableInt16 sets the nillable_int16 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate {
 	if i != nil {
-		ftc.SetNullableInt16(*i)
+		ftc.SetNillableInt16(*i)
 	}
 	return ftc
 }
 
-// SetNullableInt32 sets the nullable_int32 field.
-func (ftc *FieldTypeCreate) SetNullableInt32(i int32) *FieldTypeCreate {
-	ftc.nullable_int32 = &i
+// SetNillableInt32 sets the nillable_int32 field.
+func (ftc *FieldTypeCreate) SetNillableInt32(i int32) *FieldTypeCreate {
+	ftc.nillable_int32 = &i
 	return ftc
 }
 
-// SetNillableNullableInt32 sets the nullable_int32 field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullableInt32(i *int32) *FieldTypeCreate {
+// SetNillableNillableInt32 sets the nillable_int32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate {
 	if i != nil {
-		ftc.SetNullableInt32(*i)
+		ftc.SetNillableInt32(*i)
 	}
 	return ftc
 }
 
-// SetNullableInt64 sets the nullable_int64 field.
-func (ftc *FieldTypeCreate) SetNullableInt64(i int64) *FieldTypeCreate {
-	ftc.nullable_int64 = &i
+// SetNillableInt64 sets the nillable_int64 field.
+func (ftc *FieldTypeCreate) SetNillableInt64(i int64) *FieldTypeCreate {
+	ftc.nillable_int64 = &i
 	return ftc
 }
 
-// SetNillableNullableInt64 sets the nullable_int64 field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullableInt64(i *int64) *FieldTypeCreate {
+// SetNillableNillableInt64 sets the nillable_int64 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate {
 	if i != nil {
-		ftc.SetNullableInt64(*i)
+		ftc.SetNillableInt64(*i)
 	}
 	return ftc
 }
@@ -292,25 +292,25 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		builder.Set(fieldtype.FieldOptionalInt64, *ftc.optional_int64)
 		ft.OptionalInt64 = *ftc.optional_int64
 	}
-	if ftc.nullable_int != nil {
-		builder.Set(fieldtype.FieldNullableInt, *ftc.nullable_int)
-		ft.NullableInt = ftc.nullable_int
+	if ftc.nillable_int != nil {
+		builder.Set(fieldtype.FieldNillableInt, *ftc.nillable_int)
+		ft.NillableInt = ftc.nillable_int
 	}
-	if ftc.nullable_int8 != nil {
-		builder.Set(fieldtype.FieldNullableInt8, *ftc.nullable_int8)
-		ft.NullableInt8 = ftc.nullable_int8
+	if ftc.nillable_int8 != nil {
+		builder.Set(fieldtype.FieldNillableInt8, *ftc.nillable_int8)
+		ft.NillableInt8 = ftc.nillable_int8
 	}
-	if ftc.nullable_int16 != nil {
-		builder.Set(fieldtype.FieldNullableInt16, *ftc.nullable_int16)
-		ft.NullableInt16 = ftc.nullable_int16
+	if ftc.nillable_int16 != nil {
+		builder.Set(fieldtype.FieldNillableInt16, *ftc.nillable_int16)
+		ft.NillableInt16 = ftc.nillable_int16
 	}
-	if ftc.nullable_int32 != nil {
-		builder.Set(fieldtype.FieldNullableInt32, *ftc.nullable_int32)
-		ft.NullableInt32 = ftc.nullable_int32
+	if ftc.nillable_int32 != nil {
+		builder.Set(fieldtype.FieldNillableInt32, *ftc.nillable_int32)
+		ft.NillableInt32 = ftc.nillable_int32
 	}
-	if ftc.nullable_int64 != nil {
-		builder.Set(fieldtype.FieldNullableInt64, *ftc.nullable_int64)
-		ft.NullableInt64 = ftc.nullable_int64
+	if ftc.nillable_int64 != nil {
+		builder.Set(fieldtype.FieldNillableInt64, *ftc.nillable_int64)
+		ft.NillableInt64 = ftc.nillable_int64
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -375,20 +375,20 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	if ftc.optional_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, *ftc.optional_int64)
 	}
-	if ftc.nullable_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt, *ftc.nullable_int)
+	if ftc.nillable_int != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt, *ftc.nillable_int)
 	}
-	if ftc.nullable_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt8, *ftc.nullable_int8)
+	if ftc.nillable_int8 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt8, *ftc.nillable_int8)
 	}
-	if ftc.nullable_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt16, *ftc.nullable_int16)
+	if ftc.nillable_int16 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt16, *ftc.nillable_int16)
 	}
-	if ftc.nullable_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt32, *ftc.nullable_int32)
+	if ftc.nillable_int32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt32, *ftc.nillable_int32)
 	}
-	if ftc.nullable_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNullableInt64, *ftc.nullable_int64)
+	if ftc.nillable_int64 != nil {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftc.nillable_int64)
 	}
 	return v.ValueMap(true)
 }

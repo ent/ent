@@ -788,8 +788,8 @@ func NicknameHasSuffix(v string) predicate.User {
 	)
 }
 
-// NicknameIsNull applies the IsNull predicate on the "nickname" field.
-func NicknameIsNull() predicate.User {
+// NicknameIsNil applies the IsNil predicate on the "nickname" field.
+func NicknameIsNil() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldNickname)))
@@ -800,8 +800,8 @@ func NicknameIsNull() predicate.User {
 	)
 }
 
-// NicknameNotNull applies the NotNull predicate on the "nickname" field.
-func NicknameNotNull() predicate.User {
+// NicknameNotNil applies the NotNil predicate on the "nickname" field.
+func NicknameNotNil() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldNickname)))
@@ -964,8 +964,8 @@ func PhoneHasSuffix(v string) predicate.User {
 	)
 }
 
-// PhoneIsNull applies the IsNull predicate on the "phone" field.
-func PhoneIsNull() predicate.User {
+// PhoneIsNil applies the IsNil predicate on the "phone" field.
+func PhoneIsNil() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldPhone)))
@@ -976,8 +976,8 @@ func PhoneIsNull() predicate.User {
 	)
 }
 
-// PhoneNotNull applies the NotNull predicate on the "phone" field.
-func PhoneNotNull() predicate.User {
+// PhoneNotNil applies the NotNil predicate on the "phone" field.
+func PhoneNotNil() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldPhone)))

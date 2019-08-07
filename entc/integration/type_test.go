@@ -38,20 +38,20 @@ func Types(t *testing.T, client *ent.Client) {
 		SetOptionalInt16(math.MaxInt16).
 		SetOptionalInt32(math.MaxInt32).
 		SetOptionalInt64(math.MaxInt64).
-		SetNullableInt8(math.MaxInt8).
-		SetNullableInt16(math.MaxInt16).
-		SetNullableInt32(math.MaxInt32).
-		SetNullableInt64(math.MaxInt64).
+		SetNillableInt8(math.MaxInt8).
+		SetNillableInt16(math.MaxInt16).
+		SetNillableInt32(math.MaxInt32).
+		SetNillableInt64(math.MaxInt64).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
 	require.Equal(int16(math.MaxInt16), ft.OptionalInt16)
 	require.Equal(int32(math.MaxInt32), ft.OptionalInt32)
 	require.Equal(int64(math.MaxInt64), ft.OptionalInt64)
-	require.Equal(int8(math.MaxInt8), *ft.NullableInt8)
-	require.Equal(int16(math.MaxInt16), *ft.NullableInt16)
-	require.Equal(int32(math.MaxInt32), *ft.NullableInt32)
-	require.Equal(int64(math.MaxInt64), *ft.NullableInt64)
+	require.Equal(int8(math.MaxInt8), *ft.NillableInt8)
+	require.Equal(int16(math.MaxInt16), *ft.NillableInt16)
+	require.Equal(int32(math.MaxInt32), *ft.NillableInt32)
+	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
 
 	ft = client.FieldType.UpdateOne(ft).
 		SetInt(1).
@@ -63,18 +63,18 @@ func Types(t *testing.T, client *ent.Client) {
 		SetOptionalInt16(math.MaxInt16).
 		SetOptionalInt32(math.MaxInt32).
 		SetOptionalInt64(math.MaxInt64).
-		SetNullableInt8(math.MaxInt8).
-		SetNullableInt16(math.MaxInt16).
-		SetNullableInt32(math.MaxInt32).
-		SetNullableInt64(math.MaxInt64).
+		SetNillableInt8(math.MaxInt8).
+		SetNillableInt16(math.MaxInt16).
+		SetNillableInt32(math.MaxInt32).
+		SetNillableInt64(math.MaxInt64).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
 	require.Equal(int16(math.MaxInt16), ft.OptionalInt16)
 	require.Equal(int32(math.MaxInt32), ft.OptionalInt32)
 	require.Equal(int64(math.MaxInt64), ft.OptionalInt64)
-	require.Equal(int8(math.MaxInt8), *ft.NullableInt8)
-	require.Equal(int16(math.MaxInt16), *ft.NullableInt16)
-	require.Equal(int32(math.MaxInt32), *ft.NullableInt32)
-	require.Equal(int64(math.MaxInt64), *ft.NullableInt64)
+	require.Equal(int8(math.MaxInt8), *ft.NillableInt8)
+	require.Equal(int16(math.MaxInt16), *ft.NillableInt16)
+	require.Equal(int32(math.MaxInt32), *ft.NillableInt32)
+	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
 }

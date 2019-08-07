@@ -55,7 +55,7 @@ func ops(f *Field) (op []Op) {
 	default:
 		op = numericOps
 	}
-	if f.Nullable || f.Optional {
+	if f.Nillable || f.Optional {
 		op = append(op, nillableOps...)
 	}
 	return op

@@ -8,6 +8,7 @@
 {{ define "dialect/sql/predicate/id/ops" -}}
 	{{- $op := $.Scope.Op -}}
 	{{- $arg := $.Scope.Arg -}}
+	{{- $storage := $.Scope.Storage -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
 			// if not arguments were provided, append the FALSE constants,
@@ -23,7 +24,7 @@
 		{{- else if $.ID.IsString }}
 			id, _ := strconv.Atoi({{ $arg }})
 		{{- end }}
-		s.Where(sql.{{ $op.Name }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
+		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
 	}
 {{- end }}
 
@@ -38,6 +39,7 @@
 	{{- $f := $.Scope.Field -}}
 	{{- $op := $.Scope.Op -}}
 	{{- $arg := $.Scope.Arg -}}
+	{{- $storage := $.Scope.Storage -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
 			// if not arguments were provided, append the FALSE constants,
@@ -47,7 +49,7 @@
 				return
 			}
 		{{- end }}
-		s.Where(sql.{{ $op.Name }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, v{{ if $op.Variadic }}...{{ end }}{{ end }}))
+		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, v{{ if $op.Variadic }}...{{ end }}{{ end }}))
 	}
 {{- end }}
 

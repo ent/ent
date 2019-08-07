@@ -41,8 +41,9 @@ type (
 		Unique bool
 		// Optional indicates is this field is optional on create.
 		Optional bool
-		// Nullable indicates that this field can be null.
-		Nullable bool
+		// Nillable indicates that this field can be null in the
+		// database and pointer in the generated entities.
+		Nillable bool
 		// HasDefault indicates if this field a default value.
 		HasDefault bool
 		// StructTag of the field. default to "json".
@@ -114,7 +115,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			Name:       f.Name,
 			Type:       f.Type,
 			Unique:     f.Unique,
-			Nullable:   f.Nullable,
+			Nillable:   f.Nillable,
 			Optional:   f.Optional,
 			HasDefault: f.Default,
 			StructTag:  structTag(f.Name, f.Tag),
@@ -208,7 +209,7 @@ func (t Type) Describe(w io.Writer) {
 	b.WriteString(t.Name + ":\n")
 	table := tablewriter.NewWriter(b)
 	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nullable", "HasDefault", "StructTag", "Validators"})
+	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "HasDefault", "StructTag", "Validators"})
 	for _, f := range append([]*Field{t.ID}, t.Fields...) {
 		v := reflect.ValueOf(*f)
 		row := make([]string, v.NumField()-1)
@@ -296,10 +297,19 @@ func (f Field) NullTypeField(rec string) string {
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
 func (f Field) Column() *schema.Column {
-	c := &schema.Column{Name: f.Name, Type: f.Type, Unique: f.Unique}
-	if f.Name == "id" {
+	pk := f.Name == "id"
+	c := &schema.Column{
+		Name:   f.Name,
+		Type:   f.Type,
+		Unique: f.Unique,
+	}
+	if pk {
 		c.Type = field.TypeInt
 		c.Increment = true
+	}
+	// nullability constraint only to non primary keys.
+	if nullable := f.Optional; !pk && nullable {
+		c.Nullable = &nullable
 	}
 	if f.def != nil {
 		if f.def.Size != nil {

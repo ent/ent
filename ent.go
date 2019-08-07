@@ -20,7 +20,7 @@ type (
 		Name() string
 		Type() field.Type
 		IsUnique() bool
-		IsNullable() bool
+		IsNillable() bool
 		IsOptional() bool
 		HasDefault() bool
 		Value() interface{}

@@ -65,7 +65,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				update = true
 				builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
 				{{- if $one }}
-					{{- if $f.Nullable }}
+					{{- if $f.Nillable }}
 						{{ $.Receiver }}.{{ pascal $f.Name }} = {{ $receiver }}.{{ $f.StructField }}
 					{{- else }}
 						{{ $.Receiver }}.{{ pascal $f.Name }} = *{{ $receiver }}.{{ $f.StructField }}

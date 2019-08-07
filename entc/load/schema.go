@@ -23,7 +23,7 @@ type Field struct {
 	Size       *int       `json:"size,omitempty"`
 	Charset    *string    `json:"charset,omitempty"`
 	Unique     bool       `json:"unique,omitempty"`
-	Nullable   bool       `json:"nullable,omitempty"`
+	Nillable   bool       `json:"nillable,omitempty"`
 	Optional   bool       `json:"optional,omitempty"`
 	Default    bool       `json:"default,omitempty"`
 	Validators int        `json:"validators,omitempty"`
@@ -68,7 +68,7 @@ func MarshalSchema(schema ent.Schema) ([]byte, error) {
 			Type:       f.Type(),
 			Tag:        f.Tag(),
 			Unique:     f.IsUnique(),
-			Nullable:   f.IsNullable(),
+			Nillable:   f.IsNillable(),
 			Optional:   f.IsOptional(),
 			Default:    f.HasDefault(),
 			Validators: len(f.Validators()),

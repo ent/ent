@@ -161,13 +161,13 @@ func TestType_Describe(t *testing.T) {
 				ID:   &Field{Name: "id", Type: field.TypeInt},
 				Fields: []*Field{
 					{Name: "name", Type: field.TypeString, Validators: 1},
-					{Name: "age", Type: field.TypeInt, Nullable: true},
+					{Name: "age", Type: field.TypeInt, Nillable: true},
 				},
 			},
 			out: `
 User:
 	+-------+--------+--------+----------+----------+------------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nullable | HasDefault | StructTag | Validators |
+	| Field |  Type  | Unique | Optional | Nillable | HasDefault | StructTag | Validators |
 	+-------+--------+--------+----------+----------+------------+-----------+------------+
 	| id    | int    | false  | false    | false    | false      |           |          0 |
 	| name  | string | false  | false    | false    | false      |           |          1 |
@@ -188,7 +188,7 @@ User:
 			out: `
 User:
 	+-------+------+--------+----------+----------+------------+-----------+------------+
-	| Field | Type | Unique | Optional | Nullable | HasDefault | StructTag | Validators |
+	| Field | Type | Unique | Optional | Nillable | HasDefault | StructTag | Validators |
 	+-------+------+--------+----------+----------+------------+-----------+------------+
 	| id    | int  | false  | false    | false    | false      |           |          0 |
 	+-------+------+--------+----------+----------+------------+-----------+------------+
@@ -207,7 +207,7 @@ User:
 				ID:   &Field{Name: "id", Type: field.TypeInt},
 				Fields: []*Field{
 					{Name: "name", Type: field.TypeString, Validators: 1},
-					{Name: "age", Type: field.TypeInt, Nullable: true},
+					{Name: "age", Type: field.TypeInt, Nillable: true},
 				},
 				Edges: []*Edge{
 					{Name: "groups", Type: &Type{Name: "Group"}, Rel: Relation{Type: M2M}, Optional: true},
@@ -217,7 +217,7 @@ User:
 			out: `
 User:
 	+-------+--------+--------+----------+----------+------------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nullable | HasDefault | StructTag | Validators |
+	| Field |  Type  | Unique | Optional | Nillable | HasDefault | StructTag | Validators |
 	+-------+--------+--------+----------+----------+------------+-----------+------------+
 	| id    | int    | false  | false    | false    | false      |           |          0 |
 	| name  | string | false  | false    | false    | false      |           |          1 |

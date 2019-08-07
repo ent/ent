@@ -24,10 +24,10 @@ func (FieldType) Fields() []ent.Field {
 		field.Int16("optional_int16").Optional(),
 		field.Int32("optional_int32").Optional(),
 		field.Int64("optional_int64").Optional(),
-		field.Int("nullable_int").Optional().Nullable(),
-		field.Int8("nullable_int8").Optional().Nullable(),
-		field.Int16("nullable_int16").Optional().Nullable(),
-		field.Int32("nullable_int32").Optional().Nullable(),
-		field.Int64("nullable_int64").Optional().Nullable(),
+		field.Int("nillable_int").Optional().Nillable(),
+		field.Int8("nillable_int8").Optional().Nillable(),
+		field.Int16("nillable_int16").Optional().Nillable(),
+		field.Int32("nillable_int32").Optional().Nillable(),
+		field.Int64("nillable_int64").Optional().Nillable(),
 	}
 }

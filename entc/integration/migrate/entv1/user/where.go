@@ -466,8 +466,8 @@ func AddressHasSuffix(v string) predicate.User {
 	)
 }
 
-// AddressIsNull applies the IsNull predicate on the "address" field.
-func AddressIsNull() predicate.User {
+// AddressIsNil applies the IsNil predicate on the "address" field.
+func AddressIsNil() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldAddress)))
@@ -475,8 +475,8 @@ func AddressIsNull() predicate.User {
 	)
 }
 
-// AddressNotNull applies the NotNull predicate on the "address" field.
-func AddressNotNull() predicate.User {
+// AddressNotNil applies the NotNil predicate on the "address" field.
+func AddressNotNil() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldAddress)))

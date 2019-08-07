@@ -21,9 +21,9 @@ func TestInt(t *testing.T) {
 	assert.Equal(t, 10, f.Value())
 	assert.Len(t, f.Validators(), 2)
 
-	f = field.Int("age").Range(20, 40).Nullable()
+	f = field.Int("age").Range(20, 40).Nillable()
 	assert.False(t, f.HasDefault())
-	assert.True(t, f.IsNullable())
+	assert.True(t, f.IsNillable())
 	assert.Len(t, f.Validators(), 1)
 
 	assert.Equal(t, field.TypeInt8, field.Int8("age").Type())

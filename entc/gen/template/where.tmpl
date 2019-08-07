@@ -23,7 +23,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
 			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Arg" $arg "Op" $op -}}
+				{{- with extend $ "Arg" $arg "Op" $op "Storage" $storage -}}
 					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $storage }}
 					{{- xtemplate $tmpl . }},
 				{{ end -}}
@@ -61,7 +61,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		{{- end }}
 		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
 			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Arg" $arg "Field" $f "Op" $op -}}
+				{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $storage -}}
 					{{ $tmpl := printf "dialect/%s/predicate/field/ops" $storage }}
 					{{- xtemplate $tmpl . }},
 				{{ end -}}

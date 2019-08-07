@@ -27,16 +27,16 @@ const (
 	FieldOptionalInt32 = "optional_int32"
 	// FieldOptionalInt64 holds the string denoting the optional_int64 vertex property in the database.
 	FieldOptionalInt64 = "optional_int64"
-	// FieldNullableInt holds the string denoting the nullable_int vertex property in the database.
-	FieldNullableInt = "nullable_int"
-	// FieldNullableInt8 holds the string denoting the nullable_int8 vertex property in the database.
-	FieldNullableInt8 = "nullable_int8"
-	// FieldNullableInt16 holds the string denoting the nullable_int16 vertex property in the database.
-	FieldNullableInt16 = "nullable_int16"
-	// FieldNullableInt32 holds the string denoting the nullable_int32 vertex property in the database.
-	FieldNullableInt32 = "nullable_int32"
-	// FieldNullableInt64 holds the string denoting the nullable_int64 vertex property in the database.
-	FieldNullableInt64 = "nullable_int64"
+	// FieldNillableInt holds the string denoting the nillable_int vertex property in the database.
+	FieldNillableInt = "nillable_int"
+	// FieldNillableInt8 holds the string denoting the nillable_int8 vertex property in the database.
+	FieldNillableInt8 = "nillable_int8"
+	// FieldNillableInt16 holds the string denoting the nillable_int16 vertex property in the database.
+	FieldNillableInt16 = "nillable_int16"
+	// FieldNillableInt32 holds the string denoting the nillable_int32 vertex property in the database.
+	FieldNillableInt32 = "nillable_int32"
+	// FieldNillableInt64 holds the string denoting the nillable_int64 vertex property in the database.
+	FieldNillableInt64 = "nillable_int64"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -55,9 +55,9 @@ var Columns = []string{
 	FieldOptionalInt16,
 	FieldOptionalInt32,
 	FieldOptionalInt64,
-	FieldNullableInt,
-	FieldNullableInt8,
-	FieldNullableInt16,
-	FieldNullableInt32,
-	FieldNullableInt64,
+	FieldNillableInt,
+	FieldNillableInt8,
+	FieldNillableInt16,
+	FieldNillableInt32,
+	FieldNillableInt64,
 }

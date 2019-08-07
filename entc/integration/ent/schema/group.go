@@ -23,7 +23,7 @@ func (Group) Fields() []ent.Field {
 		field.Time("expire"),
 		field.String("type").
 			Optional().
-			Nullable().
+			Nillable().
 			MinLen(3),
 		field.Int("max_users").
 			Optional().

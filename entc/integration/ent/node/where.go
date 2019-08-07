@@ -284,8 +284,8 @@ func ValueNotIn(vs ...int) predicate.Node {
 	)
 }
 
-// ValueIsNull applies the IsNull predicate on the "value" field.
-func ValueIsNull() predicate.Node {
+// ValueIsNil applies the IsNil predicate on the "value" field.
+func ValueIsNil() predicate.Node {
 	return predicate.NodePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.IsNull(s.C(FieldValue)))
@@ -296,8 +296,8 @@ func ValueIsNull() predicate.Node {
 	)
 }
 
-// ValueNotNull applies the NotNull predicate on the "value" field.
-func ValueNotNull() predicate.Node {
+// ValueNotNil applies the NotNil predicate on the "value" field.
+func ValueNotNil() predicate.Node {
 	return predicate.NodePerDialect(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldValue)))
