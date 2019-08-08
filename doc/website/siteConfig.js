@@ -21,8 +21,8 @@ const users = [
 ];
 
 const siteConfig = {
-  title: 'ent go', // Title for your website.
-  tagline: 'An ORM for Go',
+  title: 'ent', // Title for your website.
+  tagline: 'An entity for Go',
   url: 'https://your-docusaurus-test-site.com', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
