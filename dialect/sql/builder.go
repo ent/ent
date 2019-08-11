@@ -168,7 +168,10 @@ func (c *ColumnBuilder) Attr(a string) *ColumnBuilder {
 
 // Query returns query representation of a Column.
 func (c *ColumnBuilder) Query() (string, []interface{}) {
-	c.b.Append(c.name).Pad().WriteString(c.typ)
+	c.b.Append(c.name)
+	if c.typ != "" {
+		c.b.Pad().WriteString(c.typ)
+	}
 	if c.attr != "" {
 		c.b.Pad().WriteString(c.attr)
 	}
@@ -335,6 +338,12 @@ func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 	return t
 }
 
+// DropColumn appends the `DROP COLUMN` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) DropColumn(c *ColumnBuilder) *TableAlter {
+	t.Queriers = append(t.Queriers, &Wrapper{"DROP COLUMN %s", c})
+	return t
+}
+
 // AddForeignKey adds a foreign key constraint to the `ALTER TABLE` statement.
 func (t *TableAlter) AddForeignKey(fk *ForeignKeyBuilder) *TableAlter {
 	t.Queriers = append(t.Queriers, &Wrapper{"ADD CONSTRAINT %s", fk})
@@ -454,6 +463,111 @@ func (r *ReferenceBuilder) Query() (string, []interface{}) {
 		b.AppendComma(r.columns...)
 	})
 	return r.b.String(), r.b.args
+}
+
+// IndexBuilder is a builder for `CREATE INDEX` statement.
+type IndexBuilder struct {
+	b       Builder
+	name    string
+	unique  bool
+	table   string
+	columns []string
+}
+
+// CreateIndex creates a builder for the `CREATE INDEX` statement.
+//
+//	CreateIndex("index_name").
+//		Unique().
+//		Table("users").
+//		Column("name")
+//
+// Or:
+//
+//	CreateIndex("index_name").
+//		Unique().
+//		Table("users").
+//		Columns("name", "age")
+//
+func CreateIndex(name string) *IndexBuilder {
+	return &IndexBuilder{name: name}
+}
+
+// Unique sets the index to be a unique index.
+func (i *IndexBuilder) Unique() *IndexBuilder {
+	i.unique = true
+	return i
+}
+
+// Table defines the table for the index.
+func (i *IndexBuilder) Table(table string) *IndexBuilder {
+	i.table = table
+	return i
+}
+
+// Column appends a column to the column list for the index.
+func (i *IndexBuilder) Column(column string) *IndexBuilder {
+	i.columns = append(i.columns, column)
+	return i
+}
+
+// Columns appends the given columns to the column list for the index.
+func (i *IndexBuilder) Columns(columns ...string) *IndexBuilder {
+	i.columns = append(i.columns, columns...)
+	return i
+}
+
+// Query returns query representation of a reference clause.
+func (i *IndexBuilder) Query() (string, []interface{}) {
+	i.b.WriteString("CREATE ")
+	if i.unique {
+		i.b.WriteString("UNIQUE ")
+	}
+	i.b.WriteString("INDEX ")
+	i.b.Append(i.name)
+	i.b.WriteString(" ON ")
+	i.b.Append(i.table).Nested(func(b *Builder) {
+		b.AppendComma(i.columns...)
+	})
+	return i.b.String(), nil
+}
+
+// DropIndexBuilder is a builder for `DROP INDEX` statement.
+type DropIndexBuilder struct {
+	b     Builder
+	name  string
+	table string
+}
+
+// DropIndex creates a builder for the `DROP INDEX` statement.
+//
+//	MySQL:
+//
+//		DropIndex("index_name").
+//			Table("users").
+//
+// SQLite/PostgreSQL:
+//
+//		DropIndex("index_name")
+//
+func DropIndex(name string) *DropIndexBuilder {
+	return &DropIndexBuilder{name: name}
+}
+
+// Table defines the table for the index.
+func (d *DropIndexBuilder) Table(table string) *DropIndexBuilder {
+	d.table = table
+	return d
+}
+
+// Query returns query representation of a reference clause.
+func (d *DropIndexBuilder) Query() (string, []interface{}) {
+	d.b.WriteString("DROP INDEX ")
+	d.b.Append(d.name)
+	if d.table != "" {
+		d.b.WriteString(" ON ")
+		d.b.Append(d.table)
+	}
+	return d.b.String(), nil
 }
 
 // InsertBuilder is a builder for `INSERT INTO` statement.

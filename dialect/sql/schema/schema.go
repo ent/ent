@@ -409,11 +409,60 @@ func (r ReferenceOption) ConstName() string {
 
 // Index definition for table index.
 type Index struct {
-	Name    string
-	Unique  bool
-	Columns []*Column
+	Name    string    // index name.
+	Unique  bool      // uniqueness.
+	Columns []*Column // actual table columns.
+	columns []string  // columns loaded from query scan.
 }
 
 // Primary indicates if this index is a primary key.
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
 func (i *Index) Primary() bool { return i.Name == "PRIMARY" }
+
+// Builder returns the query builder for index creation. The DSL is identical in all dialects.
+func (i *Index) Builder(table string) *sql.IndexBuilder {
+	idx := sql.CreateIndex(i.Name).Table(table)
+	if i.Unique {
+		idx.Unique()
+	}
+	for _, c := range i.Columns {
+		idx.Column(c.Name)
+	}
+	return idx
+}
+
+// DropBuilder returns the query builder for the drop index.
+func (i *Index) DropBuilder(table string) *sql.DropIndexBuilder {
+	idx := sql.DropIndex(i.Name).Table(table)
+	return idx
+}
+
+// Indexes used for scanning all sql.Rows into a list of indexes, because
+// multiple sql rows can represent the same index (multi-columns indexes).
+type Indexes []*Index
+
+// ScanMySQL scans sql.Rows into an Indexes list. The query for returning the rows,
+// should return the following 4 columns: INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX.
+// SEQ_IN_INDEX specifies the position of the column in the index columns.
+func (i *Indexes) ScanMySQL(rows *sql.Rows) error {
+	names := make(map[string]*Index)
+	for rows.Next() {
+		var (
+			name     string
+			column   string
+			nonuniq  bool
+			seqindex int
+		)
+		if err := rows.Scan(&name, &column, &nonuniq, &seqindex); err != nil {
+			return fmt.Errorf("scanning index description: %v", err)
+		}
+		idx, ok := names[name]
+		if !ok {
+			idx = &Index{Name: name, Unique: !nonuniq}
+			*i = append(*i, idx)
+			names[name] = idx
+		}
+		idx.columns = append(idx.columns, column)
+	}
+	return nil
+}

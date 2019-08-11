@@ -177,6 +177,10 @@ func TestMySQL_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
 						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -210,7 +214,119 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
 						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", "").
 						AddRow("age", "bigint(20)", "NO", "NO", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
 				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `name` varchar(255) CHARSET utf8 NULL")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "apply uniqueness on column",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "age", Type: field.TypeInt, Unique: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("age", "bigint(20)", "NO", "", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				// create the unique index.
+				mock.ExpectExec(escape("CREATE UNIQUE INDEX `age` ON `users`(`age`)")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "remove uniqueness from column without option",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "age", Type: field.TypeInt},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("age", "bigint(20)", "NO", "UNI", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1").
+						AddRow("age", "age", "0", "1"))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "remove uniqueness from column without option",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "age", Type: field.TypeInt},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			options: []MigrateOption{WithDropIndex(true)},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("age", "bigint(20)", "NO", "UNI", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1").
+						AddRow("age", "age", "0", "1"))
+				// drop the unique index.
+				mock.ExpectExec(escape("DROP INDEX `age` ON `users`")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -253,6 +369,10 @@ func TestMySQL_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
 						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `spouse_id` bigint")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
@@ -329,6 +449,10 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("groups").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))

@@ -53,6 +53,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("mysql: reading table description %v", err)
 	}
+	// call `Close` in cases of failures (`Close` is idempotent).
 	defer rows.Close()
 	t := &Table{Name: name}
 	for rows.Next() {
@@ -65,7 +66,32 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 		}
 		t.Columns = append(t.Columns, c)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, fmt.Errorf("mysql: closing rows %v", err)
+	}
+	indexes, err := d.indexes(ctx, tx, name)
+	if err != nil {
+		return nil, err
+	}
+	t.Indexes = indexes
 	return t, nil
+}
+
+// table loads the table indexes from the database.
+func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Index, error) {
+	rows := &sql.Rows{}
+	query, args := sql.Select("index_name", "column_name", "non_unique", "seq_in_index").
+		From(sql.Table("INFORMATION_SCHEMA.STATISTICS").Unquote()).
+		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return nil, fmt.Errorf("mysql: reading index description %v", err)
+	}
+	defer rows.Close()
+	var idx Indexes
+	if err := idx.ScanMySQL(rows); err != nil {
+		return nil, fmt.Errorf("mysql: %v", err)
+	}
+	return idx, nil
 }
 
 func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {

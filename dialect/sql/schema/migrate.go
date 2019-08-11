@@ -24,16 +24,35 @@ const (
 type MigrateOption func(m *Migrate)
 
 // WithGlobalUniqueID sets the universal ids options to the migration.
+// Defaults to false.
 func WithGlobalUniqueID(b bool) MigrateOption {
-	return func(o *Migrate) {
-		o.universalID = b
+	return func(m *Migrate) {
+		m.universalID = b
+	}
+}
+
+// WithDropColumn sets the columns dropping option to the migration.
+// Defaults to false.
+func WithDropColumn(b bool) MigrateOption {
+	return func(m *Migrate) {
+		m.dropColumn = b
+	}
+}
+
+// WithDropIndex sets the indexes dropping option to the migration.
+// Defaults to false.
+func WithDropIndex(b bool) MigrateOption {
+	return func(m *Migrate) {
+		m.dropIndex = b
 	}
 }
 
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID bool     // global unique id flag.
+	universalID bool     // global unique ids.
+	dropColumn  bool     // drop deleted columns.
+	dropIndex   bool     // drop deleted indexes.
 	typeRanges  []string // types order by their range.
 }
 
@@ -96,21 +115,8 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			if err != nil {
 				return err
 			}
-			if len(change.add) != 0 || len(change.modify) != 0 {
-				b := sql.AlterTable(curr.Name)
-				for _, c := range change.add {
-					b.AddColumn(m.cBuilder(c))
-				}
-				for _, c := range change.modify {
-					b.ModifyColumn(m.cBuilder(c))
-				}
-				query, args := b.Query()
-				if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-					return fmt.Errorf("alter table %q: %v", t.Name, err)
-				}
-			}
-			if len(change.indexes) > 0 {
-				panic("missing implementation")
+			if err := m.apply(ctx, tx, t.Name, change); err != nil {
+				return err
 			}
 		default: // !exist
 			query, args := m.tBuilder(t).Query()
@@ -158,11 +164,60 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 	return nil
 }
 
+// apply applies changes on the given table.
+func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change *changes) error {
+	// constraints should be dropped before dropping columns, because if a column
+	// is a part of multi-column constraints (like, unique index), ALTER TABLE
+	// might fail if the intermediate state violates the constraints.
+	if m.dropIndex {
+		for _, idx := range change.index.drop {
+			query, args := idx.DropBuilder(table).Query()
+			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+				return fmt.Errorf("drop index %q: %v", table, err)
+			}
+		}
+	}
+	b := sql.AlterTable(table)
+	for _, c := range change.column.add {
+		b.AddColumn(m.cBuilder(c))
+	}
+	for _, c := range change.column.modify {
+		b.ModifyColumn(m.cBuilder(c))
+	}
+	if m.dropColumn {
+		for _, c := range change.column.drop {
+			b.DropColumn(sql.Column(c.Name))
+		}
+	}
+	// if there's actual action to execute on ALTER TABLE.
+	if len(b.Queriers) != 0 {
+		query, args := b.Query()
+		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+			return fmt.Errorf("alter table %q: %v", table, err)
+		}
+	}
+	for _, idx := range change.index.add {
+		query, args := idx.Builder(table).Query()
+		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+			return fmt.Errorf("create index %q: %v", table, err)
+		}
+	}
+	return nil
+}
+
 // changes to apply on existing table.
 type changes struct {
-	add     []*Column
-	modify  []*Column
-	indexes []*Index
+	// column changes.
+	column struct {
+		add    []*Column
+		drop   []*Column
+		modify []*Column
+	}
+	// index changes.
+	index struct {
+		add  []*Index
+		drop []*Index
+	}
 }
 
 // changeSet returns a changes object to be applied on existing table.
@@ -180,29 +235,65 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
 		}
 	}
-	// columns.
+	// add or modify columns.
 	for _, c1 := range new.Columns {
 		switch c2, ok := curr.column(c1.Name); {
 		case !ok:
-			change.add = append(change.add, c1)
-		case c1.Unique != c2.Unique:
-			return nil, fmt.Errorf("changing column cardinality for %q is invalid", c1.Name)
+			change.column.add = append(change.column.add, c1)
+		// modify a non-unique column to unique.
+		case c1.Unique && !c2.Unique:
+			change.index.add = append(change.index.add, &Index{
+				Name:    c1.Name,
+				Unique:  true,
+				Columns: []*Column{c1},
+				columns: []string{c1.Name},
+			})
+		// modify a unique column to non-unique.
+		case !c1.Unique && c2.Unique:
+			idx, ok := curr.index(c2.Name)
+			if !ok {
+				return nil, fmt.Errorf("missing index to drop for column %q", c2.Name)
+			}
+			change.index.drop = append(change.index.drop, idx)
+		// extending column types.
 		case m.cType(c1) != m.cType(c2):
 			if !c2.ConvertibleTo(c1) {
 				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, m.cType(c1), m.cType(c2))
 			}
 			fallthrough
+		// modify character encoding.
 		case c1.Charset != "" && c1.Charset != c2.Charset || c1.Collation != "" && c1.Charset != c2.Collation:
-			change.modify = append(change.modify, c1)
+			change.column.modify = append(change.column.modify, c1)
 		}
 	}
-	// indexes.
+
+	// drop columns.
+	for _, c1 := range curr.Columns {
+		// if a column was dropped, multi-columns indexes that are associated with this column will
+		// no longer behave the same. Therefore, these indexes should be dropped too. There's no need
+		// to do it explicitly (here), because entc will remove them from the schema specification,
+		// and they will be dropped in the block below.
+		if _, ok := new.column(c1.Name); !ok {
+			change.column.drop = append(change.column.drop, c1)
+		}
+	}
+
+	// add or modify indexes.
 	for _, idx1 := range new.Indexes {
 		switch idx2, ok := curr.index(idx1.Name); {
 		case !ok:
-			change.indexes = append(change.indexes, idx1)
+			change.index.add = append(change.index.add, idx1)
+		// changing index cardinality require drop and create.
 		case idx1.Unique != idx2.Unique:
-			return nil, fmt.Errorf("changing index %q uniqness is invalid", idx1.Name)
+			change.index.drop = append(change.index.drop, idx2)
+			change.index.add = append(change.index.add, idx1)
+		}
+	}
+
+	// drop indexes.
+	for _, idx1 := range curr.Indexes {
+		if _, ok := new.index(idx1.Name); ok {
+			change.index.drop = append(change.index.drop, idx1)
 		}
 	}
 	return change, nil
@@ -300,7 +391,7 @@ type sqlDialect interface {
 	tableExist(context.Context, dialect.Tx, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)
 	setRange(context.Context, dialect.Tx, string, int) error
-	// table and column builder per dialect.
+	// table, column and index builder per dialect.
 	cType(*Column) string
 	tBuilder(*Table) *sql.TableBuilder
 	cBuilder(*Column) *sql.ColumnBuilder

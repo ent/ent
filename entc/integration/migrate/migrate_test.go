@@ -5,9 +5,10 @@ import (
 	"testing"
 
 	"fbc/ent/dialect/sql"
-	"fbc/ent/dialect/sql/schema"
 	"fbc/ent/entc/integration/migrate/entv1"
+	migratev1 "fbc/ent/entc/integration/migrate/entv1/migrate"
 	"fbc/ent/entc/integration/migrate/entv2"
+	migratev2 "fbc/ent/entc/integration/migrate/entv2/migrate"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
@@ -28,12 +29,12 @@ func TestMySQL(t *testing.T) {
 
 	// run migration and execute queries on v1.
 	clientv1 := entv1.NewClient(entv1.Driver(drv))
-	require.NoError(t, clientv1.Schema.Create(ctx, schema.WithGlobalUniqueID(true)))
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
 	SanityV1(t, clientv1)
 
 	// run migration and execute queries on v2.
 	clientv2 := entv2.NewClient(entv2.Driver(drv))
-	require.NoError(t, clientv2.Schema.Create(ctx, schema.WithGlobalUniqueID(true)))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)))
 	SanityV2(t, clientv2)
 
 	// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
@@ -50,7 +51,7 @@ func TestSQLite(t *testing.T) {
 
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
-	require.NoError(t, client.Schema.Create(ctx, schema.WithGlobalUniqueID(true)))
+	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)))
 
 	SanityV2(t, client)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 0, 1<<32)

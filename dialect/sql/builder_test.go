@@ -107,6 +107,12 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` MODIFY COLUMN `age` int",
 		},
 		{
+			input: AlterTable("users").
+				ModifyColumn(Column("age").Type("int")).
+				DropColumn(Column("name")),
+			wantQuery: "ALTER TABLE `users` MODIFY COLUMN `age` int, DROP COLUMN `name`",
+		},
+		{
 			input:     Insert("users").Columns("age").Values(1),
 			wantQuery: "INSERT INTO `users` (`age`) VALUES (?)",
 			wantArgs:  []interface{}{1},
@@ -423,6 +429,22 @@ func TestBuilder(t *testing.T) {
 			}(),
 			wantQuery: "WITH groups AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
 			wantArgs:  []interface{}{"bar"},
+		},
+		{
+			input:     CreateIndex("name_index").Table("users").Column("name"),
+			wantQuery: "CREATE INDEX `name_index` ON `users`(`name`)",
+		},
+		{
+			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),
+			wantQuery: "CREATE UNIQUE INDEX `unique_name` ON `users`(`first`, `last`)",
+		},
+		{
+			input:     DropIndex("name_index"),
+			wantQuery: "DROP INDEX `name_index`",
+		},
+		{
+			input:     DropIndex("name_index").Table("users"),
+			wantQuery: "DROP INDEX `name_index` ON `users`",
 		},
 	}
 	for i, tt := range tests {

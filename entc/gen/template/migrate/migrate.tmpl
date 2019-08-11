@@ -12,6 +12,14 @@ import (
 	"fbc/ent/dialect/sql/schema"
 )
 
+var (
+	// WithGlobalUniqueID sets the universal ids options to the migration.
+	// If this option is enabled, ent migration will allocate a 1<<32 range
+	// for the ids of each entity (table).
+	// Note that this option cannot be applied on tables that already exist.
+	WithGlobalUniqueID = schema.WithGlobalUniqueID
+)
+
 // Schema is the API for creating, migrating and dropping a schema.
 type Schema struct {
 	drv         dialect.Driver
