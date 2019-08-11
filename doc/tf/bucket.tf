@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "website" {
-  bucket = "entgo.io"
+  bucket = local.domain_name
   acl    = "public-read"
 
   server_side_encryption_configuration {
@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "website" {
     ]
 
     resources = [
-      format("%s/*", aws_s3_bucket.website.arn)
+      "${aws_s3_bucket.website.arn}/*"
     ]
 
     principals {

@@ -5,4 +5,6 @@ terraform {
     key            = "terraform.tfstate"
     dynamodb_table = "entgo.terraform.lock"
   }
+
+  required_version = "> 0.12"
 }
