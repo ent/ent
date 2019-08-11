@@ -23,7 +23,7 @@ func NewDriver(c *Client) *Driver {
 func (Driver) Dialect() string { return dialect.Neptune }
 
 // Exec implements the dialect.Exec method.
-func (c *Driver) Exec(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (c *Driver) Exec(ctx context.Context, query string, args, v interface{}) error {
 	vr, ok := v.(*Response)
 	if !ok {
 		return fmt.Errorf("dialect/gremlin: invalid type %T. expect *gremlin.Response", v)
@@ -41,7 +41,7 @@ func (c *Driver) Exec(ctx context.Context, query string, args interface{}, v int
 }
 
 // Query implements the dialect.Query method.
-func (c *Driver) Query(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (c *Driver) Query(ctx context.Context, query string, args, v interface{}) error {
 	return c.Exec(ctx, query, args, v)
 }
 

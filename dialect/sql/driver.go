@@ -82,7 +82,7 @@ type conn struct {
 }
 
 // Exec implements the dialect.Exec method.
-func (c *conn) Exec(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (c *conn) Exec(ctx context.Context, query string, args, v interface{}) error {
 	vr, ok := v.(*sql.Result)
 	if !ok {
 		return fmt.Errorf("dialect/sql: invalid type %T. expect *sql.Result", v)
@@ -100,7 +100,7 @@ func (c *conn) Exec(ctx context.Context, query string, args interface{}, v inter
 }
 
 // Exec implements the dialect.Query method.
-func (c *conn) Query(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (c *conn) Query(ctx context.Context, query string, args, v interface{}) error {
 	vr, ok := v.(*Rows)
 	if !ok {
 		return fmt.Errorf("dialect/sql: invalid type %T. expect *sql.Rows", v)

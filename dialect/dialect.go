@@ -20,10 +20,10 @@ const (
 type ExecQuerier interface {
 	// Exec executes a query that doesn't return rows. For example, in SQL, INSERT or UPDATE.
 	// It scans the result into the pointer v. In SQL, you it's usually sql.Result.
-	Exec(ctx context.Context, query string, args interface{}, v interface{}) error
+	Exec(ctx context.Context, query string, args, v interface{}) error
 	// Query executes a query that returns rows, typically a SELECT in SQL.
 	// It scans the result into the pointer v. In SQL, you it's usually *sql.Rows.
-	Query(ctx context.Context, query string, args interface{}, v interface{}) error
+	Query(ctx context.Context, query string, args, v interface{}) error
 }
 
 // Driver is the interface that wraps all necessary operations for ent clients.
@@ -61,13 +61,13 @@ func Debug(d Driver, logger ...func(...interface{})) Driver {
 }
 
 // Exec logs its params and calls the underlying driver Exec method.
-func (d *DebugDriver) Exec(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (d *DebugDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
 	d.log(fmt.Sprintf("driver.Exec: query=%v args=%v", query, args))
 	return d.Driver.Exec(ctx, query, args, v)
 }
 
 // Query logs its params and calls the underlying driver Query method.
-func (d *DebugDriver) Query(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (d *DebugDriver) Query(ctx context.Context, query string, args, v interface{}) error {
 	d.log(fmt.Sprintf("driver.Query: query=%v args=%v", query, args))
 	return d.Driver.Query(ctx, query, args, v)
 }
@@ -91,13 +91,13 @@ type DebugTx struct {
 }
 
 // Exec logs its params and calls the underlying transaction Exec method.
-func (d *DebugTx) Exec(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) error {
 	d.log(fmt.Sprintf("Tx(%s).Exec: query=%v args=%v", d.id, query, args))
 	return d.Tx.Exec(ctx, query, args, v)
 }
 
 // Query logs its params and calls the underlying transaction Query method.
-func (d *DebugTx) Query(ctx context.Context, query string, args interface{}, v interface{}) error {
+func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) error {
 	d.log(fmt.Sprintf("Tx(%s).Query: query=%v args=%v", d.id, query, args))
 	return d.Tx.Query(ctx, query, args, v)
 }
