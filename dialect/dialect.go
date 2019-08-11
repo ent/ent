@@ -44,6 +44,19 @@ type Tx interface {
 	driver.Tx
 }
 
+type nopTx struct {
+	Driver
+}
+
+func (nopTx) Commit() error   { return nil }
+func (nopTx) Rollback() error { return nil }
+
+// NopTx returns a Tx with a no-op Commit / Rollback methods wrapping
+// the provided Driver d.
+func NopTx(d Driver) Tx {
+	return nopTx{d}
+}
+
 // DebugDriver is a driver that logs all driver operations.
 type DebugDriver struct {
 	Driver                      // underlying driver.

@@ -46,15 +46,9 @@ func (c *Driver) Query(ctx context.Context, query string, args, v interface{}) e
 }
 
 // Close is a nop close call. It should close the connection in case of WS client.
-func (c *Driver) Close() error { return nil }
+func (Driver) Close() error { return nil }
 
 // Tx returns a nop transaction.
-func (c *Driver) Tx(context.Context) (dialect.Tx, error) { return c, nil }
-
-// Commit is a nop commit.
-func (c *Driver) Commit() error { return nil }
-
-// Rollback is a nop rollback.
-func (c *Driver) Rollback() error { return nil }
+func (c *Driver) Tx(context.Context) (dialect.Tx, error) { return dialect.NopTx(c), nil }
 
 var _ dialect.Driver = (*Driver)(nil)
