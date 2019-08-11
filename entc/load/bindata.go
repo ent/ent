@@ -102,7 +102,7 @@ func schemaGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "schema.go", size: 2637, mode: os.FileMode(420), modTime: time.Unix(1565179921, 0)}
+	info := bindataFileInfo{name: "schema.go", size: 2637, mode: os.FileMode(420), modTime: time.Unix(1565536164, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

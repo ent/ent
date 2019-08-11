@@ -110,6 +110,9 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 		if !f.Type.Valid() {
 			return nil, fmt.Errorf("invalid type for field %s", f.Name)
 		}
+		if f.Nillable && !f.Optional {
+			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
+		}
 		typ.Fields = append(typ.Fields, &Field{
 			def:        f,
 			Name:       f.Name,
