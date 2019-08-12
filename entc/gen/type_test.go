@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"fbc/ent/entc/load"
 	"fbc/ent/field"
 
 	"github.com/stretchr/testify/assert"
@@ -91,6 +92,37 @@ func TestType_Package(t *testing.T) {
 		typ := &Type{Name: tt.name}
 		require.Equal(t, tt.pkg, typ.Package())
 	}
+}
+
+func TestType_AddIndex(t *testing.T) {
+	size := 1024
+	typ, err := NewType(Config{}, &load.Schema{
+		Name: "User",
+		Fields: []*load.Field{
+			{Name: "name", Type: field.TypeString},
+			{Name: "text", Type: field.TypeString, Size: &size},
+		},
+	})
+	require.NoError(t, err)
+	typ.Edges = append(typ.Edges, &Edge{Name: "next"}, &Edge{Name: "owner", Inverse: "files", Rel: Relation{Type: M2O, Columns: []string{"file_id"}}})
+
+	err = typ.AddIndex(&load.Index{Unique: true})
+	require.Error(t, err, "missing fields")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"unknown"}})
+	require.Error(t, err, "unknown field for index")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"text"}})
+	require.Error(t, err, "index size exceeded")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edge: "parent"})
+	require.Error(t, err, "missing edge")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edge: "next"})
+	require.Error(t, err, "not an inverse edge")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edge: "owner"})
+	require.NoError(t, err)
 }
 
 func TestField(t *testing.T) {
