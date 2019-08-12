@@ -311,6 +311,25 @@ func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{config: c.config}
 }
 
+// QueryOwner queries the owner edge of a File.
+func (c *FileClient) QueryOwner(f *File) *UserQuery {
+	query := &UserQuery{config: c.config}
+	switch c.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		id := f.id()
+		t1 := sql.Table(user.Table)
+		t2 := sql.Select(file.OwnerColumn).
+			From(sql.Table(file.OwnerTable)).
+			Where(sql.EQ(file.FieldID, id))
+		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(file.OwnerColumn))
+
+	case dialect.Neptune:
+		query.gremlin = g.V(f.ID).InE(user.FilesLabel).OutV()
+
+	}
+	return query
+}
+
 // GroupClient is a client for the Group schema.
 type GroupClient struct {
 	config

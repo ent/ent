@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"fbc/ent/entc/integration/ent/file"
+	"fbc/ent/entc/integration/ent/user"
 
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
@@ -24,6 +25,7 @@ type FileCreate struct {
 	name  *string
 	user  *string
 	group *string
+	owner map[string]struct{}
 }
 
 // SetSize sets the size field.
@@ -74,6 +76,28 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	return fc
 }
 
+// SetOwnerID sets the owner edge to User by id.
+func (fc *FileCreate) SetOwnerID(id string) *FileCreate {
+	if fc.owner == nil {
+		fc.owner = make(map[string]struct{})
+	}
+	fc.owner[id] = struct{}{}
+	return fc
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (fc *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
+	if id != nil {
+		fc = fc.SetOwnerID(*id)
+	}
+	return fc
+}
+
+// SetOwner sets the owner edge to User.
+func (fc *FileCreate) SetOwner(u *User) *FileCreate {
+	return fc.SetOwnerID(u.ID)
+}
+
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if fc.size == nil {
@@ -85,6 +109,9 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	}
 	if fc.name == nil {
 		return nil, errors.New("ent: missing required field \"name\"")
+	}
+	if len(fc.owner) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch fc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -140,6 +167,21 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, rollback(tx, err)
 	}
 	f.ID = strconv.FormatInt(id, 10)
+	if len(fc.owner) > 0 {
+		for eid := range fc.owner {
+			eid, err := strconv.Atoi(eid)
+			if err != nil {
+				return nil, rollback(tx, err)
+			}
+			query, args := sql.Update(file.OwnerTable).
+				Set(file.OwnerColumn, eid).
+				Where(sql.EQ(file.FieldID, id)).
+				Query()
+			if err := tx.Exec(ctx, query, args, &res); err != nil {
+				return nil, rollback(tx, err)
+			}
+		}
+	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -175,6 +217,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	if fc.group != nil {
 		v.Property(dsl.Single, file.FieldGroup, *fc.group)
+	}
+	for id := range fc.owner {
+		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
 	return v.ValueMap(true)
 }

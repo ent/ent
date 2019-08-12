@@ -10,9 +10,10 @@ import (
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name   string   `json:"name,omitempty"`
-	Edges  []*Edge  `json:"edges,omitempty"`
-	Fields []*Field `json:"fields,omitempty"`
+	Name    string   `json:"name,omitempty"`
+	Edges   []*Edge  `json:"edges,omitempty"`
+	Fields  []*Field `json:"fields,omitempty"`
+	Indexes []*Index `json:"indexes,omitempty"`
 }
 
 // Field represents an ent.Field that was loaded from a complied user package.
@@ -39,6 +40,13 @@ type Edge struct {
 	Unique   bool   `json:"unique,omitempty"`
 	Inverse  bool   `json:"inverse,omitempty"`
 	Required bool   `json:"required,omitempty"`
+}
+
+// Index represents an ent.Index that was loaded from a complied user package.
+type Index struct {
+	Unique bool     `json:"unique,omitempty"`
+	Edge   string   `json:"edge,omitempty"`
+	Fields []string `json:"fields,omitempty"`
 }
 
 // NewEdge creates an loaded edge from schema interface.
@@ -85,6 +93,13 @@ func MarshalSchema(schema ent.Schema) ([]byte, error) {
 	}
 	for _, e := range schema.Edges() {
 		s.Edges = append(s.Edges, NewEdge(e))
+	}
+	for _, idx := range schema.Indexes() {
+		s.Indexes = append(s.Indexes, &Index{
+			Edge:   idx.Edge(),
+			Fields: idx.Fields(),
+			Unique: idx.IsUnique(),
+		})
 	}
 	return json.Marshal(s)
 }

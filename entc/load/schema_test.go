@@ -7,6 +7,7 @@ import (
 	"fbc/ent"
 	"fbc/ent/edge"
 	"fbc/ent/field"
+	"fbc/ent/index"
 
 	"github.com/stretchr/testify/require"
 )
@@ -32,6 +33,16 @@ func (User) Edges() []ent.Edge {
 		edge.To("parent", User.Type).
 			Unique().
 			From("children"),
+	}
+}
+
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name", "address").
+			Unique(),
+		index.Fields("name").
+			FromEdge("parent").
+			Unique(),
 	}
 }
 
@@ -81,5 +92,11 @@ func TestMarshalSchema(t *testing.T) {
 		require.True(t, schema.Edges[1].Inverse)
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
+
+		require.Equal(t, []string{"name", "address"}, schema.Indexes[0].Fields)
+		require.True(t, schema.Indexes[0].Unique)
+		require.Equal(t, []string{"name"}, schema.Indexes[1].Fields)
+		require.Equal(t, "parent", schema.Indexes[1].Edge)
+		require.True(t, schema.Indexes[1].Unique)
 	}
 }

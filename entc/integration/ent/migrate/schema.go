@@ -75,7 +75,7 @@ var (
 		{Name: "user", Type: field.TypeString, Nullable: &nullable},
 		{Name: "group", Type: field.TypeString, Nullable: &nullable},
 		{Name: "group_file_id", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "user_file_id", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: &nullable},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -96,6 +96,23 @@ var (
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "name_size",
+				Unique:  false,
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[1]},
+			},
+			{
+				Name:    "name_user",
+				Unique:  true,
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
+			},
+			{
+				Name:    "name_owner_id",
+				Unique:  true,
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[6]},
 			},
 		},
 	}

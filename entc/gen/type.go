@@ -25,8 +25,12 @@ type (
 		ID *Field
 		// Fields holds all the primitive fields of this type.
 		Fields []*Field
+		// fields map for fast lookup.
+		fields map[string]*Field
 		// Edge holds all the edges of this type.
 		Edges []*Edge
+		// Indexes are the configured indexes for this type.
+		Indexes []*Index
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -93,6 +97,18 @@ type (
 		// In O2M, M2O and O2O, this the first element.
 		Columns []string
 	}
+
+	// Index represents a database index used for either increasing speed
+	// on database operations or defining constraints such as "UNIQUE INDEX".
+	// Note that some indexes are created implicitly like table foreign keys.
+	Index struct {
+		// Name of the index. One column index is simply the column name.
+		Name string
+		// Unique index or not.
+		Unique bool
+		// Columns are the table columns.
+		Columns []string
+	}
 )
 
 // NewType creates a new type and its fields from the given schema.
@@ -105,15 +121,17 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			Type:      c.IDType,
 			StructTag: `json:"id,omitempty"`,
 		},
+		Fields: make([]*Field, len(schema.Fields)),
+		fields: make(map[string]*Field, len(schema.Fields)),
 	}
-	for _, f := range schema.Fields {
+	for i, f := range schema.Fields {
 		if !f.Type.Valid() {
 			return nil, fmt.Errorf("invalid type for field %s", f.Name)
 		}
 		if f.Nillable && !f.Optional {
 			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
 		}
-		typ.Fields = append(typ.Fields, &Field{
+		typ.Fields[i] = &Field{
 			def:        f,
 			Name:       f.Name,
 			Type:       f.Type,
@@ -123,7 +141,8 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			HasDefault: f.Default,
 			StructTag:  structTag(f.Name, f.Tag),
 			Validators: f.Validators,
-		})
+		}
+		typ.fields[f.Name] = typ.Fields[i]
 	}
 	return typ, nil
 }
@@ -144,6 +163,7 @@ func (t Type) Receiver() string {
 }
 
 // HasAssoc returns true if this type has an assoc edge with the given name.
+// faster than map access for most cases.
 func (t Type) HasAssoc(name string) (*Edge, bool) {
 	for _, e := range t.Edges {
 		if name == e.Name {
@@ -240,6 +260,47 @@ func (t Type) Describe(w io.Writer) {
 		table.Render()
 	}
 	io.WriteString(w, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
+}
+
+// NewIndex adds a new index for the given type table.
+// It fails if the schema index is invalid.
+func (t *Type) AddIndex(idx *load.Index) error {
+	index := &Index{Unique: idx.Unique}
+	if len(idx.Fields) == 0 {
+		return fmt.Errorf("missing fields")
+	}
+	for _, name := range idx.Fields {
+		f, ok := t.fields[name]
+		if !ok {
+			return fmt.Errorf("unknown index field %q", name)
+		}
+		if f.def.Size != nil && *f.def.Size > schema.DefaultStringLen {
+			return fmt.Errorf("field %q exceeds the index size limit (%d)", name, schema.DefaultStringLen)
+		}
+		index.Columns = append(index.Columns, snake(name))
+	}
+	if idx.Edge != "" {
+		var edge *Edge
+		for _, e := range t.Edges {
+			if e.Name == idx.Edge {
+				edge = e
+				break
+			}
+		}
+		switch {
+		case edge == nil:
+			return fmt.Errorf("unknown index field %q", idx.Edge)
+		case !edge.IsInverse():
+			return fmt.Errorf("non-inverse edge for index %q (edge.From)", idx.Edge)
+		case edge.Rel.Type != M2O && edge.Rel.Type != O2O:
+			return fmt.Errorf("relation %s for inverse edge %q is not one of (O2O, M2O)", edge.Rel.Type, idx.Edge)
+		default:
+			index.Columns = append(index.Columns, edge.Rel.Column())
+		}
+	}
+	index.Name += strings.Join(index.Columns, "_")
+	t.Indexes = append(t.Indexes, index)
+	return nil
 }
 
 // Constant returns the constant name of the field.

@@ -824,6 +824,40 @@ func GroupNotNil() predicate.File {
 	)
 }
 
+// HasOwner applies the HasEdge predicate on the "owner" edge.
+func HasOwner() predicate.File {
+	return predicate.FilePerDialect(
+		func(s *sql.Selector) {
+			t1 := s.Table()
+			s.Where(sql.NotNull(t1.C(OwnerColumn)))
+		},
+		func(t *dsl.Traversal) {
+			t.InE(OwnerInverseLabel).InV()
+		},
+	)
+}
+
+// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
+func HasOwnerWith(preds ...predicate.User) predicate.File {
+	return predicate.FilePerDialect(
+		func(s *sql.Selector) {
+			t1 := s.Table()
+			t2 := sql.Select(FieldID).From(sql.Table(OwnerInverseTable))
+			for _, p := range preds {
+				p(t2)
+			}
+			s.Where(sql.In(t1.C(OwnerColumn), t2))
+		},
+		func(t *dsl.Traversal) {
+			tr := __.OutV()
+			for _, p := range preds {
+				p(tr)
+			}
+			t.InE(OwnerInverseLabel).Where(tr).InV()
+		},
+	)
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.FilePerDialect(

@@ -9,17 +9,26 @@ import (
 	"fbc/ent/field"
 )
 
+// DefaultStringLen describes the default length for string/varchar types.
+const DefaultStringLen = 255
+
 // Table schema definition for SQL dialects.
 type Table struct {
 	Name        string
 	Columns     []*Column
+	columns     map[string]*Column
 	Indexes     []*Index
 	PrimaryKey  []*Column
 	ForeignKeys []*ForeignKey
 }
 
 // NewTable returns a new table with the given name.
-func NewTable(name string) *Table { return &Table{Name: name} }
+func NewTable(name string) *Table {
+	return &Table{
+		Name:    name,
+		columns: make(map[string]*Column),
+	}
+}
 
 // AddPrimary adds a new primary key to the table.
 func (t *Table) AddPrimary(c *Column) *Table {
@@ -36,7 +45,26 @@ func (t *Table) AddForeignKey(fk *ForeignKey) *Table {
 
 // AddColumn adds a new column to the table.
 func (t *Table) AddColumn(c *Column) *Table {
+	t.columns[c.Name] = c
 	t.Columns = append(t.Columns, c)
+	return t
+}
+
+// AddIndex creates and adds a new index to the table from the given options.
+func (t *Table) AddIndex(name string, unique bool, columns []string) *Table {
+	idx := &Index{
+		Name:    name,
+		Unique:  unique,
+		columns: columns,
+		Columns: make([]*Column, len(columns)),
+	}
+	for i, name := range columns {
+		c, ok := t.columns[name]
+		if ok {
+			idx.Columns[i] = c
+		}
+	}
+	t.Indexes = append(t.Indexes, idx)
 	return t
 }
 
@@ -98,6 +126,10 @@ func (t *Table) index(name string) (*Index, bool) {
 		if idx.Name == name {
 			return idx, true
 		}
+	}
+	// if it is an "implicit index" (unique constraint on table creation).
+	if c, ok := t.column(name); ok && c.Unique {
+		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
 	}
 	return nil, false
 }
@@ -218,7 +250,7 @@ func (c *Column) SQLiteType() (t string) {
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
-			size = 255
+			size = DefaultStringLen
 		}
 		// sqlite has no size limit on varchar.
 		t = fmt.Sprintf("varchar(%d)", size)
@@ -343,14 +375,13 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 // defaultSize returns the default size for MySQL varchar
 // type based on column size, charset and table indexes.
 func (c *Column) defaultSize(version string) int {
-	size := 255
 	parts := strings.Split(version, ".")
 	// non-unique or invalid version.
 	if !c.Unique || len(parts) == 1 || parts[0] == "" || parts[1] == "" {
-		return size
+		return DefaultStringLen
 	}
 	if major, minor := parts[0], parts[1]; major > "5" || minor > "6" {
-		return size
+		return DefaultStringLen
 	}
 	return 191
 }
@@ -441,6 +472,16 @@ func (i *Index) DropBuilder(table string) *sql.DropIndexBuilder {
 // multiple sql rows can represent the same index (multi-columns indexes).
 type Indexes []*Index
 
+// append wraps the basic `append` function by filtering duplicates indexes.
+func (i *Indexes) append(idx1 *Index) {
+	for _, idx2 := range *i {
+		if idx2.Name == idx1.Name {
+			return
+		}
+	}
+	*i = append(*i, idx1)
+}
+
 // ScanMySQL scans sql.Rows into an Indexes list. The query for returning the rows,
 // should return the following 4 columns: INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX.
 // SEQ_IN_INDEX specifies the position of the column in the index columns.
@@ -459,6 +500,10 @@ func (i *Indexes) ScanMySQL(rows *sql.Rows) error {
 		idx, ok := names[name]
 		if !ok {
 			idx = &Index{Name: name, Unique: !nonuniq}
+			// ignore primary keys.
+			if idx.Primary() {
+				continue
+			}
 			*i = append(*i, idx)
 			names[name] = idx
 		}

@@ -80,6 +80,11 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
+// QueryOwner queries the owner edge of the File.
+func (f *File) QueryOwner() *UserQuery {
+	return (&FileClient{f.config}).QueryOwner(f)
+}
+
 // Update returns a builder for updating this File.
 // Note that, you need to call File.Unwrap() before calling this method, if this File
 // was returned from a transaction, and the transaction was committed or rolled back.

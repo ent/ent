@@ -10,6 +10,7 @@ import (
 
 	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/predicate"
+	"fbc/ent/entc/integration/ent/user"
 
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
@@ -54,6 +55,25 @@ func (fq *FileQuery) Offset(offset int) *FileQuery {
 func (fq *FileQuery) Order(o ...Order) *FileQuery {
 	fq.order = append(fq.order, o...)
 	return fq
+}
+
+// QueryOwner chains the current query on the owner edge.
+func (fq *FileQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: fq.config}
+	switch fq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		t1 := sql.Table(user.Table)
+		t2 := fq.sqlQuery()
+		t2.Select(t2.C(file.OwnerColumn))
+		query.sql = sql.Select(t1.Columns(user.Columns...)...).
+			From(t1).
+			Join(t2).
+			On(t1.C(user.FieldID), t2.C(file.OwnerColumn))
+	case dialect.Neptune:
+		gremlin := fq.gremlinQuery()
+		query.gremlin = gremlin.InE(user.FilesLabel).OutV()
+	}
+	return query
 }
 
 // Get returns a File entity by its id.

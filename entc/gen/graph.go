@@ -56,6 +56,9 @@ func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for _, t := range g.Nodes {
 		check(g.resolve(t), "resolve %q relations/references", t.Name)
 	}
+	for _, schema := range schemas {
+		g.addIndexes(schema)
+	}
 	return
 }
 
@@ -100,6 +103,14 @@ func (g *Graph) addNode(schema *load.Schema) {
 	t, err := NewType(g.Config, schema)
 	check(err, "create type")
 	g.Nodes = append(g.Nodes, t)
+}
+
+// addIndexes adds the indexes for the schema type.
+func (g *Graph) addIndexes(schema *load.Schema) {
+	typ, _ := g.typ(schema.Name)
+	for _, idx := range schema.Indexes {
+		check(typ.AddIndex(idx), "invalid index for schema %q", schema.Name)
+	}
 }
 
 // addEdges adds the node edges to the graph.
@@ -259,7 +270,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table()).AddPrimary(n.ID.Column())
 		for _, f := range n.Fields {
-			table.Columns = append(table.Columns, f.Column())
+			table.AddColumn(f.Column())
 		}
 		tables[table.Name] = table
 		all = append(all, table)
@@ -276,8 +287,8 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Unique: e.Rel.Type == O2O, Nullable: &nullable}
-				owner.Columns = append(owner.Columns, column)
-				owner.ForeignKeys = append(owner.ForeignKeys, &schema.ForeignKey{
+				owner.AddColumn(column)
+				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
 					OnDelete:   schema.SetNull,
 					Columns:    []*schema.Column{column},
@@ -287,8 +298,8 @@ func (g *Graph) Tables() (all []*schema.Table) {
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Nullable: &nullable}
-				owner.Columns = append(owner.Columns, column)
-				owner.ForeignKeys = append(owner.ForeignKeys, &schema.ForeignKey{
+				owner.AddColumn(column)
+				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
 					OnDelete:   schema.SetNull,
 					Columns:    []*schema.Column{column},
@@ -321,6 +332,13 @@ func (g *Graph) Tables() (all []*schema.Table) {
 					},
 				})
 			}
+		}
+	}
+	// append indexes to tables after all columns were added (including relation columns).
+	for _, n := range g.Nodes {
+		table := tables[n.Table()]
+		for _, idx := range n.Indexes {
+			table.AddIndex(idx.Name, idx.Unique, idx.Columns)
 		}
 	}
 	return

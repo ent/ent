@@ -81,8 +81,8 @@ func TestGremlin(t *testing.T) {
 		drv = dialect.Debug(drv, t.Log)
 	}
 	client := ent.NewClient(ent.Driver(drv))
-	// run all tests except transaction tests.
-	for _, tt := range tests[1:] {
+	// run all tests except transaction and index tests.
+	for _, tt := range tests[2:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(strings.Split(name, ".")[1], func(t *testing.T) {
 			drop(t, client)
@@ -94,6 +94,7 @@ func TestGremlin(t *testing.T) {
 // tests for all drivers to run.
 var tests = []func(*testing.T, *ent.Client){
 	Tx,
+	Indexes,
 	Types,
 	Clone,
 	Sanity,

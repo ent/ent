@@ -66,6 +66,23 @@ var (
 					},
 				{{- end }}
 			},
+			{{- if $t.Indexes }}
+				Indexes: []*schema.Index{
+					{{- range $_, $idx := $t.Indexes }}
+						{
+							Name: "{{ $idx.Name }}",
+							Unique: {{ $idx.Unique }},
+							Columns: []*schema.Column{
+								{{- range $_, $c1 := $idx.Columns }}
+									{{- range $i, $c2 := $t.Columns }}
+										{{- if eq $c1.Name $c2.Name }}{{ $columns }}[{{ $i }}],{{ end }}
+									{{- end }}
+								{{- end }}
+							},
+						},
+					{{- end }}
+				},
+			{{- end }}
 		}
 	{{- end }}
 	// Tables holds all the tables in the schema.

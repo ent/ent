@@ -130,6 +130,13 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 					return err
 				}
 			}
+			// indexes.
+			for _, idx := range t.Indexes {
+				query, args := idx.Builder(t.Name).Query()
+				if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+					return fmt.Errorf("create index %q: %v", idx.Name, err)
+				}
+			}
 		}
 	}
 	// create foreign keys after tables were created/altered,
@@ -173,7 +180,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 		for _, idx := range change.index.drop {
 			query, args := idx.DropBuilder(table).Query()
 			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-				return fmt.Errorf("drop index %q: %v", table, err)
+				return fmt.Errorf("drop index of table %q: %v", table, err)
 			}
 		}
 	}
@@ -215,8 +222,8 @@ type changes struct {
 	}
 	// index changes.
 	index struct {
-		add  []*Index
-		drop []*Index
+		add  Indexes
+		drop Indexes
 	}
 }
 
@@ -242,7 +249,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			change.column.add = append(change.column.add, c1)
 		// modify a non-unique column to unique.
 		case c1.Unique && !c2.Unique:
-			change.index.add = append(change.index.add, &Index{
+			change.index.add.append(&Index{
 				Name:    c1.Name,
 				Unique:  true,
 				Columns: []*Column{c1},
@@ -254,7 +261,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			if !ok {
 				return nil, fmt.Errorf("missing index to drop for column %q", c2.Name)
 			}
-			change.index.drop = append(change.index.drop, idx)
+			change.index.drop.append(idx)
 		// extending column types.
 		case m.cType(c1) != m.cType(c2):
 			if !c2.ConvertibleTo(c1) {
@@ -282,18 +289,18 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	for _, idx1 := range new.Indexes {
 		switch idx2, ok := curr.index(idx1.Name); {
 		case !ok:
-			change.index.add = append(change.index.add, idx1)
+			change.index.add.append(idx1)
 		// changing index cardinality require drop and create.
 		case idx1.Unique != idx2.Unique:
-			change.index.drop = append(change.index.drop, idx2)
-			change.index.add = append(change.index.add, idx1)
+			change.index.drop.append(idx2)
+			change.index.add.append(idx1)
 		}
 	}
 
 	// drop indexes.
 	for _, idx1 := range curr.Indexes {
-		if _, ok := new.index(idx1.Name); ok {
-			change.index.drop = append(change.index.drop, idx1)
+		if _, ok := new.index(idx1.Name); !ok {
+			change.index.drop.append(idx1)
 		}
 	}
 	return change, nil

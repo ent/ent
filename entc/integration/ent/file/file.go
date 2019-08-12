@@ -22,6 +22,16 @@ const (
 
 	// Table holds the table name of the file in the database.
 	Table = "files"
+	// OwnerTable is the table the holds the owner relation/edge.
+	OwnerTable = "files"
+	// OwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "owner_id"
+
+	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
+	OwnerInverseLabel = "user_files"
 )
 
 // Columns holds all SQL columns are file fields.

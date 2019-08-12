@@ -16,6 +16,17 @@ var (
 	// for the ids of each entity (table).
 	// Note that this option cannot be applied on tables that already exist.
 	WithGlobalUniqueID = schema.WithGlobalUniqueID
+	// WithDropColumn sets the drop column option to the migration.
+	// If this option is enabled, ent migration will drop old columns
+	// that were used for both fields and edges. This defaults to false.
+	WithDropColumn = schema.WithDropColumn
+	// WithDropIndex sets the drop index option to the migration.
+	// If this option is enabled, ent migration will drop old indexes
+	// that were defined in the schema. This defaults to false.
+	// Note that unique constraints are defined using `UNIQUE INDEX`,
+	// and therefore, it's recommended to enable this option to get more
+	// flexibility in the schema changes.
+	WithDropIndex = schema.WithDropIndex
 )
 
 // Schema is the API for creating, migrating and dropping a schema.

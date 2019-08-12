@@ -22,6 +22,13 @@ var (
 		Columns:     UsersColumns,
 		PrimaryKey:  []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "name_address",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[2], UsersColumns[3]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

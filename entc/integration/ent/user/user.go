@@ -44,7 +44,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
-	FilesColumn = "user_file_id"
+	FilesColumn = "owner_id"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
 	GroupsTable = "user_groups"
 	// GroupsInverseTable is the table name for the Group entity.

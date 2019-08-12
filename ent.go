@@ -12,6 +12,7 @@ type (
 		Type()
 		Edges() []Edge
 		Fields() []Field
+		Indexes() []Index
 	}
 
 	// Field is the interface for vertex and edges fields used by the code generation.
@@ -38,10 +39,17 @@ type (
 		IsInverse() bool
 		IsRequired() bool
 	}
+
+	// Index is the interface for graph indexes in the schema. It is used by the code generation.
+	Index interface {
+		IsUnique() bool
+		Edge() string
+		Fields() []string
+	}
 )
 
 // DefaultSchema holds the default schema implementation.
-var DefaultSchema = defaultSchema{}
+var DefaultSchema defaultSchema
 
 // defaultSchema is the default implementation for the schema.
 type defaultSchema struct{ Schema }
@@ -49,3 +57,5 @@ type defaultSchema struct{ Schema }
 func (defaultSchema) Edges() []Edge { return nil }
 
 func (defaultSchema) Fields() []Field { return nil }
+
+func (defaultSchema) Indexes() []Index { return nil }

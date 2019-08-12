@@ -29,10 +29,6 @@ const (
 {{ end }}
 
 {{ if or $.HasDefault $.HasValidators }}
-
-{{ end }}
-
-{{ if or $.HasDefault $.HasValidators }}
 var (
 	fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
 	{{ range $i, $f := $.Fields -}}

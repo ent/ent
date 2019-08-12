@@ -3,6 +3,7 @@ package schema
 import (
 	"fbc/ent"
 	"fbc/ent/field"
+	"fbc/ent/index"
 )
 
 // User holds the schema definition for the User entity.
@@ -22,6 +23,15 @@ func (User) Fields() []ent.Field {
 		field.Bytes("buffer").
 			Default([]byte("{}")),
 		// deleting the address column.
+	}
+}
+
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		// deleting old indexes (name, address),
+		// and defining a new one.
+		index.Fields("phone", "age").
+			Unique(),
 	}
 }
 

@@ -6,9 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"fbc/ent/entc/integration/ent/file"
 	"fbc/ent/entc/integration/ent/predicate"
+	"fbc/ent/entc/integration/ent/user"
 
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/gremlin"
@@ -20,11 +22,13 @@ import (
 // FileUpdate is the builder for updating File entities.
 type FileUpdate struct {
 	config
-	size       *int
-	name       *string
-	user       *string
-	group      *string
-	predicates []predicate.File
+	size         *int
+	name         *string
+	user         *string
+	group        *string
+	owner        map[string]struct{}
+	clearedOwner bool
+	predicates   []predicate.File
 }
 
 // Where adds a new predicate for the builder.
@@ -81,12 +85,43 @@ func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 	return fu
 }
 
+// SetOwnerID sets the owner edge to User by id.
+func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
+	if fu.owner == nil {
+		fu.owner = make(map[string]struct{})
+	}
+	fu.owner[id] = struct{}{}
+	return fu
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (fu *FileUpdate) SetNillableOwnerID(id *string) *FileUpdate {
+	if id != nil {
+		fu = fu.SetOwnerID(*id)
+	}
+	return fu
+}
+
+// SetOwner sets the owner edge to User.
+func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
+	return fu.SetOwnerID(u.ID)
+}
+
+// ClearOwner clears the owner edge to User.
+func (fu *FileUpdate) ClearOwner() *FileUpdate {
+	fu.clearedOwner = true
+	return fu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	if fu.size != nil {
 		if err := file.SizeValidator(*fu.size); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
 		}
+	}
+	if len(fu.owner) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch fu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -174,6 +209,31 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			return 0, rollback(tx, err)
 		}
 	}
+	if fu.clearedOwner {
+		query, args := sql.Update(file.OwnerTable).
+			SetNull(file.OwnerColumn).
+			Where(sql.InInts(user.FieldID, ids...)).
+			Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return 0, rollback(tx, err)
+		}
+	}
+	if len(fu.owner) > 0 {
+		for eid := range fu.owner {
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return
+			}
+			query, args := sql.Update(file.OwnerTable).
+				Set(file.OwnerColumn, eid).
+				Where(sql.InInts(file.FieldID, ids...)).
+				Query()
+			if err := tx.Exec(ctx, query, args, &res); err != nil {
+				return 0, rollback(tx, err)
+			}
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
@@ -198,6 +258,7 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
+		rv  = v.Clone()
 		trs []*dsl.Traversal
 	)
 	if fu.size != nil {
@@ -212,6 +273,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if fu.group != nil {
 		v.Property(dsl.Single, file.FieldGroup, *fu.group)
 	}
+	if fu.clearedOwner {
+		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for id := range fu.owner {
+		v.AddE(user.FilesLabel).From(g.V(id)).InV()
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -220,11 +288,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 // FileUpdateOne is the builder for updating a single File entity.
 type FileUpdateOne struct {
 	config
-	id    string
-	size  *int
-	name  *string
-	user  *string
-	group *string
+	id           string
+	size         *int
+	name         *string
+	user         *string
+	group        *string
+	owner        map[string]struct{}
+	clearedOwner bool
 }
 
 // SetSize sets the size field.
@@ -275,12 +345,43 @@ func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 	return fuo
 }
 
+// SetOwnerID sets the owner edge to User by id.
+func (fuo *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
+	if fuo.owner == nil {
+		fuo.owner = make(map[string]struct{})
+	}
+	fuo.owner[id] = struct{}{}
+	return fuo
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableOwnerID(id *string) *FileUpdateOne {
+	if id != nil {
+		fuo = fuo.SetOwnerID(*id)
+	}
+	return fuo
+}
+
+// SetOwner sets the owner edge to User.
+func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
+	return fuo.SetOwnerID(u.ID)
+}
+
+// ClearOwner clears the owner edge to User.
+func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
+	fuo.clearedOwner = true
+	return fuo
+}
+
 // Save executes the query and returns the updated entity.
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	if fuo.size != nil {
 		if err := file.SizeValidator(*fuo.size); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
 		}
+	}
+	if len(fuo.owner) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch fuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -375,6 +476,31 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			return nil, rollback(tx, err)
 		}
 	}
+	if fuo.clearedOwner {
+		query, args := sql.Update(file.OwnerTable).
+			SetNull(file.OwnerColumn).
+			Where(sql.InInts(user.FieldID, ids...)).
+			Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return nil, rollback(tx, err)
+		}
+	}
+	if len(fuo.owner) > 0 {
+		for eid := range fuo.owner {
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return
+			}
+			query, args := sql.Update(file.OwnerTable).
+				Set(file.OwnerColumn, eid).
+				Where(sql.InInts(file.FieldID, ids...)).
+				Query()
+			if err := tx.Exec(ctx, query, args, &res); err != nil {
+				return nil, rollback(tx, err)
+			}
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -400,6 +526,7 @@ func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
+		rv  = v.Clone()
 		trs []*dsl.Traversal
 	)
 	if fuo.size != nil {
@@ -413,6 +540,13 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if fuo.group != nil {
 		v.Property(dsl.Single, file.FieldGroup, *fuo.group)
+	}
+	if fuo.clearedOwner {
+		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for id := range fuo.owner {
+		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)
