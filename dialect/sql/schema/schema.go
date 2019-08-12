@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"fbc/ent/dialect/sql"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 // DefaultStringLen describes the default length for string/varchar types.

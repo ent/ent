@@ -2,8 +2,8 @@ package schema
 
 import (
 	"fbc/ent"
-	"fbc/ent/edge"
-	"fbc/ent/field"
+	"fbc/ent/schema/edge"
+	"fbc/ent/schema/field"
 )
 
 // User holds the schema for the user entity.

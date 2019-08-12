@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"fbc/ent"
-	"fbc/ent/edge"
-	"fbc/ent/field"
-	"fbc/ent/index"
+	"fbc/ent/schema/edge"
+	"fbc/ent/schema/field"
+	"fbc/ent/schema/index"
 
 	"github.com/stretchr/testify/require"
 )

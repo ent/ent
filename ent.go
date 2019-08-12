@@ -2,8 +2,8 @@
 package ent
 
 import (
-	"fbc/ent/edge"
-	"fbc/ent/field"
+	"fbc/ent/schema/edge"
+	"fbc/ent/schema/field"
 )
 
 type (

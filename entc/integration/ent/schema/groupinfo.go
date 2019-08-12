@@ -2,8 +2,8 @@ package schema
 
 import (
 	"fbc/ent"
-	"fbc/ent/edge"
-	"fbc/ent/field"
+	"fbc/ent/schema/edge"
+	"fbc/ent/schema/field"
 )
 
 // GroupInfo holds the schema for the group-info entity.

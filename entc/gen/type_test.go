@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"fbc/ent/entc/load"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

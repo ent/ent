@@ -2,7 +2,7 @@ package schema
 
 import (
 	"fbc/ent"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 // FieldType holds the schema definition for the FieldType entity.

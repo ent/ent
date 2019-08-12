@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"fbc/ent"
-	"fbc/ent/edge"
-	"fbc/ent/field"
+	"fbc/ent/schema/edge"
+	"fbc/ent/schema/field"
 )
 
 // Group holds the schema for the group entity.

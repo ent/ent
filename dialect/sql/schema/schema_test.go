@@ -3,7 +3,7 @@ package schema
 import (
 	"testing"
 
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )

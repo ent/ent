@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"fbc/ent"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 // Schema represents an ent.Schema that was loaded from a complied user package.

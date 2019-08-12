@@ -4,9 +4,9 @@ import (
 	"math"
 
 	"fbc/ent"
-	"fbc/ent/edge"
-	"fbc/ent/field"
-	"fbc/ent/index"
+	"fbc/ent/schema/edge"
+	"fbc/ent/schema/field"
+	"fbc/ent/schema/index"
 )
 
 // File holds the schema definition for the File entity.

@@ -11,7 +11,7 @@ import (
 
 	"fbc/ent/dialect/sql/schema"
 	"fbc/ent/entc/load"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 type (

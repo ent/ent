@@ -9,7 +9,7 @@ import (
 
 	"fbc/ent/dialect"
 	"fbc/ent/dialect/sql"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 const (

@@ -3,7 +3,7 @@ package edge
 import (
 	"reflect"
 
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 // Edge represents an edge in the graph.

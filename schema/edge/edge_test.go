@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"fbc/ent"
-	"fbc/ent/edge"
+	"fbc/ent/schema/edge"
 
 	"github.com/stretchr/testify/assert"
 )

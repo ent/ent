@@ -2,7 +2,7 @@ package valid
 
 import (
 	"fbc/ent"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 // User holds the user schema.

@@ -4,7 +4,7 @@ package migrate
 
 import (
 	"fbc/ent/dialect/sql/schema"
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 )
 
 var (

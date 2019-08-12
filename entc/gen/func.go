@@ -11,7 +11,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"fbc/ent/field"
+	"fbc/ent/schema/field"
 
 	"github.com/go-openapi/inflect"
 )
