@@ -22,8 +22,8 @@ const users = [
 
 const siteConfig = {
   title: 'ent', // Title for your website.
-  tagline: 'An entity for Go',
-  url: 'https://your-docusaurus-test-site.com', // Your website URL
+  tagline: 'An entity framework for Go',
+  url: 'https://entgo.io', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -39,8 +39,8 @@ const siteConfig = {
   customDocsPath: 'md',
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'doc1', label: 'Docs'},
-    {doc: 'doc4', label: 'API'},
+    {doc: 'getting-started', label: 'Docs'},
+    {doc: 'getting-started', label: 'API'},
     {page: 'help', label: 'Help'},
     {blog: true, label: 'Blog'},
   ],

@@ -1,10 +1,11 @@
 ---
-id: doc1
+id: getting-started
 title: Quick Introduction
 sidebar_label: Quick Introduction
 ---
 
 `ent` is a simple, yet powerful entity framework for Go built with the following principles:
+- Model your data as graph easily.
 - Defining your schema as code.
 - Static typing first based on code generation.
 - Make the work with graph-like data in Go easier.
