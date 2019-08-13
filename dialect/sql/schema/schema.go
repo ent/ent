@@ -62,10 +62,20 @@ func (t *Table) AddIndex(name string, unique bool, columns []string) *Table {
 		c, ok := t.columns[name]
 		if ok {
 			idx.Columns[i] = c
+			c.indexes = append(c.indexes, idx)
 		}
 	}
 	t.Indexes = append(t.Indexes, idx)
 	return t
+}
+
+// linkColumns links the table columns to their indexes for later referencing.
+func (t *Table) linkColumns() {
+	for _, idx := range t.Indexes {
+		for _, c := range idx.Columns {
+			c.indexes.append(idx)
+		}
+	}
 }
 
 // MySQL returns the MySQL DSL query for table creation.
@@ -148,6 +158,7 @@ type Column struct {
 	Default   string     // default value.
 	Charset   string     // column character set.
 	Collation string     // column collation.
+	indexes   Indexes    // linked indexes.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -372,18 +383,23 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 	}
 }
 
-// defaultSize returns the default size for MySQL varchar
-// type based on column size, charset and table indexes.
+// defaultSize returns the default size for MySQL varchar type based
+// on column size, charset and table indexes, in order to avoid index
+// prefix key limit (767).
 func (c *Column) defaultSize(version string) int {
+	size := DefaultStringLen
 	parts := strings.Split(version, ".")
-	// non-unique or invalid version.
-	if !c.Unique || len(parts) == 1 || parts[0] == "" || parts[1] == "" {
-		return DefaultStringLen
+	switch {
+	// invalid version.
+	case len(parts) == 1 || parts[0] == "" || parts[1] == "":
+	// version is > 5.6.*.
+	case parts[0] > "5" || parts[1] > "6":
+	// non-unique, or not part of any index (reaching the error 1071).
+	case !c.Unique && len(c.indexes) == 0:
+	default:
+		size = 191
 	}
-	if major, minor := parts[0], parts[1]; major > "5" || minor > "6" {
-		return DefaultStringLen
-	}
-	return 191
+	return size
 }
 
 // ForeignKey definition for creation.

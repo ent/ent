@@ -55,7 +55,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	}
 	// call `Close` in cases of failures (`Close` is idempotent).
 	defer rows.Close()
-	t := &Table{Name: name}
+	t := NewTable(name)
 	for rows.Next() {
 		c := &Column{}
 		if err := c.ScanMySQL(rows); err != nil {
@@ -64,7 +64,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 		if c.PrimaryKey() {
 			t.PrimaryKey = append(t.PrimaryKey, c)
 		}
-		t.Columns = append(t.Columns, c)
+		t.AddColumn(c)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("mysql: closing rows %v", err)
@@ -73,7 +73,10 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	if err != nil {
 		return nil, err
 	}
-	t.Indexes = indexes
+	// add and link indexes to table columns.
+	for _, idx := range indexes {
+		t.AddIndex(idx.Name, idx.Unique, idx.columns)
+	}
 	return t, nil
 }
 
