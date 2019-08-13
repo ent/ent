@@ -100,6 +100,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Sanity,
 	Paging,
 	Charset,
+	Collation,
 	Relation,
 	Predicate,
 	UniqueConstraint,
@@ -243,6 +244,15 @@ func Charset(t *testing.T, client *ent.Client) {
 	require.Equal("נטי", f2.Name)
 	require.Equal("Ariel", f3.Name)
 	require.Equal("Nati", f4.Name)
+}
+
+func Collation(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	_ = client.File.Create().SetName("Foo").SaveX(ctx)
+	query := client.File.Query().Where(file.Name("foo"))
+	require.False(query.ExistX(ctx))
+	require.Nil(query.FirstX(ctx))
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
