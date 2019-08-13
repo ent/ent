@@ -36,3 +36,10 @@ func TestLoadNoSchema(t *testing.T) {
 	require.Error(t, err)
 	require.Empty(t, schemas)
 }
+
+func TestLoadSchemaFailure(t *testing.T) {
+	cfg := &Config{Path: "./testdata/failure"}
+	schemas, err := cfg.Load()
+	require.Error(t, err)
+	require.Empty(t, schemas)
+}

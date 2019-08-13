@@ -2,6 +2,7 @@ package load
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"fbc/ent"
@@ -68,9 +69,13 @@ func NewEdge(e ent.Edge) *Edge {
 
 // MarshalSchema encode the ent.Schema interface into a JSON
 // that can be decoded into the Schema object object.
-func MarshalSchema(schema ent.Schema) ([]byte, error) {
+func MarshalSchema(schema ent.Schema) (b []byte, err error) {
 	s := &Schema{Name: indirect(reflect.TypeOf(schema)).Name()}
-	for _, f := range schema.Fields() {
+	fields, err := safeFields(schema)
+	if err != nil {
+		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	for _, f := range fields {
 		sf := &Field{
 			Name:       f.Name(),
 			Type:       f.Type(),
@@ -91,10 +96,18 @@ func MarshalSchema(schema ent.Schema) ([]byte, error) {
 		}
 		s.Fields = append(s.Fields, sf)
 	}
-	for _, e := range schema.Edges() {
+	edges, err := safeEdges(schema)
+	if err != nil {
+		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	for _, e := range edges {
 		s.Edges = append(s.Edges, NewEdge(e))
 	}
-	for _, idx := range schema.Indexes() {
+	indexes, err := safeIndexes(schema)
+	if err != nil {
+		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	for _, idx := range indexes {
 		s.Indexes = append(s.Indexes, &Index{
 			Edge:   idx.Edge(),
 			Fields: idx.Fields(),
@@ -102,6 +115,39 @@ func MarshalSchema(schema ent.Schema) ([]byte, error) {
 		})
 	}
 	return json.Marshal(s)
+}
+
+// safeFields wraps the schema.Fields method with recover to ensure no panics in marshaling.
+func safeFields(schema ent.Schema) (fields []ent.Field, err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			err = fmt.Errorf("schema.Fields panics: %v", v)
+			fields = nil
+		}
+	}()
+	return schema.Fields(), nil
+}
+
+// safeEdges wraps the schema.Edges method with recover to ensure no panics in marshaling.
+func safeEdges(schema ent.Schema) (edges []ent.Edge, err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			err = fmt.Errorf("schema.Edges panics: %v", v)
+			edges = nil
+		}
+	}()
+	return schema.Edges(), nil
+}
+
+// safeIndexes wraps the schema.Indexes method with recover to ensure no panics in marshaling.
+func safeIndexes(schema ent.Schema) (indexes []ent.Index, err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			err = fmt.Errorf("schema.Indexes panics: %v", v)
+			indexes = nil
+		}
+	}()
+	return schema.Indexes(), nil
 }
 
 func indirect(t reflect.Type) reflect.Type {

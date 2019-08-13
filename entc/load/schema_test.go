@@ -100,3 +100,21 @@ func TestMarshalSchema(t *testing.T) {
 		require.True(t, schema.Indexes[1].Unique)
 	}
 }
+
+type Invalid struct {
+	ent.Schema
+}
+
+// Edge panics because the edge declaration is invalid.
+func (Invalid) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("invalid", Invalid{}.Type),
+	}
+}
+
+func TestMarshalFails(t *testing.T) {
+	i := Invalid{}
+	buf, err := MarshalSchema(i)
+	require.Error(t, err)
+	require.Nil(t, buf)
+}
