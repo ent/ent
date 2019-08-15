@@ -125,11 +125,13 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 		fields: make(map[string]*Field, len(schema.Fields)),
 	}
 	for i, f := range schema.Fields {
-		if !f.Type.Valid() {
+		switch {
+		case !f.Type.Valid():
 			return nil, fmt.Errorf("invalid type for field %s", f.Name)
-		}
-		if f.Nillable && !f.Optional {
+		case f.Nillable && !f.Optional:
 			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
+		case f.Unique && f.Default:
+			return nil, fmt.Errorf("unique field %q can not have default value", f.Name)
 		}
 		typ.Fields[i] = &Field{
 			def:        f,
