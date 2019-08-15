@@ -22,7 +22,12 @@ func (User) Fields() []ent.Field {
 		field.String("phone"),
 		field.Bytes("buffer").
 			Default([]byte("{}")),
-		// deleting the address column.
+		// adding new column with supported default value
+		// in the database side, will append this value to
+		// all existing rows.
+		field.String("title").
+			Default("SWE"),
+		// deleting the `address` column.
 	}
 }
 

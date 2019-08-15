@@ -81,6 +81,7 @@ func ExampleUser() {
 		SetName("string").
 		SetPhone("string").
 		SetBuffer([]byte{}).
+		SetTitle("string").
 		SaveX(ctx)
 	log.Println("user created:", u)
 

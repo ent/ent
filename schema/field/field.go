@@ -61,25 +61,50 @@ func (t Type) ConstName() string {
 	}
 }
 
-var typeNames = [...]string{
-	TypeInvalid: "invalid",
-	TypeBool:    "bool",
-	TypeTime:    "time.Time",
-	TypeBytes:   "[]byte",
-	TypeString:  "string",
-	TypeInt:     "int",
-	TypeInt8:    "int8",
-	TypeInt16:   "int16",
-	TypeInt32:   "int32",
-	TypeInt64:   "int64",
-	TypeUint:    "uint",
-	TypeUint8:   "uint8",
-	TypeUint16:  "uint16",
-	TypeUint32:  "uint32",
-	TypeUint64:  "uint64",
-	TypeFloat32: "float32",
-	TypeFloat64: "float64",
+// Bits returns the size of the type in bits.
+// It panics if the type is not numeric type.
+func (t Type) Bits() int {
+	if !t.Numeric() {
+		panic("schema/field: Bits of non-numeric type")
+	}
+	return bits[t]
 }
+
+var (
+	typeNames = [...]string{
+		TypeInvalid: "invalid",
+		TypeBool:    "bool",
+		TypeTime:    "time.Time",
+		TypeBytes:   "[]byte",
+		TypeString:  "string",
+		TypeInt:     "int",
+		TypeInt8:    "int8",
+		TypeInt16:   "int16",
+		TypeInt32:   "int32",
+		TypeInt64:   "int64",
+		TypeUint:    "uint",
+		TypeUint8:   "uint8",
+		TypeUint16:  "uint16",
+		TypeUint32:  "uint32",
+		TypeUint64:  "uint64",
+		TypeFloat32: "float32",
+		TypeFloat64: "float64",
+	}
+	bits = [...]int{
+		TypeInt:     strconv.IntSize,
+		TypeInt8:    8,
+		TypeInt16:   16,
+		TypeInt32:   32,
+		TypeInt64:   64,
+		TypeUint:    strconv.IntSize,
+		TypeUint8:   8,
+		TypeUint16:  16,
+		TypeUint32:  32,
+		TypeUint64:  64,
+		TypeFloat32: 32,
+		TypeFloat64: 64,
+	}
+)
 
 // Field represents a field on a graph vertex.
 type Field struct {

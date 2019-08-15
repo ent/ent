@@ -363,19 +363,17 @@ func (f Field) NullTypeField(rec string) string {
 func (f Field) Column() *schema.Column {
 	pk := f.Name == "id"
 	c := &schema.Column{
-		Name:   f.Name,
-		Type:   f.Type,
-		Unique: f.Unique,
+		Name:     f.Name,
+		Type:     f.Type,
+		Unique:   f.Unique,
+		Nullable: f.Optional,
 	}
 	if pk {
 		c.Type = field.TypeInt
 		c.Increment = true
 	}
-	// nullability constraint only to non primary keys.
-	if nullable := f.Optional; !pk && nullable {
-		c.Nullable = &nullable
-	}
 	if f.def != nil {
+		c.Default = f.def.Value
 		if f.def.Size != nil {
 			c.Size = *f.def.Size
 		}

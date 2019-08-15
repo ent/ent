@@ -9,8 +9,16 @@ import (
 	"fbc/ent/schema/field"
 )
 
-// DefaultStringLen describes the default length for string/varchar types.
-const DefaultStringLen = 255
+const (
+	// DefaultStringLen describes the default length for string/varchar types.
+	DefaultStringLen = 255
+	// Null is the string representation of NULL in SQL.
+	Null = "NULL"
+	// PrimaryKey is the string representation of PKs in SQL.
+	PrimaryKey = "PRI"
+	// UniqueKey is the string representation of PKs in SQL.
+	UniqueKey = "UNI"
+)
 
 // Table schema definition for SQL dialects.
 type Table struct {
@@ -69,12 +77,24 @@ func (t *Table) AddIndex(name string, unique bool, columns []string) *Table {
 	return t
 }
 
-// linkColumns links the table columns to their indexes for later referencing.
-func (t *Table) linkColumns() {
+// setup ensures the table is configured properly, like table columns
+// are linked to their indexes, and PKs columns are defined.
+func (t *Table) setup() {
+	if t.columns == nil {
+		t.columns = make(map[string]*Column, len(t.Columns))
+	}
+	for _, c := range t.Columns {
+		t.columns[c.Name] = c
+	}
 	for _, idx := range t.Indexes {
 		for _, c := range idx.Columns {
 			c.indexes.append(idx)
 		}
+	}
+	for _, pk := range t.PrimaryKey {
+		c := t.columns[pk.Name]
+		c.Key = PrimaryKey
+		pk.Key = PrimaryKey
 	}
 }
 
@@ -146,28 +166,28 @@ func (t *Table) index(name string) (*Index, bool) {
 
 // Column schema definition for SQL dialects.
 type Column struct {
-	Name      string     // column name.
-	Type      field.Type // column type.
-	typ       string     // row column type (used for Rows.Scan).
-	Attr      string     // extra attributes.
-	Size      int        // max size parameter for string, blob, etc.
-	Key       string     // key definition (PRI, UNI or MUL).
-	Unique    bool       // column with unique constraint.
-	Increment bool       // auto increment attribute.
-	Nullable  *bool      // null or not null attribute.
-	Default   string     // default value.
-	Charset   string     // column character set.
-	Collation string     // column collation.
-	indexes   Indexes    // linked indexes.
+	Name      string      // column name.
+	Type      field.Type  // column type.
+	typ       string      // row column type (used for Rows.Scan).
+	Attr      string      // extra attributes.
+	Size      int         // max size parameter for string, blob, etc.
+	Key       string      // key definition (PRI, UNI or MUL).
+	Unique    bool        // column with unique constraint.
+	Increment bool        // auto increment attribute.
+	Nullable  bool        // null or not null attribute.
+	Default   interface{} // default value.
+	Charset   string      // column character set.
+	Collation string      // column collation.
+	indexes   Indexes     // linked indexes.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
-func (c *Column) UniqueKey() bool { return c.Key == "UNI" }
+func (c *Column) UniqueKey() bool { return c.Key == UniqueKey }
 
 // PrimaryKey returns boolean indicates if this column is on of the primary key columns.
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
-func (c *Column) PrimaryKey() bool { return c.Key == "PRI" }
+func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
 
 // MySQL returns the MySQL DSL query for table creation.
 // The syntax/order is: datatype [Charset] [Unique|Increment] [Collation] [Nullable].
@@ -184,6 +204,7 @@ func (c *Column) MySQL(version string) *sql.ColumnBuilder {
 		b.Attr("COLLATE " + c.Collation)
 	}
 	c.nullable(b)
+	c.defaultValue(b)
 	return b
 }
 
@@ -195,6 +216,7 @@ func (c *Column) SQLite() *sql.ColumnBuilder {
 		b.Attr("PRIMARY KEY AUTOINCREMENT")
 	}
 	c.nullable(b)
+	c.defaultValue(b)
 	return b
 }
 
@@ -237,10 +259,7 @@ func (c *Column) MySQLType(version string) (t string) {
 		t = "timestamp"
 		// in MySQL timestamp columns are `NOT NULL by default, and assigning NULL
 		// assigns the current_timestamp(). We avoid this if not set otherwise.
-		if c.Nullable == nil {
-			nullable := true
-			c.Nullable = &nullable
-		}
+		c.Nullable = true
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}
@@ -288,11 +307,9 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 	}
 	c.Unique = c.UniqueKey()
 	c.Charset = charset.String
-	c.Default = defaults.String
 	c.Collation = collate.String
 	if nullable.Valid {
-		null := nullable.String == "YES"
-		c.Nullable = &null
+		c.Nullable = nullable.String == "YES"
 	}
 	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
 		return r == '(' || r == ')' || r == ' '
@@ -336,6 +353,9 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		}
 		c.Size = size
 	}
+	if defaults.Valid && defaults.String != Null {
+		return c.ScanDefault(defaults.String)
+	}
 	return nil
 }
 
@@ -362,6 +382,85 @@ func (c Column) UintType() bool { return c.Type >= field.TypeUint8 && c.Type <= 
 // FloatType reports of the given type is a float type (float32, float64).
 func (c Column) FloatType() bool { return c.Type == field.TypeFloat32 || c.Type == field.TypeFloat64 }
 
+// ScanDefault scans the default value string to its interface type.
+func (c *Column) ScanDefault(value string) (err error) {
+	switch {
+	case c.IntType():
+		v := &sql.NullInt64{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning int value for column %q: %v", c.Name, err)
+		}
+		c.Default = v.Int64
+	case c.UintType():
+		v := &sql.NullInt64{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning uint value for column %q: %v", c.Name, err)
+		}
+		c.Default = uint64(v.Int64)
+	case c.FloatType():
+		v := &sql.NullFloat64{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning float value for column %q: %v", c.Name, err)
+		}
+		c.Default = v.Float64
+	case c.Type == field.TypeBool:
+		v := &sql.NullBool{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning bool value for column %q: %v", c.Name, err)
+		}
+		c.Default = v.Bool
+	case c.Type == field.TypeString:
+		v := &sql.NullString{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
+		}
+		c.Default = v.String
+	default:
+		return fmt.Errorf("unsupported type: %v", c.Type)
+	}
+	return nil
+}
+
+// HasDefault reports if the column has a default value.
+func (c *Column) HasDefault() bool {
+	return c.Default != nil
+}
+
+// defaultValue adds tge `DEFAULT` attribute the the column.
+// Note that, in SQLite if a NOT NULL constraint is specified,
+// then the column must have a default value which not NULL.
+func (c *Column) defaultValue(b *sql.ColumnBuilder) {
+	// has default, and it's supported in the database level.
+	if c.Default != nil && c.supportDefault() {
+		attr := "DEFAULT "
+		switch v := c.Default.(type) {
+		case string:
+			attr += strconv.Quote(v)
+		case bool:
+			if v {
+				attr += "1"
+			} else {
+				attr += "0"
+			}
+		default:
+			attr += fmt.Sprint(v)
+		}
+		b.Attr(attr)
+	}
+}
+
+// supportDefault reports if the column type supports default value.
+func (c Column) supportDefault() bool {
+	switch {
+	case c.Type == field.TypeString:
+		return c.Size < 1<<16 // not a text.
+	case c.Type.Numeric(), c.Type == field.TypeBool:
+		return true
+	default:
+		return false
+	}
+}
+
 // unique adds the `UNIQUE` attribute if the column is a unique type.
 // it is exist in a different function to share the common declaration
 // between the two dialects.
@@ -374,13 +473,11 @@ func (c *Column) unique(b *sql.ColumnBuilder) {
 // nullable adds the `NULL`/`NOT NULL` attribute to the column. it is exist in
 // a different function to share the common declaration between the two dialects.
 func (c *Column) nullable(b *sql.ColumnBuilder) {
-	if c.Nullable != nil {
-		attr := "NULL"
-		if !*c.Nullable {
-			attr = "NOT " + attr
-		}
-		b.Attr(attr)
+	attr := Null
+	if !c.Nullable {
+		attr = "NOT " + attr
 	}
+	b.Attr(attr)
 }
 
 // defaultSize returns the default size for MySQL varchar type based

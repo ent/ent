@@ -39,6 +39,7 @@ var (
 		"lower":       strings.ToLower,
 		"upper":       strings.ToUpper,
 		"hasField":    hasField,
+		"indirect":    indirect,
 		"hasSuffix":   strings.HasSuffix,
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
@@ -273,4 +274,11 @@ func hasTemplate(name string) bool {
 func hasField(v interface{}, name string) bool {
 	vr := reflect.Indirect(reflect.ValueOf(v))
 	return vr.FieldByName(name).IsValid()
+}
+
+// indirect returns the item at the end of indirection.
+func indirect(v reflect.Value) reflect.Value {
+	for ; v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface; v = v.Elem() {
+	}
+	return v
 }

@@ -49,3 +49,43 @@ func TestColumn_ConvertibleTo(t *testing.T) {
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint32}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
 }
+
+func TestColumn_ScanDefault(t *testing.T) {
+	c1 := &Column{Type: field.TypeString, Size: 10}
+	require.NoError(t, c1.ScanDefault("Hello World"))
+	require.Equal(t, "Hello World", c1.Default)
+	require.NoError(t, c1.ScanDefault("1"))
+	require.Equal(t, "1", c1.Default)
+
+	c1 = &Column{Type: field.TypeInt64}
+	require.NoError(t, c1.ScanDefault("128"))
+	require.Equal(t, int64(128), c1.Default)
+	require.NoError(t, c1.ScanDefault("1"))
+	require.Equal(t, int64(1), c1.Default)
+	require.Error(t, c1.ScanDefault("foo"))
+
+	c1 = &Column{Type: field.TypeUint64}
+	require.NoError(t, c1.ScanDefault("128"))
+	require.Equal(t, uint64(128), c1.Default)
+	require.NoError(t, c1.ScanDefault("1"))
+	require.Equal(t, uint64(1), c1.Default)
+	require.Error(t, c1.ScanDefault("foo"))
+
+	c1 = &Column{Type: field.TypeFloat64}
+	require.NoError(t, c1.ScanDefault("128.1"))
+	require.Equal(t, 128.1, c1.Default)
+	require.NoError(t, c1.ScanDefault("1"))
+	require.Equal(t, float64(1), c1.Default)
+	require.Error(t, c1.ScanDefault("foo"))
+
+	c1 = &Column{Type: field.TypeBool}
+	require.NoError(t, c1.ScanDefault("1"))
+	require.Equal(t, true, c1.Default)
+	require.NoError(t, c1.ScanDefault("true"))
+	require.Equal(t, true, c1.Default)
+	require.NoError(t, c1.ScanDefault("0"))
+	require.Equal(t, false, c1.Default)
+	require.NoError(t, c1.ScanDefault("false"))
+	require.Equal(t, false, c1.Default)
+	require.Error(t, c1.ScanDefault("foo"))
+}

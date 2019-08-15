@@ -2,6 +2,7 @@ package load
 
 import (
 	"encoding/json"
+	"math"
 	"testing"
 
 	"fbc/ent"
@@ -117,4 +118,49 @@ func TestMarshalFails(t *testing.T) {
 	buf, err := MarshalSchema(i)
 	require.Error(t, err)
 	require.Nil(t, buf)
+}
+
+type WithDefaults struct {
+	ent.Schema
+}
+
+func (WithDefaults) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("int").
+			Default(1),
+		field.Float("float").
+			Default(math.Pi),
+		field.String("string").
+			Default("foo"),
+		field.Bool("string").
+			Default(true),
+	}
+}
+
+func (WithDefaults) Edges() []ent.Edge {
+	return nil
+}
+
+func (WithDefaults) Indexes() []ent.Index {
+	return nil
+}
+
+func TestMarshalDefaults(t *testing.T) {
+	d := WithDefaults{}
+	buf, err := MarshalSchema(d)
+	require.NoError(t, err)
+
+	schema := &Schema{}
+	err = json.Unmarshal(buf, schema)
+	require.NoError(t, err)
+
+	require.Equal(t, "WithDefaults", schema.Name)
+	require.True(t, schema.Fields[0].Default)
+	require.Equal(t, 1.0, schema.Fields[0].Value, "marshaling converts int to float")
+	require.True(t, schema.Fields[1].Default)
+	require.Equal(t, math.Pi, schema.Fields[1].Value)
+	require.True(t, schema.Fields[2].Default)
+	require.Equal(t, "foo", schema.Fields[2].Value)
+	require.True(t, schema.Fields[3].Default)
+	require.Equal(t, true, schema.Fields[3].Value)
 }

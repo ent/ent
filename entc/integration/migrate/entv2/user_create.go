@@ -18,6 +18,7 @@ type UserCreate struct {
 	name   *string
 	phone  *string
 	buffer *[]byte
+	title  *string
 }
 
 // SetAge sets the age field.
@@ -44,6 +45,20 @@ func (uc *UserCreate) SetBuffer(b []byte) *UserCreate {
 	return uc
 }
 
+// SetTitle sets the title field.
+func (uc *UserCreate) SetTitle(s string) *UserCreate {
+	uc.title = &s
+	return uc
+}
+
+// SetNillableTitle sets the title field if the given value is not nil.
+func (uc *UserCreate) SetNillableTitle(s *string) *UserCreate {
+	if s != nil {
+		uc.SetTitle(*s)
+	}
+	return uc
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.age == nil {
@@ -58,6 +73,10 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.buffer == nil {
 		v := user.DefaultBuffer
 		uc.buffer = &v
+	}
+	if uc.title == nil {
+		v := user.DefaultTitle
+		uc.title = &v
 	}
 	return uc.sqlSave(ctx)
 }
@@ -96,6 +115,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.buffer != nil {
 		builder.Set(user.FieldBuffer, *uc.buffer)
 		u.Buffer = *uc.buffer
+	}
+	if uc.title != nil {
+		builder.Set(user.FieldTitle, *uc.title)
+		u.Title = *uc.title
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

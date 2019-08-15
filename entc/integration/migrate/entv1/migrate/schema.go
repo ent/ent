@@ -8,13 +8,12 @@ import (
 )
 
 var (
-	nullable = true
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt32},
 		{Name: "name", Type: field.TypeString, Size: 10},
-		{Name: "address", Type: field.TypeString, Nullable: &nullable},
+		{Name: "address", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

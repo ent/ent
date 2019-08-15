@@ -48,20 +48,24 @@ func TestSQLite(t *testing.T) {
 }
 
 func TestMySQL(t *testing.T) {
-	var drv dialect.Driver
-	drv, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test?parseTime=True")
-	require.NoError(t, err)
-	defer drv.Close()
-	if testing.Verbose() {
-		drv = dialect.Debug(drv)
-	}
-	client := ent.NewClient(ent.Driver(drv))
-	require.NoError(t, client.Schema.Create(context.Background()))
-	for _, tt := range tests {
-		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-		t.Run(strings.Split(name, ".")[1], func(t *testing.T) {
-			drop(t, client)
-			tt(t, client)
+	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
+		t.Run(version, func(t *testing.T) {
+			var drv dialect.Driver
+			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/test?parseTime=True", port))
+			require.NoError(t, err)
+			defer drv.Close()
+			if testing.Verbose() {
+				drv = dialect.Debug(drv)
+			}
+			client := ent.NewClient(ent.Driver(drv))
+			require.NoError(t, client.Schema.Create(context.Background()))
+			for _, tt := range tests {
+				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+				t.Run(strings.Split(name, ".")[1], func(t *testing.T) {
+					drop(t, client)
+					tt(t, client)
+				})
+			}
 		})
 	}
 }

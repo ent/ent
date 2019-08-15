@@ -4,11 +4,11 @@ package migrate
 
 import (
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/entc/integration/migrate/entv2/user"
 	"fbc/ent/schema/field"
 )
 
 var (
-	nullable = true
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -37,7 +37,8 @@ var (
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "phone", Type: field.TypeString},
-		{Name: "buffer", Type: field.TypeBytes},
+		{Name: "buffer", Type: field.TypeBytes, Default: user.DefaultBuffer},
+		{Name: "title", Type: field.TypeString, Default: user.DefaultTitle},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

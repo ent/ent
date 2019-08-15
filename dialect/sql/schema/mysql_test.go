@@ -14,7 +14,6 @@ import (
 )
 
 func TestMySQL_Create(t *testing.T) {
-	null := true
 	tests := []struct {
 		name    string
 		tables  []*Table
@@ -48,7 +47,7 @@ func TestMySQL_Create(t *testing.T) {
 					},
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: &null, Charset: "utf8"},
+						{Name: "name", Type: field.TypeString, Nullable: true, Charset: "utf8"},
 						{Name: "age", Type: field.TypeInt},
 					},
 				},
@@ -60,7 +59,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, `name` varchar(255) CHARSET utf8 NULL, `age` bigint, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) CHARSET utf8 NULL, `age` bigint NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -87,7 +86,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, `age` bigint, `name` varchar(191) UNIQUE, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `age` bigint NOT NULL, `name` varchar(191) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -98,13 +97,13 @@ func TestMySQL_Create(t *testing.T) {
 				var (
 					c1 = []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: &null},
+						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "created_at", Type: field.TypeTime},
 					}
 					c2 = []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString},
-						{Name: "owner_id", Type: field.TypeInt},
+						{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 					}
 					t1 = &Table{
 						Name:       "users",
@@ -135,12 +134,12 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("pets").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT, `name` varchar(255), `owner_id` bigint, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` bigint NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
 					WithArgs("FOREIGN KEY", "pets_owner").
@@ -157,7 +156,7 @@ func TestMySQL_Create(t *testing.T) {
 					Name: "users",
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: &null},
+						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "age", Type: field.TypeInt},
 					},
 					PrimaryKey: []*Column{
@@ -181,7 +180,187 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1"))
-				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint")).
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add int column with default value to table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "age", Type: field.TypeInt, Default: 10},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL DEFAULT 10")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add float column with default value to table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "age", Type: field.TypeFloat64, Default: 10.1},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectExec("ALTER TABLE `users` ADD COLUMN `age` double NOT NULL DEFAULT 10.1").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add bool column with default value to table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "age", Type: field.TypeBool, Default: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectExec("ALTER TABLE `users` ADD COLUMN `age` boolean NOT NULL DEFAULT 1").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add string column with default value to table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "nick", Type: field.TypeString, Default: "unknown"},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `nick` varchar(255) NOT NULL DEFAULT \"unknown\"")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add column with unsupported default value to table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "nick", Type: field.TypeString, Size: 1 << 17, Default: "unknown"},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `nick` longtext NOT NULL")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -229,7 +408,7 @@ func TestMySQL_Create(t *testing.T) {
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "age", Type: field.TypeInt},
-						{Name: "name", Type: field.TypeString, Nullable: &null, Charset: "utf8"},
+						{Name: "name", Type: field.TypeString, Nullable: true, Charset: "utf8"},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -372,8 +551,8 @@ func TestMySQL_Create(t *testing.T) {
 				var (
 					c1 = []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: &null},
-						{Name: "spouse_id", Type: field.TypeInt},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "spouse_id", Type: field.TypeInt, Nullable: true},
 					}
 					t1 = &Table{
 						Name:       "users",
@@ -432,12 +611,12 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("ent_types").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 				// create ent_types table.
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint AUTO_INCREMENT, `type` varchar(255) UNIQUE, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint AUTO_INCREMENT NOT NULL, `type` varchar(255) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
@@ -448,7 +627,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("groups").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
@@ -491,7 +670,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("groups").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
@@ -522,7 +701,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range (without inserting to ent_types).
 				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 0")).
@@ -530,7 +709,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("groups").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).

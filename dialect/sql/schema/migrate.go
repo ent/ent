@@ -103,7 +103,7 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 
 func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
-		t.linkColumns()
+		t.setup()
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
 		case err != nil:
 			return err
@@ -245,6 +245,10 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	}
 	// add or modify columns.
 	for _, c1 := range new.Columns {
+		// ignore primary keys.
+		if c1.PrimaryKey() {
+			continue
+		}
 		switch c2, ok := curr.column(c1.Name); {
 		case !ok:
 			change.column.add = append(change.column.add, c1)
@@ -268,6 +272,9 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			if !c2.ConvertibleTo(c1) {
 				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, m.cType(c1), m.cType(c2))
 			}
+			fallthrough
+		// change nullability of a column.
+		case c1.Nullable != c2.Nullable:
 			fallthrough
 		// modify character encoding.
 		case c1.Charset != "" && c1.Charset != c2.Charset || c1.Collation != "" && c1.Charset != c2.Collation:

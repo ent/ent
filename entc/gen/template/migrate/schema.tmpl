@@ -5,13 +5,19 @@
 {{ end }}
 
 import (
+	{{ range $_, $n := $.Nodes }}
+		"{{ $.Config.Package }}/{{ $.Package }}"
+	{{ end }}
+
 	"fbc/ent/schema/field"
 	"fbc/ent/dialect/sql/schema"
 )
 
 var (
-	nullable = true
 	{{- range $_, $t := $.Tables }}
+		{{- /* find type node in the graph of this table, if exists */}}
+		{{- $node := index $.Nodes 0 }}
+		{{- range $_, $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
 		{{- $columns := pascal $t.Name | printf "%sColumns" }}
 		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
 		{{ $columns }} = []*schema.Column{
@@ -19,10 +25,10 @@ var (
 				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }},
 				{{- if $c.Unique }} Unique: true,{{ end }}
 				{{- if $c.Increment }} Increment: true,{{ end }}
-				{{- if or $c.Nullable }} Nullable: &nullable,{{ end }}
+				{{- if $c.Nullable }} Nullable: {{ $c.Nullable }},{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
-				{{- with $c.Default }} Default: "{{ . }}",{{ end }}
+				{{- if $c.HasDefault }} Default: {{ $node.Package }}.Default{{ pascal $c.Name }},{{ end }}
 				{{- with $c.Charset }} Charset: "{{ . }}",{{ end }} },
 			{{- end }}
 		}

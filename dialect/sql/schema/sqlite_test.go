@@ -12,7 +12,6 @@ import (
 )
 
 func TestSQLite_Create(t *testing.T) {
-	null := true
 	tests := []struct {
 		name    string
 		tables  []*Table
@@ -56,7 +55,7 @@ func TestSQLite_Create(t *testing.T) {
 					},
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: &null},
+						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "age", Type: field.TypeInt},
 					},
 				},
@@ -68,7 +67,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT, `name` varchar(255) NULL, `age` integer)")).
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -79,13 +78,13 @@ func TestSQLite_Create(t *testing.T) {
 				var (
 					c1 = []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: &null},
+						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "created_at", Type: field.TypeTime},
 					}
 					c2 = []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString},
-						{Name: "owner_id", Type: field.TypeInt},
+						{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 					}
 					t1 = &Table{
 						Name:       "users",
@@ -116,12 +115,12 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT, `name` varchar(255) NULL, `created_at` datetime)")).
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` datetime NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "pets").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT, `name` varchar(255), `owner_id` integer, FOREIGN KEY(`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE)")).
+				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` integer NULL, FOREIGN KEY(`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -141,12 +140,12 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "ent_types").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `ent_types`(`id` integer PRIMARY KEY AUTOINCREMENT, `type` varchar(255) UNIQUE)")).
+				mock.ExpectExec(escape("CREATE TABLE `ent_types`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `type` varchar(255) UNIQUE NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT)")).
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
@@ -161,7 +160,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "groups").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `groups`(`id` integer PRIMARY KEY AUTOINCREMENT)")).
+				mock.ExpectExec(escape("CREATE TABLE `groups`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
@@ -196,7 +195,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT)")).
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range (without inserting to ent_types).
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_sequence` WHERE `name` = ?")).
@@ -208,7 +207,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "groups").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `groups`(`id` integer PRIMARY KEY AUTOINCREMENT)")).
+				mock.ExpectExec(escape("CREATE TABLE `groups`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
 				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).

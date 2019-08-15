@@ -19,6 +19,7 @@ type UserUpdate struct {
 	name       *string
 	phone      *string
 	buffer     *[]byte
+	title      *string
 	predicates []predicate.User
 }
 
@@ -49,6 +50,20 @@ func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
 // SetBuffer sets the buffer field.
 func (uu *UserUpdate) SetBuffer(b []byte) *UserUpdate {
 	uu.buffer = &b
+	return uu
+}
+
+// SetTitle sets the title field.
+func (uu *UserUpdate) SetTitle(s string) *UserUpdate {
+	uu.title = &s
+	return uu
+}
+
+// SetNillableTitle sets the title field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTitle(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetTitle(*s)
+	}
 	return uu
 }
 
@@ -127,6 +142,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldBuffer, *uu.buffer)
 	}
+	if uu.title != nil {
+		update = true
+		builder.Set(user.FieldTitle, *uu.title)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -147,6 +166,7 @@ type UserUpdateOne struct {
 	name   *string
 	phone  *string
 	buffer *[]byte
+	title  *string
 }
 
 // SetAge sets the age field.
@@ -170,6 +190,20 @@ func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
 // SetBuffer sets the buffer field.
 func (uuo *UserUpdateOne) SetBuffer(b []byte) *UserUpdateOne {
 	uuo.buffer = &b
+	return uuo
+}
+
+// SetTitle sets the title field.
+func (uuo *UserUpdateOne) SetTitle(s string) *UserUpdateOne {
+	uuo.title = &s
+	return uuo
+}
+
+// SetNillableTitle sets the title field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTitle(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetTitle(*s)
+	}
 	return uuo
 }
 
@@ -254,6 +288,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		update = true
 		builder.Set(user.FieldBuffer, *uuo.buffer)
 		u.Buffer = *uuo.buffer
+	}
+	if uuo.title != nil {
+		update = true
+		builder.Set(user.FieldTitle, *uuo.title)
+		u.Title = *uuo.title
 	}
 	if update {
 		query, args := builder.Query()

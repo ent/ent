@@ -145,6 +145,15 @@ func Buffer(v []byte) predicate.User {
 	)
 }
 
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldTitle), v))
+		},
+	)
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v int) predicate.User {
 	return predicate.User(
@@ -563,6 +572,125 @@ func BufferNotIn(vs ...[]byte) predicate.User {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldBuffer), v...))
+		},
+	)
+}
+
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldTitle), v...))
+		},
+	)
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldTitle), v...))
+		},
+	)
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.Contains(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.HasPrefix(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.HasSuffix(s.C(FieldTitle), v))
 		},
 	)
 }

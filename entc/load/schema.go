@@ -19,16 +19,17 @@ type Schema struct {
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name       string     `json:"name,omitempty"`
-	Type       field.Type `json:"type,omitempty"`
-	Tag        string     `json:"tag,omitempty"`
-	Size       *int       `json:"size,omitempty"`
-	Charset    *string    `json:"charset,omitempty"`
-	Unique     bool       `json:"unique,omitempty"`
-	Nillable   bool       `json:"nillable,omitempty"`
-	Optional   bool       `json:"optional,omitempty"`
-	Default    bool       `json:"default,omitempty"`
-	Validators int        `json:"validators,omitempty"`
+	Name       string      `json:"name,omitempty"`
+	Type       field.Type  `json:"type,omitempty"`
+	Tag        string      `json:"tag,omitempty"`
+	Size       *int        `json:"size,omitempty"`
+	Charset    *string     `json:"charset,omitempty"`
+	Unique     bool        `json:"unique,omitempty"`
+	Nillable   bool        `json:"nillable,omitempty"`
+	Optional   bool        `json:"optional,omitempty"`
+	Default    bool        `json:"default,omitempty"`
+	Value      interface{} `json:"value,omitempty"`
+	Validators int         `json:"validators,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
@@ -80,10 +81,11 @@ func MarshalSchema(schema ent.Schema) (b []byte, err error) {
 			Name:       f.Name(),
 			Type:       f.Type(),
 			Tag:        f.Tag(),
+			Value:      f.Value(),
 			Unique:     f.IsUnique(),
+			Default:    f.HasDefault(),
 			Nillable:   f.IsNillable(),
 			Optional:   f.IsOptional(),
-			Default:    f.HasDefault(),
 			Validators: len(f.Validators()),
 		}
 		if s, ok := f.(field.Sizer); ok {

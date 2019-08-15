@@ -19,6 +19,8 @@ const (
 	FieldPhone = "phone"
 	// FieldBuffer holds the string denoting the buffer vertex property in the database.
 	FieldBuffer = "buffer"
+	// FieldTitle holds the string denoting the title vertex property in the database.
+	FieldTitle = "title"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -31,10 +33,13 @@ var Columns = []string{
 	FieldName,
 	FieldPhone,
 	FieldBuffer,
+	FieldTitle,
 }
 
 var (
 	fields = schema.User{}.Fields()
 	// DefaultBuffer holds the default value for the buffer field.
 	DefaultBuffer = fields[3].Value().([]byte)
+	// DefaultTitle holds the default value for the title field.
+	DefaultTitle = fields[4].Value().(string)
 )

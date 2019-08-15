@@ -4,16 +4,19 @@ package migrate
 
 import (
 	"fbc/ent/dialect/sql/schema"
+	"fbc/ent/entc/integration/ent/file"
+	"fbc/ent/entc/integration/ent/group"
+	"fbc/ent/entc/integration/ent/groupinfo"
+	"fbc/ent/entc/integration/ent/user"
 	"fbc/ent/schema/field"
 )
 
 var (
-	nullable = true
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "number", Type: field.TypeString},
-		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: &nullable},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
@@ -49,16 +52,16 @@ var (
 		{Name: "int16", Type: field.TypeInt16},
 		{Name: "int32", Type: field.TypeInt32},
 		{Name: "int64", Type: field.TypeInt64},
-		{Name: "optional_int", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "optional_int8", Type: field.TypeInt8, Nullable: &nullable},
-		{Name: "optional_int16", Type: field.TypeInt16, Nullable: &nullable},
-		{Name: "optional_int32", Type: field.TypeInt32, Nullable: &nullable},
-		{Name: "optional_int64", Type: field.TypeInt64, Nullable: &nullable},
-		{Name: "nillable_int", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "nillable_int8", Type: field.TypeInt8, Nullable: &nullable},
-		{Name: "nillable_int16", Type: field.TypeInt16, Nullable: &nullable},
-		{Name: "nillable_int32", Type: field.TypeInt32, Nullable: &nullable},
-		{Name: "nillable_int64", Type: field.TypeInt64, Nullable: &nullable},
+		{Name: "optional_int", Type: field.TypeInt, Nullable: true},
+		{Name: "optional_int8", Type: field.TypeInt8, Nullable: true},
+		{Name: "optional_int16", Type: field.TypeInt16, Nullable: true},
+		{Name: "optional_int32", Type: field.TypeInt32, Nullable: true},
+		{Name: "optional_int64", Type: field.TypeInt64, Nullable: true},
+		{Name: "nillable_int", Type: field.TypeInt, Nullable: true},
+		{Name: "nillable_int8", Type: field.TypeInt8, Nullable: true},
+		{Name: "nillable_int16", Type: field.TypeInt16, Nullable: true},
+		{Name: "nillable_int32", Type: field.TypeInt32, Nullable: true},
+		{Name: "nillable_int64", Type: field.TypeInt64, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
 	FieldTypesTable = &schema.Table{
@@ -70,12 +73,12 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "size", Type: field.TypeInt},
+		{Name: "size", Type: field.TypeInt, Default: file.DefaultSize},
 		{Name: "name", Type: field.TypeString},
-		{Name: "user", Type: field.TypeString, Nullable: &nullable},
-		{Name: "group", Type: field.TypeString, Nullable: &nullable},
-		{Name: "group_file_id", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "owner_id", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "user", Type: field.TypeString, Nullable: true},
+		{Name: "group", Type: field.TypeString, Nullable: true},
+		{Name: "group_file_id", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -119,12 +122,12 @@ var (
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "active", Type: field.TypeBool},
+		{Name: "active", Type: field.TypeBool, Default: group.DefaultActive},
 		{Name: "expire", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeString, Nullable: &nullable},
-		{Name: "max_users", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "type", Type: field.TypeString, Nullable: true},
+		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: group.DefaultMaxUsers},
 		{Name: "name", Type: field.TypeString},
-		{Name: "info_id", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "info_id", Type: field.TypeInt, Nullable: true},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
@@ -145,7 +148,7 @@ var (
 	GroupInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "desc", Type: field.TypeString},
-		{Name: "max_users", Type: field.TypeInt},
+		{Name: "max_users", Type: field.TypeInt, Default: groupinfo.DefaultMaxUsers},
 	}
 	// GroupInfosTable holds the schema information for the "group_infos" table.
 	GroupInfosTable = &schema.Table{
@@ -157,8 +160,8 @@ var (
 	// NodesColumns holds the columns for the "nodes" table.
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "value", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "prev_id", Type: field.TypeInt, Unique: true, Nullable: &nullable},
+		{Name: "value", Type: field.TypeInt, Nullable: true},
+		{Name: "prev_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// NodesTable holds the schema information for the "nodes" table.
 	NodesTable = &schema.Table{
@@ -179,8 +182,8 @@ var (
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "owner_id", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "team_id", Type: field.TypeInt, Unique: true, Nullable: &nullable},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+		{Name: "team_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -209,12 +212,12 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
-		{Name: "last", Type: field.TypeString},
-		{Name: "nickname", Type: field.TypeString, Unique: true, Nullable: &nullable},
-		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: &nullable},
-		{Name: "group_blocked_id", Type: field.TypeInt, Nullable: &nullable},
-		{Name: "user_spouse_id", Type: field.TypeInt, Unique: true, Nullable: &nullable},
-		{Name: "parent_id", Type: field.TypeInt, Nullable: &nullable},
+		{Name: "last", Type: field.TypeString, Default: user.DefaultLast},
+		{Name: "nickname", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "group_blocked_id", Type: field.TypeInt, Nullable: true},
+		{Name: "user_spouse_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

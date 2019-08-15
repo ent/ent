@@ -265,7 +265,6 @@ func (g *Graph) resolve(t *Type) error {
 
 // Tables returns the schema definitions of SQL tables for the graph.
 func (g *Graph) Tables() (all []*schema.Table) {
-	nullable := true
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table()).AddPrimary(n.ID.Column())
@@ -286,7 +285,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				// "owner" is the table that owns the relations (we set the foreign-key on)
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
-				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Unique: e.Rel.Type == O2O, Nullable: &nullable}
+				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Unique: e.Rel.Type == O2O, Nullable: true}
 				owner.AddColumn(column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -297,7 +296,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
-				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Nullable: &nullable}
+				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Nullable: true}
 				owner.AddColumn(column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
