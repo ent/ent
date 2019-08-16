@@ -53,6 +53,14 @@ func (User) Edges() []ent.Edge {
 Let's add 2 fields to the `User` schema, and then run `entc generate`:
 
 ```go
+package schema
+
+import (
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/field"
+)
+
+
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -194,7 +202,7 @@ import (
 	"log"
 
 	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/field"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // Fields of the Car.
@@ -228,7 +236,7 @@ Let's add the `"cars"` edge to the `User` schema, and run `entc generate ./ent/s
  	"log"
 
  	"github.com/facebookincubator/ent"
- 	"github.com/facebookincubator/ent/edge"
+ 	"github.com/facebookincubator/ent/schema/edge"
  )
 
  // Edges of the User.
@@ -321,10 +329,10 @@ in the `User` schema, and run `entc generate ./ent/schema`.
 
 ```go
 import (
- "log"
+	"log"
 
- "github.com/facebookincubator/ent"
- "github.com/facebookincubator/ent/edge"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
 )
 
 // Edges of the Car.
@@ -372,4 +380,218 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 ## Create Your Second Edge
 
-TODO: User/Group example.
+We'll continue our example, by creating a M2M relationship between users and groups.
+
+![er-group-users](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_group_users.png)
+
+As you can see, each group entity can have many users, and a user can be connected to many groups.
+A simple "many-to-many" relationship. In the above illustration, the `Group` schema is the owner
+of the `users` edge (relationship), and the `User` entity has a back-reference/inverse edge to this
+relationship named `groups`. Let's define this relationship in our schemas:
+
+- `<project>/ent/schema/group.go`:
+
+	```go
+	 import (
+		"log"
+	
+		"github.com/facebookincubator/ent"
+		"github.com/facebookincubator/ent/schema/edge"
+	 )
+	
+	 // Edges of the User.
+	 func (User) Edges() []ent.Edge {
+		return []ent.Edge{
+			edge.To("cars", Car.Type),
+			// create an inverse-edge called "groups" of type `Group`
+			// and reference it to the "users" edge (in Group schema)
+			// explicitly using the `Ref` method.
+			edge.From("groups", Group.Type).
+				Ref("users"),
+		}
+	 }
+	```
+
+- `<project>/ent/schema/user.go`:   
+	```go
+	 import (
+	 	"log"
+	
+	 	"github.com/facebookincubator/ent"
+	 	"github.com/facebookincubator/ent/schema/edge"
+	 )
+	
+	 // Edges of the User.
+	 func (User) Edges() []ent.Edge {
+	 	return []ent.Edge{
+			edge.To("cars", Car.Type),
+		 	// create an inverse-edge called "groups" of type `Group`
+		 	// and reference it to the "users" edge (in Group schema)
+		 	// explicitly using the `Ref` method.
+			edge.From("groups", Group.Type).
+				Ref("users"),
+	 	}
+	 }
+	```
+
+We run `entc` on the schema directory, to re-generate the assets.
+```cosole
+$ entc generate ./ent/schema
+```
+
+## Run Your First Graph Traversal
+
+In order to run our first graph traversal, we need to generate some data (nodes and edges).  
+Let's create the following graph using the framework:
+
+![re-graph](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_graph_getting_started.png)
+
+
+```go
+func CreateGraph(ctx context.Context, client *ent.Client) error {
+	// first, create the users.
+	a8m, err := client.User.
+		Create().
+		SetAge(30).
+		SetName("Ariel").
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	neta, err := client.User.
+		Create().
+		SetAge(28).
+		SetName("Neta").
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	// then, create the cars, and attach them to the users in the creation.
+	_, err = client.Car.
+		Create().
+		SetModel("Tesla").
+		SetRegisteredAt(time.Now()).	// ignore the time in the graph.
+		SetOwner(a8m).					// attach this graph to Ariel.
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.Car.
+		Create().
+		SetModel("Mazda").
+		SetRegisteredAt(time.Now()).	// ignore the time in the graph.
+		SetOwner(a8m).					// attach this graph to Ariel.
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.Car.
+		Create().
+		SetModel("Ford").
+		SetRegisteredAt(time.Now()).	// ignore the time in the graph.
+		SetOwner(neta).					// attach this graph to Neta.
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	// create the groups, and add their users in the creation.
+	_, err = client.Group.
+		Create().
+		SetModel("GitLab").
+		AddUsers(neta, a8m).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.Group.
+		Create().
+		SetModel("GitHab").
+		AddUsers(a8m).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	log.Println("The graph was created successfully")
+	return nil
+}
+```
+
+Now, when we have a graph with data, we can run a few queries on it:
+
+1. Get all user's cars of group named "Github":
+
+	```go
+	import (
+		"log"
+		
+		"<project>/ent"
+		"<project>/ent/group"
+	)
+
+	func Do(context context.Context, client *ent.Client) {
+		cars, err := client.Group.
+			Query(group.Name("Github")).	// (Group(Name=GitHub),)
+			QueryUsers().					// (User(Name=Ariel, Age=30),)
+			QueryCars().					// (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
+			All(ctx)
+		if err != nil {
+			log.Fatal("failed getting cars:", err)
+		}
+		log.Println("cars returned:", cars)
+		// Output: (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
+	}
+	```
+
+2. Changing the query above, so that the source of the traversal is the user *Ariel*:
+
+	```go
+	import (
+		"log"
+		
+		"<project>/ent"
+		"<project>/ent/car"
+	)
+
+	func Do(context context.Context, client *ent.Client) {
+		// <continuation of the code block that creates the graph>
+    	// ...
+
+		cars, err := a8m.					// Get the groups, that a8m is connected to:
+			QueryGroups().					// (Group(Name=GitHub), Group(Name=GitLab),)
+			QueryUsers().					// (User(Name=Ariel, Age=30), User(Name=Neta, Age=28),)
+			QueryCars().					//
+			Where(							//
+				car.Not(					//	Get Neta and Ariel cars, but filter out
+					car.ModelEQ("Mazda")	//	those who named "Mazda"
+				),							//
+			).								//
+			All(ctx)
+		if err != nil {
+			log.Fatal("failed getting cars:", err)
+		}
+		log.Println("cars returned:", cars)
+		// Output: (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Ford, RegisteredAt=<Time>),)
+	}
+	```
+
+3. Get all groups that have users (query with look-aside):
+
+	```go
+	import (
+		"log"
+		
+		"<project>/ent"
+		"<project>/ent/group"
+	)
+
+	func Do(context context.Context, client *ent.Client) {
+		groups, err := client.Group.
+			Query().
+			Where(group.HasUsers()).
+			All(ctx)
+		if err != nil {
+			log.Fatal("failed getting groups:", err)
+		}
+		log.Println("groups returned:", cars)
+		// Output: (Group(Name=GitHub), Group(Name=GitLab),)
+	}
