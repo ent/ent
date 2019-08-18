@@ -14,3 +14,25 @@
 
 @media only screen and (min-width: 1500px) {
 }
+
+.fixedHeaderContainer {
+    background: #7fd5ea;
+}
+
+.navigationSlider .slidingNav ul li > a:focus,
+.navigationSlider .slidingNav ul li > a:hover,
+.navigationSlider .slidingNav ul li.siteNavItemActive > a,
+.navigationSlider .slidingNav ul li.siteNavGroupActive > a {
+    background-color: #007d9c;
+}
+
+.onPageNav .toc-headings > li > a.active,
+.toc .toggleNav ul li.navListItemActive a,
+.toc .toggleNav ul li a:hover,
+.toc .toggleNav ul li a:focus{
+    color: #007d9c;
+}
+
+.imageAlignTop .blockImage {
+    max-width: 100%;
+}

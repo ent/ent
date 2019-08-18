@@ -151,16 +151,17 @@ class Index extends React.Component {
       <Block layout="fourColumn">
         {[
           {
-            content: 'This is the content of my feature',
-            image: `${baseUrl}img/undraw_react.svg`,
+            content: 'Simple API for modeling any graph schema as Go objects',
+            image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-schema-as-code.png`,
             imageAlign: 'top',
-            title: 'Feature One',
+            title: 'Schema As Code',
           },
           {
-            content: 'The content of my second feature',
-            image: `${baseUrl}img/undraw_operating_system.svg`,
+            content: 'Run queries, aggregations and traverse any graph ' +
+            'structure easily',
+            image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
             imageAlign: 'top',
-            title: 'Feature Two',
+            title: 'Easily Traverse Any Graph',
           },
         ]}
       </Block>
