@@ -16,23 +16,104 @@
 }
 
 .fixedHeaderContainer {
-    background: #7fd5ea;
+    background: #85daff;
+}
+
+@media only screen and (max-width: 1024px) {
+    .navigationSlider .slidingNav ul {
+        background: #4d8eaa;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    .navigationSlider .slidingNav ul {
+        background: #85daff;
+    }
 }
 
 .navigationSlider .slidingNav ul li > a:focus,
 .navigationSlider .slidingNav ul li > a:hover,
 .navigationSlider .slidingNav ul li.siteNavItemActive > a,
 .navigationSlider .slidingNav ul li.siteNavGroupActive > a {
-    background-color: #007d9c;
+    background-color:#4d8eaa;
 }
 
 .onPageNav .toc-headings > li > a.active,
 .toc .toggleNav ul li.navListItemActive a,
 .toc .toggleNav ul li a:hover,
 .toc .toggleNav ul li a:focus{
-    color: #007d9c;
+    color: #4d8eaa;
 }
 
 .imageAlignTop .blockImage {
     max-width: 100%;
+}
+
+.projectTitle {
+    color: #4d8eaa;
+}
+
+@media only screen and (min-width: 480px) {
+    .projectTitle {
+        font-size: 420%;
+    }
+}
+
+.button {
+    border: 1px solid #4d8eaa;
+    color: #4d8eaa;
+}
+
+.button:hover {
+    background: #48849e;
+}
+
+.homeContainer .homeWrapper {
+    padding: 2em 10px 0 10px;
+}
+
+a {
+    color: #4d8eaa;
+}
+
+
+@media only screen and (max-width: 1500px) {
+    .gridBlock .twoByGridBlock img,
+    .gridBlock .threeByGridBlock img,
+    .gridBlock .fourByGridBlock img {
+        max-height: 136px;
+    }
+}
+
+
+@media only screen and (min-width: 1500px) {
+    .gridBlock .twoByGridBlock img,
+    .gridBlock .threeByGridBlock img,
+    .gridBlock .fourByGridBlock img {
+        max-height: 180px;
+    }
+}
+
+@media only screen and (max-width: 1126px) {
+    .gridBlock .twoByGridBlock img,
+    .gridBlock .threeByGridBlock img,
+    .gridBlock .fourByGridBlock img {
+        max-height: 122px;
+    }
+}
+
+@media only screen and (max-width: 1000px) {
+    .gridBlock .twoByGridBlock img,
+    .gridBlock .threeByGridBlock img,
+    .gridBlock .fourByGridBlock img {
+        max-height: 104px;
+    }
+}
+
+@media only screen and (max-width: 880px) {
+    .gridBlock .twoByGridBlock img,
+    .gridBlock .threeByGridBlock img,
+    .gridBlock .fourByGridBlock img {
+        max-height: 85px;
+    }
 }

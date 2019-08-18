@@ -60,7 +60,7 @@ class HomeSplash extends React.Component {
 
     return (
       <SplashContainer>
-        <Logo img_src={`${baseUrl}img/undraw_monitor.svg`} />
+        {/*<Logo img_src={`${baseUrl}img/undraw_monitor.svg`} />*/}
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
@@ -88,6 +88,7 @@ class Index extends React.Component {
           align="center"
           contents={props.children}
           layout={props.layout}
+          className={props.className}
         />
       </Container>
     );
@@ -148,20 +149,33 @@ class Index extends React.Component {
     );
 
     const Features = () => (
-      <Block layout="fourColumn">
+      <Block layout="fourColumn" className="features">
         {[
           {
+            title: 'Schema As Code',
             content: 'Simple API for modeling any graph schema as Go objects',
             image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-schema-as-code.png`,
             imageAlign: 'top',
-            title: 'Schema As Code',
           },
           {
+            title: 'Easily Traverse Any Graph',
             content: 'Run queries, aggregations and traverse any graph ' +
             'structure easily',
             image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
             imageAlign: 'top',
-            title: 'Easily Traverse Any Graph',
+          },
+          {
+              title: 'Statically Typed And Explicit API',
+              content: '100% statically types and explicit api using ' +
+              'code generation',
+              image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
+              imageAlign: 'top',
+          },
+          {
+              title: 'Multiple Storage Driver Support',
+                  content: 'Support both SQL and Gremlin dialects',
+              image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
+              imageAlign: 'top',
           },
         ]}
       </Block>

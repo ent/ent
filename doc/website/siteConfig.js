@@ -40,7 +40,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
-    {doc: 'getting-started', label: 'API'},
+    {href: 'https://github.com/facebookincubator/ent', label: 'Github'},
     {page: 'help', label: 'Help'},
     {blog: true, label: 'Blog'},
   ],
@@ -55,8 +55,8 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor: '#0c6140',
-    secondaryColor: '#08432c',
+    primaryColor: '#85daff',
+    secondaryColor: '#4d8eaa',
   },
 
   /* Custom fonts for website */
