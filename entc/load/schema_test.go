@@ -60,7 +60,7 @@ func (Group) Edges() []ent.Edge {
 }
 
 func TestMarshalSchema(t *testing.T) {
-	for _, u := range []ent.Schema{User{}, &User{}} {
+	for _, u := range []ent.Interface{User{}, &User{}} {
 		buf, err := MarshalSchema(u)
 		require.NoError(t, err)
 

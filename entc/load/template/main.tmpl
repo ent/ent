@@ -12,9 +12,9 @@ import (
 
 {{ $base := base .Package}}
 
-var schemas = []ent.Schema{
+var schemas = []ent.Interface{
 	{{ range $_, $name := .Names }}
-		{{- $base }}.{{- printf "%s{Schema: ent.DefaultSchema}" $name }},
+		{{- $base }}.{{- printf "%s{}" $name }},
 	{{ end -}}
 }
 

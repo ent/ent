@@ -7,11 +7,18 @@ import (
 )
 
 type (
-	// Schema is the interface for describing an entity schema for entc.
-	Schema interface {
+	// The Interface type describes the requirements for an exported type defined in the schema package.
+	// It functions as the interface between the user's schema types and codegen loader.
+	// Users should use the Schema type for embedding as follows:
+	//
+	//	type T struct {
+	//		ent.Schema
+	//	}
+	//
+	Interface interface {
 		Type()
-		Edges() []Edge
 		Fields() []Field
+		Edges() []Edge
 		Indexes() []Index
 	}
 
@@ -46,16 +53,18 @@ type (
 		Edge() string
 		Fields() []string
 	}
+
+	// Schema is the default implementation Interface.
+	Schema struct {
+		Interface
+	}
 )
 
-// DefaultSchema holds the default schema implementation.
-var DefaultSchema defaultSchema
+// Fields of the schema.
+func (Schema) Fields() []Field { return nil }
 
-// defaultSchema is the default implementation for the schema.
-type defaultSchema struct{ Schema }
+// Edges of the schema.
+func (Schema) Edges() []Edge { return nil }
 
-func (defaultSchema) Edges() []Edge { return nil }
-
-func (defaultSchema) Fields() []Field { return nil }
-
-func (defaultSchema) Indexes() []Index { return nil }
+// Indexes of the schema.
+func (Schema) Indexes() []Index { return nil }

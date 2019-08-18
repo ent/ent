@@ -70,7 +70,7 @@ func NewEdge(e ent.Edge) *Edge {
 
 // MarshalSchema encode the ent.Schema interface into a JSON
 // that can be decoded into the Schema object object.
-func MarshalSchema(schema ent.Schema) (b []byte, err error) {
+func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	s := &Schema{Name: indirect(reflect.TypeOf(schema)).Name()}
 	fields, err := safeFields(schema)
 	if err != nil {
@@ -120,7 +120,7 @@ func MarshalSchema(schema ent.Schema) (b []byte, err error) {
 }
 
 // safeFields wraps the schema.Fields method with recover to ensure no panics in marshaling.
-func safeFields(schema ent.Schema) (fields []ent.Field, err error) {
+func safeFields(schema ent.Interface) (fields []ent.Field, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Fields panics: %v", v)
@@ -131,7 +131,7 @@ func safeFields(schema ent.Schema) (fields []ent.Field, err error) {
 }
 
 // safeEdges wraps the schema.Edges method with recover to ensure no panics in marshaling.
-func safeEdges(schema ent.Schema) (edges []ent.Edge, err error) {
+func safeEdges(schema ent.Interface) (edges []ent.Edge, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Edges panics: %v", v)
@@ -142,7 +142,7 @@ func safeEdges(schema ent.Schema) (edges []ent.Edge, err error) {
 }
 
 // safeIndexes wraps the schema.Indexes method with recover to ensure no panics in marshaling.
-func safeIndexes(schema ent.Schema) (indexes []ent.Index, err error) {
+func safeIndexes(schema ent.Interface) (indexes []ent.Index, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Indexes panics: %v", v)

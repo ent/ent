@@ -89,7 +89,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 func (c *Config) load() (string, error) {
 	// get the ent package info statically instead of dealing with string constants
 	// in the code, since import is handled by goimports and renaming should be easy.
-	entface := reflect.TypeOf(struct{ ent.Schema }{}).Field(0).Type
+	entface := reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadSyntax}, c.Path, entface.PkgPath())
 	if err != nil {
 		return "", err
