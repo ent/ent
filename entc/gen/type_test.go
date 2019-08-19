@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"fbc/ent/entc/load"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

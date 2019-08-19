@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // A SchemaOption defines what type of schema feature a storage driver support.
@@ -44,7 +44,7 @@ var drivers = []*Storage{
 		Builder:   reflect.TypeOf(&sql.Selector{}),
 		Dialects:  []string{"dialect.SQLite", "dialect.MySQL"},
 		Imports: []string{
-			"fbc/ent/dialect/sql",
+			"github.com/facebookincubator/ent/dialect/sql",
 		},
 		SchemaMode: Unique | Cascade | Migrate,
 		OpCode:     opCodes(sqlCode[:]),
@@ -55,12 +55,12 @@ var drivers = []*Storage{
 		Builder:   reflect.TypeOf(&dsl.Traversal{}),
 		Dialects:  []string{"dialect.Neptune"},
 		Imports: []string{
-			"fbc/ent/dialect/gremlin",
-			"fbc/ent/dialect/gremlin/graph/dsl",
-			"fbc/ent/dialect/gremlin/graph/dsl/__",
-			"fbc/ent/dialect/gremlin/graph/dsl/g",
-			"fbc/ent/dialect/gremlin/graph/dsl/p",
-			"fbc/ent/dialect/gremlin/encoding/graphson",
+			"github.com/facebookincubator/ent/dialect/gremlin",
+			"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl",
+			"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__",
+			"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g",
+			"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p",
+			"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson",
 		},
 		SchemaMode: Unique,
 		OpCode:     opCodes(gremlinCode[:]),

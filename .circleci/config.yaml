@@ -1,0 +1,43 @@
+version: 2.1
+jobs:
+  unit:
+    docker:
+    - image: circleci/golang
+    working_directory: /go/src/github.com/facebookincubator/ent
+    steps:
+    - checkout
+    - run:
+        name: Dialect tests
+        command: go test -v ./dialect/...
+    - run:
+        name: Schema tests
+        command: go test -v ./schema/...
+    - run:
+        name: Loader tests
+        command: go test -v ./entc/load/...
+    - run:
+        name: Codegen tests
+        command: go test -v ./entc/gen/...
+  integration:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: /home/circleci/.go_workspace/src/github.com/facebookincubator/ent/entc/integration
+    environment:
+      GOPATH: /home/circleci/.go_workspace
+    steps:
+    - checkout
+    - run:
+        name: Run docker-compose
+        command: docker-compose -f compose/docker-compose.yaml up -d
+    - run:
+        name: Integration tests
+        command: go test ./...
+
+workflows:
+  version: 2.1
+  all:
+    jobs:
+    - unit
+    - integration:
+        requires:
+        - unit

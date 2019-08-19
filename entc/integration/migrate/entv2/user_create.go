@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 
-	"fbc/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserCreate is the builder for creating a User entity.

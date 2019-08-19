@@ -9,7 +9,7 @@ import (
 	"os"
 	"net/url"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 	{{ range $_, $n := $.Nodes }}
 		"{{ $n.Config.Package }}/{{ $n.Package }}"
 	{{- end }}

@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/encoding/graphson"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Order applies an ordering on either graph traversal or sql selector.

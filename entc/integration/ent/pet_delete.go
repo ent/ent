@@ -6,14 +6,14 @@ import (
 	"context"
 	"errors"
 
-	"fbc/ent/entc/integration/ent/pet"
-	"fbc/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetDelete is the builder for deleting a Pet entity.

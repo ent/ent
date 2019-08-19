@@ -7,13 +7,13 @@ import (
 	"errors"
 	"strconv"
 
-	"fbc/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.

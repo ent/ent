@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
 
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"

@@ -6,7 +6,7 @@ import (
 	"context"
 	"log"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // dsn for the database. In order to run the tests locally, run the following command:

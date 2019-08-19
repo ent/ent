@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"fbc/ent"
-	"fbc/ent/schema/edge"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // Group holds the schema for the group entity.

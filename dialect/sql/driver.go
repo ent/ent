@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"fbc/ent/dialect"
+	"github.com/facebookincubator/ent/dialect"
 )
 
 // Driver is a dialect.Driver implementation for SQL based databases.

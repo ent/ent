@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"fbc/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin"
 
 	"go.opencensus.io/trace"
 )

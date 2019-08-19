@@ -8,7 +8,7 @@ If it is the first time you work with `entc`, you need to compile it manually,
 since we don't have any official binary distribution.
 
 ```
-cd fbsource/fbcode/fbc/ent/entc/cmd/entc
+cd fbsource/fbcode/github.com/facebookincubator/ent/entc/cmd/entc
 go build
 sudo mv entc /usr/local/bin
 ```
@@ -98,7 +98,7 @@ import (
 	
 	"<project>/ent"
 	"<project>/ent/user"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {

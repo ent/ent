@@ -1,4 +1,4 @@
-module fbc/ent
+module github.com/facebookincubator/ent
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3

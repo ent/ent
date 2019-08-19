@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Order applies an ordering on either graph traversal or sql selector.

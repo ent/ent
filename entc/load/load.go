@@ -4,7 +4,6 @@ package load
 import (
 	"bytes"
 	"encoding/json"
-	"fbc/ent"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -20,6 +19,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/facebookincubator/ent"
 
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"

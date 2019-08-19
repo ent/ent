@@ -1,8 +1,8 @@
 package valid
 
 import (
-	"fbc/ent"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // User holds the user schema.

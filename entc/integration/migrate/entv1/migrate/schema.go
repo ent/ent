@@ -3,8 +3,8 @@
 package migrate
 
 import (
-	"fbc/ent/dialect/sql/schema"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/dialect/sql/schema"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 var (

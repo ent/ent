@@ -3,7 +3,7 @@
 package user
 
 import (
-	"fbc/ent/entc/integration/migrate/entv2/schema"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/schema"
 )
 
 const (

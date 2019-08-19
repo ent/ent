@@ -5,12 +5,12 @@ package pet
 import (
 	"strconv"
 
-	"fbc/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/p"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // ID filters vertices based on their identifier.

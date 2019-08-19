@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // SQLite is an SQLite migration driver.

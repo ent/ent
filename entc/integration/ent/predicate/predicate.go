@@ -5,8 +5,8 @@ package predicate
 import (
 	"fmt"
 
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Card is the predicate function for card builders.

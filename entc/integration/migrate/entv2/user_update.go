@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"fbc/ent/entc/integration/migrate/entv2/predicate"
-	"fbc/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserUpdate is the builder for updating User entities.

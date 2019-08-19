@@ -11,9 +11,9 @@ import (
 	"text/template"
 	"unicode"
 
-	"fbc/ent/entc/gen"
-	"fbc/ent/entc/load"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/entc/gen"
+	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/spf13/cobra"
 )
@@ -126,7 +126,7 @@ func loadGraph(path string, cfg gen.Config) (*gen.Graph, error) {
 var tmpl = template.Must(template.New("schema").
 	Parse(`package schema
 
-import "fbc/ent"
+import "github.com/facebookincubator/ent"
 
 // {{ . }} holds the schema definition for the {{ . }} entity.
 type {{ . }} struct {

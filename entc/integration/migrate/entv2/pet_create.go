@@ -5,9 +5,9 @@ package entv2
 import (
 	"context"
 
-	"fbc/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetCreate is the builder for creating a Pet entity.

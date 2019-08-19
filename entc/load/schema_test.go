@@ -5,10 +5,10 @@ import (
 	"math"
 	"testing"
 
-	"fbc/ent"
-	"fbc/ent/schema/edge"
-	"fbc/ent/schema/field"
-	"fbc/ent/schema/index"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/index"
 
 	"github.com/stretchr/testify/require"
 )

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 )
 
 // Driver is a dialect.Driver implementation for TinkerPop gremlin.

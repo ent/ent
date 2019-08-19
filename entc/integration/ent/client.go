@@ -7,21 +7,21 @@ import (
 	"fmt"
 	"log"
 
-	"fbc/ent/entc/integration/ent/migrate"
+	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
 
-	"fbc/ent/entc/integration/ent/card"
-	"fbc/ent/entc/integration/ent/comment"
-	"fbc/ent/entc/integration/ent/fieldtype"
-	"fbc/ent/entc/integration/ent/file"
-	"fbc/ent/entc/integration/ent/group"
-	"fbc/ent/entc/integration/ent/groupinfo"
-	"fbc/ent/entc/integration/ent/node"
-	"fbc/ent/entc/integration/ent/pet"
-	"fbc/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/comment"
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/node"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Client is the client that holds all ent builders.

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Card is the model entity for the Card schema.

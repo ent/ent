@@ -5,9 +5,9 @@ package entv2
 import (
 	"context"
 
-	"fbc/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // GroupCreate is the builder for creating a Group entity.

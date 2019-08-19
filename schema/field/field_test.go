@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"fbc/ent"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,6 +1,6 @@
 package __
 
-import "fbc/ent/dialect/gremlin/graph/dsl"
+import "github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 
 // As is the api for calling __.As().
 func As(args ...interface{}) *dsl.Traversal { return New().As(args...) }
