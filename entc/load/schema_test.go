@@ -156,11 +156,7 @@ func TestMarshalDefaults(t *testing.T) {
 
 	require.Equal(t, "WithDefaults", schema.Name)
 	require.True(t, schema.Fields[0].Default)
-	require.Equal(t, 1.0, schema.Fields[0].Value, "marshaling converts int to float")
 	require.True(t, schema.Fields[1].Default)
-	require.Equal(t, math.Pi, schema.Fields[1].Value)
 	require.True(t, schema.Fields[2].Default)
-	require.Equal(t, "foo", schema.Fields[2].Value)
 	require.True(t, schema.Fields[3].Default)
-	require.Equal(t, true, schema.Fields[3].Value)
 }

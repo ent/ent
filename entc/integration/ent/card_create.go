@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"fbc/ent/entc/integration/ent/card"
 	"fbc/ent/entc/integration/ent/user"
@@ -23,13 +24,28 @@ import (
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	number *string
-	owner  map[string]struct{}
+	number     *string
+	created_at *time.Time
+	owner      map[string]struct{}
 }
 
 // SetNumber sets the number field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	cc.number = &s
+	return cc
+}
+
+// SetCreatedAt sets the created_at field.
+func (cc *CardCreate) SetCreatedAt(t time.Time) *CardCreate {
+	cc.created_at = &t
+	return cc
+}
+
+// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
+	if t != nil {
+		cc.SetCreatedAt(*t)
+	}
 	return cc
 }
 
@@ -62,6 +78,10 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	}
 	if err := card.NumberValidator(*cc.number); err != nil {
 		return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
+	}
+	if cc.created_at == nil {
+		v := card.DefaultCreatedAt()
+		cc.created_at = &v
 	}
 	if len(cc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -98,6 +118,10 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	if cc.number != nil {
 		builder.Set(card.FieldNumber, *cc.number)
 		c.Number = *cc.number
+	}
+	if cc.created_at != nil {
+		builder.Set(card.FieldCreatedAt, *cc.created_at)
+		c.CreatedAt = *cc.created_at
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -159,6 +183,9 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(card.Label)
 	if cc.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cc.number)
+	}
+	if cc.created_at != nil {
+		v.Property(dsl.Single, card.FieldCreatedAt, *cc.created_at)
 	}
 	for id := range cc.owner {
 		v.AddE(user.CardLabel).From(g.V(id)).InV()

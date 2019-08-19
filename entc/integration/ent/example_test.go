@@ -33,6 +33,7 @@ func ExampleCard() {
 	c := client.Card.
 		Create().
 		SetNumber("string").
+		SetCreatedAt(time.Now()).
 		SaveX(ctx)
 	log.Println("card created:", c)
 
@@ -299,6 +300,7 @@ func ExampleUser() {
 	c0 := client.Card.
 		Create().
 		SetNumber("string").
+		SetCreatedAt(time.Now()).
 		SaveX(ctx)
 	log.Println("card created:", c0)
 	pe1 := client.Pet.

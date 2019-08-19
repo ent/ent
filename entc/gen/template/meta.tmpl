@@ -33,9 +33,9 @@ var (
 	fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
 	{{ range $i, $f := $.Fields -}}
 		{{ if $f.HasDefault }}
-			{{- $default := $f.DefaultConstant -}}
+			{{- $default := $f.DefaultName -}}
 			// {{ $default }} holds the default value for the {{ $f.Name }} field.
-			{{ $default }} = fields[{{ $i }}].Value().({{ $f.Type }})
+			{{ $default }} = fields[{{ $i }}].Value().({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
 		{{ end -}}
 		{{ with $f.Validators -}}
 			{{ $name := $f.Validator -}}

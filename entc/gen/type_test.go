@@ -159,7 +159,7 @@ func TestField_Constant(t *testing.T) {
 	}
 }
 
-func TestField_DefaultConstant(t *testing.T) {
+func TestField_DefaultName(t *testing.T) {
 	tests := []struct {
 		name     string
 		constant string
@@ -170,7 +170,7 @@ func TestField_DefaultConstant(t *testing.T) {
 	}
 	for _, tt := range tests {
 		typ := &Field{Name: tt.name}
-		require.Equal(t, tt.constant, typ.DefaultConstant())
+		require.Equal(t, tt.constant, typ.DefaultName())
 	}
 }
 

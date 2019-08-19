@@ -3,6 +3,7 @@ package field_test
 import (
 	"regexp"
 	"testing"
+	"time"
 
 	"fbc/ent"
 	"fbc/ent/schema/field"
@@ -75,10 +76,16 @@ func TestCharset(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
-	f := field.Time("created_at")
+	now := time.Now()
+	f := field.Time("created_at").
+		Default(func() time.Time {
+			return now
+		})
 	assert.Equal(t, "created_at", f.Name())
 	assert.Equal(t, field.TypeTime, f.Type())
 	assert.Equal(t, "time.Time", f.Type().String())
+	assert.NotNil(t, f.Value())
+	assert.Equal(t, now, f.Value().(func() time.Time)())
 }
 
 func TestField_Tag(t *testing.T) {

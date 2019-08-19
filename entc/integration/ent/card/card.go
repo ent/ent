@@ -3,6 +3,8 @@
 package card
 
 import (
+	"time"
+
 	"fbc/ent/entc/integration/ent/schema"
 )
 
@@ -13,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldNumber holds the string denoting the number vertex property in the database.
 	FieldNumber = "number"
+	// FieldCreatedAt holds the string denoting the created_at vertex property in the database.
+	FieldCreatedAt = "created_at"
 
 	// Table holds the table name of the card in the database.
 	Table = "cards"
@@ -32,10 +36,13 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldNumber,
+	FieldCreatedAt,
 }
 
 var (
 	fields = schema.Card{}.Fields()
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.
 	NumberValidator = fields[0].Validators()[0].(func(string) error)
+	// DefaultCreatedAt holds the default value for the created_at field.
+	DefaultCreatedAt = fields[1].Value().(func() time.Time)
 )

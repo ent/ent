@@ -4,6 +4,7 @@ package card
 
 import (
 	"strconv"
+	"time"
 
 	"fbc/ent/entc/integration/ent/predicate"
 
@@ -168,6 +169,18 @@ func Number(v string) predicate.Card {
 	)
 }
 
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.EQ(v))
+		},
+	)
+}
+
 // NumberEQ applies the EQ predicate on the "number" field.
 func NumberEQ(v string) predicate.Card {
 	return predicate.CardPerDialect(
@@ -316,6 +329,122 @@ func NumberHasSuffix(v string) predicate.Card {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNumber, p.EndingWith(v))
+		},
+	)
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.EQ(v))
+		},
+	)
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.NEQ(v))
+		},
+	)
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.GT(v))
+		},
+	)
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.GTE(v))
+		},
+	)
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.LT(v))
+		},
+	)
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Card {
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.LTE(v))
+		},
+	)
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldCreatedAt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.Within(v...))
+		},
+	)
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CardPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldCreatedAt, p.Without(v...))
 		},
 	)
 }

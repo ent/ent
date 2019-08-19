@@ -116,6 +116,7 @@ var tests = []func(*testing.T, *ent.Client){
 	M2MSelfRef,
 	M2MSameType,
 	M2MTwoTypes,
+	DefaultValue,
 }
 
 func Sanity(t *testing.T, client *ent.Client) {
@@ -1834,6 +1835,12 @@ func Tx(t *testing.T, client *ent.Client) {
 	_, err = tx.Client().Tx(ctx)
 	require.Error(err, "cannot start a transaction within a transaction")
 	require.NoError(tx.Rollback())
+}
+
+func DefaultValue(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	c1 := client.Card.Create().SetNumber("102030").SaveX(ctx)
+	require.False(t, c1.CreatedAt.IsZero())
 }
 
 func drop(t *testing.T, client *ent.Client) {

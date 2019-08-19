@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Type is a field type.
@@ -479,6 +480,17 @@ func (b *timeBuilder) Comment(c string) *timeBuilder {
 // StructTag sets the struct tag of the field.
 func (b *timeBuilder) StructTag(s string) *timeBuilder {
 	b.tag = s
+	return b
+}
+
+// Default sets the function that is applied to set default value
+// of the field on creation. For example:
+//
+//	field.Time("created_at").
+//		Default(time.Now)
+//
+func (b *timeBuilder) Default(f func() time.Time) *timeBuilder {
+	b.value = f
 	return b
 }
 

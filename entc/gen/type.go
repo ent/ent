@@ -308,8 +308,8 @@ func (t *Type) AddIndex(idx *load.Index) error {
 // Constant returns the constant name of the field.
 func (f Field) Constant() string { return "Field" + pascal(f.Name) }
 
-// DefaultConstant returns the constant name of the default value of this field.
-func (f Field) DefaultConstant() string { return "Default" + pascal(f.Name) }
+// DefaultName returns the variable name of the default value of this field.
+func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
 
 // StructField returns the struct member of the field.
 func (f Field) StructField() string {
@@ -375,13 +375,17 @@ func (f Field) Column() *schema.Column {
 		c.Increment = true
 	}
 	if f.def != nil {
-		c.Default = f.def.Value
 		if f.def.Size != nil {
 			c.Size = *f.def.Size
 		}
 		if f.def.Charset != nil {
 			c.Charset = *f.def.Charset
 		}
+	}
+	if f.HasDefault && !f.IsTime() {
+		// since this column is used only for codegen, the actual default
+		// value is imported by the migrate package and used directly.
+		c.Default = true
 	}
 	return c
 }

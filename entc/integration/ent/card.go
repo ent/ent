@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"time"
 
 	"fbc/ent/dialect/gremlin"
 	"fbc/ent/dialect/sql"
@@ -18,23 +19,28 @@ type Card struct {
 	ID string `json:"id,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 // FromRows scans the sql response data into Card.
 func (c *Card) FromRows(rows *sql.Rows) error {
 	var vc struct {
-		ID     int
-		Number string
+		ID        int
+		Number    string
+		CreatedAt time.Time
 	}
 	// the order here should be the same as in the `card.Columns`.
 	if err := rows.Scan(
 		&vc.ID,
 		&vc.Number,
+		&vc.CreatedAt,
 	); err != nil {
 		return err
 	}
 	c.ID = strconv.Itoa(vc.ID)
 	c.Number = vc.Number
+	c.CreatedAt = vc.CreatedAt
 	return nil
 }
 
@@ -45,14 +51,16 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vc struct {
-		ID     string `json:"id,omitempty"`
-		Number string `json:"number,omitempty"`
+		ID        string `json:"id,omitempty"`
+		Number    string `json:"number,omitempty"`
+		CreatedAt int64  `json:"created_at,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
 	}
 	c.ID = vc.ID
 	c.Number = vc.Number
+	c.CreatedAt = time.Unix(vc.CreatedAt, 0)
 	return nil
 }
 
@@ -85,6 +93,7 @@ func (c *Card) String() string {
 	buf.WriteString("Card(")
 	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
 	buf.WriteString(fmt.Sprintf(", number=%v", c.Number))
+	buf.WriteString(fmt.Sprintf(", created_at=%v", c.CreatedAt))
 	buf.WriteString(")")
 	return buf.String()
 }
@@ -117,16 +126,18 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vc []struct {
-		ID     string `json:"id,omitempty"`
-		Number string `json:"number,omitempty"`
+		ID        string `json:"id,omitempty"`
+		Number    string `json:"number,omitempty"`
+		CreatedAt int64  `json:"created_at,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
 	}
 	for _, v := range vc {
 		*c = append(*c, &Card{
-			ID:     v.ID,
-			Number: v.Number,
+			ID:        v.ID,
+			Number:    v.Number,
+			CreatedAt: time.Unix(v.CreatedAt, 0),
 		})
 	}
 	return nil

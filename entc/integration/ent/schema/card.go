@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"fbc/ent"
 	"fbc/ent/schema/edge"
 	"fbc/ent/schema/field"
@@ -16,6 +18,8 @@ func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("number").
 			MinLen(1),
+		field.Time("created_at").
+			Default(time.Now),
 	}
 }
 

@@ -29,7 +29,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		{{- if or $f.HasDefault (not $f.Optional) -}}
 			if {{ $receiver }}.{{ $f.StructField }} == nil {
 				{{ if $f.HasDefault -}}
-					v := {{ $.Package }}.{{ $f.DefaultConstant }}
+					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if $f.IsTime }}(){{ end }}
 					{{ $receiver }}.{{ $f.StructField }} = &v
 				{{ else -}}
 					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")
