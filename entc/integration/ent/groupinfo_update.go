@@ -252,7 +252,9 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if giu.desc != nil {
@@ -518,7 +520,9 @@ func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 	constraints := make([]*constraint, 0, 1)
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if giuo.desc != nil {

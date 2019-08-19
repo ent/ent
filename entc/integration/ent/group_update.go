@@ -542,7 +542,9 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if gu.active != nil {
@@ -1132,7 +1134,9 @@ func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
 	constraints := make([]*constraint, 0, 2)
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if guo.active != nil {

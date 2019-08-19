@@ -234,7 +234,9 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if cu.number != nil {
@@ -481,7 +483,9 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	constraints := make([]*constraint, 0, 1)
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if cuo.number != nil {

@@ -44,7 +44,10 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		}
 	{{- end }}
 	var (
-		{{ if or .NumConstraint (len $.Edges) }}rv = v.Clone(){{ end }}
+		{{ if or .NumConstraint (len $.Edges) }}
+			rv = v.Clone()
+			_ = rv
+		{{ end }}
 		trs []*dsl.Traversal
 	)
 	{{- range $_, $f := $.Fields }}

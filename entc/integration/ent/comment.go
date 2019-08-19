@@ -16,20 +16,30 @@ type Comment struct {
 	config
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// UniqueInt holds the value of the "unique_int" field.
+	UniqueInt int `json:"unique_int,omitempty"`
+	// UniqueFloat holds the value of the "unique_float" field.
+	UniqueFloat float64 `json:"unique_float,omitempty"`
 }
 
 // FromRows scans the sql response data into Comment.
 func (c *Comment) FromRows(rows *sql.Rows) error {
 	var vc struct {
-		ID int
+		ID          int
+		UniqueInt   sql.NullInt64
+		UniqueFloat sql.NullFloat64
 	}
 	// the order here should be the same as in the `comment.Columns`.
 	if err := rows.Scan(
 		&vc.ID,
+		&vc.UniqueInt,
+		&vc.UniqueFloat,
 	); err != nil {
 		return err
 	}
 	c.ID = strconv.Itoa(vc.ID)
+	c.UniqueInt = int(vc.UniqueInt.Int64)
+	c.UniqueFloat = vc.UniqueFloat.Float64
 	return nil
 }
 
@@ -40,12 +50,16 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vc struct {
-		ID string `json:"id,omitempty"`
+		ID          string  `json:"id,omitempty"`
+		UniqueInt   int     `json:"unique_int,omitempty"`
+		UniqueFloat float64 `json:"unique_float,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
 	}
 	c.ID = vc.ID
+	c.UniqueInt = vc.UniqueInt
+	c.UniqueFloat = vc.UniqueFloat
 	return nil
 }
 
@@ -72,6 +86,8 @@ func (c *Comment) String() string {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("Comment(")
 	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
+	buf.WriteString(fmt.Sprintf(", unique_int=%v", c.UniqueInt))
+	buf.WriteString(fmt.Sprintf(", unique_float=%v", c.UniqueFloat))
 	buf.WriteString(")")
 	return buf.String()
 }
@@ -104,14 +120,18 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vc []struct {
-		ID string `json:"id,omitempty"`
+		ID          string  `json:"id,omitempty"`
+		UniqueInt   int     `json:"unique_int,omitempty"`
+		UniqueFloat float64 `json:"unique_float,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
 	}
 	for _, v := range vc {
 		*c = append(*c, &Comment{
-			ID: v.ID,
+			ID:          v.ID,
+			UniqueInt:   v.UniqueInt,
+			UniqueFloat: v.UniqueFloat,
 		})
 	}
 	return nil

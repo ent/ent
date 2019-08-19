@@ -156,6 +156,262 @@ func IDNotIn(ids ...string) predicate.Comment {
 	)
 }
 
+// UniqueInt applies equality check predicate on the "unique_int" field. It's identical to UniqueIntEQ.
+func UniqueInt(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.EQ(v))
+		},
+	)
+}
+
+// UniqueFloat applies equality check predicate on the "unique_float" field. It's identical to UniqueFloatEQ.
+func UniqueFloat(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.EQ(v))
+		},
+	)
+}
+
+// UniqueIntEQ applies the EQ predicate on the "unique_int" field.
+func UniqueIntEQ(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.EQ(v))
+		},
+	)
+}
+
+// UniqueIntNEQ applies the NEQ predicate on the "unique_int" field.
+func UniqueIntNEQ(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.NEQ(v))
+		},
+	)
+}
+
+// UniqueIntGT applies the GT predicate on the "unique_int" field.
+func UniqueIntGT(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.GT(v))
+		},
+	)
+}
+
+// UniqueIntGTE applies the GTE predicate on the "unique_int" field.
+func UniqueIntGTE(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.GTE(v))
+		},
+	)
+}
+
+// UniqueIntLT applies the LT predicate on the "unique_int" field.
+func UniqueIntLT(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.LT(v))
+		},
+	)
+}
+
+// UniqueIntLTE applies the LTE predicate on the "unique_int" field.
+func UniqueIntLTE(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldUniqueInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.LTE(v))
+		},
+	)
+}
+
+// UniqueIntIn applies the In predicate on the "unique_int" field.
+func UniqueIntIn(vs ...int) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldUniqueInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.Within(v...))
+		},
+	)
+}
+
+// UniqueIntNotIn applies the NotIn predicate on the "unique_int" field.
+func UniqueIntNotIn(vs ...int) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldUniqueInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueInt, p.Without(v...))
+		},
+	)
+}
+
+// UniqueFloatEQ applies the EQ predicate on the "unique_float" field.
+func UniqueFloatEQ(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.EQ(v))
+		},
+	)
+}
+
+// UniqueFloatNEQ applies the NEQ predicate on the "unique_float" field.
+func UniqueFloatNEQ(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.NEQ(v))
+		},
+	)
+}
+
+// UniqueFloatGT applies the GT predicate on the "unique_float" field.
+func UniqueFloatGT(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.GT(v))
+		},
+	)
+}
+
+// UniqueFloatGTE applies the GTE predicate on the "unique_float" field.
+func UniqueFloatGTE(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.GTE(v))
+		},
+	)
+}
+
+// UniqueFloatLT applies the LT predicate on the "unique_float" field.
+func UniqueFloatLT(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.LT(v))
+		},
+	)
+}
+
+// UniqueFloatLTE applies the LTE predicate on the "unique_float" field.
+func UniqueFloatLTE(v float64) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldUniqueFloat), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.LTE(v))
+		},
+	)
+}
+
+// UniqueFloatIn applies the In predicate on the "unique_float" field.
+func UniqueFloatIn(vs ...float64) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldUniqueFloat), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.Within(v...))
+		},
+	)
+}
+
+// UniqueFloatNotIn applies the NotIn predicate on the "unique_float" field.
+func UniqueFloatNotIn(vs ...float64) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldUniqueFloat), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldUniqueFloat, p.Without(v...))
+		},
+	)
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.CommentPerDialect(

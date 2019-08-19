@@ -57,6 +57,8 @@ func ExampleComment() {
 	// create comment vertex with its edges.
 	c := client.Comment.
 		Create().
+		SetUniqueInt(1).
+		SetUniqueFloat(1).
 		SaveX(ctx)
 	log.Println("comment created:", c)
 

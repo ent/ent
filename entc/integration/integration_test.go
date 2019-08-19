@@ -3,6 +3,7 @@ package integration
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/url"
 	"reflect"
 	"runtime"
@@ -645,6 +646,18 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	client.User.Update().Where(user.Nickname("dan")).SetNickname("yada").ExecX(ctx)
 	require.False(client.User.Query().Where(user.Nickname("dan")).ExistX(ctx))
 	require.True(client.User.Query().Where(user.Nickname("yada")).ExistX(ctx))
+
+	t.Log("unique constraint on numeric fields")
+	cm1 := client.Comment.Create().SetUniqueInt(42).SetUniqueFloat(math.Pi).SaveX(ctx)
+	_, err = client.Comment.Create().SetUniqueInt(42).SetUniqueFloat(math.E).Save(ctx)
+	require.Error(err)
+	_, err = client.Comment.Create().SetUniqueInt(7).SetUniqueFloat(math.Pi).Save(ctx)
+	require.Error(err)
+	_ = client.Comment.Create().SetUniqueInt(7).SetUniqueFloat(math.E).SaveX(ctx)
+	err = cm1.Update().SetUniqueInt(7).Exec(ctx)
+	require.Error(err)
+	err = cm1.Update().SetUniqueFloat(math.E).Exec(ctx)
+	require.Error(err)
 }
 
 // Demonstrate a O2O relation between two different types. A User and a CreditCard.

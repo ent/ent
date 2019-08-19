@@ -37,6 +37,8 @@ var (
 	// CommentsColumns holds the columns for the "comments" table.
 	CommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "unique_int", Type: field.TypeInt, Unique: true},
+		{Name: "unique_float", Type: field.TypeFloat64, Unique: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{

@@ -267,7 +267,9 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if pu.name != nil {
@@ -551,7 +553,9 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	constraints := make([]*constraint, 0, 1)
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if puo.name != nil {

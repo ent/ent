@@ -266,6 +266,19 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		UniqueInt int `json:"unique_int,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Comment.Query().
+//		GroupBy(comment.FieldUniqueInt).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
 	group := &CommentGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)

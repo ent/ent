@@ -190,6 +190,12 @@ type intBuilder struct {
 	Field
 }
 
+// Unique makes the field unique within all vertices of this type.
+func (b *intBuilder) Unique() *intBuilder {
+	b.unique = true
+	return b
+}
+
 // Range adds a range validator for this field where the given value needs to be in the range of [i, j].
 func (b *intBuilder) Range(i, j int) *intBuilder {
 	b.validators = append(b.validators, func(v int) error {
@@ -273,6 +279,12 @@ func (b *intBuilder) Validate(fn func(int) error) *intBuilder {
 // floatBuilder is the builder for float fields.
 type floatBuilder struct {
 	Field
+}
+
+// Unique makes the field unique within all vertices of this type.
+func (b *floatBuilder) Unique() *floatBuilder {
+	b.unique = true
+	return b
 }
 
 // Range adds a range validator for this field where the given value needs to be in the range of [i, j].

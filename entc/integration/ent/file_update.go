@@ -258,7 +258,9 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if fu.size != nil {
@@ -526,7 +528,9 @@ func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if fuo.size != nil {

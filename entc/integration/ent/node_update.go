@@ -280,7 +280,9 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if nu.value != nil {
@@ -582,7 +584,9 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 	constraints := make([]*constraint, 0, 2)
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if nuo.value != nil {

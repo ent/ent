@@ -1080,7 +1080,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if uu.age != nil {
@@ -2286,7 +2288,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	constraints := make([]*constraint, 0, 8)
 	v := g.V(id)
 	var (
-		rv  = v.Clone()
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if uuo.age != nil {
