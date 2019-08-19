@@ -7,16 +7,16 @@ import (
 	"errors"
 	"fmt"
 
-	"fbc/ent/entc/integration/ent/comment"
-	"fbc/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/comment"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/gremlin/graph/dsl/p"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CommentUpdate is the builder for updating Comment entities.

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"fbc/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin"
 
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"

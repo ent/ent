@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"fbc/ent/entc/integration/migrate/entv2/group"
-	"fbc/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // GroupUpdate is the builder for updating Group entities.

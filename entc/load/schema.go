@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"fbc/ent"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // Schema represents an ent.Schema that was loaded from a complied user package.

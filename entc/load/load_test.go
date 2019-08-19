@@ -3,7 +3,7 @@ package load
 import (
 	"testing"
 
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -13,7 +13,7 @@ func TestLoad(t *testing.T) {
 	spec, err := cfg.Load()
 	require.NoError(t, err)
 	require.Len(t, spec.Schemas, 3)
-	require.Equal(t, "fbc/ent/entc/load/testdata/valid", spec.PkgPath)
+	require.Equal(t, "github.com/facebookincubator/ent/entc/load/testdata/valid", spec.PkgPath)
 }
 
 func TestLoadWrongPath(t *testing.T) {
@@ -29,7 +29,7 @@ func TestLoadSpecific(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, spec.Schemas, 1)
 	require.Equal(t, "User", spec.Schemas[0].Name)
-	require.Equal(t, "fbc/ent/entc/load/testdata/valid", spec.PkgPath)
+	require.Equal(t, "github.com/facebookincubator/ent/entc/load/testdata/valid", spec.PkgPath)
 }
 
 func TestLoadNoSchema(t *testing.T) {

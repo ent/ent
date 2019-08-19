@@ -3,12 +3,12 @@
 package migrate
 
 import (
-	"fbc/ent/dialect/sql/schema"
-	"fbc/ent/entc/integration/ent/file"
-	"fbc/ent/entc/integration/ent/group"
-	"fbc/ent/entc/integration/ent/groupinfo"
-	"fbc/ent/entc/integration/ent/user"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/dialect/sql/schema"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 var (

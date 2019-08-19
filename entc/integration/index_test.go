@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"fbc/ent/entc/integration/ent"
+	"github.com/facebookincubator/ent/entc/integration/ent"
 
 	"github.com/stretchr/testify/require"
 )

@@ -7,9 +7,9 @@ import (
 	"math"
 	"sort"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/sql"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 const (

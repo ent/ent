@@ -5,8 +5,8 @@ package entv1
 import (
 	"context"
 
-	"fbc/ent/dialect"
-	"fbc/ent/entc/integration/migrate/entv1/migrate"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/migrate"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().

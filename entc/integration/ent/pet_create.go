@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"strconv"
 
-	"fbc/ent/entc/integration/ent/pet"
-	"fbc/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
-	"fbc/ent/dialect"
-	"fbc/ent/dialect/gremlin"
-	"fbc/ent/dialect/gremlin/graph/dsl"
-	"fbc/ent/dialect/gremlin/graph/dsl/__"
-	"fbc/ent/dialect/gremlin/graph/dsl/g"
-	"fbc/ent/dialect/gremlin/graph/dsl/p"
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetCreate is the builder for creating a Pet entity.

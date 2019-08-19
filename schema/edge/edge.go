@@ -3,7 +3,7 @@ package edge
 import (
 	"reflect"
 
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // Edge represents an edge in the graph.

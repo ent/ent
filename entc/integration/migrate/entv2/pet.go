@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Pet is the model entity for the Pet schema.

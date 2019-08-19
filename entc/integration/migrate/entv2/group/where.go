@@ -3,9 +3,9 @@
 package group
 
 import (
-	"fbc/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 
-	"fbc/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // ID filters vertices based on their identifier.

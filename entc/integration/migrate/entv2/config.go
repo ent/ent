@@ -3,7 +3,7 @@
 package entv2
 
 import (
-	"fbc/ent/dialect"
+	"github.com/facebookincubator/ent/dialect"
 )
 
 // Option function to configure the client.

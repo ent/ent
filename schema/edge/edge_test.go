@@ -3,8 +3,8 @@ package edge_test
 import (
 	"testing"
 
-	"fbc/ent"
-	"fbc/ent/schema/edge"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 
-	"fbc/ent/entc/integration/migrate/entv2/migrate"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
 
-	"fbc/ent/entc/integration/migrate/entv2/group"
-	"fbc/ent/entc/integration/migrate/entv2/pet"
-	"fbc/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 )
 
 // Client is the client that holds all ent builders.

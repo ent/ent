@@ -3,9 +3,9 @@
 package migrate
 
 import (
-	"fbc/ent/dialect/sql/schema"
-	"fbc/ent/entc/integration/migrate/entv2/user"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/dialect/sql/schema"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 var (

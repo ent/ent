@@ -1,8 +1,8 @@
 package gremlin
 
 import (
-	"fbc/ent/dialect/gremlin/encoding/graphson"
-	"fbc/ent/dialect/gremlin/graph"
+	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph"
 
 	"github.com/pkg/errors"
 )

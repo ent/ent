@@ -2,8 +2,8 @@
 package ent
 
 import (
-	"fbc/ent/schema/edge"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 type (

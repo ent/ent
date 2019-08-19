@@ -1,8 +1,8 @@
 package schema
 
 import (
-	"fbc/ent"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // Comment holds the schema definition for the Comment entity.

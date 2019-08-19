@@ -3,9 +3,9 @@ package schema
 import (
 	"time"
 
-	"fbc/ent"
-	"fbc/ent/schema/edge"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // Card holds the schema definition for the CreditCard entity.

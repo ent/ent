@@ -1,9 +1,9 @@
 package schema
 
 import (
-	"fbc/ent"
-	"fbc/ent/schema/edge"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // User holds the schema for the user entity.

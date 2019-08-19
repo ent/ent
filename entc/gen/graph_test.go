@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fbc/ent/entc/load"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )

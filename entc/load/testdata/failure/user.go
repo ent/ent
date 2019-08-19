@@ -1,8 +1,8 @@
 package failure
 
 import (
-	"fbc/ent"
-	"fbc/ent/schema/edge"
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
 )
 
 type User struct {

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"fbc/ent/dialect/sql"
-	"fbc/ent/entc/integration/migrate/entv1"
-	migratev1 "fbc/ent/entc/integration/migrate/entv1/migrate"
-	"fbc/ent/entc/integration/migrate/entv2"
-	migratev2 "fbc/ent/entc/integration/migrate/entv2/migrate"
-	"fbc/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
+	migratev1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/migrate"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2"
+	migratev2 "github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"

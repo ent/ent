@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"fbc/ent/dialect/sql/schema"
-	"fbc/ent/entc/load"
-	"fbc/ent/schema/field"
+	"github.com/facebookincubator/ent/dialect/sql/schema"
+	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/olekukonko/tablewriter"
 )

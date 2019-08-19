@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"fbc/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
