@@ -26,8 +26,8 @@ type User struct {
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
 		ID      int
-		Age     int32
-		Name    string
+		Age     sql.NullInt64
+		Name    sql.NullString
 		Address sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
@@ -40,8 +40,8 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	u.ID = vu.ID
-	u.Age = vu.Age
-	u.Name = vu.Name
+	u.Age = int32(vu.Age.Int64)
+	u.Name = vu.Name.String
 	u.Address = vu.Address.String
 	return nil
 }

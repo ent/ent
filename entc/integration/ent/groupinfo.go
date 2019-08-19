@@ -26,8 +26,8 @@ type GroupInfo struct {
 func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
 	var vgi struct {
 		ID       int
-		Desc     string
-		MaxUsers int
+		Desc     sql.NullString
+		MaxUsers sql.NullInt64
 	}
 	// the order here should be the same as in the `groupinfo.Columns`.
 	if err := rows.Scan(
@@ -38,8 +38,8 @@ func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	gi.ID = strconv.Itoa(vgi.ID)
-	gi.Desc = vgi.Desc
-	gi.MaxUsers = vgi.MaxUsers
+	gi.Desc = vgi.Desc.String
+	gi.MaxUsers = int(vgi.MaxUsers.Int64)
 	return nil
 }
 

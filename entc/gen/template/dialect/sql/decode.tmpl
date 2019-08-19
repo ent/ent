@@ -7,7 +7,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 	var {{ $scan }} struct {
 		ID   {{ if $.ID.IsString }}int{{ else }}{{ $.ID.Type }}{{ end }}
 		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ if or $f.Nillable $f.Optional }}{{ $f.NullType }}{{ else }}{{ $f.Type }}{{ end }}
+			{{- pascal $f.Name }} {{ $f.NullType }}
 		{{ end }}
 	}
 	// the order here should be the same as in the `{{ $.Package }}.Columns`.
@@ -30,10 +30,8 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 					*{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
 				}
 			{{- end }}
-		{{- else if $f.Optional }}
-			{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
 		{{- else }}
-			{{ $receiver }}.{{ pascal $f.Name }} = {{ $scan }}.{{ pascal $f.Name }}
+			{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
 		{{- end }}
 	{{- end }}
 	return nil

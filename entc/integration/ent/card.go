@@ -27,8 +27,8 @@ type Card struct {
 func (c *Card) FromRows(rows *sql.Rows) error {
 	var vc struct {
 		ID        int
-		Number    string
-		CreatedAt time.Time
+		Number    sql.NullString
+		CreatedAt sql.NullTime
 	}
 	// the order here should be the same as in the `card.Columns`.
 	if err := rows.Scan(
@@ -39,8 +39,8 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	c.ID = strconv.Itoa(vc.ID)
-	c.Number = vc.Number
-	c.CreatedAt = vc.CreatedAt
+	c.Number = vc.Number.String
+	c.CreatedAt = vc.CreatedAt.Time
 	return nil
 }
 

@@ -32,9 +32,9 @@ type User struct {
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
 		ID       int
-		Age      int
-		Name     string
-		Last     string
+		Age      sql.NullInt64
+		Name     sql.NullString
+		Last     sql.NullString
 		Nickname sql.NullString
 		Phone    sql.NullString
 	}
@@ -50,9 +50,9 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	u.ID = strconv.Itoa(vu.ID)
-	u.Age = vu.Age
-	u.Name = vu.Name
-	u.Last = vu.Last
+	u.Age = int(vu.Age.Int64)
+	u.Name = vu.Name.String
+	u.Last = vu.Last.String
 	u.Nickname = vu.Nickname.String
 	u.Phone = vu.Phone.String
 	return nil

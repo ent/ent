@@ -30,8 +30,8 @@ type File struct {
 func (f *File) FromRows(rows *sql.Rows) error {
 	var vf struct {
 		ID    int
-		Size  int
-		Name  string
+		Size  sql.NullInt64
+		Name  sql.NullString
 		User  sql.NullString
 		Group sql.NullString
 	}
@@ -46,8 +46,8 @@ func (f *File) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	f.ID = strconv.Itoa(vf.ID)
-	f.Size = vf.Size
-	f.Name = vf.Name
+	f.Size = int(vf.Size.Int64)
+	f.Name = vf.Name.String
 	if vf.User.Valid {
 		f.User = new(string)
 		*f.User = vf.User.String

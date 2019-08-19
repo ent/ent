@@ -30,11 +30,11 @@ type User struct {
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
 		ID     int
-		Age    int
-		Name   string
-		Phone  string
+		Age    sql.NullInt64
+		Name   sql.NullString
+		Phone  sql.NullString
 		Buffer []byte
-		Title  string
+		Title  sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
@@ -48,11 +48,11 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	u.ID = vu.ID
-	u.Age = vu.Age
-	u.Name = vu.Name
-	u.Phone = vu.Phone
+	u.Age = int(vu.Age.Int64)
+	u.Name = vu.Name.String
+	u.Phone = vu.Phone.String
 	u.Buffer = vu.Buffer
-	u.Title = vu.Title
+	u.Title = vu.Title.String
 	return nil
 }
 

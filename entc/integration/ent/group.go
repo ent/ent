@@ -33,11 +33,11 @@ type Group struct {
 func (gr *Group) FromRows(rows *sql.Rows) error {
 	var vgr struct {
 		ID       int
-		Active   bool
-		Expire   time.Time
+		Active   sql.NullBool
+		Expire   sql.NullTime
 		Type     sql.NullString
 		MaxUsers sql.NullInt64
-		Name     string
+		Name     sql.NullString
 	}
 	// the order here should be the same as in the `group.Columns`.
 	if err := rows.Scan(
@@ -51,14 +51,14 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	gr.ID = strconv.Itoa(vgr.ID)
-	gr.Active = vgr.Active
-	gr.Expire = vgr.Expire
+	gr.Active = vgr.Active.Bool
+	gr.Expire = vgr.Expire.Time
 	if vgr.Type.Valid {
 		gr.Type = new(string)
 		*gr.Type = vgr.Type.String
 	}
 	gr.MaxUsers = int(vgr.MaxUsers.Int64)
-	gr.Name = vgr.Name
+	gr.Name = vgr.Name.String
 	return nil
 }
 

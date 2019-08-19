@@ -52,11 +52,11 @@ type FieldType struct {
 func (ft *FieldType) FromRows(rows *sql.Rows) error {
 	var vft struct {
 		ID            int
-		Int           int
-		Int8          int8
-		Int16         int16
-		Int32         int32
-		Int64         int64
+		Int           sql.NullInt64
+		Int8          sql.NullInt64
+		Int16         sql.NullInt64
+		Int32         sql.NullInt64
+		Int64         sql.NullInt64
 		OptionalInt   sql.NullInt64
 		OptionalInt8  sql.NullInt64
 		OptionalInt16 sql.NullInt64
@@ -90,11 +90,11 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	ft.ID = strconv.Itoa(vft.ID)
-	ft.Int = vft.Int
-	ft.Int8 = vft.Int8
-	ft.Int16 = vft.Int16
-	ft.Int32 = vft.Int32
-	ft.Int64 = vft.Int64
+	ft.Int = int(vft.Int.Int64)
+	ft.Int8 = int8(vft.Int8.Int64)
+	ft.Int16 = int16(vft.Int16.Int64)
+	ft.Int32 = int32(vft.Int32.Int64)
+	ft.Int64 = vft.Int64.Int64
 	ft.OptionalInt = int(vft.OptionalInt.Int64)
 	ft.OptionalInt8 = int8(vft.OptionalInt8.Int64)
 	ft.OptionalInt16 = int16(vft.OptionalInt16.Int64)

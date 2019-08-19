@@ -24,7 +24,7 @@ type Pet struct {
 func (pe *Pet) FromRows(rows *sql.Rows) error {
 	var vpe struct {
 		ID   int
-		Name string
+		Name sql.NullString
 	}
 	// the order here should be the same as in the `pet.Columns`.
 	if err := rows.Scan(
@@ -34,7 +34,7 @@ func (pe *Pet) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	pe.ID = strconv.Itoa(vpe.ID)
-	pe.Name = vpe.Name
+	pe.Name = vpe.Name.String
 	return nil
 }
 

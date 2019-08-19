@@ -337,12 +337,13 @@ func (f Field) NullType() string {
 		return "sql.NullBool"
 	case field.TypeTime:
 		return "sql.NullTime"
-	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32, field.TypeInt64:
+	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32, field.TypeInt64,
+		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
 		return "sql.NullInt64"
-	case field.TypeFloat64:
+	case field.TypeFloat32, field.TypeFloat64:
 		return "sql.NullFloat64"
 	}
-	return "interface{}"
+	return f.Type.String()
 }
 
 // NullTypeField extracts the nullable type field (if exists) from the given receiver.
@@ -355,7 +356,8 @@ func (f Field) NullTypeField(rec string) string {
 		return fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
 		return fmt.Sprintf("%s(%s.Float32)", f.Type.String(), rec)
-	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32:
+	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32,
+		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
 		return fmt.Sprintf("%s(%s.Int64)", f.Type.String(), rec)
 	}
 	return rec
