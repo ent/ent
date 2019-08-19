@@ -19,6 +19,7 @@ $ go get github.com/facebookincubator/ent/entc/cmd/entc
 After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.
 
 ## Create Your First Schema
+
 Go to the root directory of your project, and run:
 
 ```console
