@@ -24,7 +24,7 @@ go run ~/fbsource/fbcode/github.com/facebookincubator/ent/entc/cmd/entc/entc.go 
 #### Running the integration tests
 
 ```
-docker-compose -f compose/docker-compose.yaml up -d
+docker-compose -f compose/docker-compose.yaml up -d --scale test=0
 go test 
 ```
 
