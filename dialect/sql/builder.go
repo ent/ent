@@ -1028,6 +1028,32 @@ func (p *Predicate) Contains(col, sub string) *Predicate {
 	return p.Like(col, "%"+sub+"%")
 }
 
+// Lower wraps the given column with the LOWER function.
+//
+//	P().EQ(sql.Lower("name"), "a8m")
+//
+func Lower(name string) string {
+	var b Builder
+	b.WriteString("LOWER")
+	b.Nested(func(b *Builder) {
+		b.Append(name)
+	})
+	return b.String()
+}
+
+// Upper wraps the given column with the UPPER function.
+//
+//	P().EQ(sql.Upper("name"), "a8m")
+//
+func Upper(name string) string {
+	var b Builder
+	b.WriteString("UPPER")
+	b.Nested(func(b *Builder) {
+		b.Append(name)
+	})
+	return b.String()
+}
+
 // Query returns query representation of a predicate.
 func (p *Predicate) Query() (string, []interface{}) {
 	return p.b.String(), p.b.args
