@@ -118,6 +118,7 @@ var tests = []func(*testing.T, *ent.Client){
 	M2MSameType,
 	M2MTwoTypes,
 	DefaultValue,
+	ImmutableValue,
 }
 
 func Sanity(t *testing.T, client *ent.Client) {
@@ -1854,6 +1855,32 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	c1 := client.Card.Create().SetNumber("102030").SaveX(ctx)
 	require.False(t, c1.CreatedAt.IsZero())
+}
+
+func ImmutableValue(t *testing.T, client *ent.Client) {
+	tests := []struct {
+		name    string
+		updater func() interface{}
+	}{
+		{
+			name: "Update",
+			updater: func() interface{} {
+				return client.Card.Update()
+			},
+		},
+		{
+			name: "UpdateOne",
+			updater: func() interface{} {
+				return client.Card.Create().SetNumber("42").SaveX(context.Background()).Update()
+			},
+		},
+	}
+	for _, tc := range tests {
+		v := reflect.ValueOf(tc.updater())
+		require.False(t, v.MethodByName("SetCreatedAt").IsValid())
+		require.False(t, v.MethodByName("SetNillableCreatedAt").IsValid())
+		require.True(t, v.MethodByName("SetNumber").IsValid())
+	}
 }
 
 func drop(t *testing.T, client *ent.Client) {

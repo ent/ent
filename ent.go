@@ -31,6 +31,7 @@ type (
 		IsNillable() bool
 		IsOptional() bool
 		HasDefault() bool
+		IsImmutable() bool
 		Value() interface{}
 		Validators() []interface{}
 	}

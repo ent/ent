@@ -147,9 +147,9 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 
 {{ end }}
 
-{{/* shared struct fields between the twp updaters */}}
+{{/* shared struct fields between the two updaters */}}
 {{ define "update/fields"}}
-{{ range $_, $f := $.Fields }}
+{{ range $_, $f := $.MutableFields }}
 	{{- $f.StructField }} *{{ $f.Type }}
 {{ end }}
 {{- range $_, $e := $.Edges }}

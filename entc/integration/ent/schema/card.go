@@ -19,7 +19,8 @@ func (Card) Fields() []ent.Field {
 		field.String("number").
 			MinLen(1),
 		field.Time("created_at").
-			Default(time.Now),
+			Default(time.Now).
+			Immutable(),
 	}
 }
 

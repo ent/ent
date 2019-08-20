@@ -28,6 +28,7 @@ type Field struct {
 	Nillable   bool       `json:"nillable,omitempty"`
 	Optional   bool       `json:"optional,omitempty"`
 	Default    bool       `json:"default,omitempty"`
+	Immutable  bool       `json:"immutable,omitempty"`
 	Validators int        `json:"validators,omitempty"`
 }
 
@@ -84,6 +85,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 			Default:    f.HasDefault(),
 			Nillable:   f.IsNillable(),
 			Optional:   f.IsOptional(),
+			Immutable:  f.IsImmutable(),
 			Validators: len(f.Validators()),
 		}
 		if s, ok := f.(field.Sizer); ok {

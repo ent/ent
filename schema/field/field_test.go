@@ -25,6 +25,7 @@ func TestInt(t *testing.T) {
 	f = field.Int("age").Range(20, 40).Nillable()
 	assert.False(t, f.HasDefault())
 	assert.True(t, f.IsNillable())
+	assert.False(t, f.IsImmutable())
 	assert.Len(t, f.Validators(), 1)
 
 	assert.Equal(t, field.TypeInt8, field.Int8("age").Type())
@@ -44,10 +45,11 @@ func TestFloat(t *testing.T) {
 }
 
 func TestBool(t *testing.T) {
-	f := field.Bool("active").Default(true)
+	f := field.Bool("active").Default(true).Immutable()
 	assert.Equal(t, "active", f.Name())
 	assert.Equal(t, field.TypeBool, f.Type())
 	assert.True(t, f.HasDefault())
+	assert.True(t, f.IsImmutable())
 	assert.Equal(t, true, f.Value())
 }
 

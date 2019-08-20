@@ -50,7 +50,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{ end }}
 		trs []*dsl.Traversal
 	)
-	{{- range $_, $f := $.Fields }}
+	{{- range $_, $f := $.MutableFields }}
 	if {{ $receiver }}.{{ $f.StructField }} != nil {
 		{{- if $f.Unique }}
 			constraints = append(constraints, &constraint{

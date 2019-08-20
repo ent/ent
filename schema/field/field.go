@@ -117,6 +117,7 @@ type Field struct {
 	unique     bool
 	nillable   bool
 	optional   bool
+	immutable  bool
 	value      interface{}
 	validators []interface{}
 }
@@ -175,6 +176,9 @@ func (f Field) IsNillable() bool { return f.nillable }
 
 // IsOptional returns is this field is an optional field.
 func (f Field) IsOptional() bool { return f.optional }
+
+// IsImmutable returns is this field is an immutable field.
+func (f Field) IsImmutable() bool { return f.immutable }
 
 // IsUnique returns is this field is a unique field.
 func (f Field) IsUnique() bool { return f.unique }
@@ -261,6 +265,12 @@ func (b *intBuilder) Comment(c string) *intBuilder {
 // Unlike edges, fields are required by default.
 func (b *intBuilder) Optional() *intBuilder {
 	b.optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *intBuilder) Immutable() *intBuilder {
+	b.immutable = true
 	return b
 }
 
@@ -355,6 +365,12 @@ func (b *floatBuilder) Optional() *floatBuilder {
 	return b
 }
 
+// Immutable indicates that this field cannot be updated.
+func (b *floatBuilder) Immutable() *floatBuilder {
+	b.immutable = true
+	return b
+}
+
 // StructTag sets the struct tag of the field.
 func (b *floatBuilder) StructTag(s string) *floatBuilder {
 	b.tag = s
@@ -440,6 +456,12 @@ func (b *stringBuilder) Optional() *stringBuilder {
 	return b
 }
 
+// Immutable indicates that this field cannot be updated.
+func (b *stringBuilder) Immutable() *stringBuilder {
+	b.immutable = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *stringBuilder) Comment(c string) *stringBuilder {
 	return b
@@ -481,6 +503,12 @@ func (b *timeBuilder) Nillable() *timeBuilder {
 // Unlike edges, fields are required by default.
 func (b *timeBuilder) Optional() *timeBuilder {
 	b.optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *timeBuilder) Immutable() *timeBuilder {
+	b.immutable = true
 	return b
 }
 
@@ -531,6 +559,12 @@ func (b *boolBuilder) Optional() *boolBuilder {
 	return b
 }
 
+// Immutable indicates that this field cannot be updated.
+func (b *boolBuilder) Immutable() *boolBuilder {
+	b.immutable = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *boolBuilder) Comment(c string) *boolBuilder {
 	return b
@@ -564,6 +598,12 @@ func (b *bytesBuilder) Nillable() *bytesBuilder {
 // Unlike edges, fields are required by default.
 func (b *bytesBuilder) Optional() *bytesBuilder {
 	b.optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *bytesBuilder) Immutable() *bytesBuilder {
+	b.immutable = true
 	return b
 }
 

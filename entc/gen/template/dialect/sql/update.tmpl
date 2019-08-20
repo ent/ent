@@ -60,7 +60,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			res sql.Result
 			builder = sql.Update({{ $.Package }}.Table).Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
 		)
-		{{- range $_, $f := $.Fields }}
+		{{- range $_, $f := $.MutableFields }}
 			if {{ $receiver }}.{{ $f.StructField }} != nil {
 				update = true
 				builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})

@@ -50,6 +50,8 @@ type (
 		Nillable bool
 		// HasDefault indicates if this field a default value.
 		HasDefault bool
+		// Immutable indicates is this field cannot be updated.
+		Immutable bool
 		// StructTag of the field. default to "json".
 		StructTag string
 		// Validators holds the number of validators this field have.
@@ -131,7 +133,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 		case f.Nillable && !f.Optional:
 			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
 		case f.Unique && f.Default:
-			return nil, fmt.Errorf("unique field %q can not have default value", f.Name)
+			return nil, fmt.Errorf("unique field %q cannot have default value", f.Name)
 		}
 		typ.Fields[i] = &Field{
 			def:        f,
@@ -141,6 +143,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			Nillable:   f.Nillable,
 			Optional:   f.Optional,
 			HasDefault: f.Default,
+			Immutable:  f.Immutable,
 			StructTag:  structTag(f.Name, f.Tag),
 			Validators: f.Validators,
 		}
@@ -211,6 +214,17 @@ func (t Type) NumConstraint() int {
 	return n
 }
 
+// MutableFields returns the types's mutable fields.
+func (t Type) MutableFields() []*Field {
+	var fields []*Field
+	for _, f := range t.Fields {
+		if !f.Immutable {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
+
 // NumM2M returns the type's many-to-many edge count
 func (t Type) NumM2M() int {
 	var n int
@@ -234,7 +248,7 @@ func (t Type) Describe(w io.Writer) {
 	b.WriteString(t.Name + ":\n")
 	table := tablewriter.NewWriter(b)
 	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "HasDefault", "StructTag", "Validators"})
+	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "HasDefault", "Immutable", "StructTag", "Validators"})
 	for _, f := range append([]*Field{t.ID}, t.Fields...) {
 		v := reflect.ValueOf(*f)
 		row := make([]string, v.NumField()-1)

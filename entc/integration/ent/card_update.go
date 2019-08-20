@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -26,7 +25,6 @@ import (
 type CardUpdate struct {
 	config
 	number       *string
-	created_at   *time.Time
 	owner        map[string]struct{}
 	clearedOwner bool
 	predicates   []predicate.Card
@@ -41,20 +39,6 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 // SetNumber sets the number field.
 func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
 	cu.number = &s
-	return cu
-}
-
-// SetCreatedAt sets the created_at field.
-func (cu *CardUpdate) SetCreatedAt(t time.Time) *CardUpdate {
-	cu.created_at = &t
-	return cu
-}
-
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
-func (cu *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
-	if t != nil {
-		cu.SetCreatedAt(*t)
-	}
 	return cu
 }
 
@@ -164,10 +148,6 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(card.FieldNumber, *cu.number)
 	}
-	if cu.created_at != nil {
-		update = true
-		builder.Set(card.FieldCreatedAt, *cu.created_at)
-	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -242,9 +222,6 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if cu.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cu.number)
 	}
-	if cu.created_at != nil {
-		v.Property(dsl.Single, card.FieldCreatedAt, *cu.created_at)
-	}
 	if cu.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -276,7 +253,6 @@ type CardUpdateOne struct {
 	config
 	id           string
 	number       *string
-	created_at   *time.Time
 	owner        map[string]struct{}
 	clearedOwner bool
 }
@@ -284,20 +260,6 @@ type CardUpdateOne struct {
 // SetNumber sets the number field.
 func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
 	cuo.number = &s
-	return cuo
-}
-
-// SetCreatedAt sets the created_at field.
-func (cuo *CardUpdateOne) SetCreatedAt(t time.Time) *CardUpdateOne {
-	cuo.created_at = &t
-	return cuo
-}
-
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
-func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
-	if t != nil {
-		cuo.SetCreatedAt(*t)
-	}
 	return cuo
 }
 
@@ -411,11 +373,6 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		builder.Set(card.FieldNumber, *cuo.number)
 		c.Number = *cuo.number
 	}
-	if cuo.created_at != nil {
-		update = true
-		builder.Set(card.FieldCreatedAt, *cuo.created_at)
-		c.CreatedAt = *cuo.created_at
-	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -490,9 +447,6 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if cuo.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cuo.number)
-	}
-	if cuo.created_at != nil {
-		v.Property(dsl.Single, card.FieldCreatedAt, *cuo.created_at)
 	}
 	if cuo.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()

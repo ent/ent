@@ -1,8 +1,12 @@
 {{ define "setter" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $fields := $.Fields }}
+{{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
+	{{ $fields = $.MutableFields }}
+{{- end }}
 
-{{ range $_, $f := $.Fields }}
+{{ range $_, $f := $fields }}
 	{{ $p := receiver $f.Type.String }}
 	{{ $func := print "Set" (pascal $f.Name) }}
 	// {{ $func }} sets the {{ $f.Name }} field.
