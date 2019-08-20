@@ -136,6 +136,8 @@ func Sanity(t *testing.T, client *ent.Client) {
 	child := client.User.Create().SetName("bar").SetAge(20).AddChildren(usr).SaveX(ctx)
 	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
 	grp := client.Group.Create().SetName("Github").SetExpire(time.Now()).AddUsers(usr, child).SetInfo(inf).SaveX(ctx)
+	require.Equal(1, client.Group.Query().CountX(ctx))
+	require.Zero(client.Group.Query().Where(group.Active(false)).CountX(ctx))
 	require.Len(grp.QueryUsers().AllX(ctx), 2)
 	usr.QueryGroups().OnlyX(ctx)
 	child.QueryGroups().OnlyX(ctx)
