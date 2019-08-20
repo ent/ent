@@ -235,6 +235,30 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10, "bar", 20, "qux", 1, 2},
 		},
 		{
+			input: Select(Lower("name")).
+				From(Table("users")),
+			wantQuery: "SELECT LOWER(`name`) FROM `users`",
+		},
+		{
+			input: Select(Lower("name")).
+				From(Table("users")).
+				Where(EQ(Lower("name"), "a8m")),
+			wantQuery: "SELECT LOWER(`name`) FROM `users` WHERE LOWER(`name`) = ?",
+			wantArgs:  []interface{}{"a8m"},
+		},
+		{
+			input: Select(Upper("name")).
+				From(Table("users")),
+			wantQuery: "SELECT UPPER(`name`) FROM `users`",
+		},
+		{
+			input: Select(Upper("name")).
+				From(Table("users")).
+				Where(EQ(Upper("name"), "a8m")),
+			wantQuery: "SELECT UPPER(`name`) FROM `users` WHERE UPPER(`name`) = ?",
+			wantArgs:  []interface{}{"a8m"},
+		},
+		{
 			input:     Select().From(Table("users")),
 			wantQuery: "SELECT * FROM `users`",
 		},
