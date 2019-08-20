@@ -10,12 +10,17 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.region
+  region  = "eu-central-1"
   version = "~> 2.0"
 }
 
+locals {
+  name   = "entgo"
+  domain = "entgo.io"
+}
+
 resource "aws_route53_zone" "zone" {
-  name = "entgo.io"
+  name = local.domain
 }
 
 resource "aws_route53_record" "ns" {
@@ -26,47 +31,29 @@ resource "aws_route53_record" "ns" {
   records = aws_route53_zone.zone.name_servers
 }
 
-resource "aws_acm_certificate" "cert" {
-  domain_name       = aws_route53_zone.zone.name
-  validation_method = "DNS"
-
-  subject_alternative_names = [
-    "*.${aws_route53_zone.zone.name}"
-  ]
-
-  tags = {
-    Name = aws_route53_zone.zone.name
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
+provider "aws" {
+  region  = "us-east-1"
+  version = "~> 2.0"
+  alias   = "us-east-1"
 }
 
-resource "aws_route53_record" "cert_validation" {
-  name            = aws_acm_certificate.cert.domain_validation_options[count.index]["resource_record_name"]
-  type            = aws_acm_certificate.cert.domain_validation_options[count.index]["resource_record_type"]
-  zone_id         = aws_route53_zone.zone.id
-  records         = [aws_acm_certificate.cert.domain_validation_options[count.index]["resource_record_value"]]
-  count           = length(aws_acm_certificate.cert.subject_alternative_names) + 1
-  ttl             = 60
-  allow_overwrite = true
+module "certificate" {
+  source                      = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate.git?ref=tags/0.4.0"
+  domain_name                 = local.domain
+  zone_name                   = local.domain
+  subject_alternative_names   = [format("*.%s", local.domain)]
+  wait_for_certificate_issued = true
+  providers                   = { aws = aws.us-east-1 }
 }
-
-resource "aws_acm_certificate_validation" "cert" {
-  certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = aws_route53_record.cert_validation.*.fqdn
-}
-
 resource "aws_iam_user" "deployer" {
-  name = format("%s.deployer", var.name)
-  path = format("/%s/", var.name)
+  name = format("%s.deployer", local.name)
+  path = format("/%s/", local.name)
 }
 
 module "website" {
   source             = "git::https://github.com/cloudposse/terraform-aws-s3-website.git?ref=tags/0.8.0"
-  name               = var.name
-  hostname           = "entgo.io"
+  name               = local.name
+  hostname           = local.domain
   versioning_enabled = true
   parent_zone_id     = aws_route53_zone.zone.id
   deployment_arns    = { tostring(aws_iam_user.deployer.arn) = "" }
