@@ -28,6 +28,16 @@ func TestType(t *testing.T) {
 	})
 	require.Error(err, "unique field can not have default")
 	require.Nil(typ)
+
+	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+		Name: "T",
+		Fields: []*load.Field{
+			{Name: "foo", Unique: true, Type: field.TypeInt},
+			{Name: "foo", Unique: true, Type: field.TypeInt},
+		},
+	})
+	require.Error(err, "field foo redeclared")
+	require.Nil(typ)
 }
 
 func TestType_Label(t *testing.T) {

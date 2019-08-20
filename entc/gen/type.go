@@ -134,6 +134,8 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
 		case f.Unique && f.Default:
 			return nil, fmt.Errorf("unique field %q cannot have default value", f.Name)
+		case typ.fields[f.Name] != nil:
+			return nil, fmt.Errorf("field %q redeclared for type %q", f.Name, typ.Name)
 		}
 		typ.Fields[i] = &Field{
 			def:        f,
