@@ -5,6 +5,9 @@ jobs:
     - image: circleci/golang
     working_directory: /go/src/github.com/facebookincubator/ent
     steps:
+    - run:
+        name: Install goimports
+        command: go get -u golang.org/x/tools/cmd/goimports
     - checkout
     - run:
         name: Dialect tests
@@ -21,17 +24,18 @@ jobs:
   integration:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: /home/circleci/.go_workspace/src/github.com/facebookincubator/ent/entc/integration
-    environment:
-      GOPATH: /home/circleci/.go_workspace
     steps:
     - checkout
     - run:
-        name: Run docker-compose
-        command: docker-compose -f compose/docker-compose.yaml up -d
+        name: Spin up databases
+        command: |
+          cd entc/integration/compose
+          docker-compose up -d --scale test=0
     - run:
-        name: Integration tests
-        command: go test ./...
+        name: Run integration tests
+        command: |
+          cd entc/integration/compose
+          docker-compose run test go test ./entc/integration/...
 
 workflows:
   version: 2.1

@@ -37,3 +37,10 @@ services:
     restart: on-failure
     ports:
       - 8182:8182
+
+  test:
+    build:
+      context: ../../../
+      dockerfile: entc/integration/compose/Dockerfile
+    network_mode: host
+    command: ["go", "test", "./..."]

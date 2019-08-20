@@ -202,17 +202,19 @@ func TestType_Describe(t *testing.T) {
 				Fields: []*Field{
 					{Name: "name", Type: field.TypeString, Validators: 1},
 					{Name: "age", Type: field.TypeInt, Nillable: true},
+					{Name: "created_at", Type: field.TypeTime, Nillable: true, Immutable: true},
 				},
 			},
 			out: `
 User:
-	+-------+--------+--------+----------+----------+------------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nillable | HasDefault | StructTag | Validators |
-	+-------+--------+--------+----------+----------+------------+-----------+------------+
-	| id    | int    | false  | false    | false    | false      |           |          0 |
-	| name  | string | false  | false    | false    | false      |           |          1 |
-	| age   | int    | false  | false    | true     | false      |           |          0 |
-	+-------+--------+--------+----------+----------+------------+-----------+------------+
+	+------------+-----------+--------+----------+----------+------------+-----------+-----------+------------+
+	|   Field    |   Type    | Unique | Optional | Nillable | HasDefault | Immutable | StructTag | Validators |
+	+------------+-----------+--------+----------+----------+------------+-----------+-----------+------------+
+	| id         | int       | false  | false    | false    | false      | false     |           |          0 |
+	| name       | string    | false  | false    | false    | false      | false     |           |          1 |
+	| age        | int       | false  | false    | true     | false      | false     |           |          0 |
+	| created_at | time.Time | false  | false    | true     | false      | true      |           |          0 |
+	+------------+-----------+--------+----------+----------+------------+-----------+-----------+------------+
 	
 `,
 		},
@@ -227,11 +229,11 @@ User:
 			},
 			out: `
 User:
-	+-------+------+--------+----------+----------+------------+-----------+------------+
-	| Field | Type | Unique | Optional | Nillable | HasDefault | StructTag | Validators |
-	+-------+------+--------+----------+----------+------------+-----------+------------+
-	| id    | int  | false  | false    | false    | false      |           |          0 |
-	+-------+------+--------+----------+----------+------------+-----------+------------+
+	+-------+------+--------+----------+----------+------------+-----------+-----------+------------+
+	| Field | Type | Unique | Optional | Nillable | HasDefault | Immutable | StructTag | Validators |
+	+-------+------+--------+----------+----------+------------+-----------+-----------+------------+
+	| id    | int  | false  | false    | false    | false      | false     |           |          0 |
+	+-------+------+--------+----------+----------+------------+-----------+-----------+------------+
 	+--------+-------+---------+---------+----------+--------+----------+
 	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
 	+--------+-------+---------+---------+----------+--------+----------+
@@ -256,13 +258,13 @@ User:
 			},
 			out: `
 User:
-	+-------+--------+--------+----------+----------+------------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nillable | HasDefault | StructTag | Validators |
-	+-------+--------+--------+----------+----------+------------+-----------+------------+
-	| id    | int    | false  | false    | false    | false      |           |          0 |
-	| name  | string | false  | false    | false    | false      |           |          1 |
-	| age   | int    | false  | false    | true     | false      |           |          0 |
-	+-------+--------+--------+----------+----------+------------+-----------+------------+
+	+-------+--------+--------+----------+----------+------------+-----------+-----------+------------+
+	| Field |  Type  | Unique | Optional | Nillable | HasDefault | Immutable | StructTag | Validators |
+	+-------+--------+--------+----------+----------+------------+-----------+-----------+------------+
+	| id    | int    | false  | false    | false    | false      | false     |           |          0 |
+	| name  | string | false  | false    | false    | false      | false     |           |          1 |
+	| age   | int    | false  | false    | true     | false      | false     |           |          0 |
+	+-------+--------+--------+----------+----------+------------+-----------+-----------+------------+
 	+--------+-------+---------+---------+----------+--------+----------+
 	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
 	+--------+-------+---------+---------+----------+--------+----------+
