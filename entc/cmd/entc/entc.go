@@ -21,37 +21,42 @@ import (
 func main() {
 	cmd := &cobra.Command{Use: "entc"}
 	cmd.AddCommand(
-		&cobra.Command{
-			Use:   "init [schemas]",
-			Short: "initialize an environment with zero or more schemas",
-			Example: examples(
-				"entc init Example",
-				"entc init User Group",
-			),
-			DisableFlagsInUseLine: true,
-			Args: func(_ *cobra.Command, names []string) error {
-				for _, name := range names {
-					if !unicode.IsUpper(rune(name[0])) {
-						return fmt.Errorf("schema names must begin with uppercase")
-					}
+		func() *cobra.Command {
+			var (
+				path string
+				cmd  = &cobra.Command{
+					Use:   "init [flags] [schemas]",
+					Short: "initialize an environment with zero or more schemas",
+					Example: examples(
+						"entc init Example",
+						"entc init --target entv1/schema User Group",
+					),
+					Args: func(_ *cobra.Command, names []string) error {
+						for _, name := range names {
+							if !unicode.IsUpper(rune(name[0])) {
+								return fmt.Errorf("schema names must begin with uppercase")
+							}
+						}
+						return nil
+					},
+					Run: func(cmd *cobra.Command, names []string) {
+						_, err := os.Stat(path)
+						if os.IsNotExist(err) {
+							err = os.MkdirAll(path, os.ModePerm)
+						}
+						failOnErr(err)
+						for _, name := range names {
+							b := bytes.NewBuffer(nil)
+							failOnErr(tmpl.Execute(b, name))
+							target := filepath.Join(path, strings.ToLower(name+".go"))
+							failOnErr(ioutil.WriteFile(target, b.Bytes(), 0644))
+						}
+					},
 				}
-				return nil
-			},
-			Run: func(cmd *cobra.Command, names []string) {
-				path := "ent/schema"
-				_, err := os.Stat(path)
-				if os.IsNotExist(err) {
-					err = os.MkdirAll(path, os.ModePerm)
-				}
-				failOnErr(err)
-				for _, name := range names {
-					b := bytes.NewBuffer(nil)
-					failOnErr(tmpl.Execute(b, name))
-					target := filepath.Join(path, strings.ToLower(name+".go"))
-					failOnErr(ioutil.WriteFile(target, b.Bytes(), 0644))
-				}
-			},
-		},
+			)
+			cmd.Flags().StringVar(&path, "target", "ent/schema", "target directory for schemas")
+			return cmd
+		}(),
 		&cobra.Command{
 			Use:   "describe [flags] path",
 			Short: "print a description of the graph schema",
