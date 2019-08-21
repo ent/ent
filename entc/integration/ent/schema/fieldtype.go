@@ -29,5 +29,8 @@ func (FieldType) Fields() []ent.Field {
 		field.Int16("nillable_int16").Optional().Nillable(),
 		field.Int32("nillable_int32").Optional().Nillable(),
 		field.Int64("nillable_int64").Optional().Nillable(),
+		field.Int32("validate_optional_int32").
+			Optional().
+			Max(100),
 	}
 }

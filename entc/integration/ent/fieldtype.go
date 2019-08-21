@@ -46,27 +46,30 @@ type FieldType struct {
 	NillableInt32 *int32 `json:"nillable_int32,omitempty"`
 	// NillableInt64 holds the value of the "nillable_int64" field.
 	NillableInt64 *int64 `json:"nillable_int64,omitempty"`
+	// ValidateOptionalInt32 holds the value of the "validate_optional_int32" field.
+	ValidateOptionalInt32 int32 `json:"validate_optional_int32,omitempty"`
 }
 
 // FromRows scans the sql response data into FieldType.
 func (ft *FieldType) FromRows(rows *sql.Rows) error {
 	var vft struct {
-		ID            int
-		Int           sql.NullInt64
-		Int8          sql.NullInt64
-		Int16         sql.NullInt64
-		Int32         sql.NullInt64
-		Int64         sql.NullInt64
-		OptionalInt   sql.NullInt64
-		OptionalInt8  sql.NullInt64
-		OptionalInt16 sql.NullInt64
-		OptionalInt32 sql.NullInt64
-		OptionalInt64 sql.NullInt64
-		NillableInt   sql.NullInt64
-		NillableInt8  sql.NullInt64
-		NillableInt16 sql.NullInt64
-		NillableInt32 sql.NullInt64
-		NillableInt64 sql.NullInt64
+		ID                    int
+		Int                   sql.NullInt64
+		Int8                  sql.NullInt64
+		Int16                 sql.NullInt64
+		Int32                 sql.NullInt64
+		Int64                 sql.NullInt64
+		OptionalInt           sql.NullInt64
+		OptionalInt8          sql.NullInt64
+		OptionalInt16         sql.NullInt64
+		OptionalInt32         sql.NullInt64
+		OptionalInt64         sql.NullInt64
+		NillableInt           sql.NullInt64
+		NillableInt8          sql.NullInt64
+		NillableInt16         sql.NullInt64
+		NillableInt32         sql.NullInt64
+		NillableInt64         sql.NullInt64
+		ValidateOptionalInt32 sql.NullInt64
 	}
 	// the order here should be the same as in the `fieldtype.Columns`.
 	if err := rows.Scan(
@@ -86,6 +89,7 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 		&vft.NillableInt16,
 		&vft.NillableInt32,
 		&vft.NillableInt64,
+		&vft.ValidateOptionalInt32,
 	); err != nil {
 		return err
 	}
@@ -120,6 +124,7 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 		ft.NillableInt64 = new(int64)
 		*ft.NillableInt64 = vft.NillableInt64.Int64
 	}
+	ft.ValidateOptionalInt32 = int32(vft.ValidateOptionalInt32.Int64)
 	return nil
 }
 
@@ -130,22 +135,23 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vft struct {
-		ID            string `json:"id,omitempty"`
-		Int           int    `json:"int,omitempty"`
-		Int8          int8   `json:"int8,omitempty"`
-		Int16         int16  `json:"int16,omitempty"`
-		Int32         int32  `json:"int32,omitempty"`
-		Int64         int64  `json:"int64,omitempty"`
-		OptionalInt   int    `json:"optional_int,omitempty"`
-		OptionalInt8  int8   `json:"optional_int8,omitempty"`
-		OptionalInt16 int16  `json:"optional_int16,omitempty"`
-		OptionalInt32 int32  `json:"optional_int32,omitempty"`
-		OptionalInt64 int64  `json:"optional_int64,omitempty"`
-		NillableInt   *int   `json:"nillable_int,omitempty"`
-		NillableInt8  *int8  `json:"nillable_int8,omitempty"`
-		NillableInt16 *int16 `json:"nillable_int16,omitempty"`
-		NillableInt32 *int32 `json:"nillable_int32,omitempty"`
-		NillableInt64 *int64 `json:"nillable_int64,omitempty"`
+		ID                    string `json:"id,omitempty"`
+		Int                   int    `json:"int,omitempty"`
+		Int8                  int8   `json:"int8,omitempty"`
+		Int16                 int16  `json:"int16,omitempty"`
+		Int32                 int32  `json:"int32,omitempty"`
+		Int64                 int64  `json:"int64,omitempty"`
+		OptionalInt           int    `json:"optional_int,omitempty"`
+		OptionalInt8          int8   `json:"optional_int8,omitempty"`
+		OptionalInt16         int16  `json:"optional_int16,omitempty"`
+		OptionalInt32         int32  `json:"optional_int32,omitempty"`
+		OptionalInt64         int64  `json:"optional_int64,omitempty"`
+		NillableInt           *int   `json:"nillable_int,omitempty"`
+		NillableInt8          *int8  `json:"nillable_int8,omitempty"`
+		NillableInt16         *int16 `json:"nillable_int16,omitempty"`
+		NillableInt32         *int32 `json:"nillable_int32,omitempty"`
+		NillableInt64         *int64 `json:"nillable_int64,omitempty"`
+		ValidateOptionalInt32 int32  `json:"validate_optional_int32,omitempty"`
 	}
 	if err := vmap.Decode(&vft); err != nil {
 		return err
@@ -166,6 +172,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.NillableInt16 = vft.NillableInt16
 	ft.NillableInt32 = vft.NillableInt32
 	ft.NillableInt64 = vft.NillableInt64
+	ft.ValidateOptionalInt32 = vft.ValidateOptionalInt32
 	return nil
 }
 
@@ -217,6 +224,7 @@ func (ft *FieldType) String() string {
 	if v := ft.NillableInt64; v != nil {
 		buf.WriteString(fmt.Sprintf(", nillable_int64=%v", *v))
 	}
+	buf.WriteString(fmt.Sprintf(", validate_optional_int32=%v", ft.ValidateOptionalInt32))
 	buf.WriteString(")")
 	return buf.String()
 }
@@ -249,44 +257,46 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vft []struct {
-		ID            string `json:"id,omitempty"`
-		Int           int    `json:"int,omitempty"`
-		Int8          int8   `json:"int8,omitempty"`
-		Int16         int16  `json:"int16,omitempty"`
-		Int32         int32  `json:"int32,omitempty"`
-		Int64         int64  `json:"int64,omitempty"`
-		OptionalInt   int    `json:"optional_int,omitempty"`
-		OptionalInt8  int8   `json:"optional_int8,omitempty"`
-		OptionalInt16 int16  `json:"optional_int16,omitempty"`
-		OptionalInt32 int32  `json:"optional_int32,omitempty"`
-		OptionalInt64 int64  `json:"optional_int64,omitempty"`
-		NillableInt   *int   `json:"nillable_int,omitempty"`
-		NillableInt8  *int8  `json:"nillable_int8,omitempty"`
-		NillableInt16 *int16 `json:"nillable_int16,omitempty"`
-		NillableInt32 *int32 `json:"nillable_int32,omitempty"`
-		NillableInt64 *int64 `json:"nillable_int64,omitempty"`
+		ID                    string `json:"id,omitempty"`
+		Int                   int    `json:"int,omitempty"`
+		Int8                  int8   `json:"int8,omitempty"`
+		Int16                 int16  `json:"int16,omitempty"`
+		Int32                 int32  `json:"int32,omitempty"`
+		Int64                 int64  `json:"int64,omitempty"`
+		OptionalInt           int    `json:"optional_int,omitempty"`
+		OptionalInt8          int8   `json:"optional_int8,omitempty"`
+		OptionalInt16         int16  `json:"optional_int16,omitempty"`
+		OptionalInt32         int32  `json:"optional_int32,omitempty"`
+		OptionalInt64         int64  `json:"optional_int64,omitempty"`
+		NillableInt           *int   `json:"nillable_int,omitempty"`
+		NillableInt8          *int8  `json:"nillable_int8,omitempty"`
+		NillableInt16         *int16 `json:"nillable_int16,omitempty"`
+		NillableInt32         *int32 `json:"nillable_int32,omitempty"`
+		NillableInt64         *int64 `json:"nillable_int64,omitempty"`
+		ValidateOptionalInt32 int32  `json:"validate_optional_int32,omitempty"`
 	}
 	if err := vmap.Decode(&vft); err != nil {
 		return err
 	}
 	for _, v := range vft {
 		*ft = append(*ft, &FieldType{
-			ID:            v.ID,
-			Int:           v.Int,
-			Int8:          v.Int8,
-			Int16:         v.Int16,
-			Int32:         v.Int32,
-			Int64:         v.Int64,
-			OptionalInt:   v.OptionalInt,
-			OptionalInt8:  v.OptionalInt8,
-			OptionalInt16: v.OptionalInt16,
-			OptionalInt32: v.OptionalInt32,
-			OptionalInt64: v.OptionalInt64,
-			NillableInt:   v.NillableInt,
-			NillableInt8:  v.NillableInt8,
-			NillableInt16: v.NillableInt16,
-			NillableInt32: v.NillableInt32,
-			NillableInt64: v.NillableInt64,
+			ID:                    v.ID,
+			Int:                   v.Int,
+			Int8:                  v.Int8,
+			Int16:                 v.Int16,
+			Int32:                 v.Int32,
+			Int64:                 v.Int64,
+			OptionalInt:           v.OptionalInt,
+			OptionalInt8:          v.OptionalInt8,
+			OptionalInt16:         v.OptionalInt16,
+			OptionalInt32:         v.OptionalInt32,
+			OptionalInt64:         v.OptionalInt64,
+			NillableInt:           v.NillableInt,
+			NillableInt8:          v.NillableInt8,
+			NillableInt16:         v.NillableInt16,
+			NillableInt32:         v.NillableInt32,
+			NillableInt64:         v.NillableInt64,
+			ValidateOptionalInt32: v.ValidateOptionalInt32,
 		})
 	}
 	return nil

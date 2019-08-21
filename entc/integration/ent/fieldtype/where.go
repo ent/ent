@@ -336,6 +336,18 @@ func NillableInt64(v int64) predicate.FieldType {
 	)
 }
 
+// ValidateOptionalInt32 applies equality check predicate on the "validate_optional_int32" field. It's identical to ValidateOptionalInt32EQ.
+func ValidateOptionalInt32(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.EQ(v))
+		},
+	)
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -2312,6 +2324,146 @@ func NillableInt64NotNil() predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.HasLabel(Label).Has(FieldNillableInt64)
+		},
+	)
+}
+
+// ValidateOptionalInt32EQ applies the EQ predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32EQ(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.EQ(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32NEQ applies the NEQ predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32NEQ(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.NEQ(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32GT applies the GT predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32GT(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.GT(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32GTE applies the GTE predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32GTE(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.GTE(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32LT applies the LT predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32LT(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.LT(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32LTE applies the LTE predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32LTE(v int32) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldValidateOptionalInt32), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.LTE(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32In applies the In predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldValidateOptionalInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.Within(v...))
+		},
+	)
+}
+
+// ValidateOptionalInt32NotIn applies the NotIn predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldValidateOptionalInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.Without(v...))
+		},
+	)
+}
+
+// ValidateOptionalInt32IsNil applies the IsNil predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32IsNil() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldValidateOptionalInt32)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldValidateOptionalInt32)
+		},
+	)
+}
+
+// ValidateOptionalInt32NotNil applies the NotNil predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32NotNil() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldValidateOptionalInt32)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldValidateOptionalInt32)
 		},
 	)
 }
