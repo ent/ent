@@ -228,7 +228,7 @@ func (Group) Fields() []ent.Field {
 Let's define our first relation. An edge from `User` to `Car` defining that a user
 can have 1 or more cars, but a car has only one owner (one-to-many relation).
 
-![er-user-cars](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_user_cars.png)
+![er-user-cars](https://entgo.io/assets/re_user_cars.png)
 
 Let's add the `"cars"` edge to the `User` schema, and run `entc generate ./ent/schema`:
 
@@ -320,7 +320,7 @@ Assume we have a `Car` object and we want to get its owner; The user that this c
 For this, we have another type of edge called "inverse edge" that is defined using the `edge.From`
 function.
 
-![er-cars-owner](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_cars_owner.png)
+![er-cars-owner](https://entgo.io/assets/re_cars_owner.png)
 
 The new edge created in the diagram above is transparent, to emphasis that we don't create another
 edge in the database, and it is just a back-reference to the real edge.
@@ -383,7 +383,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 We'll continue our example, by creating a M2M relationship between users and groups.
 
-![er-group-users](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_group_users.png)
+![er-group-users](https://entgo.io/assets/re_group_users.png)
 
 As you can see, each group entity can have many users, and a user can be connected to many groups.
 A simple "many-to-many" relationship. In the above illustration, the `Group` schema is the owner
@@ -445,7 +445,7 @@ $ entc generate ./ent/schema
 In order to run our first graph traversal, we need to generate some data (nodes and edges).  
 Let's create the following graph using the framework:
 
-![re-graph](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_graph_getting_started.png)
+![re-graph](https://entgo.io/assets/re_graph_getting_started.png)
 
 
 ```go

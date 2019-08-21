@@ -154,27 +154,27 @@ class Index extends React.Component {
           {
             title: 'Schema As Code',
             content: 'Simple API for modeling any graph schema as Go objects',
-            image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-schema-as-code.png`,
+            image: `https://entgo.io/assets/gopher-schema-as-code.png`,
             imageAlign: 'top',
           },
           {
             title: 'Easily Traverse Any Graph',
             content: 'Run queries, aggregations and traverse any graph ' +
             'structure easily',
-            image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
+            image: `https://entgo.io/assets/gopher-graph-traversal.png`,
             imageAlign: 'top',
           },
           {
               title: 'Statically Typed And Explicit API',
               content: '100% statically types and explicit api using ' +
               'code generation',
-              image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
+              image: `https://entgo.io/assets/gopher-graph-traversal.png`,
               imageAlign: 'top',
           },
           {
               title: 'Multiple Storage Driver Support',
                   content: 'Support both SQL and Gremlin dialects',
-              image: `https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-graph-traversal.png`,
+              image: `https://entgo.io/assets/gopher-graph-traversal.png`,
               imageAlign: 'top',
           },
         ]}
