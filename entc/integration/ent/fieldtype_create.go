@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
@@ -19,21 +20,22 @@ import (
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	int            *int
-	int8           *int8
-	int16          *int16
-	int32          *int32
-	int64          *int64
-	optional_int   *int
-	optional_int8  *int8
-	optional_int16 *int16
-	optional_int32 *int32
-	optional_int64 *int64
-	nillable_int   *int
-	nillable_int8  *int8
-	nillable_int16 *int16
-	nillable_int32 *int32
-	nillable_int64 *int64
+	int                     *int
+	int8                    *int8
+	int16                   *int16
+	int32                   *int32
+	int64                   *int64
+	optional_int            *int
+	optional_int8           *int8
+	optional_int16          *int16
+	optional_int32          *int32
+	optional_int64          *int64
+	nillable_int            *int
+	nillable_int8           *int8
+	nillable_int16          *int16
+	nillable_int32          *int32
+	nillable_int64          *int64
+	validate_optional_int32 *int32
 }
 
 // SetInt sets the int field.
@@ -206,6 +208,20 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate 
 	return ftc
 }
 
+// SetValidateOptionalInt32 sets the validate_optional_int32 field.
+func (ftc *FieldTypeCreate) SetValidateOptionalInt32(i int32) *FieldTypeCreate {
+	ftc.validate_optional_int32 = &i
+	return ftc
+}
+
+// SetNillableValidateOptionalInt32 sets the validate_optional_int32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeCreate {
+	if i != nil {
+		ftc.SetValidateOptionalInt32(*i)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if ftc.int == nil {
@@ -222,6 +238,11 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	}
 	if ftc.int64 == nil {
 		return nil, errors.New("ent: missing required field \"int64\"")
+	}
+	if ftc.validate_optional_int32 != nil {
+		if err := fieldtype.ValidateOptionalInt32Validator(*ftc.validate_optional_int32); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+		}
 	}
 	switch ftc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -312,6 +333,10 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		builder.Set(fieldtype.FieldNillableInt64, *ftc.nillable_int64)
 		ft.NillableInt64 = ftc.nillable_int64
 	}
+	if ftc.validate_optional_int32 != nil {
+		builder.Set(fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
+		ft.ValidateOptionalInt32 = *ftc.validate_optional_int32
+	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)
@@ -389,6 +414,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if ftc.nillable_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftc.nillable_int64)
+	}
+	if ftc.validate_optional_int32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
 	}
 	return v.ValueMap(true)
 }

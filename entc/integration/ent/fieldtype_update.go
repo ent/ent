@@ -20,22 +20,23 @@ import (
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	int            *int
-	int8           *int8
-	int16          *int16
-	int32          *int32
-	int64          *int64
-	optional_int   *int
-	optional_int8  *int8
-	optional_int16 *int16
-	optional_int32 *int32
-	optional_int64 *int64
-	nillable_int   *int
-	nillable_int8  *int8
-	nillable_int16 *int16
-	nillable_int32 *int32
-	nillable_int64 *int64
-	predicates     []predicate.FieldType
+	int                     *int
+	int8                    *int8
+	int16                   *int16
+	int32                   *int32
+	int64                   *int64
+	optional_int            *int
+	optional_int8           *int8
+	optional_int16          *int16
+	optional_int32          *int32
+	optional_int64          *int64
+	nillable_int            *int
+	nillable_int8           *int8
+	nillable_int16          *int16
+	nillable_int32          *int32
+	nillable_int64          *int64
+	validate_optional_int32 *int32
+	predicates              []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
@@ -214,8 +215,27 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate 
 	return ftu
 }
 
+// SetValidateOptionalInt32 sets the validate_optional_int32 field.
+func (ftu *FieldTypeUpdate) SetValidateOptionalInt32(i int32) *FieldTypeUpdate {
+	ftu.validate_optional_int32 = &i
+	return ftu
+}
+
+// SetNillableValidateOptionalInt32 sets the validate_optional_int32 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeUpdate {
+	if i != nil {
+		ftu.SetValidateOptionalInt32(*i)
+	}
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
+	if ftu.validate_optional_int32 != nil {
+		if err := fieldtype.ValidateOptionalInt32Validator(*ftu.validate_optional_int32); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+		}
+	}
 	switch ftu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftu.sqlSave(ctx)
@@ -340,6 +360,10 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt64, *ftu.nillable_int64)
 	}
+	if ftu.validate_optional_int32 != nil {
+		update = true
+		builder.Set(fieldtype.FieldValidateOptionalInt32, *ftu.validate_optional_int32)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -417,6 +441,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.nillable_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftu.nillable_int64)
 	}
+	if ftu.validate_optional_int32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftu.validate_optional_int32)
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -425,22 +452,23 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
-	id             string
-	int            *int
-	int8           *int8
-	int16          *int16
-	int32          *int32
-	int64          *int64
-	optional_int   *int
-	optional_int8  *int8
-	optional_int16 *int16
-	optional_int32 *int32
-	optional_int64 *int64
-	nillable_int   *int
-	nillable_int8  *int8
-	nillable_int16 *int16
-	nillable_int32 *int32
-	nillable_int64 *int64
+	id                      string
+	int                     *int
+	int8                    *int8
+	int16                   *int16
+	int32                   *int32
+	int64                   *int64
+	optional_int            *int
+	optional_int8           *int8
+	optional_int16          *int16
+	optional_int32          *int32
+	optional_int64          *int64
+	nillable_int            *int
+	nillable_int8           *int8
+	nillable_int16          *int16
+	nillable_int32          *int32
+	nillable_int64          *int64
+	validate_optional_int32 *int32
 }
 
 // SetInt sets the int field.
@@ -613,8 +641,27 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpd
 	return ftuo
 }
 
+// SetValidateOptionalInt32 sets the validate_optional_int32 field.
+func (ftuo *FieldTypeUpdateOne) SetValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
+	ftuo.validate_optional_int32 = &i
+	return ftuo
+}
+
+// SetNillableValidateOptionalInt32 sets the validate_optional_int32 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *FieldTypeUpdateOne {
+	if i != nil {
+		ftuo.SetValidateOptionalInt32(*i)
+	}
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
+	if ftuo.validate_optional_int32 != nil {
+		if err := fieldtype.ValidateOptionalInt32Validator(*ftuo.validate_optional_int32); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+		}
+	}
 	switch ftuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftuo.sqlSave(ctx)
@@ -757,6 +804,11 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		builder.Set(fieldtype.FieldNillableInt64, *ftuo.nillable_int64)
 		ft.NillableInt64 = ftuo.nillable_int64
 	}
+	if ftuo.validate_optional_int32 != nil {
+		update = true
+		builder.Set(fieldtype.FieldValidateOptionalInt32, *ftuo.validate_optional_int32)
+		ft.ValidateOptionalInt32 = *ftuo.validate_optional_int32
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -834,6 +886,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.nillable_int64 != nil {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftuo.nillable_int64)
+	}
+	if ftuo.validate_optional_int32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftuo.validate_optional_int32)
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

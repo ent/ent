@@ -2,6 +2,10 @@
 
 package fieldtype
 
+import (
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
+)
+
 const (
 	// Label holds the string label denoting the fieldtype type in the database.
 	Label = "field_type"
@@ -37,6 +41,8 @@ const (
 	FieldNillableInt32 = "nillable_int32"
 	// FieldNillableInt64 holds the string denoting the nillable_int64 vertex property in the database.
 	FieldNillableInt64 = "nillable_int64"
+	// FieldValidateOptionalInt32 holds the string denoting the validate_optional_int32 vertex property in the database.
+	FieldValidateOptionalInt32 = "validate_optional_int32"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -60,4 +66,11 @@ var Columns = []string{
 	FieldNillableInt16,
 	FieldNillableInt32,
 	FieldNillableInt64,
+	FieldValidateOptionalInt32,
 }
+
+var (
+	fields = schema.FieldType{}.Fields()
+	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
+	ValidateOptionalInt32Validator = fields[15].Validators()[0].(func(int32) error)
+)

@@ -65,6 +65,7 @@ var (
 		{Name: "nillable_int16", Type: field.TypeInt16, Nullable: true},
 		{Name: "nillable_int32", Type: field.TypeInt32, Nullable: true},
 		{Name: "nillable_int64", Type: field.TypeInt64, Nullable: true},
+		{Name: "validate_optional_int32", Type: field.TypeInt32, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
 	FieldTypesTable = &schema.Table{

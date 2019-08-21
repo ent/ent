@@ -97,6 +97,7 @@ func ExampleFieldType() {
 		SetNillableInt16(1).
 		SetNillableInt32(1).
 		SetNillableInt64(1).
+		SetValidateOptionalInt32(1).
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft)
 
