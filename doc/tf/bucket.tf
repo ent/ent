@@ -1,10 +1,6 @@
 resource "aws_s3_bucket" "website" {
   bucket = local.domain_name
-  acl    = "public-read"
-
-  website {
-    index_document = "index.html"
-  }
+  acl    = "private"
 
   cors_rule {
     allowed_headers = ["*"]
@@ -20,14 +16,16 @@ data "aws_iam_policy_document" "website" {
   statement {
     actions = [
       "s3:GetObject",
+      "s3:ListBucket",
     ]
 
     resources = [
+      aws_s3_bucket.website.arn,
       format("%s/*", aws_s3_bucket.website.arn),
     ]
 
     principals {
-      identifiers = ["*"]
+      identifiers = [aws_cloudfront_origin_access_identity.website.iam_arn]
       type        = "AWS"
     }
   }
@@ -59,18 +57,6 @@ data "aws_iam_policy_document" "website" {
 resource "aws_s3_bucket_policy" "website" {
   bucket = aws_s3_bucket.website.id
   policy = data.aws_iam_policy_document.website.json
-}
-
-resource "aws_route53_record" "website" {
-  name    = local.domain_name
-  zone_id = aws_route53_zone.zone.id
-  type    = "A"
-
-  alias {
-    evaluate_target_health = false
-    name                   = aws_s3_bucket.website.website_domain
-    zone_id                = aws_s3_bucket.website.hosted_zone_id
-  }
 }
 
 resource "aws_iam_user" "deployer" {
