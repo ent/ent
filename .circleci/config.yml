@@ -48,7 +48,7 @@ jobs:
     - run:
         name: Checking Docs Modified
         command: |
-          if [[ ! $(git diff master^ --name-only doc/ ]]; then
+          if [[ ! $(git diff master^ --name-only doc/) ]]; then
             echo "docs not modified; no need to deploy"
             circleci step halt
           fi
