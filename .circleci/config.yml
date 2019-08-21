@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  compare-url: iynere/compare-url@1.2.0
   aws-cli: circleci/aws-cli@0.1.13
 
 jobs:
@@ -46,11 +45,10 @@ jobs:
     - image: circleci/node
     steps:
     - checkout
-    - compare-url/reconstruct
-    - compare-url/use:
-        step-name: Checking Docs Modified
-        custom-logic: |
-          if [[ ! $(git diff $COMMIT_RANGE --name-only doc/ ]]; then
+    - run:
+        name: Checking Docs Modified
+        command: |
+          if [[ ! $(git diff master^ --name-only doc/ ]]; then
             echo "docs not modified; no need to deploy"
             circleci step halt
           fi
