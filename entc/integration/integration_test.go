@@ -1897,4 +1897,5 @@ func drop(t *testing.T, client *ent.Client) {
 	client.Comment.Delete().ExecX(ctx)
 	client.GroupInfo.Delete().ExecX(ctx)
 	client.FieldType.Delete().ExecX(ctx)
+	client.FileType.Delete().ExecX(ctx)
 }

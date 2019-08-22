@@ -81,6 +81,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
+		{Name: "type_id", Type: field.TypeInt, Nullable: true},
 		{Name: "group_file_id", Type: field.TypeInt, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
@@ -91,15 +92,22 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "files_groups_files",
+				Symbol:  "files_file_types_files",
 				Columns: []*schema.Column{FilesColumns[5]},
+
+				RefColumns: []*schema.Column{FileTypesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "files_groups_files",
+				Columns: []*schema.Column{FilesColumns[6]},
 
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "files_users_files",
-				Columns: []*schema.Column{FilesColumns[6]},
+				Columns: []*schema.Column{FilesColumns[7]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -117,11 +125,23 @@ var (
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
 			},
 			{
-				Name:    "name_owner_id",
+				Name:    "name_owner_id_type_id",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[6]},
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7], FilesColumns[5]},
 			},
 		},
+	}
+	// FileTypesColumns holds the columns for the "file_types" table.
+	FileTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+	}
+	// FileTypesTable holds the schema information for the "file_types" table.
+	FileTypesTable = &schema.Table{
+		Name:        "file_types",
+		Columns:     FileTypesColumns,
+		PrimaryKey:  []*schema.Column{FileTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
@@ -339,6 +359,7 @@ var (
 		CommentsTable,
 		FieldTypesTable,
 		FilesTable,
+		FileTypesTable,
 		GroupsTable,
 		GroupInfosTable,
 		NodesTable,
@@ -352,8 +373,9 @@ var (
 
 func init() {
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
-	FilesTable.ForeignKeys[0].RefTable = GroupsTable
-	FilesTable.ForeignKeys[1].RefTable = UsersTable
+	FilesTable.ForeignKeys[0].RefTable = FileTypesTable
+	FilesTable.ForeignKeys[1].RefTable = GroupsTable
+	FilesTable.ForeignKeys[2].RefTable = UsersTable
 	GroupsTable.ForeignKeys[0].RefTable = GroupInfosTable
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable

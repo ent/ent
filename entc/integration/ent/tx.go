@@ -20,6 +20,8 @@ type Tx struct {
 	FieldType *FieldTypeClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
+	// FileType is the client for interacting with the FileType builders.
+	FileType *FileTypeClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
@@ -51,6 +53,7 @@ func (tx *Tx) Client() *Client {
 		Comment:   NewCommentClient(tx.config),
 		FieldType: NewFieldTypeClient(tx.config),
 		File:      NewFileClient(tx.config),
+		FileType:  NewFileTypeClient(tx.config),
 		Group:     NewGroupClient(tx.config),
 		GroupInfo: NewGroupInfoClient(tx.config),
 		Node:      NewNodeClient(tx.config),

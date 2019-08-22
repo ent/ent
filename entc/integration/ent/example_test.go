@@ -132,6 +132,44 @@ func ExampleFile() {
 
 	// Output:
 }
+func ExampleFileType() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the filetype's edges.
+	f0 := client.File.
+		Create().
+		SetSize(1).
+		SetName("string").
+		SetUser("string").
+		SetGroup("string").
+		SaveX(ctx)
+	log.Println("file created:", f0)
+
+	// create filetype vertex with its edges.
+	ft := client.FileType.
+		Create().
+		SetName("string").
+		AddFiles(f0).
+		SaveX(ctx)
+	log.Println("filetype created:", ft)
+
+	// query edges.
+	f0, err = ft.QueryFiles().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying files: %v", err)
+	}
+	log.Println("files found:", f0)
+
+	// Output:
+}
 func ExampleGroup() {
 	if dsn == "" {
 		return

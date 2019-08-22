@@ -13,6 +13,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
@@ -37,6 +38,8 @@ type Client struct {
 	FieldType *FieldTypeClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
+	// FileType is the client for interacting with the FileType builders.
+	FileType *FileTypeClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
@@ -60,6 +63,7 @@ func NewClient(opts ...Option) *Client {
 		Comment:   NewCommentClient(c),
 		FieldType: NewFieldTypeClient(c),
 		File:      NewFileClient(c),
+		FileType:  NewFileTypeClient(c),
 		Group:     NewGroupClient(c),
 		GroupInfo: NewGroupInfoClient(c),
 		Node:      NewNodeClient(c),
@@ -84,6 +88,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Comment:   NewCommentClient(cfg),
 		FieldType: NewFieldTypeClient(cfg),
 		File:      NewFileClient(cfg),
+		FileType:  NewFileTypeClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
 		Node:      NewNodeClient(cfg),
@@ -325,6 +330,91 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 
 	case dialect.Neptune:
 		query.gremlin = g.V(f.ID).InE(user.FilesLabel).OutV()
+
+	}
+	return query
+}
+
+// QueryType queries the type edge of a File.
+func (c *FileClient) QueryType(f *File) *FileTypeQuery {
+	query := &FileTypeQuery{config: c.config}
+	switch c.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		id := f.id()
+		t1 := sql.Table(filetype.Table)
+		t2 := sql.Select(file.TypeColumn).
+			From(sql.Table(file.TypeTable)).
+			Where(sql.EQ(file.FieldID, id))
+		query.sql = sql.Select().From(t1).Join(t2).On(t1.C(filetype.FieldID), t2.C(file.TypeColumn))
+
+	case dialect.Neptune:
+		query.gremlin = g.V(f.ID).InE(filetype.FilesLabel).OutV()
+
+	}
+	return query
+}
+
+// FileTypeClient is a client for the FileType schema.
+type FileTypeClient struct {
+	config
+}
+
+// NewFileTypeClient returns a client for the FileType from the given config.
+func NewFileTypeClient(c config) *FileTypeClient {
+	return &FileTypeClient{config: c}
+}
+
+// Create returns a create builder for FileType.
+func (c *FileTypeClient) Create() *FileTypeCreate {
+	return &FileTypeCreate{config: c.config}
+}
+
+// Update returns an update builder for FileType.
+func (c *FileTypeClient) Update() *FileTypeUpdate {
+	return &FileTypeUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FileTypeClient) UpdateOne(ft *FileType) *FileTypeUpdateOne {
+	return c.UpdateOneID(ft.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FileTypeClient) UpdateOneID(id string) *FileTypeUpdateOne {
+	return &FileTypeUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for FileType.
+func (c *FileTypeClient) Delete() *FileTypeDelete {
+	return &FileTypeDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *FileTypeClient) DeleteOne(ft *FileType) *FileTypeDeleteOne {
+	return c.DeleteOneID(ft.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *FileTypeClient) DeleteOneID(id string) *FileTypeDeleteOne {
+	return &FileTypeDeleteOne{c.Delete().Where(filetype.ID(id))}
+}
+
+// Create returns a query builder for FileType.
+func (c *FileTypeClient) Query() *FileTypeQuery {
+	return &FileTypeQuery{config: c.config}
+}
+
+// QueryFiles queries the files edge of a FileType.
+func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
+	query := &FileQuery{config: c.config}
+	switch c.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		id := ft.id()
+		query.sql = sql.Select().From(sql.Table(file.Table)).
+			Where(sql.EQ(filetype.FilesColumn, id))
+
+	case dialect.Neptune:
+		query.gremlin = g.V(ft.ID).OutE(filetype.FilesLabel).InV()
 
 	}
 	return query

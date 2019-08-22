@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
@@ -27,7 +28,9 @@ type FileUpdate struct {
 	user         *string
 	group        *string
 	owner        map[string]struct{}
+	_type        map[string]struct{}
 	clearedOwner bool
+	clearedType  bool
 	predicates   []predicate.File
 }
 
@@ -107,9 +110,37 @@ func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
 	return fu.SetOwnerID(u.ID)
 }
 
+// SetTypeID sets the type edge to FileType by id.
+func (fu *FileUpdate) SetTypeID(id string) *FileUpdate {
+	if fu._type == nil {
+		fu._type = make(map[string]struct{})
+	}
+	fu._type[id] = struct{}{}
+	return fu
+}
+
+// SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
+func (fu *FileUpdate) SetNillableTypeID(id *string) *FileUpdate {
+	if id != nil {
+		fu = fu.SetTypeID(*id)
+	}
+	return fu
+}
+
+// SetType sets the type edge to FileType.
+func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
+	return fu.SetTypeID(f.ID)
+}
+
 // ClearOwner clears the owner edge to User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.clearedOwner = true
+	return fu
+}
+
+// ClearType clears the type edge to FileType.
+func (fu *FileUpdate) ClearType() *FileUpdate {
+	fu.clearedType = true
 	return fu
 }
 
@@ -122,6 +153,9 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	}
 	if len(fu.owner) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	}
+	if len(fu._type) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
 	switch fu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -234,6 +268,31 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if fu.clearedType {
+		query, args := sql.Update(file.TypeTable).
+			SetNull(file.TypeColumn).
+			Where(sql.InInts(filetype.FieldID, ids...)).
+			Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return 0, rollback(tx, err)
+		}
+	}
+	if len(fu._type) > 0 {
+		for eid := range fu._type {
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return
+			}
+			query, args := sql.Update(file.TypeTable).
+				Set(file.TypeColumn, eid).
+				Where(sql.InInts(file.FieldID, ids...)).
+				Query()
+			if err := tx.Exec(ctx, query, args, &res); err != nil {
+				return 0, rollback(tx, err)
+			}
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
@@ -282,6 +341,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	for id := range fu.owner {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
+	if fu.clearedType {
+		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for id := range fu._type {
+		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -296,7 +362,9 @@ type FileUpdateOne struct {
 	user         *string
 	group        *string
 	owner        map[string]struct{}
+	_type        map[string]struct{}
 	clearedOwner bool
+	clearedType  bool
 }
 
 // SetSize sets the size field.
@@ -369,9 +437,37 @@ func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
 	return fuo.SetOwnerID(u.ID)
 }
 
+// SetTypeID sets the type edge to FileType by id.
+func (fuo *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
+	if fuo._type == nil {
+		fuo._type = make(map[string]struct{})
+	}
+	fuo._type[id] = struct{}{}
+	return fuo
+}
+
+// SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableTypeID(id *string) *FileUpdateOne {
+	if id != nil {
+		fuo = fuo.SetTypeID(*id)
+	}
+	return fuo
+}
+
+// SetType sets the type edge to FileType.
+func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
+	return fuo.SetTypeID(f.ID)
+}
+
 // ClearOwner clears the owner edge to User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.clearedOwner = true
+	return fuo
+}
+
+// ClearType clears the type edge to FileType.
+func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
+	fuo.clearedType = true
 	return fuo
 }
 
@@ -384,6 +480,9 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	}
 	if len(fuo.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	}
+	if len(fuo._type) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
 	switch fuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -503,6 +602,31 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			}
 		}
 	}
+	if fuo.clearedType {
+		query, args := sql.Update(file.TypeTable).
+			SetNull(file.TypeColumn).
+			Where(sql.InInts(filetype.FieldID, ids...)).
+			Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return nil, rollback(tx, err)
+		}
+	}
+	if len(fuo._type) > 0 {
+		for eid := range fuo._type {
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return
+			}
+			query, args := sql.Update(file.TypeTable).
+				Set(file.TypeColumn, eid).
+				Where(sql.InInts(file.FieldID, ids...)).
+				Query()
+			if err := tx.Exec(ctx, query, args, &res); err != nil {
+				return nil, rollback(tx, err)
+			}
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -551,6 +675,13 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	for id := range fuo.owner {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
+	}
+	if fuo.clearedType {
+		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for id := range fuo._type {
+		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

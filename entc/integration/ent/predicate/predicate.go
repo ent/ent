@@ -77,6 +77,23 @@ func FilePerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) File {
 	})
 }
 
+// FileType is the predicate function for filetype builders.
+type FileType func(interface{})
+
+// FileTypePerDialect construct a predicate for graph traversals based on dialect type.
+func FileTypePerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) FileType {
+	return FileType(func(v interface{}) {
+		switch v := v.(type) {
+		case *sql.Selector:
+			f0(v)
+		case *dsl.Traversal:
+			f1(v)
+		default:
+			panic(fmt.Sprintf("unknown type for predicate: %T", v))
+		}
+	})
+}
+
 // Group is the predicate function for group builders.
 type Group func(interface{})
 

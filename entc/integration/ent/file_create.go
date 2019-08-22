@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
 	"github.com/facebookincubator/ent/dialect"
@@ -26,6 +27,7 @@ type FileCreate struct {
 	user  *string
 	group *string
 	owner map[string]struct{}
+	_type map[string]struct{}
 }
 
 // SetSize sets the size field.
@@ -98,6 +100,28 @@ func (fc *FileCreate) SetOwner(u *User) *FileCreate {
 	return fc.SetOwnerID(u.ID)
 }
 
+// SetTypeID sets the type edge to FileType by id.
+func (fc *FileCreate) SetTypeID(id string) *FileCreate {
+	if fc._type == nil {
+		fc._type = make(map[string]struct{})
+	}
+	fc._type[id] = struct{}{}
+	return fc
+}
+
+// SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
+func (fc *FileCreate) SetNillableTypeID(id *string) *FileCreate {
+	if id != nil {
+		fc = fc.SetTypeID(*id)
+	}
+	return fc
+}
+
+// SetType sets the type edge to FileType.
+func (fc *FileCreate) SetType(f *FileType) *FileCreate {
+	return fc.SetTypeID(f.ID)
+}
+
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if fc.size == nil {
@@ -112,6 +136,9 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	}
 	if len(fc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	}
+	if len(fc._type) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
 	switch fc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
@@ -182,6 +209,21 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			}
 		}
 	}
+	if len(fc._type) > 0 {
+		for eid := range fc._type {
+			eid, err := strconv.Atoi(eid)
+			if err != nil {
+				return nil, rollback(tx, err)
+			}
+			query, args := sql.Update(file.TypeTable).
+				Set(file.TypeColumn, eid).
+				Where(sql.EQ(file.FieldID, id)).
+				Query()
+			if err := tx.Exec(ctx, query, args, &res); err != nil {
+				return nil, rollback(tx, err)
+			}
+		}
+	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -220,6 +262,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	for id := range fc.owner {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
+	}
+	for id := range fc._type {
+		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
 	return v.ValueMap(true)
 }

@@ -297,21 +297,21 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		}
 		index.Columns = append(index.Columns, snake(name))
 	}
-	if idx.Edge != "" {
+	for _, name := range idx.Edges {
 		var edge *Edge
 		for _, e := range t.Edges {
-			if e.Name == idx.Edge {
+			if e.Name == name {
 				edge = e
 				break
 			}
 		}
 		switch {
 		case edge == nil:
-			return fmt.Errorf("unknown index field %q", idx.Edge)
+			return fmt.Errorf("unknown index field %q", name)
 		case !edge.IsInverse():
-			return fmt.Errorf("non-inverse edge for index %q (edge.From)", idx.Edge)
+			return fmt.Errorf("non-inverse edge for index %q (edge.From)", name)
 		case edge.Rel.Type != M2O && edge.Rel.Type != O2O:
-			return fmt.Errorf("relation %s for inverse edge %q is not one of (O2O, M2O)", edge.Rel.Type, idx.Edge)
+			return fmt.Errorf("relation %s for inverse edge %q is not one of (O2O, M2O)", edge.Rel.Type, name)
 		default:
 			index.Columns = append(index.Columns, edge.Rel.Column())
 		}

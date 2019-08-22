@@ -85,6 +85,11 @@ func (f *File) QueryOwner() *UserQuery {
 	return (&FileClient{f.config}).QueryOwner(f)
 }
 
+// QueryType queries the type edge of the File.
+func (f *File) QueryType() *FileTypeQuery {
+	return (&FileClient{f.config}).QueryType(f)
+}
+
 // Update returns a builder for updating this File.
 // Note that, you need to call File.Unwrap() before calling this method, if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
