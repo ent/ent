@@ -1,5 +1,5 @@
 ---
 id: traversals
-title: Traversal The Graph
+title: Traverse The Graph
 ---
 Lorem ipsum.
