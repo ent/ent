@@ -365,6 +365,15 @@ func NameHasSuffix(v string) predicate.User {
 	)
 }
 
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.ContainsFold(s.C(FieldName), v))
+		},
+	)
+}
+
 // PhoneEQ applies the EQ predicate on the "phone" field.
 func PhoneEQ(v string) predicate.User {
 	return predicate.User(
@@ -480,6 +489,15 @@ func PhoneHasSuffix(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.HasSuffix(s.C(FieldPhone), v))
+		},
+	)
+}
+
+// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
+func PhoneContainsFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.ContainsFold(s.C(FieldPhone), v))
 		},
 	)
 }
@@ -691,6 +709,15 @@ func TitleHasSuffix(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.HasSuffix(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.ContainsFold(s.C(FieldTitle), v))
 		},
 	)
 }

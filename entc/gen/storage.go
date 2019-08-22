@@ -27,13 +27,14 @@ func (m SchemaMode) Support(mode SchemaMode) bool { return m&mode != 0 }
 
 // Storage driver type for codegen.
 type Storage struct {
-	Name       string          // storage name.
-	Builder    reflect.Type    // query builder type.
-	Dialects   []string        // supported dialects.
-	IdentName  string          // identifier name (fields and funcs).
-	Imports    []string        // import packages needed.
-	SchemaMode SchemaMode      // schema mode support.
-	OpCode     func(Op) string // operation code for predicates.
+	Name       string            // storage name.
+	Builder    reflect.Type      // query builder type.
+	Dialects   []string          // supported dialects.
+	IdentName  string            // identifier name (fields and funcs).
+	Imports    []string          // import packages needed.
+	SchemaMode SchemaMode        // schema mode support.
+	Ops        func(*Field) []Op // storage specific operations.
+	OpCode     func(Op) string   // operation code for predicates.
 }
 
 // StorageDrivers holds the storage driver options for entc.
@@ -47,7 +48,13 @@ var drivers = []*Storage{
 			"github.com/facebookincubator/ent/dialect/sql",
 		},
 		SchemaMode: Unique | Cascade | Migrate,
-		OpCode:     opCodes(sqlCode[:]),
+		Ops: func(f *Field) []Op {
+			if !f.IsString() {
+				return nil
+			}
+			return []Op{ContainsFold}
+		},
+		OpCode: opCodes(sqlCode[:]),
 	},
 	{
 		Name:      "gremlin",
