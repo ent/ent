@@ -5,19 +5,20 @@ type Op int
 
 // List of all builtin predicates.
 const (
-	EQ        Op = iota // =
-	NEQ                 // <>
-	GT                  // >
-	GTE                 // >=
-	LT                  // <
-	LTE                 // <=
-	IsNil               // IS NULL / has
-	NotNil              // IS NOT NULL / hasNot
-	In                  // within
-	NotIn               // without
-	Contains            // containing
-	HasPrefix           // startingWith
-	HasSuffix           // endingWith
+	EQ           Op = iota // =
+	NEQ                    // <>
+	GT                     // >
+	GTE                    // >=
+	LT                     // <
+	LTE                    // <=
+	IsNil                  // IS NULL / has
+	NotNil                 // IS NOT NULL / hasNot
+	In                     // within
+	NotIn                  // without
+	Contains               // containing
+	ContainsFold           // containing case-insensitive
+	HasPrefix              // startingWith
+	HasSuffix              // endingWith
 )
 
 // Name returns the string representation of an predicate.
@@ -41,19 +42,20 @@ func (o Op) Niladic() bool {
 var (
 	// operations text.
 	opText = [...]string{
-		EQ:        "EQ",
-		NEQ:       "NEQ",
-		GT:        "GT",
-		GTE:       "GTE",
-		LT:        "LT",
-		LTE:       "LTE",
-		IsNil:     "IsNil",
-		NotNil:    "NotNil",
-		Contains:  "Contains",
-		HasPrefix: "HasPrefix",
-		HasSuffix: "HasSuffix",
-		In:        "In",
-		NotIn:     "NotIn",
+		EQ:           "EQ",
+		NEQ:          "NEQ",
+		GT:           "GT",
+		GTE:          "GTE",
+		LT:           "LT",
+		LTE:          "LTE",
+		IsNil:        "IsNil",
+		NotNil:       "NotNil",
+		Contains:     "Contains",
+		ContainsFold: "ContainsFold",
+		HasPrefix:    "HasPrefix",
+		HasSuffix:    "HasSuffix",
+		In:           "In",
+		NotIn:        "NotIn",
 	}
 	// operations per type.
 	boolOps     = []Op{EQ, NEQ}

@@ -46,6 +46,9 @@ func TestMySQL(t *testing.T) {
 			idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
 			idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 			idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+
+			// sql specific predicates.
+			ContainsFold(t, clientv2)
 		})
 	}
 }
@@ -63,6 +66,12 @@ func TestSQLite(t *testing.T) {
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.User.Create().SetAge(1).SetName("x").SetPhone("y").SaveX(ctx).ID, 2<<32, 3<<32-1)
+
+	// override the default behavior of LIKE in SQLite.
+	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
+	_, err = drv.ExecContext(ctx, "PRAGMA case_sensitive_like=1")
+	require.NoError(t, err)
+	ContainsFold(t, client)
 }
 
 func SanityV1(t *testing.T, client *entv1.Client) {
@@ -103,6 +112,15 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 		client.User.Query().CountX(ctx),
 		client.User.Query().Where(user.Title(user.DefaultTitle)).CountX(ctx),
 	)
+}
+
+func ContainsFold(t *testing.T, client *entv2.Client) {
+	ctx := context.Background()
+	t.Log("testing contains-fold on sql specific dialects")
+	client.User.Create().SetAge(30).SetName("Mashraki").SetPhone("102030").SaveX(ctx)
+	require.Zero(t, client.User.Query().Where(user.NameContains("mash")).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("mash")).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
 }
 
 func idRange(t *testing.T, id, l, h int) {
