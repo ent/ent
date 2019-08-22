@@ -1002,30 +1002,40 @@ func (p *Predicate) Like(col, pattern string) *Predicate {
 	return p
 }
 
-// HasPrefix is an helper predicate that checks prefix using the LIKE predicate.
+// HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func HasPrefix(col, prefix string) *Predicate {
 	return (&Predicate{}).HasPrefix(col, prefix)
 }
 
-// HasPrefix is an helper predicate that checks prefix using the LIKE predicate.
+// HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func (p *Predicate) HasPrefix(col, prefix string) *Predicate {
 	return p.Like(col, prefix+"%")
 }
 
-// HasSuffix is an helper predicate that checks suffix using the LIKE predicate.
+// HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
 func HasSuffix(col, suffix string) *Predicate { return (&Predicate{}).HasSuffix(col, suffix) }
 
-// HasSuffix is an helper predicate that checks suffix using the LIKE predicate.
+// HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
 func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
 	return p.Like(col, "%"+suffix)
 }
 
-// Contains is an helper predicate that checks substring using the LIKE predicate.
+// Contains is a helper predicate that checks substring using the LIKE predicate.
 func Contains(col, sub string) *Predicate { return (&Predicate{}).Contains(col, sub) }
 
-// Contains is an helper predicate that checks substring using the LIKE predicate.
+// Contains is a helper predicate that checks substring using the LIKE predicate.
 func (p *Predicate) Contains(col, sub string) *Predicate {
 	return p.Like(col, "%"+sub+"%")
+}
+
+// ContainsFold is a helper predicate that checks substring using the LIKE predicate.
+func ContainsFold(col, sub string) *Predicate { return (&Predicate{}).ContainsFold(col, sub) }
+
+// ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
+// The recommendation is to avoid using it, and to use a dialect specific feature, like
+// `ILIKE` in PostgreSQL, and `COLLATE` clause in MySQL.
+func (p *Predicate) ContainsFold(col, sub string) *Predicate {
+	return p.Like(Lower(col), "%"+strings.ToLower(sub)+"%")
 }
 
 // Lower wraps the given column with the LOWER function.

@@ -185,6 +185,20 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "a8m%", "%mash%"},
 		},
 		{
+			input: Select().
+				From(Table("users")).
+				Where(ContainsFold("name", "Ariel")),
+			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) LIKE ?",
+			wantArgs:  []interface{}{"%ariel%"},
+		},
+		{
+			input: Select().
+				From(Table("users")).
+				Where(ContainsFold("name", "Ariel").And().ContainsFold("nick", "Bar")),
+			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) LIKE ? AND LOWER(`nick`) LIKE ?",
+			wantArgs:  []interface{}{"%ariel%", "%bar%"},
+		},
+		{
 			input: Update("users").
 				Set("name", "foo").
 				Set("age", 10).
