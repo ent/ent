@@ -115,6 +115,32 @@ func TestNewGraph(t *testing.T) {
 	require.Equal(graph.Nodes[0], e1.Type)
 }
 
+func TestNewGraphRequiredLoop(t *testing.T) {
+	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, &load.Schema{
+		Name: "T1",
+		Edges: []*load.Edge{
+			{Name: "parent", Type: "T1", Unique: true, Required: true},
+			{Name: "children", Type: "T1", Inverse: true, RefName: "parent", Required: true},
+		},
+	})
+	require.Error(t, err, "require loop")
+
+	_, err = NewGraph(Config{Package: "entc/gen", Storage: drivers},
+		&load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet", Required: true},
+			},
+		},
+		&load.Schema{
+			Name: "Pet",
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", Inverse: true, RefName: "pets", Unique: true, Required: true},
+			},
+		})
+	require.Error(t, err, "require loop")
+}
+
 func TestRelation(t *testing.T) {
 	require := require.New(t)
 	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1)

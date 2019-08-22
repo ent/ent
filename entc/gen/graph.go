@@ -131,7 +131,6 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			})
 		// inverse only.
 		case e.Inverse && e.Ref == nil:
-			expect(!e.Required, `inverse edge can not be required: %s.%s`, t.Name, e.Name)
 			expect(e.RefName != "", `missing reference name for inverse edge: %s.%s`, t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
 				Type:     typ,
@@ -167,7 +166,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 }
 
 // resolve resolves the type reference and relation of edges.
-// It fails if one of the references is missing.
+// It fails if one of the references is missing or invalid.
 //
 // relation definitions between A and B, where A is the owner of
 // the edge and B uses this edge as a back-reference:
@@ -194,7 +193,10 @@ func (g *Graph) resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf(`assoc is missing for inverse edge: %s.%s`, e.Type.Name, e.Name)
+				return fmt.Errorf(`edge is missing for inverse edge: %s.%s`, e.Type.Name, e.Name)
+			}
+			if !e.Optional && !ref.Optional {
+				return fmt.Errorf(`edges cannot be required in both directions: %s.%s <-> %s.%s`, t.Name, e.Name, ref.Type.Name, ref.Name)
 			}
 			table := t.Table()
 			// The name of the column is how we identify the other side. For example "A Parent has Children"
