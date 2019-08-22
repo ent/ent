@@ -858,6 +858,40 @@ func HasOwnerWith(preds ...predicate.User) predicate.File {
 	)
 }
 
+// HasType applies the HasEdge predicate on the "type" edge.
+func HasType() predicate.File {
+	return predicate.FilePerDialect(
+		func(s *sql.Selector) {
+			t1 := s.Table()
+			s.Where(sql.NotNull(t1.C(TypeColumn)))
+		},
+		func(t *dsl.Traversal) {
+			t.InE(TypeInverseLabel).InV()
+		},
+	)
+}
+
+// HasTypeWith applies the HasEdge predicate on the "type" edge with a given conditions (other predicates).
+func HasTypeWith(preds ...predicate.FileType) predicate.File {
+	return predicate.FilePerDialect(
+		func(s *sql.Selector) {
+			t1 := s.Table()
+			t2 := sql.Select(FieldID).From(sql.Table(TypeInverseTable))
+			for _, p := range preds {
+				p(t2)
+			}
+			s.Where(sql.In(t1.C(TypeColumn), t2))
+		},
+		func(t *dsl.Traversal) {
+			tr := __.OutV()
+			for _, p := range preds {
+				p(tr)
+			}
+			t.InE(TypeInverseLabel).Where(tr).InV()
+		},
+	)
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.FilePerDialect(

@@ -133,13 +133,13 @@ func TestType_AddIndex(t *testing.T) {
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"text"}})
 	require.Error(t, err, "index size exceeded")
 
-	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edge: "parent"})
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"parent"}})
 	require.Error(t, err, "missing edge")
 
-	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edge: "next"})
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"next"}})
 	require.Error(t, err, "not an inverse edge")
 
-	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edge: "owner"})
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"owner"}})
 	require.NoError(t, err)
 }
 

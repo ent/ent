@@ -47,7 +47,7 @@ type Edge struct {
 // Index represents an ent.Index that was loaded from a complied user package.
 type Index struct {
 	Unique bool     `json:"unique,omitempty"`
-	Edge   string   `json:"edge,omitempty"`
+	Edges  []string `json:"edges,omitempty"`
 	Fields []string `json:"fields,omitempty"`
 }
 
@@ -111,7 +111,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	}
 	for _, idx := range indexes {
 		s.Indexes = append(s.Indexes, &Index{
-			Edge:   idx.Edge(),
+			Edges:  idx.Edges(),
 			Fields: idx.Fields(),
 			Unique: idx.IsUnique(),
 		})

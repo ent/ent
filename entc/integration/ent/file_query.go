@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
@@ -72,6 +73,25 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 	case dialect.Neptune:
 		gremlin := fq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.FilesLabel).OutV()
+	}
+	return query
+}
+
+// QueryType chains the current query on the type edge.
+func (fq *FileQuery) QueryType() *FileTypeQuery {
+	query := &FileTypeQuery{config: fq.config}
+	switch fq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		t1 := sql.Table(filetype.Table)
+		t2 := fq.sqlQuery()
+		t2.Select(t2.C(file.TypeColumn))
+		query.sql = sql.Select(t1.Columns(filetype.Columns...)...).
+			From(t1).
+			Join(t2).
+			On(t1.C(filetype.FieldID), t2.C(file.TypeColumn))
+	case dialect.Neptune:
+		gremlin := fq.gremlinQuery()
+		query.gremlin = gremlin.InE(filetype.FilesLabel).OutV()
 	}
 	return query
 }

@@ -35,6 +35,9 @@ func (File) Edges() []ent.Edge {
 		edge.From("owner", User.Type).
 			Ref("files").
 			Unique(),
+		edge.From("type", FileType.Type).
+			Ref("files").
+			Unique(),
 	}
 }
 
@@ -49,7 +52,7 @@ func (File) Indexes() []ent.Index {
 		// unique index under the "owner" sub-tree.
 		// user/owner can't have files with duplicate names.
 		index.Fields("name").
-			FromEdge("owner").
+			FromEdges("owner", "type").
 			Unique(),
 	}
 }

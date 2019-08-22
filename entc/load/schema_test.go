@@ -42,7 +42,7 @@ func (User) Indexes() []ent.Index {
 		index.Fields("name", "address").
 			Unique(),
 		index.Fields("name").
-			FromEdge("parent").
+			FromEdges("parent").
 			Unique(),
 	}
 }
@@ -97,7 +97,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, []string{"name", "address"}, schema.Indexes[0].Fields)
 		require.True(t, schema.Indexes[0].Unique)
 		require.Equal(t, []string{"name"}, schema.Indexes[1].Fields)
-		require.Equal(t, "parent", schema.Indexes[1].Edge)
+		require.Equal(t, []string{"parent"}, schema.Indexes[1].Edges)
 		require.True(t, schema.Indexes[1].Unique)
 	}
 }

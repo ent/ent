@@ -51,7 +51,7 @@ type (
 	// Index is the interface for graph indexes in the schema. It is used by the code generation.
 	Index interface {
 		IsUnique() bool
-		Edge() string
+		Edges() []string
 		Fields() []string
 	}
 

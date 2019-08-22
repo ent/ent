@@ -3,7 +3,7 @@ package index
 // Index represents an index on a vertex columns.
 type Index struct {
 	unique bool
-	edge   string
+	edges  []string
 	fields []string
 }
 
@@ -18,7 +18,7 @@ type Index struct {
 //
 //		// Unique index of field under specific edge.
 //		index.Fields("name").
-//			FromEdge("parent").
+//			FromEdges("parent").
 //			Unique(),
 //	}
 //
@@ -31,24 +31,24 @@ func (i Index) Fields() []string {
 	return i.fields
 }
 
-// FromEdge sets the fields index to be unique under the given edge (sub -graph). For example:
+// FromEdges sets the fields index to be unique under the set of edges (sub -graph). For example:
 //
 //	func (T) Indexes() []ent.Index {
 //
 //		// Unique "name" field under the "parent" edge.
 //		index.Fields("name").
-//			FromEdge("parent").
+//			FromEdges("parent").
 //			Unique(),
 //	}
 //
-func (i *Index) FromEdge(edge string) *Index {
-	i.edge = edge
+func (i *Index) FromEdges(edges ...string) *Index {
+	i.edges = edges
 	return i
 }
 
-// Edge returns the edge name of the given index.
-func (i Index) Edge() string {
-	return i.edge
+// Edges returns the edge names of the given index.
+func (i Index) Edges() []string {
+	return i.edges
 }
 
 // Unique sets the index to be a unique index.
