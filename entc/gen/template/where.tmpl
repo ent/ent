@@ -48,7 +48,13 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ end }}
 
 {{ range $_, $f := $.Fields }}
-	{{ range $_, $op := (ops $f) }}
+	{{ $ops := ops $f }}
+	{{/* storage specific predicates disabled for multi-storage codegen */}}
+	{{ if eq (len $.Storage) 1 }}
+		{{ $storage := index $.Storage 0 }}
+		{{ $ops = append $ops (call $storage.Ops $f) }}
+	{{ end }}
+	{{ range $_, $op := $ops }}
 	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 	{{ $func := print (pascal $f.Name) ($op.Name) }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
