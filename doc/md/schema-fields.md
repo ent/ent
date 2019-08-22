@@ -38,7 +38,7 @@ func (User) Fields() []ent.Field {
 			Default(time.Now),
 	}
 }
-``` 
+```
 
 All fields are required by default, and can be set to optional using the `Optional` method.
 
@@ -137,25 +137,123 @@ func (Group) Fields() []ent.Field {
 The framework provides a few builtin validators for each type:
 
 - Numeric types:
-  - `Positive()` 
+  - `Positive()`
   - `Negative()`
   - `Min(i)` - Validate that the given value is > i.
   - `Max(i)` - Validate that the given value is < i.
-  - `Range(i, j)` - Validate that the given value is within the range [i, j]. 
+  - `Range(i, j)` - Validate that the given value is within the range [i, j].
 
 - `string`
-  - `MinLen(i)` 
+  - `MinLen(i)`
   - `MaxLen(i)`
   - `Match(regexp.Regexp)`
 
 ## Optional
 
+Optional fields are fields that are not required in the entity creation, and
+will be set to nullable fields in the database.
+Unlike edges, **fields are required by default**, and setting them to
+optional should be done explicitly using the `Optional` method.
+
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("required_name"),
+		field.String("optional_name").
+			Optional(),
+	}
+}
+```
+
 ## Nillable
+Sometime, you want to be able to distinguish between the zero value of fields
+and `nil`. For example, if the database column contains `0` or `NULL`. The `Nillable` option exists exactly for this.
+
+If you have an `Optional` field of type `T`, setting it to `Nillable` will generate
+a struct field with type `*T`. Hence, if the database returns `NULL` for this field,
+the struct field will be `nil`. Otherwise, it will contains a pointer to the actual data.
+
+For example, given this schema:
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("required_name"),
+		field.String("optional_name").
+			Optional(),
+		field.String("nillable_name").
+			Optional().
+			Nillable(),
+	}
+}
+```
+
+The generated struct for the `User` entity will be as follows:
+
+```go
+// ent/user.go
+package ent
+
+// User entity.
+type User struct {
+	RequiredName string `json:"required_name,omitempty"`
+	OptionalName string `json:"optional_name,omitempty"`
+	NillableName string `json:"nillable_name,omitempty"`
+}
+```
 
 ## Immutable
 
+Immutable fields are fields that can be set only in the creation of the entity.
+i.e., no setters will be generated for the entity updater.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.Time("created_at").
+			Default(time.Now),
+			Immutable(),
+	}
+}
+```
+
 ## Uniqueness
+Fields can be defined as unique using the `Unique` method.
+Note that, unique fields cannot have default values.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.String("nickname").
+			Unique(),
+	}
+}
+```
 
 ## Indexes
+Indexes can be defined on multi fields and some types of edges as well.
+However, you should note, that this is currently an SQL-only feature.
+
+Read more about this in the [Indexes](indexes.md) section.
 
 ## Struct Tags
+
+Custom struct tags can be added to the generated entities using the `StructTag`
+method. Note that, if this option was not provided, or provided and did not
+contain the `json` tag, the default `json` tag will be added with the field name.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			StructTag(`gqlgen:"gql_name"`),
+	}
+}
+```
