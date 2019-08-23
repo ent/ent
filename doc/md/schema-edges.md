@@ -155,14 +155,24 @@ As you can see, a Group entity can have many users, and a User entity can have h
 In relationship definition, the `users` edge is a *M2M* (many-to-many) relationship, and the `groups`
 edge is also a *M2M* (many-to-many) relationship.
 
+## To and From
+
+`edge.To` and `edge.From` are the 2 builders for creating edges/relations.
+
+A schema that defines an edge using the `edge.To` builder is owning the relation,
+unlike using the `edge.From` builder that gives only a reference for the relation (with different name).
+
+Let's go over a few examples, and then show how you can control the relation type using edges.
+
+1\. *O2O* (one-to-one) relation. 
+
+![er-user-card](https://entgo.io/assets/er_user_card.png)
+
+In this example, a user **has only one** credit-card, and a card **has only one** owner.
+
+
 ## Relationship
-
-## To
-
-## From
 
 ## Required
 
 ## Indexes
-
-## Examples
