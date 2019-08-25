@@ -42,7 +42,7 @@ func (User) Indexes() []ent.Index {
 		index.Fields("name", "address").
 			Unique(),
 		index.Fields("name").
-			FromEdges("parent").
+			Edges("parent").
 			Unique(),
 	}
 }

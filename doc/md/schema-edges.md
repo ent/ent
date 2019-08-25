@@ -169,6 +169,7 @@ Let's go over a few examples, that show how to define different relation types u
 The following examples:
 
 - [O2O Between 2 Types](#o2o-between-2-types)
+- [O2O Same Type](#o2o-same-type)
 
 ## O2O Between 2 Types
 
@@ -248,6 +249,103 @@ func Do(ctx context.Context, client *ent.Client) error {
 ```
 
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2types).
+
+## O2O Same Type
+
+![er-linked-list](https://entgo.io/assets/er_linked_list.png)
+
+In this linked-list example, we have a **recursive relation** named `next`/`prev`. Each node in the list can
+have only of `next`. If a node A points (using `next`) to a node B, B can get its pointer using `prev`.   
+
+`ent/schema/node.go`
+```go
+// Edges of the Node.
+func (Node) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("next", Node.Type).
+			Unique().
+			From("prev").
+			Unique(),
+	}
+}
+```
+
+As you can see, in cases of relations of the same type, you can declare the edge and its
+reference in the same builder.
+
+```diff
+func (Node) Edges() []ent.Edge {
+	return []ent.Edge{
++		edge.To("next", Node.Type).
++			Unique().
++			From("prev").
++			Unique(),
+
+-		edge.To("next", Node.Type).
+-			Unique(),
+-		edge.From("prev", Node.Type).
+-			Ref("next).
+-			Unique(),
+	}
+}
+```
+
+The API for interacting with these edges is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	head, err := client.Node.
+		Create().
+		SetValue(1).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating the head: %v", err)
+	}
+	curr := head
+	// Generate the following linked-list: 1<->2<->3<->4<->5.
+	for i := 0; i < 4; i++ {
+		curr, err = client.Node.
+			Create().
+			SetValue(curr.Value + 1).
+			SetPrev(curr).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Loop over the list and print it. `FirstX` panics if an error occur.
+	for curr = head; curr != nil; curr = curr.QueryNext().FirstX(ctx) {
+		fmt.Printf("%d ", curr.Value)
+	}
+	// Output: 1 2 3 4 5
+
+	// Make the linked-list circular:
+	// The tail of the list, has no "next".
+	tail, err := client.Node.
+		Query().
+		Where(node.Not(node.HasNext())).
+		Only(ctx)
+	if err != nil {
+		return fmt.Errorf("getting the tail of the list: %v", tail)
+	}
+	tail, err = tail.Update().SetNext(head).Save(ctx)
+	if err != nil {
+		return err
+	}
+	// Check that the change actually applied:
+	prev, err := head.QueryPrev().Only(ctx)
+	if err != nil {
+		return fmt.Errorf("getting head's prev: %v", err)
+	}
+	fmt.Printf("\n%v", prev.Value == tail.Value)
+	// Output: true
+
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2recur).
 
 ## Required
 

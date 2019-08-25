@@ -76,6 +76,10 @@ a {
     color: #4d8eaa;
 }
 
+#er-linked-list {
+    height: 230px;
+}
+
 
 @media only screen and (max-width: 1500px) {
     .gridBlock .twoByGridBlock img,

@@ -14,7 +14,8 @@
       "crud",
       "predicates",
       "traversals",
-      "aggregate"
+      "aggregate",
+      "transactions"
     ],
     "Migration": [
       "migrate",
