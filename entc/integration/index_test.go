@@ -40,7 +40,7 @@ func Indexes(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	err = a8m.Update().AddFiles(f5).Exec(ctx)
 	require.Error(err)
-	require.True(ent.IsConstraintFailure(err))
+	require.True(ent.IsConstraintFailure(err), "cannot have 2 files with the same (name, type, owner)")
 	png.Update().RemoveFiles(f5).ExecX(ctx)
 	err = a8m.Update().AddFiles(f5).Exec(ctx)
 	require.NoError(err)

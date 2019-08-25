@@ -179,7 +179,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 // 	 - A have an edge (E) to B (not unique), and B doesn't have a back-reference edge for E.
 // 	 - A have an edge (E) to B (not unique), and B have a back-reference unique edge (E') for E.
 //
-// 	M2O (The "One" side, keeps a reference to the "Many" side).
+// 	M2O (The "Many" side, holds the reference to the "One" side).
 // 	 - A have a unique edge (E) to B, and B doesn't have a back-reference edge for E.
 // 	 - A have a unique edge (E) to B, and B have a back-reference non-unique edge (E') for E.
 //

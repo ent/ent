@@ -122,7 +122,11 @@ func TestType_AddIndex(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	typ.Edges = append(typ.Edges, &Edge{Name: "next"}, &Edge{Name: "owner", Inverse: "files", Rel: Relation{Type: M2O, Columns: []string{"file_id"}}})
+	typ.Edges = append(typ.Edges,
+		&Edge{Name: "next", Rel: Relation{Type: O2O, Columns: []string{"prev_id"}}},
+		&Edge{Name: "prev", Inverse: "next", Rel: Relation{Type: O2O, Columns: []string{"prev_id"}}},
+		&Edge{Name: "owner", Inverse: "files", Rel: Relation{Type: M2O, Columns: []string{"file_id"}}},
+	)
 
 	err = typ.AddIndex(&load.Index{Unique: true})
 	require.Error(t, err, "missing fields")
@@ -137,10 +141,13 @@ func TestType_AddIndex(t *testing.T) {
 	require.Error(t, err, "missing edge")
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"next"}})
-	require.Error(t, err, "not an inverse edge")
+	require.Error(t, err, "not an inverse edge for O2O relation")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"prev"}})
+	require.NoError(t, err, "valid index on O2O relation and field")
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"owner"}})
-	require.NoError(t, err)
+	require.NoError(t, err, "valid index on M2O relation and field")
 }
 
 func TestField(t *testing.T) {

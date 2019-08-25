@@ -308,8 +308,8 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		switch {
 		case edge == nil:
 			return fmt.Errorf("unknown index field %q", name)
-		case !edge.IsInverse():
-			return fmt.Errorf("non-inverse edge for index %q (edge.From)", name)
+		case edge.Rel.Type == O2O && !edge.IsInverse():
+			return fmt.Errorf("non-inverse edge (edge.From) for index %q on O2O relation", name)
 		case edge.Rel.Type != M2O && edge.Rel.Type != O2O:
 			return fmt.Errorf("relation %s for inverse edge %q is not one of (O2O, M2O)", edge.Rel.Type, name)
 		default:

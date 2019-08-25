@@ -52,7 +52,7 @@ func (File) Indexes() []ent.Index {
 		// unique index under the "owner" sub-tree.
 		// user/owner can't have files with duplicate names.
 		index.Fields("name").
-			FromEdges("owner", "type").
+			Edges("owner", "type").
 			Unique(),
 	}
 }

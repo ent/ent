@@ -111,8 +111,8 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	}
 	for _, idx := range indexes {
 		s.Indexes = append(s.Indexes, &Index{
-			Edges:  idx.Edges(),
-			Fields: idx.Fields(),
+			Edges:  idx.EdgeNames(),
+			Fields: idx.FieldNames(),
 			Unique: idx.IsUnique(),
 		})
 	}

@@ -20,35 +20,57 @@ type Index struct {
 //		index.Fields("name").
 //			FromEdges("parent").
 //			Unique(),
+//
 //	}
 //
 func Fields(fields ...string) *Index {
 	return &Index{fields: fields}
 }
 
-// Fields returns the field names of the given index.
-func (i Index) Fields() []string {
-	return i.fields
+// Edges creates an index on the given vertex edge fields.
+// Note that indexes are implemented only for SQL dialects, and does not support gremlin.
+//
+//	func (T) Indexes() []ent.Index {
+//
+//		// Unique index of field under 2 edges.
+//		index.Field("name").
+//			Edges("parent", "type").
+//			Unique(),
+//
+//	}
+//
+func Edges(edges ...string) *Index {
+	return &Index{edges: edges}
 }
 
-// FromEdges sets the fields index to be unique under the set of edges (sub -graph). For example:
+// Fields sets the fields of the index.
+//
+//	func (T) Indexes() []ent.Index {
+//
+//		// Unique "name" and "age" fields under the "parent" edge.
+//		index.Edges("parent").
+//			Fields("name", "age").
+//			Unique(),
+//
+//	}
+func (i *Index) Fields(fields ...string) *Index {
+	i.fields = fields
+	return i
+}
+
+// FromEdges sets the fields index to be unique under the set of edges (sub-graph). For example:
 //
 //	func (T) Indexes() []ent.Index {
 //
 //		// Unique "name" field under the "parent" edge.
 //		index.Fields("name").
-//			FromEdges("parent").
+//			Edges("parent").
 //			Unique(),
 //	}
 //
-func (i *Index) FromEdges(edges ...string) *Index {
+func (i *Index) Edges(edges ...string) *Index {
 	i.edges = edges
 	return i
-}
-
-// Edges returns the edge names of the given index.
-func (i Index) Edges() []string {
-	return i.edges
 }
 
 // Unique sets the index to be a unique index.
@@ -59,7 +81,17 @@ func (i *Index) Unique() *Index {
 	return i
 }
 
+// EdgeNames returns the edge names of the given index.
+func (i Index) EdgeNames() []string {
+	return i.edges
+}
+
+// FieldNames returns the field names of the given index.
+func (i Index) FieldNames() []string {
+	return i.fields
+}
+
 // IsUnique indicates if this index is a unique index.
-func (i *Index) IsUnique() bool {
+func (i Index) IsUnique() bool {
 	return i.unique
 }

@@ -41,7 +41,7 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, client.Schema.Create(context.Background()))
 	for _, tt := range tests {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-		t.Run(strings.Split(name, ".")[1], func(t *testing.T) {
+		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 			drop(t, client)
 			tt(t, client)
 		})
@@ -62,7 +62,7 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, client.Schema.Create(context.Background()))
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-				t.Run(strings.Split(name, ".")[1], func(t *testing.T) {
+				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 					drop(t, client)
 					tt(t, client)
 				})
@@ -89,7 +89,7 @@ func TestGremlin(t *testing.T) {
 	// run all tests except transaction and index tests.
 	for _, tt := range tests[2:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-		t.Run(strings.Split(name, ".")[1], func(t *testing.T) {
+		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 			drop(t, client)
 			tt(t, client)
 		})
