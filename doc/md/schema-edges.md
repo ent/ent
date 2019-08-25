@@ -340,12 +340,85 @@ func Do(ctx context.Context, client *ent.Client) error {
 	}
 	fmt.Printf("\n%v", prev.Value == tail.Value)
 	// Output: true
-
 	return nil
 }
 ```
 
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2recur).
+
+## O2O Bidirectional
+
+![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
+
+In this user-spouse example, we have a **reflexive relation** named `spouse`. Each user can have only one spouse.
+If a user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
+
+Note that, there's no owner/inverse terms in cases of bidirectional edges.
+
+`ent/schema/user.go`
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("spouse", User.Type).
+			Unique(),
+	}
+}
+```
+
+The API for interacting with this edge is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	a8m, err := client.User.
+		Create().
+		SetAge(30).
+		SetName("a8m").
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating user: %v", err)
+	}
+	nati, err := client.User.
+		Create().
+		SetAge(28).
+		SetName("nati").
+		SetSpouse(a8m).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating user: %v", err)
+	}
+
+	// Query the spouse edge.
+	// Unlike `Only`, `OnlyX` panics if an error occurs.
+	spouse := nati.QuerySpouse().OnlyX(ctx)
+	fmt.Println(spouse.Name)
+	// Output: a8m
+
+	spouse = a8m.QuerySpouse().OnlyX(ctx)
+	fmt.Println(spouse.Name)
+	// Output: nati
+
+	// Query how many users have a spouse.
+	// Unlike `Count`, `CountX` panics if an error occurs.
+	count := client.User.
+		Query().
+		Where(user.HasSpouse()).
+		CountX(ctx)
+	fmt.Println(count)
+	// Output: 2
+
+	// Get the user, that has a spouse with name="a8m".
+	spouse = client.User.
+		Query().
+		Where(user.HasSpouseWith(user.Name("a8m"))).
+		OnlyX(ctx)
+	fmt.Println(spouse.Name)
+	// Output: nati
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2obidi).
 
 ## Required
 
