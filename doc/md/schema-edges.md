@@ -35,7 +35,7 @@ func (User) Fields() []ent.Field {
 	}
 }
 
-// Fields of the user.
+// Edges of the user.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("pets", Pet.Type),
@@ -65,7 +65,7 @@ func (Pet) Fields() []ent.Field {
 	}
 }
 
-// Fields of the user.
+// Edges of the user.
 func (Pet) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
@@ -111,7 +111,7 @@ func (Group) Fields() []ent.Field {
 	}
 }
 
-// Fields of the group.
+// Edges of the group.
 func (Group) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("users", User.Type),
@@ -140,7 +140,7 @@ func (User) Fields() []ent.Field {
 	}
 }
 
-// Fields of the user.
+// Edges of the user.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("groups", Group.Type).
@@ -162,16 +162,92 @@ edge is also a *M2M* (many-to-many) relationship.
 A schema that defines an edge using the `edge.To` builder is owning the relation,
 unlike using the `edge.From` builder that gives only a reference for the relation (with different name).
 
-Let's go over a few examples, and then show how you can control the relation type using edges.
+Let's go over a few examples, that show how to define different relation types using edges.
 
-1\. *O2O* (one-to-one) relation. 
+## Relationship
+
+The following examples:
+
+- [O2O Between 2 Types](#o2o-between-2-types)
+
+## O2O Between 2 Types
 
 ![er-user-card](https://entgo.io/assets/er_user_card.png)
 
 In this example, a user **has only one** credit-card, and a card **has only one** owner.
 
+The `User` schema defines an `edge.To` card named `card`, and the `Card` schema
+defines a reference to this edge using `edge.From` named `owner`. 
 
-## Relationship
+
+`ent/schema/user.go`
+```go
+// Edges of the user.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("card", Card.Type).
+			Unique(),
+	}
+}
+```
+
+`ent/schema/card.go`
+```go
+// Edges of the user.
+func (Card) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("card").
+			Unique().
+			// We add the "Required" method to the builder
+			// to make this edge required on entity creation.
+			// i.e. Card cannot be created without its owner.
+			Required(),
+	}
+}
+```
+
+The API for interacting with these edges is as follows:
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	a8m, err := client.User.
+		Create().
+		SetAge(30).
+		SetName("Mashraki").
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating user: %v", err)
+	}
+	log.Println("user:", a8m)
+	card1, err := client.Card.
+		Create().
+		SetOwner(a8m).
+		SetNumber("1020").
+		SetExpired(time.Now().Add(time.Minute)).
+		Save(ctx)
+	if err != nil {
+    	return fmt.Errorf("creating card: %v", err)
+    }
+	log.Println("card:", card1)
+	// Only returns the card of the user,
+	// and expects that there's only one.
+	card2, err := a8m.QueryCard().Only(ctx)
+	if err != nil {
+		return fmt.Errorf("querying card: %v", err)
+    }
+	log.Println("card:", card2)
+	// The Card entity is able to query its owner using
+	// its back-reference.
+	owner, err := card2.QueryOwner().Only(ctx)
+	if err != nil {
+		return fmt.Errorf("querying owner: %v", err)
+    }
+	log.Println("owner:", owner)
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2types).
 
 ## Required
 
