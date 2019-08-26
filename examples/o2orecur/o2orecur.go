@@ -28,6 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
 func Do(ctx context.Context, client *ent.Client) error {
 	head, err := client.Node.
 		Create().

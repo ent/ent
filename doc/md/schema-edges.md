@@ -168,8 +168,11 @@ Let's go over a few examples, that show how to define different relation types u
 
 The following examples:
 
-- [O2O Two Types](#o2o-between-2-types)
+- [O2O Two Types](#o2o-two-types)
 - [O2O Same Type](#o2o-same-type)
+- [O2O Bidirectional](#o2o-bidirectional)
+- [O2M Two Types](#o2m-two-types)
+- [O2M Same Type](#o2m-same-type)
 
 ## O2O Two Types
 
@@ -452,7 +455,7 @@ func (Pet) Edges() []ent.Edge {
 }
 ```
 
-The API for interacting with this edge is as follows:
+The API for interacting with these edges is as follows:
 
 ```go
 func Do(ctx context.Context, client *ent.Client) error {
@@ -502,6 +505,114 @@ func Do(ctx context.Context, client *ent.Client) error {
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2m2types).
 
 ## O2M Same Type
+
+![er-tree](https://entgo.io/assets/er_tree.png)
+
+In this example, we have a recursive O2M relation between tree's nodes and their children (or their parent).  
+Each node in the tree **has many** children, and **has one** parent. If node A adds B to its children,
+B can get its owner using the `owner` edge.
+
+
+`ent/schema/node.go`
+```go
+// Edges of the Node.
+func (Node) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("children", Node.Type).
+			From("parent").
+			Unique(),
+	}
+}
+```
+
+As you can see, in cases of relations of the same type, you can declare the edge and its
+reference in the same builder.
+
+```diff
+func (Node) Edges() []ent.Edge {
+	return []ent.Edge{
++		edge.To("children", Node.Type).
++			From("parent").
++			Unique(),
+
+-		edge.To("children", Node.Type),
+-		edge.From("parent", Node.Type).
+-			Ref("children).
+-			Unique(),
+	}
+}
+```
+
+The API for interacting with these edges is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	root, err := client.Node.
+		Create().
+		SetValue(2).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating the root: %v", err)
+	}
+	// Add additional nodes to the tree:
+	//
+	//       2
+	//     /   \
+	//    1     4
+	//        /   \
+	//       3     5
+	//
+	// Unlike `Create`, `CreateX` panics if an error occurs.
+	n1 := client.Node.
+		Create().
+		SetValue(1).
+		SetParent(root).
+		SaveX(ctx)
+	n4 := client.Node.
+		Create().
+		SetValue(4).
+		SetParent(root).
+		SaveX(ctx)
+	n3 := client.Node.
+		Create().
+		SetValue(3).
+		SetParent(n4).
+		SaveX(ctx)
+	n5 := client.Node.
+		Create().
+		SetValue(5).
+		SetParent(n4).
+		SaveX(ctx)
+
+	fmt.Println("Tree leafs", []int{n1.Value, n3.Value, n5.Value})
+	// Output: Tree leafs [1 3 5]
+
+	// Get all leafs (nodes without children).
+	// Unlike `Int`, `IntX` panics if an error occurs.
+	ints := client.Node.
+		Query().                             // All nodes.
+		Where(node.Not(node.HasChildren())). // Only leafs.
+		Order(ent.Asc(node.FieldValue)).     // Order by their `value` field.
+		GroupBy(node.FieldValue).            // Extract only the `value` field.
+		IntsX(ctx)
+	fmt.Println(ints)
+	// Output: [1 3 5]
+
+	// Get orphan nodes (nodes without parent).
+	// Unlike `Only`, `OnlyX` panics if an error occurs.
+	orphan := client.Node.
+		Query().
+		Where(node.Not(node.HasParent())).
+		OnlyX(ctx)
+	fmt.Println(orphan)
+	// Output: Node(id=1, value=2)
+
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2mrecur).
+
 
 ## M2M Two Types
 
