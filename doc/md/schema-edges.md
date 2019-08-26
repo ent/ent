@@ -173,6 +173,9 @@ The following examples:
 - [O2O Bidirectional](#o2o-bidirectional)
 - [O2M Two Types](#o2m-two-types)
 - [O2M Same Type](#o2m-same-type)
+- [M2M Two Types](#m2m-two-types)
+- [M2M Same Type](#m2m-same-type)
+- [M2M Bidirectional](#m2m-bidirectional)
 
 ## O2O Two Types
 
@@ -613,8 +616,97 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2mrecur).
 
-
 ## M2M Two Types
+
+![er-user-groups](https://entgo.io/assets/er_user_groups.png)
+
+In this groups-users example, we have a M2M relation between groups and their users.
+Each group **has many** users, and each user can be joined to **many** groups.
+
+`ent/schema/group.go`
+```go
+// Edges of the Group.
+func (Group) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("users", User.Type),
+	}
+}
+```
+
+`ent/schema/user.go`
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("groups", Group.Type).
+			Ref("users"),
+	}
+}
+```
+
+The API for interacting with these edges is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	// Unlike `Save`, `SaveX` panics if an error occurs.
+	hub := client.Group.
+		Create().
+		SetName("GitHub").
+		SaveX(ctx)
+	lab := client.Group.
+		Create().
+		SetName("GitLab").
+		SaveX(ctx)
+	a8m := client.User.
+		Create().
+		SetAge(30).
+		SetName("a8m").
+		AddGroups(hub, lab).
+		SaveX(ctx)
+	nati := client.User.
+		Create().
+		SetAge(28).
+		SetName("nati").
+		AddGroups(hub).
+		SaveX(ctx)
+
+	// Query the edges.
+	groups, err := a8m.
+		QueryGroups().
+		All(ctx)
+	if err != nil {
+		return fmt.Errorf("querying a8m groups: %v", err)
+	}
+	fmt.Println(groups)
+	// Output: [Group(id=1, name=GitHub) Group(id=2, name=GitLab)]
+
+	groups, err = nati.
+		QueryGroups().
+		All(ctx)
+	if err != nil {
+		return fmt.Errorf("querying nati groups: %v", err)
+	}
+	fmt.Println(groups)
+	// Output: [Group(id=1, name=GitHub)]
+
+	// Traverse the graph.
+	users, err := a8m.
+		QueryGroups().                                           // [hub, lab]
+		Where(group.Not(group.HasUsersWith(user.Name("nati")))). // [lab]
+		QueryUsers().                                            // [a8m]
+		QueryGroups().                                           // [hub, lab]
+		QueryUsers().                                            // [a8m, nati]
+		All(ctx)
+	if err != nil {
+		return fmt.Errorf("traversing the graph: %v", err)
+	}
+	fmt.Println(users)
+	// Output: [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
 

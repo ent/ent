@@ -227,8 +227,8 @@ func (g *Graph) resolve(t *Type) error {
 				if c1 == c2 {
 					c2 = rules.Singularize(e.Name) + "_id"
 				}
-				e.Rel.Columns = append(e.Rel.Columns, c1, c2)
-				ref.Rel.Columns = append(ref.Rel.Columns, c1, c2)
+				e.Rel.Columns = []string{c1, c2}
+				ref.Rel.Columns = []string{c1, c2}
 			}
 			e.Rel.Table, ref.Rel.Table = table, table
 			if !e.M2M() {
