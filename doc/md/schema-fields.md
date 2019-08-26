@@ -240,7 +240,7 @@ func (User) Fields() []ent.Field {
 Indexes can be defined on multi fields and some types of edges as well.
 However, you should note, that this is currently an SQL-only feature.
 
-Read more about this in the [Indexes](indexes.md) section.
+Read more about this in the [Indexes](schema-indexes.md) section.
 
 ## Struct Tags
 

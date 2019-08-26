@@ -1,8 +1,7 @@
-# User-Spouse Bidirectional O2O Relation
+# Following-Followers M2M Relation
 
-An example for a reflexive O2O relation between a User to its spouse (also a User).    
-Each user can have only one spouse. If a user A sets its spouse (using `spouse`) to B,
-B can get its spouse using the `spouse` edge.
+In this following-followers example, we have a M2M relation between users to its followers. Each user 
+can follow **many** users, and can have **many** followers.
 
 ### Generate Assets
 

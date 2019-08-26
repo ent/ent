@@ -356,7 +356,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
 
-In this user-spouse example, we have a **reflexive relation** named `spouse`. Each user can have only one spouse.
+In this user-spouse example, we have a **symmetric O2O relation** named `spouse`. Each user can have only one spouse.
 If user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
 
 Note that, there's no owner/inverse terms in cases of bidirectional edges.
@@ -804,6 +804,88 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ## M2M Bidirectional
 
+![er-user-friends](https://entgo.io/assets/er_user_friends.png)
+
+In this user-friends example, we have a **symmetric M2M relation** named `friends`.
+Each user can **have many** friends. If user A becomes a friend of B, B is also a friend of A.
+
+Note that, there's no owner/inverse terms in cases of bidirectional edges.
+
+`ent/schema/user.go`
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("friends", User.Type),
+	}
+}
+```
+
+The API for interacting with these edges is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	// Unlike `Save`, `SaveX` panics if an error occurs.
+	a8m := client.User.
+		Create().
+		SetAge(30).
+		SetName("a8m").
+		SaveX(ctx)
+	nati := client.User.
+		Create().
+		SetAge(28).
+		SetName("nati").
+		AddFriends(a8m).
+		SaveX(ctx)
+
+	// Query friends. Unlike `All`, `AllX` panics if an error occurs.
+	friends := nati.
+		QueryFriends().
+		AllX(ctx)
+	fmt.Println(friends)
+	// Output: [User(id=1, age=30, name=a8m)]
+
+	friends = a8m.
+		QueryFriends().
+		AllX(ctx)
+	fmt.Println(friends)
+	// Output: [User(id=2, age=28, name=nati)]
+
+	// Query the graph:
+	friends = client.User.
+		Query().
+		Where(user.HasFriends()).
+		AllX(ctx)
+	fmt.Println(friends)
+	// Output: [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mbidi).
+
+
 ## Required
 
+Edges can be defined as required in the entity creation using the `Required` method on the builder.
+
+```go
+// Edges of the user.
+func (Card) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("card").
+			Unique().
+			Required(),
+	}
+}
+```
+
+If the example above, a card entity cannot be created without its owner. 
+
 ## Indexes
+
+Indexes can be defined on multi fields and some types of edges as well.
+However, you should note, that this is currently an SQL-only feature.
+
+Read more about this in the [Indexes](schema-indexes.md) section.

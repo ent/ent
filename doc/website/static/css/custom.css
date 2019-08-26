@@ -76,7 +76,8 @@ a {
     color: #4d8eaa;
 }
 
-#er-linked-list, #er-user-spouse, #er-tree, #er-following-followers {
+#er-linked-list, #er-user-spouse, #er-tree, #er-following-followers,
+#er-user-friends {
     height: 230px;
 }
 
