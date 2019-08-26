@@ -540,7 +540,7 @@ func (Node) Edges() []ent.Edge {
 
 -		edge.To("children", Node.Type),
 -		edge.From("parent", Node.Type).
--			Ref("children).
+-			Ref("children").
 -			Unique(),
 	}
 }
@@ -709,6 +709,98 @@ func Do(ctx context.Context, client *ent.Client) error {
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
+
+![er-following-followers](https://entgo.io/assets/er_following_followers.png)
+
+In this following-followers example, we have a M2M relation between users to its followers. Each user 
+can follow **many** users, and can have **many** followers.
+
+`ent/schema/user.go`
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("following", User.Type).
+			From("followers"),
+	}
+}
+```
+
+
+As you can see, in cases of relations of the same type, you can declare the edge and its
+reference in the same builder.
+
+```diff
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
++		edge.To("following", User.Type).
++			From("followers"),
+
+-		edge.To("following", User.Type),
+-		edge.From("followers", User.Type).
+-			Ref("following"),
+	}
+}
+```
+
+The API for interacting with these edges is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	// Unlike `Save`, `SaveX` panics if an error occurs.
+	a8m := client.User.
+		Create().
+		SetAge(30).
+		SetName("a8m").
+		SaveX(ctx)
+	nati := client.User.
+		Create().
+		SetAge(28).
+		SetName("nati").
+		AddFollowers(a8m).
+		SaveX(ctx)
+
+	// Query following/followers:
+
+	flw := a8m.QueryFollowing().AllX(ctx)
+	fmt.Println(flw)
+	// Output: [User(id=2, age=28, name=nati)]
+
+	flr := a8m.QueryFollowers().AllX(ctx)
+	fmt.Println(flr)
+	// Output: []
+
+	flw = nati.QueryFollowing().AllX(ctx)
+	fmt.Println(flw)
+	// Output: []
+
+	flr = nati.QueryFollowers().AllX(ctx)
+	fmt.Println(flr)
+	// Output: [User(id=1, age=30, name=a8m)]
+
+	// Traverse the graph:
+
+	ages := nati.
+		QueryFollowers().       // [a8m]
+		QueryFollowing().       // [nati]
+		GroupBy(user.FieldAge). // [28]
+		IntsX(ctx)
+	fmt.Println(ages)
+	// Output: [28]
+
+	names := client.User.
+		Query().
+		Where(user.Not(user.HasFollowers())).
+		GroupBy(user.FieldName).
+		StringsX(ctx)
+	fmt.Println(names)
+	// Output: [a8m]
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mrecur).
+
 
 ## M2M Bidirectional
 
