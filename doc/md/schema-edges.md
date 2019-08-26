@@ -168,10 +168,10 @@ Let's go over a few examples, that show how to define different relation types u
 
 The following examples:
 
-- [O2O Between 2 Types](#o2o-between-2-types)
+- [O2O Two Types](#o2o-between-2-types)
 - [O2O Same Type](#o2o-same-type)
 
-## O2O Between 2 Types
+## O2O Two Types
 
 ![er-user-card](https://entgo.io/assets/er_user_card.png)
 
@@ -351,7 +351,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 ![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
 
 In this user-spouse example, we have a **reflexive relation** named `spouse`. Each user can have only one spouse.
-If a user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
+If user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
 
 Note that, there's no owner/inverse terms in cases of bidirectional edges.
 
@@ -419,6 +419,95 @@ func Do(ctx context.Context, client *ent.Client) error {
 ```
 
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2obidi).
+
+## O2M Two Types
+
+![er-user-pets](https://entgo.io/assets/er_user_pets.png)
+
+In this user-pets example, we have a O2M relation between user and its pets.
+Each user **has many** pets, and a pet **has one** owner.
+If user A adds a pet B using the `pets` edge, B can get its owner using the `owner` edge.
+
+Note that, this relation is also a M2O (many-to-one) from the point of view of the `Pet` schema. 
+
+`ent/schema/user.go`
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("pets", Pet.Type),
+	}
+}
+```
+
+`ent/schema/pet.go`
+```go
+// Edges of the Pet.
+func (Pet) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("pets").
+			Unique(),
+	}
+}
+```
+
+The API for interacting with this edge is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	// Create the 2 pets.
+	pedro, err := client.Pet.
+		Create().
+		SetName("pedro").
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating pet: %v", err)
+	}
+	lola, err := client.Pet.
+		Create().
+		SetName("lola").
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating pet: %v", err)
+	}
+	// Create the user, and add its pets on the creation.
+	a8m, err := client.User.
+		Create().
+		SetAge(30).
+		SetName("a8m").
+		AddPets(pedro, lola).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("creating user: %v", err)
+	}
+	fmt.Println("User created:", a8m)
+	// Output: User(id=1, age=30, name=a8m)
+
+	// Query the owner. Unlike `Only`, `OnlyX` panics if an error occurs.
+	owner := pedro.QueryOwner().OnlyX(ctx)
+	fmt.Println(owner.Name)
+	// Output: a8m
+
+	// Traverse the sub-graph. Unlike `Count`, `CountX` panics if an error occurs.
+	count := pedro.
+		QueryOwner(). // a8m
+		QueryPets().  // pedro, lola
+		CountX(ctx)   // count
+	fmt.Println(count)
+	// Output: 2
+	return nil
+}
+```
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2m2types).
+
+## O2M Same Type
+
+## M2M Two Types
+
+## M2M Same Type
+
+## M2M Bidirectional
 
 ## Required
 
