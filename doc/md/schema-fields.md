@@ -88,7 +88,20 @@ To read more about how each type is mapped to its database-type, go to the [Migr
 
 ## Default Values
 
-**Non-unique** fields support default values using the `.Default` method.
+**Non-unique** fields support default values using the `.Default` and `.UpdateDefault` methods.
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Default(time.Now),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+	}
+}
+```
 
 ## Validators
 
