@@ -191,6 +191,20 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Select().
 				From(Table("users")).
+				Where(EqualFold("name", "Alex")),
+			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) = ?",
+			wantArgs:  []interface{}{"alex"},
+		},
+		{
+			input: Select().
+				From(Table("users")).
+				Where(EqualFold("name", "BAR").Or().EqualFold("name", "BAZ")),
+			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) = ? OR LOWER(`name`) = ?",
+			wantArgs:  []interface{}{"bar", "baz"},
+		},
+		{
+			input: Select().
+				From(Table("users")).
 				Where(ContainsFold("name", "Ariel")),
 			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) LIKE ?",
 			wantArgs:  []interface{}{"%ariel%"},

@@ -1024,6 +1024,14 @@ func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
 	return p.Like(col, "%"+suffix)
 }
 
+// EqualFold is a helper predicate that applies the "=" predicate with case-folding.
+func EqualFold(col, sub string) *Predicate { return (&Predicate{}).EqualFold(col, sub) }
+
+// EqualFold is a helper predicate that applies the "=" predicate with case-folding.
+func (p *Predicate) EqualFold(col, sub string) *Predicate {
+	return p.EQ(Lower(col), strings.ToLower(sub))
+}
+
 // Contains is a helper predicate that checks substring using the LIKE predicate.
 func Contains(col, sub string) *Predicate { return (&Predicate{}).Contains(col, sub) }
 

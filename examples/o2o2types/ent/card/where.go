@@ -1,7 +1,3 @@
-// Copyright 2019-present Facebook Inc. All rights reserved.
-// This source code is licensed under the Apache 2.0 license found
-// in the LICENSE file in the root directory of this source tree.
-
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package card
@@ -340,6 +336,15 @@ func NumberHasSuffix(v string) predicate.Card {
 	return predicate.Card(
 		func(s *sql.Selector) {
 			s.Where(sql.HasSuffix(s.C(FieldNumber), v))
+		},
+	)
+}
+
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.EqualFold(s.C(FieldNumber), v))
 		},
 	)
 }

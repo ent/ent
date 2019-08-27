@@ -1,7 +1,3 @@
-// Copyright 2019-present Facebook Inc. All rights reserved.
-// This source code is licensed under the Apache 2.0 license found
-// in the LICENSE file in the root directory of this source tree.
-
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package pet
@@ -237,6 +233,15 @@ func NameHasSuffix(v string) predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
 			s.Where(sql.HasSuffix(s.C(FieldName), v))
+		},
+	)
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.EqualFold(s.C(FieldName), v))
 		},
 	)
 }

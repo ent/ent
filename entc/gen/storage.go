@@ -56,7 +56,7 @@ var drivers = []*Storage{
 			if !f.IsString() {
 				return nil
 			}
-			return []Op{ContainsFold}
+			return []Op{EqualFold, ContainsFold}
 		},
 		OpCode: opCodes(sqlCode[:]),
 	},

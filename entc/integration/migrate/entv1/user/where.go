@@ -347,6 +347,15 @@ func NameHasSuffix(v string) predicate.User {
 	)
 }
 
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EqualFold(s.C(FieldName), v))
+		},
+	)
+}
+
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.User {
 	return predicate.User(
@@ -489,6 +498,15 @@ func AddressNotNil() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldAddress)))
+		},
+	)
+}
+
+// AddressEqualFold applies the EqualFold predicate on the "address" field.
+func AddressEqualFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EqualFold(s.C(FieldAddress), v))
 		},
 	)
 }

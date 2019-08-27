@@ -19,6 +19,7 @@ const (
 	NotNil                 // IS NOT NULL / hasNot
 	In                     // within
 	NotIn                  // without
+	EqualFold              // equals case-insensitive
 	Contains               // containing
 	ContainsFold           // containing case-insensitive
 	HasPrefix              // startingWith
@@ -54,6 +55,7 @@ var (
 		LTE:          "LTE",
 		IsNil:        "IsNil",
 		NotNil:       "NotNil",
+		EqualFold:    "EqualFold",
 		Contains:     "Contains",
 		ContainsFold: "ContainsFold",
 		HasPrefix:    "HasPrefix",

@@ -52,6 +52,7 @@ func TestMySQL(t *testing.T) {
 			idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 
 			// sql specific predicates.
+			EqualFold(t, clientv2)
 			ContainsFold(t, clientv2)
 		})
 	}
@@ -75,6 +76,7 @@ func TestSQLite(t *testing.T) {
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
 	_, err = drv.ExecContext(ctx, "PRAGMA case_sensitive_like=1")
 	require.NoError(t, err)
+	EqualFold(t, client)
 	ContainsFold(t, client)
 }
 
@@ -116,6 +118,14 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 		client.User.Query().CountX(ctx),
 		client.User.Query().Where(user.Title(user.DefaultTitle)).CountX(ctx),
 	)
+}
+
+func EqualFold(t *testing.T, client *entv2.Client) {
+	ctx := context.Background()
+	t.Log("testing equal-fold on sql specific dialects")
+	client.User.Create().SetAge(37).SetName("Alex").SetPhone("123456789").SaveX(ctx)
+	require.False(t, client.User.Query().Where(user.NameEQ("alex")).ExistX(ctx))
+	require.True(t, client.User.Query().Where(user.NameEqualFold("alex")).ExistX(ctx))
 }
 
 func ContainsFold(t *testing.T, client *entv2.Client) {
