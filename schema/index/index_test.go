@@ -9,18 +9,24 @@ import (
 )
 
 func TestIndex(t *testing.T) {
-	idx := index.Fields("name", "address")
-	require.Empty(t, idx.EdgeNames())
-	require.False(t, idx.IsUnique())
-	require.Equal(t, []string{"name", "address"}, idx.FieldNames())
+	idx := index.Fields("name", "address").
+		Descriptor()
+	require.Empty(t, idx.Edges)
+	require.False(t, idx.Unique)
+	require.Equal(t, []string{"name", "address"}, idx.Fields)
 
-	idx = index.Fields("name", "address").Unique()
-	require.Empty(t, idx.EdgeNames())
-	require.True(t, idx.IsUnique())
-	require.Equal(t, []string{"name", "address"}, idx.FieldNames())
+	idx = index.Fields("name", "address").
+		Unique().
+		Descriptor()
+	require.Empty(t, idx.Edges)
+	require.True(t, idx.Unique)
+	require.Equal(t, []string{"name", "address"}, idx.Fields)
 
-	idx = index.Fields("name", "address").Edges("parent", "type").Unique()
-	require.Equal(t, []string{"parent", "type"}, idx.EdgeNames())
-	require.True(t, idx.IsUnique())
-	require.Equal(t, []string{"name", "address"}, idx.FieldNames())
+	idx = index.Fields("name", "address").
+		Edges("parent", "type").
+		Unique().
+		Descriptor()
+	require.Equal(t, []string{"parent", "type"}, idx.Edges)
+	require.True(t, idx.Unique)
+	require.Equal(t, []string{"name", "address"}, idx.Fields)
 }

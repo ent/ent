@@ -32,6 +32,8 @@ var Columns = []string{
 
 var (
 	fields = schema.User{}.Fields()
+	// descName is the schema descriptor for name field.
+	descName = fields[1].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = fields[1].Validators()[0].(func(string) error)
+	NameValidator = descName.Validators[0].(func(string) error)
 )

@@ -79,17 +79,25 @@ var (
 
 var (
 	fields = schema.Group{}.Fields()
+	// descActive is the schema descriptor for active field.
+	descActive = fields[0].Descriptor()
 	// DefaultActive holds the default value for the active field.
-	DefaultActive = fields[0].Value().(bool)
+	DefaultActive = descActive.Default.(bool)
+	// descType is the schema descriptor for type field.
+	descType = fields[2].Descriptor()
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	TypeValidator = fields[2].Validators()[0].(func(string) error)
+	TypeValidator = descType.Validators[0].(func(string) error)
+	// descMaxUsers is the schema descriptor for max_users field.
+	descMaxUsers = fields[3].Descriptor()
 	// DefaultMaxUsers holds the default value for the max_users field.
-	DefaultMaxUsers = fields[3].Value().(int)
+	DefaultMaxUsers = descMaxUsers.Default.(int)
 	// MaxUsersValidator is a validator for the "max_users" field. It is called by the builders before save.
-	MaxUsersValidator = fields[3].Validators()[0].(func(int) error)
+	MaxUsersValidator = descMaxUsers.Validators[0].(func(int) error)
+	// descName is the schema descriptor for name field.
+	descName = fields[4].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator = func() func(string) error {
-		validators := fields[4].Validators()
+		validators := descName.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

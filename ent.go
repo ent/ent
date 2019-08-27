@@ -1,9 +1,10 @@
-// Package ent is an interface package for the schemas that use entc.
+// Package ent is the interface between end-user schemas and entc (ent codegen).
 package ent
 
 import (
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/index"
 )
 
 type (
@@ -16,46 +17,76 @@ type (
 	//	}
 	//
 	Interface interface {
+		// Type is a dummy method, that is used in edge declaration.
+		//
+		// The Type method should be used as follows:
+		//
+		//	type S struct { ent.Schema }
+		//
+		//	type T struct { ent.Schema }
+		//
+		//	func (T) Edges() []ent.Edge {
+		//		return []ent.Edge{
+		//			edge.To("S", S.Type),
+		//		}
+		//	}
+		//
 		Type()
+		// Fields returns the fields of the schema.
 		Fields() []Field
+		// Edges returns the edges of the schema.
 		Edges() []Edge
+		// Indexes returns the indexes of the schema.
 		Indexes() []Index
 	}
 
-	// Field is the interface for vertex and edges fields used by the code generation.
+	// A Field interface returns a field descriptor for vertex fields/properties.
+	// The usage for the interface is as follows:
+	//
+	//	func (T) Fields() []ent.Field {
+	//		return []ent.Field{
+	//			field.Int("int"),
+	//		}
+	//	}
+	//
 	Field interface {
-		Tag() string
-		Name() string
-		Type() field.Type
-		IsUnique() bool
-		IsNillable() bool
-		IsOptional() bool
-		HasDefault() bool
-		IsImmutable() bool
-		Value() interface{}
-		Validators() []interface{}
+		Descriptor() *field.Descriptor
 	}
 
-	// Edge is the interface for graph edges in the schema. It is used by the code generation.
+	// A Edge interface returns an edge descriptor for vertex edges.
+	// The usage for the interface is as follows:
+	//
+	//	func (T) Edges() []ent.Edge {
+	//		return []ent.Edge{
+	//			edge.To("S", S.Type),
+	//		}
+	//	}
+	//
 	Edge interface {
-		Tag() string
-		Type() string
-		Name() string
-		RefName() string
-		Assoc() *edge.Edge
-		IsUnique() bool
-		IsInverse() bool
-		IsRequired() bool
+		Descriptor() *edge.Descriptor
 	}
 
-	// Index is the interface for graph indexes in the schema. It is used by the code generation.
+	// A Index interface returns an index descriptor for vertex indexes.
+	// The usage for the interface is as follows:
+	//
+	//	func (T) Indexes() []ent.Index {
+	//		return []ent.Index{
+	//			index.Fields("f1", "f2").
+	//				Unique(),
+	//		}
+	//	}
+	//
 	Index interface {
-		IsUnique() bool
-		EdgeNames() []string
-		FieldNames() []string
+		Descriptor() *index.Descriptor
 	}
 
-	// Schema is the default implementation Interface.
+	// Schema is the default implementation for the schema Interface.
+	// It can be embedded in end-user schemas as follows:
+	//
+	//	type T struct {
+	//		ent.Schema
+	//	}
+	//
 	Schema struct {
 		Interface
 	}

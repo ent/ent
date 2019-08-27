@@ -8,32 +8,32 @@ import "errors"
 {{ range $_, $t := $.Ints }}
 	{{ $title := title $t.String }}
 	// {{ $title }} returns a new Field with type {{ $t }}.
-	func {{ $title }}(name string) *{{ $t }}Builder { return &{{ $t }}Builder{Field{typ: Type{{ $title }}, name: name}} }
+	func {{ $title }}(name string) *{{ $t }}Builder { return &{{ $t }}Builder{desc: &Descriptor{Type: Type{{ $title }}, Name: name}} }
 {{ end }}
 
 // Float returns a new Field with type float64.
-func Float(name string) *float64Builder { return &float64Builder{Field{typ: TypeFloat64, name: name}} }
+func Float(name string) *float64Builder { return &float64Builder{desc: &Descriptor{Type: TypeFloat64, Name: name}} }
 
 // Float32 returns a new Field with type float32.
-func Float32(name string) *float32Builder { return &float32Builder{Field{typ: TypeFloat32, name: name}} }
+func Float32(name string) *float32Builder { return &float32Builder{desc: &Descriptor{Type: TypeFloat32, Name: name}} }
 
 {{ range $_, $t := $.Ints }}
 {{ $builder := printf "%sBuilder" $t }}
 
 // {{ $builder }} is the builder for {{ $t }} field.
 type {{ $builder }} struct {
-	Field
+	desc *Descriptor
 }
 
 // Unique makes the field unique within all vertices of this type.
 func (b *{{ $builder }}) Unique() *{{ $builder }} {
-	b.unique = true
+	b.desc.Unique = true
 	return b
 }
 
 // Range adds a range validator for this field where the given value needs to be in the range of [i, j].
 func (b *{{ $builder }}) Range(i, j {{ $t }}) *{{ $builder }} {
-	b.validators = append(b.validators, func(v {{ $t }}) error {
+	b.desc.Validators = append(b.desc.Validators, func(v {{ $t }}) error {
 		if v < i || v > j {
 			return errors.New("value out of range")
 		}
@@ -44,7 +44,7 @@ func (b *{{ $builder }}) Range(i, j {{ $t }}) *{{ $builder }} {
 
 // Min adds a minimum value validator for this field. Operation fails if the validator fails.
 func (b *{{ $builder }}) Min(i {{ $t }}) *{{ $builder }} {
-	b.validators = append(b.validators, func(v {{ $t }}) error {
+	b.desc.Validators = append(b.desc.Validators, func(v {{ $t }}) error {
 		if v < i {
 			return errors.New("value out of range")
 		}
@@ -55,7 +55,7 @@ func (b *{{ $builder }}) Min(i {{ $t }}) *{{ $builder }} {
 
 // Max adds a maximum value validator for this field. Operation fails if the validator fails.
 func (b *{{ $builder }}) Max(i {{ $t }}) *{{ $builder }} {
-	b.validators = append(b.validators, func(v {{ $t }}) error {
+	b.desc.Validators = append(b.desc.Validators, func(v {{ $t }}) error {
 		if v > i {
 			return errors.New("value out of range")
 		}
@@ -78,14 +78,14 @@ func (b *{{ $builder }}) Positive() *{{ $builder }} {
 
 // Default sets the default value of the field.
 func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
-	b.value = i
+	b.desc.Default = i
 	return b
 }
 
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
-	b.nillable = true
+	b.desc.Nillable = true
 	return b
 }
 
@@ -97,26 +97,31 @@ func (b *{{ $builder }}) Comment(c string) *{{ $builder }} {
 // Optional indicates that this field is optional on create.
 // Unlike edges, fields are required by default.
 func (b *{{ $builder }}) Optional() *{{ $builder }} {
-	b.optional = true
+	b.desc.Optional = true
 	return b
 }
 
 // Immutable indicates that this field cannot be updated.
 func (b *{{ $builder }}) Immutable() *{{ $builder }} {
-	b.immutable = true
+	b.desc.Immutable = true
 	return b
 }
 
 // StructTag sets the struct tag of the field.
 func (b *{{ $builder }}) StructTag(s string) *{{ $builder }} {
-	b.tag = s
+	b.desc.Tag = s
 	return b
 }
 
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *{{ $builder }}) Validate(fn func({{ $t }}) error) *{{ $builder }} {
-	b.validators = append(b.validators, fn)
+	b.desc.Validators = append(b.desc.Validators, fn)
 	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *{{ $builder }}) Descriptor() *Descriptor {
+	return b.desc
 }
 
 {{ end }}
@@ -126,18 +131,18 @@ func (b *{{ $builder }}) Validate(fn func({{ $t }}) error) *{{ $builder }} {
 
 // {{ $builder }} is the builder for float fields.
 type {{ $builder }} struct {
-	Field
+	desc *Descriptor
 }
 
 // Unique makes the field unique within all vertices of this type.
 func (b *{{ $builder }}) Unique() *{{ $builder }} {
-	b.unique = true
+	b.desc.Unique = true
 	return b
 }
 
 // Range adds a range validator for this field where the given value needs to be in the range of [i, j].
 func (b *{{ $builder }}) Range(i, j {{ $t }}) *{{ $builder }} {
-	b.validators = append(b.validators, func(v  {{ $t }}) error {
+	b.desc.Validators = append(b.desc.Validators, func(v  {{ $t }}) error {
 		if v < i || v > j {
 			return errors.New("value out of range")
 		}
@@ -148,7 +153,7 @@ func (b *{{ $builder }}) Range(i, j {{ $t }}) *{{ $builder }} {
 
 // Min adds a minimum value validator for this field. Operation fails if the validator fails.
 func (b *{{ $builder }}) Min(i  {{ $t }}) *{{ $builder }} {
-	b.validators = append(b.validators, func(v  {{ $t }}) error {
+	b.desc.Validators = append(b.desc.Validators, func(v  {{ $t }}) error {
 		if v < i {
 			return errors.New("value out of range")
 		}
@@ -159,7 +164,7 @@ func (b *{{ $builder }}) Min(i  {{ $t }}) *{{ $builder }} {
 
 // Max adds a maximum value validator for this field. Operation fails if the validator fails.
 func (b *{{ $builder }}) Max(i {{ $t }}) *{{ $builder }} {
-	b.validators = append(b.validators, func(v {{ $t }}) error {
+	b.desc.Validators = append(b.desc.Validators, func(v {{ $t }}) error {
 		if v > i {
 			return errors.New("value out of range")
 		}
@@ -180,14 +185,14 @@ func (b *{{ $builder }}) Negative() *{{ $builder }} {
 
 // Default sets the default value of the field.
 func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
-	b.value = i
+	b.desc.Default = i
 	return b
 }
 
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
-	b.nillable = true
+	b.desc.Nillable = true
 	return b
 }
 
@@ -199,26 +204,31 @@ func (b *{{ $builder }}) Comment(c string) *{{ $builder }} {
 // Optional indicates that this field is optional on create.
 // Unlike edges, fields are required by default.
 func (b *{{ $builder }}) Optional() *{{ $builder }} {
-	b.optional = true
+	b.desc.Optional = true
 	return b
 }
 
 // Immutable indicates that this field cannot be updated.
 func (b *{{ $builder }}) Immutable() *{{ $builder }} {
-	b.immutable = true
+	b.desc.Immutable = true
 	return b
 }
 
 // StructTag sets the struct tag of the field.
 func (b *{{ $builder }}) StructTag(s string) *{{ $builder }} {
-	b.tag = s
+	b.desc.Tag = s
 	return b
 }
 
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *{{ $builder }}) Validate(fn func({{ $t }}) error) *{{ $builder }} {
-	b.validators = append(b.validators, fn)
+	b.desc.Validators = append(b.desc.Validators, fn)
 	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *{{ $builder }}) Descriptor() *Descriptor {
+	return b.desc
 }
 {{ end }}
 

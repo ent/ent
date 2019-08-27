@@ -38,8 +38,12 @@ var Columns = []string{
 
 var (
 	fields = schema.User{}.Fields()
+	// descBuffer is the schema descriptor for buffer field.
+	descBuffer = fields[3].Descriptor()
 	// DefaultBuffer holds the default value for the buffer field.
-	DefaultBuffer = fields[3].Value().([]byte)
+	DefaultBuffer = descBuffer.Default.([]byte)
+	// descTitle is the schema descriptor for title field.
+	descTitle = fields[4].Descriptor()
 	// DefaultTitle holds the default value for the title field.
-	DefaultTitle = fields[4].Value().(string)
+	DefaultTitle = descTitle.Default.(string)
 )

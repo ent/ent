@@ -127,6 +127,8 @@ var (
 
 var (
 	fields = schema.User{}.Fields()
+	// descLast is the schema descriptor for last field.
+	descLast = fields[2].Descriptor()
 	// DefaultLast holds the default value for the last field.
-	DefaultLast = fields[2].Value().(string)
+	DefaultLast = descLast.Default.(string)
 )

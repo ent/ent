@@ -1,10 +1,15 @@
 package index
 
-// Index represents an index on a vertex columns.
-type Index struct {
-	unique bool
-	edges  []string
-	fields []string
+// A Descriptor for index configuration.
+type Descriptor struct {
+	Unique bool     // unique index.
+	Edges  []string // edge columns.
+	Fields []string // field columns.
+}
+
+// Builder for indexes on vertex columns and edges in the graph.
+type Builder struct {
+	desc *Descriptor
 }
 
 // Fields creates an index on the given vertex fields.
@@ -23,8 +28,8 @@ type Index struct {
 //
 //	}
 //
-func Fields(fields ...string) *Index {
-	return &Index{fields: fields}
+func Fields(fields ...string) *Builder {
+	return &Builder{desc: &Descriptor{Fields: fields}}
 }
 
 // Edges creates an index on the given vertex edge fields.
@@ -39,8 +44,8 @@ func Fields(fields ...string) *Index {
 //
 //	}
 //
-func Edges(edges ...string) *Index {
-	return &Index{edges: edges}
+func Edges(edges ...string) *Builder {
+	return &Builder{desc: &Descriptor{Edges: edges}}
 }
 
 // Fields sets the fields of the index.
@@ -53,9 +58,9 @@ func Edges(edges ...string) *Index {
 //			Unique(),
 //
 //	}
-func (i *Index) Fields(fields ...string) *Index {
-	i.fields = fields
-	return i
+func (b *Builder) Fields(fields ...string) *Builder {
+	b.desc.Fields = fields
+	return b
 }
 
 // FromEdges sets the fields index to be unique under the set of edges (sub-graph). For example:
@@ -68,30 +73,20 @@ func (i *Index) Fields(fields ...string) *Index {
 //			Unique(),
 //	}
 //
-func (i *Index) Edges(edges ...string) *Index {
-	i.edges = edges
-	return i
+func (b *Builder) Edges(edges ...string) *Builder {
+	b.desc.Edges = edges
+	return b
 }
 
 // Unique sets the index to be a unique index.
 // Note that defining a uniqueness on optional fields won't prevent
 // duplicates if one of the column contains NULL values.
-func (i *Index) Unique() *Index {
-	i.unique = true
-	return i
+func (b *Builder) Unique() *Builder {
+	b.desc.Unique = true
+	return b
 }
 
-// EdgeNames returns the edge names of the given index.
-func (i Index) EdgeNames() []string {
-	return i.edges
-}
-
-// FieldNames returns the field names of the given index.
-func (i Index) FieldNames() []string {
-	return i.fields
-}
-
-// IsUnique indicates if this index is a unique index.
-func (i Index) IsUnique() bool {
-	return i.unique
+// Descriptor implements the ent.Descriptor interface.
+func (b *Builder) Descriptor() *Descriptor {
+	return b.desc
 }

@@ -41,8 +41,12 @@ var Columns = []string{
 
 var (
 	fields = schema.Card{}.Fields()
+	// descNumber is the schema descriptor for number field.
+	descNumber = fields[0].Descriptor()
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.
-	NumberValidator = fields[0].Validators()[0].(func(string) error)
+	NumberValidator = descNumber.Validators[0].(func(string) error)
+	// descCreatedAt is the schema descriptor for created_at field.
+	descCreatedAt = fields[1].Descriptor()
 	// DefaultCreatedAt holds the default value for the created_at field.
-	DefaultCreatedAt = fields[1].Value().(func() time.Time)
+	DefaultCreatedAt = descCreatedAt.Default.(func() time.Time)
 )

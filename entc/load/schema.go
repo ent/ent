@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/facebookincubator/ent/schema/edge"
+
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -51,19 +53,19 @@ type Index struct {
 	Fields []string `json:"fields,omitempty"`
 }
 
-// NewEdge creates an loaded edge from schema interface.
-func NewEdge(e ent.Edge) *Edge {
+// NewEdge creates an loaded edge from edge descriptor.
+func NewEdge(ed *edge.Descriptor) *Edge {
 	ne := &Edge{
-		Name:     e.Name(),
-		Type:     e.Type(),
-		Tag:      e.Tag(),
-		RefName:  e.RefName(),
-		Unique:   e.IsUnique(),
-		Inverse:  e.IsInverse(),
-		Required: e.IsRequired(),
+		Tag:      ed.Tag,
+		Type:     ed.Type,
+		Name:     ed.Name,
+		Unique:   ed.Unique,
+		Inverse:  ed.Inverse,
+		Required: ed.Required,
+		RefName:  ed.RefName,
 	}
-	if e := e.Assoc(); e != nil {
-		ne.Ref = NewEdge(e)
+	if ref := ed.Ref; ref != nil {
+		ne.Ref = NewEdge(ref)
 	}
 	return ne
 }
@@ -77,24 +79,23 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
 	}
 	for _, f := range fields {
+		fd := f.Descriptor()
 		sf := &Field{
-			Name:       f.Name(),
-			Type:       f.Type(),
-			Tag:        f.Tag(),
-			Unique:     f.IsUnique(),
-			Default:    f.HasDefault(),
-			Nillable:   f.IsNillable(),
-			Optional:   f.IsOptional(),
-			Immutable:  f.IsImmutable(),
-			Validators: len(f.Validators()),
+			Name:       fd.Name,
+			Type:       fd.Type,
+			Tag:        fd.Tag,
+			Unique:     fd.Unique,
+			Default:    fd.Default != nil,
+			Nillable:   fd.Nillable,
+			Optional:   fd.Optional,
+			Immutable:  fd.Immutable,
+			Validators: len(fd.Validators),
 		}
-		if s, ok := f.(field.Sizer); ok {
-			size := s.Size()
-			sf.Size = &size
+		if fd.Size != 0 {
+			sf.Size = &fd.Size
 		}
-		if c, ok := f.(field.Charseter); ok {
-			charset := c.Charset()
-			sf.Charset = &charset
+		if fd.Charset != "" {
+			sf.Charset = &fd.Charset
 		}
 		s.Fields = append(s.Fields, sf)
 	}
@@ -103,17 +104,18 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
 	}
 	for _, e := range edges {
-		s.Edges = append(s.Edges, NewEdge(e))
+		s.Edges = append(s.Edges, NewEdge(e.Descriptor()))
 	}
 	indexes, err := safeIndexes(schema)
 	if err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
 	}
 	for _, idx := range indexes {
+		idx := idx.Descriptor()
 		s.Indexes = append(s.Indexes, &Index{
-			Edges:  idx.EdgeNames(),
-			Fields: idx.FieldNames(),
-			Unique: idx.IsUnique(),
+			Edges:  idx.Edges,
+			Fields: idx.Fields,
+			Unique: idx.Unique,
 		})
 	}
 	return json.Marshal(s)
