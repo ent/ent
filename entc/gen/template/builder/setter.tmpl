@@ -2,7 +2,9 @@
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 {{ $fields := $.Fields }}
+{{ $updater := false }}
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
+	{{ $updater := true }}
 	{{ $fields = $.MutableFields }}
 {{- end }}
 
@@ -15,7 +17,7 @@
 		return {{ $receiver }}
 	}
 	{{/* avoid generting nillable setters for slices because the nil value for slice is valid */}}
-	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Nillable $f.HasDefault) }}
+	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
 		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {

@@ -33,7 +33,7 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" 0 -}}
-		{{ template "update/validators" . }}
+		{{ template "update/save" . }}
 	{{- end -}}
 	{{- if $multistorage -}}
 		switch {{ $receiver }}.driver.Dialect() {
@@ -100,7 +100,7 @@ type {{ $onebuilder }} struct {
 // Save executes the query and returns the updated entity.
 func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" "nil" -}}
-		{{ template "update/validators" . }}
+		{{ template "update/save" . }}
 	{{- end -}}
 	{{- if $multistorage -}}
 	switch {{ $receiver }}.driver.Dialect() {
@@ -149,8 +149,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 
 {{/* shared struct fields between the two updaters */}}
 {{ define "update/fields"}}
-{{ range $_, $f := $.MutableFields }}
-	{{- $f.StructField }} *{{ $f.Type }}
+{{ range $_, $f := $.Fields }}
+	{{- if or (not $f.Immutable) $f.UpdateDefault }}
+		{{- $f.StructField }} *{{ $f.Type }}
+	{{- end }}
 {{ end }}
 {{- range $_, $e := $.Edges }}
 	{{- $e.StructField }} map[{{ $.ID.Type }}]struct{}
@@ -203,12 +205,18 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ end }}
 {{ end }}
 
-{{/* shared templates for validators. */}}
-{{ define "update/validators" }}
+{{/* shared template for the save method of the 2 builders */}}
+{{ define "update/save" }}
 {{- $pkg := .Scope.Package -}}
 {{- $zero := .Scope.ZeroValue }}
 {{- $receiver := .Scope.Receiver -}}
 {{- range $_, $f := $.Fields -}}
+	{{- if $f.UpdateDefault -}}
+		if {{ $receiver }}.{{ $f.StructField }} == nil {
+			v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
+			{{ $receiver }}.{{ $f.StructField }} = &v
+		}
+	{{ end -}}
 	{{ with $f.Validators -}}
 		if {{ $receiver }}.{{ $f.StructField }} != nil {
 			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {

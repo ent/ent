@@ -41,6 +41,6 @@ var (
 	fields = schema.GroupInfo{}.Fields()
 	// descMaxUsers is the schema descriptor for max_users field.
 	descMaxUsers = fields[1].Descriptor()
-	// DefaultMaxUsers holds the default value for the max_users field.
+	// DefaultMaxUsers holds the default value on creation for the max_users field.
 	DefaultMaxUsers = descMaxUsers.Default.(int)
 )

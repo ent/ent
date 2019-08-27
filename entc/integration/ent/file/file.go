@@ -56,7 +56,7 @@ var (
 	fields = schema.File{}.Fields()
 	// descSize is the schema descriptor for size field.
 	descSize = fields[0].Descriptor()
-	// DefaultSize holds the default value for the size field.
+	// DefaultSize holds the default value on creation for the size field.
 	DefaultSize = descSize.Default.(int)
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator = descSize.Validators[0].(func(int) error)

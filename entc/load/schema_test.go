@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"math"
 	"testing"
+	"time"
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/edge"
@@ -138,6 +139,8 @@ func (WithDefaults) Fields() []ent.Field {
 			Default("foo"),
 		field.Bool("string").
 			Default(true),
+		field.Time("updated_at").
+			UpdateDefault(time.Now),
 	}
 }
 
@@ -163,4 +166,6 @@ func TestMarshalDefaults(t *testing.T) {
 	require.True(t, schema.Fields[1].Default)
 	require.True(t, schema.Fields[2].Default)
 	require.True(t, schema.Fields[3].Default)
+	require.False(t, schema.Fields[4].Default)
+	require.True(t, schema.Fields[4].UpdateDefault)
 }

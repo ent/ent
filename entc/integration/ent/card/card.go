@@ -17,6 +17,8 @@ const (
 	FieldNumber = "number"
 	// FieldCreatedAt holds the string denoting the created_at vertex property in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at vertex property in the database.
+	FieldUpdatedAt = "updated_at"
 
 	// Table holds the table name of the card in the database.
 	Table = "cards"
@@ -37,6 +39,7 @@ var Columns = []string{
 	FieldID,
 	FieldNumber,
 	FieldCreatedAt,
+	FieldUpdatedAt,
 }
 
 var (
@@ -47,6 +50,12 @@ var (
 	NumberValidator = descNumber.Validators[0].(func(string) error)
 	// descCreatedAt is the schema descriptor for created_at field.
 	descCreatedAt = fields[1].Descriptor()
-	// DefaultCreatedAt holds the default value for the created_at field.
+	// DefaultCreatedAt holds the default value on creation for the created_at field.
 	DefaultCreatedAt = descCreatedAt.Default.(func() time.Time)
+	// descUpdatedAt is the schema descriptor for updated_at field.
+	descUpdatedAt = fields[2].Descriptor()
+	// DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	DefaultUpdatedAt = descUpdatedAt.Default.(func() time.Time)
+	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	UpdateDefaultUpdatedAt = descUpdatedAt.UpdateDefault.(func() time.Time)
 )

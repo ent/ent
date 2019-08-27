@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -24,7 +25,9 @@ import (
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	config
-	number       *string
+	number *string
+
+	updated_at   *time.Time
 	owner        map[string]struct{}
 	clearedOwner bool
 	predicates   []predicate.Card
@@ -76,6 +79,10 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 		if err := card.NumberValidator(*cu.number); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
 		}
+	}
+	if cu.updated_at == nil {
+		v := card.UpdateDefaultUpdatedAt()
+		cu.updated_at = &v
 	}
 	if len(cu.owner) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -147,6 +154,10 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if cu.number != nil {
 		update = true
 		builder.Set(card.FieldNumber, *cu.number)
+	}
+	if cu.updated_at != nil {
+		update = true
+		builder.Set(card.FieldUpdatedAt, *cu.updated_at)
 	}
 	if update {
 		query, args := builder.Query()
@@ -222,6 +233,9 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if cu.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cu.number)
 	}
+	if cu.updated_at != nil {
+		v.Property(dsl.Single, card.FieldUpdatedAt, *cu.updated_at)
+	}
 	if cu.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -251,8 +265,10 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
-	id           string
-	number       *string
+	id     string
+	number *string
+
+	updated_at   *time.Time
 	owner        map[string]struct{}
 	clearedOwner bool
 }
@@ -297,6 +313,10 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 		if err := card.NumberValidator(*cuo.number); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
 		}
+	}
+	if cuo.updated_at == nil {
+		v := card.UpdateDefaultUpdatedAt()
+		cuo.updated_at = &v
 	}
 	if len(cuo.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -373,6 +393,11 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		builder.Set(card.FieldNumber, *cuo.number)
 		c.Number = *cuo.number
 	}
+	if cuo.updated_at != nil {
+		update = true
+		builder.Set(card.FieldUpdatedAt, *cuo.updated_at)
+		c.UpdatedAt = *cuo.updated_at
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -447,6 +472,9 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if cuo.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cuo.number)
+	}
+	if cuo.updated_at != nil {
+		v.Property(dsl.Single, card.FieldUpdatedAt, *cuo.updated_at)
 	}
 	if cuo.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()

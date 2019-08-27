@@ -40,10 +40,10 @@ var (
 	fields = schema.User{}.Fields()
 	// descBuffer is the schema descriptor for buffer field.
 	descBuffer = fields[3].Descriptor()
-	// DefaultBuffer holds the default value for the buffer field.
+	// DefaultBuffer holds the default value on creation for the buffer field.
 	DefaultBuffer = descBuffer.Default.([]byte)
 	// descTitle is the schema descriptor for title field.
 	descTitle = fields[4].Descriptor()
-	// DefaultTitle holds the default value for the title field.
+	// DefaultTitle holds the default value on creation for the title field.
 	DefaultTitle = descTitle.Default.(string)
 )

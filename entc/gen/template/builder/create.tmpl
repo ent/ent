@@ -26,9 +26,9 @@ type {{ $builder }} struct {
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
 	{{ range $_, $f := $.Fields -}}
-		{{- if or $f.HasDefault (not $f.Optional) -}}
+		{{- if or $f.Default (not $f.Optional) -}}
 			if {{ $receiver }}.{{ $f.StructField }} == nil {
-				{{ if $f.HasDefault -}}
+				{{ if $f.Default -}}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if $f.IsTime }}(){{ end }}
 					{{ $receiver }}.{{ $f.StructField }} = &v
 				{{ else -}}
@@ -38,7 +38,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		{{ end -}}
 		{{ with $f.Validators -}}
 			{{/* add nullable check only for optional fields without default value */ -}}
-			{{ $nullable := and $f.Optional (not $f.HasDefault) -}}
+			{{ $nullable := and $f.Optional (not $f.Default) -}}
 			{{- if $nullable }} if {{ $receiver }}.{{ $f.StructField }} != nil { {{ end -}}
 				if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {
 					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)

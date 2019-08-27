@@ -49,7 +49,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
 			ID: v.ID,
 			{{ range $_, $f := $.Fields }}
-				{{- pascal $f.Name }}: {{- if $f.IsTime }}time.Unix(v.{{ pascal $f.Name }}, 0) {{ else }}v.{{ pascal $f.Name }}{{ end }},
+				{{- pascal $f.Name }}: {{- if $f.IsTime }}time.Unix(0, v.{{ pascal $f.Name }}) {{ else }}v.{{ pascal $f.Name }}{{ end }},
 			{{ end -}}
 		})
 	}

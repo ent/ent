@@ -303,6 +303,18 @@ func (b *timeBuilder) Default(f func() time.Time) *timeBuilder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Time("updated_at").
+//		Default(time.Now).
+//		UpdateDefault(time.Now),
+//
+func (b *timeBuilder) UpdateDefault(f func() time.Time) *timeBuilder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	return b.desc

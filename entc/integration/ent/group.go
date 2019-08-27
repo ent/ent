@@ -184,7 +184,7 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 		*gr = append(*gr, &Group{
 			ID:       v.ID,
 			Active:   v.Active,
-			Expire:   time.Unix(v.Expire, 0),
+			Expire:   time.Unix(0, v.Expire),
 			Type:     v.Type,
 			MaxUsers: v.MaxUsers,
 			Name:     v.Name,

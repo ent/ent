@@ -50,16 +50,18 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{ end }}
 		trs []*dsl.Traversal
 	)
-	{{- range $_, $f := $.MutableFields }}
-	if {{ $receiver }}.{{ $f.StructField }} != nil {
-		{{- if $f.Unique }}
-			constraints = append(constraints, &constraint{
-				pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }}).Count(),
-				test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})),
-			})
+	{{- range $_, $f := $.Fields }}
+		{{- if or (not $f.Immutable) $f.UpdateDefault }}
+			if {{ $receiver }}.{{ $f.StructField }} != nil {
+				{{- if $f.Unique }}
+					constraints = append(constraints, &constraint{
+						pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }}).Count(),
+						test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})),
+					})
+				{{- end }}
+				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+			}
 		{{- end }}
-		v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
-	}
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
 		{{- $direction := "In" }}

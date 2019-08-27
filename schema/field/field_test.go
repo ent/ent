@@ -100,6 +100,14 @@ func TestTime(t *testing.T) {
 	assert.Equal(t, "time.Time", fd.Type.String())
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, now, fd.Default.(func() time.Time)())
+
+	fd = field.Time("updated_at").
+		UpdateDefault(func() time.Time {
+			return now
+		}).
+		Descriptor()
+	assert.Equal(t, "updated_at", fd.Name)
+	assert.Equal(t, now, fd.UpdateDefault.(func() time.Time)())
 }
 
 func TestField_Tag(t *testing.T) {

@@ -25,17 +25,18 @@ type Schema struct {
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name       string     `json:"name,omitempty"`
-	Type       field.Type `json:"type,omitempty"`
-	Tag        string     `json:"tag,omitempty"`
-	Size       *int       `json:"size,omitempty"`
-	Charset    *string    `json:"charset,omitempty"`
-	Unique     bool       `json:"unique,omitempty"`
-	Nillable   bool       `json:"nillable,omitempty"`
-	Optional   bool       `json:"optional,omitempty"`
-	Default    bool       `json:"default,omitempty"`
-	Immutable  bool       `json:"immutable,omitempty"`
-	Validators int        `json:"validators,omitempty"`
+	Name          string     `json:"name,omitempty"`
+	Type          field.Type `json:"type,omitempty"`
+	Tag           string     `json:"tag,omitempty"`
+	Size          *int       `json:"size,omitempty"`
+	Charset       *string    `json:"charset,omitempty"`
+	Unique        bool       `json:"unique,omitempty"`
+	Nillable      bool       `json:"nillable,omitempty"`
+	Optional      bool       `json:"optional,omitempty"`
+	Default       bool       `json:"default,omitempty"`
+	UpdateDefault bool       `json:"update_default,omitempty"`
+	Immutable     bool       `json:"immutable,omitempty"`
+	Validators    int        `json:"validators,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
@@ -85,15 +86,16 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	for _, f := range fields {
 		fd := f.Descriptor()
 		sf := &Field{
-			Name:       fd.Name,
-			Type:       fd.Type,
-			Tag:        fd.Tag,
-			Unique:     fd.Unique,
-			Default:    fd.Default != nil,
-			Nillable:   fd.Nillable,
-			Optional:   fd.Optional,
-			Immutable:  fd.Immutable,
-			Validators: len(fd.Validators),
+			Name:          fd.Name,
+			Type:          fd.Type,
+			Tag:           fd.Tag,
+			Unique:        fd.Unique,
+			Nillable:      fd.Nillable,
+			Optional:      fd.Optional,
+			Immutable:     fd.Immutable,
+			Validators:    len(fd.Validators),
+			Default:       fd.Default != nil,
+			UpdateDefault: fd.UpdateDefault != nil,
 		}
 		if fd.Size != 0 {
 			sf.Size = &fd.Size

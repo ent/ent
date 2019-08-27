@@ -60,18 +60,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			res sql.Result
 			builder = sql.Update({{ $.Package }}.Table).Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
 		)
-		{{- range $_, $f := $.MutableFields }}
-			if {{ $receiver }}.{{ $f.StructField }} != nil {
-				update = true
-				builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
-				{{- if $one }}
-					{{- if $f.Nillable }}
-						{{ $.Receiver }}.{{ pascal $f.Name }} = {{ $receiver }}.{{ $f.StructField }}
-					{{- else }}
-						{{ $.Receiver }}.{{ pascal $f.Name }} = *{{ $receiver }}.{{ $f.StructField }}
+		{{- range $_, $f := $.Fields }}
+			{{- if or (not $f.Immutable) $f.UpdateDefault }}
+				if {{ $receiver }}.{{ $f.StructField }} != nil {
+					update = true
+					builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+					{{- if $one }}
+						{{- if $f.Nillable }}
+							{{ $.Receiver }}.{{ pascal $f.Name }} = {{ $receiver }}.{{ $f.StructField }}
+						{{- else }}
+							{{ $.Receiver }}.{{ pascal $f.Name }} = *{{ $receiver }}.{{ $f.StructField }}
+						{{- end }}
 					{{- end }}
-				{{- end }}
-			}
+				}
+			{{- end }}
 		{{- end }}
 		if update {
 			query, args := builder.Query()

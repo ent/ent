@@ -103,7 +103,7 @@ func (b Bindings) Add(v interface{}) string {
 	k := fmt.Sprintf("$%x", len(b))
 	switch v := v.(type) {
 	case time.Time:
-		b[k] = v.Unix()
+		b[k] = v.UnixNano()
 	default:
 		b[k] = v
 	}

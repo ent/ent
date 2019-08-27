@@ -1861,6 +1861,12 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	c1 := client.Card.Create().SetNumber("102030").SaveX(ctx)
 	require.False(t, c1.CreatedAt.IsZero())
+	require.False(t, c1.UpdatedAt.IsZero())
+	require.Equal(t, c1.UpdatedAt.Unix(), c1.CreatedAt.Unix())
+	c1 = c1.Update().SetNumber("302010").SaveX(ctx)
+	require.False(t, c1.CreatedAt.IsZero())
+	require.False(t, c1.UpdatedAt.IsZero())
+	require.NotEqual(t, c1.UpdatedAt.UnixNano(), c1.CreatedAt.UnixNano())
 }
 
 func ImmutableValue(t *testing.T, client *ent.Client) {

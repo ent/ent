@@ -26,6 +26,7 @@ type CardCreate struct {
 	config
 	number     *string
 	created_at *time.Time
+	updated_at *time.Time
 	owner      map[string]struct{}
 }
 
@@ -45,6 +46,20 @@ func (cc *CardCreate) SetCreatedAt(t time.Time) *CardCreate {
 func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
 	if t != nil {
 		cc.SetCreatedAt(*t)
+	}
+	return cc
+}
+
+// SetUpdatedAt sets the updated_at field.
+func (cc *CardCreate) SetUpdatedAt(t time.Time) *CardCreate {
+	cc.updated_at = &t
+	return cc
+}
+
+// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+func (cc *CardCreate) SetNillableUpdatedAt(t *time.Time) *CardCreate {
+	if t != nil {
+		cc.SetUpdatedAt(*t)
 	}
 	return cc
 }
@@ -82,6 +97,10 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if cc.created_at == nil {
 		v := card.DefaultCreatedAt()
 		cc.created_at = &v
+	}
+	if cc.updated_at == nil {
+		v := card.DefaultUpdatedAt()
+		cc.updated_at = &v
 	}
 	if len(cc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -122,6 +141,10 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	if cc.created_at != nil {
 		builder.Set(card.FieldCreatedAt, *cc.created_at)
 		c.CreatedAt = *cc.created_at
+	}
+	if cc.updated_at != nil {
+		builder.Set(card.FieldUpdatedAt, *cc.updated_at)
+		c.UpdatedAt = *cc.updated_at
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -186,6 +209,9 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	}
 	if cc.created_at != nil {
 		v.Property(dsl.Single, card.FieldCreatedAt, *cc.created_at)
+	}
+	if cc.updated_at != nil {
+		v.Property(dsl.Single, card.FieldUpdatedAt, *cc.updated_at)
 	}
 	for id := range cc.owner {
 		v.AddE(user.CardLabel).From(g.V(id)).InV()

@@ -52,8 +52,10 @@ type (
 		// Nillable indicates that this field can be null in the
 		// database and pointer in the generated entities.
 		Nillable bool
-		// HasDefault indicates if this field a default value.
-		HasDefault bool
+		// Default indicates if this field has a default value for creation.
+		Default bool
+		// UpdateDefault indicates if this field has a default value for update.
+		UpdateDefault bool
 		// Immutable indicates is this field cannot be updated.
 		Immutable bool
 		// StructTag of the field. default to "json".
@@ -142,16 +144,17 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			return nil, fmt.Errorf("field %q redeclared for type %q", f.Name, typ.Name)
 		}
 		typ.Fields[i] = &Field{
-			def:        f,
-			Name:       f.Name,
-			Type:       f.Type,
-			Unique:     f.Unique,
-			Nillable:   f.Nillable,
-			Optional:   f.Optional,
-			HasDefault: f.Default,
-			Immutable:  f.Immutable,
-			StructTag:  structTag(f.Name, f.Tag),
-			Validators: f.Validators,
+			def:           f,
+			Name:          f.Name,
+			Type:          f.Type,
+			Unique:        f.Unique,
+			Nillable:      f.Nillable,
+			Optional:      f.Optional,
+			Default:       f.Default,
+			UpdateDefault: f.UpdateDefault,
+			Immutable:     f.Immutable,
+			StructTag:     structTag(f.Name, f.Tag),
+			Validators:    f.Validators,
 		}
 		typ.fields[f.Name] = typ.Fields[i]
 	}
@@ -194,10 +197,20 @@ func (t Type) HasValidators() bool {
 	return false
 }
 
-// HasDefault indicates if any of this type's fields has default value.
+// HasDefault indicates if any of this type's fields has default value on creation.
 func (t Type) HasDefault() bool {
 	for _, f := range t.Fields {
-		if f.HasDefault {
+		if f.Default {
+			return true
+		}
+	}
+	return false
+}
+
+// HasUpdateDefault indicates if any of this type's fields has default value on update.
+func (t Type) HasUpdateDefault() bool {
+	for _, f := range t.Fields {
+		if f.Default {
 			return true
 		}
 	}
@@ -331,6 +344,9 @@ func (f Field) Constant() string { return "Field" + pascal(f.Name) }
 // DefaultName returns the variable name of the default value of this field.
 func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
 
+// UpdateDefaultName returns the variable name of the update default value of this field.
+func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
+
 // StructField returns the struct member of the field.
 func (f Field) StructField() string {
 	if token.Lookup(f.Name).IsKeyword() {
@@ -404,7 +420,7 @@ func (f Field) Column() *schema.Column {
 			c.Charset = *f.def.Charset
 		}
 	}
-	if f.HasDefault && !f.IsTime() {
+	if f.Default && !f.IsTime() {
 		// since this column is used only for codegen, the actual default
 		// value is imported by the migrate package and used directly.
 		c.Default = true
