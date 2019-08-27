@@ -228,14 +228,14 @@ func TestType_Describe(t *testing.T) {
 			},
 			out: `
 User:
-	+------------+-----------+--------+----------+----------+------------+-----------+-----------+------------+
-	|   Field    |   Type    | Unique | Optional | Nillable | HasDefault | Immutable | StructTag | Validators |
-	+------------+-----------+--------+----------+----------+------------+-----------+-----------+------------+
-	| id         | int       | false  | false    | false    | false      | false     |           |          0 |
-	| name       | string    | false  | false    | false    | false      | false     |           |          1 |
-	| age        | int       | false  | false    | true     | false      | false     |           |          0 |
-	| created_at | time.Time | false  | false    | true     | false      | true      |           |          0 |
-	+------------+-----------+--------+----------+----------+------------+-----------+-----------+------------+
+	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
+	|   Field    |   Type    | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag | Validators |
+	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
+	| id         | int       | false  | false    | false    | false   | false         | false     |           |          0 |
+	| name       | string    | false  | false    | false    | false   | false         | false     |           |          1 |
+	| age        | int       | false  | false    | true     | false   | false         | false     |           |          0 |
+	| created_at | time.Time | false  | false    | true     | false   | false         | true      |           |          0 |
+	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
 	
 `,
 		},
@@ -250,11 +250,11 @@ User:
 			},
 			out: `
 User:
-	+-------+------+--------+----------+----------+------------+-----------+-----------+------------+
-	| Field | Type | Unique | Optional | Nillable | HasDefault | Immutable | StructTag | Validators |
-	+-------+------+--------+----------+----------+------------+-----------+-----------+------------+
-	| id    | int  | false  | false    | false    | false      | false     |           |          0 |
-	+-------+------+--------+----------+----------+------------+-----------+-----------+------------+
+	+-------+------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
+	| Field | Type | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag | Validators |
+	+-------+------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
+	| id    | int  | false  | false    | false    | false   | false         | false     |           |          0 |
+	+-------+------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
 	+--------+-------+---------+---------+----------+--------+----------+
 	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
 	+--------+-------+---------+---------+----------+--------+----------+
@@ -279,13 +279,13 @@ User:
 			},
 			out: `
 User:
-	+-------+--------+--------+----------+----------+------------+-----------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nillable | HasDefault | Immutable | StructTag | Validators |
-	+-------+--------+--------+----------+----------+------------+-----------+-----------+------------+
-	| id    | int    | false  | false    | false    | false      | false     |           |          0 |
-	| name  | string | false  | false    | false    | false      | false     |           |          1 |
-	| age   | int    | false  | false    | true     | false      | false     |           |          0 |
-	+-------+--------+--------+----------+----------+------------+-----------+-----------+------------+
+	+-------+--------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
+	| Field |  Type  | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag | Validators |
+	+-------+--------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
+	| id    | int    | false  | false    | false    | false   | false         | false     |           |          0 |
+	| name  | string | false  | false    | false    | false   | false         | false     |           |          1 |
+	| age   | int    | false  | false    | true     | false   | false         | false     |           |          0 |
+	+-------+--------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
 	+--------+-------+---------+---------+----------+--------+----------+
 	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
 	+--------+-------+---------+---------+----------+--------+----------+

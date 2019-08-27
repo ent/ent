@@ -88,7 +88,7 @@ func TestNewGraph(t *testing.T) {
 		require.Equal(nullable, t1.Fields[i].Nillable)
 	}
 	for i, value := range []bool{false, false, true} {
-		require.Equal(value, t1.Fields[i].HasDefault)
+		require.Equal(value, t1.Fields[i].Default)
 	}
 
 	// check edges.

@@ -267,7 +267,7 @@ func (t Type) Describe(w io.Writer) {
 	b.WriteString(t.Name + ":\n")
 	table := tablewriter.NewWriter(b)
 	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "HasDefault", "Immutable", "StructTag", "Validators"})
+	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators"})
 	for _, f := range append([]*Field{t.ID}, t.Fields...) {
 		v := reflect.ValueOf(*f)
 		row := make([]string, v.NumField()-1)
