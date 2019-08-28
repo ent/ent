@@ -12,6 +12,7 @@ import (
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -53,6 +54,26 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Card:   NewCardClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
+}
+
+// Debug returns a new debug-client. It's used to get verbose logging on specific operations.
+//
+//	client.Debug().
+//		Card.
+//		Query().
+//		Count(ctx)
+//
+func (c *Client) Debug() *Client {
+	if c.debug {
+		return c
+	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	return &Client{
+		config: cfg,
+		Schema: migrate.NewSchema(cfg.driver),
+		Card:   NewCardClient(cfg),
+		User:   NewUserClient(cfg),
+	}
 }
 
 // CardClient is a client for the Card schema.

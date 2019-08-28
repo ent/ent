@@ -32,7 +32,7 @@ func TestMySQL(t *testing.T) {
 			ctx := context.Background()
 			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE migrate IF EXISTS", []interface{}{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result))
 
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")

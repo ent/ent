@@ -11,6 +11,7 @@ import (
 
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -48,6 +49,25 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config: cfg,
 		Node:   NewNodeClient(cfg),
 	}, nil
+}
+
+// Debug returns a new debug-client. It's used to get verbose logging on specific operations.
+//
+//	client.Debug().
+//		Node.
+//		Query().
+//		Count(ctx)
+//
+func (c *Client) Debug() *Client {
+	if c.debug {
+		return c
+	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	return &Client{
+		config: cfg,
+		Schema: migrate.NewSchema(cfg.driver),
+		Node:   NewNodeClient(cfg),
+	}
 }
 
 // NodeClient is a client for the Node schema.

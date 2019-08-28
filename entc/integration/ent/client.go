@@ -97,6 +97,34 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}, nil
 }
 
+// Debug returns a new debug-client. It's used to get verbose logging on specific operations.
+//
+//	client.Debug().
+//		Card.
+//		Query().
+//		Count(ctx)
+//
+func (c *Client) Debug() *Client {
+	if c.debug {
+		return c
+	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	return &Client{
+		config:    cfg,
+		Schema:    migrate.NewSchema(cfg.driver),
+		Card:      NewCardClient(cfg),
+		Comment:   NewCommentClient(cfg),
+		FieldType: NewFieldTypeClient(cfg),
+		File:      NewFileClient(cfg),
+		FileType:  NewFileTypeClient(cfg),
+		Group:     NewGroupClient(cfg),
+		GroupInfo: NewGroupInfoClient(cfg),
+		Node:      NewNodeClient(cfg),
+		Pet:       NewPetClient(cfg),
+		User:      NewUserClient(cfg),
+	}
+}
+
 // CardClient is a client for the Card schema.
 type CardClient struct {
 	config

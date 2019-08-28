@@ -16,7 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent"
@@ -34,13 +33,9 @@ import (
 )
 
 func TestSQLite(t *testing.T) {
-	db, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
-	defer db.Close()
-	drv := dialect.Driver(db)
-	if testing.Verbose() {
-		drv = dialect.Debug(drv)
-	}
+	defer drv.Close()
 	client := ent.NewClient(ent.Driver(drv))
 	require.NoError(t, client.Schema.Create(context.Background()))
 	for _, tt := range tests[1:] {
@@ -55,13 +50,9 @@ func TestSQLite(t *testing.T) {
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
 		t.Run(version, func(t *testing.T) {
-			var drv dialect.Driver
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/test?parseTime=True", port))
 			require.NoError(t, err)
 			defer drv.Close()
-			if testing.Verbose() {
-				drv = dialect.Debug(drv)
-			}
 			client := ent.NewClient(ent.Driver(drv))
 			require.NoError(t, client.Schema.Create(context.Background()))
 			for _, tt := range tests {
@@ -85,11 +76,7 @@ func TestGremlin(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	var drv dialect.Driver = gremlin.NewDriver(c)
-	if testing.Verbose() {
-		drv = dialect.Debug(drv, t.Log)
-	}
-	client := ent.NewClient(ent.Driver(drv))
+	client := ent.NewClient(ent.Driver(gremlin.NewDriver(c)))
 	// run all tests except transaction and index tests.
 	for _, tt := range tests[3:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
