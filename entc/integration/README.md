@@ -2,23 +2,11 @@
 
 #### Regenerating new templates
 
-If you edited one of the files in `entc/gen/template` or `entc/build/template`,
-please run the following command:
-
-For `entc/gen` 
-```
-cd ~/fbsource/fbcode/github.com/facebookincubator/ent/entc/gen && go generate && cd -
-``` 
-
-For `entc/build`
+If you edited one of the files in `entc/gen/template` or `entc/load/template`,
+run the following command to from `entc` directory:
 
 ```
-cd ~/fbsource/fbcode/github.com/facebookincubator/ent/entc/gen && go generate && cd -
-```
-
-Then, regenerate new assets for your schema:
-```
-go run ~/fbsource/fbcode/github.com/facebookincubator/ent/entc/cmd/entc/entc.go generate ./ent/schema
+go generate ./...
 ```
 
 #### Running the integration tests
@@ -34,3 +22,4 @@ go test -run=MySQL
 
 go test -run=SQLite/Sanity
 ```
+

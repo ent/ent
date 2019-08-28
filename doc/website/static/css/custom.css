@@ -1,4 +1,11 @@
 /* your custom css */
+@font-face {
+  font-family: 'Calibre Medium';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Calibre Medium'),
+  url('../font/CalibreMedium.woff') format('woff');
+}
 
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
@@ -15,65 +22,80 @@
 @media only screen and (min-width: 1500px) {
 }
 
+body {
+  background: #3d3e3f;
+}
+
+.sideNavVisible {
+    background: white;
+}
+
 .fixedHeaderContainer {
-    background: #85daff;
+  background: #3d3e3f;
 }
 
-@media only screen and (max-width: 1024px) {
-    .navigationSlider .slidingNav ul {
-        background: #4d8eaa;
-    }
-}
-
-@media only screen and (min-width: 1024px) {
-    .navigationSlider .slidingNav ul {
-        background: #85daff;
-    }
+.navigationSlider .slidingNav ul {
+  background: #3d3e3f;
 }
 
 .navigationSlider .slidingNav ul li > a:focus,
 .navigationSlider .slidingNav ul li > a:hover,
 .navigationSlider .slidingNav ul li.siteNavItemActive > a,
 .navigationSlider .slidingNav ul li.siteNavGroupActive > a {
-    background-color:#4d8eaa;
+  background-color: #4d8eaa;
 }
 
 .onPageNav .toc-headings > li > a.active,
 .toc .toggleNav ul li.navListItemActive a,
 .toc .toggleNav ul li a:hover,
-.toc .toggleNav ul li a:focus{
-    color: #4d8eaa;
+.toc .toggleNav ul li a:focus {
+  color: #4d8eaa;
 }
 
 .imageAlignTop .blockImage {
-    max-width: 100%;
+  max-width: 100%;
 }
 
-.projectTitle {
-    color: #4d8eaa;
+.projectTitleContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+.projectTitleContainer img {
+  width: 109px;
+  height: 44px;
 }
 
 @media only screen and (min-width: 480px) {
-    .projectTitle {
-        font-size: 420%;
-    }
+  .projectTitle {
+    margin: 0;
+  }
+}
+
+.projectTitle p {
+  display: inline-block;
+  color: white;
+  font-family: 'Calibre Medium';
+  font-size: 56px;
+  margin-left: 15px;
 }
 
 .button {
-    border: 1px solid #4d8eaa;
-    color: #4d8eaa;
+  border: 1px solid #4d8eaa;
+  color: #4d8eaa;
 }
 
 .button:hover {
-    background: #48849e;
+  background: #48849e;
 }
 
 .homeContainer .homeWrapper {
-    padding: 2em 10px 0 10px;
+  padding: 2em 10px 0 10px;
 }
 
 a {
-    color: #4d8eaa;
+  color: #4d8eaa;
 }
 
 #er-linked-list, #er-user-spouse, #er-tree, #er-following-followers,
@@ -81,44 +103,73 @@ a {
     height: 230px;
 }
 
-
 @media only screen and (max-width: 1500px) {
-    .gridBlock .twoByGridBlock img,
-    .gridBlock .threeByGridBlock img,
-    .gridBlock .fourByGridBlock img {
-        max-height: 136px;
-    }
+  .gridBlock .twoByGridBlock img,
+  .gridBlock .threeByGridBlock img,
+  .gridBlock .fourByGridBlock img {
+    max-height: 136px;
+  }
 }
 
-
 @media only screen and (min-width: 1500px) {
-    .gridBlock .twoByGridBlock img,
-    .gridBlock .threeByGridBlock img,
-    .gridBlock .fourByGridBlock img {
-        max-height: 180px;
-    }
+  .gridBlock .twoByGridBlock img,
+  .gridBlock .threeByGridBlock img,
+  .gridBlock .fourByGridBlock img {
+    max-height: 180px;
+  }
 }
 
 @media only screen and (max-width: 1126px) {
-    .gridBlock .twoByGridBlock img,
-    .gridBlock .threeByGridBlock img,
-    .gridBlock .fourByGridBlock img {
-        max-height: 122px;
-    }
+  .gridBlock .twoByGridBlock img,
+  .gridBlock .threeByGridBlock img,
+  .gridBlock .fourByGridBlock img {
+    max-height: 122px;
+  }
 }
 
 @media only screen and (max-width: 1000px) {
-    .gridBlock .twoByGridBlock img,
-    .gridBlock .threeByGridBlock img,
-    .gridBlock .fourByGridBlock img {
-        max-height: 104px;
-    }
+  .gridBlock .twoByGridBlock img,
+  .gridBlock .threeByGridBlock img,
+  .gridBlock .fourByGridBlock img {
+    max-height: 104px;
+  }
 }
 
 @media only screen and (max-width: 880px) {
-    .gridBlock .twoByGridBlock img,
-    .gridBlock .threeByGridBlock img,
-    .gridBlock .fourByGridBlock img {
-        max-height: 85px;
-    }
+  .gridBlock .twoByGridBlock img,
+  .gridBlock .threeByGridBlock img,
+  .gridBlock .fourByGridBlock img {
+    max-height: 85px;
+  }
+}
+
+/*
+ Home Page
+*/
+.fixedHeaderContainer a {
+  display: none;
+}
+
+.fixedHeaderContainer {
+  position: relative;
+}
+
+header > .navigationSlider {
+  margin-left: 0;
+  font-size: 20px;
+}
+
+/*
+ Docs Page
+*/
+.sideNavVisible header > .navigationSlider {
+  margin-left: auto;
+}
+
+.sideNavVisible .fixedHeaderContainer a {
+  display: flex!important;
+}
+
+.sideNavVisible .fixedHeaderContainer {
+  position: fixed;
 }

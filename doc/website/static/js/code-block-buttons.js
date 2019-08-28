@@ -44,9 +44,4 @@ window.addEventListener('load', function() {
             textEl.textContent = 'Copy';
         }, 2000);
     });
-
-    // add an id tag for images based on their alt attribute.
-    document.querySelectorAll('.container img').forEach(function(el) {
-        el.id = el.alt;
-    });
 });

@@ -151,5 +151,5 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ## Dialect Support
 
-Indexes are currently support SQL dialects, and does not support Gremlin.
+Indexes are currently support only SQL dialects, and do not support Gremlin.
 

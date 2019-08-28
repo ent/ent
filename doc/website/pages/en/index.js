@@ -3,6 +3,8 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
+ *
+ * @format
  */
 
 const React = require('react');
@@ -36,10 +38,12 @@ class HomeSplash extends React.Component {
     );
 
     const ProjectTitle = () => (
-      <h2 className="projectTitle">
-        {siteConfig.title}
-        <small>{siteConfig.tagline}</small>
-      </h2>
+      <div className="projectTitleContainer">
+        <img src="https://entgo.io/assets/logo.png" />
+        <div className="projectTitle">
+          <p>{siteConfig.tagline}</p>
+        </div>
+      </div>
     );
 
     const PromoSection = props => (
@@ -65,8 +69,6 @@ class HomeSplash extends React.Component {
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
             <Button href="#try">Getting Started</Button>
-            <Button href={docUrl('doc1.html')}>Example Link</Button>
-            <Button href={docUrl('doc2.html')}>Example Link 2</Button>
           </PromoSection>
         </div>
       </SplashContainer>
@@ -138,7 +140,7 @@ class Index extends React.Component {
         {[
           {
             content:
-              'Each new Docusaurus project has **randomly-generated** '+
+              'Each new Docusaurus project has **randomly-generated** ' +
               'theme colors.',
             image: `${baseUrl}img/undraw_youtube_tutorial.svg`,
             imageAlign: 'right',
@@ -159,23 +161,25 @@ class Index extends React.Component {
           },
           {
             title: 'Easily Traverse Any Graph',
-            content: 'Run queries, aggregations and traverse any graph ' +
-            'structure easily',
+            content:
+              'Run queries, aggregations and traverse any graph ' +
+              'structure easily',
             image: `https://entgo.io/assets/gopher-graph-traversal.png`,
             imageAlign: 'top',
           },
           {
-              title: 'Statically Typed And Explicit API',
-              content: '100% statically types and explicit api using ' +
+            title: 'Statically Typed And Explicit API',
+            content:
+              '100% statically types and explicit api using ' +
               'code generation',
-              image: `https://entgo.io/assets/gopher-graph-traversal.png`,
-              imageAlign: 'top',
+            image: `https://entgo.io/assets/gopher-graph-traversal.png`,
+            imageAlign: 'top',
           },
           {
-              title: 'Multiple Storage Driver Support',
-                  content: 'Support both SQL and Gremlin dialects',
-              image: `https://entgo.io/assets/gopher-graph-traversal.png`,
-              imageAlign: 'top',
+            title: 'Multiple Storage Driver Support',
+            content: 'Support both SQL and Gremlin dialects',
+            image: `https://entgo.io/assets/gopher-graph-traversal.png`,
+            imageAlign: 'top',
           },
         ]}
       </Block>
