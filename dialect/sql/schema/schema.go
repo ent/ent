@@ -198,7 +198,7 @@ func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
 func (c *Column) MySQL(version string) *sql.ColumnBuilder {
 	b := sql.Column(c.Name).Type(c.MySQLType(version)).Attr(c.Attr)
 	if c.Charset != "" {
-		b.Attr("CHARSET " + c.Charset)
+		b.Attr("CHARACTER SET " + c.Charset)
 	}
 	c.unique(b)
 	if c.Increment {

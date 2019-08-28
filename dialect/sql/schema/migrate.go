@@ -281,7 +281,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		case c1.Nullable != c2.Nullable:
 			fallthrough
 		// modify character encoding.
-		case c1.Charset != "" && c1.Charset != c2.Charset || c1.Collation != "" && c1.Charset != c2.Collation:
+		case c1.Charset != "" && c1.Charset != c2.Charset || c1.Collation != "" && c1.Collation != c2.Collation:
 			change.column.modify = append(change.column.modify, c1)
 		}
 	}
