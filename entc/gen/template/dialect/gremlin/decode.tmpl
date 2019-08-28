@@ -19,7 +19,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
 	{{ range $_, $f := $.Fields }}
-		{{- $receiver }}.{{ pascal $f.Name }} = {{- if $f.IsTime }}time.Unix({{ $scan }}.{{- pascal $f.Name }}, 0) {{ else }}{{- $scan }}.{{- pascal $f.Name }}{{ end }}
+		{{- $receiver }}.{{ pascal $f.Name }} = {{- if $f.IsTime }}time.Unix(0, {{ $scan }}.{{- pascal $f.Name }}) {{ else }}{{- $scan }}.{{- pascal $f.Name }}{{ end }}
 	{{ end -}}
 	return nil
 }

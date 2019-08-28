@@ -66,8 +66,8 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 	}
 	c.ID = vc.ID
 	c.Number = vc.Number
-	c.CreatedAt = time.Unix(vc.CreatedAt, 0)
-	c.UpdatedAt = time.Unix(vc.UpdatedAt, 0)
+	c.CreatedAt = time.Unix(0, vc.CreatedAt)
+	c.UpdatedAt = time.Unix(0, vc.UpdatedAt)
 	return nil
 }
 

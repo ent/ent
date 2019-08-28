@@ -81,7 +81,7 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 	}
 	gr.ID = vgr.ID
 	gr.Active = vgr.Active
-	gr.Expire = time.Unix(vgr.Expire, 0)
+	gr.Expire = time.Unix(0, vgr.Expire)
 	gr.Type = vgr.Type
 	gr.MaxUsers = vgr.MaxUsers
 	gr.Name = vgr.Name
