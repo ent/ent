@@ -11,11 +11,11 @@ type Option func(*config)
 
 // Config is the configuration for the client and its builder.
 type config struct {
-	// driver is the driver used for execute database requests.
+	// driver used for executing database requests.
 	driver dialect.Driver
-	// verbose enable a verbosity logging.
-	verbose bool
-	// log used for logging on verbose mode.
+	// debug enable a debug logging.
+	debug bool
+	// log used for logging on debug mode.
 	log func(...interface{})
 }
 
@@ -24,19 +24,19 @@ func (c *config) options(opts ...Option) {
 	for _, opt := range opts {
 		opt(c)
 	}
-	if c.verbose {
+	if c.debug {
 		c.driver = dialect.Debug(c.driver, c.log)
 	}
 }
 
-// Verbose sets the client logging to verbose.
-func Verbose() Option {
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
 	return func(c *config) {
-		c.verbose = true
+		c.debug = true
 	}
 }
 
-// Log sets the client logging to verbose.
+// Log sets the logging function for debug mode.
 func Log(fn func(...interface{})) Option {
 	return func(c *config) {
 		c.log = fn

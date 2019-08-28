@@ -43,7 +43,7 @@ func TestMySQL(t *testing.T) {
 			SanityV1(t, clientv1)
 
 			// run migration and execute queries on v2.
-			clientv2 := entv2.NewClient(entv2.Driver(drv), entv2.Verbose())
+			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
 			SanityV2(t, clientv2)
 

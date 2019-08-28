@@ -43,7 +43,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, verbose: c.verbose}
+	cfg := config{driver: tx, log: c.log, debug: c.debug}
 	return &Tx{
 		config: cfg,
 		User:   NewUserClient(cfg),
