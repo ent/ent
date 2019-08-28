@@ -16,7 +16,9 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -25,6 +27,7 @@ type FileUpdate struct {
 	config
 	size         *int
 	name         *string
+	text         *string
 	user         *string
 	group        *string
 	owner        map[string]struct{}
@@ -57,6 +60,20 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 // SetName sets the name field.
 func (fu *FileUpdate) SetName(s string) *FileUpdate {
 	fu.name = &s
+	return fu
+}
+
+// SetText sets the text field.
+func (fu *FileUpdate) SetText(s string) *FileUpdate {
+	fu.text = &s
+	return fu
+}
+
+// SetNillableText sets the text field if the given value is not nil.
+func (fu *FileUpdate) SetNillableText(s *string) *FileUpdate {
+	if s != nil {
+		fu.SetText(*s)
+	}
 	return fu
 }
 
@@ -229,6 +246,10 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(file.FieldName, *fu.name)
 	}
+	if fu.text != nil {
+		update = true
+		builder.Set(file.FieldText, *fu.text)
+	}
 	if fu.user != nil {
 		update = true
 		builder.Set(file.FieldUser, *fu.user)
@@ -312,6 +333,11 @@ func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
 }
 
 func (fu *FileUpdate) gremlin() *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(file.Label)
 	for _, p := range fu.predicates {
 		p(v)
@@ -327,6 +353,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	}
 	if fu.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fu.name)
+	}
+	if fu.text != nil {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldText, *fu.text).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldText, *fu.text)),
+		})
+		v.Property(dsl.Single, file.FieldText, *fu.text)
 	}
 	if fu.user != nil {
 		v.Property(dsl.Single, file.FieldUser, *fu.user)
@@ -349,6 +382,16 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
 	v.Count()
+	if len(constraints) > 0 {
+		constraints = append(constraints, &constraint{
+			pred: rv.Count(),
+			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
+		})
+		v = constraints[0].pred.Coalesce(constraints[0].test, v)
+		for _, cr := range constraints[1:] {
+			v = cr.pred.Coalesce(cr.test, v)
+		}
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }
@@ -359,6 +402,7 @@ type FileUpdateOne struct {
 	id           string
 	size         *int
 	name         *string
+	text         *string
 	user         *string
 	group        *string
 	owner        map[string]struct{}
@@ -384,6 +428,20 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 // SetName sets the name field.
 func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
 	fuo.name = &s
+	return fuo
+}
+
+// SetText sets the text field.
+func (fuo *FileUpdateOne) SetText(s string) *FileUpdateOne {
+	fuo.text = &s
+	return fuo
+}
+
+// SetNillableText sets the text field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableText(s *string) *FileUpdateOne {
+	if s != nil {
+		fuo.SetText(*s)
+	}
 	return fuo
 }
 
@@ -561,6 +619,11 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		builder.Set(file.FieldName, *fuo.name)
 		f.Name = *fuo.name
 	}
+	if fuo.text != nil {
+		update = true
+		builder.Set(file.FieldText, *fuo.text)
+		f.Text = *fuo.text
+	}
 	if fuo.user != nil {
 		update = true
 		builder.Set(file.FieldUser, *fuo.user)
@@ -650,6 +713,11 @@ func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 }
 
 func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -662,6 +730,13 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if fuo.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fuo.name)
+	}
+	if fuo.text != nil {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(file.Label, file.FieldText, *fuo.text).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldText, *fuo.text)),
+		})
+		v.Property(dsl.Single, file.FieldText, *fuo.text)
 	}
 	if fuo.user != nil {
 		v.Property(dsl.Single, file.FieldUser, *fuo.user)
@@ -684,6 +759,12 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
+	if len(constraints) > 0 {
+		v = constraints[0].pred.Coalesce(constraints[0].test, v)
+		for _, cr := range constraints[1:] {
+			v = cr.pred.Coalesce(cr.test, v)
+		}
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

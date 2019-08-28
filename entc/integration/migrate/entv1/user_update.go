@@ -18,6 +18,7 @@ type UserUpdate struct {
 	age        *int32
 	name       *string
 	address    *string
+	role       *string
 	predicates []predicate.User
 }
 
@@ -49,6 +50,20 @@ func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
 func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetAddress(*s)
+	}
+	return uu
+}
+
+// SetRole sets the role field.
+func (uu *UserUpdate) SetRole(s string) *UserUpdate {
+	uu.role = &s
+	return uu
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRole(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetRole(*s)
 	}
 	return uu
 }
@@ -129,6 +144,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldAddress, *uu.address)
 	}
+	if uu.role != nil {
+		update = true
+		builder.Set(user.FieldRole, *uu.role)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -148,6 +167,7 @@ type UserUpdateOne struct {
 	age     *int32
 	name    *string
 	address *string
+	role    *string
 }
 
 // SetAge sets the age field.
@@ -172,6 +192,20 @@ func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
 func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetAddress(*s)
+	}
+	return uuo
+}
+
+// SetRole sets the role field.
+func (uuo *UserUpdateOne) SetRole(s string) *UserUpdateOne {
+	uuo.role = &s
+	return uuo
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRole(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetRole(*s)
 	}
 	return uuo
 }
@@ -257,6 +291,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		update = true
 		builder.Set(user.FieldAddress, *uuo.address)
 		u.Address = *uuo.address
+	}
+	if uuo.role != nil {
+		update = true
+		builder.Set(user.FieldRole, *uuo.role)
+		u.Role = *uuo.role
 	}
 	if update {
 		query, args := builder.Query()

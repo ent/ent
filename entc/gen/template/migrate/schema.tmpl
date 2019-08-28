@@ -29,7 +29,8 @@ var (
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- if $c.HasDefault }} Default: {{ $node.Package }}.Default{{ pascal $c.Name }},{{ end }}
-				{{- with $c.Charset }} Charset: "{{ . }}",{{ end }} },
+				{{- with $c.Charset }} Charset: "{{ . }}",{{ end }}
+				{{- with $c.Collation }} Collation: "{{ . }}",{{ end }}},
 			{{- end }}
 		}
 		{{- $table := pascal $t.Name | printf "%sTable" }}

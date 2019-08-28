@@ -31,6 +31,10 @@ func (User) Fields() []ent.Field {
 		// all existing rows.
 		field.String("title").
 			Default("SWE"),
+		// adding column collation
+		field.String("role").
+			Collation("utf8mb4_general_ci").
+			Optional(),
 		// deleting the `address` column.
 	}
 }

@@ -419,6 +419,9 @@ func (f Field) Column() *schema.Column {
 		if f.def.Charset != nil {
 			c.Charset = *f.def.Charset
 		}
+		if f.def.Collation != nil {
+			c.Collation = *f.def.Collation
+		}
 	}
 	if f.Default && !f.IsTime() {
 		// since this column is used only for codegen, the actual default

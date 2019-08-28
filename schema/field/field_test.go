@@ -88,6 +88,13 @@ func TestCharset(t *testing.T) {
 	assert.Equal(t, "utf8", fd.Charset)
 }
 
+func TestCollation(t *testing.T) {
+	fd := field.String("name").
+		Collation("utf8_general_ci").
+		Descriptor()
+	assert.Equal(t, "utf8_general_ci", fd.Collation)
+}
+
 func TestTime(t *testing.T) {
 	now := time.Now()
 	fd := field.Time("created_at").

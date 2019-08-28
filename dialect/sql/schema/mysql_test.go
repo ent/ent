@@ -412,7 +412,7 @@ func TestMySQL_Create(t *testing.T) {
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "age", Type: field.TypeInt},
-						{Name: "name", Type: field.TypeString, Nullable: true, Charset: "utf8"},
+						{Name: "name", Type: field.TypeString, Nullable: true, Charset: "utf8", Collation: "utf8_general_ci"},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -436,7 +436,7 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1"))
-				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `name` varchar(255) CHARACTER SET utf8 NULL")).
+				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

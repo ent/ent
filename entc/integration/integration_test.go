@@ -43,7 +43,7 @@ func TestSQLite(t *testing.T) {
 	}
 	client := ent.NewClient(ent.Driver(drv))
 	require.NoError(t, client.Schema.Create(context.Background()))
-	for _, tt := range tests {
+	for _, tt := range tests[1:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 			drop(t, client)
@@ -91,7 +91,7 @@ func TestGremlin(t *testing.T) {
 	}
 	client := ent.NewClient(ent.Driver(drv))
 	// run all tests except transaction and index tests.
-	for _, tt := range tests[2:] {
+	for _, tt := range tests[3:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 			drop(t, client)
@@ -102,6 +102,7 @@ func TestGremlin(t *testing.T) {
 
 // tests for all drivers to run.
 var tests = []func(*testing.T, *ent.Client){
+	Collation,
 	Tx,
 	Indexes,
 	Types,
@@ -109,7 +110,6 @@ var tests = []func(*testing.T, *ent.Client){
 	Sanity,
 	Paging,
 	Charset,
-	Collation,
 	Relation,
 	Predicate,
 	UniqueConstraint,
@@ -262,10 +262,15 @@ func Charset(t *testing.T, client *ent.Client) {
 func Collation(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	_ = client.File.Create().SetName("Foo").SaveX(ctx)
+	_ = client.File.Create().SetName("Foo").SetText("hello world").SaveX(ctx)
 	query := client.File.Query().Where(file.Name("foo"))
 	require.False(query.ExistX(ctx))
 	require.Nil(query.FirstX(ctx))
+	f := client.File.Query().Where(file.Text("Hello WoRLD")).OnlyX(ctx)
+	require.Equal("Foo", f.Name)
+	require.Equal("hello world", f.Text)
+	_, err := client.File.Create().SetName("Bar").SetText("Hello World").Save(ctx)
+	require.Error(err, "text field uses case insensitive collation")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

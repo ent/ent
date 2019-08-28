@@ -25,6 +25,10 @@ func (File) Fields() []ent.Field {
 			Default(math.MaxInt32).
 			Positive(),
 		field.String("name"),
+		field.String("text").
+			Collation("utf8mb4_general_ci").
+			Optional().
+			Unique(),
 		field.String("user").
 			Optional().
 			Nillable(),

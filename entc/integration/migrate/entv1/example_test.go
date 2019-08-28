@@ -34,6 +34,7 @@ func ExampleUser() {
 		SetAge(1).
 		SetName("string").
 		SetAddress("string").
+		SetRole("string").
 		SaveX(ctx)
 	log.Println("user created:", u)
 

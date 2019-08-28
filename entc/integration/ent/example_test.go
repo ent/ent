@@ -124,6 +124,7 @@ func ExampleFile() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetText("string").
 		SetUser("string").
 		SetGroup("string").
 		SaveX(ctx)
@@ -149,6 +150,7 @@ func ExampleFileType() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetText("string").
 		SetUser("string").
 		SetGroup("string").
 		SaveX(ctx)
@@ -187,6 +189,7 @@ func ExampleGroup() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetText("string").
 		SetUser("string").
 		SetGroup("string").
 		SaveX(ctx)
@@ -355,6 +358,7 @@ func ExampleUser() {
 		Create().
 		SetSize(1).
 		SetName("string").
+		SetText("string").
 		SetUser("string").
 		SetGroup("string").
 		SaveX(ctx)

@@ -12,9 +12,11 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
 	migratev1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/migrate"
+	userv1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2"
 	migratev2 "github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/stretchr/testify/assert"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
@@ -52,6 +54,7 @@ func TestMySQL(t *testing.T) {
 			idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 
 			// sql specific predicates.
+			Collation(t, clientv2)
 			EqualFold(t, clientv2)
 			ContainsFold(t, clientv2)
 		})
@@ -82,9 +85,15 @@ func TestSQLite(t *testing.T) {
 
 func SanityV1(t *testing.T, client *entv1.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("foo").SaveX(ctx)
-	require.Equal(t, int32(1), u.Age)
+	u := client.User.Create().SetAge(1).SetName("foo").SetRole("admin").SaveX(ctx)
+	require.EqualValues(t, 1, u.Age)
 	require.Equal(t, "foo", u.Name)
+	require.Equal(t, "admin", u.Role)
+
+	u = client.User.Create().SetAge(5).SetName("bar").SetRole("Admin").SaveX(ctx)
+	require.EqualValues(t, 5, u.Age)
+	require.Equal(t, "bar", u.Name)
+	require.Equal(t, "Admin", u.Role)
 
 	_, err := client.User.Create().SetAge(2).SetName("foobarbazqux").Save(ctx)
 	require.Error(t, err, "name is limited to 10 chars")
@@ -93,6 +102,14 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	client.User.Create().SetAge(3).SetName("foo").SetAddress("tlv").SaveX(ctx)
 	_, err = client.User.Create().SetAge(4).SetName("foo").SetAddress("tlv").Save(ctx)
 	require.Error(t, err)
+
+	// default role collation is case sensitive
+	c := client.User.Query().Where(userv1.Role("admin")).CountX(ctx)
+	assert.Equal(t, 1, c)
+	c = client.User.Query().Where(userv1.Role("Admin")).CountX(ctx)
+	assert.Equal(t, 1, c)
+	c = client.User.Query().Where(userv1.Role("ADMIN")).CountX(ctx)
+	assert.Zero(t, c)
 }
 
 func SanityV2(t *testing.T, client *entv2.Client) {
@@ -118,6 +135,11 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 		client.User.Query().CountX(ctx),
 		client.User.Query().Where(user.Title(user.DefaultTitle)).CountX(ctx),
 	)
+}
+
+func Collation(t *testing.T, client *entv2.Client) {
+	t.Log("testing case insensitive collation update on sql specific dialects")
+	require.Equal(t, 2, client.User.Query().Where(user.Role("ADMIN")).CountX(context.Background()))
 }
 
 func EqualFold(t *testing.T, client *entv2.Client) {

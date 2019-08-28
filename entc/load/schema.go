@@ -30,6 +30,7 @@ type Field struct {
 	Tag           string     `json:"tag,omitempty"`
 	Size          *int       `json:"size,omitempty"`
 	Charset       *string    `json:"charset,omitempty"`
+	Collation     *string    `json:"collation,omitempty"`
 	Unique        bool       `json:"unique,omitempty"`
 	Nillable      bool       `json:"nillable,omitempty"`
 	Optional      bool       `json:"optional,omitempty"`
@@ -102,6 +103,9 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		}
 		if fd.Charset != "" {
 			sf.Charset = &fd.Charset
+		}
+		if fd.Collation != "" {
+			sf.Collation = &fd.Collation
 		}
 		s.Fields = append(s.Fields, sf)
 	}

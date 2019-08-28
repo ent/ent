@@ -20,6 +20,8 @@ type File struct {
 	Size int `json:"size,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 	// User holds the value of the "user" field.
 	User *string `json:"user,omitempty"`
 	// Group holds the value of the "group" field.
@@ -32,6 +34,7 @@ func (f *File) FromRows(rows *sql.Rows) error {
 		ID    int
 		Size  sql.NullInt64
 		Name  sql.NullString
+		Text  sql.NullString
 		User  sql.NullString
 		Group sql.NullString
 	}
@@ -40,6 +43,7 @@ func (f *File) FromRows(rows *sql.Rows) error {
 		&vf.ID,
 		&vf.Size,
 		&vf.Name,
+		&vf.Text,
 		&vf.User,
 		&vf.Group,
 	); err != nil {
@@ -48,6 +52,7 @@ func (f *File) FromRows(rows *sql.Rows) error {
 	f.ID = strconv.Itoa(vf.ID)
 	f.Size = int(vf.Size.Int64)
 	f.Name = vf.Name.String
+	f.Text = vf.Text.String
 	if vf.User.Valid {
 		f.User = new(string)
 		*f.User = vf.User.String
@@ -66,6 +71,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		ID    string  `json:"id,omitempty"`
 		Size  int     `json:"size,omitempty"`
 		Name  string  `json:"name,omitempty"`
+		Text  string  `json:"text,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
 	}
@@ -75,6 +81,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	f.ID = vf.ID
 	f.Size = vf.Size
 	f.Name = vf.Name
+	f.Text = vf.Text
 	f.User = vf.User
 	f.Group = vf.Group
 	return nil
@@ -115,6 +122,7 @@ func (f *File) String() string {
 	buf.WriteString(fmt.Sprintf("id=%v", f.ID))
 	buf.WriteString(fmt.Sprintf(", size=%v", f.Size))
 	buf.WriteString(fmt.Sprintf(", name=%v", f.Name))
+	buf.WriteString(fmt.Sprintf(", text=%v", f.Text))
 	if v := f.User; v != nil {
 		buf.WriteString(fmt.Sprintf(", user=%v", *v))
 	}
@@ -154,6 +162,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		ID    string  `json:"id,omitempty"`
 		Size  int     `json:"size,omitempty"`
 		Name  string  `json:"name,omitempty"`
+		Text  string  `json:"text,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
 	}
@@ -165,6 +174,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 			ID:    v.ID,
 			Size:  v.Size,
 			Name:  v.Name,
+			Text:  v.Text,
 			User:  v.User,
 			Group: v.Group,
 		})
