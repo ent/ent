@@ -15,6 +15,30 @@ const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
 
+const Block = props => (
+  <div className="block">
+    <div className="blockTitle">{props.title}</div>
+    <div className="blockContent">{props.content}</div>
+  </div>
+);
+
+const Features = () => (
+  <div className="features">
+    <Block
+      title="Schema As Code"
+      content="Simple API for modeling any graph schema as Go objects"
+    />
+    <Block
+      title="Easily Traverse Any Graph"
+      content="Run queries, aggregations and traverse any graph structure easily"
+    />
+    <Block
+      title="Statically Typed And Explicit API"
+      content="100% statically types and explicit api using code generation"
+    />
+  </div>
+);
+
 class HomeSplash extends React.Component {
   render() {
     const {siteConfig, language = ''} = this.props;
@@ -38,11 +62,16 @@ class HomeSplash extends React.Component {
     );
 
     const ProjectTitle = () => (
-      <div className="projectTitleContainer">
-        <img src="https://entgo.io/assets/logo.png" />
-        <div className="projectTitle">
-          <p>{siteConfig.tagline}</p>
+      <div>
+        <div className="projectTitleContainer">
+          <img src="https://entgo.io/assets/logo.png" />
+          <div className="projectTitle">
+            <p>{siteConfig.tagline}</p>
+          </div>
         </div>
+        <p className="projectDesc">
+          A simple API for modeling any graph using scema as Go objects
+        </p>
       </div>
     );
 
@@ -67,9 +96,15 @@ class HomeSplash extends React.Component {
         {/*<Logo img_src={`${baseUrl}img/undraw_monitor.svg`} />*/}
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
-          <PromoSection>
-            <Button href="#try">Getting Started</Button>
-          </PromoSection>
+          <div className="gettingStartedButton">
+            <a href="./docs/getting-started">
+              <div className="gettingStartedButtonText">
+                <div className="gettingStartedText">{'Getting Started '}</div>
+                <div className="gettingStartedButtonArrow">→</div>
+              </div>
+            </a>
+          </div>
+          <Features />
         </div>
       </SplashContainer>
     );
@@ -80,110 +115,6 @@ class Index extends React.Component {
   render() {
     const {config: siteConfig, language = ''} = this.props;
     const {baseUrl} = siteConfig;
-
-    const Block = props => (
-      <Container
-        padding={['bottom', 'top']}
-        id={props.id}
-        background={props.background}>
-        <GridBlock
-          align="center"
-          contents={props.children}
-          layout={props.layout}
-          className={props.className}
-        />
-      </Container>
-    );
-
-    const FeatureCallout = () => (
-      <div
-        className="productShowcaseSection paddingBottom"
-        style={{textAlign: 'center'}}>
-        <h2>Feature Callout</h2>
-        <MarkdownBlock>These are features of this project</MarkdownBlock>
-      </div>
-    );
-
-    const TryOut = () => (
-      <Block id="try">
-        {[
-          {
-            content:
-              'To make your landing page more attractive, use illustrations!' +
-              ' Check out [**unDraw**](https://undraw.co/) which provides' +
-              'you with customizable illustrations which are free to use. ' +
-              'The illustrations you see on this page are from unDraw.',
-            image: `${baseUrl}img/undraw_code_review.svg`,
-            imageAlign: 'left',
-            title: 'Wonderful SVG Illustrations',
-          },
-        ]}
-      </Block>
-    );
-
-    const Description = () => (
-      <Block background="dark">
-        {[
-          {
-            content:
-              'This is another description of how this project is useful',
-            image: `${baseUrl}img/undraw_note_list.svg`,
-            imageAlign: 'right',
-            title: 'Description',
-          },
-        ]}
-      </Block>
-    );
-
-    const LearnHow = () => (
-      <Block background="light">
-        {[
-          {
-            content:
-              'Each new Docusaurus project has **randomly-generated** ' +
-              'theme colors.',
-            image: `${baseUrl}img/undraw_youtube_tutorial.svg`,
-            imageAlign: 'right',
-            title: 'Randomly Generated Theme Colors',
-          },
-        ]}
-      </Block>
-    );
-
-    const Features = () => (
-      <Block layout="fourColumn" className="features">
-        {[
-          {
-            title: 'Schema As Code',
-            content: 'Simple API for modeling any graph schema as Go objects',
-            image: `https://entgo.io/assets/gopher-schema-as-code.png`,
-            imageAlign: 'top',
-          },
-          {
-            title: 'Easily Traverse Any Graph',
-            content:
-              'Run queries, aggregations and traverse any graph ' +
-              'structure easily',
-            image: `https://entgo.io/assets/gopher-graph-traversal.png`,
-            imageAlign: 'top',
-          },
-          {
-            title: 'Statically Typed And Explicit API',
-            content:
-              '100% statically types and explicit api using ' +
-              'code generation',
-            image: `https://entgo.io/assets/gopher-graph-traversal.png`,
-            imageAlign: 'top',
-          },
-          {
-            title: 'Multiple Storage Driver Support',
-            content: 'Support both SQL and Gremlin dialects',
-            image: `https://entgo.io/assets/gopher-graph-traversal.png`,
-            imageAlign: 'top',
-          },
-        ]}
-      </Block>
-    );
 
     const Showcase = () => {
       if ((siteConfig.users || []).length === 0) {
@@ -217,14 +148,6 @@ class Index extends React.Component {
     return (
       <div>
         <HomeSplash siteConfig={siteConfig} language={language} />
-        <div className="mainContainer">
-          <Features />
-          <FeatureCallout />
-          <LearnHow />
-          <TryOut />
-          <Description />
-          <Showcase />
-        </div>
       </div>
     );
   }

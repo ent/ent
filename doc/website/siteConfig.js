@@ -3,6 +3,8 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
+ *
+ * @format
  */
 
 // See https://docusaurus.io/docs/site-config for all the possible
@@ -37,7 +39,9 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
+    {doc: 'getting-started', label: 'GoDoc'},
     {href: 'https://github.com/facebookincubator/ent', label: 'Github'},
+    {href: 'https://github.com/facebookincubator/ent/issues', label: 'Help'},
   ],
 
   // If you have users set above, you add it here:
@@ -45,7 +49,6 @@ const siteConfig = {
 
   /* path to images for header/footer */
   headerIcon: 'img/favicon.ico',
-  footerIcon: 'img/favicon.ico',
   favicon: 'img/favicon.ico',
 
   /* Colors for website */
@@ -77,13 +80,13 @@ const siteConfig = {
   },
 
   // Add custom scripts here that would be placed in <script> tags.
-    scripts: [
-        'https://buttons.github.io/buttons.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js',
-        '/js/code-block-buttons.js',
-        '/js/custom.js',
-    ],
-    stylesheets: ['/css/code-block-buttons.css'],
+  scripts: [
+    'https://buttons.github.io/buttons.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js',
+    '/js/code-block-buttons.js',
+    '/js/custom.js',
+  ],
+  stylesheets: ['/css/code-block-buttons.css'],
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',

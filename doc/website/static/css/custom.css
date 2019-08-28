@@ -3,8 +3,45 @@
   font-family: 'Calibre Medium';
   font-style: normal;
   font-weight: normal;
-  src: local('Calibre Medium'),
-  url('../font/CalibreMedium.woff') format('woff');
+  src: local('Calibre Medium'), url('../font/CalibreMedium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Calibre Light';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Calibre Light'), url('../font/CalibreLight.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Calibre Light Italic';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Calibre Light Italic'),
+    url('../font/CalibreLightItalic.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Calibre Semibold';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Calibre Semibold'),
+    url('../font/CalibreSemibold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Calibre Bold';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Calibre Bold'), url('../font/CalibreBold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Calibre Medium Italic';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Calibre Medium Italic'),
+    url('../font/CalibreMediumItalic.woff') format('woff');
 }
 
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
@@ -27,7 +64,7 @@ body {
 }
 
 .sideNavVisible {
-    background: white;
+  background: white;
 }
 
 .fixedHeaderContainer {
@@ -42,7 +79,7 @@ body {
 .navigationSlider .slidingNav ul li > a:hover,
 .navigationSlider .slidingNav ul li.siteNavItemActive > a,
 .navigationSlider .slidingNav ul li.siteNavGroupActive > a {
-  background-color: #4d8eaa;
+  background-color: transparent;
 }
 
 .onPageNav .toc-headings > li > a.active,
@@ -67,10 +104,83 @@ body {
   height: 44px;
 }
 
+.projectDesc {
+  font-family: 'Calibre Light Italic';
+  font-size: 29px;
+  line-height: 34px;
+  color: white;
+  text-align: left;
+  max-width: 520px;
+}
+
 @media only screen and (min-width: 480px) {
   .projectTitle {
     margin: 0;
   }
+}
+
+.homeContainer {
+  padding: 0 15%;
+  padding-bottom: 20px;
+}
+
+.features {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  margin: 100px auto;
+  margin-bottom: 0px;
+}
+
+.block {
+  width: 290px;
+}
+
+.blockTitle {
+  font-family: 'Calibre Medium Italic';
+  font-size: 24px;
+  color: #ffe800;
+  margin-bottom: 13px;
+}
+
+.blockContent {
+  font-family: 'Calibre Light';
+  font-size: 24px;
+  line-height: 26px;
+  color: white;
+}
+
+.gettingStartedButton {
+  display: inline-block;
+  border-radius: 31px;
+  padding: 15px 15px 7px 25px;
+  background-image: linear-gradient(to right, #85c3e1, #29bbaf);
+}
+
+.gettingStartedText {
+  font-family: 'Calibre Semibold';
+  font-size: 28px;
+  color: white;
+  line-height: 35px;
+}
+
+.gettingStartedButtonArrow {
+  font-family: 'Calibre Bold';
+  line-height: 35px;
+  font-size: 35px;
+  color: white;
+  margin-top: 7px;
+  margin-left: 15px;
+}
+
+.homeContainer {
+  text-align: left;
+}
+
+.gettingStartedButtonText {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .projectTitle p {
@@ -79,6 +189,39 @@ body {
   font-family: 'Calibre Medium';
   font-size: 56px;
   margin-left: 15px;
+  margin-bottom: 20px;
+}
+
+.navigationSlider .slidingNav ul li {
+  min-width: 124px;
+  text-align: left;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.navigationSlider .slidingNav ul li a {
+  color: white;
+  font-family: 'Calibre Light';
+  font-size: 24px;
+  padding: 0;
+}
+
+.navigationSlider .slidingNav ul li > a {
+  background-color: transparent;
+}
+
+.navigationSlider .slidingNav ul li a:hover {
+  background-color: transparent;
+  color: #4d8eaa;
+}
+
+.headerWrapper.wrapper {
+  padding: 0;
+}
+
+body .homeContainer .homeWrapper {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .button {
@@ -98,9 +241,13 @@ a {
   color: #4d8eaa;
 }
 
-#er-linked-list, #er-user-spouse, #er-tree, #er-following-followers,
-#er-user-friends, #er-city-streets {
-    height: 230px;
+#er-linked-list,
+#er-user-spouse,
+#er-tree,
+#er-following-followers,
+#er-user-friends,
+#er-city-streets {
+  height: 230px;
 }
 
 @media only screen and (max-width: 1500px) {
@@ -133,6 +280,51 @@ a {
   .gridBlock .fourByGridBlock img {
     max-height: 104px;
   }
+
+  body .wrapper.homeWrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  .headerWrapper.wrapper {
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .navPusher {
+    padding-top: 50px;
+    position: relative;
+  }
+
+  .features {
+    flex-direction: column;
+  }
+
+  .block {
+    margin-top: 20px;
+    width: 80%;
+  }
+
+  .projectTitleContainer {
+    flex-direction: column;
+  }
+
+  .projectTitle p {
+    margin-left: 0px;
+    margin-top: 20px;
+  }
+
+  .homeContainer {
+    margin-bottom: 50px;
+  }
+
+  .fixedHeaderContainer {
+    margin-top: 0 !important;
+  }
+
+  .navigationSlider .slidingNav ul li {
+    min-width: 100px;
+  }
 }
 
 @media only screen and (max-width: 880px) {
@@ -143,6 +335,17 @@ a {
   }
 }
 
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.wrapper.homeWrapper {
+  display: block !important;
+}
+
 /*
  Home Page
 */
@@ -151,6 +354,12 @@ a {
 }
 
 .fixedHeaderContainer {
+  position: relative;
+  margin-top: 100px;
+  padding: 0 15%;
+}
+
+.navigationSlider .slidingNav {
   position: relative;
 }
 
@@ -167,9 +376,39 @@ header > .navigationSlider {
 }
 
 .sideNavVisible .fixedHeaderContainer a {
-  display: flex!important;
+  display: flex !important;
+}
+
+.sideNavVisible .navigationSlider .slidingNav {
+  position: relative;
 }
 
 .sideNavVisible .fixedHeaderContainer {
+  display: flex;
+  align-items: center;
   position: fixed;
+  margin-top: 0;
+  padding: 0;
+}
+
+.sideNavVisible .navigationWrapper.navigationSlider {
+  align-self: flex-end;
+}
+
+.sideNavVisible .headerWrapper.wrapper {
+  width: 100vw;
+  margin: 0 20px;
+}
+
+.sideNavVisible .headerWrapper.wrapper header {
+  width: 100vw;
+}
+
+.navigationSlider .slidingNav ul {
+  margin-top: 0px;
+}
+
+ul,
+ol {
+  margin-bottom: 0px;
 }
