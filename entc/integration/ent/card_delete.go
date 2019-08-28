@@ -33,7 +33,7 @@ func (cd *CardDelete) Exec(ctx context.Context) error {
 	switch cd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cd.sqlExec(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cd.gremlinExec(ctx)
 	default:
 		return errors.New("ent: unsupported dialect")

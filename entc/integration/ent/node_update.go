@@ -118,7 +118,7 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 	switch nu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -417,7 +417,7 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 	switch nuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

@@ -68,7 +68,7 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(node.FieldID), t2.C(node.PrevColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := nq.gremlinQuery()
 		query.gremlin = gremlin.InE(node.NextLabel).OutV()
 	}
@@ -87,7 +87,7 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(node.NextColumn), t2.C(node.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := nq.gremlinQuery()
 		query.gremlin = gremlin.OutE(node.NextLabel).InV()
 	}
@@ -207,7 +207,7 @@ func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -228,7 +228,7 @@ func (nq *NodeQuery) IDs(ctx context.Context) ([]string, error) {
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -249,7 +249,7 @@ func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -270,7 +270,7 @@ func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -323,7 +323,7 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = nq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = nq.gremlinQuery()
 	}
 	return group
@@ -513,7 +513,7 @@ func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ngb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ngb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ngb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ngb: unsupported dialect")

@@ -33,7 +33,7 @@ func (gd *GroupDelete) Exec(ctx context.Context) error {
 	switch gd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gd.sqlExec(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gd.gremlinExec(ctx)
 	default:
 		return errors.New("ent: unsupported dialect")

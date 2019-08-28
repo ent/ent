@@ -69,7 +69,7 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(filetype.FilesColumn), t2.C(filetype.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := ftq.gremlinQuery()
 		query.gremlin = gremlin.OutE(filetype.FilesLabel).InV()
 	}
@@ -189,7 +189,7 @@ func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -210,7 +210,7 @@ func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -231,7 +231,7 @@ func (ftq *FileTypeQuery) Count(ctx context.Context) (int, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -252,7 +252,7 @@ func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -305,7 +305,7 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = ftq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = ftq.gremlinQuery()
 	}
 	return group
@@ -495,7 +495,7 @@ func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ftgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftgb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ftgb: unsupported dialect")

@@ -90,7 +90,7 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	switch cu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -324,7 +324,7 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	switch cuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

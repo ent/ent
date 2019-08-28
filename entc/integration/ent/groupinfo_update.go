@@ -102,7 +102,7 @@ func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 	switch giu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return giu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return giu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -364,7 +364,7 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 	switch giuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return giuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return giuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

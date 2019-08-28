@@ -352,7 +352,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	switch uc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

@@ -177,7 +177,7 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	switch fu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -545,7 +545,7 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	switch fuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

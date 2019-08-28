@@ -92,7 +92,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	switch pc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

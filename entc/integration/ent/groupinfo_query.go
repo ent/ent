@@ -69,7 +69,7 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(groupinfo.GroupsColumn), t2.C(groupinfo.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := giq.gremlinQuery()
 		query.gremlin = gremlin.InE(group.InfoLabel).OutV()
 	}
@@ -189,7 +189,7 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return giq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return giq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -210,7 +210,7 @@ func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]string, error) {
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return giq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return giq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -231,7 +231,7 @@ func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return giq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return giq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -252,7 +252,7 @@ func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return giq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return giq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -305,7 +305,7 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = giq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = giq.gremlinQuery()
 	}
 	return group
@@ -495,7 +495,7 @@ func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch gigb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gigb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gigb.gremlinScan(ctx, v)
 	default:
 		return errors.New("gigb: unsupported dialect")

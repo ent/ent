@@ -80,7 +80,7 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 	switch gic.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gic.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gic.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

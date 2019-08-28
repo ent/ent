@@ -69,7 +69,7 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FieldID), t2.C(pet.TeamColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := pq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.TeamLabel).OutV()
 	}
@@ -88,7 +88,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := pq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.PetsLabel).OutV()
 	}
@@ -208,7 +208,7 @@ func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -229,7 +229,7 @@ func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -250,7 +250,7 @@ func (pq *PetQuery) Count(ctx context.Context) (int, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -271,7 +271,7 @@ func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -324,7 +324,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = pq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = pq.gremlinQuery()
 	}
 	return group
@@ -514,7 +514,7 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch pgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pgb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("pgb: unsupported dialect")

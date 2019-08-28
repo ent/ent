@@ -50,7 +50,7 @@ func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 	switch cu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -213,7 +213,7 @@ func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 	switch cuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

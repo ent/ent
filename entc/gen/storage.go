@@ -64,7 +64,7 @@ var drivers = []*Storage{
 		Name:      "gremlin",
 		IdentName: "Gremlin",
 		Builder:   reflect.TypeOf(&dsl.Traversal{}),
-		Dialects:  []string{"dialect.Neptune"},
+		Dialects:  []string{"dialect.Gremlin"},
 		Imports: []string{
 			"github.com/facebookincubator/ent/dialect/gremlin",
 			"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl",

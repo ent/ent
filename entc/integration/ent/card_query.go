@@ -69,7 +69,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := cq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.CardLabel).OutV()
 	}
@@ -189,7 +189,7 @@ func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -210,7 +210,7 @@ func (cq *CardQuery) IDs(ctx context.Context) ([]string, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -231,7 +231,7 @@ func (cq *CardQuery) Count(ctx context.Context) (int, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -252,7 +252,7 @@ func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -305,7 +305,7 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = cq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = cq.gremlinQuery()
 	}
 	return group
@@ -495,7 +495,7 @@ func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch cgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cgb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("cgb: unsupported dialect")

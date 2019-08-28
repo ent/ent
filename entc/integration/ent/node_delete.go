@@ -33,7 +33,7 @@ func (nd *NodeDelete) Exec(ctx context.Context) error {
 	switch nd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nd.sqlExec(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nd.gremlinExec(ctx)
 	default:
 		return errors.New("ent: unsupported dialect")

@@ -200,7 +200,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	switch gc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

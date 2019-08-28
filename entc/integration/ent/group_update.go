@@ -269,7 +269,7 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	switch gu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -852,7 +852,7 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	switch guo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return guo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return guo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

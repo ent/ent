@@ -160,7 +160,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	switch fc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

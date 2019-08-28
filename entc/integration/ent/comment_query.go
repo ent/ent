@@ -169,7 +169,7 @@ func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -190,7 +190,7 @@ func (cq *CommentQuery) IDs(ctx context.Context) ([]string, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -211,7 +211,7 @@ func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -232,7 +232,7 @@ func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -285,7 +285,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 	switch cq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = cq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = cq.gremlinQuery()
 	}
 	return group
@@ -475,7 +475,7 @@ func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch cgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cgb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("cgb: unsupported dialect")

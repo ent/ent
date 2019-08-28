@@ -33,7 +33,7 @@ func (ud *UserDelete) Exec(ctx context.Context) error {
 	switch ud.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ud.sqlExec(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ud.gremlinExec(ctx)
 	default:
 		return errors.New("ent: unsupported dialect")

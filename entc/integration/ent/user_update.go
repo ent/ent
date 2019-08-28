@@ -525,7 +525,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	switch uu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -1724,7 +1724,7 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	switch uuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

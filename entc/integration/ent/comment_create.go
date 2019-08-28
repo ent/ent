@@ -48,7 +48,7 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 	switch cc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

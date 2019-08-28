@@ -1,5 +1,5 @@
 ---
-id: predicate
+id: predicates
 title: Predicates
 ---
 Lorem ipsum.

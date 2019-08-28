@@ -108,7 +108,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	switch cc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return cc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return cc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

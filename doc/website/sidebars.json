@@ -12,9 +12,9 @@
     "Code Generation": [
       "code-gen",
       "crud",
-      "predicates",
       "traversals",
       "aggregate",
+      "predicates",
       "transactions"
     ],
     "Migration": [

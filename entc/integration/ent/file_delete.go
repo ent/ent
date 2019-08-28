@@ -33,7 +33,7 @@ func (fd *FileDelete) Exec(ctx context.Context) error {
 	switch fd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fd.sqlExec(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fd.gremlinExec(ctx)
 	default:
 		return errors.New("ent: unsupported dialect")

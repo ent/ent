@@ -111,7 +111,7 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	switch pu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -392,7 +392,7 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	switch puo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return puo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return puo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

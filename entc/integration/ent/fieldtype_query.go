@@ -169,7 +169,7 @@ func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -190,7 +190,7 @@ func (ftq *FieldTypeQuery) IDs(ctx context.Context) ([]string, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -211,7 +211,7 @@ func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -232,7 +232,7 @@ func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -285,7 +285,7 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = ftq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = ftq.gremlinQuery()
 	}
 	return group
@@ -475,7 +475,7 @@ func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ftgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftgb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ftgb: unsupported dialect")

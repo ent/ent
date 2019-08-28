@@ -61,7 +61,7 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	switch ftc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

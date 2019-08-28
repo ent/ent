@@ -39,6 +39,16 @@ You should note, that `goimports` is required for the codegen, and it can be ins
 go get -u golang.org/x/tools/cmd/goimports
 ``` 
 
+The `generate` command generates the following assets for the schemas:
+
+- `Client` and `Tx` objects used for interacting with the graph.
+- CRUD builders for each schema type. See [CRUD](crud.md) for more info.
+- Entity object (Go struct) for each of the schema type.
+- Package contains constants and predicates used for interacting with the builders.
+- A `migrate` package, for SQL dialects. See [Migration](migrate.md) for more info.
+
+## Code Generation Options
+
 For more info about codegen options, run `entc generate -h`:
 
 ```console

@@ -70,7 +70,7 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FieldID), t2.C(file.OwnerColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := fq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.FilesLabel).OutV()
 	}
@@ -89,7 +89,7 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(filetype.FieldID), t2.C(file.TypeColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := fq.gremlinQuery()
 		query.gremlin = gremlin.InE(filetype.FilesLabel).OutV()
 	}
@@ -209,7 +209,7 @@ func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -230,7 +230,7 @@ func (fq *FileQuery) IDs(ctx context.Context) ([]string, error) {
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -251,7 +251,7 @@ func (fq *FileQuery) Count(ctx context.Context) (int, error) {
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -272,7 +272,7 @@ func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -325,7 +325,7 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = fq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = fq.gremlinQuery()
 	}
 	return group
@@ -515,7 +515,7 @@ func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch fgb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return fgb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return fgb.gremlinScan(ctx, v)
 	default:
 		return errors.New("fgb: unsupported dialect")

@@ -239,7 +239,7 @@ func templateClientTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/client.tmpl", size: 4844, mode: os.FileMode(420), modTime: time.Unix(1566998190, 0)}
+	info := bindataFileInfo{name: "template/client.tmpl", size: 4844, mode: os.FileMode(420), modTime: time.Unix(1567007034, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -259,7 +259,7 @@ func templateConfigTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/config.tmpl", size: 1058, mode: os.FileMode(420), modTime: time.Unix(1566996430, 0)}
+	info := bindataFileInfo{name: "template/config.tmpl", size: 1058, mode: os.FileMode(420), modTime: time.Unix(1567007034, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

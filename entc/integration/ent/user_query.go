@@ -72,7 +72,7 @@ func (uq *UserQuery) QueryCard() *CardQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.CardColumn), t2.C(user.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.CardLabel).InV()
 	}
@@ -91,7 +91,7 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.PetsColumn), t2.C(user.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.PetsLabel).InV()
 	}
@@ -110,7 +110,7 @@ func (uq *UserQuery) QueryFiles() *FileQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FilesColumn), t2.C(user.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.FilesLabel).InV()
 	}
@@ -134,7 +134,7 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[1]))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.GroupsLabel).InV()
 	}
@@ -158,7 +158,7 @@ func (uq *UserQuery) QueryFriends() *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.Both(user.FriendsLabel)
 	}
@@ -182,7 +182,7 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.FollowingLabel).OutV()
 	}
@@ -206,7 +206,7 @@ func (uq *UserQuery) QueryFollowing() *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.FollowingLabel).InV()
 	}
@@ -225,7 +225,7 @@ func (uq *UserQuery) QueryTeam() *PetQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.TeamColumn), t2.C(user.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.TeamLabel).InV()
 	}
@@ -244,7 +244,7 @@ func (uq *UserQuery) QuerySpouse() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.SpouseColumn), t2.C(user.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.Both(user.SpouseLabel)
 	}
@@ -263,7 +263,7 @@ func (uq *UserQuery) QueryChildren() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.ChildrenColumn), t2.C(user.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.ParentLabel).OutV()
 	}
@@ -282,7 +282,7 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FieldID), t2.C(user.ParentColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.ParentLabel).InV()
 	}
@@ -402,7 +402,7 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -423,7 +423,7 @@ func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -444,7 +444,7 @@ func (uq *UserQuery) Count(ctx context.Context) (int, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -465,7 +465,7 @@ func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return uq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return uq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -518,7 +518,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = uq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = uq.gremlinQuery()
 	}
 	return group
@@ -708,7 +708,7 @@ func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ugb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ugb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ugb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ugb: unsupported dialect")

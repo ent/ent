@@ -71,7 +71,7 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(group.FilesColumn), t2.C(group.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.OutE(group.FilesLabel).InV()
 	}
@@ -90,7 +90,7 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(group.BlockedColumn), t2.C(group.FieldID))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.OutE(group.BlockedLabel).InV()
 	}
@@ -114,7 +114,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[0]))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.GroupsLabel).OutV()
 	}
@@ -133,7 +133,7 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 			From(t1).
 			Join(t2).
 			On(t1.C(groupinfo.FieldID), t2.C(group.InfoColumn))
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.OutE(group.InfoLabel).InV()
 	}
@@ -253,7 +253,7 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlAll(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gq.gremlinAll(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -274,7 +274,7 @@ func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlIDs(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gq.gremlinIDs(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
@@ -295,7 +295,7 @@ func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlCount(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gq.gremlinCount(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -316,7 +316,7 @@ func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return gq.sqlExist(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return gq.gremlinExist(ctx)
 	default:
 		return false, errors.New("ent: unsupported dialect")
@@ -369,7 +369,7 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		group.sql = gq.sqlQuery()
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		group.gremlin = gq.gremlinQuery()
 	}
 	return group
@@ -559,7 +559,7 @@ func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ggb.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ggb.sqlScan(ctx, v)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ggb.gremlinScan(ctx, v)
 	default:
 		return errors.New("ggb: unsupported dialect")

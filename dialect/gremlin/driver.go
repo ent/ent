@@ -24,7 +24,7 @@ func NewDriver(c *Client) *Driver {
 }
 
 // Dialect implements the dialect.Dialect method.
-func (Driver) Dialect() string { return dialect.Neptune }
+func (Driver) Dialect() string { return dialect.Gremlin }
 
 // Exec implements the dialect.Exec method.
 func (c *Driver) Exec(ctx context.Context, query string, args, v interface{}) error {

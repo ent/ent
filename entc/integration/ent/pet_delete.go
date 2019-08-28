@@ -33,7 +33,7 @@ func (pd *PetDelete) Exec(ctx context.Context) error {
 	switch pd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pd.sqlExec(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return pd.gremlinExec(ctx)
 	default:
 		return errors.New("ent: unsupported dialect")

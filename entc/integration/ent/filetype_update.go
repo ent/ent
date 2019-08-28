@@ -87,7 +87,7 @@ func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	switch ftu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -331,7 +331,7 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 	switch ftuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

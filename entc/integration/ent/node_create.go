@@ -96,7 +96,7 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	switch nc.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return nc.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return nc.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")

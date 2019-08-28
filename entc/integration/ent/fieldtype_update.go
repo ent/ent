@@ -239,7 +239,7 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	switch ftu.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftu.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftu.gremlinSave(ctx)
 	default:
 		return 0, errors.New("ent: unsupported dialect")
@@ -665,7 +665,7 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	switch ftuo.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return ftuo.sqlSave(ctx)
-	case dialect.Neptune:
+	case dialect.Gremlin:
 		return ftuo.gremlinSave(ctx)
 	default:
 		return nil, errors.New("ent: unsupported dialect")
