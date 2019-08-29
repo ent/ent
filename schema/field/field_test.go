@@ -81,20 +81,6 @@ func TestString(t *testing.T) {
 	assert.Len(t, fd.Validators, 2)
 }
 
-func TestCharset(t *testing.T) {
-	fd := field.String("name").
-		Charset("utf8").
-		Descriptor()
-	assert.Equal(t, "utf8", fd.Charset)
-}
-
-func TestCollation(t *testing.T) {
-	fd := field.String("name").
-		Collation("utf8_general_ci").
-		Descriptor()
-	assert.Equal(t, "utf8_general_ci", fd.Collation)
-}
-
 func TestTime(t *testing.T) {
 	now := time.Now()
 	fd := field.Time("created_at").

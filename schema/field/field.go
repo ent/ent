@@ -117,8 +117,6 @@ type Descriptor struct {
 	Size          int           // varchar size.
 	Name          string        // field name.
 	Type          Type          // field type.
-	Charset       string        // string charset.
-	Collation     string        // string collation.
 	Unique        bool          // unique index of field.
 	Nillable      bool          // nillable struct field.
 	Optional      bool          // nullable field in database.
@@ -242,20 +240,6 @@ func (b *stringBuilder) Comment(c string) *stringBuilder {
 // StructTag sets the struct tag of the field.
 func (b *stringBuilder) StructTag(s string) *stringBuilder {
 	b.desc.Tag = s
-	return b
-}
-
-// Charset sets the character set attribute for character fields.
-// For example, utf8 or utf8mb4 in MySQL.
-func (b *stringBuilder) Charset(s string) *stringBuilder {
-	b.desc.Charset = s
-	return b
-}
-
-// Collation sets the collation attribute for character fields.
-// For example, utf8_general_ci or utf8mb4_bin in MySQL.
-func (b *stringBuilder) Collation(c string) *stringBuilder {
-	b.desc.Collation = c
 	return b
 }
 

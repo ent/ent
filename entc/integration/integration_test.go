@@ -38,7 +38,7 @@ func TestSQLite(t *testing.T) {
 	defer drv.Close()
 	client := ent.NewClient(ent.Driver(drv))
 	require.NoError(t, client.Schema.Create(context.Background()))
-	for _, tt := range tests[1:] {
+	for _, tt := range tests {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 			drop(t, client)
@@ -78,7 +78,7 @@ func TestGremlin(t *testing.T) {
 	require.NoError(t, err)
 	client := ent.NewClient(ent.Driver(gremlin.NewDriver(c)))
 	// run all tests except transaction and index tests.
-	for _, tt := range tests[3:] {
+	for _, tt := range tests[2:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
 			drop(t, client)
@@ -89,14 +89,12 @@ func TestGremlin(t *testing.T) {
 
 // tests for all drivers to run.
 var tests = []func(*testing.T, *ent.Client){
-	Collation,
 	Tx,
 	Indexes,
 	Types,
 	Clone,
 	Sanity,
 	Paging,
-	Charset,
 	Relation,
 	Predicate,
 	UniqueConstraint,
@@ -231,33 +229,6 @@ func Paging(t *testing.T, client *ent.Client) {
 	for i := 0; i < 10; i++ {
 		require.Equal(i+1, client.User.Query().Order(ent.Asc(user.FieldAge)).Offset(i).Limit(1).AllX(ctx)[0].Age)
 	}
-}
-
-func Charset(t *testing.T, client *ent.Client) {
-	require := require.New(t)
-	ctx := context.Background()
-	f1 := client.File.Create().SetName("אריאל").SetSize(10).SaveX(ctx)
-	f2 := client.File.Create().SetName("נטי").SetSize(10).SaveX(ctx)
-	f3 := client.File.Create().SetName("Ariel").SetSize(10).SaveX(ctx)
-	f4 := client.File.Create().SetName("Nati").SetSize(10).SaveX(ctx)
-	require.Equal("אריאל", f1.Name)
-	require.Equal("נטי", f2.Name)
-	require.Equal("Ariel", f3.Name)
-	require.Equal("Nati", f4.Name)
-}
-
-func Collation(t *testing.T, client *ent.Client) {
-	require := require.New(t)
-	ctx := context.Background()
-	_ = client.File.Create().SetName("Foo").SetText("hello world").SaveX(ctx)
-	query := client.File.Query().Where(file.Name("foo"))
-	require.False(query.ExistX(ctx))
-	require.Nil(query.FirstX(ctx))
-	f := client.File.Query().Where(file.Text("Hello WoRLD")).OnlyX(ctx)
-	require.Equal("Foo", f.Name)
-	require.Equal("hello world", f.Text)
-	_, err := client.File.Create().SetName("Bar").SetText("Hello World").Save(ctx)
-	require.Error(err, "text field uses case insensitive collation")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

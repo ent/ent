@@ -18,7 +18,6 @@ type UserCreate struct {
 	age     *int32
 	name    *string
 	address *string
-	role    *string
 }
 
 // SetAge sets the age field.
@@ -43,20 +42,6 @@ func (uc *UserCreate) SetAddress(s string) *UserCreate {
 func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
 	if s != nil {
 		uc.SetAddress(*s)
-	}
-	return uc
-}
-
-// SetRole sets the role field.
-func (uc *UserCreate) SetRole(s string) *UserCreate {
-	uc.role = &s
-	return uc
-}
-
-// SetNillableRole sets the role field if the given value is not nil.
-func (uc *UserCreate) SetNillableRole(s *string) *UserCreate {
-	if s != nil {
-		uc.SetRole(*s)
 	}
 	return uc
 }
@@ -105,10 +90,6 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.address != nil {
 		builder.Set(user.FieldAddress, *uc.address)
 		u.Address = *uc.address
-	}
-	if uc.role != nil {
-		builder.Set(user.FieldRole, *uc.role)
-		u.Role = *uc.role
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

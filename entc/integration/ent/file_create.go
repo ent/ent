@@ -15,9 +15,7 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -26,7 +24,6 @@ type FileCreate struct {
 	config
 	size  *int
 	name  *string
-	text  *string
 	user  *string
 	group *string
 	owner map[string]struct{}
@@ -50,20 +47,6 @@ func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
 // SetName sets the name field.
 func (fc *FileCreate) SetName(s string) *FileCreate {
 	fc.name = &s
-	return fc
-}
-
-// SetText sets the text field.
-func (fc *FileCreate) SetText(s string) *FileCreate {
-	fc.text = &s
-	return fc
-}
-
-// SetNillableText sets the text field if the given value is not nil.
-func (fc *FileCreate) SetNillableText(s *string) *FileCreate {
-	if s != nil {
-		fc.SetText(*s)
-	}
 	return fc
 }
 
@@ -194,10 +177,6 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		builder.Set(file.FieldName, *fc.name)
 		f.Name = *fc.name
 	}
-	if fc.text != nil {
-		builder.Set(file.FieldText, *fc.text)
-		f.Text = *fc.text
-	}
 	if fc.user != nil {
 		builder.Set(file.FieldUser, *fc.user)
 		f.User = fc.user
@@ -268,24 +247,12 @@ func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
 }
 
 func (fc *FileCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(file.Label)
 	if fc.size != nil {
 		v.Property(dsl.Single, file.FieldSize, *fc.size)
 	}
 	if fc.name != nil {
 		v.Property(dsl.Single, file.FieldName, *fc.name)
-	}
-	if fc.text != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(file.Label, file.FieldText, *fc.text).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldText, *fc.text)),
-		})
-		v.Property(dsl.Single, file.FieldText, *fc.text)
 	}
 	if fc.user != nil {
 		v.Property(dsl.Single, file.FieldUser, *fc.user)
@@ -299,12 +266,5 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	for id := range fc._type {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
+	return v.ValueMap(true)
 }

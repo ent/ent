@@ -80,7 +80,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "size", Type: field.TypeInt, Default: file.DefaultSize},
 		{Name: "name", Type: field.TypeString},
-		{Name: "text", Type: field.TypeString, Unique: true, Nullable: true, Collation: "utf8mb4_general_ci"},
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
 		{Name: "type_id", Type: field.TypeInt, Nullable: true},
@@ -95,21 +94,21 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "files_file_types_files",
-				Columns: []*schema.Column{FilesColumns[6]},
+				Columns: []*schema.Column{FilesColumns[5]},
 
 				RefColumns: []*schema.Column{FileTypesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "files_groups_files",
-				Columns: []*schema.Column{FilesColumns[7]},
+				Columns: []*schema.Column{FilesColumns[6]},
 
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "files_users_files",
-				Columns: []*schema.Column{FilesColumns[8]},
+				Columns: []*schema.Column{FilesColumns[7]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -124,12 +123,12 @@ var (
 			{
 				Name:    "name_user",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[4]},
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
 			},
 			{
 				Name:    "name_owner_id_type_id",
 				Unique:  true,
-				Columns: []*schema.Column{FilesColumns[2], FilesColumns[8], FilesColumns[6]},
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7], FilesColumns[5]},
 			},
 		},
 	}

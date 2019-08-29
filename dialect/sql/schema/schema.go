@@ -180,8 +180,6 @@ type Column struct {
 	Increment bool        // auto increment attribute.
 	Nullable  bool        // null or not null attribute.
 	Default   interface{} // default value.
-	Charset   string      // column character set.
-	Collation string      // column collation.
 	indexes   Indexes     // linked indexes.
 }
 
@@ -197,15 +195,9 @@ func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
 // The syntax/order is: datatype [Charset] [Unique|Increment] [Collation] [Nullable].
 func (c *Column) MySQL(version string) *sql.ColumnBuilder {
 	b := sql.Column(c.Name).Type(c.MySQLType(version)).Attr(c.Attr)
-	if c.Charset != "" {
-		b.Attr("CHARACTER SET " + c.Charset)
-	}
 	c.unique(b)
 	if c.Increment {
 		b.Attr("AUTO_INCREMENT")
-	}
-	if c.Collation != "" {
-		b.Attr("COLLATE " + c.Collation)
 	}
 	c.nullable(b)
 	c.defaultValue(b)
@@ -301,17 +293,13 @@ func (c *Column) SQLiteType() (t string) {
 // ScanMySQL scans the information from MySQL column description.
 func (c *Column) ScanMySQL(rows *sql.Rows) error {
 	var (
-		charset  sql.NullString
-		collate  sql.NullString
 		nullable sql.NullString
 		defaults sql.NullString
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &charset, &collate); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &sql.NullString{}, &sql.NullString{}); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
 	}
 	c.Unique = c.UniqueKey()
-	c.Charset = charset.String
-	c.Collation = collate.String
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
