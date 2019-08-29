@@ -15,6 +15,7 @@
       "traversals",
       "aggregate",
       "predicates",
+      "paging",
       "transactions"
     ],
     "Migration": [
