@@ -15,9 +15,14 @@ const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
 
+const arrow = '\u2192';
+
 const Block = props => (
   <div className="block">
-    <div className="blockTitle">{props.title}</div>
+    <div className="blockTitle">
+      <div className="blockTitleText">{props.title}</div>{' '}
+      <div className="yellowArrow">{arrow}</div>
+    </div>
     <div className="blockContent">{props.content}</div>
   </div>
 );
@@ -100,9 +105,12 @@ class HomeSplash extends React.Component {
             <a href="./docs/getting-started">
               <div className="gettingStartedButtonText">
                 <div className="gettingStartedText">{'Getting Started '}</div>
-                <div className="gettingStartedButtonArrow">→</div>
+                <div className="gettingStartedButtonArrow">{arrow}</div>
               </div>
             </a>
+          </div>
+          <div className="gopherGraph">
+            <img src="https://entgo.io/assets/gopher_graph.png" />
           </div>
           <Features />
         </div>

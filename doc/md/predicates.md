@@ -23,15 +23,15 @@ title: Predicates
 
 ## Edge Predicates
 
-- **HasEdge**. For example, for edge named `owenr` of type `Pet`, use:
+- **HasEdge**. For example, for edge named `owner` of type `Pet`, use:
 
   ```go
    client.Pet.
 		Query().
 		Where(user.HasOwner()).
 		All(ctx)
-  ``` 
-  
+  ```
+
 - **HasEdgeWith**. Add list of predicates for edge predicate.
 
   ```go
@@ -39,7 +39,7 @@ title: Predicates
 		Query().
 		Where(user.HasOwnerWith(user.Name("a8m"))).
 		All(ctx)
-  ``` 
+  ```
 
 
 ## Negation (NOT)
