@@ -21,7 +21,7 @@ const Block = props => (
   <div className="block">
     <div className="blockTitle">
       <div className="blockTitleText">{props.title}</div>{' '}
-      <div className="yellowArrow">{arrow}</div>
+      <a className="yellowArrow" href={props.link}>{arrow}</a>
     </div>
     <div className="blockContent">{props.content}</div>
   </div>
@@ -32,14 +32,17 @@ const Features = () => (
     <Block
       title="Schema As Code"
       content="Simple API for modeling any graph schema as Go objects"
+      link="docs/schema-def"
     />
     <Block
       title="Easily Traverse Any Graph"
       content="Run queries, aggregations and traverse any graph structure easily"
+      link="docs/traversals"
     />
     <Block
       title="Statically Typed And Explicit API"
-      content="100% statically types and explicit api using code generation"
+      content="100% statically typed and explicit API using code generation"
+      link="docs/code-gen"
     />
   </div>
 );
@@ -75,7 +78,7 @@ class HomeSplash extends React.Component {
           </div>
         </div>
         <p className="projectDesc">
-          A simple API for modeling any graph using scema as Go objects
+          A simple API for modeling any graph using schema as Go objects
         </p>
       </div>
     );

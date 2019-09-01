@@ -30,10 +30,8 @@ const siteConfig = {
 
   // Used for publishing and more
   projectName: 'ent',
-  organizationName: 'facebook',
-  // For top-level user or org sites, the organization is still the same.
-  // e.g., for the https://JoelMarcey.github.io site, it would be set like...
-  //   organizationName: 'JoelMarcey'
+  organizationName: 'facebookincubator',
+
 
   customDocsPath: 'md',
   // For no header links in the top nav bar -> headerLinks: [],
@@ -41,14 +39,13 @@ const siteConfig = {
     {doc: 'getting-started', label: 'Docs'},
     {doc: 'getting-started', label: 'GoDoc'},
     {href: 'https://github.com/facebookincubator/ent', label: 'Github'},
-    {href: 'https://github.com/facebookincubator/ent/issues', label: 'Help'},
   ],
 
   // If you have users set above, you add it here:
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/favicon.ico',
+  headerIcon: 'img/logo.png',
   favicon: 'img/favicon.ico',
 
   /* Colors for website */

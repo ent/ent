@@ -5,10 +5,10 @@ sidebar_label: Quick Introduction
 ---
 
 `ent` is a simple, yet powerful entity framework for Go built with the following principles:
-- Model your data as graph easily.
+- Easily modeling your data as a graph structure.
 - Defining your schema as code.
-- Static typing first based on code generation.
-- Make the work with graph-like data in Go easier.
+- Static typing based on code generation.
+- Simplifying graph traversals.
 
 ## Installation
 
@@ -51,7 +51,7 @@ func (User) Edges() []ent.Edge {
 
 ```
 
-Let's add 2 fields to the `User` schema, and then run `entc generate`:
+Add 2 fields to the `User` schema, and then run `entc generate`:
 
 ```go
 package schema
@@ -73,13 +73,13 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-Running `entc generate` from the root directory of the project:
+Run `entc generate` from the root directory of the project:
 
 ```go
 $ entc generate ./ent/schema
 ```
 
-Will produce the following files:
+This produces the following files:
 ```
 ent
 ├── client.go
@@ -108,8 +108,7 @@ ent
 
 ## Create Your First Entity
 
-First thing we need to do, is creating a new `ent.Client`. For the example purpose,
-we will use SQLite3.
+To get started, create a new `ent.Client`. For this example, we will use SQLite3.
 
 ```go
 package main
@@ -141,7 +140,7 @@ func main() {
 }
 ```
 
-Now, we're ready to create our user. Let's call this function `Do` for the sake of the example:
+Now, we're ready to create our user. Let's call this function `Do` for the sake of example:
 ```go
 func Do(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
@@ -160,7 +159,7 @@ func Do(ctx context.Context, client *ent.Client) (*ent.User, error) {
 ## Query Your Entities
 
 `entc` generates a package for each entity schema that contains its predicates, default values, validators
-and information about storage elements (like, column names, primary keys, etc).
+and additional information about storage elements (column names, primary keys, etc).
 
 ```go
 package main
@@ -189,15 +188,15 @@ func Query(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
 
 ## Add Your First Edge (Relation)
-In this part of the tutorial, we want to declare an edge to another entity in the schema.  
+In this part of the tutorial, we want to declare an edge (relation) to another entity in the schema.  
 Let's create 2 additional entities named `Car` and `Group` with a few fields. We use `entc`
-to generate the initial schema:
+to generate the initial schemas:
 
 ```console
 $ entc init Car Group
 ```
 
-And then, we add the rest of the fields manually:
+And then we add the rest of the fields manually:
 ```go
 import (
 	"log"
@@ -226,7 +225,7 @@ func (Group) Fields() []ent.Field {
 ```
 
 Let's define our first relation. An edge from `User` to `Car` defining that a user
-can have 1 or more cars, but a car has only one owner (one-to-many relation).
+can **have 1 or more** cars, but a car **has only one** owner (one-to-many relation).
 
 ![er-user-cars](https://entgo.io/assets/re_user_cars.png)
 
@@ -248,7 +247,7 @@ Let's add the `"cars"` edge to the `User` schema, and run `entc generate ./ent/s
  }
  ```
 
-We continue our example, by creating 2 cars, and add them to a user.
+We continue our example by creating 2 cars and adding them to a user.
 ```go
 func Do(ctx context.Context, client *ent.Client) error {
 	// creating new car with model "Tesla".
@@ -285,7 +284,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	log.Println("user was created: %v", a8m)
 }
 ```
-But, what about querying the "cars" edge? Here's how we do it:
+But what about querying the `cars` edge (relation)? Here's how we do it:
 ```go
 import (
 	"log"
@@ -316,16 +315,16 @@ func Do(ctx context.Context, client *ent.Client) error {
 ```
 
 ## Add Your First Inverse Edge (BackRef)
-Assume we have a `Car` object and we want to get its owner; The user that this car belongs to.
+Assume we have a `Car` object and we want to get its owner; the user that this car belongs to.
 For this, we have another type of edge called "inverse edge" that is defined using the `edge.From`
 function.
 
 ![er-cars-owner](https://entgo.io/assets/re_cars_owner.png)
 
-The new edge created in the diagram above is transparent, to emphasis that we don't create another
-edge in the database, and it is just a back-reference to the real edge.
+The new edge created in the diagram above is translucent, to emphasize that we don't create another
+edge in the database. It's just a back-reference to the real edge (relation).
 
-Let's add an inverse edge named `"owner"` to the `Car` schema, reference it to the `"cars"` edge
+Let's add an inverse edge named `owner` to the `Car` schema, reference it to the `cars` edge
 in the `User` schema, and run `entc generate ./ent/schema`.
 
 ```go
@@ -381,13 +380,13 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 ## Create Your Second Edge
 
-We'll continue our example, by creating a M2M relationship between users and groups.
+We'll continue our example by creating a M2M (many-to-many) relationship between users and groups.
 
 ![er-group-users](https://entgo.io/assets/re_group_users.png)
 
-As you can see, each group entity can have many users, and a user can be connected to many groups.
-A simple "many-to-many" relationship. In the above illustration, the `Group` schema is the owner
-of the `users` edge (relationship), and the `User` entity has a back-reference/inverse edge to this
+As you can see, each group entity can **have many** users, and a user can **be connected to many** groups;
+a simple "many-to-many" relationship. In the above illustration, the `Group` schema is the owner
+of the `users` edge (relation), and the `User` entity has a back-reference/inverse edge to this
 relationship named `groups`. Let's define this relationship in our schemas:
 
 - `<project>/ent/schema/group.go`:
@@ -435,15 +434,15 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	 }
 	```
 
-We run `entc` on the schema directory, to re-generate the assets.
+We run `entc` on the schema directory to re-generate the assets.
 ```cosole
 $ entc generate ./ent/schema
 ```
 
 ## Run Your First Graph Traversal
 
-In order to run our first graph traversal, we need to generate some data (nodes and edges).  
-Let's create the following graph using the framework:
+In order to run our first graph traversal, we need to generate some data (nodes and edges, or in other words, 
+entities and relations). Let's create the following graph using the framework:
 
 ![re-graph](https://entgo.io/assets/re_graph_getting_started.png)
 
@@ -517,9 +516,9 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-Now, when we have a graph with data, we can run a few queries on it:
+Now when we have a graph with data, we can run a few queries on it:
 
-1. Get all user's cars of group named "Github":
+1. Get all user's cars within the group named "Github":
 
 	```go
 	import (
@@ -543,7 +542,7 @@ Now, when we have a graph with data, we can run a few queries on it:
 	}
 	```
 
-2. Changing the query above, so that the source of the traversal is the user *Ariel*:
+2. Change the query above, so that the source of the traversal is the user *Ariel*:
 
 	```go
 	import (
@@ -575,7 +574,7 @@ Now, when we have a graph with data, we can run a few queries on it:
 	}
 	```
 
-3. Get all groups that have users (query with look-aside):
+3. Get all groups that have users (query with a look-aside predicate):
 
 	```go
 	import (

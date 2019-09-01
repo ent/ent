@@ -40,7 +40,7 @@ class Footer extends React.Component {
             </a>
           </div>
           <div>
-            <h5>Credits</h5>
+            <h5>Credit</h5>
             <span className="copyright">
               The Go gopher was designed by{' '}
               <a

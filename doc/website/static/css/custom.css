@@ -90,6 +90,37 @@
 @media only screen and (min-width: 1400px) {
 }
 
+@media only screen and (max-width: 500px) {
+    .sideNavVisible .headerWrapper.wrapper header > a {
+        display: none!important;
+    }
+}
+
+
+@media only screen and (max-width: 800px) {
+    .gopherGraph {
+        margin-top: 25px;
+    }
+    .features {
+        margin: 60px auto 0 !important;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .gopherGraph {
+        margin-top: 40px;
+    }
+    .features {
+        margin: 30px auto 0!important;
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .gettingStartedText {
+        font-size: 22px!important;
+    }
+}
+
 body {
   background: #3d3e3f;
 }
@@ -121,13 +152,6 @@ body {
 .navigationSlider .slidingNav ul li.siteNavItemActive > a,
 .navigationSlider .slidingNav ul li.siteNavGroupActive > a {
   background-color: transparent;
-}
-
-.onPageNav .toc-headings > li > a.active,
-.toc .toggleNav ul li.navListItemActive a,
-.toc .toggleNav ul li a:hover,
-.toc .toggleNav ul li a:focus {
-  font-family: 'Calibre Regular', sans-serif;
 }
 
 .imageAlignTop .blockImage {
@@ -322,7 +346,7 @@ a {
   }
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1023px) {
   .gridBlock .twoByGridBlock img,
   .gridBlock .threeByGridBlock img,
   .gridBlock .fourByGridBlock img {
@@ -381,6 +405,10 @@ a {
 
   .navigationSlider .slidingNav ul li {
     min-width: 100px;
+  }
+
+  .projectTitle {
+     line-height: 1.3em;
   }
 }
 
@@ -506,11 +534,13 @@ ol {
     width: 1100px;
     padding: 0 0;
   }
+}
 
-  .sideNavVisible.separateOnPageNav .fixedHeaderContainer {
-    margin-top: 35px;
-    width: 100vw;
-  }
+@media only screen and (min-width: 1000px) {
+    .sideNavVisible.separateOnPageNav .fixedHeaderContainer {
+        margin-top: 35px;
+        width: 100vw;
+    }
 }
 
 .sideNavVisible .navigationSlider .slidingNav ul li a {
@@ -525,8 +555,23 @@ ol {
   top: 4px;
   left: 5px;
   font-size: 30px;
+  color: #ffe800;
+
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
+.yellowArrow:hover {
+    color: #ffe800;
+
+    -webkit-transform: translateX(5px);
+    -moz-transform: translateX(5px);
+    -ms-transform: translateX(5px);
+    -o-transform: translateX(5px);
+    transform: translateX(5px);
+}
 .blockTitleText {
   display: inline;
 }

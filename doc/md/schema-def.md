@@ -63,4 +63,5 @@ $ entc init User Group
 If you are used to the definition of relations over edges, that's fine.
 The modeling is the same. You can model with `ent` whatever you can model
 with other traditional ORMs.
-There are many examples in this website that will help you to get started.
+There are many examples in this website that will help you to get started,
+and can be found in the [edges section](schema-edges.md).
