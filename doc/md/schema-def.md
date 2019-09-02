@@ -6,11 +6,12 @@ title: Introduction
 ## Quick Summary
 
 Schema describes the definition of one entity type in the graph, like `User` or `Group`,
-and can contains the following configuration:
+and can contain the following configurations:
 - Entity fields (or properties), like: name or age of a `User`.
 - Entity edges (or relations), like: `User`'s groups, or `User`'s friends.
 - Database specific options, like: indexes or unique indexes.
 
+<br/>
 Here's an example of a schema:
 
 ```go
@@ -63,5 +64,5 @@ $ entc init User Group
 If you are used to the definition of relations over edges, that's fine.
 The modeling is the same. You can model with `ent` whatever you can model
 with other traditional ORMs.
-There are many examples in this website that will help you to get started,
-and can be found in the [edges section](schema-edges.md).
+There are many examples in this website that can help you get started
+in the [Edges](schema-edges.md) section.

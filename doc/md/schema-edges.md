@@ -75,14 +75,14 @@ func (Pet) Edges() []ent.Edge {
 }
 ```
 
-As you can see, a `User` entity can have many pets, but a `Pet` entity can have only one owner.  
+As you can see, a `User` entity can **have many** pets, but a `Pet` entity can **have only one** owner.  
 In relationship definition, the `pets` edge is a *O2M* (one-to-many) relationship, and the `owner` edge
 is a *M2O* (many-to-one) relationship.
 
 The `User` schema **owns** the `pets/owner` relationship because it uses `edge.To`, and the `Pet` schema
-just have a back-reference to it, declared using `edge.From` with the `Ref` method.
+just has a back-reference to it, declared using `edge.From` with the `Ref` method.
 
-The `Ref` method describes which edge of the `User` schema we're referencing to, because, there can be multiple
+The `Ref` method describes which edge of the `User` schema we're referencing because there can be multiple
 references from one schema to other. 
 
 The cardinality of the edge/relationship can be controlled using the `Unique` method, and it's explained
@@ -151,7 +151,7 @@ func (User) Edges() []ent.Edge {
 }
 ```
 
-As you can see, a Group entity can have many users, and a User entity can have have many groups.  
+As you can see, a Group entity can **have many** users, and a User entity can have **have many** groups.  
 In relationship definition, the `users` edge is a *M2M* (many-to-many) relationship, and the `groups`
 edge is also a *M2M* (many-to-many) relationship.
 
@@ -159,14 +159,12 @@ edge is also a *M2M* (many-to-many) relationship.
 
 `edge.To` and `edge.From` are the 2 builders for creating edges/relations.
 
-A schema that defines an edge using the `edge.To` builder is owning the relation,
-unlike using the `edge.From` builder that gives only a reference for the relation (with different name).
+A schema that defines an edge using the `edge.To` builder owns the relation,
+unlike using the `edge.From` builder that gives only a back-reference for the relation (with a different name).
 
-Let's go over a few examples, that show how to define different relation types using edges.
+Let's go over a few examples that show how to define different relation types using edges.
 
 ## Relationship
-
-The following examples:
 
 - [O2O Two Types](#o2o-two-types)
 - [O2O Same Type](#o2o-same-type)
@@ -184,7 +182,7 @@ The following examples:
 In this example, a user **has only one** credit-card, and a card **has only one** owner.
 
 The `User` schema defines an `edge.To` card named `card`, and the `Card` schema
-defines a reference to this edge using `edge.From` named `owner`. 
+defines a back-reference to this edge using `edge.From` named `owner`. 
 
 
 `ent/schema/user.go`
@@ -261,7 +259,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 ![er-linked-list](https://entgo.io/assets/er_linked_list.png)
 
 In this linked-list example, we have a **recursive relation** named `next`/`prev`. Each node in the list can
-have only of `next`. If a node A points (using `next`) to a node B, B can get its pointer using `prev`.   
+**have only one** `next` node. If a node A points (using `next`) to node B, B can get its pointer using `prev` (the back-reference edge).   
 
 `ent/schema/node.go`
 ```go
@@ -356,10 +354,10 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
 
-In this user-spouse example, we have a **symmetric O2O relation** named `spouse`. Each user can have only one spouse.
+In this user-spouse example, we have a **symmetric O2O relation** named `spouse`. Each user can **have only one** spouse.
 If user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
 
-Note that, there's no owner/inverse terms in cases of bidirectional edges.
+Note that there are no owner/inverse terms in cases of bidirectional edges.
 
 `ent/schema/user.go`
 ```go
@@ -432,9 +430,9 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 In this user-pets example, we have a O2M relation between user and its pets.
 Each user **has many** pets, and a pet **has one** owner.
-If user A adds a pet B using the `pets` edge, B can get its owner using the `owner` edge.
+If user A adds a pet B using the `pets` edge, B can get its owner using the `owner` edge (the back-reference edge).
 
-Note that, this relation is also a M2O (many-to-one) from the point of view of the `Pet` schema. 
+Note that this relation is also a M2O (many-to-one) from the point of view of the `Pet` schema. 
 
 `ent/schema/user.go`
 ```go
@@ -712,7 +710,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ![er-following-followers](https://entgo.io/assets/er_following_followers.png)
 
-In this following-followers example, we have a M2M relation between users to its followers. Each user 
+In this following-followers example, we have a M2M relation between users to their followers. Each user 
 can follow **many** users, and can have **many** followers.
 
 `ent/schema/user.go`
@@ -809,7 +807,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 In this user-friends example, we have a **symmetric M2M relation** named `friends`.
 Each user can **have many** friends. If user A becomes a friend of B, B is also a friend of A.
 
-Note that, there's no owner/inverse terms in cases of bidirectional edges.
+Note that there are no owner/inverse terms in cases of bidirectional edges.
 
 `ent/schema/user.go`
 ```go

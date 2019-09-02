@@ -46,12 +46,13 @@ All fields are required by default, and can be set to optional using the `Option
 
 The following types are currently supported by the framework:
 
-- All Go numeric types. Like, `int`, `uint8`, `float64`, etc.
+- All Go numeric types. Like `int`, `uint8`, `float64`, etc.
 - `bool`
 - `string`
 - `time.Time`
-- `[]byte` (only support by SQL dialects).
+- `[]byte` (only supported by SQL dialects).
 
+<br/>
 ```go
 package schema
 
@@ -106,10 +107,10 @@ func (User) Fields() []ent.Field {
 ## Validators
 
 A field validator is a function from type `func(T) error` that is defined in the schema
-using the `Validate` method, and applied on the given field value before creating or updating
+using the `Validate` method, and applied on the field value before creating or updating
 the entity.
 
-The supported types for field validators are `string` and all numeric types.
+The supported types of field validators are `string` and all numeric types.
 
 ```go
 package schema
@@ -145,9 +146,9 @@ func (Group) Fields() []ent.Field {
 }
 ```
 
-## Builtin Validators
+## Built-in Validators
 
-The framework provides a few builtin validators for each type:
+The framework provides a few built-in validators for each type:
 
 - Numeric types:
   - `Positive()`
@@ -181,8 +182,9 @@ func (User) Fields() []ent.Field {
 ```
 
 ## Nillable
-Sometime, you want to be able to distinguish between the zero value of fields
-and `nil`. For example, if the database column contains `0` or `NULL`. The `Nillable` option exists exactly for this.
+Sometimes you want to be able to distinguish between the zero value of fields
+and `nil`; for example if the database column contains `0` or `NULL`.
+The `Nillable` option exists exactly for this.
 
 If you have an `Optional` field of type `T`, setting it to `Nillable` will generate
 a struct field with type `*T`. Hence, if the database returns `NULL` for this field,
@@ -213,7 +215,7 @@ package ent
 type User struct {
 	RequiredName string `json:"required_name,omitempty"`
 	OptionalName string `json:"optional_name,omitempty"`
-	NillableName string `json:"nillable_name,omitempty"`
+	NillableName *string `json:"nillable_name,omitempty"`
 }
 ```
 
@@ -236,7 +238,7 @@ func (User) Fields() []ent.Field {
 
 ## Uniqueness
 Fields can be defined as unique using the `Unique` method.
-Note that, unique fields cannot have default values.
+Note that unique fields cannot have default values.
 
 ```go
 // Fields of the user.
@@ -258,7 +260,7 @@ Read more about this in the [Indexes](schema-indexes.md) section.
 ## Struct Tags
 
 Custom struct tags can be added to the generated entities using the `StructTag`
-method. Note that, if this option was not provided, or provided and did not
+method. Note that if this option was not provided, or provided and did not
 contain the `json` tag, the default `json` tag will be added with the field name.
 
 ```go
