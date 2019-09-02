@@ -105,6 +105,7 @@ in the LICENSE file in the root directory of this source tree.
 @media only screen and (max-width: 800px) {
     .gopherGraph {
         margin-top: 25px;
+        display: block!important;
     }
     .features {
         margin: 60px auto 0 !important;
@@ -181,7 +182,6 @@ body {
   color: white;
   text-align: left;
   margin-left: 5px;
-  max-width: 520px;
   margin-bottom: 19px;
 }
 
@@ -325,6 +325,10 @@ a {
 #er-user-friends,
 #er-city-streets {
   height: 230px;
+}
+
+#gopher-schema-as-code {
+    height: 200px;
 }
 
 @media only screen and (max-width: 1500px) {

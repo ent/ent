@@ -57,6 +57,10 @@ class Footer extends React.Component {
               </a>{' '}
               for more details.
             </span>
+            <br/><br/>
+            <span className="copyright">
+              The homepage was designed by Moriah Rich.
+            </span>
           </div>
         </section>
 

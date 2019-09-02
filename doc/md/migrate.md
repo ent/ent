@@ -2,4 +2,114 @@
 id: migrate
 title: Database Migration
 ---
-Lorem ipsum.
+
+The migration support for `ent` provides the option for keeping the database schema
+aligned with the schema objects defined in `ent/migrate/schema.go` under the root of your project.
+
+## Auto Migration
+
+Run the auto-migration logic in the initialization of the application:
+
+```go
+if err := client.Schema.Create(ctx); err != nil {
+	log.Fatalf("failed creating schema resources: %v", err)
+}
+```
+
+`Create` creates all database resources needed for your `ent` project. By default, `Create` works
+in an *"append-only"* mode; which means, it only creates new tables and indexes, appends columns to tables or 
+extends column types. For example, changing `int` to `bigint`.
+
+What about dropping columns or indexes?
+
+## Drop Resources
+
+`WithDropIndex` and `WithDropColumn` are 2 options for dropping table columns and indexes.
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+	
+	"<project>/ent"
+	"<project>/ent/migrate"
+	
+	"github.com/facebookincubator/ent/dialect/sql"
+)
+
+func main() {
+	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	if err != nil {
+		log.Fatalf("failed connecting to mysql: %v", err)
+	}
+	ctx := context.Background()
+	client := ent.NewClient(ent.Driver(db))
+	// Run migration.
+	err = client.Schema.Create(
+		ctx, 
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true), 
+	)
+	if err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+In order to run the migration in debug mode (printing all SQL queries), run:
+
+```go
+err := client.Debug().Schema.Create(
+	ctx, 
+	migrate.WithDropIndex(true),
+	migrate.WithDropColumn(true),
+)
+if err != nil {
+	log.Fatalf("failed creating schema resources: %v", err)
+}
+```
+
+## Universal IDs
+
+By default, SQL primary-keys start from 1 for each table; which means that multiple entities of different types
+can share the same id. Unlike AWS Neptune, where vertex ids are UUIDs.
+
+This does not work well if you work with [GraphQL](https://graphql.org/learn/schema/#scalar-types) which requires
+the object identifier to be unique.
+
+To enable the universal-ids for your project, pass the `WithGlobalUniqueID` option to the migration.
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+	
+	"<project>/ent"
+	"<project>/ent/migrate"
+	
+	"github.com/facebookincubator/ent/dialect/sql"
+)
+
+func main() {
+	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	if err != nil {
+		log.Fatalf("failed connecting to mysql: %v", err)
+	}
+	ctx := context.Background()
+	client := ent.NewClient(ent.Driver(db))
+	// Run migration.
+	if err := client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+**How does it work?** `ent` migration allocates a 1<<32 range for the ids of each entity (table),
+and store this information in a table named `ent_types`. For example, type `A` will have the range
+of `[1,4294967296)` for its ids, and type `B` will have the range of `[4294967296,8589934592)`, etc.
+
+Note that if this option is enabled, the maximum number of possible tables are **65535**. 

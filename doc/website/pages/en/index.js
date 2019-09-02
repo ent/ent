@@ -78,7 +78,7 @@ class HomeSplash extends React.Component {
           </div>
         </div>
         <p className="projectDesc">
-          A simple API for modeling any graph using schema as Go objects
+          Simple, yet powerful ORM for modeling and querying data.
         </p>
       </div>
     );
