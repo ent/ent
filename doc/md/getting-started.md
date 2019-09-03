@@ -17,7 +17,7 @@ sidebar_label: Quick Introduction
 ## Installation
 
 ```console
-$ go get github.com/facebookincubator/ent/entc/cmd/entc
+go get github.com/facebookincubator/ent/entc/cmd/entc
 ```
 
 After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.
@@ -27,7 +27,7 @@ After installing `entc` (the code generator for `ent`), you should have it in yo
 Go to the root directory of your project, and run:
 
 ```console
-$ entc init User
+entc init User
 ```
 The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
 
@@ -80,7 +80,7 @@ func (User) Fields() []ent.Field {
 Run `entc generate` from the root directory of the project:
 
 ```go
-$ entc generate ./ent/schema
+entc generate ./ent/schema
 ```
 
 This produces the following files:
@@ -197,7 +197,7 @@ Let's create 2 additional entities named `Car` and `Group` with a few fields. We
 to generate the initial schemas:
 
 ```console
-$ entc init Car Group
+entc init Car Group
 ```
 
 And then we add the rest of the fields manually:
@@ -440,7 +440,7 @@ relationship named `groups`. Let's define this relationship in our schemas:
 
 We run `entc` on the schema directory to re-generate the assets.
 ```cosole
-$ entc generate ./ent/schema
+entc generate ./ent/schema
 ```
 
 ## Run Your First Graph Traversal

@@ -20,7 +20,9 @@ const arrow = '\u2192';
 const Block = props => (
   <div className="block">
     <div className="blockTitle">
-      <div className="blockTitleText">{props.title}</div>{' '}
+      <a href={props.link}>
+        <div className="blockTitleText">{props.title}</div>{' '}
+      </a>
       <a className="yellowArrow" href={props.link}>{arrow}</a>
     </div>
     <div className="blockContent">{props.content}</div>

@@ -59,7 +59,7 @@ class Footer extends React.Component {
             </span>
             <br/><br/>
             <span className="copyright">
-              The homepage was designed by Moriah Rich.
+              Design by Moriah Rich, illustration by Ariel Mashraki.
             </span>
           </div>
         </section>

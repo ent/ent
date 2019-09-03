@@ -33,7 +33,7 @@ window.addEventListener('load', function() {
     const clipboard = new ClipboardJS('.btnClipboard', {
         target: function(trigger) {
             return trigger.parentNode.querySelector('code');
-        },
+},
     });
 
     clipboard.on('success', function(event) {
