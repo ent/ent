@@ -1,5 +1,7 @@
 module github.com/facebookincubator/ent
 
+go 1.13
+
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/go-openapi/inflect v0.18.0
