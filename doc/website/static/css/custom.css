@@ -327,10 +327,6 @@ a {
   height: 230px;
 }
 
-#gopher-schema-as-code {
-    height: 200px;
-}
-
 @media only screen and (max-width: 1500px) {
   .gridBlock .twoByGridBlock img,
   .gridBlock .threeByGridBlock img,

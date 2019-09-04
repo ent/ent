@@ -55,7 +55,7 @@ func (User) Edges() []ent.Edge {
 
 ```
 
-Add 2 fields to the `User` schema, and then run `entc generate`:
+Add 2 fields to the `User` schema:
 
 ```go
 package schema
@@ -132,10 +132,6 @@ func main() {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer db.Close()
-	drv := dialect.Driver(db)
-	if testing.Verbose() {
-		drv = dialect.Debug(drv)
-	}
 	client := ent.NewClient(ent.Driver(db))
 	// run the auto migration tool.
 	if err := client.Schema.Create(context.Background()); err != nil {
