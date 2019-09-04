@@ -199,6 +199,32 @@ users, err := a8m.
 	QueryPets().
 	All(ctx)
 ```
+
+Get all pet names.
+
+```go
+names, err := client.Pet.
+	Query().
+	Select(pet.FieldName).
+	Strings(ctx)
+```
+
+Get all pet names and ages.
+
+```go
+var v []struct {
+	Age  int    `json:"age"`
+	Name string `json:"name"`
+}
+err := client.Pet.
+	Query().
+	Select(pet.FieldAge, pet.FieldName).
+	Scan(ctx, &v)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
 More advance traversals can be found in the [next section](traversals.md). 
 
 ## Delete One 
