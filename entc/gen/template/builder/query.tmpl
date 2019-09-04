@@ -341,6 +341,39 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 	return group
 }
 
+{{ $selectBuilder := pascal $.Name | printf "%sSelect" }}
+
+// Select one or more fields from the given query.
+{{- with len $.Fields }}
+{{- $f := index $.Fields 0 }}
+//
+// Example:
+//
+//	var v []struct {
+//		{{ pascal $f.Name }} {{ $f.Type }} `{{ $f.StructTag }}`
+//	}
+//
+//	client.{{ pascal $.Name }}.Query().
+//		Select({{ $.Package }}.{{ $f.Constant }}).
+//		Scan(ctx, &v)
+//
+{{- end }}
+func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
+	selector := &{{ $selectBuilder }}{config: {{ $receiver }}.config}
+	selector.fields = append([]string{field}, fields...)
+	{{- if $multistorage }}
+		switch {{ $receiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			selector.{{ $storage }} = {{ $receiver }}.{{ $storage }}Query()
+		{{- end }}
+		}
+	{{- else }}
+		selector.{{ index $.Storage 0 }} = {{ $receiver }}.{{ index $.Storage 0 }}Query()
+	{{- end }}
+	return selector
+}
+
 {{- range $_, $storage := $.Storage }}
 	{{ with extend $ "Builder" $builder "Package" $pkg }}
 		{{ $tmpl := printf "dialect/%s/query" $storage }}
@@ -348,9 +381,11 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 	{{ end }}
 {{ end }}
 
+{{/* groupby builder */}}
+
 {{ $groupReceiver := receiver $groupBuilder }}
 
-// {{ $builder }} is the builder for group-by {{ pascal $.Name }} entities.
+// {{ $groupBuilder }} is the builder for group-by {{ pascal $.Name }} entities.
 type {{ $groupBuilder }} struct {
 	config
 	fields []string
@@ -420,5 +455,75 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 		{{ xtemplate $tmpl . }}
 	{{ end }}
 {{ end }}
+
+{{/* select builder */}}
+
+{{ $selectReceiver := receiver $selectBuilder }}
+
+// {{ $selectBuilder }} is the builder for select fields of {{ pascal $.Name }} entities.
+type {{ $selectBuilder }} struct {
+	config
+	fields []string
+	// intermediate queries.
+	{{- range $_, $storage := $.Storage }}
+		{{ $storage }} {{ $storage.Builder}}
+	{{- end }}
+}
+
+
+// Scan applies the selector query and scan the result into the given value.
+func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	{{- if $multistorage }}
+		switch {{ $selectReceiver }}.driver.Dialect() {
+		{{- range $_, $storage := $.Storage }}
+		case {{ join $storage.Dialects ", " }}:
+			return {{ $selectReceiver }}.{{ $storage }}Scan(ctx, v)
+		{{- end }}
+		default:
+			return errors.New("{{ $selectBuilder }}: unsupported dialect")
+		}
+	{{- else }}
+		return {{ $selectReceiver }}.{{ index $.Storage 0 }}Scan(ctx, v)
+	{{- end }}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v interface{}) {
+	if err := {{ $selectReceiver }}.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+{{ range $_, $t := primitives }}
+	{{ $f := pascal $t | plural }}
+	// {{ $f }} returns list of {{ plural $t }} from selector. It is only allowed when selecting one field.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $f }}(ctx context.Context) ([]{{ $t }}, error) {
+		if len({{ $selectReceiver }}.fields) > 1 {
+			return nil, errors.New("{{ $pkg }}: {{ $selectBuilder }}.{{ $f }} is not achievable when selecting more than 1 field")
+		}
+		var v []{{ $t }}
+		if err := {{ $selectReceiver }}.Scan(ctx, &v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
+	// {{ $f }}X is like {{ $f }}, but panics if an error occurs.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $f }}X(ctx context.Context) []{{ $t }} {
+		v, err := {{ $selectReceiver }}.{{ $f }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+{{ end }}
+
+{{- range $_, $storage := $.Storage }}
+	{{ with extend $ "Builder" $selectBuilder }}
+		{{ $tmpl := printf "dialect/%s/select" $storage }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
+{{ end }}
+
 
 {{ end }}

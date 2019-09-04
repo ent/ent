@@ -269,6 +269,25 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Street.Query().
+//		Select(street.FieldName).
+//		Scan(ctx, &v)
+//
+func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
+	selector := &StreetSelect{config: sq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = sq.sqlQuery()
+	return selector
+}
+
 func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	rows := &sql.Rows{}
 	selector := sq.sqlQuery()
@@ -355,7 +374,7 @@ func (sq *StreetQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// StreetQuery is the builder for group-by Street entities.
+// StreetGroupBy is the builder for group-by Street entities.
 type StreetGroupBy struct {
 	config
 	fields []string
@@ -484,4 +503,123 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
+}
+
+// StreetSelect is the builder for select fields of Street entities.
+type StreetSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
+	return ss.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (ss *StreetSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := ss.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(ss.fields) > 1 {
+		return nil, errors.New("ent: StreetSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := ss.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (ss *StreetSelect) StringsX(ctx context.Context) []string {
+	v, err := ss.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(ss.fields) > 1 {
+		return nil, errors.New("ent: StreetSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := ss.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (ss *StreetSelect) IntsX(ctx context.Context) []int {
+	v, err := ss.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(ss.fields) > 1 {
+		return nil, errors.New("ent: StreetSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := ss.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (ss *StreetSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := ss.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(ss.fields) > 1 {
+		return nil, errors.New("ent: StreetSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := ss.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (ss *StreetSelect) BoolsX(ctx context.Context) []bool {
+	v, err := ss.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := ss.sqlQuery().Query()
+	if err := ss.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (ss *StreetSelect) sqlQuery() sql.Querier {
+	view := "street_view"
+	return sql.Select(ss.fields...).From(ss.sql.As(view))
 }

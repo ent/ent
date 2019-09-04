@@ -319,6 +319,25 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Age int `json:"age,omitempty"`
+//	}
+//
+//	client.User.Query().
+//		Select(user.FieldAge).
+//		Scan(ctx, &v)
+//
+func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
+	selector := &UserSelect{config: uq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = uq.sqlQuery()
+	return selector
+}
+
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	rows := &sql.Rows{}
 	selector := uq.sqlQuery()
@@ -405,7 +424,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// UserQuery is the builder for group-by User entities.
+// UserGroupBy is the builder for group-by User entities.
 type UserGroupBy struct {
 	config
 	fields []string
@@ -534,4 +553,123 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
+}
+
+// UserSelect is the builder for select fields of User entities.
+type UserSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+	return us.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (us *UserSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := us.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(us.fields) > 1 {
+		return nil, errors.New("ent: UserSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := us.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (us *UserSelect) StringsX(ctx context.Context) []string {
+	v, err := us.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(us.fields) > 1 {
+		return nil, errors.New("ent: UserSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := us.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (us *UserSelect) IntsX(ctx context.Context) []int {
+	v, err := us.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(us.fields) > 1 {
+		return nil, errors.New("ent: UserSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := us.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (us *UserSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := us.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(us.fields) > 1 {
+		return nil, errors.New("ent: UserSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := us.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (us *UserSelect) BoolsX(ctx context.Context) []bool {
+	v, err := us.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := us.sqlQuery().Query()
+	if err := us.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (us *UserSelect) sqlQuery() sql.Querier {
+	view := "user_view"
+	return sql.Select(us.fields...).From(us.sql.As(view))
 }

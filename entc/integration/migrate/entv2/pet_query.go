@@ -242,6 +242,14 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
+	selector := &PetSelect{config: pq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = pq.sqlQuery()
+	return selector
+}
+
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	rows := &sql.Rows{}
 	selector := pq.sqlQuery()
@@ -328,7 +336,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// PetQuery is the builder for group-by Pet entities.
+// PetGroupBy is the builder for group-by Pet entities.
 type PetGroupBy struct {
 	config
 	fields []string
@@ -457,4 +465,123 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(pgb.fields...)
+}
+
+// PetSelect is the builder for select fields of Pet entities.
+type PetSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+	return ps.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (ps *PetSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := ps.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("entv2: PetSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (ps *PetSelect) StringsX(ctx context.Context) []string {
+	v, err := ps.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("entv2: PetSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (ps *PetSelect) IntsX(ctx context.Context) []int {
+	v, err := ps.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("entv2: PetSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (ps *PetSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := ps.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("entv2: PetSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (ps *PetSelect) BoolsX(ctx context.Context) []bool {
+	v, err := ps.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := ps.sqlQuery().Query()
+	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (ps *PetSelect) sqlQuery() sql.Querier {
+	view := "pet_view"
+	return sql.Select(ps.fields...).From(ps.sql.As(view))
 }

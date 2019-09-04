@@ -287,6 +287,25 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Group.Query().
+//		Select(group.FieldName).
+//		Scan(ctx, &v)
+//
+func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
+	selector := &GroupSelect{config: gq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = gq.sqlQuery()
+	return selector
+}
+
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	rows := &sql.Rows{}
 	selector := gq.sqlQuery()
@@ -373,7 +392,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// GroupQuery is the builder for group-by Group entities.
+// GroupGroupBy is the builder for group-by Group entities.
 type GroupGroupBy struct {
 	config
 	fields []string
@@ -502,4 +521,123 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
+}
+
+// GroupSelect is the builder for select fields of Group entities.
+type GroupSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+	return gs.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (gs *GroupSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := gs.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(gs.fields) > 1 {
+		return nil, errors.New("ent: GroupSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := gs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (gs *GroupSelect) StringsX(ctx context.Context) []string {
+	v, err := gs.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(gs.fields) > 1 {
+		return nil, errors.New("ent: GroupSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := gs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (gs *GroupSelect) IntsX(ctx context.Context) []int {
+	v, err := gs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(gs.fields) > 1 {
+		return nil, errors.New("ent: GroupSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := gs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (gs *GroupSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := gs.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(gs.fields) > 1 {
+		return nil, errors.New("ent: GroupSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := gs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (gs *GroupSelect) BoolsX(ctx context.Context) []bool {
+	v, err := gs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := gs.sqlQuery().Query()
+	if err := gs.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (gs *GroupSelect) sqlQuery() sql.Querier {
+	view := "group_view"
+	return sql.Select(gs.fields...).From(gs.sql.As(view))
 }

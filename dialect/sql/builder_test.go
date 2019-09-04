@@ -390,6 +390,22 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				s1 := Select().From(Table("users")).Where(Not(EQ("name", "foo").And().EQ("age", "bar")))
+				return Queries{With("users_view").As(s1), Select("name").From(Table("users_view"))}
+			}(),
+			wantQuery: "WITH users_view AS (SELECT * FROM `users` WHERE NOT (`name` = ? AND `age` = ?)) SELECT `name` FROM `users_view`",
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: func() Querier {
+				s1 := Select().From(Table("users")).Where(Not(EQ("name", "foo").And().EQ("age", "bar"))).As("users_view")
+				return Select("name").From(s1)
+			}(),
+			wantQuery: "SELECT `name` FROM (SELECT * FROM `users` WHERE NOT (`name` = ? AND `age` = ?)) AS `users_view`",
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: func() Querier {
 				t1 := Table("users")
 				return Select().
 					From(t1).

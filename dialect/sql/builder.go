@@ -750,8 +750,8 @@ func (d *DeleteBuilder) Where(p *Predicate) *DeleteBuilder {
 // FromSelect make it possible to delete a sub query.
 func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 	d.Where(s.where)
-	if s.from != nil {
-		d.table = s.from.name
+	if table, _ := s.from.(*SelectTable); table != nil {
+		d.table = table.name
 	}
 	return d
 }
@@ -1217,7 +1217,7 @@ type join struct {
 type Selector struct {
 	as       string
 	columns  []string
-	from     *SelectTable
+	from     TableView
 	joins    []join
 	where    *Predicate
 	or       bool
@@ -1250,8 +1250,8 @@ func (s *Selector) Select(columns ...string) *Selector {
 	return s
 }
 
-// From sets the source of `FORM` clause.
-func (s *Selector) From(t *SelectTable) *Selector {
+// From sets the source of `FROM` clause.
+func (s *Selector) From(t TableView) *Selector {
 	s.from = t
 	return s
 }
@@ -1312,7 +1312,7 @@ func (s *Selector) Or() *Selector {
 
 // Table returns the selected table.
 func (s *Selector) Table() *SelectTable {
-	return s.from
+	return s.from.(*SelectTable)
 }
 
 // Join appends a `JOIN` clause to the statement.
@@ -1339,7 +1339,7 @@ func (s *Selector) C(column string) string {
 	if s.as != "" {
 		return fmt.Sprintf("`%s`.`%s`", s.as, column)
 	}
-	return s.from.C(column)
+	return s.Table().C(column)
 }
 
 // Columns returns a list of formatted strings for a selected columns from this statement.
@@ -1445,7 +1445,14 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString("*")
 	}
 	b.WriteString(" FROM ")
-	b.WriteString(s.from.ref())
+	switch t := s.from.(type) {
+	case *SelectTable:
+		b.WriteString(t.ref())
+	case *Selector:
+		query, args := t.Query()
+		b.WriteString(fmt.Sprintf("(%s) AS `%s`", query, t.as))
+		b.args = append(b.args, args...)
+	}
 	for _, join := range s.joins {
 		b.WriteString(fmt.Sprintf(" %s ", join.kind))
 		switch view := join.table.(type) {
@@ -1504,7 +1511,7 @@ type WithBuilder struct {
 
 // With returns a new builder for the `WITH` statement.
 //
-//	n := Queriers{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))}
+//	n := Queries{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))}
 //	return n.Query()
 //
 func With(name string) *WithBuilder {

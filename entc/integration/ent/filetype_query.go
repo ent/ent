@@ -315,6 +315,30 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.FileType.Query().
+//		Select(filetype.FieldName).
+//		Scan(ctx, &v)
+//
+func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect {
+	selector := &FileTypeSelect{config: ftq.config}
+	selector.fields = append([]string{field}, fields...)
+	switch ftq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		selector.sql = ftq.sqlQuery()
+	case dialect.Gremlin:
+		selector.gremlin = ftq.gremlinQuery()
+	}
+	return selector
+}
+
 func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	rows := &sql.Rows{}
 	selector := ftq.sqlQuery()
@@ -478,7 +502,7 @@ func (ftq *FileTypeQuery) gremlinQuery() *dsl.Traversal {
 	return v
 }
 
-// FileTypeQuery is the builder for group-by FileType entities.
+// FileTypeGroupBy is the builder for group-by FileType entities.
 type FileTypeGroupBy struct {
 	config
 	fields []string
@@ -652,4 +676,159 @@ func (ftgb *FileTypeGroupBy) gremlinQuery() *dsl.Traversal {
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next()
+}
+
+// FileTypeSelect is the builder for select fields of FileType entities.
+type FileTypeSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql     *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
+	switch fts.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return fts.sqlScan(ctx, v)
+	case dialect.Gremlin:
+		return fts.gremlinScan(ctx, v)
+	default:
+		return errors.New("FileTypeSelect: unsupported dialect")
+	}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (fts *FileTypeSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := fts.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FileTypeSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (fts *FileTypeSelect) StringsX(ctx context.Context) []string {
+	v, err := fts.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FileTypeSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (fts *FileTypeSelect) IntsX(ctx context.Context) []int {
+	v, err := fts.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FileTypeSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (fts *FileTypeSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := fts.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FileTypeSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (fts *FileTypeSelect) BoolsX(ctx context.Context) []bool {
+	v, err := fts.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := fts.sqlQuery().Query()
+	if err := fts.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (fts *FileTypeSelect) sqlQuery() sql.Querier {
+	view := "filetype_view"
+	return sql.Select(fts.fields...).From(fts.sql.As(view))
+}
+
+func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {
+	var (
+		traversal *dsl.Traversal
+		res       = &gremlin.Response{}
+	)
+	if len(fts.fields) == 1 {
+		traversal = fts.gremlin.Values(fts.fields...)
+	} else {
+		fields := make([]interface{}, len(fts.fields))
+		for i, f := range fts.fields {
+			fields[i] = f
+		}
+		traversal = fts.gremlin.ValueMap(fields...)
+	}
+	query, bindings := traversal.Query()
+	if err := fts.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(fts.fields) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
