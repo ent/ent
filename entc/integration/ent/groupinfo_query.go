@@ -315,6 +315,30 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Desc string `json:"desc,omitempty"`
+//	}
+//
+//	client.GroupInfo.Query().
+//		Select(groupinfo.FieldDesc).
+//		Scan(ctx, &v)
+//
+func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
+	selector := &GroupInfoSelect{config: giq.config}
+	selector.fields = append([]string{field}, fields...)
+	switch giq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		selector.sql = giq.sqlQuery()
+	case dialect.Gremlin:
+		selector.gremlin = giq.gremlinQuery()
+	}
+	return selector
+}
+
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 	rows := &sql.Rows{}
 	selector := giq.sqlQuery()
@@ -478,7 +502,7 @@ func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
 	return v
 }
 
-// GroupInfoQuery is the builder for group-by GroupInfo entities.
+// GroupInfoGroupBy is the builder for group-by GroupInfo entities.
 type GroupInfoGroupBy struct {
 	config
 	fields []string
@@ -652,4 +676,159 @@ func (gigb *GroupInfoGroupBy) gremlinQuery() *dsl.Traversal {
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next()
+}
+
+// GroupInfoSelect is the builder for select fields of GroupInfo entities.
+type GroupInfoSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql     *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
+	switch gis.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return gis.sqlScan(ctx, v)
+	case dialect.Gremlin:
+		return gis.gremlinScan(ctx, v)
+	default:
+		return errors.New("GroupInfoSelect: unsupported dialect")
+	}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (gis *GroupInfoSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := gis.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(gis.fields) > 1 {
+		return nil, errors.New("ent: GroupInfoSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := gis.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (gis *GroupInfoSelect) StringsX(ctx context.Context) []string {
+	v, err := gis.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(gis.fields) > 1 {
+		return nil, errors.New("ent: GroupInfoSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := gis.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (gis *GroupInfoSelect) IntsX(ctx context.Context) []int {
+	v, err := gis.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(gis.fields) > 1 {
+		return nil, errors.New("ent: GroupInfoSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := gis.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (gis *GroupInfoSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := gis.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(gis.fields) > 1 {
+		return nil, errors.New("ent: GroupInfoSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := gis.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (gis *GroupInfoSelect) BoolsX(ctx context.Context) []bool {
+	v, err := gis.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := gis.sqlQuery().Query()
+	if err := gis.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
+	view := "groupinfo_view"
+	return sql.Select(gis.fields...).From(gis.sql.As(view))
+}
+
+func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v interface{}) error {
+	var (
+		traversal *dsl.Traversal
+		res       = &gremlin.Response{}
+	)
+	if len(gis.fields) == 1 {
+		traversal = gis.gremlin.Values(gis.fields...)
+	} else {
+		fields := make([]interface{}, len(gis.fields))
+		for i, f := range gis.fields {
+			fields[i] = f
+		}
+		traversal = gis.gremlin.ValueMap(fields...)
+	}
+	query, bindings := traversal.Query()
+	if err := gis.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(gis.fields) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }

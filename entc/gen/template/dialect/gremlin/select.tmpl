@@ -1,0 +1,38 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "dialect/gremlin/select" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, v interface{}) error {
+	var (
+		traversal *dsl.Traversal
+		res = &gremlin.Response{}
+	)
+	if len({{ $receiver }}.fields) == 1 {
+		traversal = {{ $receiver }}.gremlin.Values({{ $receiver }}.fields...)
+	} else {
+		fields := make([]interface{}, len({{ $receiver }}.fields))
+		for i, f := range {{ $receiver }}.fields {
+			fields[i] = f
+		}
+		traversal = {{ $receiver }}.gremlin.ValueMap(fields...)
+	}
+	query, bindings := traversal.Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len({{ $receiver }}.fields) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
+}
+{{ end }}

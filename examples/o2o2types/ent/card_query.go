@@ -269,6 +269,25 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Expired time.Time `json:"expired,omitempty"`
+//	}
+//
+//	client.Card.Query().
+//		Select(card.FieldExpired).
+//		Scan(ctx, &v)
+//
+func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
+	selector := &CardSelect{config: cq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = cq.sqlQuery()
+	return selector
+}
+
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	rows := &sql.Rows{}
 	selector := cq.sqlQuery()
@@ -355,7 +374,7 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CardQuery is the builder for group-by Card entities.
+// CardGroupBy is the builder for group-by Card entities.
 type CardGroupBy struct {
 	config
 	fields []string
@@ -484,4 +503,123 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
+}
+
+// CardSelect is the builder for select fields of Card entities.
+type CardSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
+	return cs.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (cs *CardSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := cs.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (cs *CardSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CardSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (cs *CardSelect) StringsX(ctx context.Context) []string {
+	v, err := cs.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (cs *CardSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CardSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (cs *CardSelect) IntsX(ctx context.Context) []int {
+	v, err := cs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (cs *CardSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CardSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (cs *CardSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := cs.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (cs *CardSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CardSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (cs *CardSelect) BoolsX(ctx context.Context) []bool {
+	v, err := cs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := cs.sqlQuery().Query()
+	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (cs *CardSelect) sqlQuery() sql.Querier {
+	view := "card_view"
+	return sql.Select(cs.fields...).From(cs.sql.As(view))
 }

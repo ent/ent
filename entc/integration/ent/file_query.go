@@ -335,6 +335,30 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Size int `json:"size,omitempty"`
+//	}
+//
+//	client.File.Query().
+//		Select(file.FieldSize).
+//		Scan(ctx, &v)
+//
+func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
+	selector := &FileSelect{config: fq.config}
+	selector.fields = append([]string{field}, fields...)
+	switch fq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		selector.sql = fq.sqlQuery()
+	case dialect.Gremlin:
+		selector.gremlin = fq.gremlinQuery()
+	}
+	return selector
+}
+
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	rows := &sql.Rows{}
 	selector := fq.sqlQuery()
@@ -498,7 +522,7 @@ func (fq *FileQuery) gremlinQuery() *dsl.Traversal {
 	return v
 }
 
-// FileQuery is the builder for group-by File entities.
+// FileGroupBy is the builder for group-by File entities.
 type FileGroupBy struct {
 	config
 	fields []string
@@ -672,4 +696,159 @@ func (fgb *FileGroupBy) gremlinQuery() *dsl.Traversal {
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next()
+}
+
+// FileSelect is the builder for select fields of File entities.
+type FileSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql     *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+	switch fs.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return fs.sqlScan(ctx, v)
+	case dialect.Gremlin:
+		return fs.gremlinScan(ctx, v)
+	default:
+		return errors.New("FileSelect: unsupported dialect")
+	}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (fs *FileSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := fs.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(fs.fields) > 1 {
+		return nil, errors.New("ent: FileSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := fs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (fs *FileSelect) StringsX(ctx context.Context) []string {
+	v, err := fs.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(fs.fields) > 1 {
+		return nil, errors.New("ent: FileSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := fs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (fs *FileSelect) IntsX(ctx context.Context) []int {
+	v, err := fs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(fs.fields) > 1 {
+		return nil, errors.New("ent: FileSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := fs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (fs *FileSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := fs.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(fs.fields) > 1 {
+		return nil, errors.New("ent: FileSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := fs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (fs *FileSelect) BoolsX(ctx context.Context) []bool {
+	v, err := fs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := fs.sqlQuery().Query()
+	if err := fs.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (fs *FileSelect) sqlQuery() sql.Querier {
+	view := "file_view"
+	return sql.Select(fs.fields...).From(fs.sql.As(view))
+}
+
+func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {
+	var (
+		traversal *dsl.Traversal
+		res       = &gremlin.Response{}
+	)
+	if len(fs.fields) == 1 {
+		traversal = fs.gremlin.Values(fs.fields...)
+	} else {
+		fields := make([]interface{}, len(fs.fields))
+		for i, f := range fs.fields {
+			fields[i] = f
+		}
+		traversal = fs.gremlin.ValueMap(fields...)
+	}
+	query, bindings := traversal.Query()
+	if err := fs.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(fs.fields) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }

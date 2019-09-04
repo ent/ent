@@ -95,6 +95,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Clone,
 	Sanity,
 	Paging,
+	Select,
 	Relation,
 	Predicate,
 	UniqueConstraint,
@@ -229,6 +230,53 @@ func Paging(t *testing.T, client *ent.Client) {
 	for i := 0; i < 10; i++ {
 		require.Equal(i+1, client.User.Query().Order(ent.Asc(user.FieldAge)).Offset(i).Limit(1).AllX(ctx)[0].Age)
 	}
+}
+
+func Select(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	require := require.New(t)
+
+	t.Log("select one field")
+	client.User.Create().SetName("foo").SetAge(30).SaveX(ctx)
+	names := client.User.
+		Query().
+		Select(user.FieldName).
+		StringsX(ctx)
+	require.Equal([]string{"foo"}, names)
+	client.User.Create().SetName("bar").SetAge(30).SaveX(ctx)
+	t.Log("select one field with ordering")
+	names = client.User.
+		Query().
+		Order(ent.Asc(user.FieldName)).
+		Select(user.FieldName).
+		StringsX(ctx)
+	require.Equal([]string{"bar", "foo"}, names)
+	names = client.User.
+		Query().
+		Order(ent.Desc(user.FieldName)).
+		Select(user.FieldName).
+		StringsX(ctx)
+	require.Equal([]string{"foo", "bar"}, names)
+	client.User.Create().SetName("baz").SetAge(30).SaveX(ctx)
+	names = client.User.
+		Query().
+		Order(ent.Asc(user.FieldName)).
+		Select(user.FieldName).
+		StringsX(ctx)
+	require.Equal([]string{"bar", "baz", "foo"}, names)
+
+	t.Log("select 2 fields")
+	var v []struct {
+		Age  int    `json:"age"`
+		Name string `json:"name"`
+	}
+	client.User.
+		Query().
+		Order(ent.Asc(user.FieldName)).
+		Select(user.FieldAge, user.FieldName).
+		ScanX(ctx, &v)
+	require.Equal([]int{30, 30, 30}, []int{v[0].Age, v[1].Age, v[2].Age})
+	require.Equal([]string{"bar", "baz", "foo"}, []string{v[0].Name, v[1].Name, v[2].Name})
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

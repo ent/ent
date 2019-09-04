@@ -269,6 +269,25 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.City.Query().
+//		Select(city.FieldName).
+//		Scan(ctx, &v)
+//
+func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
+	selector := &CitySelect{config: cq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = cq.sqlQuery()
+	return selector
+}
+
 func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	rows := &sql.Rows{}
 	selector := cq.sqlQuery()
@@ -355,7 +374,7 @@ func (cq *CityQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CityQuery is the builder for group-by City entities.
+// CityGroupBy is the builder for group-by City entities.
 type CityGroupBy struct {
 	config
 	fields []string
@@ -484,4 +503,123 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
+}
+
+// CitySelect is the builder for select fields of City entities.
+type CitySelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
+	return cs.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (cs *CitySelect) ScanX(ctx context.Context, v interface{}) {
+	if err := cs.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (cs *CitySelect) Strings(ctx context.Context) ([]string, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CitySelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (cs *CitySelect) StringsX(ctx context.Context) []string {
+	v, err := cs.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (cs *CitySelect) Ints(ctx context.Context) ([]int, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CitySelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (cs *CitySelect) IntsX(ctx context.Context) []int {
+	v, err := cs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (cs *CitySelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CitySelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (cs *CitySelect) Float64sX(ctx context.Context) []float64 {
+	v, err := cs.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (cs *CitySelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(cs.fields) > 1 {
+		return nil, errors.New("ent: CitySelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := cs.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (cs *CitySelect) BoolsX(ctx context.Context) []bool {
+	v, err := cs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (cs *CitySelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := cs.sqlQuery().Query()
+	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (cs *CitySelect) sqlQuery() sql.Querier {
+	view := "city_view"
+	return sql.Select(cs.fields...).From(cs.sql.As(view))
 }

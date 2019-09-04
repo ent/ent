@@ -281,6 +281,25 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Value int `json:"value,omitempty"`
+//	}
+//
+//	client.Node.Query().
+//		Select(node.FieldValue).
+//		Scan(ctx, &v)
+//
+func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
+	selector := &NodeSelect{config: nq.config}
+	selector.fields = append([]string{field}, fields...)
+	selector.sql = nq.sqlQuery()
+	return selector
+}
+
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	rows := &sql.Rows{}
 	selector := nq.sqlQuery()
@@ -367,7 +386,7 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// NodeQuery is the builder for group-by Node entities.
+// NodeGroupBy is the builder for group-by Node entities.
 type NodeGroupBy struct {
 	config
 	fields []string
@@ -496,4 +515,123 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 		columns = append(columns, fn.SQL(selector))
 	}
 	return selector.Select(columns...).GroupBy(ngb.fields...)
+}
+
+// NodeSelect is the builder for select fields of Node entities.
+type NodeSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql *sql.Selector
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+	return ns.sqlScan(ctx, v)
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (ns *NodeSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := ns.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(ns.fields) > 1 {
+		return nil, errors.New("ent: NodeSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := ns.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (ns *NodeSelect) StringsX(ctx context.Context) []string {
+	v, err := ns.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(ns.fields) > 1 {
+		return nil, errors.New("ent: NodeSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := ns.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (ns *NodeSelect) IntsX(ctx context.Context) []int {
+	v, err := ns.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(ns.fields) > 1 {
+		return nil, errors.New("ent: NodeSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := ns.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (ns *NodeSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := ns.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(ns.fields) > 1 {
+		return nil, errors.New("ent: NodeSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := ns.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (ns *NodeSelect) BoolsX(ctx context.Context) []bool {
+	v, err := ns.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := ns.sqlQuery().Query()
+	if err := ns.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (ns *NodeSelect) sqlQuery() sql.Querier {
+	view := "node_view"
+	return sql.Select(ns.fields...).From(ns.sql.As(view))
 }

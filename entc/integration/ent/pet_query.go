@@ -334,6 +334,30 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Pet.Query().
+//		Select(pet.FieldName).
+//		Scan(ctx, &v)
+//
+func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
+	selector := &PetSelect{config: pq.config}
+	selector.fields = append([]string{field}, fields...)
+	switch pq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		selector.sql = pq.sqlQuery()
+	case dialect.Gremlin:
+		selector.gremlin = pq.gremlinQuery()
+	}
+	return selector
+}
+
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	rows := &sql.Rows{}
 	selector := pq.sqlQuery()
@@ -497,7 +521,7 @@ func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
 	return v
 }
 
-// PetQuery is the builder for group-by Pet entities.
+// PetGroupBy is the builder for group-by Pet entities.
 type PetGroupBy struct {
 	config
 	fields []string
@@ -671,4 +695,159 @@ func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next()
+}
+
+// PetSelect is the builder for select fields of Pet entities.
+type PetSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql     *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+	switch ps.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return ps.sqlScan(ctx, v)
+	case dialect.Gremlin:
+		return ps.gremlinScan(ctx, v)
+	default:
+		return errors.New("PetSelect: unsupported dialect")
+	}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (ps *PetSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := ps.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("ent: PetSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (ps *PetSelect) StringsX(ctx context.Context) []string {
+	v, err := ps.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("ent: PetSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (ps *PetSelect) IntsX(ctx context.Context) []int {
+	v, err := ps.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("ent: PetSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (ps *PetSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := ps.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(ps.fields) > 1 {
+		return nil, errors.New("ent: PetSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := ps.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (ps *PetSelect) BoolsX(ctx context.Context) []bool {
+	v, err := ps.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := ps.sqlQuery().Query()
+	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (ps *PetSelect) sqlQuery() sql.Querier {
+	view := "pet_view"
+	return sql.Select(ps.fields...).From(ps.sql.As(view))
+}
+
+func (ps *PetSelect) gremlinScan(ctx context.Context, v interface{}) error {
+	var (
+		traversal *dsl.Traversal
+		res       = &gremlin.Response{}
+	)
+	if len(ps.fields) == 1 {
+		traversal = ps.gremlin.Values(ps.fields...)
+	} else {
+		fields := make([]interface{}, len(ps.fields))
+		for i, f := range ps.fields {
+			fields[i] = f
+		}
+		traversal = ps.gremlin.ValueMap(fields...)
+	}
+	query, bindings := traversal.Query()
+	if err := ps.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(ps.fields) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }

@@ -295,6 +295,30 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 	return group
 }
 
+// Select one or more fields from the given query.
+//
+// Example:
+//
+//	var v []struct {
+//		Int int `json:"int,omitempty"`
+//	}
+//
+//	client.FieldType.Query().
+//		Select(fieldtype.FieldInt).
+//		Scan(ctx, &v)
+//
+func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
+	selector := &FieldTypeSelect{config: ftq.config}
+	selector.fields = append([]string{field}, fields...)
+	switch ftq.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		selector.sql = ftq.sqlQuery()
+	case dialect.Gremlin:
+		selector.gremlin = ftq.gremlinQuery()
+	}
+	return selector
+}
+
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	rows := &sql.Rows{}
 	selector := ftq.sqlQuery()
@@ -458,7 +482,7 @@ func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
 	return v
 }
 
-// FieldTypeQuery is the builder for group-by FieldType entities.
+// FieldTypeGroupBy is the builder for group-by FieldType entities.
 type FieldTypeGroupBy struct {
 	config
 	fields []string
@@ -632,4 +656,159 @@ func (ftgb *FieldTypeGroupBy) gremlinQuery() *dsl.Traversal {
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next()
+}
+
+// FieldTypeSelect is the builder for select fields of FieldType entities.
+type FieldTypeSelect struct {
+	config
+	fields []string
+	// intermediate queries.
+	sql     *sql.Selector
+	gremlin *dsl.Traversal
+}
+
+// Scan applies the selector query and scan the result into the given value.
+func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+	switch fts.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		return fts.sqlScan(ctx, v)
+	case dialect.Gremlin:
+		return fts.gremlinScan(ctx, v)
+	default:
+		return errors.New("FieldTypeSelect: unsupported dialect")
+	}
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (fts *FieldTypeSelect) ScanX(ctx context.Context, v interface{}) {
+	if err := fts.Scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Strings(ctx context.Context) ([]string, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FieldTypeSelect.Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (fts *FieldTypeSelect) StringsX(ctx context.Context) []string {
+	v, err := fts.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Ints(ctx context.Context) ([]int, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FieldTypeSelect.Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (fts *FieldTypeSelect) IntsX(ctx context.Context) []int {
+	v, err := fts.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Float64s(ctx context.Context) ([]float64, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FieldTypeSelect.Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (fts *FieldTypeSelect) Float64sX(ctx context.Context) []float64 {
+	v, err := fts.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Bools(ctx context.Context) ([]bool, error) {
+	if len(fts.fields) > 1 {
+		return nil, errors.New("ent: FieldTypeSelect.Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := fts.Scan(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (fts *FieldTypeSelect) BoolsX(ctx context.Context) []bool {
+	v, err := fts.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+	rows := &sql.Rows{}
+	query, args := fts.sqlQuery().Query()
+	if err := fts.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, v)
+}
+
+func (fts *FieldTypeSelect) sqlQuery() sql.Querier {
+	view := "fieldtype_view"
+	return sql.Select(fts.fields...).From(fts.sql.As(view))
+}
+
+func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {
+	var (
+		traversal *dsl.Traversal
+		res       = &gremlin.Response{}
+	)
+	if len(fts.fields) == 1 {
+		traversal = fts.gremlin.Values(fts.fields...)
+	} else {
+		fields := make([]interface{}, len(fts.fields))
+		for i, f := range fts.fields {
+			fields[i] = f
+		}
+		traversal = fts.gremlin.ValueMap(fields...)
+	}
+	query, bindings := traversal.Query()
+	if err := fts.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	if len(fts.fields) == 1 {
+		return res.ReadVal(v)
+	}
+	vm, err := res.ReadValueMap()
+	if err != nil {
+		return err
+	}
+	return vm.Decode(v)
 }
