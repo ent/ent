@@ -153,13 +153,13 @@ func Gen(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-Let's go over a few traversals, and show the code for then:
+Let's go over a few traversals, and show the code for them:
 
 ![er-traversal-graph-gopher](https://entgo.io/assets/er_traversal_graph_gopher.png)
 
-The traversal above starts from a `Group` entity, continue to its `admin` (edge),
-continue to its `friends` (edge), get their `pets` (edge), get each pet's `friends` (edge),
-and request their owners. 
+The traversal above starts from a `Group` entity, continues to its `admin` (edge),
+continues to its `friends` (edge), gets their `pets` (edge), gets each pet's `friends` (edge),
+and requests their owners. 
 
 ```go
 func Traverse(ctx context.Context, client *ent.Client) error {
@@ -186,7 +186,7 @@ What about the following traversal?
 
 ![er-traversal-graph-gopher-query](https://entgo.io/assets/er_traversal_graph_gopher_query.png)
 
-We want to get all pets (entities), that have an `owner` (`edge`), that it's a `friend`
+We want to get all pets (entities) that have an `owner` (`edge`) that is a `friend`
 (edge) of some group `admin` (edge).
 
 ```go

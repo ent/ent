@@ -62,7 +62,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ## Transactional Client
 
-Sometimes, you have an existing code that already work with `*ent.Client`, and you want to change it (or wrap it)
+Sometimes, you have an existing code that already works with `*ent.Client`, and you want to change it (or wrap it)
 to interact with transactions. For these use cases, you have a transactional client. An `*ent.Client` that you can
 get from an existing transaction.
 

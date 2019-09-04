@@ -9,8 +9,8 @@ will generate the following assets:
 - `Client` and `Tx` objects used for interacting with the graph.
 - CRUD builders for each schema type. See [CRUD](crud.md) for more info.
 - Entity object (Go struct) for each of the schema type.
-- Package contains constants and predicates used for interacting with the builders.
-- A `migrate` package, for SQL dialects. See [Migration](migrate.md) for more info.
+- Package containing constants and predicates used for interacting with the builders.
+- A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
 
 ## Create A New Client
 
@@ -119,7 +119,7 @@ pedro := client.Pet.	// PetClient.
 
 ## Update One
 
-If an entity that already returned from the database.
+Update an entity that was returned from the database.
 
 ```go
 a8m, err = a8m.Update().	// User update builder.
@@ -211,7 +211,7 @@ err := client.User.
 	Exec(ctx)
 ```
 
-Delete by id.
+Delete by ID.
 
 ```go
 err := client.User.

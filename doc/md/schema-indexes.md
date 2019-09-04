@@ -32,7 +32,7 @@ func (User) Indexes() []ent.Index {
 }
 ```
 
-Note that, for setting a single field as unique, use the `Unique`
+Note that for setting a single field as unique, use the `Unique`
 method on the field builder as follows:
 
 ```go
@@ -47,7 +47,7 @@ func (User) Fields() []ent.Field {
 ## Index On Edges
 
 Indexes can be configured on composition of fields and edges. The main use-case
-is setting uniqueness on fields under specific relation. Let's take an example:
+is setting uniqueness on fields under a specific relation. Let's take an example:
 
 ![er-city-streets](https://entgo.io/assets/er_city_streets.png)
 
@@ -151,5 +151,5 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 
 ## Dialect Support
 
-Indexes are currently support only SQL dialects, and do not support Gremlin.
+Indexes currently support only SQL dialects, and do not support Gremlin.
 

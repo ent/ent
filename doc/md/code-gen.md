@@ -20,7 +20,7 @@ In order to generate one or more schema templates, run `entc init` as follows:
 entc init User Pet
 ```
 
-`init` will created the 2 schemas (`user.go` and `pet.go`) under `ent/schema`.
+`init` will create the 2 schemas (`user.go` and `pet.go`) under the `ent/schema` directory.
 If the `ent` directory does not exist, it will create it as well. The convention
 is to have an `ent` directory under the root directory of the project.
 
@@ -33,7 +33,7 @@ the assets for working with your entities. Run the following command:
 entc generate ./ent/schema
 ```
 
-You should note, that `goimports` is required for the codegen, and it can be installed using:
+You should note that `goimports` is required for the codegen, and it can be installed using:
 
 ```bash
 go get -u golang.org/x/tools/cmd/goimports
@@ -43,9 +43,9 @@ The `generate` command generates the following assets for the schemas:
 
 - `Client` and `Tx` objects used for interacting with the graph.
 - CRUD builders for each schema type. See [CRUD](crud.md) for more info.
-- Entity object (Go struct) for each of the schema type.
-- Package contains constants and predicates used for interacting with the builders.
-- A `migrate` package, for SQL dialects. See [Migration](migrate.md) for more info.
+- Entity object (Go struct) for each of the schema types.
+- Package containing constants and predicates used for interacting with the builders.
+- A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
 
 ## Code Generation Options
 
@@ -77,7 +77,7 @@ In order to get a description of your graph schema, run:
 entc describe ./ent/schema
 ```
 
-An example for the output, is as follows:
+An example for the output is as follows:
 
 ```console
 Pet:

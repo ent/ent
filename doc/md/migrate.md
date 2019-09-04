@@ -74,12 +74,12 @@ if err != nil {
 ## Universal IDs
 
 By default, SQL primary-keys start from 1 for each table; which means that multiple entities of different types
-can share the same id. Unlike AWS Neptune, where vertex ids are UUIDs.
+can share the same ID. Unlike AWS Neptune, where vertex IDs are UUIDs.
 
-This does not work well if you work with [GraphQL](https://graphql.org/learn/schema/#scalar-types) which requires
-the object identifier to be unique.
+This does not work well if you work with [GraphQL](https://graphql.org/learn/schema/#scalar-types), which requires
+the object ID to be unique.
 
-To enable the universal-ids for your project, pass the `WithGlobalUniqueID` option to the migration.
+To enable the Universal-IDs support for your project, pass the `WithGlobalUniqueID` option to the migration.
 
 ```go
 package main
@@ -108,8 +108,8 @@ func main() {
 }
 ```
 
-**How does it work?** `ent` migration allocates a 1<<32 range for the ids of each entity (table),
+**How does it work?** `ent` migration allocates a 1<<32 range for the IDs of each entity (table),
 and store this information in a table named `ent_types`. For example, type `A` will have the range
-of `[1,4294967296)` for its ids, and type `B` will have the range of `[4294967296,8589934592)`, etc.
+of `[1,4294967296)` for its IDs, and type `B` will have the range of `[4294967296,8589934592)`, etc.
 
-Note that if this option is enabled, the maximum number of possible tables are **65535**. 
+Note that if this option is enabled, the maximum number of possible tables is **65535**. 
