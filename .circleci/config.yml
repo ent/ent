@@ -9,7 +9,7 @@ jobs:
     - image: circleci/golang
     working_directory: /go/src/github.com/facebookincubator/ent
     steps:
-    - run:
+    - run: &goimports_install
         name: Install goimports
         command: go get -u golang.org/x/tools/cmd/goimports
     - checkout
@@ -26,20 +26,30 @@ jobs:
         name: Codegen tests
         command: go test -v ./entc/gen/...
   integration:
-    machine:
-      image: ubuntu-1604:201903-01
+    docker:
+      - image: circleci/golang
+      - image: mysql:5.6.35
+        environment: &mysql_env
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+      - image: mysql:5.7.26
+        environment:
+          <<: *mysql_env
+          MYSQL_TCP_PORT: 3307
+      - image: mysql:8
+        environment:
+          <<: *mysql_env
+          MYSQL_TCP_PORT: 3308
+      - image: entgo/gremlin-server
+        entrypoint: /opt/gremlin-server/bin/gremlin-server.sh
+        command: conf/gremlin-server.yaml
     steps:
-    - checkout
-    - run:
-        name: Spin up databases
-        command: |
-          cd entc/integration/compose
-          docker-compose up -d --scale test=0
-    - run:
-        name: Run integration tests
-        command: |
-          cd entc/integration/compose
-          docker-compose run test go test ./entc/integration/...
+      - checkout
+      - run: *goimports_install
+      - run:
+          name: Run integration tests
+          working_directory: entc/integration
+          command: go test -v -race ./...
   docs:
     docker:
     - image: circleci/node
