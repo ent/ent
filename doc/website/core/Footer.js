@@ -29,16 +29,16 @@ class Footer extends React.Component {
         <section className="sitemap">
           <div>
             <h5>Docs</h5>
-            <a href="docs/getting-started">
+            <a href={this.docUrl('getting-started')}>
               Getting Started
             </a>
-            <a href="docs/schema-def">
+            <a href={this.docUrl('schema-def')}>
               Schema Guide
             </a>
-            <a href="docs/code-gen">
+            <a href={this.docUrl('code-gen')}>
               Code Generation
             </a>
-            <a href="docs/migrate">
+            <a href={this.docUrl('migrate')}>
              Schema Migration
             </a>
           </div>
