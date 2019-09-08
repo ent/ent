@@ -9,6 +9,7 @@ package migrate
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql/schema"
@@ -45,6 +46,24 @@ func NewSchema(drv dialect.Driver) *Schema { return &Schema{drv: drv} }
 // Create creates all schema resources.
 func (s *Schema) Create(ctx context.Context, opts ...schema.MigrateOption) error {
 	migrate, err := schema.NewMigrate(s.drv, opts...)
+	if err != nil {
+		return fmt.Errorf("ent/migrate: %v", err)
+	}
+	return migrate.Create(ctx, Tables...)
+}
+
+// WriteTo writes the schema changes to w instead of running them against the database.
+//
+// 	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
+//		log.Fatal(err)
+// 	}
+//
+func (s *Schema) WriteTo(ctx context.Context, w io.Writer, opts ...schema.MigrateOption) error {
+	drv := &schema.WriteDriver{
+		Writer: w,
+		Driver: s.drv,
+	}
+	migrate, err := schema.NewMigrate(drv, opts...)
 	if err != nil {
 		return fmt.Errorf("ent/migrate: %v", err)
 	}
