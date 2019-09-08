@@ -41,7 +41,7 @@
 // template/predicate.tmpl
 // template/tx.tmpl
 // template/where.tmpl
-package gen
+package internal
 
 import (
 	"bytes"

@@ -2,7 +2,7 @@
 // sources:
 // template/main.tmpl
 // schema.go
-package load
+package internal
 
 import (
 	"bytes"

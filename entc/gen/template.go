@@ -12,9 +12,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"text/template"
+
+	"github.com/facebookincubator/ent/entc/gen/internal"
 )
 
-//go:generate go-bindata -pkg=gen ./template/...
+//go:generate go-bindata -o=internal/bindata.go -pkg=internal ./template/...
 
 var (
 	// Templates holds the template information for a file that the graph is generating.
@@ -108,8 +110,8 @@ var (
 
 func init() {
 	templates.Funcs(funcs)
-	for _, asset := range AssetNames() {
-		templates = template.Must(templates.Parse(string(MustAsset(asset))))
+	for _, asset := range internal.AssetNames() {
+		templates = template.Must(templates.Parse(string(internal.MustAsset(asset))))
 	}
 	b := bytes.NewBuffer([]byte("package main\n"))
 	check(templates.ExecuteTemplate(b, "import", Type{}), "load imports")

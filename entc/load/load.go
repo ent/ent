@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/entc/load/internal"
 
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
@@ -189,13 +190,13 @@ func indirectType(typ types.Type) types.Type {
 	}
 }
 
-//go:generate go-bindata -pkg=load ./template/... schema.go
+//go:generate go-bindata -pkg=internal -o=internal/bindata.go ./template/... schema.go
 
 var buildTmpl = templates()
 
 func templates() *template.Template {
 	tmpl := template.New("templates").Funcs(template.FuncMap{"base": filepath.Base})
-	tmpl = template.Must(tmpl.Parse(string(MustAsset("template/main.tmpl"))))
+	tmpl = template.Must(tmpl.Parse(string(internal.MustAsset("template/main.tmpl"))))
 	// turns the schema file and its imports into templates.
 	tmpls, err := schemaTemplates()
 	if err != nil {
@@ -215,7 +216,7 @@ func schemaTemplates() ([]string, error) {
 		code    bytes.Buffer
 		fset    = token.NewFileSet()
 	)
-	f, err := parser.ParseFile(fset, name, string(MustAsset(name)), parser.AllErrors)
+	f, err := parser.ParseFile(fset, name, string(internal.MustAsset(name)), parser.AllErrors)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "parse file: %s", name)
 	}
