@@ -20,7 +20,8 @@ import (
 )
 
 type (
-	// Type represents one node/type in the graph, its relations and the information it holds.
+	// Type represents one node-type in the graph, its relations and
+	// the information it holds.
 	Type struct {
 		Config
 		// Name holds the type/ent name.
@@ -35,6 +36,9 @@ type (
 		Edges []*Edge
 		// Indexes are the configured indexes for this type.
 		Indexes []*Index
+		// StructFields are additional struct fields to be added to
+		// the generated entity.
+		StructFields []*load.StructField
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -84,8 +88,8 @@ type (
 		// Relation holds the relation info of an edge.
 		Rel Relation
 		// SelfRef indicates if this edge is a self-reference to the same
-		// type with the same name. For example, a User type have one of
-		// following edges:
+		// type with the same name (symmetric relation). For example, a User
+		// type have one of following edges:
 		//
 		//	edge.To("friends", User.Type)			// many 2 many.
 		//	edge.To("spouse", User.Type).Unique()	// one 2 one.
@@ -129,8 +133,9 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			Type:      c.IDType,
 			StructTag: `json:"id,omitempty"`,
 		},
-		Fields: make([]*Field, len(schema.Fields)),
-		fields: make(map[string]*Field, len(schema.Fields)),
+		Fields:       make([]*Field, len(schema.Fields)),
+		fields:       make(map[string]*Field, len(schema.Fields)),
+		StructFields: schema.StructFields,
 	}
 	for i, f := range schema.Fields {
 		switch {

@@ -18,6 +18,16 @@ func TestLoad(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, spec.Schemas, 3)
 	require.Equal(t, "github.com/facebookincubator/ent/entc/load/testdata/valid", spec.PkgPath)
+
+	require.Equal(t, "Group", spec.Schemas[0].Name, "ordered alphabetically")
+	require.Equal(t, "Tag", spec.Schemas[1].Name)
+	require.Equal(t, "User", spec.Schemas[2].Name)
+
+	require.Len(t, spec.Schemas[2].StructFields, 3)
+	fields := spec.Schemas[2].StructFields
+	require.Equal(t, &StructField{Tag: "json:\"tenant,omitempty\"", Name: "Tenant", Type: "string"}, fields[0])
+	require.Equal(t, &StructField{Name: "Logger", Type: "*log.Logger", PkgPath: "log", Comment: "Comment."}, fields[1])
+	require.Equal(t, &StructField{Name: "Mutex", Type: "sync.Mutex", PkgPath: "sync", Embedded: true}, fields[2])
 }
 
 func TestLoadWrongPath(t *testing.T) {

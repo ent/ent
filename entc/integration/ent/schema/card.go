@@ -5,6 +5,7 @@
 package schema
 
 import (
+	"log"
 	"time"
 
 	"github.com/facebookincubator/ent"
@@ -15,6 +16,11 @@ import (
 // Card holds the schema definition for the CreditCard entity.
 type Card struct {
 	ent.Schema
+
+	// additional fields to be added to the schema.
+	internal  int         // internal.
+	RequestID string      // RequestID.
+	Logger    *log.Logger // Logger.
 }
 
 // Fields of the Comment.

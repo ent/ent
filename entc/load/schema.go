@@ -17,10 +17,11 @@ import (
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name    string   `json:"name,omitempty"`
-	Edges   []*Edge  `json:"edges,omitempty"`
-	Fields  []*Field `json:"fields,omitempty"`
-	Indexes []*Index `json:"indexes,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Edges        []*Edge        `json:"edges,omitempty"`
+	Fields       []*Field       `json:"fields,omitempty"`
+	Indexes      []*Index       `json:"indexes,omitempty"`
+	StructFields []*StructField `json:"struct_fields,omitempty"`
 }
 
 // Field represents an ent.Field that was loaded from a complied user package.
@@ -36,6 +37,16 @@ type Field struct {
 	UpdateDefault bool       `json:"update_default,omitempty"`
 	Immutable     bool       `json:"immutable,omitempty"`
 	Validators    int        `json:"validators,omitempty"`
+}
+
+// StructField represents an external struct field defined in the schema.
+type StructField struct {
+	Tag      string `json:"tag,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Type     string `json:"type,omitempty"`
+	Comment  string `json:"comment,omitempty"`
+	PkgPath  string `json:"pkg_path,omitempty"`
+	Embedded bool   `json:"embedded,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.

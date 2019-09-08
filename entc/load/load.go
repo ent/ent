@@ -47,6 +47,8 @@ type Config struct {
 	// Names are the schema names to run the code generation on.
 	// Empty means all schemas in the directory.
 	Names []string
+	// schema types and their exported struct fields.
+	fields map[string][]*StructField
 }
 
 // Build loads the schemas package and build the Go plugin with this info.
@@ -85,30 +87,42 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		if err := json.Unmarshal([]byte(line), schema); err != nil {
 			return nil, errors.WithMessagef(err, "unmarshal schema %s", line)
 		}
+		schema.StructFields = c.fields[schema.Name]
 		spec.Schemas = append(spec.Schemas, schema)
 	}
 	return spec, nil
 }
 
+// entInterface represents the the ent.Interface type.
+var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
+
 // load loads the schemas info.
 func (c *Config) load() (string, error) {
-	// get the ent package info statically instead of dealing with string constants
-	// in the code, since import is handled by goimports and renaming should be easy.
-	entface := reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadSyntax}, c.Path, entface.PkgPath())
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadSyntax}, c.Path, entInterface.PkgPath())
 	if err != nil {
 		return "", err
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
-	if pkgs[0].PkgPath != entface.PkgPath() {
+	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
 	}
 	names := make([]string, 0)
-	iface := entPkg.Types.Scope().Lookup(entface.Name()).Type().Underlying().(*types.Interface)
+	iface := entPkg.Types.Scope().Lookup(entInterface.Name()).Type().Underlying().(*types.Interface)
 	for k, v := range pkg.TypesInfo.Defs {
 		typ, ok := v.(*types.TypeName)
 		if !ok || !k.IsExported() || !types.Implements(typ.Type(), iface) {
 			continue
+		}
+		spec, ok := k.Obj.Decl.(*ast.TypeSpec)
+		if !ok {
+			return "", fmt.Errorf("invalid declaration %T for %s", k.Obj.Decl, k.Name)
+		}
+		specType, ok := spec.Type.(*ast.StructType)
+		if !ok {
+			return "", fmt.Errorf("invalid spec type %T for %s", spec.Type, k.Name)
+		}
+		if err := c.structFields(k.Name, v, specType); err != nil {
+			return "", err
 		}
 		names = append(names, k.Name)
 	}
@@ -117,6 +131,62 @@ func (c *Config) load() (string, error) {
 	}
 	sort.Strings(c.Names)
 	return pkg.PkgPath, err
+}
+
+// structFields loads schema type fields if exist.
+func (c *Config) structFields(name string, obj types.Object, spec *ast.StructType) (err error) {
+	typ, ok := obj.(*types.TypeName)
+	if !ok {
+		return
+	}
+	st, ok := typ.Type().Underlying().(*types.Struct)
+	if !ok {
+		return
+	}
+	if c.fields == nil {
+		c.fields = make(map[string][]*StructField)
+	}
+	for i := 0; i < st.NumFields(); i++ {
+		f := st.Field(i)
+		// skip non-exported fields, because they
+		// cannot be used outside the package.
+		if !f.Exported() {
+			continue
+		}
+		sf := &StructField{
+			Tag:      st.Tag(i),
+			Name:     f.Name(),
+			Type:     f.Type().String(),
+			Embedded: f.Embedded(),
+			Comment:  strings.TrimSpace(spec.Fields.List[i].Comment.Text()),
+		}
+		switch typ := indirectType(f.Type()).(type) {
+		case *types.Named:
+			sf.PkgPath = typ.Obj().Pkg().Path()
+			// skip fields used for schema definition.
+			if sf.PkgPath == entInterface.PkgPath() {
+				continue
+			}
+			c.fields[name] = append(c.fields[name], sf)
+		default:
+			if f.Embedded() {
+				return fmt.Errorf("field %s for schema %q cannot be embbeded", f.Type(), name)
+			}
+			c.fields[name] = append(c.fields[name], sf)
+		}
+	}
+	return
+}
+
+// indirectType returns the type at the end of indirection.
+func indirectType(typ types.Type) types.Type {
+	for {
+		ptr, ok := typ.(*types.Pointer)
+		if !ok {
+			return typ
+		}
+		typ = ptr.Elem()
+	}
 }
 
 //go:generate go-bindata -pkg=load ./template/... schema.go

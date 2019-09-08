@@ -27,6 +27,12 @@ type {{ $.Name }} struct {
 			{{ pascal $e.Name }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} `{{ $e.StructTag }}`
 		{{ end -}}
 	{{ end -}}
+	{{ with $.StructFields -}}
+		// additional struct fields defined in the schema.
+		{{ range $_, $f := $.StructFields -}}
+			{{ $f.Name }} {{ $f.Type }} {{ with $f.Tag -}}`{{ . }}`{{ end }} {{ with $f.Comment -}}// {{ . }}{{ end }}
+		{{ end -}}
+	{{ end -}}
 }
 
 {{ range $_, $storage := $.Storage }}

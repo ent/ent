@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"log"
+
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -27,6 +29,9 @@ type Card struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// additional struct fields defined in the schema.
+	RequestID string      // RequestID.
+	Logger    *log.Logger // Logger.
 }
 
 // FromRows scans the sql response data into Card.
