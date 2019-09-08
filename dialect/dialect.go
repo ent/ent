@@ -100,7 +100,7 @@ func (d *DebugDriver) Tx(ctx context.Context) (Tx, error) {
 	return &DebugTx{tx, id, d.log}, nil
 }
 
-// DebugTx is a driver that logs all transaction operations.
+// DebugTx is a transaction implementation that logs all transaction operations.
 type DebugTx struct {
 	Tx                       // underlying transaction.
 	id  string               // transaction logging id.
