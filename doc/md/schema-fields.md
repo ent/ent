@@ -272,3 +272,67 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+## Struct Fields
+
+By default, `entc` generates the entity model with fields that are configured in the `schema.Fields` method.
+For example, given this schema configuration:
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("age").
+			Optional().
+			Nillable(),
+		field.String("name").
+			StructTag(`gqlgen:"gql_name"`),
+	}
+}
+```
+
+The generated model will be as follows:
+
+```go
+// User is the model entity for the User schema.
+type User struct {
+	// Age holds the value of the "age" field.
+	Age  *int	`json:"age,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty" gqlgen:"gql_name"`
+}
+```
+
+In order to add additional fields to the generated struct **that are not stored in the database**,
+add them to the schema struct as follows:
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+	// Additional struct-only fields.
+	Tenant	string
+	Logger	*log.Logger
+}
+
+```
+
+The generated model will be as follows:
+
+```go
+// User is the model entity for the User schema.
+type User struct {
+	// Age holds the value of the "age" field.
+	Age  *int	`json:"age,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty" gqlgen:"gql_name"` 
+	// additional struct fields defined in the schema.
+	Tenant	string
+	Logger	*log.Logger
+}
+```
