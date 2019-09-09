@@ -189,6 +189,22 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "a8m%", "%mash%"},
 		},
 		{
+			input: Update("users").
+				Add("age", 1).
+				Where(HasPrefix("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, ?) + ? WHERE `nickname` LIKE ?",
+			wantArgs:  []interface{}{0, 1, "a8m%"},
+		},
+		{
+			input: Update("users").
+				Add("age", 1).
+				Set("nickname", "a8m").
+				Add("version", 10).
+				Set("name", "mashraki"),
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, ?) + ?, `nickname` = ?, `version` = COALESCE(`version`, ?) + ?, `name` = ?",
+			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki"},
+		},
+		{
 			input: Select().
 				From(Table("users")).
 				Where(EqualFold("name", "Alex")),

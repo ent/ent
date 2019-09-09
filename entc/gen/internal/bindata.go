@@ -201,7 +201,7 @@ func templateBuilderSetterTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/setter.tmpl", size: 3452, mode: os.FileMode(420), modTime: time.Unix(1567330680, 0)}
+	info := bindataFileInfo{name: "template/builder/setter.tmpl", size: 3452, mode: os.FileMode(420), modTime: time.Unix(1568032077, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -221,7 +221,7 @@ func templateBuilderUpdateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/update.tmpl", size: 7847, mode: os.FileMode(420), modTime: time.Unix(1567330684, 0)}
+	info := bindataFileInfo{name: "template/builder/update.tmpl", size: 7847, mode: os.FileMode(420), modTime: time.Unix(1568032077, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -721,7 +721,7 @@ func templateDialectSqlUpdateTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/update.tmpl", size: 11628, mode: os.FileMode(420), modTime: time.Unix(1567330621, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/update.tmpl", size: 11628, mode: os.FileMode(420), modTime: time.Unix(1568032077, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -921,7 +921,7 @@ func templateWhereTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/where.tmpl", size: 5099, mode: os.FileMode(420), modTime: time.Unix(1567330531, 0)}
+	info := bindataFileInfo{name: "template/where.tmpl", size: 5099, mode: os.FileMode(420), modTime: time.Unix(1567957074, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

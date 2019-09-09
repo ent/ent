@@ -36,10 +36,11 @@ func (n Queries) Query() (string, []interface{}) {
 	return b.String(), b.args
 }
 
-// Builder is a query builder for the sql dsl.
+// Builder is the base query builder for the sql dsl.
 type Builder struct {
 	bytes.Buffer
-	args []interface{}
+	args    []interface{}
+	dialect string
 }
 
 // Append appends the given string as a quoted parameter
@@ -139,6 +140,22 @@ func (b Builder) clone() Builder {
 	c := Builder{args: append([]interface{}{}, b.args...)}
 	c.Buffer.Write(c.Bytes())
 	return c
+}
+
+// SetDialect sets the builder dialect. It's used for garnering dialect specific queries.
+func (b *Builder) SetDialect(dialect string) *Builder {
+	b.dialect = dialect
+	return b
+}
+
+// Dialect returns the dialect of the builder.
+func (b Builder) Dialect() string {
+	return b.dialect
+}
+
+// Query implements the Querier interface.
+func (b Builder) Query() (string, []interface{}) {
+	return b.String(), b.args
 }
 
 // ColumnBuilder is a builder for column definition in table creation.
@@ -671,6 +688,20 @@ func (u *UpdateBuilder) Set(column string, v interface{}) *UpdateBuilder {
 	return u
 }
 
+// Add adds a numeric value to the given column.
+func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
+	u.columns = append(u.columns, column)
+	var b Builder
+	b.WriteString("COALESCE")
+	b.Nested(func(b *Builder) {
+		b.Append(column).Comma().Arg(0)
+	})
+	b.WriteString(" + ")
+	b.Arg(v)
+	u.values = append(u.values, b)
+	return u
+}
+
 // SetNull sets a column as null value.
 func (u *UpdateBuilder) SetNull(column string) *UpdateBuilder {
 	u.nulls = append(u.nulls, column)
@@ -691,8 +722,8 @@ func (u *UpdateBuilder) Where(p *Predicate) *UpdateBuilder {
 func (u *UpdateBuilder) Query() (string, []interface{}) {
 	u.b.WriteString("UPDATE ")
 	u.b.Append(u.table).Pad().WriteString("SET ")
-	for j, c := range u.nulls {
-		if j > 0 {
+	for i, c := range u.nulls {
+		if i > 0 {
 			u.b.Comma()
 		}
 		u.b.Append(c).WriteString(" = NULL")
@@ -700,13 +731,18 @@ func (u *UpdateBuilder) Query() (string, []interface{}) {
 	if len(u.nulls) > 0 && len(u.columns) > 0 {
 		u.b.Comma()
 	}
-	for j, c := range u.columns {
-		if j > 0 {
+	for i, c := range u.columns {
+		if i > 0 {
 			u.b.Comma()
 		}
-		u.b.Append(c).WriteString(" = ?")
+		u.b.Append(c).WriteString(" = ")
+		switch v := u.values[i].(type) {
+		case Querier:
+			u.b.Join(v)
+		default:
+			u.b.Arg(v)
+		}
 	}
-	u.b.args = append(u.b.args, u.values...)
 	if u.where != nil {
 		u.b.WriteString(" WHERE ")
 		u.b.Join(u.where)
