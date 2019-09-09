@@ -113,3 +113,72 @@ and store this information in a table named `ent_types`. For example, type `A` w
 of `[1,4294967296)` for its IDs, and type `B` will have the range of `[4294967296,8589934592)`, etc.
 
 Note that if this option is enabled, the maximum number of possible tables is **65535**. 
+
+## Offline Mode
+
+Offline mode allows you to write the schema changes to an `io.Writer` before executing them on the database.
+It's useful for verifying the SQL commands before they're executed on the database, or to get an SQL script
+to run manually. 
+
+**Print changes**
+```go
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+	
+	"<project>/ent"
+	"<project>/ent/migrate"
+	
+	"github.com/facebookincubator/ent/dialect/sql"
+)
+
+func main() {
+	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	if err != nil {
+		log.Fatalf("failed connecting to mysql: %v", err)
+	}
+	ctx := context.Background()
+	client := ent.NewClient(ent.Driver(db))
+	// Dump migration changes to stdout.
+	if err := client.Schema.WriteTo(ctx, os.Stdout); err != nil {
+		log.Fatalf("failed printing schema changes: %v", err)
+	}
+}
+```
+
+**Write changes to file**
+```go
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+	
+	"<project>/ent"
+	"<project>/ent/migrate"
+	
+	"github.com/facebookincubator/ent/dialect/sql"
+)
+
+func main() {
+	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	if err != nil {
+		log.Fatalf("failed connecting to mysql: %v", err)
+	}
+	ctx := context.Background()
+	client := ent.NewClient(ent.Driver(db))
+	// Dump migration changes to an SQL script.
+	f, err := os.Create("migrate.sql")
+	if err != nil {
+		log.Fatalf("create migrate file: %v", err)
+	}
+	defer f.Close()
+	if err := client.Schema.WriteTo(ctx, f); err != nil {
+		log.Fatalf("failed printing schema changes: %v", err)
+	}
+}
+```
