@@ -226,7 +226,7 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum().Next()
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %d", *value))),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %v", *value))),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueInt, __.Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum())
 	}
@@ -241,7 +241,7 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum().Next()
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %d", *value))),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %v", *value))),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueFloat, __.Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum())
 	}
@@ -477,7 +477,7 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum().Next()
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %d", *value))),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %v", *value))),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueInt, __.Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum())
 	}
@@ -492,7 +492,7 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum().Next()
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %d", *value))),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %v", *value))),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueFloat, __.Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum())
 	}

@@ -31,6 +31,10 @@ func (User) Fields() []ent.Field {
 		// all existing rows.
 		field.String("title").
 			Default("SWE"),
+		// extending the blob size.
+		field.Bytes("blob").
+			Optional().
+			MaxLen(1000),
 		// deleting the `address` column.
 	}
 }

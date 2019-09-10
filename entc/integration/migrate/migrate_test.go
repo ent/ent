@@ -92,6 +92,12 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	client.User.Create().SetAge(3).SetName("foo").SetAddress("tlv").SaveX(ctx)
 	_, err = client.User.Create().SetAge(4).SetName("foo").SetAddress("tlv").Save(ctx)
 	require.Error(t, err)
+
+	// blob type limited to 255.
+	u = u.Update().SetBlob([]byte("hello")).SaveX(ctx)
+	require.Equal(t, "hello", string(u.Blob))
+	u, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
+	require.Error(t, err, "data too long for column 'blob' error")
 }
 
 func SanityV2(t *testing.T, client *entv2.Client) {
@@ -117,6 +123,11 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 		client.User.Query().CountX(ctx),
 		client.User.Query().Where(user.Title(user.DefaultTitle)).CountX(ctx),
 	)
+
+	// blob type was extended.
+	u, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
+	require.NoError(t, err, "data type blob was extended in v2")
+	require.Equal(t, make([]byte, 256), u.Blob)
 }
 
 func EqualFold(t *testing.T, client *entv2.Client) {

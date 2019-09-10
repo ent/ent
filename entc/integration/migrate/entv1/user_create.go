@@ -22,6 +22,7 @@ type UserCreate struct {
 	age     *int32
 	name    *string
 	address *string
+	blob    *[]byte
 }
 
 // SetAge sets the age field.
@@ -47,6 +48,12 @@ func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
 	if s != nil {
 		uc.SetAddress(*s)
 	}
+	return uc
+}
+
+// SetBlob sets the blob field.
+func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
+	uc.blob = &b
 	return uc
 }
 
@@ -94,6 +101,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.address != nil {
 		builder.Set(user.FieldAddress, *uc.address)
 		u.Address = *uc.address
+	}
+	if uc.blob != nil {
+		builder.Set(user.FieldBlob, *uc.blob)
+		u.Blob = *uc.blob
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

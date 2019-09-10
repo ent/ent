@@ -43,6 +43,7 @@ var (
 		{Name: "phone", Type: field.TypeString},
 		{Name: "buffer", Type: field.TypeBytes, Default: user.DefaultBuffer},
 		{Name: "title", Type: field.TypeString, Default: user.DefaultTitle},
+		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

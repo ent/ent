@@ -401,6 +401,14 @@ func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 	return b
 }
 
+// MaxLen sets the max-length of the bytes type in the database.
+// In MySQL, this affects the BLOB type (tiny 2^8-1, regular 2^16-1, medium 2^24-1, long 2^32-1).
+// In SQLite, it does not have any effect on the type size, which is default to 1B bytes.
+func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
+	b.desc.Size = i
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *bytesBuilder) Descriptor() *Descriptor {
 	return b.desc
