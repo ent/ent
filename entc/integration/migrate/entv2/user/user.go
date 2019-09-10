@@ -25,6 +25,8 @@ const (
 	FieldBuffer = "buffer"
 	// FieldTitle holds the string denoting the title vertex property in the database.
 	FieldTitle = "title"
+	// FieldBlob holds the string denoting the blob vertex property in the database.
+	FieldBlob = "blob"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -38,6 +40,7 @@ var Columns = []string{
 	FieldPhone,
 	FieldBuffer,
 	FieldTitle,
+	FieldBlob,
 }
 
 var (

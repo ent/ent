@@ -140,6 +140,15 @@ func Address(v string) predicate.User {
 	)
 }
 
+// Blob applies equality check predicate on the "blob" field. It's identical to BlobEQ.
+func Blob(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldBlob), v))
+		},
+	)
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v int32) predicate.User {
 	return predicate.User(
@@ -520,6 +529,116 @@ func AddressContainsFold(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.ContainsFold(s.C(FieldAddress), v))
+		},
+	)
+}
+
+// BlobEQ applies the EQ predicate on the "blob" field.
+func BlobEQ(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobNEQ applies the NEQ predicate on the "blob" field.
+func BlobNEQ(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobGT applies the GT predicate on the "blob" field.
+func BlobGT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobGTE applies the GTE predicate on the "blob" field.
+func BlobGTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobLT applies the LT predicate on the "blob" field.
+func BlobLT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobLTE applies the LTE predicate on the "blob" field.
+func BlobLTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobIn applies the In predicate on the "blob" field.
+func BlobIn(vs ...[]byte) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldBlob), v...))
+		},
+	)
+}
+
+// BlobNotIn applies the NotIn predicate on the "blob" field.
+func BlobNotIn(vs ...[]byte) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldBlob), v...))
+		},
+	)
+}
+
+// BlobIsNil applies the IsNil predicate on the "blob" field.
+func BlobIsNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldBlob)))
+		},
+	)
+}
+
+// BlobNotNil applies the NotNil predicate on the "blob" field.
+func BlobNotNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldBlob)))
 		},
 	)
 }

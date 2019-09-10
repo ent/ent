@@ -21,6 +21,9 @@ func (User) Fields() []ent.Field {
 		field.Int32("age"),
 		field.String("name").MaxLen(10),
 		field.String("address").Optional(),
+		field.Bytes("blob").
+			Optional().
+			MaxLen(255),
 	}
 }
 

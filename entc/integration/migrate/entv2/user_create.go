@@ -23,6 +23,7 @@ type UserCreate struct {
 	phone  *string
 	buffer *[]byte
 	title  *string
+	blob   *[]byte
 }
 
 // SetAge sets the age field.
@@ -60,6 +61,12 @@ func (uc *UserCreate) SetNillableTitle(s *string) *UserCreate {
 	if s != nil {
 		uc.SetTitle(*s)
 	}
+	return uc
+}
+
+// SetBlob sets the blob field.
+func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
+	uc.blob = &b
 	return uc
 }
 
@@ -123,6 +130,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.title != nil {
 		builder.Set(user.FieldTitle, *uc.title)
 		u.Title = *uc.title
+	}
+	if uc.blob != nil {
+		builder.Set(user.FieldBlob, *uc.blob)
+		u.Blob = *uc.blob
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

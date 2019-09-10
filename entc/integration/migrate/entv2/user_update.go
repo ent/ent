@@ -25,6 +25,7 @@ type UserUpdate struct {
 	phone      *string
 	buffer     *[]byte
 	title      *string
+	blob       *[]byte
 	predicates []predicate.User
 }
 
@@ -75,6 +76,12 @@ func (uu *UserUpdate) SetNillableTitle(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetTitle(*s)
 	}
+	return uu
+}
+
+// SetBlob sets the blob field.
+func (uu *UserUpdate) SetBlob(b []byte) *UserUpdate {
+	uu.blob = &b
 	return uu
 }
 
@@ -161,6 +168,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldTitle, *value)
 	}
+	if value := uu.blob; value != nil {
+		update = true
+		builder.Set(user.FieldBlob, *value)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -183,6 +194,7 @@ type UserUpdateOne struct {
 	phone  *string
 	buffer *[]byte
 	title  *string
+	blob   *[]byte
 }
 
 // SetAge sets the age field.
@@ -226,6 +238,12 @@ func (uuo *UserUpdateOne) SetNillableTitle(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetTitle(*s)
 	}
+	return uuo
+}
+
+// SetBlob sets the blob field.
+func (uuo *UserUpdateOne) SetBlob(b []byte) *UserUpdateOne {
+	uuo.blob = &b
 	return uuo
 }
 
@@ -320,6 +338,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		update = true
 		builder.Set(user.FieldTitle, *value)
 		u.Title = *value
+	}
+	if value := uuo.blob; value != nil {
+		update = true
+		builder.Set(user.FieldBlob, *value)
+		u.Blob = *value
 	}
 	if update {
 		query, args := builder.Query()

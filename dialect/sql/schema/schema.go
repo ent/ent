@@ -6,6 +6,7 @@ package schema
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -238,13 +239,26 @@ func (c *Column) MySQLType(version string) (t string) {
 	case field.TypeUint, field.TypeUint64:
 		t = "bigint unsigned"
 	case field.TypeBytes:
-		t = "blob"
+		size := math.MaxUint16
+		if c.Size > 0 {
+			size = c.Size
+		}
+		switch {
+		case size <= math.MaxUint8:
+			t = "tinyblob"
+		case size <= math.MaxUint16:
+			t = "blob"
+		case size < 1<<24:
+			t = "mediumblob"
+		case size <= math.MaxUint32:
+			t = "longblob"
+		}
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
 			size = c.defaultSize(version)
 		}
-		if size < 1<<16 {
+		if size <= math.MaxUint16 {
 			t = fmt.Sprintf("varchar(%d)", size)
 		} else {
 			t = "longtext"
@@ -335,7 +349,17 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		c.Type = field.TypeFloat64
 	case "timestamp":
 		c.Type = field.TypeTime
+	case "tinyblob":
+		c.Size = math.MaxUint8
+		c.Type = field.TypeBytes
 	case "blob":
+		c.Size = math.MaxUint16
+		c.Type = field.TypeBytes
+	case "mediumblob":
+		c.Size = 1<<24 - 1
+		c.Type = field.TypeBytes
+	case "longblob":
+		c.Size = math.MaxUint32
 		c.Type = field.TypeBytes
 	case "varchar":
 		c.Type = field.TypeString

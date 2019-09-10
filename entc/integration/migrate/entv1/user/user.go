@@ -21,6 +21,8 @@ const (
 	FieldName = "name"
 	// FieldAddress holds the string denoting the address vertex property in the database.
 	FieldAddress = "address"
+	// FieldBlob holds the string denoting the blob vertex property in the database.
+	FieldBlob = "blob"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -32,6 +34,7 @@ var Columns = []string{
 	FieldAge,
 	FieldName,
 	FieldAddress,
+	FieldBlob,
 }
 
 var (
