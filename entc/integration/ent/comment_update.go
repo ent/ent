@@ -26,9 +26,13 @@ import (
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	unique_int   *int
-	unique_float *float64
-	predicates   []predicate.Comment
+	unique_int      *int
+	addunique_int   *int
+	unique_float    *float64
+	addunique_float *float64
+	nillable_int    *int
+	addnillable_int *int
+	predicates      []predicate.Comment
 }
 
 // Where adds a new predicate for the builder.
@@ -43,9 +47,41 @@ func (cu *CommentUpdate) SetUniqueInt(i int) *CommentUpdate {
 	return cu
 }
 
+// AddUniqueInt adds i to unique_int.
+func (cu *CommentUpdate) AddUniqueInt(i int) *CommentUpdate {
+	cu.addunique_int = &i
+	return cu
+}
+
 // SetUniqueFloat sets the unique_float field.
 func (cu *CommentUpdate) SetUniqueFloat(f float64) *CommentUpdate {
 	cu.unique_float = &f
+	return cu
+}
+
+// AddUniqueFloat adds f to unique_float.
+func (cu *CommentUpdate) AddUniqueFloat(f float64) *CommentUpdate {
+	cu.addunique_float = &f
+	return cu
+}
+
+// SetNillableInt sets the nillable_int field.
+func (cu *CommentUpdate) SetNillableInt(i int) *CommentUpdate {
+	cu.nillable_int = &i
+	return cu
+}
+
+// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
+	if i != nil {
+		cu.SetNillableInt(*i)
+	}
+	return cu
+}
+
+// AddNillableInt adds i to nillable_int.
+func (cu *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
+	cu.addnillable_int = &i
 	return cu
 }
 
@@ -115,13 +151,29 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
 	)
-	if cu.unique_int != nil {
+	if value := cu.unique_int; value != nil {
 		update = true
-		builder.Set(comment.FieldUniqueInt, *cu.unique_int)
+		builder.Set(comment.FieldUniqueInt, *value)
 	}
-	if cu.unique_float != nil {
+	if value := cu.addunique_int; value != nil {
 		update = true
-		builder.Set(comment.FieldUniqueFloat, *cu.unique_float)
+		builder.Add(comment.FieldUniqueInt, *value)
+	}
+	if value := cu.unique_float; value != nil {
+		update = true
+		builder.Set(comment.FieldUniqueFloat, *value)
+	}
+	if value := cu.addunique_float; value != nil {
+		update = true
+		builder.Add(comment.FieldUniqueFloat, *value)
+	}
+	if value := cu.nillable_int; value != nil {
+		update = true
+		builder.Set(comment.FieldNillableInt, *value)
+	}
+	if value := cu.addnillable_int; value != nil {
+		update = true
+		builder.Add(comment.FieldNillableInt, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -163,19 +215,41 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if cu.unique_int != nil {
+	if value := cu.unique_int; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *cu.unique_int).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *cu.unique_int)),
+			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *value)),
 		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, *cu.unique_int)
+		v.Property(dsl.Single, comment.FieldUniqueInt, *value)
 	}
-	if cu.unique_float != nil {
+	if value := cu.addunique_int; value != nil {
+		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum().Next()
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *cu.unique_float).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *cu.unique_float)),
+			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, addValue).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %d", *value))),
 		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, *cu.unique_float)
+		v.Property(dsl.Single, comment.FieldUniqueInt, __.Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum())
+	}
+	if value := cu.unique_float; value != nil {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *value)),
+		})
+		v.Property(dsl.Single, comment.FieldUniqueFloat, *value)
+	}
+	if value := cu.addunique_float; value != nil {
+		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum().Next()
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, addValue).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %d", *value))),
+		})
+		v.Property(dsl.Single, comment.FieldUniqueFloat, __.Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum())
+	}
+	if value := cu.nillable_int; value != nil {
+		v.Property(dsl.Single, comment.FieldNillableInt, *value)
+	}
+	if value := cu.addnillable_int; value != nil {
+		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(*value)).Sum())
 	}
 	v.Count()
 	if len(constraints) > 0 {
@@ -195,9 +269,13 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
-	id           string
-	unique_int   *int
-	unique_float *float64
+	id              string
+	unique_int      *int
+	addunique_int   *int
+	unique_float    *float64
+	addunique_float *float64
+	nillable_int    *int
+	addnillable_int *int
 }
 
 // SetUniqueInt sets the unique_int field.
@@ -206,9 +284,41 @@ func (cuo *CommentUpdateOne) SetUniqueInt(i int) *CommentUpdateOne {
 	return cuo
 }
 
+// AddUniqueInt adds i to unique_int.
+func (cuo *CommentUpdateOne) AddUniqueInt(i int) *CommentUpdateOne {
+	cuo.addunique_int = &i
+	return cuo
+}
+
 // SetUniqueFloat sets the unique_float field.
 func (cuo *CommentUpdateOne) SetUniqueFloat(f float64) *CommentUpdateOne {
 	cuo.unique_float = &f
+	return cuo
+}
+
+// AddUniqueFloat adds f to unique_float.
+func (cuo *CommentUpdateOne) AddUniqueFloat(f float64) *CommentUpdateOne {
+	cuo.addunique_float = &f
+	return cuo
+}
+
+// SetNillableInt sets the nillable_int field.
+func (cuo *CommentUpdateOne) SetNillableInt(i int) *CommentUpdateOne {
+	cuo.nillable_int = &i
+	return cuo
+}
+
+// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
+	if i != nil {
+		cuo.SetNillableInt(*i)
+	}
+	return cuo
+}
+
+// AddNillableInt adds i to nillable_int.
+func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
+	cuo.addnillable_int = &i
 	return cuo
 }
 
@@ -281,15 +391,39 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		res     sql.Result
 		builder = sql.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
 	)
-	if cuo.unique_int != nil {
+	if value := cuo.unique_int; value != nil {
 		update = true
-		builder.Set(comment.FieldUniqueInt, *cuo.unique_int)
-		c.UniqueInt = *cuo.unique_int
+		builder.Set(comment.FieldUniqueInt, *value)
+		c.UniqueInt = *value
 	}
-	if cuo.unique_float != nil {
+	if value := cuo.addunique_int; value != nil {
 		update = true
-		builder.Set(comment.FieldUniqueFloat, *cuo.unique_float)
-		c.UniqueFloat = *cuo.unique_float
+		builder.Add(comment.FieldUniqueInt, *value)
+		c.UniqueInt += *value
+	}
+	if value := cuo.unique_float; value != nil {
+		update = true
+		builder.Set(comment.FieldUniqueFloat, *value)
+		c.UniqueFloat = *value
+	}
+	if value := cuo.addunique_float; value != nil {
+		update = true
+		builder.Add(comment.FieldUniqueFloat, *value)
+		c.UniqueFloat += *value
+	}
+	if value := cuo.nillable_int; value != nil {
+		update = true
+		builder.Set(comment.FieldNillableInt, *value)
+		c.NillableInt = value
+	}
+	if value := cuo.addnillable_int; value != nil {
+		update = true
+		builder.Add(comment.FieldNillableInt, *value)
+		if c.NillableInt != nil {
+			*c.NillableInt += *value
+		} else {
+			c.NillableInt = value
+		}
 	}
 	if update {
 		query, args := builder.Query()
@@ -332,19 +466,41 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if cuo.unique_int != nil {
+	if value := cuo.unique_int; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *cuo.unique_int).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *cuo.unique_int)),
+			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *value)),
 		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, *cuo.unique_int)
+		v.Property(dsl.Single, comment.FieldUniqueInt, *value)
 	}
-	if cuo.unique_float != nil {
+	if value := cuo.addunique_int; value != nil {
+		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum().Next()
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *cuo.unique_float).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *cuo.unique_float)),
+			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, addValue).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %d", *value))),
 		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, *cuo.unique_float)
+		v.Property(dsl.Single, comment.FieldUniqueInt, __.Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum())
+	}
+	if value := cuo.unique_float; value != nil {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *value)),
+		})
+		v.Property(dsl.Single, comment.FieldUniqueFloat, *value)
+	}
+	if value := cuo.addunique_float; value != nil {
+		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum().Next()
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, addValue).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %d", *value))),
+		})
+		v.Property(dsl.Single, comment.FieldUniqueFloat, __.Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum())
+	}
+	if value := cuo.nillable_int; value != nil {
+		v.Property(dsl.Single, comment.FieldNillableInt, *value)
+	}
+	if value := cuo.addnillable_int; value != nil {
+		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(*value)).Sum())
 	}
 	v.ValueMap(true)
 	if len(constraints) > 0 {

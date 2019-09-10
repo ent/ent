@@ -155,13 +155,13 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
-	if cu.number != nil {
+	if value := cu.number; value != nil {
 		update = true
-		builder.Set(card.FieldNumber, *cu.number)
+		builder.Set(card.FieldNumber, *value)
 	}
-	if cu.updated_at != nil {
+	if value := cu.updated_at; value != nil {
 		update = true
-		builder.Set(card.FieldUpdatedAt, *cu.updated_at)
+		builder.Set(card.FieldUpdatedAt, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -234,11 +234,11 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if cu.number != nil {
-		v.Property(dsl.Single, card.FieldNumber, *cu.number)
+	if value := cu.number; value != nil {
+		v.Property(dsl.Single, card.FieldNumber, *value)
 	}
-	if cu.updated_at != nil {
-		v.Property(dsl.Single, card.FieldUpdatedAt, *cu.updated_at)
+	if value := cu.updated_at; value != nil {
+		v.Property(dsl.Single, card.FieldUpdatedAt, *value)
 	}
 	if cu.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
@@ -392,15 +392,15 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
-	if cuo.number != nil {
+	if value := cuo.number; value != nil {
 		update = true
-		builder.Set(card.FieldNumber, *cuo.number)
-		c.Number = *cuo.number
+		builder.Set(card.FieldNumber, *value)
+		c.Number = *value
 	}
-	if cuo.updated_at != nil {
+	if value := cuo.updated_at; value != nil {
 		update = true
-		builder.Set(card.FieldUpdatedAt, *cuo.updated_at)
-		c.UpdatedAt = *cuo.updated_at
+		builder.Set(card.FieldUpdatedAt, *value)
+		c.UpdatedAt = *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -474,11 +474,11 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if cuo.number != nil {
-		v.Property(dsl.Single, card.FieldNumber, *cuo.number)
+	if value := cuo.number; value != nil {
+		v.Property(dsl.Single, card.FieldNumber, *value)
 	}
-	if cuo.updated_at != nil {
-		v.Property(dsl.Single, card.FieldUpdatedAt, *cuo.updated_at)
+	if value := cuo.updated_at; value != nil {
+		v.Property(dsl.Single, card.FieldUpdatedAt, *value)
 	}
 	if cuo.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()

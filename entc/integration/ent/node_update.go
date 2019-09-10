@@ -28,6 +28,7 @@ import (
 type NodeUpdate struct {
 	config
 	value       *int
+	addvalue    *int
 	prev        map[string]struct{}
 	next        map[string]struct{}
 	clearedPrev bool
@@ -52,6 +53,12 @@ func (nu *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
 	if i != nil {
 		nu.SetValue(*i)
 	}
+	return nu
+}
+
+// AddValue adds i to value.
+func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
+	nu.addvalue = &i
 	return nu
 }
 
@@ -183,9 +190,13 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
-	if nu.value != nil {
+	if value := nu.value; value != nil {
 		update = true
-		builder.Set(node.FieldValue, *nu.value)
+		builder.Set(node.FieldValue, *value)
+	}
+	if value := nu.addvalue; value != nil {
+		update = true
+		builder.Add(node.FieldValue, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -289,8 +300,11 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if nu.value != nil {
-		v.Property(dsl.Single, node.FieldValue, *nu.value)
+	if value := nu.value; value != nil {
+		v.Property(dsl.Single, node.FieldValue, *value)
+	}
+	if value := nu.addvalue; value != nil {
+		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(*value)).Sum())
 	}
 	if nu.clearedPrev {
 		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()
@@ -334,6 +348,7 @@ type NodeUpdateOne struct {
 	config
 	id          string
 	value       *int
+	addvalue    *int
 	prev        map[string]struct{}
 	next        map[string]struct{}
 	clearedPrev bool
@@ -351,6 +366,12 @@ func (nuo *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
 	if i != nil {
 		nuo.SetValue(*i)
 	}
+	return nuo
+}
+
+// AddValue adds i to value.
+func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
+	nuo.addvalue = &i
 	return nuo
 }
 
@@ -485,10 +506,15 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		res     sql.Result
 		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
-	if nuo.value != nil {
+	if value := nuo.value; value != nil {
 		update = true
-		builder.Set(node.FieldValue, *nuo.value)
-		n.Value = *nuo.value
+		builder.Set(node.FieldValue, *value)
+		n.Value = *value
+	}
+	if value := nuo.addvalue; value != nil {
+		update = true
+		builder.Add(node.FieldValue, *value)
+		n.Value += *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -593,8 +619,11 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if nuo.value != nil {
-		v.Property(dsl.Single, node.FieldValue, *nuo.value)
+	if value := nuo.value; value != nil {
+		v.Property(dsl.Single, node.FieldValue, *value)
+	}
+	if value := nuo.addvalue; value != nil {
+		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(*value)).Sum())
 	}
 	if nuo.clearedPrev {
 		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()

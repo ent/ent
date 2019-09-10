@@ -184,6 +184,18 @@ func UniqueFloat(v float64) predicate.Comment {
 	)
 }
 
+// NillableInt applies equality check predicate on the "nillable_int" field. It's identical to NillableIntEQ.
+func NillableInt(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.EQ(v))
+		},
+	)
+}
+
 // UniqueIntEQ applies the EQ predicate on the "unique_int" field.
 func UniqueIntEQ(v int) predicate.Comment {
 	return predicate.CommentPerDialect(
@@ -412,6 +424,146 @@ func UniqueFloatNotIn(vs ...float64) predicate.Comment {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldUniqueFloat, p.Without(v...))
+		},
+	)
+}
+
+// NillableIntEQ applies the EQ predicate on the "nillable_int" field.
+func NillableIntEQ(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.EQ(v))
+		},
+	)
+}
+
+// NillableIntNEQ applies the NEQ predicate on the "nillable_int" field.
+func NillableIntNEQ(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.NEQ(v))
+		},
+	)
+}
+
+// NillableIntGT applies the GT predicate on the "nillable_int" field.
+func NillableIntGT(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.GT(v))
+		},
+	)
+}
+
+// NillableIntGTE applies the GTE predicate on the "nillable_int" field.
+func NillableIntGTE(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.GTE(v))
+		},
+	)
+}
+
+// NillableIntLT applies the LT predicate on the "nillable_int" field.
+func NillableIntLT(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.LT(v))
+		},
+	)
+}
+
+// NillableIntLTE applies the LTE predicate on the "nillable_int" field.
+func NillableIntLTE(v int) predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldNillableInt), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.LTE(v))
+		},
+	)
+}
+
+// NillableIntIn applies the In predicate on the "nillable_int" field.
+func NillableIntIn(vs ...int) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNillableInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.Within(v...))
+		},
+	)
+}
+
+// NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
+func NillableIntNotIn(vs ...int) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNillableInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.Without(v...))
+		},
+	)
+}
+
+// NillableIntIsNil applies the IsNil predicate on the "nillable_int" field.
+func NillableIntIsNil() predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNillableInt)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldNillableInt)
+		},
+	)
+}
+
+// NillableIntNotNil applies the NotNil predicate on the "nillable_int" field.
+func NillableIntNotNil() predicate.Comment {
+	return predicate.CommentPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNillableInt)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldNillableInt)
 		},
 	)
 }

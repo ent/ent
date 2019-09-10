@@ -24,6 +24,8 @@ type Comment struct {
 	UniqueInt int `json:"unique_int,omitempty"`
 	// UniqueFloat holds the value of the "unique_float" field.
 	UniqueFloat float64 `json:"unique_float,omitempty"`
+	// NillableInt holds the value of the "nillable_int" field.
+	NillableInt *int `json:"nillable_int,omitempty"`
 }
 
 // FromRows scans the sql response data into Comment.
@@ -32,18 +34,24 @@ func (c *Comment) FromRows(rows *sql.Rows) error {
 		ID          int
 		UniqueInt   sql.NullInt64
 		UniqueFloat sql.NullFloat64
+		NillableInt sql.NullInt64
 	}
 	// the order here should be the same as in the `comment.Columns`.
 	if err := rows.Scan(
 		&vc.ID,
 		&vc.UniqueInt,
 		&vc.UniqueFloat,
+		&vc.NillableInt,
 	); err != nil {
 		return err
 	}
 	c.ID = strconv.Itoa(vc.ID)
 	c.UniqueInt = int(vc.UniqueInt.Int64)
 	c.UniqueFloat = vc.UniqueFloat.Float64
+	if vc.NillableInt.Valid {
+		c.NillableInt = new(int)
+		*c.NillableInt = int(vc.NillableInt.Int64)
+	}
 	return nil
 }
 
@@ -57,6 +65,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		ID          string  `json:"id,omitempty"`
 		UniqueInt   int     `json:"unique_int,omitempty"`
 		UniqueFloat float64 `json:"unique_float,omitempty"`
+		NillableInt *int    `json:"nillable_int,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
@@ -64,6 +73,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 	c.ID = vc.ID
 	c.UniqueInt = vc.UniqueInt
 	c.UniqueFloat = vc.UniqueFloat
+	c.NillableInt = vc.NillableInt
 	return nil
 }
 
@@ -92,6 +102,9 @@ func (c *Comment) String() string {
 	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
 	buf.WriteString(fmt.Sprintf(", unique_int=%v", c.UniqueInt))
 	buf.WriteString(fmt.Sprintf(", unique_float=%v", c.UniqueFloat))
+	if v := c.NillableInt; v != nil {
+		buf.WriteString(fmt.Sprintf(", nillable_int=%v", *v))
+	}
 	buf.WriteString(")")
 	return buf.String()
 }
@@ -127,6 +140,7 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		ID          string  `json:"id,omitempty"`
 		UniqueInt   int     `json:"unique_int,omitempty"`
 		UniqueFloat float64 `json:"unique_float,omitempty"`
+		NillableInt *int    `json:"nillable_int,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
@@ -136,6 +150,7 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 			ID:          v.ID,
 			UniqueInt:   v.UniqueInt,
 			UniqueFloat: v.UniqueFloat,
+			NillableInt: v.NillableInt,
 		})
 	}
 	return nil

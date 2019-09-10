@@ -30,6 +30,7 @@ type GroupInfoUpdate struct {
 	config
 	desc          *string
 	max_users     *int
+	addmax_users  *int
 	groups        map[string]struct{}
 	removedGroups map[string]struct{}
 	predicates    []predicate.GroupInfo
@@ -58,6 +59,12 @@ func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 	if i != nil {
 		giu.SetMaxUsers(*i)
 	}
+	return giu
+}
+
+// AddMaxUsers adds i to max_users.
+func (giu *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
+	giu.addmax_users = &i
 	return giu
 }
 
@@ -167,13 +174,17 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
 	)
-	if giu.desc != nil {
+	if value := giu.desc; value != nil {
 		update = true
-		builder.Set(groupinfo.FieldDesc, *giu.desc)
+		builder.Set(groupinfo.FieldDesc, *value)
 	}
-	if giu.max_users != nil {
+	if value := giu.max_users; value != nil {
 		update = true
-		builder.Set(groupinfo.FieldMaxUsers, *giu.max_users)
+		builder.Set(groupinfo.FieldMaxUsers, *value)
+	}
+	if value := giu.addmax_users; value != nil {
+		update = true
+		builder.Add(groupinfo.FieldMaxUsers, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -261,11 +272,14 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if giu.desc != nil {
-		v.Property(dsl.Single, groupinfo.FieldDesc, *giu.desc)
+	if value := giu.desc; value != nil {
+		v.Property(dsl.Single, groupinfo.FieldDesc, *value)
 	}
-	if giu.max_users != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *giu.max_users)
+	if value := giu.max_users; value != nil {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *value)
+	}
+	if value := giu.addmax_users; value != nil {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(*value)).Sum())
 	}
 	for id := range giu.removedGroups {
 		tr := rv.Clone().InE(group.InfoLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
@@ -299,6 +313,7 @@ type GroupInfoUpdateOne struct {
 	id            string
 	desc          *string
 	max_users     *int
+	addmax_users  *int
 	groups        map[string]struct{}
 	removedGroups map[string]struct{}
 }
@@ -320,6 +335,12 @@ func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne 
 	if i != nil {
 		giuo.SetMaxUsers(*i)
 	}
+	return giuo
+}
+
+// AddMaxUsers adds i to max_users.
+func (giuo *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
+	giuo.addmax_users = &i
 	return giuo
 }
 
@@ -432,15 +453,20 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		res     sql.Result
 		builder = sql.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
 	)
-	if giuo.desc != nil {
+	if value := giuo.desc; value != nil {
 		update = true
-		builder.Set(groupinfo.FieldDesc, *giuo.desc)
-		gi.Desc = *giuo.desc
+		builder.Set(groupinfo.FieldDesc, *value)
+		gi.Desc = *value
 	}
-	if giuo.max_users != nil {
+	if value := giuo.max_users; value != nil {
 		update = true
-		builder.Set(groupinfo.FieldMaxUsers, *giuo.max_users)
-		gi.MaxUsers = *giuo.max_users
+		builder.Set(groupinfo.FieldMaxUsers, *value)
+		gi.MaxUsers = *value
+	}
+	if value := giuo.addmax_users; value != nil {
+		update = true
+		builder.Add(groupinfo.FieldMaxUsers, *value)
+		gi.MaxUsers += *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -529,11 +555,14 @@ func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if giuo.desc != nil {
-		v.Property(dsl.Single, groupinfo.FieldDesc, *giuo.desc)
+	if value := giuo.desc; value != nil {
+		v.Property(dsl.Single, groupinfo.FieldDesc, *value)
 	}
-	if giuo.max_users != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *giuo.max_users)
+	if value := giuo.max_users; value != nil {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *value)
+	}
+	if value := giuo.addmax_users; value != nil {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(*value)).Sum())
 	}
 	for id := range giuo.removedGroups {
 		tr := rv.Clone().InE(group.InfoLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()

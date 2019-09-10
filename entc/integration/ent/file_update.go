@@ -20,6 +20,7 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -28,6 +29,7 @@ import (
 type FileUpdate struct {
 	config
 	size         *int
+	addsize      *int
 	name         *string
 	user         *string
 	group        *string
@@ -55,6 +57,12 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 	if i != nil {
 		fu.SetSize(*i)
 	}
+	return fu
+}
+
+// AddSize adds i to size.
+func (fu *FileUpdate) AddSize(i int) *FileUpdate {
+	fu.addsize = &i
 	return fu
 }
 
@@ -225,21 +233,25 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
 	)
-	if fu.size != nil {
+	if value := fu.size; value != nil {
 		update = true
-		builder.Set(file.FieldSize, *fu.size)
+		builder.Set(file.FieldSize, *value)
 	}
-	if fu.name != nil {
+	if value := fu.addsize; value != nil {
 		update = true
-		builder.Set(file.FieldName, *fu.name)
+		builder.Add(file.FieldSize, *value)
 	}
-	if fu.user != nil {
+	if value := fu.name; value != nil {
 		update = true
-		builder.Set(file.FieldUser, *fu.user)
+		builder.Set(file.FieldName, *value)
 	}
-	if fu.group != nil {
+	if value := fu.user; value != nil {
 		update = true
-		builder.Set(file.FieldGroup, *fu.group)
+		builder.Set(file.FieldUser, *value)
+	}
+	if value := fu.group; value != nil {
+		update = true
+		builder.Set(file.FieldGroup, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -326,17 +338,20 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if fu.size != nil {
-		v.Property(dsl.Single, file.FieldSize, *fu.size)
+	if value := fu.size; value != nil {
+		v.Property(dsl.Single, file.FieldSize, *value)
 	}
-	if fu.name != nil {
-		v.Property(dsl.Single, file.FieldName, *fu.name)
+	if value := fu.addsize; value != nil {
+		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(*value)).Sum())
 	}
-	if fu.user != nil {
-		v.Property(dsl.Single, file.FieldUser, *fu.user)
+	if value := fu.name; value != nil {
+		v.Property(dsl.Single, file.FieldName, *value)
 	}
-	if fu.group != nil {
-		v.Property(dsl.Single, file.FieldGroup, *fu.group)
+	if value := fu.user; value != nil {
+		v.Property(dsl.Single, file.FieldUser, *value)
+	}
+	if value := fu.group; value != nil {
+		v.Property(dsl.Single, file.FieldGroup, *value)
 	}
 	if fu.clearedOwner {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
@@ -362,6 +377,7 @@ type FileUpdateOne struct {
 	config
 	id           string
 	size         *int
+	addsize      *int
 	name         *string
 	user         *string
 	group        *string
@@ -382,6 +398,12 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 	if i != nil {
 		fuo.SetSize(*i)
 	}
+	return fuo
+}
+
+// AddSize adds i to size.
+func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
+	fuo.addsize = &i
 	return fuo
 }
 
@@ -555,25 +577,30 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		res     sql.Result
 		builder = sql.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
 	)
-	if fuo.size != nil {
+	if value := fuo.size; value != nil {
 		update = true
-		builder.Set(file.FieldSize, *fuo.size)
-		f.Size = *fuo.size
+		builder.Set(file.FieldSize, *value)
+		f.Size = *value
 	}
-	if fuo.name != nil {
+	if value := fuo.addsize; value != nil {
 		update = true
-		builder.Set(file.FieldName, *fuo.name)
-		f.Name = *fuo.name
+		builder.Add(file.FieldSize, *value)
+		f.Size += *value
 	}
-	if fuo.user != nil {
+	if value := fuo.name; value != nil {
 		update = true
-		builder.Set(file.FieldUser, *fuo.user)
-		f.User = fuo.user
+		builder.Set(file.FieldName, *value)
+		f.Name = *value
 	}
-	if fuo.group != nil {
+	if value := fuo.user; value != nil {
 		update = true
-		builder.Set(file.FieldGroup, *fuo.group)
-		f.Group = *fuo.group
+		builder.Set(file.FieldUser, *value)
+		f.User = value
+	}
+	if value := fuo.group; value != nil {
+		update = true
+		builder.Set(file.FieldGroup, *value)
+		f.Group = *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -661,17 +688,20 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if fuo.size != nil {
-		v.Property(dsl.Single, file.FieldSize, *fuo.size)
+	if value := fuo.size; value != nil {
+		v.Property(dsl.Single, file.FieldSize, *value)
 	}
-	if fuo.name != nil {
-		v.Property(dsl.Single, file.FieldName, *fuo.name)
+	if value := fuo.addsize; value != nil {
+		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(*value)).Sum())
 	}
-	if fuo.user != nil {
-		v.Property(dsl.Single, file.FieldUser, *fuo.user)
+	if value := fuo.name; value != nil {
+		v.Property(dsl.Single, file.FieldName, *value)
 	}
-	if fuo.group != nil {
-		v.Property(dsl.Single, file.FieldGroup, *fuo.group)
+	if value := fuo.user; value != nil {
+		v.Property(dsl.Single, file.FieldUser, *value)
+	}
+	if value := fuo.group; value != nil {
+		v.Property(dsl.Single, file.FieldGroup, *value)
 	}
 	if fuo.clearedOwner {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()

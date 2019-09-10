@@ -15,6 +15,8 @@ const (
 	FieldUniqueInt = "unique_int"
 	// FieldUniqueFloat holds the string denoting the unique_float vertex property in the database.
 	FieldUniqueFloat = "unique_float"
+	// FieldNillableInt holds the string denoting the nillable_int vertex property in the database.
+	FieldNillableInt = "nillable_int"
 
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
@@ -25,4 +27,5 @@ var Columns = []string{
 	FieldID,
 	FieldUniqueInt,
 	FieldUniqueFloat,
+	FieldNillableInt,
 }

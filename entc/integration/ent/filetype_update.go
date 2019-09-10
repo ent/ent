@@ -152,9 +152,9 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(filetype.Table).Where(sql.InInts(filetype.FieldID, ids...))
 	)
-	if ftu.name != nil {
+	if value := ftu.name; value != nil {
 		update = true
-		builder.Set(filetype.FieldName, *ftu.name)
+		builder.Set(filetype.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -242,12 +242,12 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if ftu.name != nil {
+	if value := ftu.name; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *ftu.name).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *ftu.name)),
+			pred: g.V().Has(filetype.Label, filetype.FieldName, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *value)),
 		})
-		v.Property(dsl.Single, filetype.FieldName, *ftu.name)
+		v.Property(dsl.Single, filetype.FieldName, *value)
 	}
 	for id := range ftu.removedFiles {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
@@ -399,10 +399,10 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		res     sql.Result
 		builder = sql.Update(filetype.Table).Where(sql.InInts(filetype.FieldID, ids...))
 	)
-	if ftuo.name != nil {
+	if value := ftuo.name; value != nil {
 		update = true
-		builder.Set(filetype.FieldName, *ftuo.name)
-		ft.Name = *ftuo.name
+		builder.Set(filetype.FieldName, *value)
+		ft.Name = *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -491,12 +491,12 @@ func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if ftuo.name != nil {
+	if value := ftuo.name; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *ftuo.name).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *ftuo.name)),
+			pred: g.V().Has(filetype.Label, filetype.FieldName, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *value)),
 		})
-		v.Property(dsl.Single, filetype.FieldName, *ftuo.name)
+		v.Property(dsl.Single, filetype.FieldName, *value)
 	}
 	for id := range ftuo.removedFiles {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()

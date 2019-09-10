@@ -68,17 +68,34 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		)
 		{{- range $_, $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
-				if {{ $receiver }}.{{ $f.StructField }} != nil {
+				if value := {{ $receiver }}.{{ $f.StructField }}; value != nil {
 					update = true
-					builder.Set({{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+					builder.Set({{ $.Package }}.{{ $f.Constant }}, *value)
 					{{- if $one }}
 						{{- if $f.Nillable }}
-							{{ $.Receiver }}.{{ pascal $f.Name }} = {{ $receiver }}.{{ $f.StructField }}
+							{{ $.Receiver }}.{{ pascal $f.Name }} = value
 						{{- else }}
-							{{ $.Receiver }}.{{ pascal $f.Name }} = *{{ $receiver }}.{{ $f.StructField }}
+							{{ $.Receiver }}.{{ pascal $f.Name }} = *value
 						{{- end }}
 					{{- end }}
 				}
+				{{- if $f.Type.Numeric }}
+					if value := {{ $receiver }}.add{{ $f.StructField }}; value != nil {
+						update = true
+						builder.Add({{ $.Package }}.{{ $f.Constant }}, *value)
+						{{- if $one }}
+							{{- if $f.Nillable }}
+								if {{ $.Receiver }}.{{ pascal $f.Name }} != nil {
+									*{{ $.Receiver }}.{{ pascal $f.Name }} += *value
+								} else {
+									{{ $.Receiver }}.{{ pascal $f.Name }} = value
+								}
+							{{- else }}
+								{{ $.Receiver }}.{{ pascal $f.Name }} += *value
+							{{- end }}
+						{{- end }}
+					}
+				{{- end }}
 			{{- end }}
 		{{- end }}
 		if update {

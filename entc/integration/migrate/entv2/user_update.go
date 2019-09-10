@@ -20,6 +20,7 @@ import (
 type UserUpdate struct {
 	config
 	age        *int
+	addage     *int
 	name       *string
 	phone      *string
 	buffer     *[]byte
@@ -36,6 +37,12 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.age = &i
+	return uu
+}
+
+// AddAge adds i to age.
+func (uu *UserUpdate) AddAge(i int) *UserUpdate {
+	uu.addage = &i
 	return uu
 }
 
@@ -130,25 +137,29 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uu.age != nil {
+	if value := uu.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uu.age)
+		builder.Set(user.FieldAge, *value)
 	}
-	if uu.name != nil {
+	if value := uu.addage; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uu.name)
+		builder.Add(user.FieldAge, *value)
 	}
-	if uu.phone != nil {
+	if value := uu.name; value != nil {
 		update = true
-		builder.Set(user.FieldPhone, *uu.phone)
+		builder.Set(user.FieldName, *value)
 	}
-	if uu.buffer != nil {
+	if value := uu.phone; value != nil {
 		update = true
-		builder.Set(user.FieldBuffer, *uu.buffer)
+		builder.Set(user.FieldPhone, *value)
 	}
-	if uu.title != nil {
+	if value := uu.buffer; value != nil {
 		update = true
-		builder.Set(user.FieldTitle, *uu.title)
+		builder.Set(user.FieldBuffer, *value)
+	}
+	if value := uu.title; value != nil {
+		update = true
+		builder.Set(user.FieldTitle, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -167,6 +178,7 @@ type UserUpdateOne struct {
 	config
 	id     int
 	age    *int
+	addage *int
 	name   *string
 	phone  *string
 	buffer *[]byte
@@ -176,6 +188,12 @@ type UserUpdateOne struct {
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.age = &i
+	return uuo
+}
+
+// AddAge adds i to age.
+func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
+	uuo.addage = &i
 	return uuo
 }
 
@@ -273,30 +291,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uuo.age != nil {
+	if value := uuo.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uuo.age)
-		u.Age = *uuo.age
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uuo.name != nil {
+	if value := uuo.addage; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uuo.name)
-		u.Name = *uuo.name
+		builder.Add(user.FieldAge, *value)
+		u.Age += *value
 	}
-	if uuo.phone != nil {
+	if value := uuo.name; value != nil {
 		update = true
-		builder.Set(user.FieldPhone, *uuo.phone)
-		u.Phone = *uuo.phone
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
-	if uuo.buffer != nil {
+	if value := uuo.phone; value != nil {
 		update = true
-		builder.Set(user.FieldBuffer, *uuo.buffer)
-		u.Buffer = *uuo.buffer
+		builder.Set(user.FieldPhone, *value)
+		u.Phone = *value
 	}
-	if uuo.title != nil {
+	if value := uuo.buffer; value != nil {
 		update = true
-		builder.Set(user.FieldTitle, *uuo.title)
-		u.Title = *uuo.title
+		builder.Set(user.FieldBuffer, *value)
+		u.Buffer = *value
+	}
+	if value := uuo.title; value != nil {
+		update = true
+		builder.Set(user.FieldTitle, *value)
+		u.Title = *value
 	}
 	if update {
 		query, args := builder.Query()

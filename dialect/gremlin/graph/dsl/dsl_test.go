@@ -216,6 +216,11 @@ func TestTraverse(t *testing.T) {
 			wantQuery: "g.V().has($0, $1, $2).count().coalesce(__.is(neq($3)).constant($4), g.addV($5).property($6, $7).valueMap($8))",
 			wantBinds: dsl.Bindings{"$0": "person", "$1": "name", "$2": "a8m", "$3": 0, "$4": "unique constraint failed", "$5": "person", "$6": "name", "$7": "a8m", "$8": true},
 		},
+		{
+			input:     g.V().Has("age").Property("age", __.Union(__.Values("age"), __.Constant(10)).Sum()).ValueMap(),
+			wantQuery: "g.V().has($0).property($1, __.union(__.values($2), __.constant($3)).sum()).valueMap()",
+			wantBinds: dsl.Bindings{"$0": "age", "$1": "age", "$2": "age", "$3": 10},
+		},
 	}
 	for i, tt := range tests {
 		tt := tt

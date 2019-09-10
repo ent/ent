@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $fields := $.Fields }}
 {{ $updater := false }}
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
-	{{ $updater := true }}
+	{{ $updater = true }}
 	{{ $fields = $.MutableFields }}
 {{- end }}
 
@@ -22,6 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $receiver }}.{{ $f.StructField }} = &{{ $p }}
 		return {{ $receiver }}
 	}
+
 	{{/* avoid generting nillable setters for slices because the nil value for slice is valid */}}
 	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
@@ -30,6 +31,15 @@ in the LICENSE file in the root directory of this source tree.
 			if {{ $p }} != nil {
 				{{ $receiver }}.{{ $func }}(*{{ $p }})
 			}
+			return {{ $receiver }}
+		}
+	{{ end }}
+
+	{{ if and $f.Type.Numeric $updater }}
+		{{ $func := print "Add" (pascal $f.Name) }}
+		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
+			{{ $receiver }}.add{{ $f.StructField }} = &{{ $p }}
 			return {{ $receiver }}
 		}
 	{{ end }}

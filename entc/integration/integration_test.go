@@ -98,6 +98,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Select,
 	Relation,
 	Predicate,
+	AddValues,
 	UniqueConstraint,
 	O2OTwoTypes,
 	O2OSameType,
@@ -343,6 +344,26 @@ func Predicate(t *testing.T, client *ent.Client) {
 			).
 			CountX(ctx),
 	)
+}
+
+func AddValues(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	t.Log("add values to fields")
+	cmt := client.Comment.Create().SetUniqueInt(1).SetUniqueFloat(1).SaveX(ctx)
+	cmt = cmt.Update().AddUniqueInt(10).SaveX(ctx)
+	require.Equal(11, cmt.UniqueInt)
+	require.Equal(11, client.Comment.Query().OnlyX(ctx).UniqueInt, "should be updated in the database")
+	t.Log("add values to null fields")
+	cmt = cmt.Update().AddNillableInt(10).SaveX(ctx)
+	require.Equal(10, *cmt.NillableInt)
+
+	cmt1 := client.Comment.Create().SetUniqueInt(1).SetUniqueFloat(10).SaveX(ctx)
+	err := cmt1.Update().AddUniqueInt(10).Exec(ctx)
+	require.True(ent.IsConstraintFailure(err))
+	cmt1 = cmt1.Update().AddUniqueInt(20).AddNillableInt(20).SaveX(ctx)
+	require.Equal(21, cmt1.UniqueInt)
+	require.Equal(20, *cmt1.NillableInt)
 }
 
 func Relation(t *testing.T, client *ent.Client) {

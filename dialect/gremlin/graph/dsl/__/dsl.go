@@ -51,6 +51,12 @@ func OutV(args ...interface{}) *dsl.Traversal { return New().OutV(args...) }
 // Values is the api for calling __.Values().
 func Values(args ...string) *dsl.Traversal { return New().Values(args...) }
 
+// Union is the api for calling __.Union().
+func Union(args ...interface{}) *dsl.Traversal { return New().Union(args...) }
+
+// Constant is the api for calling __.Constant().
+func Constant(args ...interface{}) *dsl.Traversal { return New().Constant(args...) }
+
 // OtherV is the api for calling __.OtherV().
 func OtherV() *dsl.Traversal { return New().OtherV() }
 

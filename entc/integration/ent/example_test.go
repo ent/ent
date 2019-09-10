@@ -64,6 +64,7 @@ func ExampleComment() {
 		Create().
 		SetUniqueInt(1).
 		SetUniqueFloat(1).
+		SetNillableInt(1).
 		SaveX(ctx)
 	log.Println("comment created:", c)
 

@@ -176,9 +176,9 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
-	if pu.name != nil {
+	if value := pu.name; value != nil {
 		update = true
-		builder.Set(pet.FieldName, *pu.name)
+		builder.Set(pet.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -276,8 +276,8 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if pu.name != nil {
-		v.Property(dsl.Single, pet.FieldName, *pu.name)
+	if value := pu.name; value != nil {
+		v.Property(dsl.Single, pet.FieldName, *value)
 	}
 	if pu.clearedTeam {
 		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()
@@ -460,10 +460,10 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		res     sql.Result
 		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
-	if puo.name != nil {
+	if value := puo.name; value != nil {
 		update = true
-		builder.Set(pet.FieldName, *puo.name)
-		pe.Name = *puo.name
+		builder.Set(pet.FieldName, *value)
+		pe.Name = *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -562,8 +562,8 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if puo.name != nil {
-		v.Property(dsl.Single, pet.FieldName, *puo.name)
+	if value := puo.name; value != nil {
+		v.Property(dsl.Single, pet.FieldName, *value)
 	}
 	if puo.clearedTeam {
 		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()

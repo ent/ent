@@ -27,6 +27,7 @@ type CommentCreate struct {
 	config
 	unique_int   *int
 	unique_float *float64
+	nillable_int *int
 }
 
 // SetUniqueInt sets the unique_int field.
@@ -38,6 +39,20 @@ func (cc *CommentCreate) SetUniqueInt(i int) *CommentCreate {
 // SetUniqueFloat sets the unique_float field.
 func (cc *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
 	cc.unique_float = &f
+	return cc
+}
+
+// SetNillableInt sets the nillable_int field.
+func (cc *CommentCreate) SetNillableInt(i int) *CommentCreate {
+	cc.nillable_int = &i
+	return cc
+}
+
+// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
+	if i != nil {
+		cc.SetNillableInt(*i)
+	}
 	return cc
 }
 
@@ -85,6 +100,10 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	if cc.unique_float != nil {
 		builder.Set(comment.FieldUniqueFloat, *cc.unique_float)
 		c.UniqueFloat = *cc.unique_float
+	}
+	if cc.nillable_int != nil {
+		builder.Set(comment.FieldNillableInt, *cc.nillable_int)
+		c.NillableInt = cc.nillable_int
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -137,6 +156,9 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *cc.unique_float)),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueFloat, *cc.unique_float)
+	}
+	if cc.nillable_int != nil {
+		v.Property(dsl.Single, comment.FieldNillableInt, *cc.nillable_int)
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

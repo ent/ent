@@ -58,15 +58,27 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	)
 	{{- range $_, $f := $.Fields }}
 		{{- if or (not $f.Immutable) $f.UpdateDefault }}
-			if {{ $receiver }}.{{ $f.StructField }} != nil {
+			if value := {{ $receiver }}.{{ $f.StructField }}; value != nil {
 				{{- if $f.Unique }}
 					constraints = append(constraints, &constraint{
-						pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }}).Count(),
-						test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})),
+						pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *value).Count(),
+						test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *value)),
 					})
 				{{- end }}
-				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.StructField }})
+				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *value)
 			}
+			{{- if $f.Type.Numeric }}
+				if value := {{ $receiver }}.add{{ $f.StructField }}; value != nil {
+					{{- if $f.Unique }}
+						addValue := rv.Clone().Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(*value)).Sum().Next()
+						constraints = append(constraints, &constraint{
+							pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, addValue).Count(),
+							test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, fmt.Sprintf("+= %d", *value))),
+						})
+					{{- end }}
+					v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, __.Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(*value)).Sum())
+				}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	{{- range $_, $e := $.Edges }}

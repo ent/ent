@@ -31,6 +31,7 @@ import (
 type UserUpdate struct {
 	config
 	age              *int
+	addage           *int
 	name             *string
 	last             *string
 	nickname         *string
@@ -69,6 +70,12 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.age = &i
+	return uu
+}
+
+// AddAge adds i to age.
+func (uu *UserUpdate) AddAge(i int) *UserUpdate {
+	uu.addage = &i
 	return uu
 }
 
@@ -590,25 +597,29 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uu.age != nil {
+	if value := uu.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uu.age)
+		builder.Set(user.FieldAge, *value)
 	}
-	if uu.name != nil {
+	if value := uu.addage; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uu.name)
+		builder.Add(user.FieldAge, *value)
 	}
-	if uu.last != nil {
+	if value := uu.name; value != nil {
 		update = true
-		builder.Set(user.FieldLast, *uu.last)
+		builder.Set(user.FieldName, *value)
 	}
-	if uu.nickname != nil {
+	if value := uu.last; value != nil {
 		update = true
-		builder.Set(user.FieldNickname, *uu.nickname)
+		builder.Set(user.FieldLast, *value)
 	}
-	if uu.phone != nil {
+	if value := uu.nickname; value != nil {
 		update = true
-		builder.Set(user.FieldPhone, *uu.phone)
+		builder.Set(user.FieldNickname, *value)
+	}
+	if value := uu.phone; value != nil {
+		update = true
+		builder.Set(user.FieldPhone, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -1089,28 +1100,31 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if uu.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uu.age)
+	if value := uu.age; value != nil {
+		v.Property(dsl.Single, user.FieldAge, *value)
 	}
-	if uu.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uu.name)
+	if value := uu.addage; value != nil {
+		v.Property(dsl.Single, user.FieldAge, __.Union(__.Values(user.FieldAge), __.Constant(*value)).Sum())
 	}
-	if uu.last != nil {
-		v.Property(dsl.Single, user.FieldLast, *uu.last)
+	if value := uu.name; value != nil {
+		v.Property(dsl.Single, user.FieldName, *value)
 	}
-	if uu.nickname != nil {
+	if value := uu.last; value != nil {
+		v.Property(dsl.Single, user.FieldLast, *value)
+	}
+	if value := uu.nickname; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldNickname, *uu.nickname).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *uu.nickname)),
+			pred: g.V().Has(user.Label, user.FieldNickname, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *value)),
 		})
-		v.Property(dsl.Single, user.FieldNickname, *uu.nickname)
+		v.Property(dsl.Single, user.FieldNickname, *value)
 	}
-	if uu.phone != nil {
+	if value := uu.phone; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldPhone, *uu.phone).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *uu.phone)),
+			pred: g.V().Has(user.Label, user.FieldPhone, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *value)),
 		})
-		v.Property(dsl.Single, user.FieldPhone, *uu.phone)
+		v.Property(dsl.Single, user.FieldPhone, *value)
 	}
 	if uu.clearedCard {
 		tr := rv.Clone().OutE(user.CardLabel).Drop().Iterate()
@@ -1237,6 +1251,7 @@ type UserUpdateOne struct {
 	config
 	id               string
 	age              *int
+	addage           *int
 	name             *string
 	last             *string
 	nickname         *string
@@ -1268,6 +1283,12 @@ type UserUpdateOne struct {
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.age = &i
+	return uuo
+}
+
+// AddAge adds i to age.
+func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
+	uuo.addage = &i
 	return uuo
 }
 
@@ -1792,30 +1813,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uuo.age != nil {
+	if value := uuo.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uuo.age)
-		u.Age = *uuo.age
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uuo.name != nil {
+	if value := uuo.addage; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uuo.name)
-		u.Name = *uuo.name
+		builder.Add(user.FieldAge, *value)
+		u.Age += *value
 	}
-	if uuo.last != nil {
+	if value := uuo.name; value != nil {
 		update = true
-		builder.Set(user.FieldLast, *uuo.last)
-		u.Last = *uuo.last
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
-	if uuo.nickname != nil {
+	if value := uuo.last; value != nil {
 		update = true
-		builder.Set(user.FieldNickname, *uuo.nickname)
-		u.Nickname = *uuo.nickname
+		builder.Set(user.FieldLast, *value)
+		u.Last = *value
 	}
-	if uuo.phone != nil {
+	if value := uuo.nickname; value != nil {
 		update = true
-		builder.Set(user.FieldPhone, *uuo.phone)
-		u.Phone = *uuo.phone
+		builder.Set(user.FieldNickname, *value)
+		u.Nickname = *value
+	}
+	if value := uuo.phone; value != nil {
+		update = true
+		builder.Set(user.FieldPhone, *value)
+		u.Phone = *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -2297,28 +2323,31 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if uuo.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uuo.age)
+	if value := uuo.age; value != nil {
+		v.Property(dsl.Single, user.FieldAge, *value)
 	}
-	if uuo.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uuo.name)
+	if value := uuo.addage; value != nil {
+		v.Property(dsl.Single, user.FieldAge, __.Union(__.Values(user.FieldAge), __.Constant(*value)).Sum())
 	}
-	if uuo.last != nil {
-		v.Property(dsl.Single, user.FieldLast, *uuo.last)
+	if value := uuo.name; value != nil {
+		v.Property(dsl.Single, user.FieldName, *value)
 	}
-	if uuo.nickname != nil {
+	if value := uuo.last; value != nil {
+		v.Property(dsl.Single, user.FieldLast, *value)
+	}
+	if value := uuo.nickname; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldNickname, *uuo.nickname).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *uuo.nickname)),
+			pred: g.V().Has(user.Label, user.FieldNickname, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *value)),
 		})
-		v.Property(dsl.Single, user.FieldNickname, *uuo.nickname)
+		v.Property(dsl.Single, user.FieldNickname, *value)
 	}
-	if uuo.phone != nil {
+	if value := uuo.phone; value != nil {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldPhone, *uuo.phone).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *uuo.phone)),
+			pred: g.V().Has(user.Label, user.FieldPhone, *value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *value)),
 		})
-		v.Property(dsl.Single, user.FieldPhone, *uuo.phone)
+		v.Property(dsl.Single, user.FieldPhone, *value)
 	}
 	if uuo.clearedCard {
 		tr := rv.Clone().OutE(user.CardLabel).Drop().Iterate()

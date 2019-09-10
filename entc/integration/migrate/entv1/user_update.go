@@ -121,17 +121,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uu.age != nil {
+	if value := uu.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uu.age)
+		builder.Set(user.FieldAge, *value)
 	}
-	if uu.name != nil {
+	if value := uu.name; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uu.name)
+		builder.Set(user.FieldName, *value)
 	}
-	if uu.address != nil {
+	if value := uu.address; value != nil {
 		update = true
-		builder.Set(user.FieldAddress, *uu.address)
+		builder.Set(user.FieldAddress, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -247,20 +247,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uuo.age != nil {
+	if value := uuo.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uuo.age)
-		u.Age = *uuo.age
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uuo.name != nil {
+	if value := uuo.name; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uuo.name)
-		u.Name = *uuo.name
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
-	if uuo.address != nil {
+	if value := uuo.address; value != nil {
 		update = true
-		builder.Set(user.FieldAddress, *uuo.address)
-		u.Address = *uuo.address
+		builder.Set(user.FieldAddress, *value)
+		u.Address = *value
 	}
 	if update {
 		query, args := builder.Query()

@@ -21,6 +21,9 @@ func (Comment) Fields() []ent.Field {
 			Unique(),
 		field.Float("unique_float").
 			Unique(),
+		field.Int("nillable_int").
+			Optional().
+			Nillable(),
 	}
 }
 

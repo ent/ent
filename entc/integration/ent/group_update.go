@@ -35,6 +35,7 @@ type GroupUpdate struct {
 	expire         *time.Time
 	_type          *string
 	max_users      *int
+	addmax_users   *int
 	name           *string
 	files          map[string]struct{}
 	blocked        map[string]struct{}
@@ -98,6 +99,12 @@ func (gu *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
 	if i != nil {
 		gu.SetMaxUsers(*i)
 	}
+	return gu
+}
+
+// AddMaxUsers adds i to max_users.
+func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
+	gu.addmax_users = &i
 	return gu
 }
 
@@ -334,25 +341,29 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
-	if gu.active != nil {
+	if value := gu.active; value != nil {
 		update = true
-		builder.Set(group.FieldActive, *gu.active)
+		builder.Set(group.FieldActive, *value)
 	}
-	if gu.expire != nil {
+	if value := gu.expire; value != nil {
 		update = true
-		builder.Set(group.FieldExpire, *gu.expire)
+		builder.Set(group.FieldExpire, *value)
 	}
-	if gu._type != nil {
+	if value := gu._type; value != nil {
 		update = true
-		builder.Set(group.FieldType, *gu._type)
+		builder.Set(group.FieldType, *value)
 	}
-	if gu.max_users != nil {
+	if value := gu.max_users; value != nil {
 		update = true
-		builder.Set(group.FieldMaxUsers, *gu.max_users)
+		builder.Set(group.FieldMaxUsers, *value)
 	}
-	if gu.name != nil {
+	if value := gu.addmax_users; value != nil {
 		update = true
-		builder.Set(group.FieldName, *gu.name)
+		builder.Add(group.FieldMaxUsers, *value)
+	}
+	if value := gu.name; value != nil {
+		update = true
+		builder.Set(group.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -551,20 +562,23 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if gu.active != nil {
-		v.Property(dsl.Single, group.FieldActive, *gu.active)
+	if value := gu.active; value != nil {
+		v.Property(dsl.Single, group.FieldActive, *value)
 	}
-	if gu.expire != nil {
-		v.Property(dsl.Single, group.FieldExpire, *gu.expire)
+	if value := gu.expire; value != nil {
+		v.Property(dsl.Single, group.FieldExpire, *value)
 	}
-	if gu._type != nil {
-		v.Property(dsl.Single, group.FieldType, *gu._type)
+	if value := gu._type; value != nil {
+		v.Property(dsl.Single, group.FieldType, *value)
 	}
-	if gu.max_users != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, *gu.max_users)
+	if value := gu.max_users; value != nil {
+		v.Property(dsl.Single, group.FieldMaxUsers, *value)
 	}
-	if gu.name != nil {
-		v.Property(dsl.Single, group.FieldName, *gu.name)
+	if value := gu.addmax_users; value != nil {
+		v.Property(dsl.Single, group.FieldMaxUsers, __.Union(__.Values(group.FieldMaxUsers), __.Constant(*value)).Sum())
+	}
+	if value := gu.name; value != nil {
+		v.Property(dsl.Single, group.FieldName, *value)
 	}
 	for id := range gu.removedFiles {
 		tr := rv.Clone().OutE(group.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
@@ -625,6 +639,7 @@ type GroupUpdateOne struct {
 	expire         *time.Time
 	_type          *string
 	max_users      *int
+	addmax_users   *int
 	name           *string
 	files          map[string]struct{}
 	blocked        map[string]struct{}
@@ -681,6 +696,12 @@ func (guo *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
 	if i != nil {
 		guo.SetMaxUsers(*i)
 	}
+	return guo
+}
+
+// AddMaxUsers adds i to max_users.
+func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
+	guo.addmax_users = &i
 	return guo
 }
 
@@ -920,30 +941,35 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
-	if guo.active != nil {
+	if value := guo.active; value != nil {
 		update = true
-		builder.Set(group.FieldActive, *guo.active)
-		gr.Active = *guo.active
+		builder.Set(group.FieldActive, *value)
+		gr.Active = *value
 	}
-	if guo.expire != nil {
+	if value := guo.expire; value != nil {
 		update = true
-		builder.Set(group.FieldExpire, *guo.expire)
-		gr.Expire = *guo.expire
+		builder.Set(group.FieldExpire, *value)
+		gr.Expire = *value
 	}
-	if guo._type != nil {
+	if value := guo._type; value != nil {
 		update = true
-		builder.Set(group.FieldType, *guo._type)
-		gr.Type = guo._type
+		builder.Set(group.FieldType, *value)
+		gr.Type = value
 	}
-	if guo.max_users != nil {
+	if value := guo.max_users; value != nil {
 		update = true
-		builder.Set(group.FieldMaxUsers, *guo.max_users)
-		gr.MaxUsers = *guo.max_users
+		builder.Set(group.FieldMaxUsers, *value)
+		gr.MaxUsers = *value
 	}
-	if guo.name != nil {
+	if value := guo.addmax_users; value != nil {
 		update = true
-		builder.Set(group.FieldName, *guo.name)
-		gr.Name = *guo.name
+		builder.Add(group.FieldMaxUsers, *value)
+		gr.MaxUsers += *value
+	}
+	if value := guo.name; value != nil {
+		update = true
+		builder.Set(group.FieldName, *value)
+		gr.Name = *value
 	}
 	if update {
 		query, args := builder.Query()
@@ -1143,20 +1169,23 @@ func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if guo.active != nil {
-		v.Property(dsl.Single, group.FieldActive, *guo.active)
+	if value := guo.active; value != nil {
+		v.Property(dsl.Single, group.FieldActive, *value)
 	}
-	if guo.expire != nil {
-		v.Property(dsl.Single, group.FieldExpire, *guo.expire)
+	if value := guo.expire; value != nil {
+		v.Property(dsl.Single, group.FieldExpire, *value)
 	}
-	if guo._type != nil {
-		v.Property(dsl.Single, group.FieldType, *guo._type)
+	if value := guo._type; value != nil {
+		v.Property(dsl.Single, group.FieldType, *value)
 	}
-	if guo.max_users != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, *guo.max_users)
+	if value := guo.max_users; value != nil {
+		v.Property(dsl.Single, group.FieldMaxUsers, *value)
 	}
-	if guo.name != nil {
-		v.Property(dsl.Single, group.FieldName, *guo.name)
+	if value := guo.addmax_users; value != nil {
+		v.Property(dsl.Single, group.FieldMaxUsers, __.Union(__.Values(group.FieldMaxUsers), __.Constant(*value)).Sum())
+	}
+	if value := guo.name; value != nil {
+		v.Property(dsl.Single, group.FieldName, *value)
 	}
 	for id := range guo.removedFiles {
 		tr := rv.Clone().OutE(group.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()

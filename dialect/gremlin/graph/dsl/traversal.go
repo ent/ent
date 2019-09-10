@@ -334,6 +334,11 @@ func (t *Traversal) Constant(args ...interface{}) *Traversal {
 	return t.Add(Dot, NewFunc("constant", args...))
 }
 
+// Union merges the results of an arbitrary number of traversals.
+func (t *Traversal) Union(args ...interface{}) *Traversal {
+	return t.Add(Dot, NewFunc("union", args...))
+}
+
 // Each is a Groovy each-loop function.
 func Each(v interface{}, cb func(it *Traversal) *Traversal) *Traversal {
 	t := &Traversal{}
