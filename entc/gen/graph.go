@@ -59,7 +59,7 @@ func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
 		g.addEdges(schema)
 	}
 	for _, t := range g.Nodes {
-		check(g.resolve(t), "resolve %q relations/references", t.Name)
+		check(g.resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, schema := range schemas {
 		g.addIndexes(schema)
@@ -136,7 +136,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			})
 		// inverse only.
 		case e.Inverse && e.Ref == nil:
-			expect(e.RefName != "", `missing reference name for inverse edge: %s.%s`, t.Name, e.Name)
+			expect(e.RefName != "", "missing reference name for inverse edge: %s.%s", t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
 				Type:     typ,
 				Name:     e.Name,
@@ -148,7 +148,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		// inverse and assoc.
 		case e.Inverse:
 			ref := e.Ref
-			expect(e.RefName == "", `reference name is derived from the assoc name: %s.%s <-> %s.%s`, t.Name, ref.Name, t.Name, e.Name)
+			expect(e.RefName == "", "reference name is derived from the assoc name: %s.%s <-> %s.%s", t.Name, ref.Name, t.Name, e.Name)
 			expect(ref.Type == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
 			t.Edges = append(t.Edges, &Edge{
 				Type:     typ,
@@ -198,10 +198,13 @@ func (g *Graph) resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf(`edge is missing for inverse edge: %s.%s`, e.Type.Name, e.Name)
+				return fmt.Errorf("edge is missing for inverse edge: %s.%s", e.Type.Name, e.Name)
 			}
 			if !e.Optional && !ref.Optional {
-				return fmt.Errorf(`edges cannot be required in both directions: %s.%s <-> %s.%s`, t.Name, e.Name, ref.Type.Name, ref.Name)
+				return fmt.Errorf("edges cannot be required in both directions: %s.%s <-> %s.%s", t.Name, e.Name, e.Type.Name, ref.Name)
+			}
+			if ref.Type != t {
+				return fmt.Errorf("mismatch type for back-ref %q of %s.%s <-> %s.%s", e.Inverse, t.Name, e.Name, e.Type.Name, ref.Name)
 			}
 			table := t.Table()
 			// The name of the column is how we identify the other side. For example "A Parent has Children"

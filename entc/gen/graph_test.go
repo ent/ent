@@ -145,6 +145,30 @@ func TestNewGraphRequiredLoop(t *testing.T) {
 	require.Error(t, err, "require loop")
 }
 
+func TestNewGraphBadInverse(t *testing.T) {
+	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers},
+		&load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet"},
+				{Name: "groups", Type: "Group"},
+			},
+		},
+		&load.Schema{
+			Name: "Pet",
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", Unique: true, Required: true, RefName: "pets", Inverse: true},
+			},
+		},
+		&load.Schema{
+			Name: "Group",
+			Edges: []*load.Edge{
+				{Name: "users", Type: "User", RefName: "pets", Inverse: true},
+			},
+		})
+	require.Errorf(t, err, "mismatch type for back-reference")
+}
+
 func TestRelation(t *testing.T) {
 	require := require.New(t)
 	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1)
