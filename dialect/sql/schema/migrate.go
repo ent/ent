@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	// TypeTable holds the table name holding the type information.
+	// TypeTable defines the table name holding the type information.
 	TypeTable = "ent_types"
 	// MaxTypes defines the max number of types can be created when
 	// defining universal ids. The left 16-bits are reserved.
