@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"text/template"
 
 	"github.com/facebookincubator/ent/entc/load"
 	"github.com/facebookincubator/ent/schema/field"
@@ -207,7 +208,8 @@ func TestGraph_Gen(t *testing.T) {
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.Remove(target)
-	graph, err := NewGraph(Config{Package: "entc/gen", Target: target, Storage: drivers}, &load.Schema{
+	external := template.Must(template.New("external").Parse("external"))
+	graph, err := NewGraph(Config{Package: "entc/gen", Target: target, Storage: drivers, Template: external}, &load.Schema{
 		Name: "T1",
 		Fields: []*load.Field{
 			{Name: "age", Type: field.TypeInt, Optional: true},
@@ -231,4 +233,6 @@ func TestGraph_Gen(t *testing.T) {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
 		require.NoError(err)
 	}
+	_, err = os.Stat(target + "/external.go")
+	require.NoError(err)
 }

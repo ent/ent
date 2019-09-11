@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"text/template"
 
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
@@ -35,6 +36,12 @@ type (
 		// IDType specifies the type of the id field in the codegen.
 		// The supported types are string and int, which also the default.
 		IDType field.Type
+		// Template specifies an alternative template to execute or to override
+		// the default. If nil, the default template is used.
+		//
+		// Note that, additional templates are executed on the Graph object and
+		// the execution output is stored in a file derived by the template name.
+		Template *template.Template
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -70,6 +77,21 @@ func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
 // Gen generates the artifacts for the graph.
 func (g *Graph) Gen() (err error) {
 	defer catch(&err)
+	var (
+		external  []GraphTemplate
+		templates = template.Must(templates.Clone())
+	)
+	if g.Template != nil {
+		for _, tmpl := range g.Template.Templates() {
+			if name := tmpl.Name(); templates.Lookup(name) == nil {
+				external = append(external, GraphTemplate{
+					Name:   name,
+					Format: snake(name) + ".go",
+				})
+			}
+			templates = template.Must(templates.AddParseTree(tmpl.Name(), tmpl.Tree))
+		}
+	}
 	for _, n := range g.Nodes {
 		path := filepath.Join(g.Config.Target, n.Package())
 		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
@@ -80,7 +102,7 @@ func (g *Graph) Gen() (err error) {
 			check(ioutil.WriteFile(target, b.Bytes(), 0644), "create file %q", target)
 		}
 	}
-	for _, tmpl := range GraphTemplates {
+	for _, tmpl := range append(GraphTemplates[:], external...) {
 		if tmpl.Skip != nil && tmpl.Skip(g) {
 			continue
 		}

@@ -18,12 +18,25 @@ import (
 
 //go:generate go-bindata -o=internal/bindata.go -pkg=internal ./template/...
 
+type (
+	// TypeTemplate specifies a template that is executed with
+	// each Type object of the graph.
+	TypeTemplate struct {
+		Name   string             // template name.
+		Format func(*Type) string // file name format.
+	}
+	// GraphTemplate specifies a template that is executed with
+	// the Graph object.
+	GraphTemplate struct {
+		Name   string            // template name.
+		Format string            // file name format.
+		Skip   func(*Graph) bool // skip condition.
+	}
+)
+
 var (
 	// Templates holds the template information for a file that the graph is generating.
-	Templates = []struct {
-		Name   string
-		Format func(*Type) string
-	}{
+	Templates = []TypeTemplate{
 		{
 			Name:   "create",
 			Format: pkgf("%s_create.go"),
@@ -56,11 +69,7 @@ var (
 		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
-	GraphTemplates = []struct {
-		Name   string
-		Format string
-		Skip   func(*Graph) bool
-	}{
+	GraphTemplates = []GraphTemplate{
 		{
 			Name:   "base",
 			Format: "ent.go",
