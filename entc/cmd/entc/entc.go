@@ -77,10 +77,11 @@ func main() {
 		},
 		func() *cobra.Command {
 			var (
-				cfg     gen.Config
-				storage []string
-				idtype  = idType(field.TypeInt)
-				cmd     = &cobra.Command{
+				cfg      gen.Config
+				storage  []string
+				template []string
+				idtype   = idType(field.TypeInt)
+				cmd      = &cobra.Command{
 					Use:   "generate [flags] path",
 					Short: "generate go code for the schema directory",
 					Example: examples(
@@ -99,6 +100,9 @@ func main() {
 							failOnErr(err)
 							cfg.Storage = append(cfg.Storage, sr)
 						}
+						if len(template) > 0 {
+							cfg.Template = loadTemplate(template)
+						}
 						cfg.IDType = field.Type(idtype)
 						graph, err := loadGraph(path[0], cfg)
 						failOnErr(err)
@@ -109,6 +113,7 @@ func main() {
 			cmd.Flags().Var(&idtype, "idtype", "type of the id field")
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
+			cmd.Flags().StringSliceVarP(&template, "template", "", nil, "external templates to execute")
 			cmd.Flags().StringSliceVarP(&storage, "storage", "", []string{"sql"}, "list of storage drivers to support")
 			return cmd
 		}(),
@@ -129,6 +134,34 @@ func loadGraph(path string, cfg gen.Config) (*gen.Graph, error) {
 	cfg.Schema = spec.PkgPath
 	cfg.Package = filepath.Dir(spec.PkgPath)
 	return gen.NewGraph(cfg, spec.Schemas...)
+}
+
+// loadTemplate loads templates from files or directory.
+func loadTemplate(paths []string) *template.Template {
+	t := template.New("external").
+		Funcs(gen.Funcs)
+	for _, path := range paths {
+		info, err := os.Stat(path)
+		failOnErr(err)
+		if !info.IsDir() {
+			buf, err := ioutil.ReadFile(path)
+			failOnErr(err)
+			t, err = t.Parse(string(buf))
+			failOnErr(err)
+			continue
+		}
+		infos, err := ioutil.ReadDir(path)
+		failOnErr(err)
+		paths := make([]string, len(infos))
+		for i := range infos {
+			paths[i] = filepath.Join(path, infos[0].Name())
+		}
+		for _, tt := range loadTemplate(paths).Templates() {
+			t, err = t.AddParseTree(tt.Name(), tt.Tree)
+			failOnErr(err)
+		}
+	}
+	return t
 }
 
 // schema template for the "init" command.

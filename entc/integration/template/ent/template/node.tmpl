@@ -1,0 +1,133 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "node" }}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+// Noder wraps the basic Node method.
+type Noder interface {
+	Node(context.Context) (*Node, error)
+}
+
+// Node in the graph.
+type Node struct {
+	ID 	   {{ $.IDType }} `json:"id,omitemty"` // node id.
+	Type   string   `json:"type,omitempty"`   // node type.
+	Fields []*Field `json:"fields,omitempty"` // node fields.
+	Edges  []*Edge  `json:"edges,omitempty"`  // node edges.
+}
+
+// Field of a node.
+type Field struct {
+	Type  string `json:"type,omitempty"`  // field type.
+	Name  string `json:"name,omitempty"`  // field name (as in struct).
+	Value string `json:"value,omitempty"` // stringified value.
+}
+
+// Edges between two nodes.
+type Edge struct {
+	Type string   `json:"type,omitempty"` // edge type.
+	Name string   `json:"name,omitempty"` // edge name.
+	IDs  []{{ $.IDType }} `json:"ids,omitempty"`  // node ids (where this edge point to).
+}
+
+{{/* loop over all types and add implement the Node interface. */}}
+{{ range $_, $n := $.Nodes -}}
+	{{ $receiver := $n.Receiver }}
+	func ({{ $receiver }} *{{ $n.Name }}) Node(ctx context.Context) (node *Node, err error) {
+		node = &Node{
+			ID: {{ $receiver }}.ID,
+			Type: "{{ $n.Name }}",
+			Fields: make([]*Field, {{ len $n.Fields }}),
+			Edges: make([]*Edge, {{ len $n.Edges }}),
+		}
+		{{- with $n.Fields }}
+			var buf []byte
+			{{- range $i, $f := $n.Fields }}
+				if buf, err = json.Marshal({{ $receiver }}.{{ pascal $f.Name }}); err != nil {
+					return nil, err
+				}
+				node.Fields[{{ $i }}] = &Field{
+					Type:  "{{ $f.Type }}",
+					Name:  "{{ pascal $f.Name }}",
+					Value: string(buf),
+				}
+			{{- end }}
+		{{- end }}
+		{{- with $n.Edges }}
+			var ids []{{ $.IDType }}
+			{{- range $i, $e := $n.Edges }}
+				ids, err = {{ $receiver }}.{{ print "Query" (pascal $e.Name) }}().
+					Select({{ $e.Type.Package }}.FieldID).
+					{{ pascal $.IDType.String }}s(ctx)
+				if err != nil {
+					return nil, err
+				}
+				node.Edges[{{ $i }}] = &Edge{
+					IDs: ids,
+					Type: "{{ $e.Type.Name }}",
+					Name: "{{ pascal $e.Name }}",
+				}
+			{{- end }}
+		{{- end }}
+		return node, nil
+	}
+{{ end }}
+
+{{/* add the node api to the client */}}
+
+var (
+	once sync.Once
+	types []string
+	typeNodes = make(map[string]func(ctx context.Context, id {{ $.IDType }})(*Node, error))
+)
+
+func (c *Client) Node(ctx context.Context, id {{ $.IDType }}) (*Node, error) {
+	var err error
+	once.Do(func() {
+		err = c.loadTypes(ctx)
+	})
+	if err != nil {
+		return nil, err
+	}
+	{{- if not $.IDType.Numeric }}
+		idv, err := strconv.Atoi(id)
+		if err != nil {
+			return nil, err
+		}
+		idx := idv/(1<<32 - 1)
+	{{- else }}
+		idx := id/(1<<32 - 1)
+	{{- end }}
+	return typeNodes[types[idx]](ctx, id)
+}
+
+func (c *Client) loadTypes(ctx context.Context) error {
+	rows := &sql.Rows{}
+	query, args := sql.Select("type").
+		From(sql.Table(schema.TypeTable)).
+		OrderBy(sql.Asc("id")).
+		Query()
+	if err := c.driver.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	if err := sql.ScanSlice(rows, &types); err != nil {
+		return err
+	}
+	{{- range $_, $n := $.Nodes }}
+		typeNodes[{{ $n.Package }}.Table] = func(ctx context.Context, id {{ $.IDType }})(*Node, error) {
+			nv, err := c.{{ $n.Name }}.Query().Get(ctx, id)
+			if err != nil {
+				return nil, err
+			}
+			return nv.Node(ctx)
+		}
+	{{- end }}
+	return nil
+}
+{{ end }}

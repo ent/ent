@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"text/template"
+	"text/template/parse"
 
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
@@ -77,21 +78,7 @@ func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
 // Gen generates the artifacts for the graph.
 func (g *Graph) Gen() (err error) {
 	defer catch(&err)
-	var (
-		external  []GraphTemplate
-		templates = template.Must(templates.Clone())
-	)
-	if g.Template != nil {
-		for _, tmpl := range g.Template.Templates() {
-			if name := tmpl.Name(); templates.Lookup(name) == nil {
-				external = append(external, GraphTemplate{
-					Name:   name,
-					Format: snake(name) + ".go",
-				})
-			}
-			templates = template.Must(templates.AddParseTree(tmpl.Name(), tmpl.Tree))
-		}
-	}
+	templates, external := g.templates()
 	for _, n := range g.Nodes {
 		path := filepath.Join(g.Config.Target, n.Package())
 		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
@@ -392,6 +379,29 @@ func (g *Graph) typ(name string) (*Type, bool) {
 		}
 	}
 	return nil, false
+}
+
+// templates returns the template.Template for the code and external templates
+// to execute on the Graph object if provided.
+func (g *Graph) templates() (*template.Template, []GraphTemplate) {
+	templates = template.Must(templates.Clone())
+	if g.Template == nil {
+		return templates, nil
+	}
+	external := make([]GraphTemplate, 0)
+	for _, tmpl := range g.Template.Templates() {
+		name := tmpl.Name()
+		// check that is not defined in the default templates
+		// it's not the root.
+		if templates.Lookup(name) == nil && !parse.IsEmptyTree(tmpl.Root) {
+			external = append(external, GraphTemplate{
+				Name:   name,
+				Format: snake(name) + ".go",
+			})
+		}
+		templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
+	}
+	return templates, external
 }
 
 // expect panic if the condition is false.
