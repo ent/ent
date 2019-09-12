@@ -83,7 +83,7 @@ type Edge struct {
 var (
 	once sync.Once
 	types []string
-	typeNodes = make(map[string]func(ctx context.Context, id {{ $.IDType }})(*Node, error))
+	typeNodes = make(map[string]func(context.Context, {{ $.IDType }})(*Node, error))
 )
 
 func (c *Client) Node(ctx context.Context, id {{ $.IDType }}) (*Node, error) {
