@@ -118,7 +118,7 @@ var (
 )
 
 func init() {
-	templates.Funcs(funcs)
+	templates.Funcs(Funcs)
 	for _, asset := range internal.AssetNames() {
 		templates = template.Must(templates.Parse(string(internal.MustAsset(asset))))
 	}

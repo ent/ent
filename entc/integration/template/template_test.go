@@ -1,0 +1,44 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+package template
+
+import (
+	"context"
+	"testing"
+
+	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/template/ent"
+	"github.com/facebookincubator/ent/entc/integration/template/ent/migrate"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+)
+
+func TestCustomTemplate(t *testing.T) {
+	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer drv.Close()
+	ctx := context.Background()
+	client := ent.NewClient(ent.Driver(drv))
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+	p := client.Pet.Create().SetAge(1).SaveX(ctx)
+	u := client.User.Create().SetName("a8m").AddPets(p).SaveX(ctx)
+	g := client.Group.Create().SetMaxUsers(10).SaveX(ctx)
+
+	node, err := client.Node(ctx, p.ID)
+	require.Equal(t, p.ID, node.ID)
+	require.Equal(t, &ent.Field{Type: "int", Name: "Age", Value: "1"}, node.Fields[0])
+	require.Equal(t, &ent.Edge{Type: "User", Name: "Owner", IDs: []int{u.ID}}, node.Edges[0])
+
+	node, err = client.Node(ctx, u.ID)
+	require.Equal(t, u.ID, node.ID)
+	require.Equal(t, &ent.Field{Type: "string", Name: "Name", Value: "\"a8m\""}, node.Fields[0])
+	require.Equal(t, &ent.Edge{Type: "Pet", Name: "Pets", IDs: []int{p.ID}}, node.Edges[0])
+
+	node, err = client.Node(ctx, g.ID)
+	require.Equal(t, g.ID, node.ID)
+	require.Equal(t, &ent.Field{Type: "int", Name: "MaxUsers", Value: "10"}, node.Fields[0])
+}

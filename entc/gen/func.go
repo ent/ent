@@ -21,9 +21,9 @@ import (
 )
 
 var (
-	rules   = ruleset()
-	acronym = make(map[string]bool)
-	funcs   = template.FuncMap{
+	// Funcs are the predefined template
+	// functions used by the codegen.
+	Funcs = template.FuncMap{
 		"ops":         ops,
 		"add":         add,
 		"append":      reflect.AppendSlice,
@@ -49,6 +49,8 @@ var (
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
 	}
+	rules   = ruleset()
+	acronym = make(map[string]bool)
 )
 
 // ops returns all operations for given field.
