@@ -99,6 +99,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Relation,
 	Predicate,
 	AddValues,
+	ClearFields,
 	UniqueConstraint,
 	O2OTwoTypes,
 	O2OSameType,
@@ -609,6 +610,30 @@ func Relation(t *testing.T, client *ent.Client) {
 		require.Equal(2, v2[i].Total)
 	}
 }
+
+func ClearFields(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	img := client.File.Create().SetName("foo").SetSize(100).SetUser("a8m").SetGroup("Github").SaveX(ctx)
+
+	t.Log("clear one field")
+	img = img.Update().ClearUser().SaveX(ctx)
+	require.Nil(t, img.User)
+	img = client.File.Query().OnlyX(ctx)
+	require.Nil(t, img.User)
+	require.Equal(t, "Github", img.Group)
+
+	t.Log("clear many fields")
+	img = img.Update().ClearUser().ClearGroup().SaveX(ctx)
+	require.Nil(t, img.User)
+	img = client.File.Query().OnlyX(ctx)
+	require.Nil(t, img.User)
+	require.Empty(t, img.Group)
+
+	t.Log("revert previous set")
+	img = img.Update().SetUser("a8m").ClearUser().SaveX(ctx)
+	require.Nil(t, img.User)
+}
+
 func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()

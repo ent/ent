@@ -57,6 +57,9 @@ func Union(args ...interface{}) *dsl.Traversal { return New().Union(args...) }
 // Constant is the api for calling __.Constant().
 func Constant(args ...interface{}) *dsl.Traversal { return New().Constant(args...) }
 
+// Properties is the api for calling __.Properties().
+func Properties(args ...interface{}) *dsl.Traversal { return New().Properties(args...) }
+
 // OtherV is the api for calling __.OtherV().
 func OtherV() *dsl.Traversal { return New().OtherV() }
 

@@ -221,6 +221,11 @@ func TestTraverse(t *testing.T) {
 			wantQuery: "g.V().has($0).property($1, __.union(__.values($2), __.constant($3)).sum()).valueMap()",
 			wantBinds: dsl.Bindings{"$0": "age", "$1": "age", "$2": "age", "$3": 10},
 		},
+		{
+			input:     g.V().Has("age").SideEffect(__.Properties("name").Drop()).ValueMap(),
+			wantQuery: "g.V().has($0).sideEffect(__.properties($1).drop()).valueMap()",
+			wantBinds: dsl.Bindings{"$0": "age", "$1": "name"},
+		},
 	}
 	for i, tt := range tests {
 		tt := tt

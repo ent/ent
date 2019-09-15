@@ -29,6 +29,7 @@ type NodeUpdate struct {
 	config
 	value       *int
 	addvalue    *int
+	clearvalue  bool
 	prev        map[string]struct{}
 	next        map[string]struct{}
 	clearedPrev bool
@@ -59,6 +60,13 @@ func (nu *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
 // AddValue adds i to value.
 func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 	nu.addvalue = &i
+	return nu
+}
+
+// ClearValue clears the value of value.
+func (nu *NodeUpdate) ClearValue() *NodeUpdate {
+	nu.value = nil
+	nu.clearvalue = true
 	return nu
 }
 
@@ -198,6 +206,10 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Add(node.FieldValue, *value)
 	}
+	if nu.clearvalue {
+		update = true
+		builder.SetNull(node.FieldValue)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -306,6 +318,13 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 	if value := nu.addvalue; value != nil {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(*value)).Sum())
 	}
+	var properties []interface{}
+	if nu.clearvalue {
+		properties = append(properties, node.FieldValue)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	if nu.clearedPrev {
 		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -349,6 +368,7 @@ type NodeUpdateOne struct {
 	id          string
 	value       *int
 	addvalue    *int
+	clearvalue  bool
 	prev        map[string]struct{}
 	next        map[string]struct{}
 	clearedPrev bool
@@ -372,6 +392,13 @@ func (nuo *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
 // AddValue adds i to value.
 func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
 	nuo.addvalue = &i
+	return nuo
+}
+
+// ClearValue clears the value of value.
+func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
+	nuo.value = nil
+	nuo.clearvalue = true
 	return nuo
 }
 
@@ -516,6 +543,12 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		builder.Add(node.FieldValue, *value)
 		n.Value += *value
 	}
+	if nuo.clearvalue {
+		update = true
+		var value int
+		n.Value = value
+		builder.SetNull(node.FieldValue)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -624,6 +657,13 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value := nuo.addvalue; value != nil {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(*value)).Sum())
+	}
+	var properties []interface{}
+	if nuo.clearvalue {
+		properties = append(properties, node.FieldValue)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if nuo.clearedPrev {
 		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()

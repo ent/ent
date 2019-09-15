@@ -19,11 +19,13 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	age        *int32
-	name       *string
-	address    *string
-	blob       *[]byte
-	predicates []predicate.User
+	age          *int32
+	name         *string
+	address      *string
+	clearaddress bool
+	blob         *[]byte
+	clearblob    bool
+	predicates   []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -58,9 +60,23 @@ func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 	return uu
 }
 
+// ClearAddress clears the value of address.
+func (uu *UserUpdate) ClearAddress() *UserUpdate {
+	uu.address = nil
+	uu.clearaddress = true
+	return uu
+}
+
 // SetBlob sets the blob field.
 func (uu *UserUpdate) SetBlob(b []byte) *UserUpdate {
 	uu.blob = &b
+	return uu
+}
+
+// ClearBlob clears the value of blob.
+func (uu *UserUpdate) ClearBlob() *UserUpdate {
+	uu.blob = nil
+	uu.clearblob = true
 	return uu
 }
 
@@ -140,9 +156,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldAddress, *value)
 	}
+	if uu.clearaddress {
+		update = true
+		builder.SetNull(user.FieldAddress)
+	}
 	if value := uu.blob; value != nil {
 		update = true
 		builder.Set(user.FieldBlob, *value)
+	}
+	if uu.clearblob {
+		update = true
+		builder.SetNull(user.FieldBlob)
 	}
 	if update {
 		query, args := builder.Query()
@@ -159,11 +183,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id      int
-	age     *int32
-	name    *string
-	address *string
-	blob    *[]byte
+	id           int
+	age          *int32
+	name         *string
+	address      *string
+	clearaddress bool
+	blob         *[]byte
+	clearblob    bool
 }
 
 // SetAge sets the age field.
@@ -192,9 +218,23 @@ func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// ClearAddress clears the value of address.
+func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
+	uuo.address = nil
+	uuo.clearaddress = true
+	return uuo
+}
+
 // SetBlob sets the blob field.
 func (uuo *UserUpdateOne) SetBlob(b []byte) *UserUpdateOne {
 	uuo.blob = &b
+	return uuo
+}
+
+// ClearBlob clears the value of blob.
+func (uuo *UserUpdateOne) ClearBlob() *UserUpdateOne {
+	uuo.blob = nil
+	uuo.clearblob = true
 	return uuo
 }
 
@@ -280,10 +320,22 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		builder.Set(user.FieldAddress, *value)
 		u.Address = *value
 	}
+	if uuo.clearaddress {
+		update = true
+		var value string
+		u.Address = value
+		builder.SetNull(user.FieldAddress)
+	}
 	if value := uuo.blob; value != nil {
 		update = true
 		builder.Set(user.FieldBlob, *value)
 		u.Blob = *value
+	}
+	if uuo.clearblob {
+		update = true
+		var value []byte
+		u.Blob = value
+		builder.SetNull(user.FieldBlob)
 	}
 	if update {
 		query, args := builder.Query()

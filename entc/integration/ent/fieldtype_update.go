@@ -25,29 +25,40 @@ import (
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	int                     *int
-	addint                  *int
-	int8                    *int8
-	int16                   *int16
-	int32                   *int32
-	int64                   *int64
-	addint64                *int64
-	optional_int            *int
-	addoptional_int         *int
-	optional_int8           *int8
-	optional_int16          *int16
-	optional_int32          *int32
-	optional_int64          *int64
-	addoptional_int64       *int64
-	nillable_int            *int
-	addnillable_int         *int
-	nillable_int8           *int8
-	nillable_int16          *int16
-	nillable_int32          *int32
-	nillable_int64          *int64
-	addnillable_int64       *int64
-	validate_optional_int32 *int32
-	predicates              []predicate.FieldType
+	int                          *int
+	addint                       *int
+	int8                         *int8
+	int16                        *int16
+	int32                        *int32
+	int64                        *int64
+	addint64                     *int64
+	optional_int                 *int
+	addoptional_int              *int
+	clearoptional_int            bool
+	optional_int8                *int8
+	clearoptional_int8           bool
+	optional_int16               *int16
+	clearoptional_int16          bool
+	optional_int32               *int32
+	clearoptional_int32          bool
+	optional_int64               *int64
+	addoptional_int64            *int64
+	clearoptional_int64          bool
+	nillable_int                 *int
+	addnillable_int              *int
+	clearnillable_int            bool
+	nillable_int8                *int8
+	clearnillable_int8           bool
+	nillable_int16               *int16
+	clearnillable_int16          bool
+	nillable_int32               *int32
+	clearnillable_int32          bool
+	nillable_int64               *int64
+	addnillable_int64            *int64
+	clearnillable_int64          bool
+	validate_optional_int32      *int32
+	clearvalidate_optional_int32 bool
+	predicates                   []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
@@ -118,6 +129,13 @@ func (ftu *FieldTypeUpdate) AddOptionalInt(i int) *FieldTypeUpdate {
 	return ftu
 }
 
+// ClearOptionalInt clears the value of optional_int.
+func (ftu *FieldTypeUpdate) ClearOptionalInt() *FieldTypeUpdate {
+	ftu.optional_int = nil
+	ftu.clearoptional_int = true
+	return ftu
+}
+
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt8(i int8) *FieldTypeUpdate {
 	ftu.optional_int8 = &i
@@ -129,6 +147,13 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt8(i *int8) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetOptionalInt8(*i)
 	}
+	return ftu
+}
+
+// ClearOptionalInt8 clears the value of optional_int8.
+func (ftu *FieldTypeUpdate) ClearOptionalInt8() *FieldTypeUpdate {
+	ftu.optional_int8 = nil
+	ftu.clearoptional_int8 = true
 	return ftu
 }
 
@@ -146,6 +171,13 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt16(i *int16) *FieldTypeUpdate 
 	return ftu
 }
 
+// ClearOptionalInt16 clears the value of optional_int16.
+func (ftu *FieldTypeUpdate) ClearOptionalInt16() *FieldTypeUpdate {
+	ftu.optional_int16 = nil
+	ftu.clearoptional_int16 = true
+	return ftu
+}
+
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.optional_int32 = &i
@@ -157,6 +189,13 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt32(i *int32) *FieldTypeUpdate 
 	if i != nil {
 		ftu.SetOptionalInt32(*i)
 	}
+	return ftu
+}
+
+// ClearOptionalInt32 clears the value of optional_int32.
+func (ftu *FieldTypeUpdate) ClearOptionalInt32() *FieldTypeUpdate {
+	ftu.optional_int32 = nil
+	ftu.clearoptional_int32 = true
 	return ftu
 }
 
@@ -180,6 +219,13 @@ func (ftu *FieldTypeUpdate) AddOptionalInt64(i int64) *FieldTypeUpdate {
 	return ftu
 }
 
+// ClearOptionalInt64 clears the value of optional_int64.
+func (ftu *FieldTypeUpdate) ClearOptionalInt64() *FieldTypeUpdate {
+	ftu.optional_int64 = nil
+	ftu.clearoptional_int64 = true
+	return ftu
+}
+
 // SetNillableInt sets the nillable_int field.
 func (ftu *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
 	ftu.nillable_int = &i
@@ -200,6 +246,13 @@ func (ftu *FieldTypeUpdate) AddNillableInt(i int) *FieldTypeUpdate {
 	return ftu
 }
 
+// ClearNillableInt clears the value of nillable_int.
+func (ftu *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
+	ftu.nillable_int = nil
+	ftu.clearnillable_int = true
+	return ftu
+}
+
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftu *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
 	ftu.nillable_int8 = &i
@@ -211,6 +264,13 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetNillableInt8(*i)
 	}
+	return ftu
+}
+
+// ClearNillableInt8 clears the value of nillable_int8.
+func (ftu *FieldTypeUpdate) ClearNillableInt8() *FieldTypeUpdate {
+	ftu.nillable_int8 = nil
+	ftu.clearnillable_int8 = true
 	return ftu
 }
 
@@ -228,6 +288,13 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate 
 	return ftu
 }
 
+// ClearNillableInt16 clears the value of nillable_int16.
+func (ftu *FieldTypeUpdate) ClearNillableInt16() *FieldTypeUpdate {
+	ftu.nillable_int16 = nil
+	ftu.clearnillable_int16 = true
+	return ftu
+}
+
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftu *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
 	ftu.nillable_int32 = &i
@@ -239,6 +306,13 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate 
 	if i != nil {
 		ftu.SetNillableInt32(*i)
 	}
+	return ftu
+}
+
+// ClearNillableInt32 clears the value of nillable_int32.
+func (ftu *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
+	ftu.nillable_int32 = nil
+	ftu.clearnillable_int32 = true
 	return ftu
 }
 
@@ -262,6 +336,13 @@ func (ftu *FieldTypeUpdate) AddNillableInt64(i int64) *FieldTypeUpdate {
 	return ftu
 }
 
+// ClearNillableInt64 clears the value of nillable_int64.
+func (ftu *FieldTypeUpdate) ClearNillableInt64() *FieldTypeUpdate {
+	ftu.nillable_int64 = nil
+	ftu.clearnillable_int64 = true
+	return ftu
+}
+
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftu *FieldTypeUpdate) SetValidateOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.validate_optional_int32 = &i
@@ -273,6 +354,13 @@ func (ftu *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 	if i != nil {
 		ftu.SetValidateOptionalInt32(*i)
 	}
+	return ftu
+}
+
+// ClearValidateOptionalInt32 clears the value of validate_optional_int32.
+func (ftu *FieldTypeUpdate) ClearValidateOptionalInt32() *FieldTypeUpdate {
+	ftu.validate_optional_int32 = nil
+	ftu.clearvalidate_optional_int32 = true
 	return ftu
 }
 
@@ -383,17 +471,33 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Add(fieldtype.FieldOptionalInt, *value)
 	}
+	if ftu.clearoptional_int {
+		update = true
+		builder.SetNull(fieldtype.FieldOptionalInt)
+	}
 	if value := ftu.optional_int8; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt8, *value)
+	}
+	if ftu.clearoptional_int8 {
+		update = true
+		builder.SetNull(fieldtype.FieldOptionalInt8)
 	}
 	if value := ftu.optional_int16; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt16, *value)
 	}
+	if ftu.clearoptional_int16 {
+		update = true
+		builder.SetNull(fieldtype.FieldOptionalInt16)
+	}
 	if value := ftu.optional_int32; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt32, *value)
+	}
+	if ftu.clearoptional_int32 {
+		update = true
+		builder.SetNull(fieldtype.FieldOptionalInt32)
 	}
 	if value := ftu.optional_int64; value != nil {
 		update = true
@@ -403,6 +507,10 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Add(fieldtype.FieldOptionalInt64, *value)
 	}
+	if ftu.clearoptional_int64 {
+		update = true
+		builder.SetNull(fieldtype.FieldOptionalInt64)
+	}
 	if value := ftu.nillable_int; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt, *value)
@@ -411,17 +519,33 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Add(fieldtype.FieldNillableInt, *value)
 	}
+	if ftu.clearnillable_int {
+		update = true
+		builder.SetNull(fieldtype.FieldNillableInt)
+	}
 	if value := ftu.nillable_int8; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt8, *value)
+	}
+	if ftu.clearnillable_int8 {
+		update = true
+		builder.SetNull(fieldtype.FieldNillableInt8)
 	}
 	if value := ftu.nillable_int16; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt16, *value)
 	}
+	if ftu.clearnillable_int16 {
+		update = true
+		builder.SetNull(fieldtype.FieldNillableInt16)
+	}
 	if value := ftu.nillable_int32; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt32, *value)
+	}
+	if ftu.clearnillable_int32 {
+		update = true
+		builder.SetNull(fieldtype.FieldNillableInt32)
 	}
 	if value := ftu.nillable_int64; value != nil {
 		update = true
@@ -431,9 +555,17 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Add(fieldtype.FieldNillableInt64, *value)
 	}
+	if ftu.clearnillable_int64 {
+		update = true
+		builder.SetNull(fieldtype.FieldNillableInt64)
+	}
 	if value := ftu.validate_optional_int32; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldValidateOptionalInt32, *value)
+	}
+	if ftu.clearvalidate_optional_int32 {
+		update = true
+		builder.SetNull(fieldtype.FieldValidateOptionalInt32)
 	}
 	if update {
 		query, args := builder.Query()
@@ -533,6 +665,43 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value := ftu.validate_optional_int32; value != nil {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *value)
 	}
+	var properties []interface{}
+	if ftu.clearoptional_int {
+		properties = append(properties, fieldtype.FieldOptionalInt)
+	}
+	if ftu.clearoptional_int8 {
+		properties = append(properties, fieldtype.FieldOptionalInt8)
+	}
+	if ftu.clearoptional_int16 {
+		properties = append(properties, fieldtype.FieldOptionalInt16)
+	}
+	if ftu.clearoptional_int32 {
+		properties = append(properties, fieldtype.FieldOptionalInt32)
+	}
+	if ftu.clearoptional_int64 {
+		properties = append(properties, fieldtype.FieldOptionalInt64)
+	}
+	if ftu.clearnillable_int {
+		properties = append(properties, fieldtype.FieldNillableInt)
+	}
+	if ftu.clearnillable_int8 {
+		properties = append(properties, fieldtype.FieldNillableInt8)
+	}
+	if ftu.clearnillable_int16 {
+		properties = append(properties, fieldtype.FieldNillableInt16)
+	}
+	if ftu.clearnillable_int32 {
+		properties = append(properties, fieldtype.FieldNillableInt32)
+	}
+	if ftu.clearnillable_int64 {
+		properties = append(properties, fieldtype.FieldNillableInt64)
+	}
+	if ftu.clearvalidate_optional_int32 {
+		properties = append(properties, fieldtype.FieldValidateOptionalInt32)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	v.Count()
 	trs = append(trs, v)
 	return dsl.Join(trs...)
@@ -541,29 +710,40 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
-	id                      string
-	int                     *int
-	addint                  *int
-	int8                    *int8
-	int16                   *int16
-	int32                   *int32
-	int64                   *int64
-	addint64                *int64
-	optional_int            *int
-	addoptional_int         *int
-	optional_int8           *int8
-	optional_int16          *int16
-	optional_int32          *int32
-	optional_int64          *int64
-	addoptional_int64       *int64
-	nillable_int            *int
-	addnillable_int         *int
-	nillable_int8           *int8
-	nillable_int16          *int16
-	nillable_int32          *int32
-	nillable_int64          *int64
-	addnillable_int64       *int64
-	validate_optional_int32 *int32
+	id                           string
+	int                          *int
+	addint                       *int
+	int8                         *int8
+	int16                        *int16
+	int32                        *int32
+	int64                        *int64
+	addint64                     *int64
+	optional_int                 *int
+	addoptional_int              *int
+	clearoptional_int            bool
+	optional_int8                *int8
+	clearoptional_int8           bool
+	optional_int16               *int16
+	clearoptional_int16          bool
+	optional_int32               *int32
+	clearoptional_int32          bool
+	optional_int64               *int64
+	addoptional_int64            *int64
+	clearoptional_int64          bool
+	nillable_int                 *int
+	addnillable_int              *int
+	clearnillable_int            bool
+	nillable_int8                *int8
+	clearnillable_int8           bool
+	nillable_int16               *int16
+	clearnillable_int16          bool
+	nillable_int32               *int32
+	clearnillable_int32          bool
+	nillable_int64               *int64
+	addnillable_int64            *int64
+	clearnillable_int64          bool
+	validate_optional_int32      *int32
+	clearvalidate_optional_int32 bool
 }
 
 // SetInt sets the int field.
@@ -628,6 +808,13 @@ func (ftuo *FieldTypeUpdateOne) AddOptionalInt(i int) *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// ClearOptionalInt clears the value of optional_int.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalInt() *FieldTypeUpdateOne {
+	ftuo.optional_int = nil
+	ftuo.clearoptional_int = true
+	return ftuo
+}
+
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.optional_int8 = &i
@@ -639,6 +826,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt8(i *int8) *FieldTypeUpdat
 	if i != nil {
 		ftuo.SetOptionalInt8(*i)
 	}
+	return ftuo
+}
+
+// ClearOptionalInt8 clears the value of optional_int8.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalInt8() *FieldTypeUpdateOne {
+	ftuo.optional_int8 = nil
+	ftuo.clearoptional_int8 = true
 	return ftuo
 }
 
@@ -656,6 +850,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt16(i *int16) *FieldTypeUpd
 	return ftuo
 }
 
+// ClearOptionalInt16 clears the value of optional_int16.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalInt16() *FieldTypeUpdateOne {
+	ftuo.optional_int16 = nil
+	ftuo.clearoptional_int16 = true
+	return ftuo
+}
+
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.optional_int32 = &i
@@ -667,6 +868,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt32(i *int32) *FieldTypeUpd
 	if i != nil {
 		ftuo.SetOptionalInt32(*i)
 	}
+	return ftuo
+}
+
+// ClearOptionalInt32 clears the value of optional_int32.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalInt32() *FieldTypeUpdateOne {
+	ftuo.optional_int32 = nil
+	ftuo.clearoptional_int32 = true
 	return ftuo
 }
 
@@ -690,6 +898,13 @@ func (ftuo *FieldTypeUpdateOne) AddOptionalInt64(i int64) *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// ClearOptionalInt64 clears the value of optional_int64.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalInt64() *FieldTypeUpdateOne {
+	ftuo.optional_int64 = nil
+	ftuo.clearoptional_int64 = true
+	return ftuo
+}
+
 // SetNillableInt sets the nillable_int field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
 	ftuo.nillable_int = &i
@@ -710,6 +925,13 @@ func (ftuo *FieldTypeUpdateOne) AddNillableInt(i int) *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// ClearNillableInt clears the value of nillable_int.
+func (ftuo *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
+	ftuo.nillable_int = nil
+	ftuo.clearnillable_int = true
+	return ftuo
+}
+
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.nillable_int8 = &i
@@ -721,6 +943,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdat
 	if i != nil {
 		ftuo.SetNillableInt8(*i)
 	}
+	return ftuo
+}
+
+// ClearNillableInt8 clears the value of nillable_int8.
+func (ftuo *FieldTypeUpdateOne) ClearNillableInt8() *FieldTypeUpdateOne {
+	ftuo.nillable_int8 = nil
+	ftuo.clearnillable_int8 = true
 	return ftuo
 }
 
@@ -738,6 +967,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpd
 	return ftuo
 }
 
+// ClearNillableInt16 clears the value of nillable_int16.
+func (ftuo *FieldTypeUpdateOne) ClearNillableInt16() *FieldTypeUpdateOne {
+	ftuo.nillable_int16 = nil
+	ftuo.clearnillable_int16 = true
+	return ftuo
+}
+
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.nillable_int32 = &i
@@ -749,6 +985,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpd
 	if i != nil {
 		ftuo.SetNillableInt32(*i)
 	}
+	return ftuo
+}
+
+// ClearNillableInt32 clears the value of nillable_int32.
+func (ftuo *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
+	ftuo.nillable_int32 = nil
+	ftuo.clearnillable_int32 = true
 	return ftuo
 }
 
@@ -772,6 +1015,13 @@ func (ftuo *FieldTypeUpdateOne) AddNillableInt64(i int64) *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// ClearNillableInt64 clears the value of nillable_int64.
+func (ftuo *FieldTypeUpdateOne) ClearNillableInt64() *FieldTypeUpdateOne {
+	ftuo.nillable_int64 = nil
+	ftuo.clearnillable_int64 = true
+	return ftuo
+}
+
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.validate_optional_int32 = &i
@@ -783,6 +1033,13 @@ func (ftuo *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *Fiel
 	if i != nil {
 		ftuo.SetValidateOptionalInt32(*i)
 	}
+	return ftuo
+}
+
+// ClearValidateOptionalInt32 clears the value of validate_optional_int32.
+func (ftuo *FieldTypeUpdateOne) ClearValidateOptionalInt32() *FieldTypeUpdateOne {
+	ftuo.validate_optional_int32 = nil
+	ftuo.clearvalidate_optional_int32 = true
 	return ftuo
 }
 
@@ -905,20 +1162,44 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		builder.Add(fieldtype.FieldOptionalInt, *value)
 		ft.OptionalInt += *value
 	}
+	if ftuo.clearoptional_int {
+		update = true
+		var value int
+		ft.OptionalInt = value
+		builder.SetNull(fieldtype.FieldOptionalInt)
+	}
 	if value := ftuo.optional_int8; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt8, *value)
 		ft.OptionalInt8 = *value
+	}
+	if ftuo.clearoptional_int8 {
+		update = true
+		var value int8
+		ft.OptionalInt8 = value
+		builder.SetNull(fieldtype.FieldOptionalInt8)
 	}
 	if value := ftuo.optional_int16; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt16, *value)
 		ft.OptionalInt16 = *value
 	}
+	if ftuo.clearoptional_int16 {
+		update = true
+		var value int16
+		ft.OptionalInt16 = value
+		builder.SetNull(fieldtype.FieldOptionalInt16)
+	}
 	if value := ftuo.optional_int32; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldOptionalInt32, *value)
 		ft.OptionalInt32 = *value
+	}
+	if ftuo.clearoptional_int32 {
+		update = true
+		var value int32
+		ft.OptionalInt32 = value
+		builder.SetNull(fieldtype.FieldOptionalInt32)
 	}
 	if value := ftuo.optional_int64; value != nil {
 		update = true
@@ -929,6 +1210,12 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		update = true
 		builder.Add(fieldtype.FieldOptionalInt64, *value)
 		ft.OptionalInt64 += *value
+	}
+	if ftuo.clearoptional_int64 {
+		update = true
+		var value int64
+		ft.OptionalInt64 = value
+		builder.SetNull(fieldtype.FieldOptionalInt64)
 	}
 	if value := ftuo.nillable_int; value != nil {
 		update = true
@@ -944,20 +1231,40 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			ft.NillableInt = value
 		}
 	}
+	if ftuo.clearnillable_int {
+		update = true
+		ft.NillableInt = nil
+		builder.SetNull(fieldtype.FieldNillableInt)
+	}
 	if value := ftuo.nillable_int8; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt8, *value)
 		ft.NillableInt8 = value
+	}
+	if ftuo.clearnillable_int8 {
+		update = true
+		ft.NillableInt8 = nil
+		builder.SetNull(fieldtype.FieldNillableInt8)
 	}
 	if value := ftuo.nillable_int16; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt16, *value)
 		ft.NillableInt16 = value
 	}
+	if ftuo.clearnillable_int16 {
+		update = true
+		ft.NillableInt16 = nil
+		builder.SetNull(fieldtype.FieldNillableInt16)
+	}
 	if value := ftuo.nillable_int32; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldNillableInt32, *value)
 		ft.NillableInt32 = value
+	}
+	if ftuo.clearnillable_int32 {
+		update = true
+		ft.NillableInt32 = nil
+		builder.SetNull(fieldtype.FieldNillableInt32)
 	}
 	if value := ftuo.nillable_int64; value != nil {
 		update = true
@@ -973,10 +1280,21 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			ft.NillableInt64 = value
 		}
 	}
+	if ftuo.clearnillable_int64 {
+		update = true
+		ft.NillableInt64 = nil
+		builder.SetNull(fieldtype.FieldNillableInt64)
+	}
 	if value := ftuo.validate_optional_int32; value != nil {
 		update = true
 		builder.Set(fieldtype.FieldValidateOptionalInt32, *value)
 		ft.ValidateOptionalInt32 = *value
+	}
+	if ftuo.clearvalidate_optional_int32 {
+		update = true
+		var value int32
+		ft.ValidateOptionalInt32 = value
+		builder.SetNull(fieldtype.FieldValidateOptionalInt32)
 	}
 	if update {
 		query, args := builder.Query()
@@ -1076,6 +1394,43 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value := ftuo.validate_optional_int32; value != nil {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *value)
+	}
+	var properties []interface{}
+	if ftuo.clearoptional_int {
+		properties = append(properties, fieldtype.FieldOptionalInt)
+	}
+	if ftuo.clearoptional_int8 {
+		properties = append(properties, fieldtype.FieldOptionalInt8)
+	}
+	if ftuo.clearoptional_int16 {
+		properties = append(properties, fieldtype.FieldOptionalInt16)
+	}
+	if ftuo.clearoptional_int32 {
+		properties = append(properties, fieldtype.FieldOptionalInt32)
+	}
+	if ftuo.clearoptional_int64 {
+		properties = append(properties, fieldtype.FieldOptionalInt64)
+	}
+	if ftuo.clearnillable_int {
+		properties = append(properties, fieldtype.FieldNillableInt)
+	}
+	if ftuo.clearnillable_int8 {
+		properties = append(properties, fieldtype.FieldNillableInt8)
+	}
+	if ftuo.clearnillable_int16 {
+		properties = append(properties, fieldtype.FieldNillableInt16)
+	}
+	if ftuo.clearnillable_int32 {
+		properties = append(properties, fieldtype.FieldNillableInt32)
+	}
+	if ftuo.clearnillable_int64 {
+		properties = append(properties, fieldtype.FieldNillableInt64)
+	}
+	if ftuo.clearvalidate_optional_int32 {
+		properties = append(properties, fieldtype.FieldValidateOptionalInt32)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

@@ -34,8 +34,10 @@ type GroupUpdate struct {
 	active         *bool
 	expire         *time.Time
 	_type          *string
+	clear_type     bool
 	max_users      *int
 	addmax_users   *int
+	clearmax_users bool
 	name           *string
 	files          map[string]struct{}
 	blocked        map[string]struct{}
@@ -88,6 +90,13 @@ func (gu *GroupUpdate) SetNillableType(s *string) *GroupUpdate {
 	return gu
 }
 
+// ClearType clears the value of type.
+func (gu *GroupUpdate) ClearType() *GroupUpdate {
+	gu._type = nil
+	gu.clear_type = true
+	return gu
+}
+
 // SetMaxUsers sets the max_users field.
 func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
 	gu.max_users = &i
@@ -105,6 +114,13 @@ func (gu *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
 // AddMaxUsers adds i to max_users.
 func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
 	gu.addmax_users = &i
+	return gu
+}
+
+// ClearMaxUsers clears the value of max_users.
+func (gu *GroupUpdate) ClearMaxUsers() *GroupUpdate {
+	gu.max_users = nil
+	gu.clearmax_users = true
 	return gu
 }
 
@@ -353,6 +369,10 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(group.FieldType, *value)
 	}
+	if gu.clear_type {
+		update = true
+		builder.SetNull(group.FieldType)
+	}
 	if value := gu.max_users; value != nil {
 		update = true
 		builder.Set(group.FieldMaxUsers, *value)
@@ -360,6 +380,10 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value := gu.addmax_users; value != nil {
 		update = true
 		builder.Add(group.FieldMaxUsers, *value)
+	}
+	if gu.clearmax_users {
+		update = true
+		builder.SetNull(group.FieldMaxUsers)
 	}
 	if value := gu.name; value != nil {
 		update = true
@@ -580,6 +604,16 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 	if value := gu.name; value != nil {
 		v.Property(dsl.Single, group.FieldName, *value)
 	}
+	var properties []interface{}
+	if gu.clear_type {
+		properties = append(properties, group.FieldType)
+	}
+	if gu.clearmax_users {
+		properties = append(properties, group.FieldMaxUsers)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	for id := range gu.removedFiles {
 		tr := rv.Clone().OutE(group.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
@@ -638,8 +672,10 @@ type GroupUpdateOne struct {
 	active         *bool
 	expire         *time.Time
 	_type          *string
+	clear_type     bool
 	max_users      *int
 	addmax_users   *int
+	clearmax_users bool
 	name           *string
 	files          map[string]struct{}
 	blocked        map[string]struct{}
@@ -685,6 +721,13 @@ func (guo *GroupUpdateOne) SetNillableType(s *string) *GroupUpdateOne {
 	return guo
 }
 
+// ClearType clears the value of type.
+func (guo *GroupUpdateOne) ClearType() *GroupUpdateOne {
+	guo._type = nil
+	guo.clear_type = true
+	return guo
+}
+
 // SetMaxUsers sets the max_users field.
 func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
 	guo.max_users = &i
@@ -702,6 +745,13 @@ func (guo *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
 // AddMaxUsers adds i to max_users.
 func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
 	guo.addmax_users = &i
+	return guo
+}
+
+// ClearMaxUsers clears the value of max_users.
+func (guo *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
+	guo.max_users = nil
+	guo.clearmax_users = true
 	return guo
 }
 
@@ -956,6 +1006,11 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		builder.Set(group.FieldType, *value)
 		gr.Type = value
 	}
+	if guo.clear_type {
+		update = true
+		gr.Type = nil
+		builder.SetNull(group.FieldType)
+	}
 	if value := guo.max_users; value != nil {
 		update = true
 		builder.Set(group.FieldMaxUsers, *value)
@@ -965,6 +1020,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		update = true
 		builder.Add(group.FieldMaxUsers, *value)
 		gr.MaxUsers += *value
+	}
+	if guo.clearmax_users {
+		update = true
+		var value int
+		gr.MaxUsers = value
+		builder.SetNull(group.FieldMaxUsers)
 	}
 	if value := guo.name; value != nil {
 		update = true
@@ -1186,6 +1247,16 @@ func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value := guo.name; value != nil {
 		v.Property(dsl.Single, group.FieldName, *value)
+	}
+	var properties []interface{}
+	if guo.clear_type {
+		properties = append(properties, group.FieldType)
+	}
+	if guo.clearmax_users {
+		properties = append(properties, group.FieldMaxUsers)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	for id := range guo.removedFiles {
 		tr := rv.Clone().OutE(group.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
