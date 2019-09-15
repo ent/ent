@@ -35,7 +35,9 @@ type UserUpdate struct {
 	name             *string
 	last             *string
 	nickname         *string
+	clearnickname    bool
 	phone            *string
+	clearphone       bool
 	card             map[string]struct{}
 	pets             map[string]struct{}
 	files            map[string]struct{}
@@ -113,6 +115,13 @@ func (uu *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
 	return uu
 }
 
+// ClearNickname clears the value of nickname.
+func (uu *UserUpdate) ClearNickname() *UserUpdate {
+	uu.nickname = nil
+	uu.clearnickname = true
+	return uu
+}
+
 // SetPhone sets the phone field.
 func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
 	uu.phone = &s
@@ -124,6 +133,13 @@ func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetPhone(*s)
 	}
+	return uu
+}
+
+// ClearPhone clears the value of phone.
+func (uu *UserUpdate) ClearPhone() *UserUpdate {
+	uu.phone = nil
+	uu.clearphone = true
 	return uu
 }
 
@@ -617,9 +633,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldNickname, *value)
 	}
+	if uu.clearnickname {
+		update = true
+		builder.SetNull(user.FieldNickname)
+	}
 	if value := uu.phone; value != nil {
 		update = true
 		builder.Set(user.FieldPhone, *value)
+	}
+	if uu.clearphone {
+		update = true
+		builder.SetNull(user.FieldPhone)
 	}
 	if update {
 		query, args := builder.Query()
@@ -1126,6 +1150,16 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 		})
 		v.Property(dsl.Single, user.FieldPhone, *value)
 	}
+	var properties []interface{}
+	if uu.clearnickname {
+		properties = append(properties, user.FieldNickname)
+	}
+	if uu.clearphone {
+		properties = append(properties, user.FieldPhone)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	if uu.clearedCard {
 		tr := rv.Clone().OutE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -1255,7 +1289,9 @@ type UserUpdateOne struct {
 	name             *string
 	last             *string
 	nickname         *string
+	clearnickname    bool
 	phone            *string
+	clearphone       bool
 	card             map[string]struct{}
 	pets             map[string]struct{}
 	files            map[string]struct{}
@@ -1326,6 +1362,13 @@ func (uuo *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// ClearNickname clears the value of nickname.
+func (uuo *UserUpdateOne) ClearNickname() *UserUpdateOne {
+	uuo.nickname = nil
+	uuo.clearnickname = true
+	return uuo
+}
+
 // SetPhone sets the phone field.
 func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
 	uuo.phone = &s
@@ -1337,6 +1380,13 @@ func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetPhone(*s)
 	}
+	return uuo
+}
+
+// ClearPhone clears the value of phone.
+func (uuo *UserUpdateOne) ClearPhone() *UserUpdateOne {
+	uuo.phone = nil
+	uuo.clearphone = true
 	return uuo
 }
 
@@ -1838,10 +1888,22 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		builder.Set(user.FieldNickname, *value)
 		u.Nickname = *value
 	}
+	if uuo.clearnickname {
+		update = true
+		var value string
+		u.Nickname = value
+		builder.SetNull(user.FieldNickname)
+	}
 	if value := uuo.phone; value != nil {
 		update = true
 		builder.Set(user.FieldPhone, *value)
 		u.Phone = *value
+	}
+	if uuo.clearphone {
+		update = true
+		var value string
+		u.Phone = value
+		builder.SetNull(user.FieldPhone)
 	}
 	if update {
 		query, args := builder.Query()
@@ -2348,6 +2410,16 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *value)),
 		})
 		v.Property(dsl.Single, user.FieldPhone, *value)
+	}
+	var properties []interface{}
+	if uuo.clearnickname {
+		properties = append(properties, user.FieldNickname)
+	}
+	if uuo.clearphone {
+		properties = append(properties, user.FieldPhone)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if uuo.clearedCard {
 		tr := rv.Clone().OutE(user.CardLabel).Drop().Iterate()

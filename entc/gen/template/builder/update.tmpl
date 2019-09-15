@@ -159,8 +159,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{- if or (not $f.Immutable) $f.UpdateDefault }}
 		{{- $f.StructField }} *{{ $f.Type }}
 		{{- if $f.Type.Numeric }}
-			add{{- $f.StructField }} *{{ $f.Type }}
+			add{{ $f.StructField }} *{{ $f.Type }}
 		{{- end }}
+	{{- end }}
+	{{- if $f.Optional }}
+		clear{{ $f.StructField }} bool
 	{{- end }}
 {{ end }}
 {{- range $_, $e := $.Edges }}
@@ -221,7 +224,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{- $receiver := .Scope.Receiver -}}
 {{- range $_, $f := $.Fields -}}
 	{{- if $f.UpdateDefault -}}
-		if {{ $receiver }}.{{ $f.StructField }} == nil {
+		if {{ $receiver }}.{{ $f.StructField }} == nil
+		{{- with $.HasOptional }}
+			&& !{{ $receiver }}.clear{{ $f.StructField }}
+		{{- end }} {
 			v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
 			{{ $receiver }}.{{ $f.StructField }} = &v
 		}

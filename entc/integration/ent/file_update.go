@@ -32,7 +32,9 @@ type FileUpdate struct {
 	addsize      *int
 	name         *string
 	user         *string
+	clearuser    bool
 	group        *string
+	cleargroup   bool
 	owner        map[string]struct{}
 	_type        map[string]struct{}
 	clearedOwner bool
@@ -86,6 +88,13 @@ func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
 	return fu
 }
 
+// ClearUser clears the value of user.
+func (fu *FileUpdate) ClearUser() *FileUpdate {
+	fu.user = nil
+	fu.clearuser = true
+	return fu
+}
+
 // SetGroup sets the group field.
 func (fu *FileUpdate) SetGroup(s string) *FileUpdate {
 	fu.group = &s
@@ -97,6 +106,13 @@ func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 	if s != nil {
 		fu.SetGroup(*s)
 	}
+	return fu
+}
+
+// ClearGroup clears the value of group.
+func (fu *FileUpdate) ClearGroup() *FileUpdate {
+	fu.group = nil
+	fu.cleargroup = true
 	return fu
 }
 
@@ -249,9 +265,17 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(file.FieldUser, *value)
 	}
+	if fu.clearuser {
+		update = true
+		builder.SetNull(file.FieldUser)
+	}
 	if value := fu.group; value != nil {
 		update = true
 		builder.Set(file.FieldGroup, *value)
+	}
+	if fu.cleargroup {
+		update = true
+		builder.SetNull(file.FieldGroup)
 	}
 	if update {
 		query, args := builder.Query()
@@ -353,6 +377,16 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	if value := fu.group; value != nil {
 		v.Property(dsl.Single, file.FieldGroup, *value)
 	}
+	var properties []interface{}
+	if fu.clearuser {
+		properties = append(properties, file.FieldUser)
+	}
+	if fu.cleargroup {
+		properties = append(properties, file.FieldGroup)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	if fu.clearedOwner {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -380,7 +414,9 @@ type FileUpdateOne struct {
 	addsize      *int
 	name         *string
 	user         *string
+	clearuser    bool
 	group        *string
+	cleargroup   bool
 	owner        map[string]struct{}
 	_type        map[string]struct{}
 	clearedOwner bool
@@ -427,6 +463,13 @@ func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
 	return fuo
 }
 
+// ClearUser clears the value of user.
+func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
+	fuo.user = nil
+	fuo.clearuser = true
+	return fuo
+}
+
 // SetGroup sets the group field.
 func (fuo *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
 	fuo.group = &s
@@ -438,6 +481,13 @@ func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 	if s != nil {
 		fuo.SetGroup(*s)
 	}
+	return fuo
+}
+
+// ClearGroup clears the value of group.
+func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
+	fuo.group = nil
+	fuo.cleargroup = true
 	return fuo
 }
 
@@ -597,10 +647,21 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		builder.Set(file.FieldUser, *value)
 		f.User = value
 	}
+	if fuo.clearuser {
+		update = true
+		f.User = nil
+		builder.SetNull(file.FieldUser)
+	}
 	if value := fuo.group; value != nil {
 		update = true
 		builder.Set(file.FieldGroup, *value)
 		f.Group = *value
+	}
+	if fuo.cleargroup {
+		update = true
+		var value string
+		f.Group = value
+		builder.SetNull(file.FieldGroup)
 	}
 	if update {
 		query, args := builder.Query()
@@ -702,6 +763,16 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value := fuo.group; value != nil {
 		v.Property(dsl.Single, file.FieldGroup, *value)
+	}
+	var properties []interface{}
+	if fuo.clearuser {
+		properties = append(properties, file.FieldUser)
+	}
+	if fuo.cleargroup {
+		properties = append(properties, file.FieldGroup)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if fuo.clearedOwner {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()

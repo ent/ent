@@ -140,7 +140,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 var (
 	once      sync.Once
 	types     []string
-	typeNodes = make(map[string]func(ctx context.Context, id int) (*Node, error))
+	typeNodes = make(map[string]func(context.Context, int) (*Node, error))
 )
 
 func (c *Client) Node(ctx context.Context, id int) (*Node, error) {

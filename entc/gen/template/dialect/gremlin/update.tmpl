@@ -81,6 +81,20 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			{{- end }}
 		{{- end }}
 	{{- end }}
+	{{- /* clear optional fields. */}}
+	{{- with $.HasOptional }}
+		var properties []interface{}
+		{{- range $_, $f := $.Fields }}
+			{{- if $f.Optional }}
+				if {{ $receiver }}.clear{{ $f.StructField }} {
+					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})
+				}
+			{{- end }}
+		{{- end }}
+		if len(properties) > 0 {
+			v.SideEffect(__.Properties(properties...).Drop())
+		}
+	{{- end }}
 	{{- range $_, $e := $.Edges }}
 		{{- $direction := "In" }}
 		{{- $name := printf "%s.%s" $.Package $e.Constant }}

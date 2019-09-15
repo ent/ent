@@ -26,6 +26,7 @@ type UserUpdate struct {
 	buffer     *[]byte
 	title      *string
 	blob       *[]byte
+	clearblob  bool
 	predicates []predicate.User
 }
 
@@ -82,6 +83,13 @@ func (uu *UserUpdate) SetNillableTitle(s *string) *UserUpdate {
 // SetBlob sets the blob field.
 func (uu *UserUpdate) SetBlob(b []byte) *UserUpdate {
 	uu.blob = &b
+	return uu
+}
+
+// ClearBlob clears the value of blob.
+func (uu *UserUpdate) ClearBlob() *UserUpdate {
+	uu.blob = nil
+	uu.clearblob = true
 	return uu
 }
 
@@ -172,6 +180,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldBlob, *value)
 	}
+	if uu.clearblob {
+		update = true
+		builder.SetNull(user.FieldBlob)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -187,14 +199,15 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id     int
-	age    *int
-	addage *int
-	name   *string
-	phone  *string
-	buffer *[]byte
-	title  *string
-	blob   *[]byte
+	id        int
+	age       *int
+	addage    *int
+	name      *string
+	phone     *string
+	buffer    *[]byte
+	title     *string
+	blob      *[]byte
+	clearblob bool
 }
 
 // SetAge sets the age field.
@@ -244,6 +257,13 @@ func (uuo *UserUpdateOne) SetNillableTitle(s *string) *UserUpdateOne {
 // SetBlob sets the blob field.
 func (uuo *UserUpdateOne) SetBlob(b []byte) *UserUpdateOne {
 	uuo.blob = &b
+	return uuo
+}
+
+// ClearBlob clears the value of blob.
+func (uuo *UserUpdateOne) ClearBlob() *UserUpdateOne {
+	uuo.blob = nil
+	uuo.clearblob = true
 	return uuo
 }
 
@@ -343,6 +363,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		update = true
 		builder.Set(user.FieldBlob, *value)
 		u.Blob = *value
+	}
+	if uuo.clearblob {
+		update = true
+		var value []byte
+		u.Blob = value
+		builder.SetNull(user.FieldBlob)
 	}
 	if update {
 		query, args := builder.Query()

@@ -192,7 +192,7 @@ func (t Type) HasAssoc(name string) (*Edge, bool) {
 	return nil, false
 }
 
-// HasValidators indicates if any of the type's field has validators.
+// HasValidators reports if any of the type's field has validators.
 func (t Type) HasValidators() bool {
 	for _, f := range t.Fields {
 		if f.Validators > 0 {
@@ -202,7 +202,7 @@ func (t Type) HasValidators() bool {
 	return false
 }
 
-// HasDefault indicates if any of this type's fields has default value on creation.
+// HasDefault reports if any of this type's fields has default value on creation.
 func (t Type) HasDefault() bool {
 	for _, f := range t.Fields {
 		if f.Default {
@@ -212,10 +212,20 @@ func (t Type) HasDefault() bool {
 	return false
 }
 
-// HasUpdateDefault indicates if any of this type's fields has default value on update.
+// HasUpdateDefault reports if any of this type's fields has default value on update.
 func (t Type) HasUpdateDefault() bool {
 	for _, f := range t.Fields {
 		if f.Default {
+			return true
+		}
+	}
+	return false
+}
+
+// HasOptional reports if this type has an optional field.
+func (t Type) HasOptional() bool {
+	for _, f := range t.Fields {
+		if f.Optional {
 			return true
 		}
 	}

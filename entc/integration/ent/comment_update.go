@@ -26,13 +26,14 @@ import (
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	unique_int      *int
-	addunique_int   *int
-	unique_float    *float64
-	addunique_float *float64
-	nillable_int    *int
-	addnillable_int *int
-	predicates      []predicate.Comment
+	unique_int        *int
+	addunique_int     *int
+	unique_float      *float64
+	addunique_float   *float64
+	nillable_int      *int
+	addnillable_int   *int
+	clearnillable_int bool
+	predicates        []predicate.Comment
 }
 
 // Where adds a new predicate for the builder.
@@ -82,6 +83,13 @@ func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
 // AddNillableInt adds i to nillable_int.
 func (cu *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
 	cu.addnillable_int = &i
+	return cu
+}
+
+// ClearNillableInt clears the value of nillable_int.
+func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
+	cu.nillable_int = nil
+	cu.clearnillable_int = true
 	return cu
 }
 
@@ -175,6 +183,10 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Add(comment.FieldNillableInt, *value)
 	}
+	if cu.clearnillable_int {
+		update = true
+		builder.SetNull(comment.FieldNillableInt)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -251,6 +263,13 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	if value := cu.addnillable_int; value != nil {
 		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(*value)).Sum())
 	}
+	var properties []interface{}
+	if cu.clearnillable_int {
+		properties = append(properties, comment.FieldNillableInt)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
@@ -269,13 +288,14 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
-	id              string
-	unique_int      *int
-	addunique_int   *int
-	unique_float    *float64
-	addunique_float *float64
-	nillable_int    *int
-	addnillable_int *int
+	id                string
+	unique_int        *int
+	addunique_int     *int
+	unique_float      *float64
+	addunique_float   *float64
+	nillable_int      *int
+	addnillable_int   *int
+	clearnillable_int bool
 }
 
 // SetUniqueInt sets the unique_int field.
@@ -319,6 +339,13 @@ func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
 // AddNillableInt adds i to nillable_int.
 func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
 	cuo.addnillable_int = &i
+	return cuo
+}
+
+// ClearNillableInt clears the value of nillable_int.
+func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
+	cuo.nillable_int = nil
+	cuo.clearnillable_int = true
 	return cuo
 }
 
@@ -425,6 +452,11 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 			c.NillableInt = value
 		}
 	}
+	if cuo.clearnillable_int {
+		update = true
+		c.NillableInt = nil
+		builder.SetNull(comment.FieldNillableInt)
+	}
 	if update {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -501,6 +533,13 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value := cuo.addnillable_int; value != nil {
 		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(*value)).Sum())
+	}
+	var properties []interface{}
+	if cuo.clearnillable_int {
+		properties = append(properties, comment.FieldNillableInt)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	v.ValueMap(true)
 	if len(constraints) > 0 {

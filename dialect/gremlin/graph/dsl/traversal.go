@@ -339,6 +339,12 @@ func (t *Traversal) Union(args ...interface{}) *Traversal {
 	return t.Add(Dot, NewFunc("union", args...))
 }
 
+// SideEffect allows the traverser to proceed unchanged, but yield some computational
+// sideEffect in the process.
+func (t *Traversal) SideEffect(args ...interface{}) *Traversal {
+	return t.Add(Dot, NewFunc("sideEffect", args...))
+}
+
 // Each is a Groovy each-loop function.
 func Each(v interface{}, cb func(it *Traversal) *Traversal) *Traversal {
 	t := &Traversal{}

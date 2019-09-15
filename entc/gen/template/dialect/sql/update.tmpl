@@ -97,6 +97,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					}
 				{{- end }}
 			{{- end }}
+			{{- if $f.Optional }}
+				if {{ $receiver }}.clear{{ $f.StructField }} {
+					update = true
+					{{- if $one }}
+						{{- if $f.Nillable }}
+							{{ $.Receiver }}.{{ pascal $f.Name }} = nil
+						{{- else }}
+							var value {{ $f.Type }}
+							{{ $.Receiver }}.{{ pascal $f.Name }} = value
+						{{- end }}
+					{{- end }}
+					builder.SetNull({{ $.Package }}.{{ $f.Constant }})
+				}
+			{{- end }}
 		{{- end }}
 		if update {
 			query, args := builder.Query()
