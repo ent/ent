@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	"math"
 	"regexp"
 	"strings"
 	"testing"
@@ -161,6 +162,7 @@ func TestMySQL_Create(t *testing.T) {
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
 						{Name: "age", Type: field.TypeInt},
 					},
 					PrimaryKey: []*Column{
@@ -179,7 +181,8 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
-						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", ""))
+						AddRow("name", "varchar(255)", "NO", "YES", "NULL", "", "", "").
+						AddRow("text", "longtext", "NO", "YES", "NULL", "", "", ""))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).

@@ -368,6 +368,9 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 			return fmt.Errorf("converting varchar size to int: %v", err)
 		}
 		c.Size = size
+	case "longtext":
+		c.Size = math.MaxInt32
+		c.Type = field.TypeString
 	}
 	if defaults.Valid && defaults.String != Null {
 		return c.ScanDefault(defaults.String)
