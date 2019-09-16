@@ -158,6 +158,15 @@ func Title(v string) predicate.User {
 	)
 }
 
+// NewName applies equality check predicate on the "new_name" field. It's identical to NewNameEQ.
+func NewName(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldNewName), v))
+		},
+	)
+}
+
 // Blob applies equality check predicate on the "blob" field. It's identical to BlobEQ.
 func Blob(v []byte) predicate.User {
 	return predicate.User(
@@ -758,6 +767,161 @@ func TitleContainsFold(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.ContainsFold(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// NewNameEQ applies the EQ predicate on the "new_name" field.
+func NewNameEQ(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameNEQ applies the NEQ predicate on the "new_name" field.
+func NewNameNEQ(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameGT applies the GT predicate on the "new_name" field.
+func NewNameGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameGTE applies the GTE predicate on the "new_name" field.
+func NewNameGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameLT applies the LT predicate on the "new_name" field.
+func NewNameLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameLTE applies the LTE predicate on the "new_name" field.
+func NewNameLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameIn applies the In predicate on the "new_name" field.
+func NewNameIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNewName), v...))
+		},
+	)
+}
+
+// NewNameNotIn applies the NotIn predicate on the "new_name" field.
+func NewNameNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNewName), v...))
+		},
+	)
+}
+
+// NewNameContains applies the Contains predicate on the "new_name" field.
+func NewNameContains(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.Contains(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameHasPrefix applies the HasPrefix predicate on the "new_name" field.
+func NewNameHasPrefix(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.HasPrefix(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameHasSuffix applies the HasSuffix predicate on the "new_name" field.
+func NewNameHasSuffix(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.HasSuffix(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameIsNil applies the IsNil predicate on the "new_name" field.
+func NewNameIsNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldNewName)))
+		},
+	)
+}
+
+// NewNameNotNil applies the NotNil predicate on the "new_name" field.
+func NewNameNotNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldNewName)))
+		},
+	)
+}
+
+// NewNameEqualFold applies the EqualFold predicate on the "new_name" field.
+func NewNameEqualFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EqualFold(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameContainsFold applies the ContainsFold predicate on the "new_name" field.
+func NewNameContainsFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.ContainsFold(s.C(FieldNewName), v))
 		},
 	)
 }

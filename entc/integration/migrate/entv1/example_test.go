@@ -38,6 +38,7 @@ func ExampleUser() {
 		SetAge(1).
 		SetName("string").
 		SetAddress("string").
+		SetRenamed("string").
 		SetBlob([]byte{}).
 		SaveX(ctx)
 	log.Println("user created:", u)

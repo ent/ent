@@ -140,6 +140,15 @@ func Address(v string) predicate.User {
 	)
 }
 
+// Renamed applies equality check predicate on the "renamed" field. It's identical to RenamedEQ.
+func Renamed(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldRenamed), v))
+		},
+	)
+}
+
 // Blob applies equality check predicate on the "blob" field. It's identical to BlobEQ.
 func Blob(v []byte) predicate.User {
 	return predicate.User(
@@ -529,6 +538,161 @@ func AddressContainsFold(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.ContainsFold(s.C(FieldAddress), v))
+		},
+	)
+}
+
+// RenamedEQ applies the EQ predicate on the "renamed" field.
+func RenamedEQ(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedNEQ applies the NEQ predicate on the "renamed" field.
+func RenamedNEQ(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedGT applies the GT predicate on the "renamed" field.
+func RenamedGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedGTE applies the GTE predicate on the "renamed" field.
+func RenamedGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedLT applies the LT predicate on the "renamed" field.
+func RenamedLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedLTE applies the LTE predicate on the "renamed" field.
+func RenamedLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedIn applies the In predicate on the "renamed" field.
+func RenamedIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldRenamed), v...))
+		},
+	)
+}
+
+// RenamedNotIn applies the NotIn predicate on the "renamed" field.
+func RenamedNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldRenamed), v...))
+		},
+	)
+}
+
+// RenamedContains applies the Contains predicate on the "renamed" field.
+func RenamedContains(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.Contains(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedHasPrefix applies the HasPrefix predicate on the "renamed" field.
+func RenamedHasPrefix(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.HasPrefix(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedHasSuffix applies the HasSuffix predicate on the "renamed" field.
+func RenamedHasSuffix(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.HasSuffix(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedIsNil applies the IsNil predicate on the "renamed" field.
+func RenamedIsNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldRenamed)))
+		},
+	)
+}
+
+// RenamedNotNil applies the NotNil predicate on the "renamed" field.
+func RenamedNotNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldRenamed)))
+		},
+	)
+}
+
+// RenamedEqualFold applies the EqualFold predicate on the "renamed" field.
+func RenamedEqualFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EqualFold(s.C(FieldRenamed), v))
+		},
+	)
+}
+
+// RenamedContainsFold applies the ContainsFold predicate on the "renamed" field.
+func RenamedContainsFold(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.ContainsFold(s.C(FieldRenamed), v))
 		},
 	)
 }

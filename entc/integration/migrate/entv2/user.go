@@ -28,6 +28,8 @@ type User struct {
 	Buffer []byte `json:"buffer,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
+	// NewName holds the value of the "new_name" field.
+	NewName string `json:"new_name,omitempty"`
 	// Blob holds the value of the "blob" field.
 	Blob []byte `json:"blob,omitempty"`
 }
@@ -35,13 +37,14 @@ type User struct {
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
 	var vu struct {
-		ID     int
-		Age    sql.NullInt64
-		Name   sql.NullString
-		Phone  sql.NullString
-		Buffer []byte
-		Title  sql.NullString
-		Blob   []byte
+		ID      int
+		Age     sql.NullInt64
+		Name    sql.NullString
+		Phone   sql.NullString
+		Buffer  []byte
+		Title   sql.NullString
+		NewName sql.NullString
+		Blob    []byte
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
@@ -51,6 +54,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		&vu.Phone,
 		&vu.Buffer,
 		&vu.Title,
+		&vu.NewName,
 		&vu.Blob,
 	); err != nil {
 		return err
@@ -61,6 +65,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Phone = vu.Phone.String
 	u.Buffer = vu.Buffer
 	u.Title = vu.Title.String
+	u.NewName = vu.NewName.String
 	u.Blob = vu.Blob
 	return nil
 }
@@ -93,6 +98,7 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf(", phone=%v", u.Phone))
 	buf.WriteString(fmt.Sprintf(", buffer=%v", u.Buffer))
 	buf.WriteString(fmt.Sprintf(", title=%v", u.Title))
+	buf.WriteString(fmt.Sprintf(", new_name=%v", u.NewName))
 	buf.WriteString(fmt.Sprintf(", blob=%v", u.Blob))
 	buf.WriteString(")")
 	return buf.String()

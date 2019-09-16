@@ -123,6 +123,13 @@ func (b *{{ $builder }}) Validate(fn func({{ $t }}) error) *{{ $builder }} {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *{{ $builder }}) StorageKey(key string) *{{ $builder }} {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	return b.desc
@@ -227,6 +234,14 @@ func (b *{{ $builder }}) StructTag(s string) *{{ $builder }} {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *{{ $builder }}) Validate(fn func({{ $t }}) error) *{{ $builder }} {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *{{ $builder }}) StorageKey(key string) *{{ $builder }} {
+	b.desc.StorageKey = key
 	return b
 }
 

@@ -418,7 +418,7 @@ func (f Field) NullTypeField(rec string) string {
 func (f Field) Column() *schema.Column {
 	pk := f.Name == "id"
 	c := &schema.Column{
-		Name:     f.Name,
+		Name:     f.StorageKey(),
 		Type:     f.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
@@ -454,6 +454,15 @@ func (f Field) ExampleCode() string {
 	default:
 		return "1"
 	}
+}
+
+// StorageKey returns the storage name of the field.
+// SQL columns or Gremlin property.
+func (f Field) StorageKey() string {
+	if f.def != nil && f.def.StorageKey != "" {
+		return f.def.StorageKey
+	}
+	return snake(f.Name)
 }
 
 // Label returns the Gremlin label name of the edge.
