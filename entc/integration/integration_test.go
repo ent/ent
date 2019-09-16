@@ -498,8 +498,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.False(client.User.Query().Where(user.Name("alex")).Exist(ctx))
 
 	t.Log("query using get")
-	require.Equal(usr.Name, client.User.Query().GetX(ctx, usr.ID).Name)
-	uid, err := client.User.Query().Where(user.Not(user.Name(usr.Name))).Get(ctx, usr.ID)
+	require.Equal(usr.Name, client.User.GetX(ctx, usr.ID).Name)
+	uid, err := client.User.Query().Where(user.ID(usr.ID), user.Not(user.Name(usr.Name))).Only(ctx)
 	require.Error(err)
 	require.Nil(uid)
 

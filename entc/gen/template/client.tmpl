@@ -142,6 +142,20 @@ func (c *{{ $client }}) Query() *{{ $n.Name }}Query {
 	return &{{ $n.Name }}Query{config: c.config}
 }
 
+// Get returns a {{ $n.Name }} entity by its id.
+func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error) {
+	return c.Query().Where({{ $n.Package }}.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Name }} {
+	{{ $rec }}, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return {{ $rec }}
+}
+
 {{ range $_, $e := $n.Edges }}
 {{ $builder := print (pascal $e.Type.Name) "Query" }}
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.

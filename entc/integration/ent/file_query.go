@@ -100,20 +100,6 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 	return query
 }
 
-// Get returns a File entity by its id.
-func (fq *FileQuery) Get(ctx context.Context, id string) (*File, error) {
-	return fq.Where(file.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (fq *FileQuery) GetX(ctx context.Context, id string) *File {
-	f, err := fq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return f
-}
-
 // First returns the first File entity in the query. Returns *ErrNotFound when no file was found.
 func (fq *FileQuery) First(ctx context.Context) (*File, error) {
 	fs, err := fq.Limit(1).All(ctx)

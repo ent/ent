@@ -179,6 +179,20 @@ func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
 
+// Get returns a Card entity by its id.
+func (c *CardClient) Get(ctx context.Context, id string) (*Card, error) {
+	return c.Query().Where(card.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CardClient) GetX(ctx context.Context, id string) *Card {
+	ca, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ca
+}
+
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -248,6 +262,20 @@ func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{config: c.config}
 }
 
+// Get returns a Comment entity by its id.
+func (c *CommentClient) Get(ctx context.Context, id string) (*Comment, error) {
+	return c.Query().Where(comment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CommentClient) GetX(ctx context.Context, id string) *Comment {
+	co, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return co
+}
+
 // FieldTypeClient is a client for the FieldType schema.
 type FieldTypeClient struct {
 	config
@@ -298,6 +326,20 @@ func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{config: c.config}
 }
 
+// Get returns a FieldType entity by its id.
+func (c *FieldTypeClient) Get(ctx context.Context, id string) (*FieldType, error) {
+	return c.Query().Where(fieldtype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FieldTypeClient) GetX(ctx context.Context, id string) *FieldType {
+	ft, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ft
+}
+
 // FileClient is a client for the File schema.
 type FileClient struct {
 	config
@@ -346,6 +388,20 @@ func (c *FileClient) DeleteOneID(id string) *FileDeleteOne {
 // Create returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{config: c.config}
+}
+
+// Get returns a File entity by its id.
+func (c *FileClient) Get(ctx context.Context, id string) (*File, error) {
+	return c.Query().Where(file.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileClient) GetX(ctx context.Context, id string) *File {
+	f, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return f
 }
 
 // QueryOwner queries the owner edge of a File.
@@ -436,6 +492,20 @@ func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{config: c.config}
 }
 
+// Get returns a FileType entity by its id.
+func (c *FileTypeClient) Get(ctx context.Context, id string) (*FileType, error) {
+	return c.Query().Where(filetype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
+	ft, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ft
+}
+
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
@@ -500,6 +570,20 @@ func (c *GroupClient) DeleteOneID(id string) *GroupDeleteOne {
 // Create returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
+}
+
+// Get returns a Group entity by its id.
+func (c *GroupClient) Get(ctx context.Context, id string) (*Group, error) {
+	return c.Query().Where(group.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
+	gr, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return gr
 }
 
 // QueryFiles queries the files edge of a Group.
@@ -629,6 +713,20 @@ func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{config: c.config}
 }
 
+// Get returns a GroupInfo entity by its id.
+func (c *GroupInfoClient) Get(ctx context.Context, id string) (*GroupInfo, error) {
+	return c.Query().Where(groupinfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
+	gi, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return gi
+}
+
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
@@ -693,6 +791,20 @@ func (c *NodeClient) DeleteOneID(id string) *NodeDeleteOne {
 // Create returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
+}
+
+// Get returns a Node entity by its id.
+func (c *NodeClient) Get(ctx context.Context, id string) (*Node, error) {
+	return c.Query().Where(node.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
+	n, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return n
 }
 
 // QueryPrev queries the prev edge of a Node.
@@ -778,6 +890,20 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 // Create returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
+}
+
+// Get returns a Pet entity by its id.
+func (c *PetClient) Get(ctx context.Context, id string) (*Pet, error) {
+	return c.Query().Where(pet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
+	pe, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return pe
 }
 
 // QueryTeam queries the team edge of a Pet.
@@ -866,6 +992,20 @@ func (c *UserClient) DeleteOneID(id string) *UserDeleteOne {
 // Create returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id string) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id string) *User {
+	u, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return u
 }
 
 // QueryCard queries the card edge of a User.

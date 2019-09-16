@@ -80,20 +80,6 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	return query
 }
 
-// Get returns a FileType entity by its id.
-func (ftq *FileTypeQuery) Get(ctx context.Context, id string) (*FileType, error) {
-	return ftq.Where(filetype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (ftq *FileTypeQuery) GetX(ctx context.Context, id string) *FileType {
-	ft, err := ftq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return ft
-}
-
 // First returns the first FileType entity in the query. Returns *ErrNotFound when no filetype was found.
 func (ftq *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
 	fts, err := ftq.Limit(1).All(ctx)

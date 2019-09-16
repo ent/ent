@@ -60,20 +60,6 @@ func (ftq *FieldTypeQuery) Order(o ...Order) *FieldTypeQuery {
 	return ftq
 }
 
-// Get returns a FieldType entity by its id.
-func (ftq *FieldTypeQuery) Get(ctx context.Context, id string) (*FieldType, error) {
-	return ftq.Where(fieldtype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (ftq *FieldTypeQuery) GetX(ctx context.Context, id string) *FieldType {
-	ft, err := ftq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return ft
-}
-
 // First returns the first FieldType entity in the query. Returns *ErrNotFound when no fieldtype was found.
 func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
 	fts, err := ftq.Limit(1).All(ctx)

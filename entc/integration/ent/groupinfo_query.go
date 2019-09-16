@@ -80,20 +80,6 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	return query
 }
 
-// Get returns a GroupInfo entity by its id.
-func (giq *GroupInfoQuery) Get(ctx context.Context, id string) (*GroupInfo, error) {
-	return giq.Where(groupinfo.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (giq *GroupInfoQuery) GetX(ctx context.Context, id string) *GroupInfo {
-	gi, err := giq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return gi
-}
-
 // First returns the first GroupInfo entity in the query. Returns *ErrNotFound when no groupinfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
 	gis, err := giq.Limit(1).All(ctx)

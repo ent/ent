@@ -293,20 +293,6 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 	return query
 }
 
-// Get returns a User entity by its id.
-func (uq *UserQuery) Get(ctx context.Context, id string) (*User, error) {
-	return uq.Where(user.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (uq *UserQuery) GetX(ctx context.Context, id string) *User {
-	u, err := uq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return u
-}
-
 // First returns the first User entity in the query. Returns *ErrNotFound when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 	us, err := uq.Limit(1).All(ctx)

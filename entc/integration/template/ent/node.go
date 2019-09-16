@@ -169,21 +169,21 @@ func (c *Client) loadTypes(ctx context.Context) error {
 		return err
 	}
 	typeNodes[group.Table] = func(ctx context.Context, id int) (*Node, error) {
-		nv, err := c.Group.Query().Get(ctx, id)
+		nv, err := c.Group.Get(ctx, id)
 		if err != nil {
 			return nil, err
 		}
 		return nv.Node(ctx)
 	}
 	typeNodes[pet.Table] = func(ctx context.Context, id int) (*Node, error) {
-		nv, err := c.Pet.Query().Get(ctx, id)
+		nv, err := c.Pet.Get(ctx, id)
 		if err != nil {
 			return nil, err
 		}
 		return nv.Node(ctx)
 	}
 	typeNodes[user.Table] = func(ctx context.Context, id int) (*Node, error) {
-		nv, err := c.User.Query().Get(ctx, id)
+		nv, err := c.User.Get(ctx, id)
 		if err != nil {
 			return nil, err
 		}
