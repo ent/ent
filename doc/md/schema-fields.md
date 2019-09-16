@@ -251,6 +251,21 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Storage Key
+
+Custom storage name can be configured using the `StorageKey` method.  
+It's mapped to a column name in SQL dialects and to property name in Gremlin.
+
+```go
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			StorageKey(`old_name"`),
+	}
+}
+```
+
 ## Indexes
 Indexes can be defined on multi fields and some types of edges as well.
 However, you should note, that this is currently an SQL-only feature.
