@@ -80,20 +80,6 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// Get returns a Card entity by its id.
-func (cq *CardQuery) Get(ctx context.Context, id string) (*Card, error) {
-	return cq.Where(card.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (cq *CardQuery) GetX(ctx context.Context, id string) *Card {
-	c, err := cq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return c
-}
-
 // First returns the first Card entity in the query. Returns *ErrNotFound when no card was found.
 func (cq *CardQuery) First(ctx context.Context) (*Card, error) {
 	cs, err := cq.Limit(1).All(ctx)

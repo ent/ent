@@ -60,20 +60,6 @@ func (cq *CommentQuery) Order(o ...Order) *CommentQuery {
 	return cq
 }
 
-// Get returns a Comment entity by its id.
-func (cq *CommentQuery) Get(ctx context.Context, id string) (*Comment, error) {
-	return cq.Where(comment.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (cq *CommentQuery) GetX(ctx context.Context, id string) *Comment {
-	c, err := cq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return c
-}
-
 // First returns the first Comment entity in the query. Returns *ErrNotFound when no comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
 	cs, err := cq.Limit(1).All(ctx)

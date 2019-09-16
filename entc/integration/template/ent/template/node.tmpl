@@ -121,7 +121,7 @@ func (c *Client) loadTypes(ctx context.Context) error {
 	}
 	{{- range $_, $n := $.Nodes }}
 		typeNodes[{{ $n.Package }}.Table] = func(ctx context.Context, id {{ $.IDType }})(*Node, error) {
-			nv, err := c.{{ $n.Name }}.Query().Get(ctx, id)
+			nv, err := c.{{ $n.Name }}.Get(ctx, id)
 			if err != nil {
 				return nil, err
 			}

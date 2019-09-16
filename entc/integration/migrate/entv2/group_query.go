@@ -54,20 +54,6 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 	return gq
 }
 
-// Get returns a Group entity by its id.
-func (gq *GroupQuery) Get(ctx context.Context, id int) (*Group, error) {
-	return gq.Where(group.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (gq *GroupQuery) GetX(ctx context.Context, id int) *Group {
-	gr, err := gq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return gr
-}
-
 // First returns the first Group entity in the query. Returns *ErrNotFound when no group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
 	grs, err := gq.Limit(1).All(ctx)

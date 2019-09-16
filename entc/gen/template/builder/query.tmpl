@@ -79,21 +79,6 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	}
 {{ end }}
 
-
-// Get returns a {{ $.Name }} entity by its id.
-func ({{ $receiver }} *{{ $builder }}) Get(ctx context.Context, id {{ $.ID.Type }}) (*{{ $.Name }}, error) {
-	return {{ $receiver }}.Where({{ $.Package }}.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) GetX(ctx context.Context, id {{ $.ID.Type }}) *{{ $.Name }} {
-	{{ $.Receiver }}, err := {{ $receiver }}.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return {{ $.Receiver }}
-}
-
 // First returns the first {{ $.Name }} entity in the query. Returns *ErrNotFound when no {{ lower $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
 	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(1).All(ctx)
