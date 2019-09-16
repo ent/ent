@@ -31,6 +31,11 @@ func (User) Fields() []ent.Field {
 		// all existing rows.
 		field.String("title").
 			Default("SWE"),
+		// change column name and reference it to the
+		// previous one ("renamed").
+		field.String("new_name").
+			Optional().
+			StorageKey("renamed"),
 		// extending the blob size.
 		field.Bytes("blob").
 			Optional().

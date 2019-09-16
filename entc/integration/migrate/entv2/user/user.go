@@ -25,6 +25,8 @@ const (
 	FieldBuffer = "buffer"
 	// FieldTitle holds the string denoting the title vertex property in the database.
 	FieldTitle = "title"
+	// FieldNewName holds the string denoting the new_name vertex property in the database.
+	FieldNewName = "renamed"
 	// FieldBlob holds the string denoting the blob vertex property in the database.
 	FieldBlob = "blob"
 
@@ -40,6 +42,7 @@ var Columns = []string{
 	FieldPhone,
 	FieldBuffer,
 	FieldTitle,
+	FieldNewName,
 	FieldBlob,
 }
 

@@ -37,6 +37,7 @@ type Field struct {
 	UpdateDefault bool       `json:"update_default,omitempty"`
 	Immutable     bool       `json:"immutable,omitempty"`
 	Validators    int        `json:"validators,omitempty"`
+	StorageKey    string     `json:"storage_key,omitempty"`
 }
 
 // StructField represents an external struct field defined in the schema.
@@ -103,6 +104,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 			Nillable:      fd.Nillable,
 			Optional:      fd.Optional,
 			Immutable:     fd.Immutable,
+			StorageKey:    fd.StorageKey,
 			Validators:    len(fd.Validators),
 			Default:       fd.Default != nil,
 			UpdateDefault: fd.UpdateDefault != nil,

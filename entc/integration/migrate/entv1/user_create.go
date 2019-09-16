@@ -22,6 +22,7 @@ type UserCreate struct {
 	age     *int32
 	name    *string
 	address *string
+	renamed *string
 	blob    *[]byte
 }
 
@@ -47,6 +48,20 @@ func (uc *UserCreate) SetAddress(s string) *UserCreate {
 func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
 	if s != nil {
 		uc.SetAddress(*s)
+	}
+	return uc
+}
+
+// SetRenamed sets the renamed field.
+func (uc *UserCreate) SetRenamed(s string) *UserCreate {
+	uc.renamed = &s
+	return uc
+}
+
+// SetNillableRenamed sets the renamed field if the given value is not nil.
+func (uc *UserCreate) SetNillableRenamed(s *string) *UserCreate {
+	if s != nil {
+		uc.SetRenamed(*s)
 	}
 	return uc
 }
@@ -101,6 +116,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.address != nil {
 		builder.Set(user.FieldAddress, *uc.address)
 		u.Address = *uc.address
+	}
+	if uc.renamed != nil {
+		builder.Set(user.FieldRenamed, *uc.renamed)
+		u.Renamed = *uc.renamed
 	}
 	if uc.blob != nil {
 		builder.Set(user.FieldBlob, *uc.blob)

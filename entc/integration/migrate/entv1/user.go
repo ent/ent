@@ -24,6 +24,8 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
+	// Renamed holds the value of the "renamed" field.
+	Renamed string `json:"renamed,omitempty"`
 	// Blob holds the value of the "blob" field.
 	Blob []byte `json:"blob,omitempty"`
 }
@@ -35,6 +37,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		Age     sql.NullInt64
 		Name    sql.NullString
 		Address sql.NullString
+		Renamed sql.NullString
 		Blob    []byte
 	}
 	// the order here should be the same as in the `user.Columns`.
@@ -43,6 +46,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		&vu.Age,
 		&vu.Name,
 		&vu.Address,
+		&vu.Renamed,
 		&vu.Blob,
 	); err != nil {
 		return err
@@ -51,6 +55,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Age = int32(vu.Age.Int64)
 	u.Name = vu.Name.String
 	u.Address = vu.Address.String
+	u.Renamed = vu.Renamed.String
 	u.Blob = vu.Blob
 	return nil
 }
@@ -81,6 +86,7 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf(", age=%v", u.Age))
 	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
 	buf.WriteString(fmt.Sprintf(", address=%v", u.Address))
+	buf.WriteString(fmt.Sprintf(", renamed=%v", u.Renamed))
 	buf.WriteString(fmt.Sprintf(", blob=%v", u.Blob))
 	buf.WriteString(")")
 	return buf.String()

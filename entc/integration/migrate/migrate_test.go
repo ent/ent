@@ -53,6 +53,10 @@ func TestMySQL(t *testing.T) {
 			// sql specific predicates.
 			EqualFold(t, clientv2)
 			ContainsFold(t, clientv2)
+
+			// "renamed" field was renamed to "new_name".
+			exist := clientv2.User.Query().Where(user.NewName("renamed")).ExistX(ctx)
+			require.True(t, exist, "expect renamed column to have previous values")
 		})
 	}
 }
@@ -81,7 +85,7 @@ func TestSQLite(t *testing.T) {
 
 func SanityV1(t *testing.T, client *entv1.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("foo").SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("foo").SetRenamed("renamed").SaveX(ctx)
 	require.EqualValues(t, 1, u.Age)
 	require.Equal(t, "foo", u.Name)
 
