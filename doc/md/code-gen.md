@@ -67,7 +67,21 @@ Flags:
       --idtype [int string]   type of the id field (default int)
       --storage strings       list of storage drivers to support (default [sql])
       --target string         target directory for codegen
+      --template strings      external templates to execute
 ```
+
+## Storage Options
+
+`entc` can generate assets for both SQL and Gremlin dialect. The default dialect is SQL.
+
+## External Templates
+
+`entc` accepts external Go templates to execute. If the template name is already defined by
+`entc`, it will override the existing one. Otherwise, it will write the execution output to
+a file with the same name as the template.
+
+Example of a custom template provides a `Node` API for GraphQL - 
+[Github](https://github.com/facebookincubator/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
 
 ## Schema Description
 
