@@ -129,9 +129,9 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
-	if pu.name != nil {
+	if value := pu.name; value != nil {
 		update = true
-		builder.Set(pet.FieldName, *pu.name)
+		builder.Set(pet.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -273,10 +273,10 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		res     sql.Result
 		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
-	if puo.name != nil {
+	if value := puo.name; value != nil {
 		update = true
-		builder.Set(pet.FieldName, *puo.name)
-		pe.Name = *puo.name
+		builder.Set(pet.FieldName, *value)
+		pe.Name = *value
 	}
 	if update {
 		query, args := builder.Query()

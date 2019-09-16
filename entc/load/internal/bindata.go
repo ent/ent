@@ -19,7 +19,7 @@ import (
 func bindataRead(data []byte, name string) ([]byte, error) {
 	gz, err := gzip.NewReader(bytes.NewBuffer(data))
 	if err != nil {
-		return nil, fmt.Errorf("Read %q: %v", name, err)
+		return nil, fmt.Errorf("read %q: %v", name, err)
 	}
 
 	var buf bytes.Buffer
@@ -27,7 +27,7 @@ func bindataRead(data []byte, name string) ([]byte, error) {
 	clErr := gz.Close()
 
 	if err != nil {
-		return nil, fmt.Errorf("Read %q: %v", name, err)
+		return nil, fmt.Errorf("read %q: %v", name, err)
 	}
 	if clErr != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (fi bindataFileInfo) Mode() os.FileMode {
 	return fi.mode
 }
 
-// Mode return file modify time
+// ModTime return file modify time
 func (fi bindataFileInfo) ModTime() time.Time {
 	return fi.modTime
 }
@@ -93,7 +93,7 @@ func templateMainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/main.tmpl", size: 843, mode: os.FileMode(420), modTime: time.Unix(1567360769, 0)}
+	info := bindataFileInfo{name: "template/main.tmpl", size: 843, mode: os.FileMode(420), modTime: time.Unix(1567330508, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -113,7 +113,7 @@ func schemaGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "schema.go", size: 5321, mode: os.FileMode(420), modTime: time.Unix(1568643141, 0)}
+	info := bindataFileInfo{name: "schema.go", size: 5321, mode: os.FileMode(420), modTime: time.Unix(1568644555, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

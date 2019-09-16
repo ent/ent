@@ -130,6 +130,20 @@ func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
 
+// Get returns a Card entity by its id.
+func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
+	return c.Query().Where(card.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CardClient) GetX(ctx context.Context, id int) *Card {
+	ca, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ca
+}
+
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -191,6 +205,20 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 // Create returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	u, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return u
 }
 
 // QueryCard queries the card edge of a User.

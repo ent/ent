@@ -8,14 +8,21 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) error {
+func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table({{ $.Package }}.Table))
 	for _, p := range {{ $receiver }}.predicates {
 		p(selector)
 	}
 	query, args := sql.Delete({{ $.Package }}.Table).FromSelect(selector).Query()
-	return {{ $receiver }}.driver.Exec(ctx, query, args, &res)
+	if err := {{ $receiver }}.driver.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
 {{ end }}

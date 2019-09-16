@@ -21,6 +21,7 @@ import (
 type NodeUpdate struct {
 	config
 	value           *int
+	addvalue        *int
 	parent          map[int]struct{}
 	children        map[int]struct{}
 	clearedParent   bool
@@ -37,6 +38,12 @@ func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 // SetValue sets the value field.
 func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
 	nu.value = &i
+	return nu
+}
+
+// AddValue adds i to value.
+func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
+	nu.addvalue = &i
 	return nu
 }
 
@@ -170,9 +177,13 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
-	if nu.value != nil {
+	if value := nu.value; value != nil {
 		update = true
-		builder.Set(node.FieldValue, *nu.value)
+		builder.Set(node.FieldValue, *value)
+	}
+	if value := nu.addvalue; value != nil {
+		update = true
+		builder.Add(node.FieldValue, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -247,6 +258,7 @@ type NodeUpdateOne struct {
 	config
 	id              int
 	value           *int
+	addvalue        *int
 	parent          map[int]struct{}
 	children        map[int]struct{}
 	clearedParent   bool
@@ -256,6 +268,12 @@ type NodeUpdateOne struct {
 // SetValue sets the value field.
 func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
 	nuo.value = &i
+	return nuo
+}
+
+// AddValue adds i to value.
+func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
+	nuo.addvalue = &i
 	return nuo
 }
 
@@ -392,10 +410,15 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		res     sql.Result
 		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
-	if nuo.value != nil {
+	if value := nuo.value; value != nil {
 		update = true
-		builder.Set(node.FieldValue, *nuo.value)
-		n.Value = *nuo.value
+		builder.Set(node.FieldValue, *value)
+		n.Value = *value
+	}
+	if value := nuo.addvalue; value != nil {
+		update = true
+		builder.Add(node.FieldValue, *value)
+		n.Value += *value
 	}
 	if update {
 		query, args := builder.Query()

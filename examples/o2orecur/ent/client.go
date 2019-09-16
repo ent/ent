@@ -124,6 +124,20 @@ func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
 }
 
+// Get returns a Node entity by its id.
+func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
+	return c.Query().Where(node.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
+	n, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return n
+}
+
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}

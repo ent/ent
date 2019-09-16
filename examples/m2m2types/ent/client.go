@@ -130,6 +130,20 @@ func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
 
+// Get returns a Group entity by its id.
+func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
+	return c.Query().Where(group.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
+	gr, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return gr
+}
+
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -198,6 +212,20 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 // Create returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	u, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return u
 }
 
 // QueryGroups queries the groups edge of a User.

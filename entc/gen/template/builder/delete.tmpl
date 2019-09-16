@@ -20,14 +20,14 @@ type {{ $builder }} struct {
 }
 
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate to the delete builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
 	return {{ $receiver }}
 }
 
-// Exec executes the deletion query.
-func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) error {
+// Exec executes the deletion query and returns how many vertices were deleted.
+func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 	{{- if gt (len $.Storage) 1 -}}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
@@ -35,7 +35,7 @@ func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) error {
 			return {{ $receiver }}.{{ $storage }}Exec(ctx)
 		{{- end }}
 		default:
-			return errors.New("{{ $pkg }}: unsupported dialect")
+			return 0, errors.New("{{ $pkg }}: unsupported dialect")
 		}
 	{{- else -}}
 		return {{ $receiver }}.{{ index $.Storage 0 }}Exec(ctx)
@@ -43,10 +43,12 @@ func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
-	if err := {{ $receiver }}.Exec(ctx); err != nil {
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
+	n, err := {{ $receiver }}.Exec(ctx)
+	if err != nil {
 		panic(err)
 	}
+	return n
 }
 
 {{- range $_, $storage := $.Storage }}
@@ -66,7 +68,15 @@ type {{ $onebuilder }} struct {
 
 // Exec executes the deletion query.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
-	return {{ $oneReceiver }}.{{ $receiver }}.Exec(ctx)
+	n, err := {{ $oneReceiver }}.{{ $receiver }}.Exec(ctx)
+	switch {
+	case err != nil:
+		return err
+	case n == 0:
+		return &ErrNotFound{ {{ $.Package }}.Label}
+	default:
+		return nil
+	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.

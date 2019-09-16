@@ -96,6 +96,7 @@ var tests = []func(*testing.T, *ent.Client){
 	Sanity,
 	Paging,
 	Select,
+	Delete,
 	Relation,
 	Predicate,
 	AddValues,
@@ -365,6 +366,28 @@ func AddValues(t *testing.T, client *ent.Client) {
 	cmt1 = cmt1.Update().AddUniqueInt(20).AddNillableInt(20).SaveX(ctx)
 	require.Equal(21, cmt1.UniqueInt)
 	require.Equal(20, *cmt1.NillableInt)
+}
+
+func Delete(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+
+	nd := client.Node.Create().SetValue(1e3).SaveX(ctx)
+	err := client.Node.DeleteOneID(nd.ID).Exec(ctx)
+	require.NoError(err)
+	err = client.Node.DeleteOneID(nd.ID).Exec(ctx)
+	require.True(ent.IsNotFound(err))
+
+	for i := 0; i < 5; i++ {
+		client.Node.Create().SetValue(i).SaveX(ctx)
+	}
+	affected, err := client.Node.Delete().Where(node.ValueGT(2)).Exec(ctx)
+	require.NoError(err)
+	require.Equal(2, affected)
+
+	affected, err = client.Node.Delete().Exec(ctx)
+	require.NoError(err)
+	require.Equal(3, affected)
 }
 
 func Relation(t *testing.T, client *ent.Client) {

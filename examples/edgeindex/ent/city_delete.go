@@ -21,32 +21,41 @@ type CityDelete struct {
 	predicates []predicate.City
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate to the delete builder.
 func (cd *CityDelete) Where(ps ...predicate.City) *CityDelete {
 	cd.predicates = append(cd.predicates, ps...)
 	return cd
 }
 
-// Exec executes the deletion query.
-func (cd *CityDelete) Exec(ctx context.Context) error {
+// Exec executes the deletion query and returns how many vertices were deleted.
+func (cd *CityDelete) Exec(ctx context.Context) (int, error) {
 	return cd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cd *CityDelete) ExecX(ctx context.Context) {
-	if err := cd.Exec(ctx); err != nil {
+func (cd *CityDelete) ExecX(ctx context.Context) int {
+	n, err := cd.Exec(ctx)
+	if err != nil {
 		panic(err)
 	}
+	return n
 }
 
-func (cd *CityDelete) sqlExec(ctx context.Context) error {
+func (cd *CityDelete) sqlExec(ctx context.Context) (int, error) {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(city.Table))
 	for _, p := range cd.predicates {
 		p(selector)
 	}
 	query, args := sql.Delete(city.Table).FromSelect(selector).Query()
-	return cd.driver.Exec(ctx, query, args, &res)
+	if err := cd.driver.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
 // CityDeleteOne is the builder for deleting a single City entity.
@@ -56,7 +65,15 @@ type CityDeleteOne struct {
 
 // Exec executes the deletion query.
 func (cdo *CityDeleteOne) Exec(ctx context.Context) error {
-	return cdo.cd.Exec(ctx)
+	n, err := cdo.cd.Exec(ctx)
+	switch {
+	case err != nil:
+		return err
+	case n == 0:
+		return &ErrNotFound{city.Label}
+	default:
+		return nil
+	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.

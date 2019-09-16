@@ -22,6 +22,7 @@ import (
 type UserUpdate struct {
 	config
 	age         *int
+	addage      *int
 	name        *string
 	card        map[int]struct{}
 	clearedCard bool
@@ -37,6 +38,12 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.age = &i
+	return uu
+}
+
+// AddAge adds i to age.
+func (uu *UserUpdate) AddAge(i int) *UserUpdate {
+	uu.addage = &i
 	return uu
 }
 
@@ -136,13 +143,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uu.age != nil {
+	if value := uu.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uu.age)
+		builder.Set(user.FieldAge, *value)
 	}
-	if uu.name != nil {
+	if value := uu.addage; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uu.name)
+		builder.Add(user.FieldAge, *value)
+	}
+	if value := uu.name; value != nil {
+		update = true
+		builder.Set(user.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -189,6 +200,7 @@ type UserUpdateOne struct {
 	config
 	id          int
 	age         *int
+	addage      *int
 	name        *string
 	card        map[int]struct{}
 	clearedCard bool
@@ -197,6 +209,12 @@ type UserUpdateOne struct {
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.age = &i
+	return uuo
+}
+
+// AddAge adds i to age.
+func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
+	uuo.addage = &i
 	return uuo
 }
 
@@ -299,15 +317,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
-	if uuo.age != nil {
+	if value := uuo.age; value != nil {
 		update = true
-		builder.Set(user.FieldAge, *uuo.age)
-		u.Age = *uuo.age
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uuo.name != nil {
+	if value := uuo.addage; value != nil {
 		update = true
-		builder.Set(user.FieldName, *uuo.name)
-		u.Name = *uuo.name
+		builder.Add(user.FieldAge, *value)
+		u.Age += *value
+	}
+	if value := uuo.name; value != nil {
+		update = true
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
 	if update {
 		query, args := builder.Query()

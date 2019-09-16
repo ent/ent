@@ -8,10 +8,13 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) error {
+func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlin().Query()
-	return {{ $receiver }}.driver.Exec(ctx, query, bindings, res)
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return 0, err
+	}
+	return res.ReadInt()
 }
 
 
@@ -20,6 +23,6 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	for _, p := range {{ $receiver }}.predicates {
 		p(t)
 	}
-	return t.Drop()
+	return t.SideEffect(__.Drop()).Count()
 }
 {{ end }}

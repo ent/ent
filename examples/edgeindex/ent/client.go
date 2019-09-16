@@ -130,6 +130,20 @@ func (c *CityClient) Query() *CityQuery {
 	return &CityQuery{config: c.config}
 }
 
+// Get returns a City entity by its id.
+func (c *CityClient) Get(ctx context.Context, id int) (*City, error) {
+	return c.Query().Where(city.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CityClient) GetX(ctx context.Context, id int) *City {
+	ci, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ci
+}
+
 // QueryStreets queries the streets edge of a City.
 func (c *CityClient) QueryStreets(ci *City) *StreetQuery {
 	query := &StreetQuery{config: c.config}
@@ -188,6 +202,20 @@ func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 // Create returns a query builder for Street.
 func (c *StreetClient) Query() *StreetQuery {
 	return &StreetQuery{config: c.config}
+}
+
+// Get returns a Street entity by its id.
+func (c *StreetClient) Get(ctx context.Context, id int) (*Street, error) {
+	return c.Query().Where(street.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
+	s, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return s
 }
 
 // QueryCity queries the city edge of a Street.

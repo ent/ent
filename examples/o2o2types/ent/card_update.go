@@ -132,13 +132,13 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
-	if cu.expired != nil {
+	if value := cu.expired; value != nil {
 		update = true
-		builder.Set(card.FieldExpired, *cu.expired)
+		builder.Set(card.FieldExpired, *value)
 	}
-	if cu.number != nil {
+	if value := cu.number; value != nil {
 		update = true
-		builder.Set(card.FieldNumber, *cu.number)
+		builder.Set(card.FieldNumber, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -290,15 +290,15 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
-	if cuo.expired != nil {
+	if value := cuo.expired; value != nil {
 		update = true
-		builder.Set(card.FieldExpired, *cuo.expired)
-		c.Expired = *cuo.expired
+		builder.Set(card.FieldExpired, *value)
+		c.Expired = *value
 	}
-	if cuo.number != nil {
+	if value := cuo.number; value != nil {
 		update = true
-		builder.Set(card.FieldNumber, *cuo.number)
-		c.Number = *cuo.number
+		builder.Set(card.FieldNumber, *value)
+		c.Number = *value
 	}
 	if update {
 		query, args := builder.Query()

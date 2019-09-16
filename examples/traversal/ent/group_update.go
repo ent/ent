@@ -171,9 +171,9 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
-	if gu.name != nil {
+	if value := gu.name; value != nil {
 		update = true
-		builder.Set(group.FieldName, *gu.name)
+		builder.Set(group.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -387,10 +387,10 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
-	if guo.name != nil {
+	if value := guo.name; value != nil {
 		update = true
-		builder.Set(group.FieldName, *guo.name)
-		gr.Name = *guo.name
+		builder.Set(group.FieldName, *value)
+		gr.Name = *value
 	}
 	if update {
 		query, args := builder.Query()

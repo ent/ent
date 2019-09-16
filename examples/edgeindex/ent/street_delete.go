@@ -21,32 +21,41 @@ type StreetDelete struct {
 	predicates []predicate.Street
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate to the delete builder.
 func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
 	sd.predicates = append(sd.predicates, ps...)
 	return sd
 }
 
-// Exec executes the deletion query.
-func (sd *StreetDelete) Exec(ctx context.Context) error {
+// Exec executes the deletion query and returns how many vertices were deleted.
+func (sd *StreetDelete) Exec(ctx context.Context) (int, error) {
 	return sd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sd *StreetDelete) ExecX(ctx context.Context) {
-	if err := sd.Exec(ctx); err != nil {
+func (sd *StreetDelete) ExecX(ctx context.Context) int {
+	n, err := sd.Exec(ctx)
+	if err != nil {
 		panic(err)
 	}
+	return n
 }
 
-func (sd *StreetDelete) sqlExec(ctx context.Context) error {
+func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(street.Table))
 	for _, p := range sd.predicates {
 		p(selector)
 	}
 	query, args := sql.Delete(street.Table).FromSelect(selector).Query()
-	return sd.driver.Exec(ctx, query, args, &res)
+	if err := sd.driver.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
 // StreetDeleteOne is the builder for deleting a single Street entity.
@@ -56,7 +65,15 @@ type StreetDeleteOne struct {
 
 // Exec executes the deletion query.
 func (sdo *StreetDeleteOne) Exec(ctx context.Context) error {
-	return sdo.sd.Exec(ctx)
+	n, err := sdo.sd.Exec(ctx)
+	switch {
+	case err != nil:
+		return err
+	case n == 0:
+		return &ErrNotFound{street.Label}
+	default:
+		return nil
+	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -129,9 +129,9 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
 	)
-	if su.name != nil {
+	if value := su.name; value != nil {
 		update = true
-		builder.Set(street.FieldName, *su.name)
+		builder.Set(street.FieldName, *value)
 	}
 	if update {
 		query, args := builder.Query()
@@ -273,10 +273,10 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		res     sql.Result
 		builder = sql.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
 	)
-	if suo.name != nil {
+	if value := suo.name; value != nil {
 		update = true
-		builder.Set(street.FieldName, *suo.name)
-		s.Name = *suo.name
+		builder.Set(street.FieldName, *value)
+		s.Name = *value
 	}
 	if update {
 		query, args := builder.Query()

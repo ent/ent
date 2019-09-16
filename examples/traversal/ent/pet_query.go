@@ -86,20 +86,6 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// Get returns a Pet entity by its id.
-func (pq *PetQuery) Get(ctx context.Context, id int) (*Pet, error) {
-	return pq.Where(pet.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (pq *PetQuery) GetX(ctx context.Context, id int) *Pet {
-	pe, err := pq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return pe
-}
-
 // First returns the first Pet entity in the query. Returns *ErrNotFound when no pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
 	pes, err := pq.Limit(1).All(ctx)

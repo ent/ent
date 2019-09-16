@@ -66,6 +66,9 @@ func OtherV() *dsl.Traversal { return New().OtherV() }
 // Count is the api for calling __.Count().
 func Count() *dsl.Traversal { return New().Count() }
 
+// Drop is the api for calling __.Drop().
+func Drop() *dsl.Traversal { return New().Drop() }
+
 // Fold is the api for calling __.Fold().
 func Fold() *dsl.Traversal { return New().Fold() }
 

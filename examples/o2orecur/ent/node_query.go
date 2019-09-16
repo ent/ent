@@ -80,20 +80,6 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 	return query
 }
 
-// Get returns a Node entity by its id.
-func (nq *NodeQuery) Get(ctx context.Context, id int) (*Node, error) {
-	return nq.Where(node.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (nq *NodeQuery) GetX(ctx context.Context, id int) *Node {
-	n, err := nq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
 // First returns the first Node entity in the query. Returns *ErrNotFound when no node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
 	ns, err := nq.Limit(1).All(ctx)

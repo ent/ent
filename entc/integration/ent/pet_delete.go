@@ -16,6 +16,7 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -26,45 +27,57 @@ type PetDelete struct {
 	predicates []predicate.Pet
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate to the delete builder.
 func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 	pd.predicates = append(pd.predicates, ps...)
 	return pd
 }
 
-// Exec executes the deletion query.
-func (pd *PetDelete) Exec(ctx context.Context) error {
+// Exec executes the deletion query and returns how many vertices were deleted.
+func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
 	switch pd.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
 		return pd.sqlExec(ctx)
 	case dialect.Gremlin:
 		return pd.gremlinExec(ctx)
 	default:
-		return errors.New("ent: unsupported dialect")
+		return 0, errors.New("ent: unsupported dialect")
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pd *PetDelete) ExecX(ctx context.Context) {
-	if err := pd.Exec(ctx); err != nil {
+func (pd *PetDelete) ExecX(ctx context.Context) int {
+	n, err := pd.Exec(ctx)
+	if err != nil {
 		panic(err)
 	}
+	return n
 }
 
-func (pd *PetDelete) sqlExec(ctx context.Context) error {
+func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	var res sql.Result
 	selector := sql.Select().From(sql.Table(pet.Table))
 	for _, p := range pd.predicates {
 		p(selector)
 	}
 	query, args := sql.Delete(pet.Table).FromSelect(selector).Query()
-	return pd.driver.Exec(ctx, query, args, &res)
+	if err := pd.driver.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
-func (pd *PetDelete) gremlinExec(ctx context.Context) error {
+func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := pd.gremlin().Query()
-	return pd.driver.Exec(ctx, query, bindings, res)
+	if err := pd.driver.Exec(ctx, query, bindings, res); err != nil {
+		return 0, err
+	}
+	return res.ReadInt()
 }
 
 func (pd *PetDelete) gremlin() *dsl.Traversal {
@@ -72,7 +85,7 @@ func (pd *PetDelete) gremlin() *dsl.Traversal {
 	for _, p := range pd.predicates {
 		p(t)
 	}
-	return t.Drop()
+	return t.SideEffect(__.Drop()).Count()
 }
 
 // PetDeleteOne is the builder for deleting a single Pet entity.
@@ -82,7 +95,15 @@ type PetDeleteOne struct {
 
 // Exec executes the deletion query.
 func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
-	return pdo.pd.Exec(ctx)
+	n, err := pdo.pd.Exec(ctx)
+	switch {
+	case err != nil:
+		return err
+	case n == 0:
+		return &ErrNotFound{pet.Label}
+	default:
+		return nil
+	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.

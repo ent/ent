@@ -68,20 +68,6 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 	return query
 }
 
-// Get returns a Street entity by its id.
-func (sq *StreetQuery) Get(ctx context.Context, id int) (*Street, error) {
-	return sq.Where(street.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (sq *StreetQuery) GetX(ctx context.Context, id int) *Street {
-	s, err := sq.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return s
-}
-
 // First returns the first Street entity in the query. Returns *ErrNotFound when no street was found.
 func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
 	sSlice, err := sq.Limit(1).All(ctx)
