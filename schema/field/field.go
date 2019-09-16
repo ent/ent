@@ -124,6 +124,7 @@ type Descriptor struct {
 	Default       interface{}   // default value on create.
 	UpdateDefault interface{}   // default value on update.
 	Validators    []interface{} // validator functions.
+	StorageKey    string        // sql column or gremlin property.
 }
 
 // String returns a new Field with type string.
@@ -243,6 +244,13 @@ func (b *stringBuilder) StructTag(s string) *stringBuilder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *stringBuilder) StorageKey(key string) *stringBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -307,6 +315,13 @@ func (b *timeBuilder) UpdateDefault(f func() time.Time) *timeBuilder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *timeBuilder) StorageKey(key string) *timeBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -351,6 +366,13 @@ func (b *boolBuilder) Comment(c string) *boolBuilder {
 // StructTag sets the struct tag of the field.
 func (b *boolBuilder) StructTag(s string) *boolBuilder {
 	b.desc.Tag = s
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *boolBuilder) StorageKey(key string) *boolBuilder {
+	b.desc.StorageKey = key
 	return b
 }
 
@@ -406,6 +428,13 @@ func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 // In SQLite, it does not have any effect on the type size, which is default to 1B bytes.
 func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	b.desc.Size = i
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
+	b.desc.StorageKey = key
 	return b
 }
 

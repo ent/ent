@@ -16,10 +16,10 @@ const (
 	// Label holds the string label denoting the {{ lower $.Name }} type in the database.
 	Label = "{{ $.Label }}"
 	// {{ $.ID.Constant }} holds the string denoting the id field in the database.
-	{{ $.ID.Constant }} = "{{ snake $.ID.Name }}"
+	{{ $.ID.Constant }} = "{{ $.ID.StorageKey }}"
 	{{ range $_, $f := $.Fields -}}{{ $field := $f.Constant -}}
 		// {{ $field }} holds the string denoting the {{ lower $f.Name }} vertex property in the database.
-		{{ $field }} = "{{ snake $f.Name }}"
+		{{ $field }} = "{{ $f.StorageKey }}"
 	{{ end -}}
 	{{ range $_, $storage := $.Storage }}
 		{{ $tmpl := printf "dialect/%s/meta/constants" $storage }}

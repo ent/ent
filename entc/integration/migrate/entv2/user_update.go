@@ -19,15 +19,17 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	age        *int
-	addage     *int
-	name       *string
-	phone      *string
-	buffer     *[]byte
-	title      *string
-	blob       *[]byte
-	clearblob  bool
-	predicates []predicate.User
+	age           *int
+	addage        *int
+	name          *string
+	phone         *string
+	buffer        *[]byte
+	title         *string
+	new_name      *string
+	clearnew_name bool
+	blob          *[]byte
+	clearblob     bool
+	predicates    []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -77,6 +79,27 @@ func (uu *UserUpdate) SetNillableTitle(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetTitle(*s)
 	}
+	return uu
+}
+
+// SetNewName sets the new_name field.
+func (uu *UserUpdate) SetNewName(s string) *UserUpdate {
+	uu.new_name = &s
+	return uu
+}
+
+// SetNillableNewName sets the new_name field if the given value is not nil.
+func (uu *UserUpdate) SetNillableNewName(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetNewName(*s)
+	}
+	return uu
+}
+
+// ClearNewName clears the value of new_name.
+func (uu *UserUpdate) ClearNewName() *UserUpdate {
+	uu.new_name = nil
+	uu.clearnew_name = true
 	return uu
 }
 
@@ -176,6 +199,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.Set(user.FieldTitle, *value)
 	}
+	if value := uu.new_name; value != nil {
+		update = true
+		builder.Set(user.FieldNewName, *value)
+	}
+	if uu.clearnew_name {
+		update = true
+		builder.SetNull(user.FieldNewName)
+	}
 	if value := uu.blob; value != nil {
 		update = true
 		builder.Set(user.FieldBlob, *value)
@@ -199,15 +230,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id        int
-	age       *int
-	addage    *int
-	name      *string
-	phone     *string
-	buffer    *[]byte
-	title     *string
-	blob      *[]byte
-	clearblob bool
+	id            int
+	age           *int
+	addage        *int
+	name          *string
+	phone         *string
+	buffer        *[]byte
+	title         *string
+	new_name      *string
+	clearnew_name bool
+	blob          *[]byte
+	clearblob     bool
 }
 
 // SetAge sets the age field.
@@ -251,6 +284,27 @@ func (uuo *UserUpdateOne) SetNillableTitle(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetTitle(*s)
 	}
+	return uuo
+}
+
+// SetNewName sets the new_name field.
+func (uuo *UserUpdateOne) SetNewName(s string) *UserUpdateOne {
+	uuo.new_name = &s
+	return uuo
+}
+
+// SetNillableNewName sets the new_name field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableNewName(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetNewName(*s)
+	}
+	return uuo
+}
+
+// ClearNewName clears the value of new_name.
+func (uuo *UserUpdateOne) ClearNewName() *UserUpdateOne {
+	uuo.new_name = nil
+	uuo.clearnew_name = true
 	return uuo
 }
 
@@ -358,6 +412,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		update = true
 		builder.Set(user.FieldTitle, *value)
 		u.Title = *value
+	}
+	if value := uuo.new_name; value != nil {
+		update = true
+		builder.Set(user.FieldNewName, *value)
+		u.NewName = *value
+	}
+	if uuo.clearnew_name {
+		update = true
+		var value string
+		u.NewName = value
+		builder.SetNull(user.FieldNewName)
 	}
 	if value := uuo.blob; value != nil {
 		update = true

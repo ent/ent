@@ -163,6 +163,13 @@ func (b *intBuilder) Validate(fn func(int) error) *intBuilder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *intBuilder) StorageKey(key string) *intBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -257,6 +264,13 @@ func (b *uintBuilder) StructTag(s string) *uintBuilder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uintBuilder) Validate(fn func(uint) error) *uintBuilder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *uintBuilder) StorageKey(key string) *uintBuilder {
+	b.desc.StorageKey = key
 	return b
 }
 
@@ -362,6 +376,13 @@ func (b *int8Builder) Validate(fn func(int8) error) *int8Builder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *int8Builder) StorageKey(key string) *int8Builder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -461,6 +482,13 @@ func (b *int16Builder) StructTag(s string) *int16Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *int16Builder) StorageKey(key string) *int16Builder {
+	b.desc.StorageKey = key
 	return b
 }
 
@@ -566,6 +594,13 @@ func (b *int32Builder) Validate(fn func(int32) error) *int32Builder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *int32Builder) StorageKey(key string) *int32Builder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -668,6 +703,13 @@ func (b *int64Builder) Validate(fn func(int64) error) *int64Builder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *int64Builder) StorageKey(key string) *int64Builder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -762,6 +804,13 @@ func (b *uint8Builder) StructTag(s string) *uint8Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint8Builder) Validate(fn func(uint8) error) *uint8Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *uint8Builder) StorageKey(key string) *uint8Builder {
+	b.desc.StorageKey = key
 	return b
 }
 
@@ -862,6 +911,13 @@ func (b *uint16Builder) Validate(fn func(uint16) error) *uint16Builder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *uint16Builder) StorageKey(key string) *uint16Builder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -959,6 +1015,13 @@ func (b *uint32Builder) Validate(fn func(uint32) error) *uint32Builder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *uint32Builder) StorageKey(key string) *uint32Builder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1053,6 +1116,13 @@ func (b *uint64Builder) StructTag(s string) *uint64Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint64Builder) Validate(fn func(uint64) error) *uint64Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *uint64Builder) StorageKey(key string) *uint64Builder {
+	b.desc.StorageKey = key
 	return b
 }
 
@@ -1158,6 +1228,13 @@ func (b *float64Builder) Validate(fn func(float64) error) *float64Builder {
 	return b
 }
 
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *float64Builder) StorageKey(key string) *float64Builder {
+	b.desc.StorageKey = key
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1257,6 +1334,13 @@ func (b *float32Builder) StructTag(s string) *float32Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *float32Builder) Validate(fn func(float32) error) *float32Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *float32Builder) StorageKey(key string) *float32Builder {
+	b.desc.StorageKey = key
 	return b
 }
 

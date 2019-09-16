@@ -7,8 +7,9 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+
+	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -43,6 +44,7 @@ var (
 		{Name: "phone", Type: field.TypeString},
 		{Name: "buffer", Type: field.TypeBytes, Default: user.DefaultBuffer},
 		{Name: "title", Type: field.TypeString, Default: user.DefaultTitle},
+		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 	}
 	// UsersTable holds the schema information for the "users" table.

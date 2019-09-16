@@ -23,6 +23,8 @@ type UserUpdate struct {
 	name         *string
 	address      *string
 	clearaddress bool
+	renamed      *string
+	clearrenamed bool
 	blob         *[]byte
 	clearblob    bool
 	predicates   []predicate.User
@@ -64,6 +66,27 @@ func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 func (uu *UserUpdate) ClearAddress() *UserUpdate {
 	uu.address = nil
 	uu.clearaddress = true
+	return uu
+}
+
+// SetRenamed sets the renamed field.
+func (uu *UserUpdate) SetRenamed(s string) *UserUpdate {
+	uu.renamed = &s
+	return uu
+}
+
+// SetNillableRenamed sets the renamed field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRenamed(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetRenamed(*s)
+	}
+	return uu
+}
+
+// ClearRenamed clears the value of renamed.
+func (uu *UserUpdate) ClearRenamed() *UserUpdate {
+	uu.renamed = nil
+	uu.clearrenamed = true
 	return uu
 }
 
@@ -160,6 +183,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		update = true
 		builder.SetNull(user.FieldAddress)
 	}
+	if value := uu.renamed; value != nil {
+		update = true
+		builder.Set(user.FieldRenamed, *value)
+	}
+	if uu.clearrenamed {
+		update = true
+		builder.SetNull(user.FieldRenamed)
+	}
 	if value := uu.blob; value != nil {
 		update = true
 		builder.Set(user.FieldBlob, *value)
@@ -188,6 +219,8 @@ type UserUpdateOne struct {
 	name         *string
 	address      *string
 	clearaddress bool
+	renamed      *string
+	clearrenamed bool
 	blob         *[]byte
 	clearblob    bool
 }
@@ -222,6 +255,27 @@ func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
 	uuo.address = nil
 	uuo.clearaddress = true
+	return uuo
+}
+
+// SetRenamed sets the renamed field.
+func (uuo *UserUpdateOne) SetRenamed(s string) *UserUpdateOne {
+	uuo.renamed = &s
+	return uuo
+}
+
+// SetNillableRenamed sets the renamed field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRenamed(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetRenamed(*s)
+	}
+	return uuo
+}
+
+// ClearRenamed clears the value of renamed.
+func (uuo *UserUpdateOne) ClearRenamed() *UserUpdateOne {
+	uuo.renamed = nil
+	uuo.clearrenamed = true
 	return uuo
 }
 
@@ -325,6 +379,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		var value string
 		u.Address = value
 		builder.SetNull(user.FieldAddress)
+	}
+	if value := uuo.renamed; value != nil {
+		update = true
+		builder.Set(user.FieldRenamed, *value)
+		u.Renamed = *value
+	}
+	if uuo.clearrenamed {
+		update = true
+		var value string
+		u.Renamed = value
+		builder.SetNull(user.FieldRenamed)
 	}
 	if value := uuo.blob; value != nil {
 		update = true

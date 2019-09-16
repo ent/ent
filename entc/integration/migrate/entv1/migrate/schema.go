@@ -18,6 +18,7 @@ var (
 		{Name: "age", Type: field.TypeInt32},
 		{Name: "name", Type: field.TypeString, Size: 10},
 		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 255},
 	}
 	// UsersTable holds the schema information for the "users" table.

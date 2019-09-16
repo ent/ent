@@ -18,12 +18,13 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age    *int
-	name   *string
-	phone  *string
-	buffer *[]byte
-	title  *string
-	blob   *[]byte
+	age      *int
+	name     *string
+	phone    *string
+	buffer   *[]byte
+	title    *string
+	new_name *string
+	blob     *[]byte
 }
 
 // SetAge sets the age field.
@@ -60,6 +61,20 @@ func (uc *UserCreate) SetTitle(s string) *UserCreate {
 func (uc *UserCreate) SetNillableTitle(s *string) *UserCreate {
 	if s != nil {
 		uc.SetTitle(*s)
+	}
+	return uc
+}
+
+// SetNewName sets the new_name field.
+func (uc *UserCreate) SetNewName(s string) *UserCreate {
+	uc.new_name = &s
+	return uc
+}
+
+// SetNillableNewName sets the new_name field if the given value is not nil.
+func (uc *UserCreate) SetNillableNewName(s *string) *UserCreate {
+	if s != nil {
+		uc.SetNewName(*s)
 	}
 	return uc
 }
@@ -130,6 +145,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if uc.title != nil {
 		builder.Set(user.FieldTitle, *uc.title)
 		u.Title = *uc.title
+	}
+	if uc.new_name != nil {
+		builder.Set(user.FieldNewName, *uc.new_name)
+		u.NewName = *uc.new_name
 	}
 	if uc.blob != nil {
 		builder.Set(user.FieldBlob, *uc.blob)
