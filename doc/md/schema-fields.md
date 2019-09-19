@@ -51,6 +51,7 @@ The following types are currently supported by the framework:
 - `string`
 - `time.Time`
 - `[]byte` (only supported by SQL dialects).
+- `JSON` (only supported by SQL dialects) - **experimental**.
 
 <br/>
 ```go
@@ -81,6 +82,10 @@ func (User) Fields() []ent.Field {
 			Unique(),
 		field.Time("created_at").
 			Default(time.Now),
+		field.JSON("url", &url.URL{}).
+			Optional(),
+		field.JSON("strings", []string{}).
+			Optional(),
 	}
 }
 ```
