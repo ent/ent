@@ -354,7 +354,7 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		}
 	case "double":
 		c.Type = field.TypeFloat64
-	case "timestamp":
+	case "timestamp", "datetime":
 		c.Type = field.TypeTime
 	case "tinyblob":
 		c.Size = math.MaxUint8
