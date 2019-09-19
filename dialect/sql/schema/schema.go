@@ -693,7 +693,7 @@ func parseVersion(v string) (*version, bool) {
 		if i == len(parts) {
 			break
 		}
-		if *e, err = strconv.Atoi(parts[i]); err != nil {
+		if *e, err = strconv.Atoi(strings.Split(parts[i], "-")[0]); err != nil {
 			return nil, false
 		}
 	}
