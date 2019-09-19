@@ -79,66 +79,92 @@ func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 // SetInt sets the int field.
 func (ftu *FieldTypeUpdate) SetInt(i int) *FieldTypeUpdate {
 	ftu.int = &i
+	ftu.addint = nil
 	return ftu
 }
 
 // AddInt adds i to int.
 func (ftu *FieldTypeUpdate) AddInt(i int) *FieldTypeUpdate {
-	ftu.addint = &i
+	if ftu.addint == nil {
+		ftu.addint = &i
+	} else {
+		*ftu.addint += i
+	}
 	return ftu
 }
 
 // SetInt8 sets the int8 field.
 func (ftu *FieldTypeUpdate) SetInt8(i int8) *FieldTypeUpdate {
 	ftu.int8 = &i
+	ftu.addint8 = nil
 	return ftu
 }
 
 // AddInt8 adds i to int8.
 func (ftu *FieldTypeUpdate) AddInt8(i int8) *FieldTypeUpdate {
-	ftu.addint8 = &i
+	if ftu.addint8 == nil {
+		ftu.addint8 = &i
+	} else {
+		*ftu.addint8 += i
+	}
 	return ftu
 }
 
 // SetInt16 sets the int16 field.
 func (ftu *FieldTypeUpdate) SetInt16(i int16) *FieldTypeUpdate {
 	ftu.int16 = &i
+	ftu.addint16 = nil
 	return ftu
 }
 
 // AddInt16 adds i to int16.
 func (ftu *FieldTypeUpdate) AddInt16(i int16) *FieldTypeUpdate {
-	ftu.addint16 = &i
+	if ftu.addint16 == nil {
+		ftu.addint16 = &i
+	} else {
+		*ftu.addint16 += i
+	}
 	return ftu
 }
 
 // SetInt32 sets the int32 field.
 func (ftu *FieldTypeUpdate) SetInt32(i int32) *FieldTypeUpdate {
 	ftu.int32 = &i
+	ftu.addint32 = nil
 	return ftu
 }
 
 // AddInt32 adds i to int32.
 func (ftu *FieldTypeUpdate) AddInt32(i int32) *FieldTypeUpdate {
-	ftu.addint32 = &i
+	if ftu.addint32 == nil {
+		ftu.addint32 = &i
+	} else {
+		*ftu.addint32 += i
+	}
 	return ftu
 }
 
 // SetInt64 sets the int64 field.
 func (ftu *FieldTypeUpdate) SetInt64(i int64) *FieldTypeUpdate {
 	ftu.int64 = &i
+	ftu.addint64 = nil
 	return ftu
 }
 
 // AddInt64 adds i to int64.
 func (ftu *FieldTypeUpdate) AddInt64(i int64) *FieldTypeUpdate {
-	ftu.addint64 = &i
+	if ftu.addint64 == nil {
+		ftu.addint64 = &i
+	} else {
+		*ftu.addint64 += i
+	}
 	return ftu
 }
 
 // SetOptionalInt sets the optional_int field.
 func (ftu *FieldTypeUpdate) SetOptionalInt(i int) *FieldTypeUpdate {
 	ftu.optional_int = &i
+	ftu.addoptional_int = nil
 	return ftu
 }
 
@@ -152,7 +178,11 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt(i *int) *FieldTypeUpdate {
 
 // AddOptionalInt adds i to optional_int.
 func (ftu *FieldTypeUpdate) AddOptionalInt(i int) *FieldTypeUpdate {
-	ftu.addoptional_int = &i
+	if ftu.addoptional_int == nil {
+		ftu.addoptional_int = &i
+	} else {
+		*ftu.addoptional_int += i
+	}
 	return ftu
 }
 
@@ -166,6 +196,7 @@ func (ftu *FieldTypeUpdate) ClearOptionalInt() *FieldTypeUpdate {
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt8(i int8) *FieldTypeUpdate {
 	ftu.optional_int8 = &i
+	ftu.addoptional_int8 = nil
 	return ftu
 }
 
@@ -179,7 +210,11 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt8(i *int8) *FieldTypeUpdate {
 
 // AddOptionalInt8 adds i to optional_int8.
 func (ftu *FieldTypeUpdate) AddOptionalInt8(i int8) *FieldTypeUpdate {
-	ftu.addoptional_int8 = &i
+	if ftu.addoptional_int8 == nil {
+		ftu.addoptional_int8 = &i
+	} else {
+		*ftu.addoptional_int8 += i
+	}
 	return ftu
 }
 
@@ -193,6 +228,7 @@ func (ftu *FieldTypeUpdate) ClearOptionalInt8() *FieldTypeUpdate {
 // SetOptionalInt16 sets the optional_int16 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt16(i int16) *FieldTypeUpdate {
 	ftu.optional_int16 = &i
+	ftu.addoptional_int16 = nil
 	return ftu
 }
 
@@ -206,7 +242,11 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt16(i *int16) *FieldTypeUpdate 
 
 // AddOptionalInt16 adds i to optional_int16.
 func (ftu *FieldTypeUpdate) AddOptionalInt16(i int16) *FieldTypeUpdate {
-	ftu.addoptional_int16 = &i
+	if ftu.addoptional_int16 == nil {
+		ftu.addoptional_int16 = &i
+	} else {
+		*ftu.addoptional_int16 += i
+	}
 	return ftu
 }
 
@@ -220,6 +260,7 @@ func (ftu *FieldTypeUpdate) ClearOptionalInt16() *FieldTypeUpdate {
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.optional_int32 = &i
+	ftu.addoptional_int32 = nil
 	return ftu
 }
 
@@ -233,7 +274,11 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt32(i *int32) *FieldTypeUpdate 
 
 // AddOptionalInt32 adds i to optional_int32.
 func (ftu *FieldTypeUpdate) AddOptionalInt32(i int32) *FieldTypeUpdate {
-	ftu.addoptional_int32 = &i
+	if ftu.addoptional_int32 == nil {
+		ftu.addoptional_int32 = &i
+	} else {
+		*ftu.addoptional_int32 += i
+	}
 	return ftu
 }
 
@@ -247,6 +292,7 @@ func (ftu *FieldTypeUpdate) ClearOptionalInt32() *FieldTypeUpdate {
 // SetOptionalInt64 sets the optional_int64 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt64(i int64) *FieldTypeUpdate {
 	ftu.optional_int64 = &i
+	ftu.addoptional_int64 = nil
 	return ftu
 }
 
@@ -260,7 +306,11 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt64(i *int64) *FieldTypeUpdate 
 
 // AddOptionalInt64 adds i to optional_int64.
 func (ftu *FieldTypeUpdate) AddOptionalInt64(i int64) *FieldTypeUpdate {
-	ftu.addoptional_int64 = &i
+	if ftu.addoptional_int64 == nil {
+		ftu.addoptional_int64 = &i
+	} else {
+		*ftu.addoptional_int64 += i
+	}
 	return ftu
 }
 
@@ -274,6 +324,7 @@ func (ftu *FieldTypeUpdate) ClearOptionalInt64() *FieldTypeUpdate {
 // SetNillableInt sets the nillable_int field.
 func (ftu *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
 	ftu.nillable_int = &i
+	ftu.addnillable_int = nil
 	return ftu
 }
 
@@ -287,7 +338,11 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
 
 // AddNillableInt adds i to nillable_int.
 func (ftu *FieldTypeUpdate) AddNillableInt(i int) *FieldTypeUpdate {
-	ftu.addnillable_int = &i
+	if ftu.addnillable_int == nil {
+		ftu.addnillable_int = &i
+	} else {
+		*ftu.addnillable_int += i
+	}
 	return ftu
 }
 
@@ -301,6 +356,7 @@ func (ftu *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftu *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
 	ftu.nillable_int8 = &i
+	ftu.addnillable_int8 = nil
 	return ftu
 }
 
@@ -314,7 +370,11 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
 
 // AddNillableInt8 adds i to nillable_int8.
 func (ftu *FieldTypeUpdate) AddNillableInt8(i int8) *FieldTypeUpdate {
-	ftu.addnillable_int8 = &i
+	if ftu.addnillable_int8 == nil {
+		ftu.addnillable_int8 = &i
+	} else {
+		*ftu.addnillable_int8 += i
+	}
 	return ftu
 }
 
@@ -328,6 +388,7 @@ func (ftu *FieldTypeUpdate) ClearNillableInt8() *FieldTypeUpdate {
 // SetNillableInt16 sets the nillable_int16 field.
 func (ftu *FieldTypeUpdate) SetNillableInt16(i int16) *FieldTypeUpdate {
 	ftu.nillable_int16 = &i
+	ftu.addnillable_int16 = nil
 	return ftu
 }
 
@@ -341,7 +402,11 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate 
 
 // AddNillableInt16 adds i to nillable_int16.
 func (ftu *FieldTypeUpdate) AddNillableInt16(i int16) *FieldTypeUpdate {
-	ftu.addnillable_int16 = &i
+	if ftu.addnillable_int16 == nil {
+		ftu.addnillable_int16 = &i
+	} else {
+		*ftu.addnillable_int16 += i
+	}
 	return ftu
 }
 
@@ -355,6 +420,7 @@ func (ftu *FieldTypeUpdate) ClearNillableInt16() *FieldTypeUpdate {
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftu *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
 	ftu.nillable_int32 = &i
+	ftu.addnillable_int32 = nil
 	return ftu
 }
 
@@ -368,7 +434,11 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate 
 
 // AddNillableInt32 adds i to nillable_int32.
 func (ftu *FieldTypeUpdate) AddNillableInt32(i int32) *FieldTypeUpdate {
-	ftu.addnillable_int32 = &i
+	if ftu.addnillable_int32 == nil {
+		ftu.addnillable_int32 = &i
+	} else {
+		*ftu.addnillable_int32 += i
+	}
 	return ftu
 }
 
@@ -382,6 +452,7 @@ func (ftu *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
 // SetNillableInt64 sets the nillable_int64 field.
 func (ftu *FieldTypeUpdate) SetNillableInt64(i int64) *FieldTypeUpdate {
 	ftu.nillable_int64 = &i
+	ftu.addnillable_int64 = nil
 	return ftu
 }
 
@@ -395,7 +466,11 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate 
 
 // AddNillableInt64 adds i to nillable_int64.
 func (ftu *FieldTypeUpdate) AddNillableInt64(i int64) *FieldTypeUpdate {
-	ftu.addnillable_int64 = &i
+	if ftu.addnillable_int64 == nil {
+		ftu.addnillable_int64 = &i
+	} else {
+		*ftu.addnillable_int64 += i
+	}
 	return ftu
 }
 
@@ -409,6 +484,7 @@ func (ftu *FieldTypeUpdate) ClearNillableInt64() *FieldTypeUpdate {
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftu *FieldTypeUpdate) SetValidateOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.validate_optional_int32 = &i
+	ftu.addvalidate_optional_int32 = nil
 	return ftu
 }
 
@@ -422,7 +498,11 @@ func (ftu *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 
 // AddValidateOptionalInt32 adds i to validate_optional_int32.
 func (ftu *FieldTypeUpdate) AddValidateOptionalInt32(i int32) *FieldTypeUpdate {
-	ftu.addvalidate_optional_int32 = &i
+	if ftu.addvalidate_optional_int32 == nil {
+		ftu.addvalidate_optional_int32 = &i
+	} else {
+		*ftu.addvalidate_optional_int32 += i
+	}
 	return ftu
 }
 
@@ -854,66 +934,92 @@ type FieldTypeUpdateOne struct {
 // SetInt sets the int field.
 func (ftuo *FieldTypeUpdateOne) SetInt(i int) *FieldTypeUpdateOne {
 	ftuo.int = &i
+	ftuo.addint = nil
 	return ftuo
 }
 
 // AddInt adds i to int.
 func (ftuo *FieldTypeUpdateOne) AddInt(i int) *FieldTypeUpdateOne {
-	ftuo.addint = &i
+	if ftuo.addint == nil {
+		ftuo.addint = &i
+	} else {
+		*ftuo.addint += i
+	}
 	return ftuo
 }
 
 // SetInt8 sets the int8 field.
 func (ftuo *FieldTypeUpdateOne) SetInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.int8 = &i
+	ftuo.addint8 = nil
 	return ftuo
 }
 
 // AddInt8 adds i to int8.
 func (ftuo *FieldTypeUpdateOne) AddInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.addint8 = &i
+	if ftuo.addint8 == nil {
+		ftuo.addint8 = &i
+	} else {
+		*ftuo.addint8 += i
+	}
 	return ftuo
 }
 
 // SetInt16 sets the int16 field.
 func (ftuo *FieldTypeUpdateOne) SetInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.int16 = &i
+	ftuo.addint16 = nil
 	return ftuo
 }
 
 // AddInt16 adds i to int16.
 func (ftuo *FieldTypeUpdateOne) AddInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.addint16 = &i
+	if ftuo.addint16 == nil {
+		ftuo.addint16 = &i
+	} else {
+		*ftuo.addint16 += i
+	}
 	return ftuo
 }
 
 // SetInt32 sets the int32 field.
 func (ftuo *FieldTypeUpdateOne) SetInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.int32 = &i
+	ftuo.addint32 = nil
 	return ftuo
 }
 
 // AddInt32 adds i to int32.
 func (ftuo *FieldTypeUpdateOne) AddInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.addint32 = &i
+	if ftuo.addint32 == nil {
+		ftuo.addint32 = &i
+	} else {
+		*ftuo.addint32 += i
+	}
 	return ftuo
 }
 
 // SetInt64 sets the int64 field.
 func (ftuo *FieldTypeUpdateOne) SetInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.int64 = &i
+	ftuo.addint64 = nil
 	return ftuo
 }
 
 // AddInt64 adds i to int64.
 func (ftuo *FieldTypeUpdateOne) AddInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.addint64 = &i
+	if ftuo.addint64 == nil {
+		ftuo.addint64 = &i
+	} else {
+		*ftuo.addint64 += i
+	}
 	return ftuo
 }
 
 // SetOptionalInt sets the optional_int field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt(i int) *FieldTypeUpdateOne {
 	ftuo.optional_int = &i
+	ftuo.addoptional_int = nil
 	return ftuo
 }
 
@@ -927,7 +1033,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt(i *int) *FieldTypeUpdateO
 
 // AddOptionalInt adds i to optional_int.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt(i int) *FieldTypeUpdateOne {
-	ftuo.addoptional_int = &i
+	if ftuo.addoptional_int == nil {
+		ftuo.addoptional_int = &i
+	} else {
+		*ftuo.addoptional_int += i
+	}
 	return ftuo
 }
 
@@ -941,6 +1051,7 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalInt() *FieldTypeUpdateOne {
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.optional_int8 = &i
+	ftuo.addoptional_int8 = nil
 	return ftuo
 }
 
@@ -954,7 +1065,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt8(i *int8) *FieldTypeUpdat
 
 // AddOptionalInt8 adds i to optional_int8.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.addoptional_int8 = &i
+	if ftuo.addoptional_int8 == nil {
+		ftuo.addoptional_int8 = &i
+	} else {
+		*ftuo.addoptional_int8 += i
+	}
 	return ftuo
 }
 
@@ -968,6 +1083,7 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalInt8() *FieldTypeUpdateOne {
 // SetOptionalInt16 sets the optional_int16 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.optional_int16 = &i
+	ftuo.addoptional_int16 = nil
 	return ftuo
 }
 
@@ -981,7 +1097,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt16(i *int16) *FieldTypeUpd
 
 // AddOptionalInt16 adds i to optional_int16.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.addoptional_int16 = &i
+	if ftuo.addoptional_int16 == nil {
+		ftuo.addoptional_int16 = &i
+	} else {
+		*ftuo.addoptional_int16 += i
+	}
 	return ftuo
 }
 
@@ -995,6 +1115,7 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalInt16() *FieldTypeUpdateOne {
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.optional_int32 = &i
+	ftuo.addoptional_int32 = nil
 	return ftuo
 }
 
@@ -1008,7 +1129,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt32(i *int32) *FieldTypeUpd
 
 // AddOptionalInt32 adds i to optional_int32.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.addoptional_int32 = &i
+	if ftuo.addoptional_int32 == nil {
+		ftuo.addoptional_int32 = &i
+	} else {
+		*ftuo.addoptional_int32 += i
+	}
 	return ftuo
 }
 
@@ -1022,6 +1147,7 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalInt32() *FieldTypeUpdateOne {
 // SetOptionalInt64 sets the optional_int64 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.optional_int64 = &i
+	ftuo.addoptional_int64 = nil
 	return ftuo
 }
 
@@ -1035,7 +1161,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt64(i *int64) *FieldTypeUpd
 
 // AddOptionalInt64 adds i to optional_int64.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.addoptional_int64 = &i
+	if ftuo.addoptional_int64 == nil {
+		ftuo.addoptional_int64 = &i
+	} else {
+		*ftuo.addoptional_int64 += i
+	}
 	return ftuo
 }
 
@@ -1049,6 +1179,7 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalInt64() *FieldTypeUpdateOne {
 // SetNillableInt sets the nillable_int field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
 	ftuo.nillable_int = &i
+	ftuo.addnillable_int = nil
 	return ftuo
 }
 
@@ -1062,7 +1193,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateO
 
 // AddNillableInt adds i to nillable_int.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt(i int) *FieldTypeUpdateOne {
-	ftuo.addnillable_int = &i
+	if ftuo.addnillable_int == nil {
+		ftuo.addnillable_int = &i
+	} else {
+		*ftuo.addnillable_int += i
+	}
 	return ftuo
 }
 
@@ -1076,6 +1211,7 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.nillable_int8 = &i
+	ftuo.addnillable_int8 = nil
 	return ftuo
 }
 
@@ -1089,7 +1225,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdat
 
 // AddNillableInt8 adds i to nillable_int8.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.addnillable_int8 = &i
+	if ftuo.addnillable_int8 == nil {
+		ftuo.addnillable_int8 = &i
+	} else {
+		*ftuo.addnillable_int8 += i
+	}
 	return ftuo
 }
 
@@ -1103,6 +1243,7 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt8() *FieldTypeUpdateOne {
 // SetNillableInt16 sets the nillable_int16 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.nillable_int16 = &i
+	ftuo.addnillable_int16 = nil
 	return ftuo
 }
 
@@ -1116,7 +1257,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpd
 
 // AddNillableInt16 adds i to nillable_int16.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.addnillable_int16 = &i
+	if ftuo.addnillable_int16 == nil {
+		ftuo.addnillable_int16 = &i
+	} else {
+		*ftuo.addnillable_int16 += i
+	}
 	return ftuo
 }
 
@@ -1130,6 +1275,7 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt16() *FieldTypeUpdateOne {
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.nillable_int32 = &i
+	ftuo.addnillable_int32 = nil
 	return ftuo
 }
 
@@ -1143,7 +1289,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpd
 
 // AddNillableInt32 adds i to nillable_int32.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.addnillable_int32 = &i
+	if ftuo.addnillable_int32 == nil {
+		ftuo.addnillable_int32 = &i
+	} else {
+		*ftuo.addnillable_int32 += i
+	}
 	return ftuo
 }
 
@@ -1157,6 +1307,7 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
 // SetNillableInt64 sets the nillable_int64 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.nillable_int64 = &i
+	ftuo.addnillable_int64 = nil
 	return ftuo
 }
 
@@ -1170,7 +1321,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpd
 
 // AddNillableInt64 adds i to nillable_int64.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.addnillable_int64 = &i
+	if ftuo.addnillable_int64 == nil {
+		ftuo.addnillable_int64 = &i
+	} else {
+		*ftuo.addnillable_int64 += i
+	}
 	return ftuo
 }
 
@@ -1184,6 +1339,7 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt64() *FieldTypeUpdateOne {
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.validate_optional_int32 = &i
+	ftuo.addvalidate_optional_int32 = nil
 	return ftuo
 }
 
@@ -1197,7 +1353,11 @@ func (ftuo *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *Fiel
 
 // AddValidateOptionalInt32 adds i to validate_optional_int32.
 func (ftuo *FieldTypeUpdateOne) AddValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.addvalidate_optional_int32 = &i
+	if ftuo.addvalidate_optional_int32 == nil {
+		ftuo.addvalidate_optional_int32 = &i
+	} else {
+		*ftuo.addvalidate_optional_int32 += i
+	}
 	return ftuo
 }
 

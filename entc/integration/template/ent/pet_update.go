@@ -36,12 +36,17 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 // SetAge sets the age field.
 func (pu *PetUpdate) SetAge(i int) *PetUpdate {
 	pu.age = &i
+	pu.addage = nil
 	return pu
 }
 
 // AddAge adds i to age.
 func (pu *PetUpdate) AddAge(i int) *PetUpdate {
-	pu.addage = &i
+	if pu.addage == nil {
+		pu.addage = &i
+	} else {
+		*pu.addage += i
+	}
 	return pu
 }
 
@@ -185,12 +190,17 @@ type PetUpdateOne struct {
 // SetAge sets the age field.
 func (puo *PetUpdateOne) SetAge(i int) *PetUpdateOne {
 	puo.age = &i
+	puo.addage = nil
 	return puo
 }
 
 // AddAge adds i to age.
 func (puo *PetUpdateOne) AddAge(i int) *PetUpdateOne {
-	puo.addage = &i
+	if puo.addage == nil {
+		puo.addage = &i
+	} else {
+		*puo.addage += i
+	}
 	return puo
 }
 

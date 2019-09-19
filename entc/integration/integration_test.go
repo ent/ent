@@ -366,6 +366,10 @@ func AddValues(t *testing.T, client *ent.Client) {
 	cmt1 = cmt1.Update().AddUniqueInt(20).AddNillableInt(20).SaveX(ctx)
 	require.Equal(21, cmt1.UniqueInt)
 	require.Equal(20, *cmt1.NillableInt)
+
+	cmt1 = cmt1.Update().AddUniqueInt(10).AddUniqueInt(-1).SaveX(ctx)
+	require.Equal(30, cmt1.UniqueInt)
+	require.Equal(30, client.Comment.GetX(ctx, cmt1.ID).UniqueInt)
 }
 
 func Delete(t *testing.T, client *ent.Client) {

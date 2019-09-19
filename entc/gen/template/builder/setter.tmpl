@@ -20,6 +20,10 @@ in the LICENSE file in the root directory of this source tree.
 	// {{ $func }} sets the {{ $f.Name }} field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{ $receiver }}.{{ $f.StructField }} = &{{ $p }}
+		{{- /* setting numeric type override previous calls to Add. */}}
+		{{- if and $f.Type.Numeric $updater }}
+			{{ $receiver }}.add{{ $f.StructField }} = nil
+		{{- end }}
 		return {{ $receiver }}
 	}
 
@@ -39,7 +43,11 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $func := print "Add" (pascal $f.Name) }}
 		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
-			{{ $receiver }}.add{{ $f.StructField }} = &{{ $p }}
+			if {{ $receiver }}.add{{ $f.StructField }} == nil {
+				{{ $receiver }}.add{{ $f.StructField }} = &{{ $p }}
+			} else {
+				*{{ $receiver }}.add{{ $f.StructField }} += {{ $p }}
+			}
 			return {{ $receiver }}
 		}
 	{{ end }}

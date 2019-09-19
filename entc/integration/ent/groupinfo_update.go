@@ -50,6 +50,7 @@ func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
 // SetMaxUsers sets the max_users field.
 func (giu *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
 	giu.max_users = &i
+	giu.addmax_users = nil
 	return giu
 }
 
@@ -63,7 +64,11 @@ func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 
 // AddMaxUsers adds i to max_users.
 func (giu *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
-	giu.addmax_users = &i
+	if giu.addmax_users == nil {
+		giu.addmax_users = &i
+	} else {
+		*giu.addmax_users += i
+	}
 	return giu
 }
 
@@ -322,6 +327,7 @@ func (giuo *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
 // SetMaxUsers sets the max_users field.
 func (giuo *GroupInfoUpdateOne) SetMaxUsers(i int) *GroupInfoUpdateOne {
 	giuo.max_users = &i
+	giuo.addmax_users = nil
 	return giuo
 }
 
@@ -335,7 +341,11 @@ func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne 
 
 // AddMaxUsers adds i to max_users.
 func (giuo *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
-	giuo.addmax_users = &i
+	if giuo.addmax_users == nil {
+		giuo.addmax_users = &i
+	} else {
+		*giuo.addmax_users += i
+	}
 	return giuo
 }
 

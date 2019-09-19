@@ -44,30 +44,41 @@ func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 // SetUniqueInt sets the unique_int field.
 func (cu *CommentUpdate) SetUniqueInt(i int) *CommentUpdate {
 	cu.unique_int = &i
+	cu.addunique_int = nil
 	return cu
 }
 
 // AddUniqueInt adds i to unique_int.
 func (cu *CommentUpdate) AddUniqueInt(i int) *CommentUpdate {
-	cu.addunique_int = &i
+	if cu.addunique_int == nil {
+		cu.addunique_int = &i
+	} else {
+		*cu.addunique_int += i
+	}
 	return cu
 }
 
 // SetUniqueFloat sets the unique_float field.
 func (cu *CommentUpdate) SetUniqueFloat(f float64) *CommentUpdate {
 	cu.unique_float = &f
+	cu.addunique_float = nil
 	return cu
 }
 
 // AddUniqueFloat adds f to unique_float.
 func (cu *CommentUpdate) AddUniqueFloat(f float64) *CommentUpdate {
-	cu.addunique_float = &f
+	if cu.addunique_float == nil {
+		cu.addunique_float = &f
+	} else {
+		*cu.addunique_float += f
+	}
 	return cu
 }
 
 // SetNillableInt sets the nillable_int field.
 func (cu *CommentUpdate) SetNillableInt(i int) *CommentUpdate {
 	cu.nillable_int = &i
+	cu.addnillable_int = nil
 	return cu
 }
 
@@ -81,7 +92,11 @@ func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
 
 // AddNillableInt adds i to nillable_int.
 func (cu *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
-	cu.addnillable_int = &i
+	if cu.addnillable_int == nil {
+		cu.addnillable_int = &i
+	} else {
+		*cu.addnillable_int += i
+	}
 	return cu
 }
 
@@ -292,30 +307,41 @@ type CommentUpdateOne struct {
 // SetUniqueInt sets the unique_int field.
 func (cuo *CommentUpdateOne) SetUniqueInt(i int) *CommentUpdateOne {
 	cuo.unique_int = &i
+	cuo.addunique_int = nil
 	return cuo
 }
 
 // AddUniqueInt adds i to unique_int.
 func (cuo *CommentUpdateOne) AddUniqueInt(i int) *CommentUpdateOne {
-	cuo.addunique_int = &i
+	if cuo.addunique_int == nil {
+		cuo.addunique_int = &i
+	} else {
+		*cuo.addunique_int += i
+	}
 	return cuo
 }
 
 // SetUniqueFloat sets the unique_float field.
 func (cuo *CommentUpdateOne) SetUniqueFloat(f float64) *CommentUpdateOne {
 	cuo.unique_float = &f
+	cuo.addunique_float = nil
 	return cuo
 }
 
 // AddUniqueFloat adds f to unique_float.
 func (cuo *CommentUpdateOne) AddUniqueFloat(f float64) *CommentUpdateOne {
-	cuo.addunique_float = &f
+	if cuo.addunique_float == nil {
+		cuo.addunique_float = &f
+	} else {
+		*cuo.addunique_float += f
+	}
 	return cuo
 }
 
 // SetNillableInt sets the nillable_int field.
 func (cuo *CommentUpdateOne) SetNillableInt(i int) *CommentUpdateOne {
 	cuo.nillable_int = &i
+	cuo.addnillable_int = nil
 	return cuo
 }
 
@@ -329,7 +355,11 @@ func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
 
 // AddNillableInt adds i to nillable_int.
 func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
-	cuo.addnillable_int = &i
+	if cuo.addnillable_int == nil {
+		cuo.addnillable_int = &i
+	} else {
+		*cuo.addnillable_int += i
+	}
 	return cuo
 }
 

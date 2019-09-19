@@ -50,6 +50,7 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 // SetSize sets the size field.
 func (fu *FileUpdate) SetSize(i int) *FileUpdate {
 	fu.size = &i
+	fu.addsize = nil
 	return fu
 }
 
@@ -63,7 +64,11 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 
 // AddSize adds i to size.
 func (fu *FileUpdate) AddSize(i int) *FileUpdate {
-	fu.addsize = &i
+	if fu.addsize == nil {
+		fu.addsize = &i
+	} else {
+		*fu.addsize += i
+	}
 	return fu
 }
 
@@ -417,6 +422,7 @@ type FileUpdateOne struct {
 // SetSize sets the size field.
 func (fuo *FileUpdateOne) SetSize(i int) *FileUpdateOne {
 	fuo.size = &i
+	fuo.addsize = nil
 	return fuo
 }
 
@@ -430,7 +436,11 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 
 // AddSize adds i to size.
 func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
-	fuo.addsize = &i
+	if fuo.addsize == nil {
+		fuo.addsize = &i
+	} else {
+		*fuo.addsize += i
+	}
 	return fuo
 }
 

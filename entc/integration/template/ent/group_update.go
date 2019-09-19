@@ -32,12 +32,17 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 // SetMaxUsers sets the max_users field.
 func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
 	gu.max_users = &i
+	gu.addmax_users = nil
 	return gu
 }
 
 // AddMaxUsers adds i to max_users.
 func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
-	gu.addmax_users = &i
+	if gu.addmax_users == nil {
+		gu.addmax_users = &i
+	} else {
+		*gu.addmax_users += i
+	}
 	return gu
 }
 
@@ -128,12 +133,17 @@ type GroupUpdateOne struct {
 // SetMaxUsers sets the max_users field.
 func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
 	guo.max_users = &i
+	guo.addmax_users = nil
 	return guo
 }
 
 // AddMaxUsers adds i to max_users.
 func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
-	guo.addmax_users = &i
+	if guo.addmax_users == nil {
+		guo.addmax_users = &i
+	} else {
+		*guo.addmax_users += i
+	}
 	return guo
 }
 

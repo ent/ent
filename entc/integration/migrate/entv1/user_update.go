@@ -39,12 +39,17 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int32) *UserUpdate {
 	uu.age = &i
+	uu.addage = nil
 	return uu
 }
 
 // AddAge adds i to age.
 func (uu *UserUpdate) AddAge(i int32) *UserUpdate {
-	uu.addage = &i
+	if uu.addage == nil {
+		uu.addage = &i
+	} else {
+		*uu.addage += i
+	}
 	return uu
 }
 
@@ -229,12 +234,17 @@ type UserUpdateOne struct {
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
 	uuo.age = &i
+	uuo.addage = nil
 	return uuo
 }
 
 // AddAge adds i to age.
 func (uuo *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
-	uuo.addage = &i
+	if uuo.addage == nil {
+		uuo.addage = &i
+	} else {
+		*uuo.addage += i
+	}
 	return uuo
 }
 
