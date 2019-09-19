@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -24,6 +19,10 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -382,25 +381,25 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	builder := sql.Insert(user.Table).Default(uc.driver.Dialect())
-	if uc.age != nil {
-		builder.Set(user.FieldAge, *uc.age)
-		u.Age = *uc.age
+	if value := uc.age; value != nil {
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uc.name != nil {
-		builder.Set(user.FieldName, *uc.name)
-		u.Name = *uc.name
+	if value := uc.name; value != nil {
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
-	if uc.last != nil {
-		builder.Set(user.FieldLast, *uc.last)
-		u.Last = *uc.last
+	if value := uc.last; value != nil {
+		builder.Set(user.FieldLast, *value)
+		u.Last = *value
 	}
-	if uc.nickname != nil {
-		builder.Set(user.FieldNickname, *uc.nickname)
-		u.Nickname = *uc.nickname
+	if value := uc.nickname; value != nil {
+		builder.Set(user.FieldNickname, *value)
+		u.Nickname = *value
 	}
-	if uc.phone != nil {
-		builder.Set(user.FieldPhone, *uc.phone)
-		u.Phone = *uc.phone
+	if value := uc.phone; value != nil {
+		builder.Set(user.FieldPhone, *value)
+		u.Phone = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

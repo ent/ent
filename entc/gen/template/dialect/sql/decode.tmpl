@@ -27,7 +27,13 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 	}
 	{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.Itoa({{ $scan }}.ID){{ else }}{{ $scan }}.ID{{ end }}
 	{{- range $_, $f := $.Fields }}
-		{{- if $f.Nillable }}
+		{{- if $f.IsJSON }}
+			if value := {{ $scan }}.{{ pascal $f.Name }}; len(value) > 0 {
+				if err := json.Unmarshal(value, &{{ $receiver }}.{{ pascal $f.Name }}); err != nil {
+					return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
+				}
+			}
+		{{- else if $f.Nillable }}
 			{{- if $f.IsTime }}
 				{{ $receiver }}.{{ pascal $f.Name }} = &{{ $scan }}.{{ pascal $f.Name }}
 			{{- else }}

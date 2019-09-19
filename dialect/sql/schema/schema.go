@@ -253,6 +253,11 @@ func (c *Column) MySQLType(version string) (t string) {
 		case size <= math.MaxUint32:
 			t = "longblob"
 		}
+	case field.TypeJSON:
+		t = "json"
+		if compareVersions(version, "5.7.8") == -1 {
+			t = "longblob"
+		}
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
@@ -298,6 +303,8 @@ func (c *Column) SQLiteType() (t string) {
 		t = "real"
 	case field.TypeTime:
 		t = "datetime"
+	case field.TypeJSON:
+		t = "json"
 	default:
 		panic("unsupported type " + c.Type.String())
 	}
@@ -371,6 +378,8 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 	case "longtext":
 		c.Size = math.MaxInt32
 		c.Type = field.TypeString
+	case "json":
+		c.Type = field.TypeJSON
 	}
 	if defaults.Valid && defaults.String != Null {
 		return c.ScanDefault(defaults.String)
@@ -504,12 +513,9 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 // prefix key limit (767).
 func (c *Column) defaultSize(version string) int {
 	size := DefaultStringLen
-	parts := strings.Split(version, ".")
 	switch {
-	// invalid version.
-	case len(parts) == 1 || parts[0] == "" || parts[1] == "":
-	// version is > 5.6.*.
-	case parts[0] > "5" || parts[1] > "6":
+	// version is >= 5.7.
+	case compareVersions(version, "5.7.0") != -1:
 	// non-unique, or not part of any index (reaching the error 1071).
 	case !c.Unique && len(c.indexes) == 0:
 	default:
@@ -642,4 +648,64 @@ func (i *Indexes) ScanMySQL(rows *sql.Rows) error {
 		idx.columns = append(idx.columns, column)
 	}
 	return nil
+}
+
+// compareVersions returns an integer comparing the 2 versions.
+func compareVersions(v1, v2 string) int {
+	pv1, ok1 := parseVersion(v1)
+	pv2, ok2 := parseVersion(v2)
+	if !ok1 && !ok2 {
+		return 0
+	}
+	if !ok1 {
+		return -1
+	}
+	if !ok2 {
+		return 1
+	}
+	if v := compare(pv1.major, pv2.major); v != 0 {
+		return v
+	}
+	if v := compare(pv1.minor, pv2.minor); v != 0 {
+		return v
+	}
+	return compare(pv1.patch, pv2.patch)
+}
+
+// version represents a parsed MySQL version.
+type version struct {
+	major int
+	minor int
+	patch int
+}
+
+// parseVersion returns an integer comparing the 2 versions.
+func parseVersion(v string) (*version, bool) {
+	parts := strings.Split(v, ".")
+	if len(parts) == 0 {
+		return nil, false
+	}
+	var (
+		err error
+		ver = &version{}
+	)
+	for i, e := range []*int{&ver.major, &ver.minor, &ver.patch} {
+		if i == len(parts) {
+			break
+		}
+		if *e, err = strconv.Atoi(parts[i]); err != nil {
+			return nil, false
+		}
+	}
+	return ver, true
+}
+
+func compare(v1, v2 int) int {
+	if v1 == v2 {
+		return 0
+	}
+	if v1 < v2 {
+		return -1
+	}
+	return 1
 }

@@ -48,7 +48,7 @@ type (
 		// Name is the name of this field in the database schema.
 		Name string
 		// Type holds the type information of the field.
-		Type field.Type
+		Type *field.TypeInfo
 		// Unique indicate if this field is a unique field.
 		Unique bool
 		// Optional indicates is this field is optional on create.
@@ -139,7 +139,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 	}
 	for i, f := range schema.Fields {
 		switch {
-		case !f.Type.Valid():
+		case f.Info == nil || !f.Info.Valid():
 			return nil, fmt.Errorf("invalid type for field %s", f.Name)
 		case f.Nillable && !f.Optional:
 			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
@@ -151,7 +151,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 		typ.Fields[i] = &Field{
 			def:           f,
 			Name:          f.Name,
-			Type:          f.Type,
+			Type:          f.Info,
 			Unique:        f.Unique,
 			Nillable:      f.Nillable,
 			Optional:      f.Optional,
@@ -373,15 +373,20 @@ func (f Field) StructField() string {
 // Validator returns the validator name.
 func (f Field) Validator() string { return pascal(f.Name) + "Validator" }
 
-// IsTime returns true if the field is timestamp field.
-func (f Field) IsTime() bool { return f.Type == field.TypeTime }
+// IsTime returns true if the field is a timestamp field.
+func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.TypeTime }
+
+// IsJSON returns true if the field is a JSON field.
+func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.TypeJSON }
 
 // IsString returns true if the field is a string field.
-func (f Field) IsString() bool { return f.Type == field.TypeString }
+func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.TypeString }
 
 // NullType returns the sql null-type for optional and nullable fields.
 func (f Field) NullType() string {
-	switch f.Type {
+	switch f.Type.Type {
+	case field.TypeJSON:
+		return "[]byte"
 	case field.TypeString:
 		return "sql.NullString"
 	case field.TypeBool:
@@ -400,16 +405,16 @@ func (f Field) NullType() string {
 // NullTypeField extracts the nullable type field (if exists) from the given receiver.
 // It also does the type conversion if needed.
 func (f Field) NullTypeField(rec string) string {
-	switch f.Type {
+	switch f.Type.Type {
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
 		return fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.String()))
 	case field.TypeTime:
 		return fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
-		return fmt.Sprintf("%s(%s.Float32)", f.Type.String(), rec)
+		return fmt.Sprintf("%s(%s.Float32)", f.Type, rec)
 	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32,
 		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
-		return fmt.Sprintf("%s(%s.Int64)", f.Type.String(), rec)
+		return fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
 	}
 	return rec
 }
@@ -419,7 +424,7 @@ func (f Field) Column() *schema.Column {
 	pk := f.Name == "id"
 	c := &schema.Column{
 		Name:     f.StorageKey(),
-		Type:     f.Type,
+		Type:     f.Type.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
 	}
@@ -442,17 +447,17 @@ func (f Field) Column() *schema.Column {
 
 // ExampleCode returns an example code of the field value for the example_test file.
 func (f Field) ExampleCode() string {
-	switch f.Type {
-	case field.TypeString:
-		return "\"string\""
-	case field.TypeBytes:
-		return "[]byte{}"
-	case field.TypeBool:
-		return "true"
-	case field.TypeTime:
-		return "time.Now()"
-	default:
+	switch t := f.Type.Type; {
+	case t.Numeric():
 		return "1"
+	case t == field.TypeBool:
+		return "true"
+	case t == field.TypeTime:
+		return "time.Now()"
+	case t == field.TypeString:
+		return "\"string\""
+	default:
+		return "nil"
 	}
 }
 

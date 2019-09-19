@@ -9,10 +9,9 @@ package entv1
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserDelete is the builder for deleting a User entity.

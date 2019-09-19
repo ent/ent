@@ -11,9 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -21,6 +18,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/comment"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
@@ -155,39 +154,31 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
 	)
 	if value := cu.unique_int; value != nil {
-		update = true
 		builder.Set(comment.FieldUniqueInt, *value)
 	}
 	if value := cu.addunique_int; value != nil {
-		update = true
 		builder.Add(comment.FieldUniqueInt, *value)
 	}
 	if value := cu.unique_float; value != nil {
-		update = true
 		builder.Set(comment.FieldUniqueFloat, *value)
 	}
 	if value := cu.addunique_float; value != nil {
-		update = true
 		builder.Add(comment.FieldUniqueFloat, *value)
 	}
 	if value := cu.nillable_int; value != nil {
-		update = true
 		builder.Set(comment.FieldNillableInt, *value)
 	}
 	if value := cu.addnillable_int; value != nil {
-		update = true
 		builder.Add(comment.FieldNillableInt, *value)
 	}
 	if cu.clearnillable_int {
-		update = true
 		builder.SetNull(comment.FieldNillableInt)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -414,37 +405,30 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
 	)
 	if value := cuo.unique_int; value != nil {
-		update = true
 		builder.Set(comment.FieldUniqueInt, *value)
 		c.UniqueInt = *value
 	}
 	if value := cuo.addunique_int; value != nil {
-		update = true
 		builder.Add(comment.FieldUniqueInt, *value)
 		c.UniqueInt += *value
 	}
 	if value := cuo.unique_float; value != nil {
-		update = true
 		builder.Set(comment.FieldUniqueFloat, *value)
 		c.UniqueFloat = *value
 	}
 	if value := cuo.addunique_float; value != nil {
-		update = true
 		builder.Add(comment.FieldUniqueFloat, *value)
 		c.UniqueFloat += *value
 	}
 	if value := cuo.nillable_int; value != nil {
-		update = true
 		builder.Set(comment.FieldNillableInt, *value)
 		c.NillableInt = value
 	}
 	if value := cuo.addnillable_int; value != nil {
-		update = true
 		builder.Add(comment.FieldNillableInt, *value)
 		if c.NillableInt != nil {
 			*c.NillableInt += *value
@@ -453,11 +437,10 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		}
 	}
 	if cuo.clearnillable_int {
-		update = true
 		c.NillableInt = nil
 		builder.SetNull(comment.FieldNillableInt)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

@@ -7,9 +7,8 @@
 package user
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
 )
 
 // ID filters vertices based on their identifier.

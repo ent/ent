@@ -10,16 +10,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
 	age          *int32
+	addage       *int32
 	name         *string
 	address      *string
 	clearaddress bool
@@ -39,6 +39,12 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int32) *UserUpdate {
 	uu.age = &i
+	return uu
+}
+
+// AddAge adds i to age.
+func (uu *UserUpdate) AddAge(i int32) *UserUpdate {
+	uu.addage = &i
 	return uu
 }
 
@@ -163,43 +169,37 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 	}
+	if value := uu.addage; value != nil {
+		builder.Add(user.FieldAge, *value)
+	}
 	if value := uu.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 	}
 	if value := uu.address; value != nil {
-		update = true
 		builder.Set(user.FieldAddress, *value)
 	}
 	if uu.clearaddress {
-		update = true
 		builder.SetNull(user.FieldAddress)
 	}
 	if value := uu.renamed; value != nil {
-		update = true
 		builder.Set(user.FieldRenamed, *value)
 	}
 	if uu.clearrenamed {
-		update = true
 		builder.SetNull(user.FieldRenamed)
 	}
 	if value := uu.blob; value != nil {
-		update = true
 		builder.Set(user.FieldBlob, *value)
 	}
 	if uu.clearblob {
-		update = true
 		builder.SetNull(user.FieldBlob)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -216,6 +216,7 @@ type UserUpdateOne struct {
 	config
 	id           int
 	age          *int32
+	addage       *int32
 	name         *string
 	address      *string
 	clearaddress bool
@@ -228,6 +229,12 @@ type UserUpdateOne struct {
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
 	uuo.age = &i
+	return uuo
+}
+
+// AddAge adds i to age.
+func (uuo *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
+	uuo.addage = &i
 	return uuo
 }
 
@@ -355,54 +362,49 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
+	if value := uuo.addage; value != nil {
+		builder.Add(user.FieldAge, *value)
+		u.Age += *value
+	}
 	if value := uuo.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 		u.Name = *value
 	}
 	if value := uuo.address; value != nil {
-		update = true
 		builder.Set(user.FieldAddress, *value)
 		u.Address = *value
 	}
 	if uuo.clearaddress {
-		update = true
 		var value string
 		u.Address = value
 		builder.SetNull(user.FieldAddress)
 	}
 	if value := uuo.renamed; value != nil {
-		update = true
 		builder.Set(user.FieldRenamed, *value)
 		u.Renamed = *value
 	}
 	if uuo.clearrenamed {
-		update = true
 		var value string
 		u.Renamed = value
 		builder.SetNull(user.FieldRenamed)
 	}
 	if value := uuo.blob; value != nil {
-		update = true
 		builder.Set(user.FieldBlob, *value)
 		u.Blob = *value
 	}
 	if uuo.clearblob {
-		update = true
 		var value []byte
 		u.Blob = value
 		builder.SetNull(user.FieldBlob)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

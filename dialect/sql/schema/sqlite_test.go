@@ -61,6 +61,7 @@ func TestSQLite_Create(t *testing.T) {
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "age", Type: field.TypeInt},
+						{Name: "doc", Type: field.TypeJSON, Nullable: true},
 					},
 				},
 			},
@@ -71,7 +72,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
 					WithArgs("table", "users").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL)")).
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL, `doc` json NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

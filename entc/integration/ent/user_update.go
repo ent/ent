@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -25,6 +19,11 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -609,43 +608,34 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		update = true
 		builder.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 	}
 	if value := uu.last; value != nil {
-		update = true
 		builder.Set(user.FieldLast, *value)
 	}
 	if value := uu.nickname; value != nil {
-		update = true
 		builder.Set(user.FieldNickname, *value)
 	}
 	if uu.clearnickname {
-		update = true
 		builder.SetNull(user.FieldNickname)
 	}
 	if value := uu.phone; value != nil {
-		update = true
 		builder.Set(user.FieldPhone, *value)
 	}
 	if uu.clearphone {
-		update = true
 		builder.SetNull(user.FieldPhone)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -1859,53 +1849,44 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		update = true
 		builder.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 		u.Name = *value
 	}
 	if value := uuo.last; value != nil {
-		update = true
 		builder.Set(user.FieldLast, *value)
 		u.Last = *value
 	}
 	if value := uuo.nickname; value != nil {
-		update = true
 		builder.Set(user.FieldNickname, *value)
 		u.Nickname = *value
 	}
 	if uuo.clearnickname {
-		update = true
 		var value string
 		u.Nickname = value
 		builder.SetNull(user.FieldNickname)
 	}
 	if value := uuo.phone; value != nil {
-		update = true
 		builder.Set(user.FieldPhone, *value)
 		u.Phone = *value
 	}
 	if uuo.clearphone {
-		update = true
 		var value string
 		u.Phone = value
 		builder.SetNull(user.FieldPhone)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

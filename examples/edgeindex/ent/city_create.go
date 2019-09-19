@@ -11,10 +11,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CityCreate is the builder for creating a City entity.
@@ -77,9 +76,9 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		return nil, err
 	}
 	builder := sql.Insert(city.Table).Default(cc.driver.Dialect())
-	if cc.name != nil {
-		builder.Set(city.FieldName, *cc.name)
-		c.Name = *cc.name
+	if value := cc.name; value != nil {
+		builder.Set(city.FieldName, *value)
+		c.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

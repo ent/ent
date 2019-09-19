@@ -13,9 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -23,6 +20,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -138,17 +137,17 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	builder := sql.Insert(card.Table).Default(cc.driver.Dialect())
-	if cc.number != nil {
-		builder.Set(card.FieldNumber, *cc.number)
-		c.Number = *cc.number
+	if value := cc.number; value != nil {
+		builder.Set(card.FieldNumber, *value)
+		c.Number = *value
 	}
-	if cc.created_at != nil {
-		builder.Set(card.FieldCreatedAt, *cc.created_at)
-		c.CreatedAt = *cc.created_at
+	if value := cc.created_at; value != nil {
+		builder.Set(card.FieldCreatedAt, *value)
+		c.CreatedAt = *value
 	}
-	if cc.updated_at != nil {
-		builder.Set(card.FieldUpdatedAt, *cc.updated_at)
-		c.UpdatedAt = *cc.updated_at
+	if value := cc.updated_at; value != nil {
+		builder.Set(card.FieldUpdatedAt, *value)
+		c.UpdatedAt = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

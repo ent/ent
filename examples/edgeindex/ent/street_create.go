@@ -10,9 +10,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
 )
 
 // StreetCreate is the builder for creating a Street entity.
@@ -80,9 +79,9 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		return nil, err
 	}
 	builder := sql.Insert(street.Table).Default(sc.driver.Dialect())
-	if sc.name != nil {
-		builder.Set(street.FieldName, *sc.name)
-		s.Name = *sc.name
+	if value := sc.name; value != nil {
+		builder.Set(street.FieldName, *value)
+		s.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

@@ -62,26 +62,27 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	}
 	{{- if $.Fields }}
 		var (
-			update bool
 			res sql.Result
 			builder = sql.Update({{ $.Package }}.Table).Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
 		)
 		{{- range $_, $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value := {{ $receiver }}.{{ $f.StructField }}; value != nil {
-					update = true
-					builder.Set({{ $.Package }}.{{ $f.Constant }}, *value)
+					{{- if $f.IsJSON }}
+						buf, err := json.Marshal(*value)
+						if err != nil {
+							return {{ $zero }}, err
+						}
+						builder.Set({{ $.Package }}.{{ $f.Constant }}, buf)
+					{{- else }}
+						builder.Set({{ $.Package }}.{{ $f.Constant }}, *value)
+					{{- end }}
 					{{- if $one }}
-						{{- if $f.Nillable }}
-							{{ $.Receiver }}.{{ pascal $f.Name }} = value
-						{{- else }}
-							{{ $.Receiver }}.{{ pascal $f.Name }} = *value
-						{{- end }}
+						{{ $.Receiver }}.{{ pascal $f.Name }} = {{ if not $f.Nillable }}*{{ end }}value
 					{{- end }}
 				}
 				{{- if $f.Type.Numeric }}
 					if value := {{ $receiver }}.add{{ $f.StructField }}; value != nil {
-						update = true
 						builder.Add({{ $.Package }}.{{ $f.Constant }}, *value)
 						{{- if $one }}
 							{{- if $f.Nillable }}
@@ -99,7 +100,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{- end }}
 			{{- if $f.Optional }}
 				if {{ $receiver }}.clear{{ $f.StructField }} {
-					update = true
 					{{- if $one }}
 						{{- if $f.Nillable }}
 							{{ $.Receiver }}.{{ pascal $f.Name }} = nil
@@ -112,7 +112,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				}
 			{{- end }}
 		{{- end }}
-		if update {
+		if !builder.Empty() {
 			query, args := builder.Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return {{ $zero }}, rollback(tx, err)

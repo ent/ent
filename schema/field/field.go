@@ -7,108 +7,9 @@ package field
 import (
 	"errors"
 	"math"
+	"reflect"
 	"regexp"
-	"strconv"
-	"strings"
 	"time"
-)
-
-// Type is a field type.
-type Type uint
-
-// Field types.
-const (
-	TypeInvalid Type = iota
-	TypeBool
-	TypeTime
-	TypeBytes
-	TypeString
-	TypeInt8
-	TypeInt16
-	TypeInt32
-	TypeInt
-	TypeInt64
-	TypeUint8
-	TypeUint16
-	TypeUint32
-	TypeUint
-	TypeUint64
-	TypeFloat32
-	TypeFloat64
-	endTypes
-)
-
-func (t Type) String() string {
-	if int(t) < len(typeNames) {
-		return typeNames[t]
-	}
-	return "type" + strconv.Itoa(int(t))
-}
-
-// Valid reports if the given type if known type.
-func (t Type) Valid() bool { return t > TypeInvalid && t < endTypes }
-
-// Numeric reports if the given type is a numeric type.
-func (t Type) Numeric() bool { return t >= TypeInt && t < endTypes }
-
-// Slice reports if the given type is a slice type.
-func (t Type) Slice() bool { return t == TypeBytes }
-
-// ConstName returns the constant name of a type. It's used by entc for printing the constant name in templates.
-func (t Type) ConstName() string {
-	switch t {
-	case TypeTime:
-		return "TypeTime"
-	case TypeBytes:
-		return "TypeBytes"
-	default:
-		return "Type" + strings.Title(t.String())
-	}
-}
-
-// Bits returns the size of the type in bits.
-// It panics if the type is not numeric type.
-func (t Type) Bits() int {
-	if !t.Numeric() {
-		panic("schema/field: Bits of non-numeric type")
-	}
-	return bits[t]
-}
-
-var (
-	typeNames = [...]string{
-		TypeInvalid: "invalid",
-		TypeBool:    "bool",
-		TypeTime:    "time.Time",
-		TypeBytes:   "[]byte",
-		TypeString:  "string",
-		TypeInt:     "int",
-		TypeInt8:    "int8",
-		TypeInt16:   "int16",
-		TypeInt32:   "int32",
-		TypeInt64:   "int64",
-		TypeUint:    "uint",
-		TypeUint8:   "uint8",
-		TypeUint16:  "uint16",
-		TypeUint32:  "uint32",
-		TypeUint64:  "uint64",
-		TypeFloat32: "float32",
-		TypeFloat64: "float64",
-	}
-	bits = [...]int{
-		TypeInt:     strconv.IntSize,
-		TypeInt8:    8,
-		TypeInt16:   16,
-		TypeInt32:   32,
-		TypeInt64:   64,
-		TypeUint:    strconv.IntSize,
-		TypeUint8:   8,
-		TypeUint16:  16,
-		TypeUint32:  32,
-		TypeUint64:  64,
-		TypeFloat32: 32,
-		TypeFloat64: 64,
-	}
 )
 
 // A Descriptor for field configuration.
@@ -116,7 +17,7 @@ type Descriptor struct {
 	Tag           string        // struct tag.
 	Size          int           // varchar size.
 	Name          string        // field name.
-	Type          Type          // field type.
+	Info          *TypeInfo     // field type info.
 	Unique        bool          // unique index of field.
 	Nillable      bool          // nillable struct field.
 	Optional      bool          // nullable field in database.
@@ -129,29 +30,87 @@ type Descriptor struct {
 
 // String returns a new Field with type string.
 func String(name string) *stringBuilder {
-	return &stringBuilder{desc: &Descriptor{Type: TypeString, Name: name}}
+	return &stringBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeString},
+	}}
 }
 
 // Text returns a new string field without limitation on the size.
 // In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has not effect.
 func Text(name string) *stringBuilder {
-	return &stringBuilder{desc: &Descriptor{Type: TypeString, Name: name, Size: math.MaxInt32}}
+	return &stringBuilder{&Descriptor{
+		Name: name,
+		Size: math.MaxInt32,
+		Info: &TypeInfo{Type: TypeString},
+	}}
 }
 
 // Bytes returns a new Field with type bytes/buffer.
 // In MySQL and SQLite, it is the "BLOB" type, and it does not support for Gremlin.
 func Bytes(name string) *bytesBuilder {
-	return &bytesBuilder{desc: &Descriptor{Type: TypeBytes, Name: name}}
+	return &bytesBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeBytes, Nillable: true},
+	}}
 }
 
 // Bool returns a new Field with type bool.
 func Bool(name string) *boolBuilder {
-	return &boolBuilder{desc: &Descriptor{Type: TypeBool, Name: name}}
+	return &boolBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeBool},
+	}}
 }
 
 // Time returns a new Field with type timestamp.
 func Time(name string) *timeBuilder {
-	return &timeBuilder{desc: &Descriptor{Type: TypeTime, Name: name}}
+	return &timeBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeTime, PkgPath: "time"},
+	}}
+}
+
+// JSON returns a new Field with type json that is serialized to the given object.
+// For example:
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		Optional()
+//
+//
+//	field.JSON("info", &Info{}).
+//		Optional()
+//
+func JSON(name string, typ interface{}) *jsonsBuilder {
+	t := reflect.TypeOf(typ)
+	info := &TypeInfo{
+		Type:    TypeJSON,
+		Ident:   t.String(),
+		PkgPath: t.PkgPath(),
+	}
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		info.Nillable = true
+	}
+	return &jsonsBuilder{&Descriptor{
+		Name: name,
+		Info: info,
+	}}
+}
+
+// Strings returns a new JSON Field with type []string.
+func Strings(name string) *jsonsBuilder {
+	return JSON(name, []string{})
+}
+
+// Ints returns a new JSON Field with type []int.
+func Ints(name string) *jsonsBuilder {
+	return JSON(name, []int{})
+}
+
+// Floats returns a new JSON Field with type []float.
+func Floats(name string) *jsonsBuilder {
+	return JSON(name, []float64{})
 }
 
 // stringBuilder is the builder for string fields.
@@ -440,5 +399,40 @@ func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *bytesBuilder) Descriptor() *Descriptor {
+	return b.desc
+}
+
+// jsonsBuilder is the builder for json fields.
+type jsonsBuilder struct {
+	desc *Descriptor
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *jsonsBuilder) StorageKey(key string) *jsonsBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *jsonsBuilder) Optional() *jsonsBuilder {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *jsonsBuilder) Immutable() *jsonsBuilder {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *jsonsBuilder) Comment(c string) *jsonsBuilder {
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *jsonsBuilder) Descriptor() *Descriptor {
 	return b.desc
 }

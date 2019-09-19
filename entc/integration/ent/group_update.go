@@ -13,12 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -26,6 +20,11 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -353,43 +352,34 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := gu.active; value != nil {
-		update = true
 		builder.Set(group.FieldActive, *value)
 	}
 	if value := gu.expire; value != nil {
-		update = true
 		builder.Set(group.FieldExpire, *value)
 	}
 	if value := gu._type; value != nil {
-		update = true
 		builder.Set(group.FieldType, *value)
 	}
 	if gu.clear_type {
-		update = true
 		builder.SetNull(group.FieldType)
 	}
 	if value := gu.max_users; value != nil {
-		update = true
 		builder.Set(group.FieldMaxUsers, *value)
 	}
 	if value := gu.addmax_users; value != nil {
-		update = true
 		builder.Add(group.FieldMaxUsers, *value)
 	}
 	if gu.clearmax_users {
-		update = true
 		builder.SetNull(group.FieldMaxUsers)
 	}
 	if value := gu.name; value != nil {
-		update = true
 		builder.Set(group.FieldName, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -987,52 +977,43 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := guo.active; value != nil {
-		update = true
 		builder.Set(group.FieldActive, *value)
 		gr.Active = *value
 	}
 	if value := guo.expire; value != nil {
-		update = true
 		builder.Set(group.FieldExpire, *value)
 		gr.Expire = *value
 	}
 	if value := guo._type; value != nil {
-		update = true
 		builder.Set(group.FieldType, *value)
 		gr.Type = value
 	}
 	if guo.clear_type {
-		update = true
 		gr.Type = nil
 		builder.SetNull(group.FieldType)
 	}
 	if value := guo.max_users; value != nil {
-		update = true
 		builder.Set(group.FieldMaxUsers, *value)
 		gr.MaxUsers = *value
 	}
 	if value := guo.addmax_users; value != nil {
-		update = true
 		builder.Add(group.FieldMaxUsers, *value)
 		gr.MaxUsers += *value
 	}
 	if guo.clearmax_users {
-		update = true
 		var value int
 		gr.MaxUsers = value
 		builder.SetNull(group.FieldMaxUsers)
 	}
 	if value := guo.name; value != nil {
-		update = true
 		builder.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

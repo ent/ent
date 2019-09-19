@@ -12,10 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -23,6 +19,9 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
@@ -170,23 +169,19 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
 	)
 	if value := giu.desc; value != nil {
-		update = true
 		builder.Set(groupinfo.FieldDesc, *value)
 	}
 	if value := giu.max_users; value != nil {
-		update = true
 		builder.Set(groupinfo.FieldMaxUsers, *value)
 	}
 	if value := giu.addmax_users; value != nil {
-		update = true
 		builder.Add(groupinfo.FieldMaxUsers, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -449,26 +444,22 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
 	)
 	if value := giuo.desc; value != nil {
-		update = true
 		builder.Set(groupinfo.FieldDesc, *value)
 		gi.Desc = *value
 	}
 	if value := giuo.max_users; value != nil {
-		update = true
 		builder.Set(groupinfo.FieldMaxUsers, *value)
 		gi.MaxUsers = *value
 	}
 	if value := giuo.addmax_users; value != nil {
-		update = true
 		builder.Add(groupinfo.FieldMaxUsers, *value)
 		gi.MaxUsers += *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

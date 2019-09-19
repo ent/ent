@@ -12,17 +12,16 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // FileUpdate is the builder for updating File entities.
@@ -245,39 +244,31 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
 	)
 	if value := fu.size; value != nil {
-		update = true
 		builder.Set(file.FieldSize, *value)
 	}
 	if value := fu.addsize; value != nil {
-		update = true
 		builder.Add(file.FieldSize, *value)
 	}
 	if value := fu.name; value != nil {
-		update = true
 		builder.Set(file.FieldName, *value)
 	}
 	if value := fu.user; value != nil {
-		update = true
 		builder.Set(file.FieldUser, *value)
 	}
 	if fu.clearuser {
-		update = true
 		builder.SetNull(file.FieldUser)
 	}
 	if value := fu.group; value != nil {
-		update = true
 		builder.Set(file.FieldGroup, *value)
 	}
 	if fu.cleargroup {
-		update = true
 		builder.SetNull(file.FieldGroup)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -623,47 +614,39 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
 	)
 	if value := fuo.size; value != nil {
-		update = true
 		builder.Set(file.FieldSize, *value)
 		f.Size = *value
 	}
 	if value := fuo.addsize; value != nil {
-		update = true
 		builder.Add(file.FieldSize, *value)
 		f.Size += *value
 	}
 	if value := fuo.name; value != nil {
-		update = true
 		builder.Set(file.FieldName, *value)
 		f.Name = *value
 	}
 	if value := fuo.user; value != nil {
-		update = true
 		builder.Set(file.FieldUser, *value)
 		f.User = value
 	}
 	if fuo.clearuser {
-		update = true
 		f.User = nil
 		builder.SetNull(file.FieldUser)
 	}
 	if value := fuo.group; value != nil {
-		update = true
 		builder.Set(file.FieldGroup, *value)
 		f.Group = *value
 	}
 	if fuo.cleargroup {
-		update = true
 		var value string
 		f.Group = value
 		builder.SetNull(file.FieldGroup)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

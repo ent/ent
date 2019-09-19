@@ -9,10 +9,9 @@ package ent
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/traversal/ent/group"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // GroupDelete is the builder for deleting a Group entity.

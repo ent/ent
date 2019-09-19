@@ -12,9 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -22,6 +19,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -122,9 +121,9 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	builder := sql.Insert(pet.Table).Default(pc.driver.Dialect())
-	if pc.name != nil {
-		builder.Set(pet.FieldName, *pc.name)
-		pe.Name = *pc.name
+	if value := pc.name; value != nil {
+		builder.Set(pet.FieldName, *value)
+		pe.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

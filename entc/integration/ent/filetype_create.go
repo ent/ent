@@ -12,9 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -22,6 +19,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
@@ -91,9 +90,9 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		return nil, err
 	}
 	builder := sql.Insert(filetype.Table).Default(ftc.driver.Dialect())
-	if ftc.name != nil {
-		builder.Set(filetype.FieldName, *ftc.name)
-		ft.Name = *ftc.name
+	if value := ftc.name; value != nil {
+		builder.Set(filetype.FieldName, *value)
+		ft.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

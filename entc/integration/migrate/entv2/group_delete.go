@@ -9,10 +9,9 @@ package entv2
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // GroupDelete is the builder for deleting a Group entity.

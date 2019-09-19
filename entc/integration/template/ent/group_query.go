@@ -12,10 +12,9 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // GroupQuery is the builder for querying Group entities.

@@ -11,11 +11,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/traversal/ent/group"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
 	"github.com/facebookincubator/ent/examples/traversal/ent/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -167,15 +166,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := gu.name; value != nil {
-		update = true
 		builder.Set(group.FieldName, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -383,16 +380,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := guo.name; value != nil {
-		update = true
 		builder.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

@@ -12,9 +12,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -87,13 +86,13 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	builder := sql.Insert(card.Table).Default(cc.driver.Dialect())
-	if cc.expired != nil {
-		builder.Set(card.FieldExpired, *cc.expired)
-		c.Expired = *cc.expired
+	if value := cc.expired; value != nil {
+		builder.Set(card.FieldExpired, *value)
+		c.Expired = *value
 	}
-	if cc.number != nil {
-		builder.Set(card.FieldNumber, *cc.number)
-		c.Number = *cc.number
+	if value := cc.number; value != nil {
+		builder.Set(card.FieldNumber, *value)
+		c.Number = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

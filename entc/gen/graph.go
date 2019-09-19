@@ -36,7 +36,7 @@ type (
 		Storage []*Storage
 		// IDType specifies the type of the id field in the codegen.
 		// The supported types are string and int, which also the default.
-		IDType field.Type
+		IDType *field.TypeInfo
 		// Template specifies an alternative template to execute or to override
 		// the default. If nil, the default template is used.
 		//

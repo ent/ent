@@ -12,10 +12,9 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetQuery is the builder for querying Pet entities.

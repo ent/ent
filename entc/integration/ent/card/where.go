@@ -10,12 +10,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.

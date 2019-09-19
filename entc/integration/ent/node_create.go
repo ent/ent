@@ -12,8 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -21,6 +19,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/node"
 )
 
 // NodeCreate is the builder for creating a Node entity.
@@ -126,9 +125,9 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		return nil, err
 	}
 	builder := sql.Insert(node.Table).Default(nc.driver.Dialect())
-	if nc.value != nil {
-		builder.Set(node.FieldValue, *nc.value)
-		n.Value = *nc.value
+	if value := nc.value; value != nil {
+		builder.Set(node.FieldValue, *value)
+		n.Value = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

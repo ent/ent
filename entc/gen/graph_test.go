@@ -21,9 +21,9 @@ var (
 	T1 = &load.Schema{
 		Name: "T1",
 		Fields: []*load.Field{
-			{Name: "age", Type: field.TypeInt, Optional: true},
-			{Name: "expired_at", Type: field.TypeTime, Nillable: true, Optional: true},
-			{Name: "name", Type: field.TypeString, Default: true},
+			{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+			{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}, Default: true},
 		},
 		Edges: []*load.Edge{
 			{Name: "t2", Type: "T2", Required: true},
@@ -49,7 +49,7 @@ var (
 	T2 = &load.Schema{
 		Name: "T2",
 		Fields: []*load.Field{
-			{Name: "active", Type: field.TypeBool},
+			{Name: "active", Info: &field.TypeInfo{Type: field.TypeBool}},
 		},
 		Edges: []*load.Edge{
 			{Name: "t1", Type: "T1", RefName: "t2", Inverse: true},
@@ -209,12 +209,18 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.Remove(target)
 	external := template.Must(template.New("external").Parse("external"))
-	graph, err := NewGraph(Config{Package: "entc/gen", Target: target, Storage: drivers, Template: external}, &load.Schema{
+	graph, err := NewGraph(Config{
+		Package:  "entc/gen",
+		Target:   target,
+		Storage:  drivers,
+		Template: external,
+		IDType:   &field.TypeInfo{Type: field.TypeInt},
+	}, &load.Schema{
 		Name: "T1",
 		Fields: []*load.Field{
-			{Name: "age", Type: field.TypeInt, Optional: true},
-			{Name: "expired_at", Type: field.TypeTime, Nillable: true, Optional: true},
-			{Name: "name", Type: field.TypeString},
+			{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+			{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
 		},
 		Edges: []*load.Edge{
 			{Name: "t1", Type: "T1", Unique: true},

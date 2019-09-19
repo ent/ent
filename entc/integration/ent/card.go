@@ -9,10 +9,9 @@ package ent
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
-
-	"log"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"

@@ -13,10 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -24,6 +20,9 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // CardUpdate is the builder for updating Card entities.
@@ -151,19 +150,16 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
 	if value := cu.number; value != nil {
-		update = true
 		builder.Set(card.FieldNumber, *value)
 	}
 	if value := cu.updated_at; value != nil {
-		update = true
 		builder.Set(card.FieldUpdatedAt, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -388,21 +384,18 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
 	if value := cuo.number; value != nil {
-		update = true
 		builder.Set(card.FieldNumber, *value)
 		c.Number = *value
 	}
 	if value := cuo.updated_at; value != nil {
-		update = true
 		builder.Set(card.FieldUpdatedAt, *value)
 		c.UpdatedAt = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

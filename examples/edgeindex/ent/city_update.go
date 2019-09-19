@@ -10,11 +10,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CityUpdate is the builder for updating City entities.
@@ -133,15 +132,13 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(city.Table).Where(sql.InInts(city.FieldID, ids...))
 	)
 	if value := cu.name; value != nil {
-		update = true
 		builder.Set(city.FieldName, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -302,16 +299,14 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(city.Table).Where(sql.InInts(city.FieldID, ids...))
 	)
 	if value := cuo.name; value != nil {
-		update = true
 		builder.Set(city.FieldName, *value)
 		c.Name = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

@@ -103,7 +103,7 @@ func main() {
 						if len(template) > 0 {
 							cfg.Template = loadTemplate(template)
 						}
-						cfg.IDType = field.Type(idtype)
+						cfg.IDType = &field.TypeInfo{Type: field.Type(idtype)}
 						graph, err := loadGraph(path[0], cfg)
 						failOnErr(err)
 						failOnErr(graph.Gen())

@@ -9,10 +9,9 @@ package ent
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetDelete is the builder for deleting a Pet entity.

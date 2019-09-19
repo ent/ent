@@ -55,7 +55,8 @@ var (
 
 // ops returns all operations for given field.
 func ops(f *Field) (op []Op) {
-	switch t := f.Type; {
+	switch t := f.Type.Type; {
+	case t == field.TypeJSON:
 	case t == field.TypeBool:
 		op = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":

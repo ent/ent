@@ -10,9 +10,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/examples/traversal/ent/group"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/traversal/ent/group"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -101,9 +100,9 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	builder := sql.Insert(group.Table).Default(gc.driver.Dialect())
-	if gc.name != nil {
-		builder.Set(group.FieldName, *gc.name)
-		gr.Name = *gc.name
+	if value := gc.name; value != nil {
+		builder.Set(group.FieldName, *value)
+		gr.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

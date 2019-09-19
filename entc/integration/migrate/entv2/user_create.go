@@ -10,9 +10,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -126,33 +125,33 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	builder := sql.Insert(user.Table).Default(uc.driver.Dialect())
-	if uc.age != nil {
-		builder.Set(user.FieldAge, *uc.age)
-		u.Age = *uc.age
+	if value := uc.age; value != nil {
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uc.name != nil {
-		builder.Set(user.FieldName, *uc.name)
-		u.Name = *uc.name
+	if value := uc.name; value != nil {
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
-	if uc.phone != nil {
-		builder.Set(user.FieldPhone, *uc.phone)
-		u.Phone = *uc.phone
+	if value := uc.phone; value != nil {
+		builder.Set(user.FieldPhone, *value)
+		u.Phone = *value
 	}
-	if uc.buffer != nil {
-		builder.Set(user.FieldBuffer, *uc.buffer)
-		u.Buffer = *uc.buffer
+	if value := uc.buffer; value != nil {
+		builder.Set(user.FieldBuffer, *value)
+		u.Buffer = *value
 	}
-	if uc.title != nil {
-		builder.Set(user.FieldTitle, *uc.title)
-		u.Title = *uc.title
+	if value := uc.title; value != nil {
+		builder.Set(user.FieldTitle, *value)
+		u.Title = *value
 	}
-	if uc.new_name != nil {
-		builder.Set(user.FieldNewName, *uc.new_name)
-		u.NewName = *uc.new_name
+	if value := uc.new_name; value != nil {
+		builder.Set(user.FieldNewName, *value)
+		u.NewName = *value
 	}
-	if uc.blob != nil {
-		builder.Set(user.FieldBlob, *uc.blob)
-		u.Blob = *uc.blob
+	if value := uc.blob; value != nil {
+		builder.Set(user.FieldBlob, *value)
+		u.Blob = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

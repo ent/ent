@@ -12,10 +12,9 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserQuery is the builder for querying User entities.

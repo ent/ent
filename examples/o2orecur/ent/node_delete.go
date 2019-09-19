@@ -9,10 +9,9 @@ package ent
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/node"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // NodeDelete is the builder for deleting a Node entity.
