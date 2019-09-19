@@ -224,10 +224,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{- $receiver := .Scope.Receiver -}}
 {{- range $_, $f := $.Fields -}}
 	{{- if $f.UpdateDefault -}}
-		if {{ $receiver }}.{{ $f.StructField }} == nil
-		{{- with $.HasOptional }}
-			&& !{{ $receiver }}.clear{{ $f.StructField }}
-		{{- end }} {
+		if {{ $receiver }}.{{ $f.StructField }} == nil {{ if $f.Optional }} && !{{ $receiver }}.clear{{ $f.StructField }} {{ end }} {
 			v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
 			{{ $receiver }}.{{ $f.StructField }} = &v
 		}

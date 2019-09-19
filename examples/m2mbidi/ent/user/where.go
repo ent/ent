@@ -7,9 +7,8 @@
 package user
 
 import (
-	"github.com/facebookincubator/ent/examples/m2mbidi/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/m2mbidi/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.

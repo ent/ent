@@ -68,8 +68,8 @@ func TestLoadBaseSchema(t *testing.T) {
 	require.Len(t, spec.Schemas[0].Fields, 2, "embedded base schema")
 	f1 := spec.Schemas[0].Fields[0]
 	require.Equal(t, "base_field", f1.Name)
-	require.Equal(t, field.TypeInt, f1.Type)
+	require.Equal(t, field.TypeInt, f1.Info.Type)
 	f2 := spec.Schemas[0].Fields[1]
 	require.Equal(t, "user_field", f2.Name)
-	require.Equal(t, field.TypeString, f2.Type)
+	require.Equal(t, field.TypeString, f2.Info.Type)
 }

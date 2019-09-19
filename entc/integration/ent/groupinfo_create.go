@@ -12,9 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -22,6 +19,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
@@ -110,13 +109,13 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		return nil, err
 	}
 	builder := sql.Insert(groupinfo.Table).Default(gic.driver.Dialect())
-	if gic.desc != nil {
-		builder.Set(groupinfo.FieldDesc, *gic.desc)
-		gi.Desc = *gic.desc
+	if value := gic.desc; value != nil {
+		builder.Set(groupinfo.FieldDesc, *value)
+		gi.Desc = *value
 	}
-	if gic.max_users != nil {
-		builder.Set(groupinfo.FieldMaxUsers, *gic.max_users)
-		gi.MaxUsers = *gic.max_users
+	if value := gic.max_users; value != nil {
+		builder.Set(groupinfo.FieldMaxUsers, *value)
+		gi.MaxUsers = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

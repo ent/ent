@@ -12,11 +12,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/predicate"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CardUpdate is the builder for updating Card entities.
@@ -128,19 +127,16 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
 	if value := cu.expired; value != nil {
-		update = true
 		builder.Set(card.FieldExpired, *value)
 	}
 	if value := cu.number; value != nil {
-		update = true
 		builder.Set(card.FieldNumber, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -286,21 +282,18 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
 	if value := cuo.expired; value != nil {
-		update = true
 		builder.Set(card.FieldExpired, *value)
 		c.Expired = *value
 	}
 	if value := cuo.number; value != nil {
-		update = true
 		builder.Set(card.FieldNumber, *value)
 		c.Number = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

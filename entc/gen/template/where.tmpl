@@ -39,18 +39,20 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ end }}
 
 {{ range $_, $f := $.Fields }}
-	{{ $func := pascal $f.Name }}
-	// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
-	func {{ $func }}(v {{ $f.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
-			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Field" $f -}}
-					{{ $tmpl := printf "dialect/%s/predicate/field" $storage }}
-					{{- xtemplate $tmpl . }},
+	{{- if not $f.IsJSON }}
+		{{ $func := pascal $f.Name }}
+		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
+		func {{ $func }}(v {{ $f.Type }}) predicate.{{ $.Name }} {
+			return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+				{{ range $_, $storage := $.Storage -}}
+					{{- with extend $ "Field" $f -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field" $storage }}
+						{{- xtemplate $tmpl . }},
+					{{ end -}}
 				{{ end -}}
-			{{ end -}}
-		)
-	}
+			)
+		}
+	{{- end }}
 {{ end }}
 
 {{ range $_, $f := $.Fields }}

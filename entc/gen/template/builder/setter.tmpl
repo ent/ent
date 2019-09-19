@@ -23,8 +23,8 @@ in the LICENSE file in the root directory of this source tree.
 		return {{ $receiver }}
 	}
 
-	{{/* avoid generting nillable setters for slices because the nil value for slice is valid */}}
-	{{ if and (not $f.Type.Slice) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
+	{{/* avoid generting nillable setters for nillable types. */}}
+	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
 		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {

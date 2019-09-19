@@ -12,10 +12,9 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/node"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // NodeQuery is the builder for querying Node entities.

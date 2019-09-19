@@ -11,10 +11,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -92,13 +91,13 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	builder := sql.Insert(user.Table).Default(uc.driver.Dialect())
-	if uc.age != nil {
-		builder.Set(user.FieldAge, *uc.age)
-		u.Age = *uc.age
+	if value := uc.age; value != nil {
+		builder.Set(user.FieldAge, *value)
+		u.Age = *value
 	}
-	if uc.name != nil {
-		builder.Set(user.FieldName, *uc.name)
-		u.Name = *uc.name
+	if value := uc.name; value != nil {
+		builder.Set(user.FieldName, *value)
+		u.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

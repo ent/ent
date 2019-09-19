@@ -11,11 +11,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetUpdate is the builder for updating Pet entities.
@@ -132,19 +131,16 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
 	if value := pu.age; value != nil {
-		update = true
 		builder.Set(pet.FieldAge, *value)
 	}
 	if value := pu.addage; value != nil {
-		update = true
 		builder.Add(pet.FieldAge, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -287,21 +283,18 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
 	if value := puo.age; value != nil {
-		update = true
 		builder.Set(pet.FieldAge, *value)
 		pe.Age = *value
 	}
 	if value := puo.addage; value != nil {
-		update = true
 		builder.Add(pet.FieldAge, *value)
 		pe.Age += *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

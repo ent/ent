@@ -10,9 +10,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -54,9 +53,9 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	builder := sql.Insert(group.Table).Default(gc.driver.Dialect())
-	if gc.max_users != nil {
-		builder.Set(group.FieldMaxUsers, *gc.max_users)
-		gr.MaxUsers = *gc.max_users
+	if value := gc.max_users; value != nil {
+		builder.Set(group.FieldMaxUsers, *value)
+		gr.MaxUsers = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

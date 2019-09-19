@@ -10,10 +10,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -171,51 +170,40 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		update = true
 		builder.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 	}
 	if value := uu.phone; value != nil {
-		update = true
 		builder.Set(user.FieldPhone, *value)
 	}
 	if value := uu.buffer; value != nil {
-		update = true
 		builder.Set(user.FieldBuffer, *value)
 	}
 	if value := uu.title; value != nil {
-		update = true
 		builder.Set(user.FieldTitle, *value)
 	}
 	if value := uu.new_name; value != nil {
-		update = true
 		builder.Set(user.FieldNewName, *value)
 	}
 	if uu.clearnew_name {
-		update = true
 		builder.SetNull(user.FieldNewName)
 	}
 	if value := uu.blob; value != nil {
-		update = true
 		builder.Set(user.FieldBlob, *value)
 	}
 	if uu.clearblob {
-		update = true
 		builder.SetNull(user.FieldBlob)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -379,63 +367,52 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		update = true
 		builder.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 		u.Name = *value
 	}
 	if value := uuo.phone; value != nil {
-		update = true
 		builder.Set(user.FieldPhone, *value)
 		u.Phone = *value
 	}
 	if value := uuo.buffer; value != nil {
-		update = true
 		builder.Set(user.FieldBuffer, *value)
 		u.Buffer = *value
 	}
 	if value := uuo.title; value != nil {
-		update = true
 		builder.Set(user.FieldTitle, *value)
 		u.Title = *value
 	}
 	if value := uuo.new_name; value != nil {
-		update = true
 		builder.Set(user.FieldNewName, *value)
 		u.NewName = *value
 	}
 	if uuo.clearnew_name {
-		update = true
 		var value string
 		u.NewName = value
 		builder.SetNull(user.FieldNewName)
 	}
 	if value := uuo.blob; value != nil {
-		update = true
 		builder.Set(user.FieldBlob, *value)
 		u.Blob = *value
 	}
 	if uuo.clearblob {
-		update = true
 		var value []byte
 		u.Blob = value
 		builder.SetNull(user.FieldBlob)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

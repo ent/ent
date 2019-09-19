@@ -7,9 +7,8 @@
 package pet
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.

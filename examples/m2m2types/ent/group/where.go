@@ -7,9 +7,8 @@
 package group
 
 import (
-	"github.com/facebookincubator/ent/examples/m2m2types/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/m2m2types/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.

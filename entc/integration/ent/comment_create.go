@@ -11,8 +11,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/comment"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -20,6 +18,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -93,17 +92,17 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	builder := sql.Insert(comment.Table).Default(cc.driver.Dialect())
-	if cc.unique_int != nil {
-		builder.Set(comment.FieldUniqueInt, *cc.unique_int)
-		c.UniqueInt = *cc.unique_int
+	if value := cc.unique_int; value != nil {
+		builder.Set(comment.FieldUniqueInt, *value)
+		c.UniqueInt = *value
 	}
-	if cc.unique_float != nil {
-		builder.Set(comment.FieldUniqueFloat, *cc.unique_float)
-		c.UniqueFloat = *cc.unique_float
+	if value := cc.unique_float; value != nil {
+		builder.Set(comment.FieldUniqueFloat, *value)
+		c.UniqueFloat = *value
 	}
-	if cc.nillable_int != nil {
-		builder.Set(comment.FieldNillableInt, *cc.nillable_int)
-		c.NillableInt = cc.nillable_int
+	if value := cc.nillable_int; value != nil {
+		builder.Set(comment.FieldNillableInt, *value)
+		c.NillableInt = value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

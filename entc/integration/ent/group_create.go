@@ -13,10 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -24,6 +20,9 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -230,25 +229,25 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	builder := sql.Insert(group.Table).Default(gc.driver.Dialect())
-	if gc.active != nil {
-		builder.Set(group.FieldActive, *gc.active)
-		gr.Active = *gc.active
+	if value := gc.active; value != nil {
+		builder.Set(group.FieldActive, *value)
+		gr.Active = *value
 	}
-	if gc.expire != nil {
-		builder.Set(group.FieldExpire, *gc.expire)
-		gr.Expire = *gc.expire
+	if value := gc.expire; value != nil {
+		builder.Set(group.FieldExpire, *value)
+		gr.Expire = *value
 	}
-	if gc._type != nil {
-		builder.Set(group.FieldType, *gc._type)
-		gr.Type = gc._type
+	if value := gc._type; value != nil {
+		builder.Set(group.FieldType, *value)
+		gr.Type = value
 	}
-	if gc.max_users != nil {
-		builder.Set(group.FieldMaxUsers, *gc.max_users)
-		gr.MaxUsers = *gc.max_users
+	if value := gc.max_users; value != nil {
+		builder.Set(group.FieldMaxUsers, *value)
+		gr.MaxUsers = *value
 	}
-	if gc.name != nil {
-		builder.Set(group.FieldName, *gc.name)
-		gr.Name = *gc.name
+	if value := gc.name; value != nil {
+		builder.Set(group.FieldName, *value)
+		gr.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

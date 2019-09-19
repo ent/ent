@@ -7,9 +7,8 @@
 package city
 
 import (
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.

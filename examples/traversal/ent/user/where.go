@@ -7,9 +7,8 @@
 package user
 
 import (
-	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.

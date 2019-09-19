@@ -9,10 +9,9 @@ package ent
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CityDelete is the builder for deleting a City entity.

@@ -27,7 +27,7 @@ func TestType(t *testing.T) {
 
 	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
-			{Unique: true, Default: true, Type: field.TypeInt},
+			{Unique: true, Default: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
 	require.Error(err, "unique field can not have default")
@@ -36,8 +36,8 @@ func TestType(t *testing.T) {
 	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "foo", Unique: true, Type: field.TypeInt},
-			{Name: "foo", Unique: true, Type: field.TypeInt},
+			{Name: "foo", Unique: true, Info: &field.TypeInfo{Type: field.TypeInt}},
+			{Name: "foo", Unique: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
 	require.Error(err, "field foo redeclared")
@@ -121,8 +121,8 @@ func TestType_AddIndex(t *testing.T) {
 	typ, err := NewType(Config{}, &load.Schema{
 		Name: "User",
 		Fields: []*load.Field{
-			{Name: "name", Type: field.TypeString},
-			{Name: "text", Type: field.TypeString, Size: &size},
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			{Name: "text", Info: &field.TypeInfo{Type: field.TypeString}, Size: &size},
 		},
 	})
 	require.NoError(t, err)
@@ -155,14 +155,14 @@ func TestType_AddIndex(t *testing.T) {
 }
 
 func TestField(t *testing.T) {
-	f := &Field{Type: field.TypeTime}
+	f := &Field{Type: &field.TypeInfo{Type: field.TypeTime}}
 	require.True(t, f.IsTime())
 	require.Equal(t, "time.Now()", f.ExampleCode())
 
-	require.Equal(t, "1", Field{Type: field.TypeInt}.ExampleCode())
-	require.Equal(t, "true", Field{Type: field.TypeBool}.ExampleCode())
-	require.Equal(t, "1", Field{Type: field.TypeFloat64}.ExampleCode())
-	require.Equal(t, "\"string\"", Field{Type: field.TypeString}.ExampleCode())
+	require.Equal(t, "1", Field{Type: &field.TypeInfo{Type: field.TypeInt}}.ExampleCode())
+	require.Equal(t, "true", Field{Type: &field.TypeInfo{Type: field.TypeBool}}.ExampleCode())
+	require.Equal(t, "1", Field{Type: &field.TypeInfo{Type: field.TypeFloat64}}.ExampleCode())
+	require.Equal(t, "\"string\"", Field{Type: &field.TypeInfo{Type: field.TypeString}}.ExampleCode())
 }
 
 func TestField_Constant(t *testing.T) {
@@ -219,11 +219,11 @@ func TestType_Describe(t *testing.T) {
 		{
 			typ: &Type{
 				Name: "User",
-				ID:   &Field{Name: "id", Type: field.TypeInt},
+				ID:   &Field{Name: "id", Type: &field.TypeInfo{Type: field.TypeInt}},
 				Fields: []*Field{
-					{Name: "name", Type: field.TypeString, Validators: 1},
-					{Name: "age", Type: field.TypeInt, Nillable: true},
-					{Name: "created_at", Type: field.TypeTime, Nillable: true, Immutable: true},
+					{Name: "name", Type: &field.TypeInfo{Type: field.TypeString}, Validators: 1},
+					{Name: "age", Type: &field.TypeInfo{Type: field.TypeInt}, Nillable: true},
+					{Name: "created_at", Type: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Immutable: true},
 				},
 			},
 			out: `
@@ -242,7 +242,7 @@ User:
 		{
 			typ: &Type{
 				Name: "User",
-				ID:   &Field{Name: "id", Type: field.TypeInt},
+				ID:   &Field{Name: "id", Type: &field.TypeInfo{Type: field.TypeInt}},
 				Edges: []*Edge{
 					{Name: "groups", Type: &Type{Name: "Group"}, Rel: Relation{Type: M2M}, Optional: true},
 					{Name: "spouse", Type: &Type{Name: "User"}, Unique: true, Rel: Relation{Type: O2O}},
@@ -267,10 +267,10 @@ User:
 		{
 			typ: &Type{
 				Name: "User",
-				ID:   &Field{Name: "id", Type: field.TypeInt},
+				ID:   &Field{Name: "id", Type: &field.TypeInfo{Type: field.TypeInt}},
 				Fields: []*Field{
-					{Name: "name", Type: field.TypeString, Validators: 1},
-					{Name: "age", Type: field.TypeInt, Nillable: true},
+					{Name: "name", Type: &field.TypeInfo{Type: field.TypeString}, Validators: 1},
+					{Name: "age", Type: &field.TypeInfo{Type: field.TypeInt}, Nillable: true},
 				},
 				Edges: []*Edge{
 					{Name: "groups", Type: &Type{Name: "Group"}, Rel: Relation{Type: M2M}, Optional: true},

@@ -12,14 +12,26 @@ import "errors"
 {{ range $_, $t := $.Ints }}
 	{{ $title := title $t.String }}
 	// {{ $title }} returns a new Field with type {{ $t }}.
-	func {{ $title }}(name string) *{{ $t }}Builder { return &{{ $t }}Builder{desc: &Descriptor{Type: Type{{ $title }}, Name: name}} }
+	func {{ $title }}(name string) *{{ $t }}Builder { return &{{ $t }}Builder{&Descriptor{
+			Name: name,
+			Info: &TypeInfo{Type: Type{{ $title }} },
+		}}
+	}
 {{ end }}
 
 // Float returns a new Field with type float64.
-func Float(name string) *float64Builder { return &float64Builder{desc: &Descriptor{Type: TypeFloat64, Name: name}} }
+func Float(name string) *float64Builder { return &float64Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeFloat64},
+	}}
+}
 
 // Float32 returns a new Field with type float32.
-func Float32(name string) *float32Builder { return &float32Builder{desc: &Descriptor{Type: TypeFloat32, Name: name}} }
+func Float32(name string) *float32Builder { return &float32Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeFloat32},
+	}}
+}
 
 {{ range $_, $t := $.Ints }}
 {{ $builder := printf "%sBuilder" $t }}

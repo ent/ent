@@ -74,18 +74,18 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "User", schema.Name)
 		require.Len(t, schema.Fields, 4)
 		require.Equal(t, "age", schema.Fields[0].Name)
-		require.Equal(t, field.TypeInt, schema.Fields[0].Type)
+		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
 
 		require.Equal(t, "name", schema.Fields[1].Name)
-		require.Equal(t, field.TypeString, schema.Fields[1].Type)
+		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)
-		require.Equal(t, field.TypeString, schema.Fields[2].Type)
+		require.Equal(t, field.TypeString, schema.Fields[2].Info.Type)
 		require.True(t, schema.Fields[2].Nillable)
 		require.False(t, schema.Fields[2].Optional)
 
 		require.Equal(t, "optional", schema.Fields[3].Name)
-		require.Equal(t, field.TypeString, schema.Fields[3].Type)
+		require.Equal(t, field.TypeString, schema.Fields[3].Info.Type)
 		require.False(t, schema.Fields[3].Nillable)
 		require.True(t, schema.Fields[3].Optional)
 

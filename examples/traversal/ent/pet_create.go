@@ -10,9 +10,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -101,9 +100,9 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	builder := sql.Insert(pet.Table).Default(pc.driver.Dialect())
-	if pc.name != nil {
-		builder.Set(pet.FieldName, *pc.name)
-		pe.Name = *pc.name
+	if value := pc.name; value != nil {
+		builder.Set(pet.FieldName, *value)
+		pe.Name = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

@@ -12,15 +12,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -173,21 +172,21 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	builder := sql.Insert(file.Table).Default(fc.driver.Dialect())
-	if fc.size != nil {
-		builder.Set(file.FieldSize, *fc.size)
-		f.Size = *fc.size
+	if value := fc.size; value != nil {
+		builder.Set(file.FieldSize, *value)
+		f.Size = *value
 	}
-	if fc.name != nil {
-		builder.Set(file.FieldName, *fc.name)
-		f.Name = *fc.name
+	if value := fc.name; value != nil {
+		builder.Set(file.FieldName, *value)
+		f.Name = *value
 	}
-	if fc.user != nil {
-		builder.Set(file.FieldUser, *fc.user)
-		f.User = fc.user
+	if value := fc.user; value != nil {
+		builder.Set(file.FieldUser, *value)
+		f.User = value
 	}
-	if fc.group != nil {
-		builder.Set(file.FieldGroup, *fc.group)
-		f.Group = *fc.group
+	if value := fc.group; value != nil {
+		builder.Set(file.FieldGroup, *value)
+		f.Group = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

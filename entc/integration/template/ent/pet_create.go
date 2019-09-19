@@ -10,9 +10,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
-
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -80,9 +79,9 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	builder := sql.Insert(pet.Table).Default(pc.driver.Dialect())
-	if pc.age != nil {
-		builder.Set(pet.FieldAge, *pc.age)
-		pe.Age = *pc.age
+	if value := pc.age; value != nil {
+		builder.Set(pet.FieldAge, *value)
+		pe.Age = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

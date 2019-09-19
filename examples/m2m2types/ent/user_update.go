@@ -10,10 +10,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/predicate"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -146,23 +145,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		update = true
 		builder.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -331,26 +326,22 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		update = true
 		builder.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		update = true
 		builder.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		update = true
 		builder.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

@@ -9,61 +9,99 @@ import "errors"
 //go:generate go run gen/gen.go
 
 // Int returns a new Field with type int.
-func Int(name string) *intBuilder { return &intBuilder{desc: &Descriptor{Type: TypeInt, Name: name}} }
+func Int(name string) *intBuilder {
+	return &intBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeInt},
+	}}
+}
 
 // Uint returns a new Field with type uint.
 func Uint(name string) *uintBuilder {
-	return &uintBuilder{desc: &Descriptor{Type: TypeUint, Name: name}}
+	return &uintBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeUint},
+	}}
 }
 
 // Int8 returns a new Field with type int8.
 func Int8(name string) *int8Builder {
-	return &int8Builder{desc: &Descriptor{Type: TypeInt8, Name: name}}
+	return &int8Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeInt8},
+	}}
 }
 
 // Int16 returns a new Field with type int16.
 func Int16(name string) *int16Builder {
-	return &int16Builder{desc: &Descriptor{Type: TypeInt16, Name: name}}
+	return &int16Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeInt16},
+	}}
 }
 
 // Int32 returns a new Field with type int32.
 func Int32(name string) *int32Builder {
-	return &int32Builder{desc: &Descriptor{Type: TypeInt32, Name: name}}
+	return &int32Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeInt32},
+	}}
 }
 
 // Int64 returns a new Field with type int64.
 func Int64(name string) *int64Builder {
-	return &int64Builder{desc: &Descriptor{Type: TypeInt64, Name: name}}
+	return &int64Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeInt64},
+	}}
 }
 
 // Uint8 returns a new Field with type uint8.
 func Uint8(name string) *uint8Builder {
-	return &uint8Builder{desc: &Descriptor{Type: TypeUint8, Name: name}}
+	return &uint8Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeUint8},
+	}}
 }
 
 // Uint16 returns a new Field with type uint16.
 func Uint16(name string) *uint16Builder {
-	return &uint16Builder{desc: &Descriptor{Type: TypeUint16, Name: name}}
+	return &uint16Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeUint16},
+	}}
 }
 
 // Uint32 returns a new Field with type uint32.
 func Uint32(name string) *uint32Builder {
-	return &uint32Builder{desc: &Descriptor{Type: TypeUint32, Name: name}}
+	return &uint32Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeUint32},
+	}}
 }
 
 // Uint64 returns a new Field with type uint64.
 func Uint64(name string) *uint64Builder {
-	return &uint64Builder{desc: &Descriptor{Type: TypeUint64, Name: name}}
+	return &uint64Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeUint64},
+	}}
 }
 
 // Float returns a new Field with type float64.
 func Float(name string) *float64Builder {
-	return &float64Builder{desc: &Descriptor{Type: TypeFloat64, Name: name}}
+	return &float64Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeFloat64},
+	}}
 }
 
 // Float32 returns a new Field with type float32.
 func Float32(name string) *float32Builder {
-	return &float32Builder{desc: &Descriptor{Type: TypeFloat32, Name: name}}
+	return &float32Builder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeFloat32},
+	}}
 }
 
 // intBuilder is the builder for int field.

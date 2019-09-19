@@ -12,13 +12,12 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -277,69 +276,69 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		return nil, err
 	}
 	builder := sql.Insert(fieldtype.Table).Default(ftc.driver.Dialect())
-	if ftc.int != nil {
-		builder.Set(fieldtype.FieldInt, *ftc.int)
-		ft.Int = *ftc.int
+	if value := ftc.int; value != nil {
+		builder.Set(fieldtype.FieldInt, *value)
+		ft.Int = *value
 	}
-	if ftc.int8 != nil {
-		builder.Set(fieldtype.FieldInt8, *ftc.int8)
-		ft.Int8 = *ftc.int8
+	if value := ftc.int8; value != nil {
+		builder.Set(fieldtype.FieldInt8, *value)
+		ft.Int8 = *value
 	}
-	if ftc.int16 != nil {
-		builder.Set(fieldtype.FieldInt16, *ftc.int16)
-		ft.Int16 = *ftc.int16
+	if value := ftc.int16; value != nil {
+		builder.Set(fieldtype.FieldInt16, *value)
+		ft.Int16 = *value
 	}
-	if ftc.int32 != nil {
-		builder.Set(fieldtype.FieldInt32, *ftc.int32)
-		ft.Int32 = *ftc.int32
+	if value := ftc.int32; value != nil {
+		builder.Set(fieldtype.FieldInt32, *value)
+		ft.Int32 = *value
 	}
-	if ftc.int64 != nil {
-		builder.Set(fieldtype.FieldInt64, *ftc.int64)
-		ft.Int64 = *ftc.int64
+	if value := ftc.int64; value != nil {
+		builder.Set(fieldtype.FieldInt64, *value)
+		ft.Int64 = *value
 	}
-	if ftc.optional_int != nil {
-		builder.Set(fieldtype.FieldOptionalInt, *ftc.optional_int)
-		ft.OptionalInt = *ftc.optional_int
+	if value := ftc.optional_int; value != nil {
+		builder.Set(fieldtype.FieldOptionalInt, *value)
+		ft.OptionalInt = *value
 	}
-	if ftc.optional_int8 != nil {
-		builder.Set(fieldtype.FieldOptionalInt8, *ftc.optional_int8)
-		ft.OptionalInt8 = *ftc.optional_int8
+	if value := ftc.optional_int8; value != nil {
+		builder.Set(fieldtype.FieldOptionalInt8, *value)
+		ft.OptionalInt8 = *value
 	}
-	if ftc.optional_int16 != nil {
-		builder.Set(fieldtype.FieldOptionalInt16, *ftc.optional_int16)
-		ft.OptionalInt16 = *ftc.optional_int16
+	if value := ftc.optional_int16; value != nil {
+		builder.Set(fieldtype.FieldOptionalInt16, *value)
+		ft.OptionalInt16 = *value
 	}
-	if ftc.optional_int32 != nil {
-		builder.Set(fieldtype.FieldOptionalInt32, *ftc.optional_int32)
-		ft.OptionalInt32 = *ftc.optional_int32
+	if value := ftc.optional_int32; value != nil {
+		builder.Set(fieldtype.FieldOptionalInt32, *value)
+		ft.OptionalInt32 = *value
 	}
-	if ftc.optional_int64 != nil {
-		builder.Set(fieldtype.FieldOptionalInt64, *ftc.optional_int64)
-		ft.OptionalInt64 = *ftc.optional_int64
+	if value := ftc.optional_int64; value != nil {
+		builder.Set(fieldtype.FieldOptionalInt64, *value)
+		ft.OptionalInt64 = *value
 	}
-	if ftc.nillable_int != nil {
-		builder.Set(fieldtype.FieldNillableInt, *ftc.nillable_int)
-		ft.NillableInt = ftc.nillable_int
+	if value := ftc.nillable_int; value != nil {
+		builder.Set(fieldtype.FieldNillableInt, *value)
+		ft.NillableInt = value
 	}
-	if ftc.nillable_int8 != nil {
-		builder.Set(fieldtype.FieldNillableInt8, *ftc.nillable_int8)
-		ft.NillableInt8 = ftc.nillable_int8
+	if value := ftc.nillable_int8; value != nil {
+		builder.Set(fieldtype.FieldNillableInt8, *value)
+		ft.NillableInt8 = value
 	}
-	if ftc.nillable_int16 != nil {
-		builder.Set(fieldtype.FieldNillableInt16, *ftc.nillable_int16)
-		ft.NillableInt16 = ftc.nillable_int16
+	if value := ftc.nillable_int16; value != nil {
+		builder.Set(fieldtype.FieldNillableInt16, *value)
+		ft.NillableInt16 = value
 	}
-	if ftc.nillable_int32 != nil {
-		builder.Set(fieldtype.FieldNillableInt32, *ftc.nillable_int32)
-		ft.NillableInt32 = ftc.nillable_int32
+	if value := ftc.nillable_int32; value != nil {
+		builder.Set(fieldtype.FieldNillableInt32, *value)
+		ft.NillableInt32 = value
 	}
-	if ftc.nillable_int64 != nil {
-		builder.Set(fieldtype.FieldNillableInt64, *ftc.nillable_int64)
-		ft.NillableInt64 = ftc.nillable_int64
+	if value := ftc.nillable_int64; value != nil {
+		builder.Set(fieldtype.FieldNillableInt64, *value)
+		ft.NillableInt64 = value
 	}
-	if ftc.validate_optional_int32 != nil {
-		builder.Set(fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
-		ft.ValidateOptionalInt32 = *ftc.validate_optional_int32
+	if value := ftc.validate_optional_int32; value != nil {
+		builder.Set(fieldtype.FieldValidateOptionalInt32, *value)
+		ft.ValidateOptionalInt32 = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

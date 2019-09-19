@@ -12,11 +12,10 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CityQuery is the builder for querying City entities.

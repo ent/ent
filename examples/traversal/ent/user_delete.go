@@ -9,10 +9,9 @@ package ent
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
 	"github.com/facebookincubator/ent/examples/traversal/ent/user"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // UserDelete is the builder for deleting a User entity.

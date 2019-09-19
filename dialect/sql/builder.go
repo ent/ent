@@ -718,6 +718,11 @@ func (u *UpdateBuilder) Where(p *Predicate) *UpdateBuilder {
 	return u
 }
 
+// Empty reports whether this builder does not contain update changes.
+func (u *UpdateBuilder) Empty() bool {
+	return len(u.columns) == 0 && len(u.nulls) == 0
+}
+
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []interface{}) {
 	u.b.WriteString("UPDATE ")

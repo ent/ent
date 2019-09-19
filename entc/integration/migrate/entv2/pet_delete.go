@@ -9,10 +9,9 @@ package entv2
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // PetDelete is the builder for deleting a Pet entity.

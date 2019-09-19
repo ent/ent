@@ -9,10 +9,9 @@ package ent
 import (
 	"context"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/predicate"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // CardDelete is the builder for deleting a Card entity.

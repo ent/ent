@@ -11,11 +11,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // StreetUpdate is the builder for updating Street entities.
@@ -125,15 +124,13 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
 	)
 	if value := su.name; value != nil {
-		update = true
 		builder.Set(street.FieldName, *value)
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
@@ -269,16 +266,14 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		return nil, err
 	}
 	var (
-		update  bool
 		res     sql.Result
 		builder = sql.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
 	)
 	if value := suo.name; value != nil {
-		update = true
 		builder.Set(street.FieldName, *value)
 		s.Name = *value
 	}
-	if update {
+	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)

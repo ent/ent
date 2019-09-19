@@ -26,18 +26,18 @@ type Schema struct {
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name          string     `json:"name,omitempty"`
-	Type          field.Type `json:"type,omitempty"`
-	Tag           string     `json:"tag,omitempty"`
-	Size          *int       `json:"size,omitempty"`
-	Unique        bool       `json:"unique,omitempty"`
-	Nillable      bool       `json:"nillable,omitempty"`
-	Optional      bool       `json:"optional,omitempty"`
-	Default       bool       `json:"default,omitempty"`
-	UpdateDefault bool       `json:"update_default,omitempty"`
-	Immutable     bool       `json:"immutable,omitempty"`
-	Validators    int        `json:"validators,omitempty"`
-	StorageKey    string     `json:"storage_key,omitempty"`
+	Name          string          `json:"name,omitempty"`
+	Info          *field.TypeInfo `json:"type,omitempty"`
+	Tag           string          `json:"tag,omitempty"`
+	Size          *int            `json:"size,omitempty"`
+	Unique        bool            `json:"unique,omitempty"`
+	Nillable      bool            `json:"nillable,omitempty"`
+	Optional      bool            `json:"optional,omitempty"`
+	Default       bool            `json:"default,omitempty"`
+	UpdateDefault bool            `json:"update_default,omitempty"`
+	Immutable     bool            `json:"immutable,omitempty"`
+	Validators    int             `json:"validators,omitempty"`
+	StorageKey    string          `json:"storage_key,omitempty"`
 }
 
 // StructField represents an external struct field defined in the schema.
@@ -98,7 +98,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		fd := f.Descriptor()
 		sf := &Field{
 			Name:          fd.Name,
-			Type:          fd.Type,
+			Info:          fd.Info,
 			Tag:           fd.Tag,
 			Unique:        fd.Unique,
 			Nillable:      fd.Nillable,
@@ -108,6 +108,9 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 			Validators:    len(fd.Validators),
 			Default:       fd.Default != nil,
 			UpdateDefault: fd.UpdateDefault != nil,
+		}
+		if sf.Info == nil {
+			return nil, fmt.Errorf("schema %q: missing type info for field %q", s.Name, sf.Name)
 		}
 		if fd.Size != 0 {
 			sf.Size = &fd.Size
