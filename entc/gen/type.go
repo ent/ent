@@ -24,6 +24,8 @@ type (
 	// the information it holds.
 	Type struct {
 		Config
+		// schema definition.
+		schema *load.Schema
 		// Name holds the type/ent name.
 		Name string
 		// ID holds the ID field of this type.
@@ -127,12 +129,13 @@ type (
 func NewType(c Config, schema *load.Schema) (*Type, error) {
 	typ := &Type{
 		Config: c,
-		Name:   schema.Name,
 		ID: &Field{
 			Name:      "id",
 			Type:      c.IDType,
 			StructTag: `json:"id,omitempty"`,
 		},
+		schema:       schema,
+		Name:         schema.Name,
 		Fields:       make([]*Field, len(schema.Fields)),
 		fields:       make(map[string]*Field, len(schema.Fields)),
 		StructFields: schema.StructFields,
@@ -170,7 +173,12 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 func (t Type) Label() string { return snake(t.Name) }
 
 // Table returns SQL table name of the node/type.
-func (t Type) Table() string { return snake(rules.Pluralize(t.Name)) }
+func (t Type) Table() string {
+	if t.schema != nil && t.schema.Config.Table != "" {
+		return t.schema.Config.Table
+	}
+	return snake(rules.Pluralize(t.Name))
+}
 
 // Package returns the package name of this node.
 func (t Type) Package() string { return strings.ToLower(t.Name) }
