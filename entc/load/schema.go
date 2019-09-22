@@ -18,6 +18,7 @@ import (
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
 	Name         string         `json:"name,omitempty"`
+	Config       ent.Config     `json:"config,omitempty"`
 	Edges        []*Edge        `json:"edges,omitempty"`
 	Fields       []*Field       `json:"fields,omitempty"`
 	Indexes      []*Index       `json:"indexes,omitempty"`
@@ -89,7 +90,10 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 // MarshalSchema encode the ent.Schema interface into a JSON
 // that can be decoded into the Schema object object.
 func MarshalSchema(schema ent.Interface) (b []byte, err error) {
-	s := &Schema{Name: indirect(reflect.TypeOf(schema)).Name()}
+	s := &Schema{
+		Config: schema.Config(),
+		Name:   indirect(reflect.TypeOf(schema)).Name(),
+	}
 	fields, err := safeFields(schema)
 	if err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)

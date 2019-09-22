@@ -42,6 +42,8 @@ type (
 		Edges() []Edge
 		// Indexes returns the indexes of the schema.
 		Indexes() []Index
+		// Config returns an optional config for the schema.
+		Config() Config
 	}
 
 	// A Field interface returns a field descriptor for vertex fields/properties.
@@ -84,6 +86,20 @@ type (
 		Descriptor() *index.Descriptor
 	}
 
+	// A Config structure is used to configure an entity schema.
+	// The usage of this structure is as follows:
+	//
+	//	func (T) Config() ent.Config {
+	//		return ent.Config{
+	//			Table: "Name",
+	//		}
+	//	}
+	//
+	Config struct {
+		// A Table is an optional table name defined for the schema.
+		Table string
+	}
+
 	// Schema is the default implementation for the schema Interface.
 	// It can be embedded in end-user schemas as follows:
 	//
@@ -104,3 +120,6 @@ func (Schema) Edges() []Edge { return nil }
 
 // Indexes of the schema.
 func (Schema) Indexes() []Index { return nil }
+
+// Config of the schema.
+func (Schema) Config() Config { return Config{} }

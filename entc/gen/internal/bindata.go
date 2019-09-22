@@ -212,7 +212,7 @@ func templateBuilderSetterTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/builder/setter.tmpl", size: 4397, mode: os.FileMode(420), modTime: time.Unix(1568886398, 0)}
+	info := bindataFileInfo{name: "template/builder/setter.tmpl", size: 4397, mode: os.FileMode(420), modTime: time.Unix(1568906061, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
