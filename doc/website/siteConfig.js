@@ -37,7 +37,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
-    {doc: 'getting-started', label: 'GoDoc'},
+    {href: 'https://godoc.org/github.com/facebookincubator/ent', label: 'GoDoc'},
     {href: 'https://github.com/facebookincubator/ent', label: 'Github'},
   ],
 
