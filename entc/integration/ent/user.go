@@ -17,7 +17,7 @@ import (
 
 // User is the model entity for the User schema.
 type User struct {
-	config
+	config `json:"-" graphql:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Age holds the value of the "age" field.

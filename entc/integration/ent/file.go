@@ -17,7 +17,7 @@ import (
 
 // File is the model entity for the File schema.
 type File struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Size holds the value of the "size" field.

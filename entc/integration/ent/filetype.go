@@ -17,7 +17,7 @@ import (
 
 // FileType is the model entity for the FileType schema.
 type FileType struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.

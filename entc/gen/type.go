@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
@@ -276,6 +277,28 @@ func (t Type) NumM2M() int {
 		}
 	}
 	return n
+}
+
+// TagTypes returns all struct-tag types of the type fields.
+func (t Type) TagTypes() []string {
+	tags := make(map[string]bool)
+	for _, f := range t.Fields {
+		tag := reflect.StructTag(f.StructTag)
+		fields := strings.FieldsFunc(f.StructTag, func(r rune) bool {
+			return r == ':' || unicode.IsSpace(r)
+		})
+		for _, name := range fields {
+			_, ok := tag.Lookup(name)
+			if ok && !tags[name] {
+				tags[name] = true
+			}
+		}
+	}
+	r := make([]string, 0, len(tags))
+	for tag := range tags {
+		r = append(r, tag)
+	}
+	return r
 }
 
 // Describe returns description of a type. The format of the description is:

@@ -17,7 +17,7 @@ import (
 
 // Comment is the model entity for the Comment schema.
 type Comment struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// UniqueInt holds the value of the "unique_int" field.

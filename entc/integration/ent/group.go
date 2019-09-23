@@ -18,7 +18,7 @@ import (
 
 // Group is the model entity for the Group schema.
 type Group struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Active holds the value of the "active" field.

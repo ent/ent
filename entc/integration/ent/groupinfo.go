@@ -17,7 +17,7 @@ import (
 
 // GroupInfo is the model entity for the GroupInfo schema.
 type GroupInfo struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Desc holds the value of the "desc" field.

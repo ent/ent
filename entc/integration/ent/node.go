@@ -17,7 +17,7 @@ import (
 
 // Node is the model entity for the Node schema.
 type Node struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Value holds the value of the "value" field.

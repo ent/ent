@@ -5,6 +5,7 @@
 package gen
 
 import (
+	"sort"
 	"strings"
 	"testing"
 
@@ -97,6 +98,23 @@ func TestType_Receiver(t *testing.T) {
 		typ := &Type{Name: tt.name, Config: Config{Package: "entc/gen"}}
 		require.Equal(t, tt.receiver, typ.Receiver())
 	}
+}
+
+func TestType_TagTypes(t *testing.T) {
+	typ := &Type{
+		Fields: []*Field{
+			{StructTag: `json:"age"`},
+			{StructTag: `json:"name,omitempty`},
+			{StructTag: `json:"name,omitempty" sql:"nothing"`},
+			{StructTag: `sql:"nothing" yaml:"ignore"`},
+			{StructTag: `sql:"nothing" yaml:"ignore"`},
+			{StructTag: `invalid`},
+			{StructTag: `"invalid"`},
+		},
+	}
+	tags := typ.TagTypes()
+	sort.Strings(tags)
+	require.Equal(t, []string{"json", "sql", "yaml"}, tags)
 }
 
 func TestType_Package(t *testing.T) {

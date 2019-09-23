@@ -17,7 +17,7 @@ import (
 
 // FieldType is the model entity for the FieldType schema.
 type FieldType struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Int holds the value of the "int" field.

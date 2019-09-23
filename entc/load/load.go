@@ -157,9 +157,11 @@ func (c *Config) structFields(name string, obj types.Object, spec *ast.StructTyp
 		sf := &StructField{
 			Tag:      st.Tag(i),
 			Name:     f.Name(),
-			Type:     f.Type().String(),
 			Embedded: f.Embedded(),
 			Comment:  strings.TrimSpace(spec.Fields.List[i].Comment.Text()),
+			Type: types.TypeString(f.Type(), func(p *types.Package) string {
+				return p.Name()
+			}),
 		}
 		switch typ := indirectType(f.Type()).(type) {
 		case *types.Named:

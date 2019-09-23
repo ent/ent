@@ -15,7 +15,7 @@ import (
 
 // Group is the model entity for the Group schema.
 type Group struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.

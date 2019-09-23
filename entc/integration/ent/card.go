@@ -19,7 +19,7 @@ import (
 
 // Card is the model entity for the Card schema.
 type Card struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Number holds the value of the "number" field.
