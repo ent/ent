@@ -35,7 +35,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			if err := {{ $.Receiver }}.FromRows(rows); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: failed scanning row into {{ $.Name }}: %v", err)
 			}
-			id = {{ $.Receiver }}.{{- if $.ID.IsString }}id(){{ else }}ID{{ end }}
+			id = {{ if $.ID.IsString }}{{ $.Receiver }}.id(){{ else if not $.ID.IsInt }}int({{ $.Receiver }}.ID){{ else }}{{ $.Receiver }}.ID{{ end }}
 		{{- else }}
 			if err := rows.Scan(&id); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: failed reading id: %v", err)
@@ -311,5 +311,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			err = rollback(tx, serr)
 			return {{/* return is not knwon at this point. */}}
 		}
+	{{- else if not $.Type.ID.IsInt }}
+		eid := int(eid)
 	{{- end }}
 {{ end }}

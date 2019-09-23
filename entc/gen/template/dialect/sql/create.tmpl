@@ -40,7 +40,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
-	{{ $.Receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}int(id){{ end }}
+	{{ $.Receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
 	{{- range $_, $e := $.Edges }}
 		if len({{ $receiver }}.{{ $e.StructField }}) > 0 {
 			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}

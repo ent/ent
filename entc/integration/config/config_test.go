@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCustomTemplate(t *testing.T) {
+func TestSchemaConfig(t *testing.T) {
 	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer drv.Close()

@@ -194,6 +194,12 @@ func (t *idType) Set(s string) error {
 	switch s {
 	case field.TypeInt.String():
 		*t = idType(field.TypeInt)
+	case field.TypeInt64.String():
+		*t = idType(field.TypeInt64)
+	case field.TypeUint.String():
+		*t = idType(field.TypeUint)
+	case field.TypeUint64.String():
+		*t = idType(field.TypeUint64)
 	case field.TypeString.String():
 		*t = idType(field.TypeString)
 	default:
@@ -204,7 +210,13 @@ func (t *idType) Set(s string) error {
 
 // Type returns the type representation of the id option for help command.
 func (idType) Type() string {
-	return fmt.Sprintf("[%s %s]", field.TypeInt, field.TypeString)
+	return fmt.Sprintf("%v", []field.Type{
+		field.TypeInt,
+		field.TypeInt64,
+		field.TypeUint,
+		field.TypeUint64,
+		field.TypeString,
+	})
 }
 
 // String returns the default value for the help command.

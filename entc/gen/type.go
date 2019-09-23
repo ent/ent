@@ -413,6 +413,9 @@ func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.Type
 // IsString returns true if the field is a string field.
 func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.TypeString }
 
+// IsInt returns true if the field is an int field.
+func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeInt }
+
 // NullType returns the sql null-type for optional and nullable fields.
 func (f Field) NullType() string {
 	switch f.Type.Type {
