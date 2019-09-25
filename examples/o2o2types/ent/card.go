@@ -16,7 +16,7 @@ import (
 
 // Card is the model entity for the Card schema.
 type Card struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Expired holds the value of the "expired" field.

@@ -15,7 +15,7 @@ import (
 
 // City is the model entity for the City schema.
 type City struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.

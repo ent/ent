@@ -474,9 +474,7 @@ func (f Field) Column() *schema.Column {
 		}
 	}
 	if f.Default && !f.IsTime() {
-		// since this column is used only for codegen, the actual default
-		// value is imported by the migrate package and used directly.
-		c.Default = true
+		c.Default = "Default" + pascal(f.Name)
 	}
 	return c
 }

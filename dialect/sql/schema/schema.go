@@ -449,11 +449,6 @@ func (c *Column) ScanDefault(value string) (err error) {
 	return nil
 }
 
-// HasDefault reports if the column has a default value.
-func (c *Column) HasDefault() bool {
-	return c.Default != nil
-}
-
 // defaultValue adds tge `DEFAULT` attribute the the column.
 // Note that, in SQLite if a NOT NULL constraint is specified,
 // then the column must have a default value which not NULL.

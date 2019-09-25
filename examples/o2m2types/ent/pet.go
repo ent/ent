@@ -15,7 +15,7 @@ import (
 
 // Pet is the model entity for the Pet schema.
 type Pet struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.

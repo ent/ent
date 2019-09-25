@@ -15,7 +15,7 @@ import (
 
 // Street is the model entity for the Street schema.
 type Street struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.

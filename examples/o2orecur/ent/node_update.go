@@ -37,12 +37,17 @@ func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 // SetValue sets the value field.
 func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
 	nu.value = &i
+	nu.addvalue = nil
 	return nu
 }
 
 // AddValue adds i to value.
 func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
-	nu.addvalue = &i
+	if nu.addvalue == nil {
+		nu.addvalue = &i
+	} else {
+		*nu.addvalue += i
+	}
 	return nu
 }
 
@@ -255,12 +260,17 @@ type NodeUpdateOne struct {
 // SetValue sets the value field.
 func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
 	nuo.value = &i
+	nuo.addvalue = nil
 	return nuo
 }
 
 // AddValue adds i to value.
 func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
-	nuo.addvalue = &i
+	if nuo.addvalue == nil {
+		nuo.addvalue = &i
+	} else {
+		*nuo.addvalue += i
+	}
 	return nuo
 }
 
