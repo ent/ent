@@ -147,6 +147,12 @@ func (b *stringBuilder) MinLen(i int) *stringBuilder {
 	return b
 }
 
+// NotEmpty adds a length validator for this field.
+// Operation fails if the length of the string is zero.
+func (b *stringBuilder) NotEmpty() *stringBuilder {
+	return b.MinLen(1)
+}
+
 // MaxLen adds a length validator for this field.
 // Operation fails if the length of the string is greater than the given value.
 func (b *stringBuilder) MaxLen(i int) *stringBuilder {

@@ -27,7 +27,7 @@ type Card struct {
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("number").
-			MinLen(1),
+			NotEmpty(),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
