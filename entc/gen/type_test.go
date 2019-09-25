@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"sort"
 	"strings"
 	"testing"
 
@@ -113,7 +112,6 @@ func TestType_TagTypes(t *testing.T) {
 		},
 	}
 	tags := typ.TagTypes()
-	sort.Strings(tags)
 	require.Equal(t, []string{"json", "sql", "yaml"}, tags)
 }
 

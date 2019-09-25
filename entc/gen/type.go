@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"io"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -298,6 +299,7 @@ func (t Type) TagTypes() []string {
 	for tag := range tags {
 		r = append(r, tag)
 	}
+	sort.Strings(r)
 	return r
 }
 
