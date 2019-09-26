@@ -8,7 +8,8 @@
       "schema-fields",
       "schema-edges",
       "schema-indexes",
-      "schema-config"
+      "schema-config",
+      "schema-mixin"
     ],
     "Code Generation": [
       "code-gen",
