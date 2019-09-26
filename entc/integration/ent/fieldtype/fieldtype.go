@@ -75,6 +75,7 @@ var Columns = []string{
 
 var (
 	fields = schema.FieldType{}.Fields()
+
 	// descValidateOptionalInt32 is the schema descriptor for validate_optional_int32 field.
 	descValidateOptionalInt32 = fields[15].Descriptor()
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.

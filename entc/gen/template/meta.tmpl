@@ -36,12 +36,25 @@ const (
 
 {{ if or $.HasDefault $.HasValidators }}
 var (
+	{{- with $.MixedInWithDefault }}
+		mixin = {{ base $.Schema }}.{{ $.Name }}{}.Mixin()
+		mixinFields = [...][]ent.Field{
+			{{- range $i, $_ := xrange $.NumMixin }}
+				mixin[{{ $i }}].Fields(),
+			{{- end }}
+		}
+	{{- end }}
 	fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
 	{{ range $i, $f := $.Fields -}}
 		{{- $desc := print "desc" (pascal $f.Name) -}}
 		{{ if or $f.Default $f.UpdateDefault $f.Validators -}}
-			// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
-			{{ $desc }} = fields[{{ $i }}].Descriptor()
+			{{- if $f.Position.MixedIn }}
+				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+				{{ $desc }} = mixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
+			{{- else }}
+				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+				{{ $desc }} = fields[{{ $f.Position.Index }}].Descriptor()
+			{{- end }}
 		{{ end -}}
 		{{ if $f.Default }}
 			{{- $default := $f.DefaultName -}}

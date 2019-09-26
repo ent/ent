@@ -20,9 +20,9 @@ var (
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "number", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "number", Type: field.TypeString},
 		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
