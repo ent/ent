@@ -44,6 +44,9 @@ type (
 		Indexes() []Index
 		// Config returns an optional config for the schema.
 		Config() Config
+		// Mixin returns an optional list of Mixin to extends
+		// the schema.
+		Mixin() []Mixin
 	}
 
 	// A Field interface returns a field descriptor for vertex fields/properties.
@@ -100,6 +103,38 @@ type (
 		Table string
 	}
 
+	// The Mixin type describes a set of methods that can extend
+	// other methods in the schema without calling them directly.
+	//
+	//	type TimeMixin struct {}
+	//
+	//	func (TimeMixin) Fields() []ent.Field {
+	//		return []ent.Field{
+	//			field.Time("created_at").
+	//				Immutable().
+	//				Default(time.Now),
+	//			field.Time("updated_at").
+	//				Default(time.Now).
+	//				UpdateDefault(time.Now),
+	//		}
+	//	}
+	//
+	//	type T struct {
+	//		ent.Schema
+	//	}
+	//
+	// 	func(T) Mixin() []ent.Mixin {
+	// 		return []ent.Mixin{
+	//			TimeMixin{},
+	// 		}
+	// 	}
+	//
+	Mixin interface {
+		// Fields returns a slice of fields to be added
+		// to the schema fields.
+		Fields() []Field
+	}
+
 	// Schema is the default implementation for the schema Interface.
 	// It can be embedded in end-user schemas as follows:
 	//
@@ -123,3 +158,6 @@ func (Schema) Indexes() []Index { return nil }
 
 // Config of the schema.
 func (Schema) Config() Config { return Config{} }
+
+// Mixin of the schema.
+func (Schema) Mixin() []Mixin { return nil }
