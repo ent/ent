@@ -474,7 +474,7 @@ func (f Field) Column() *schema.Column {
 		}
 	}
 	if f.Default && !f.IsTime() {
-		c.Default = "Default" + pascal(f.Name)
+		c.Default = f.DefaultName()
 	}
 	return c
 }
