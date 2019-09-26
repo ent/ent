@@ -36,9 +36,9 @@ func ExampleCard() {
 	// create card vertex with its edges.
 	c := client.Card.
 		Create().
-		SetNumber("string").
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
+		SetNumber("string").
 		SaveX(ctx)
 	log.Println("card created:", c)
 
@@ -346,9 +346,9 @@ func ExampleUser() {
 	// creating vertices for the user's edges.
 	c0 := client.Card.
 		Create().
-		SetNumber("string").
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
+		SetNumber("string").
 		SaveX(ctx)
 	log.Println("card created:", c0)
 	pe1 := client.Pet.

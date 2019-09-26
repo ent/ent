@@ -25,6 +25,13 @@ type Schema struct {
 	StructFields []*StructField `json:"struct_fields,omitempty"`
 }
 
+// Position describes a field position in the schema.
+type Position struct {
+	Index      int  // field index in the field list.
+	MixedIn    bool // indicates if the field was mixed-in.
+	MixinIndex int  // mixin index in the mixin list.
+}
+
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
 	Name          string          `json:"name,omitempty"`
@@ -39,6 +46,7 @@ type Field struct {
 	Immutable     bool            `json:"immutable,omitempty"`
 	Validators    int             `json:"validators,omitempty"`
 	StorageKey    string          `json:"storage_key,omitempty"`
+	Position      *Position       `json:"position,omitempty"`
 }
 
 // StructField represents an external struct field defined in the schema.
@@ -87,6 +95,30 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 	return ne
 }
 
+// NewField creates an loaded field from edge descriptor.
+func NewField(fd *field.Descriptor) (*Field, error) {
+	sf := &Field{
+		Name:          fd.Name,
+		Info:          fd.Info,
+		Tag:           fd.Tag,
+		Unique:        fd.Unique,
+		Nillable:      fd.Nillable,
+		Optional:      fd.Optional,
+		Immutable:     fd.Immutable,
+		StorageKey:    fd.StorageKey,
+		Validators:    len(fd.Validators),
+		Default:       fd.Default != nil,
+		UpdateDefault: fd.UpdateDefault != nil,
+	}
+	if sf.Info == nil {
+		return nil, fmt.Errorf("missing type info for field %q", sf.Name)
+	}
+	if fd.Size != 0 {
+		sf.Size = &fd.Size
+	}
+	return sf, nil
+}
+
 // MarshalSchema encode the ent.Schema interface into a JSON
 // that can be decoded into the Schema object object.
 func MarshalSchema(schema ent.Interface) (b []byte, err error) {
@@ -94,32 +126,8 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		Config: schema.Config(),
 		Name:   indirect(reflect.TypeOf(schema)).Name(),
 	}
-	fields, err := safeFields(schema)
-	if err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
-	}
-	for _, f := range fields {
-		fd := f.Descriptor()
-		sf := &Field{
-			Name:          fd.Name,
-			Info:          fd.Info,
-			Tag:           fd.Tag,
-			Unique:        fd.Unique,
-			Nillable:      fd.Nillable,
-			Optional:      fd.Optional,
-			Immutable:     fd.Immutable,
-			StorageKey:    fd.StorageKey,
-			Validators:    len(fd.Validators),
-			Default:       fd.Default != nil,
-			UpdateDefault: fd.UpdateDefault != nil,
-		}
-		if sf.Info == nil {
-			return nil, fmt.Errorf("schema %q: missing type info for field %q", s.Name, sf.Name)
-		}
-		if fd.Size != 0 {
-			sf.Size = &fd.Size
-		}
-		s.Fields = append(s.Fields, sf)
+	if err := s.loadFields(schema); err != nil {
+		return nil, err
 	}
 	edges, err := safeEdges(schema)
 	if err != nil {
@@ -143,15 +151,54 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	return json.Marshal(s)
 }
 
-// safeFields wraps the schema.Fields method with recover to ensure no panics in marshaling.
-func safeFields(schema ent.Interface) (fields []ent.Field, err error) {
+// loadFields loads field to schema from ent.Interface.
+func (s *Schema) loadFields(schema ent.Interface) error {
+	mixin, err := safeMixin(schema)
+	if err != nil {
+		return fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	for i, mx := range mixin {
+		fields, err := safeFields(mx)
+		if err != nil {
+			return fmt.Errorf("schema %q: %v", s.Name, err)
+		}
+		for j, f := range fields {
+			sf, err := NewField(f.Descriptor())
+			if err != nil {
+				return fmt.Errorf("schema %q: %v", s.Name, err)
+			}
+			sf.Position = &Position{
+				Index:      j,
+				MixedIn:    true,
+				MixinIndex: i,
+			}
+			s.Fields = append(s.Fields, sf)
+		}
+	}
+	fields, err := safeFields(schema)
+	if err != nil {
+		return fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	for i, f := range fields {
+		sf, err := NewField(f.Descriptor())
+		if err != nil {
+			return fmt.Errorf("schema %q: %v", s.Name, err)
+		}
+		sf.Position = &Position{Index: i}
+		s.Fields = append(s.Fields, sf)
+	}
+	return nil
+}
+
+// safeFields wraps the schema.Fields and mixin.Fields method with recover to ensure no panics in marshaling.
+func safeFields(fd interface{ Fields() []ent.Field }) (fields []ent.Field, err error) {
 	defer func() {
 		if v := recover(); v != nil {
-			err = fmt.Errorf("schema.Fields panics: %v", v)
+			err = fmt.Errorf("%T.Fields panics: %v", fd, v)
 			fields = nil
 		}
 	}()
-	return schema.Fields(), nil
+	return fd.Fields(), nil
 }
 
 // safeEdges wraps the schema.Edges method with recover to ensure no panics in marshaling.
@@ -174,6 +221,17 @@ func safeIndexes(schema ent.Interface) (indexes []ent.Index, err error) {
 		}
 	}()
 	return schema.Indexes(), nil
+}
+
+// safeMixin wraps the schema.Mixin method with recover to ensure no panics in marshaling.
+func safeMixin(schema ent.Interface) (mixin []ent.Mixin, err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			err = fmt.Errorf("schema.Mixin panics: %v", v)
+			mixin = nil
+		}
+	}()
+	return schema.Mixin(), nil
 }
 
 func indirect(t reflect.Type) reflect.Type {

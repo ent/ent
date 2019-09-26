@@ -27,16 +27,10 @@ import (
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	number     *string
 	created_at *time.Time
 	updated_at *time.Time
+	number     *string
 	owner      map[string]struct{}
-}
-
-// SetNumber sets the number field.
-func (cc *CardCreate) SetNumber(s string) *CardCreate {
-	cc.number = &s
-	return cc
 }
 
 // SetCreatedAt sets the created_at field.
@@ -67,6 +61,12 @@ func (cc *CardCreate) SetNillableUpdatedAt(t *time.Time) *CardCreate {
 	return cc
 }
 
+// SetNumber sets the number field.
+func (cc *CardCreate) SetNumber(s string) *CardCreate {
+	cc.number = &s
+	return cc
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (cc *CardCreate) SetOwnerID(id string) *CardCreate {
 	if cc.owner == nil {
@@ -91,12 +91,6 @@ func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if cc.number == nil {
-		return nil, errors.New("ent: missing required field \"number\"")
-	}
-	if err := card.NumberValidator(*cc.number); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
-	}
 	if cc.created_at == nil {
 		v := card.DefaultCreatedAt()
 		cc.created_at = &v
@@ -104,6 +98,12 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if cc.updated_at == nil {
 		v := card.DefaultUpdatedAt()
 		cc.updated_at = &v
+	}
+	if cc.number == nil {
+		return nil, errors.New("ent: missing required field \"number\"")
+	}
+	if err := card.NumberValidator(*cc.number); err != nil {
+		return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
 	}
 	if len(cc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -137,10 +137,6 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	builder := sql.Insert(card.Table).Default(cc.driver.Dialect())
-	if value := cc.number; value != nil {
-		builder.Set(card.FieldNumber, *value)
-		c.Number = *value
-	}
 	if value := cc.created_at; value != nil {
 		builder.Set(card.FieldCreatedAt, *value)
 		c.CreatedAt = *value
@@ -148,6 +144,10 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	if value := cc.updated_at; value != nil {
 		builder.Set(card.FieldUpdatedAt, *value)
 		c.UpdatedAt = *value
+	}
+	if value := cc.number; value != nil {
+		builder.Set(card.FieldNumber, *value)
+		c.Number = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -207,14 +207,14 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(card.Label)
-	if cc.number != nil {
-		v.Property(dsl.Single, card.FieldNumber, *cc.number)
-	}
 	if cc.created_at != nil {
 		v.Property(dsl.Single, card.FieldCreatedAt, *cc.created_at)
 	}
 	if cc.updated_at != nil {
 		v.Property(dsl.Single, card.FieldUpdatedAt, *cc.updated_at)
+	}
+	if cc.number != nil {
+		v.Property(dsl.Single, card.FieldNumber, *cc.number)
 	}
 	for id := range cc.owner {
 		v.AddE(user.CardLabel).From(g.V(id)).InV()

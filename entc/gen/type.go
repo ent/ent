@@ -70,6 +70,8 @@ type (
 		StructTag string
 		// Validators holds the number of validators this field have.
 		Validators int
+		// Position info of the field.
+		Position *load.Position
 	}
 
 	// Edge of a graph between two types.
@@ -158,6 +160,7 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			Name:          f.Name,
 			Type:          f.Info,
 			Unique:        f.Unique,
+			Position:      f.Position,
 			Nillable:      f.Nillable,
 			Optional:      f.Optional,
 			Default:       f.Default,
@@ -225,7 +228,7 @@ func (t Type) HasDefault() bool {
 // HasUpdateDefault reports if any of this type's fields has default value on update.
 func (t Type) HasUpdateDefault() bool {
 	for _, f := range t.Fields {
-		if f.Default {
+		if f.UpdateDefault {
 			return true
 		}
 	}
@@ -240,6 +243,27 @@ func (t Type) HasOptional() bool {
 		}
 	}
 	return false
+}
+
+// MixedInWithDefault returns all mixed-in fields with default values for creation or update.
+func (t Type) MixedInWithDefault() (fields []*Field) {
+	for _, f := range t.Fields {
+		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault) {
+			fields = append(fields, f)
+		}
+	}
+	return
+}
+
+// NumMixin returns the type's mixin count.
+func (t Type) NumMixin() int {
+	m := make(map[int]struct{})
+	for _, f := range t.Fields {
+		if p := f.Position; p != nil && p.MixedIn {
+			m[p.MixinIndex] = struct{}{}
+		}
+	}
+	return len(m)
 }
 
 // NumConstraint returns the type's constraint count. Used for slice allocation.
@@ -318,7 +342,7 @@ func (t Type) Describe(w io.Writer) {
 	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators"})
 	for _, f := range append([]*Field{t.ID}, t.Fields...) {
 		v := reflect.ValueOf(*f)
-		row := make([]string, v.NumField()-1)
+		row := make([]string, v.NumField()-2)
 		for i := range row {
 			row[i] = fmt.Sprint(v.Field(i + 1).Interface())
 		}

@@ -58,6 +58,7 @@ var Columns = []string{
 
 var (
 	fields = schema.File{}.Fields()
+
 	// descSize is the schema descriptor for size field.
 	descSize = fields[0].Descriptor()
 	// DefaultSize holds the default value on creation for the size field.

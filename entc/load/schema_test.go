@@ -169,3 +169,77 @@ func TestMarshalDefaults(t *testing.T) {
 	require.False(t, schema.Fields[4].Default)
 	require.True(t, schema.Fields[4].UpdateDefault)
 }
+
+type TimeMixin struct{}
+
+func (TimeMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Immutable().
+			Default(time.Now),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+	}
+}
+
+type Mixin struct{}
+
+func (Mixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("boring"),
+	}
+}
+
+type WithMixin struct {
+	ent.Schema
+}
+
+func (WithMixin) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
+		Mixin{},
+	}
+}
+
+func (WithMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("field"),
+	}
+}
+
+func TestMarshalMixin(t *testing.T) {
+	d := WithMixin{}
+	buf, err := MarshalSchema(d)
+	require.NoError(t, err)
+
+	schema := &Schema{}
+	err = json.Unmarshal(buf, schema)
+	require.NoError(t, err)
+
+	require.Equal(t, "WithMixin", schema.Name)
+	require.Equal(t, "created_at", schema.Fields[0].Name)
+	require.True(t, schema.Fields[0].Default)
+	require.True(t, schema.Fields[0].Position.MixedIn)
+	require.Equal(t, 0, schema.Fields[0].Position.MixinIndex)
+	require.Equal(t, 0, schema.Fields[0].Position.Index)
+
+	require.Equal(t, "updated_at", schema.Fields[1].Name)
+	require.True(t, schema.Fields[1].Default)
+	require.True(t, schema.Fields[1].UpdateDefault)
+	require.True(t, schema.Fields[1].Position.MixedIn)
+	require.Equal(t, 0, schema.Fields[1].Position.MixinIndex)
+	require.Equal(t, 1, schema.Fields[1].Position.Index)
+
+	require.Equal(t, "boring", schema.Fields[2].Name)
+	require.False(t, schema.Fields[2].Default)
+	require.False(t, schema.Fields[2].UpdateDefault)
+	require.True(t, schema.Fields[2].Position.MixedIn)
+	require.Equal(t, 1, schema.Fields[2].Position.MixinIndex)
+	require.Equal(t, 0, schema.Fields[2].Position.Index)
+
+	require.Equal(t, "field", schema.Fields[3].Name)
+	require.False(t, schema.Fields[3].Default)
+	require.False(t, schema.Fields[3].Position.MixedIn)
+	require.Equal(t, 0, schema.Fields[3].Position.Index)
+}

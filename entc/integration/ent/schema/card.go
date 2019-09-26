@@ -13,6 +13,20 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
+type TimeMixin struct{}
+
+func (TimeMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Default(time.Now).
+			Immutable(),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now).
+			Immutable(),
+	}
+}
+
 // Card holds the schema definition for the CreditCard entity.
 type Card struct {
 	ent.Schema
@@ -23,18 +37,17 @@ type Card struct {
 	Logger    *log.Logger // Logger.
 }
 
+func (Card) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
+	}
+}
+
 // Fields of the Comment.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("number").
 			NotEmpty(),
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now).
-			Immutable(),
 	}
 }
 
