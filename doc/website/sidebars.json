@@ -7,7 +7,8 @@
       "schema-def",
       "schema-fields",
       "schema-edges",
-      "schema-indexes"
+      "schema-indexes",
+      "schema-config"
     ],
     "Code Generation": [
       "code-gen",
