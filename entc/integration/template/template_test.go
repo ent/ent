@@ -8,7 +8,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/migrate"
 
@@ -17,11 +16,10 @@ import (
 )
 
 func TestCustomTemplate(t *testing.T) {
-	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
-	defer drv.Close()
+	defer client.Close()
 	ctx := context.Background()
-	client := ent.NewClient(ent.Driver(drv))
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
 	p := client.Pet.Create().SetAge(1).SaveX(ctx)
