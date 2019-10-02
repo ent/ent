@@ -23,5 +23,11 @@ The documentation for developing and using ent is avaliable at: https://entgo.io
 ## Join the ent Community
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
 
+## Project Status
+`ent` was developed and maintained by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
+from the Facebook Connectivity team. It's currently considered experimental (although we're using it in production),
+and the roadmap for v1 release is described [here](https://github.com/facebookincubator/ent/issues/46).  
+Read more about the motivation of the project [here](https://entgo.io/blog/2019/10/03/introducing-ent).
+
 ## License
 ent is licensed under Apache 2.0 as found in the LICENSE file.

@@ -131,6 +131,10 @@ body {
   background: #3d3e3f;
 }
 
+body.blog {
+    background: white;
+}
+
 .sideNavVisible {
   background: white;
 }
@@ -139,16 +143,22 @@ body {
   background: #3d3e3f;
 }
 
+.blog .fixedHeaderContainer,
 .sideNavVisible .fixedHeaderContainer {
   background: white;
   max-width: 1400px;
   margin: 0 auto;
 }
 
+.blog .wrapper {
+    max-width: 1400px;
+}
+
 .sideNavVisible.navigationSlider .slidingNav ul {
   background: white;
 }
 
+.blog .slidingNav ul li a,
 .sideNavVisible .navigationSlider .slidingNav ul li a {
   color: #3d3e3f !important;
 }
@@ -404,6 +414,7 @@ a {
     overflow-x: hidden;
   }
 
+  .blog .fixedHeaderContainer,
   .sideNavVisible.separateOnPageNav .fixedHeaderContainer {
     width: 100vw;
   }
@@ -466,18 +477,22 @@ header > .navigationSlider {
 /*
  Docs Page
 */
+.blog > .navigationSlider,
 .sideNavVisible header > .navigationSlider {
   margin-left: 0;
 }
 
+.blog > .fixedHeaderContainer a,
 .sideNavVisible .fixedHeaderContainer a {
   display: flex !important;
 }
 
+.blog .navigationSlider .slidingNav,
 .sideNavVisible .navigationSlider .slidingNav {
   position: relative;
 }
 
+.blog .fixedHeaderContainer,
 .sideNavVisible .fixedHeaderContainer {
   display: flex;
   align-items: center;
@@ -485,6 +500,7 @@ header > .navigationSlider {
   padding: 0;
 }
 
+.blog .navigationWrapper.navigationSlider,
 .sideNavVisible .navigationWrapper.navigationSlider {
   align-self: flex-end;
   align-items: center;
@@ -497,26 +513,27 @@ header > .navigationSlider {
   }
 }
 
+.blog .headerWrapper.wrapper,
 .sideNavVisible .headerWrapper.wrapper {
   width: 100vw;
   margin: 0 20px;
 }
 
+.blog .headerWrapper.wrapper header,
 .sideNavVisible .headerWrapper.wrapper header {
   width: 100vw;
 }
 
+.blog .headerWrapper.wrapper header > a,
 .sideNavVisible .headerWrapper.wrapper header > a {
   width: 288px;
-}
-
-.sideNavVisible .headerWrapper.wrapper header a {
 }
 
 .navigationSlider .slidingNav ul {
   background: transparent;
 }
 
+.blog .navigationSlider .slidingNav ul,
 .sideNavVisible .navigationSlider .slidingNav ul {
   background: white;
   margin-top: 0;
@@ -542,12 +559,14 @@ ol {
 }
 
 @media only screen and (min-width: 1000px) {
+    .blog .fixedHeaderContainer,
     .sideNavVisible.separateOnPageNav .fixedHeaderContainer {
         margin-top: 35px;
         width: 100vw;
     }
 }
 
+.blog .slidingNav ul li a,
 .sideNavVisible .navigationSlider .slidingNav ul li a {
   font-family: 'Calibre Light', sans-serif;
 }

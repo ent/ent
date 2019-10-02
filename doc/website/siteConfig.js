@@ -39,6 +39,7 @@ const siteConfig = {
     {doc: 'getting-started', label: 'Docs'},
     {href: 'https://godoc.org/github.com/facebookincubator/ent', label: 'GoDoc'},
     {href: 'https://github.com/facebookincubator/ent', label: 'Github'},
+    { blog: true, label: 'Blog' },
   ],
 
   // If you have users set above, you add it here:
