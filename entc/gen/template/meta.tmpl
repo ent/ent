@@ -95,4 +95,36 @@ var (
 )
 {{ end }}
 
+
+{{/* define custom type for enum fields */}}
+{{ range $_, $f := $.Fields -}}
+	{{ if $f.IsEnum }}
+		{{/* omit the package name from the type. */}}
+		{{ $enum := trimPackage $f.Type.String $.Package }}
+		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
+		type {{ $enum }} string
+
+		const (
+			{{- range $_, $e := $f.Enums }}
+				{{ pascal $f.Name }}{{ pascal $e }} {{ $enum }} = "{{ $e }}"
+			{{-  end }}
+		)
+
+		func (s {{ $enum }}) String() string {
+			return string(s)
+		}
+
+		{{ $name := $f.Validator -}}
+		// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
+		func {{ $name }}({{ $f.Name }} {{ $enum }}) error {
+			switch {{ $f.Name }} {
+				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ pascal $f.Name }}{{ pascal $e }}{{ end }}:
+					return nil
+				default:
+					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $f.Name }})
+			}
+		}
+	{{ end }}
+{{ end }}
+
 {{ end }}

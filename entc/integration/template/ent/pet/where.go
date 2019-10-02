@@ -38,42 +38,6 @@ func IDNEQ(id int) predicate.Pet {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Pet {
 	return predicate.Pet(
@@ -112,6 +76,42 @@ func IDNotIn(ids ...int) predicate.Pet {
 	)
 }
 
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldID), id))
+		},
+	)
+}
+
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.Pet {
 	return predicate.Pet(
@@ -135,42 +135,6 @@ func AgeNEQ(v int) predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
 			s.Where(sql.NEQ(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldAge), v))
 		},
 	)
 }
@@ -209,6 +173,42 @@ func AgeNotIn(vs ...int) predicate.Pet {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldAge), v...))
+		},
+	)
+}
+
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldAge), v))
+		},
+	)
+}
+
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldAge), v))
+		},
+	)
+}
+
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldAge), v))
+		},
+	)
+}
+
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v int) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldAge), v))
 		},
 	)
 }

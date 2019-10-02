@@ -55,58 +55,6 @@ func IDNEQ(id string) predicate.Node {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Node {
-	return predicate.NodePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GT(id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Node {
-	return predicate.NodePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GTE(id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Node {
-	return predicate.NodePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LT(id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Node {
-	return predicate.NodePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LTE(id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.Node {
 	return predicate.NodePerDialect(
@@ -159,6 +107,58 @@ func IDNotIn(ids ...string) predicate.Node {
 	)
 }
 
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id string) predicate.Node {
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.GT(id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id string) predicate.Node {
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.GTE(id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id string) predicate.Node {
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.LT(id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id string) predicate.Node {
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LTE(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.LTE(id))
+		},
+	)
+}
+
 // Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
 func Value(v int) predicate.Node {
 	return predicate.NodePerDialect(
@@ -191,6 +191,50 @@ func ValueNEQ(v int) predicate.Node {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldValue, p.NEQ(v))
+		},
+	)
+}
+
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...int) predicate.Node {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldValue), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValue, p.Within(v...))
+		},
+	)
+}
+
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...int) predicate.Node {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.NodePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldValue), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValue, p.Without(v...))
 		},
 	)
 }
@@ -239,50 +283,6 @@ func ValueLTE(v int) predicate.Node {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldValue, p.LTE(v))
-		},
-	)
-}
-
-// ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...int) predicate.Node {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.NodePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldValue), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldValue, p.Within(v...))
-		},
-	)
-}
-
-// ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...int) predicate.Node {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.NodePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldValue), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldValue, p.Without(v...))
 		},
 	)
 }

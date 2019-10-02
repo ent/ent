@@ -55,58 +55,6 @@ func IDNEQ(id string) predicate.FieldType {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.FieldType {
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GT(id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.FieldType {
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GTE(id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.FieldType {
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LT(id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.FieldType {
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LTE(id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -155,6 +103,58 @@ func IDNotIn(ids ...string) predicate.FieldType {
 				v[i] = ids[i]
 			}
 			t.HasID(p.Without(v...))
+		},
+	)
+}
+
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id string) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.GT(id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id string) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.GTE(id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id string) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.LT(id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id string) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LTE(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.LTE(id))
 		},
 	)
 }
@@ -375,6 +375,50 @@ func IntNEQ(v int) predicate.FieldType {
 	)
 }
 
+// IntIn applies the In predicate on the "int" field.
+func IntIn(vs ...int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt, p.Within(v...))
+		},
+	)
+}
+
+// IntNotIn applies the NotIn predicate on the "int" field.
+func IntNotIn(vs ...int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt, p.Without(v...))
+		},
+	)
+}
+
 // IntGT applies the GT predicate on the "int" field.
 func IntGT(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -423,50 +467,6 @@ func IntLTE(v int) predicate.FieldType {
 	)
 }
 
-// IntIn applies the In predicate on the "int" field.
-func IntIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldInt), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt, p.Within(v...))
-		},
-	)
-}
-
-// IntNotIn applies the NotIn predicate on the "int" field.
-func IntNotIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldInt), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt, p.Without(v...))
-		},
-	)
-}
-
 // Int8EQ applies the EQ predicate on the "int8" field.
 func Int8EQ(v int8) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -487,6 +487,50 @@ func Int8NEQ(v int8) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldInt8, p.NEQ(v))
+		},
+	)
+}
+
+// Int8In applies the In predicate on the "int8" field.
+func Int8In(vs ...int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldInt8), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt8, p.Within(v...))
+		},
+	)
+}
+
+// Int8NotIn applies the NotIn predicate on the "int8" field.
+func Int8NotIn(vs ...int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldInt8), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt8, p.Without(v...))
 		},
 	)
 }
@@ -539,50 +583,6 @@ func Int8LTE(v int8) predicate.FieldType {
 	)
 }
 
-// Int8In applies the In predicate on the "int8" field.
-func Int8In(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldInt8), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt8, p.Within(v...))
-		},
-	)
-}
-
-// Int8NotIn applies the NotIn predicate on the "int8" field.
-func Int8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldInt8), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt8, p.Without(v...))
-		},
-	)
-}
-
 // Int16EQ applies the EQ predicate on the "int16" field.
 func Int16EQ(v int16) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -603,6 +603,50 @@ func Int16NEQ(v int16) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldInt16, p.NEQ(v))
+		},
+	)
+}
+
+// Int16In applies the In predicate on the "int16" field.
+func Int16In(vs ...int16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldInt16), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt16, p.Within(v...))
+		},
+	)
+}
+
+// Int16NotIn applies the NotIn predicate on the "int16" field.
+func Int16NotIn(vs ...int16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldInt16), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt16, p.Without(v...))
 		},
 	)
 }
@@ -655,50 +699,6 @@ func Int16LTE(v int16) predicate.FieldType {
 	)
 }
 
-// Int16In applies the In predicate on the "int16" field.
-func Int16In(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldInt16), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt16, p.Within(v...))
-		},
-	)
-}
-
-// Int16NotIn applies the NotIn predicate on the "int16" field.
-func Int16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldInt16), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt16, p.Without(v...))
-		},
-	)
-}
-
 // Int32EQ applies the EQ predicate on the "int32" field.
 func Int32EQ(v int32) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -719,6 +719,50 @@ func Int32NEQ(v int32) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldInt32, p.NEQ(v))
+		},
+	)
+}
+
+// Int32In applies the In predicate on the "int32" field.
+func Int32In(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt32, p.Within(v...))
+		},
+	)
+}
+
+// Int32NotIn applies the NotIn predicate on the "int32" field.
+func Int32NotIn(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt32, p.Without(v...))
 		},
 	)
 }
@@ -771,50 +815,6 @@ func Int32LTE(v int32) predicate.FieldType {
 	)
 }
 
-// Int32In applies the In predicate on the "int32" field.
-func Int32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt32, p.Within(v...))
-		},
-	)
-}
-
-// Int32NotIn applies the NotIn predicate on the "int32" field.
-func Int32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt32, p.Without(v...))
-		},
-	)
-}
-
 // Int64EQ applies the EQ predicate on the "int64" field.
 func Int64EQ(v int64) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -835,6 +835,50 @@ func Int64NEQ(v int64) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldInt64, p.NEQ(v))
+		},
+	)
+}
+
+// Int64In applies the In predicate on the "int64" field.
+func Int64In(vs ...int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldInt64), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt64, p.Within(v...))
+		},
+	)
+}
+
+// Int64NotIn applies the NotIn predicate on the "int64" field.
+func Int64NotIn(vs ...int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldInt64), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldInt64, p.Without(v...))
 		},
 	)
 }
@@ -887,50 +931,6 @@ func Int64LTE(v int64) predicate.FieldType {
 	)
 }
 
-// Int64In applies the In predicate on the "int64" field.
-func Int64In(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldInt64), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt64, p.Within(v...))
-		},
-	)
-}
-
-// Int64NotIn applies the NotIn predicate on the "int64" field.
-func Int64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldInt64), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldInt64, p.Without(v...))
-		},
-	)
-}
-
 // OptionalIntEQ applies the EQ predicate on the "optional_int" field.
 func OptionalIntEQ(v int) predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -951,6 +951,50 @@ func OptionalIntNEQ(v int) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt, p.NEQ(v))
+		},
+	)
+}
+
+// OptionalIntIn applies the In predicate on the "optional_int" field.
+func OptionalIntIn(vs ...int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldOptionalInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt, p.Within(v...))
+		},
+	)
+}
+
+// OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
+func OptionalIntNotIn(vs ...int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldOptionalInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt, p.Without(v...))
 		},
 	)
 }
@@ -1003,50 +1047,6 @@ func OptionalIntLTE(v int) predicate.FieldType {
 	)
 }
 
-// OptionalIntIn applies the In predicate on the "optional_int" field.
-func OptionalIntIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldOptionalInt), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt, p.Within(v...))
-		},
-	)
-}
-
-// OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
-func OptionalIntNotIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldOptionalInt), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt, p.Without(v...))
-		},
-	)
-}
-
 // OptionalIntIsNil applies the IsNil predicate on the "optional_int" field.
 func OptionalIntIsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1091,6 +1091,50 @@ func OptionalInt8NEQ(v int8) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt8, p.NEQ(v))
+		},
+	)
+}
+
+// OptionalInt8In applies the In predicate on the "optional_int8" field.
+func OptionalInt8In(vs ...int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldOptionalInt8), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt8, p.Within(v...))
+		},
+	)
+}
+
+// OptionalInt8NotIn applies the NotIn predicate on the "optional_int8" field.
+func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldOptionalInt8), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt8, p.Without(v...))
 		},
 	)
 }
@@ -1143,50 +1187,6 @@ func OptionalInt8LTE(v int8) predicate.FieldType {
 	)
 }
 
-// OptionalInt8In applies the In predicate on the "optional_int8" field.
-func OptionalInt8In(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldOptionalInt8), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt8, p.Within(v...))
-		},
-	)
-}
-
-// OptionalInt8NotIn applies the NotIn predicate on the "optional_int8" field.
-func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldOptionalInt8), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt8, p.Without(v...))
-		},
-	)
-}
-
 // OptionalInt8IsNil applies the IsNil predicate on the "optional_int8" field.
 func OptionalInt8IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1231,6 +1231,50 @@ func OptionalInt16NEQ(v int16) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt16, p.NEQ(v))
+		},
+	)
+}
+
+// OptionalInt16In applies the In predicate on the "optional_int16" field.
+func OptionalInt16In(vs ...int16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldOptionalInt16), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt16, p.Within(v...))
+		},
+	)
+}
+
+// OptionalInt16NotIn applies the NotIn predicate on the "optional_int16" field.
+func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldOptionalInt16), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt16, p.Without(v...))
 		},
 	)
 }
@@ -1283,50 +1327,6 @@ func OptionalInt16LTE(v int16) predicate.FieldType {
 	)
 }
 
-// OptionalInt16In applies the In predicate on the "optional_int16" field.
-func OptionalInt16In(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldOptionalInt16), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt16, p.Within(v...))
-		},
-	)
-}
-
-// OptionalInt16NotIn applies the NotIn predicate on the "optional_int16" field.
-func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldOptionalInt16), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt16, p.Without(v...))
-		},
-	)
-}
-
 // OptionalInt16IsNil applies the IsNil predicate on the "optional_int16" field.
 func OptionalInt16IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1371,6 +1371,50 @@ func OptionalInt32NEQ(v int32) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt32, p.NEQ(v))
+		},
+	)
+}
+
+// OptionalInt32In applies the In predicate on the "optional_int32" field.
+func OptionalInt32In(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldOptionalInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt32, p.Within(v...))
+		},
+	)
+}
+
+// OptionalInt32NotIn applies the NotIn predicate on the "optional_int32" field.
+func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldOptionalInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt32, p.Without(v...))
 		},
 	)
 }
@@ -1423,50 +1467,6 @@ func OptionalInt32LTE(v int32) predicate.FieldType {
 	)
 }
 
-// OptionalInt32In applies the In predicate on the "optional_int32" field.
-func OptionalInt32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldOptionalInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt32, p.Within(v...))
-		},
-	)
-}
-
-// OptionalInt32NotIn applies the NotIn predicate on the "optional_int32" field.
-func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldOptionalInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt32, p.Without(v...))
-		},
-	)
-}
-
 // OptionalInt32IsNil applies the IsNil predicate on the "optional_int32" field.
 func OptionalInt32IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1511,6 +1511,50 @@ func OptionalInt64NEQ(v int64) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldOptionalInt64, p.NEQ(v))
+		},
+	)
+}
+
+// OptionalInt64In applies the In predicate on the "optional_int64" field.
+func OptionalInt64In(vs ...int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldOptionalInt64), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt64, p.Within(v...))
+		},
+	)
+}
+
+// OptionalInt64NotIn applies the NotIn predicate on the "optional_int64" field.
+func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldOptionalInt64), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldOptionalInt64, p.Without(v...))
 		},
 	)
 }
@@ -1563,50 +1607,6 @@ func OptionalInt64LTE(v int64) predicate.FieldType {
 	)
 }
 
-// OptionalInt64In applies the In predicate on the "optional_int64" field.
-func OptionalInt64In(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldOptionalInt64), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt64, p.Within(v...))
-		},
-	)
-}
-
-// OptionalInt64NotIn applies the NotIn predicate on the "optional_int64" field.
-func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldOptionalInt64), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldOptionalInt64, p.Without(v...))
-		},
-	)
-}
-
 // OptionalInt64IsNil applies the IsNil predicate on the "optional_int64" field.
 func OptionalInt64IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1651,6 +1651,50 @@ func NillableIntNEQ(v int) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNillableInt, p.NEQ(v))
+		},
+	)
+}
+
+// NillableIntIn applies the In predicate on the "nillable_int" field.
+func NillableIntIn(vs ...int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNillableInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.Within(v...))
+		},
+	)
+}
+
+// NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
+func NillableIntNotIn(vs ...int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNillableInt), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt, p.Without(v...))
 		},
 	)
 }
@@ -1703,50 +1747,6 @@ func NillableIntLTE(v int) predicate.FieldType {
 	)
 }
 
-// NillableIntIn applies the In predicate on the "nillable_int" field.
-func NillableIntIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldNillableInt), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt, p.Within(v...))
-		},
-	)
-}
-
-// NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
-func NillableIntNotIn(vs ...int) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldNillableInt), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt, p.Without(v...))
-		},
-	)
-}
-
 // NillableIntIsNil applies the IsNil predicate on the "nillable_int" field.
 func NillableIntIsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1791,6 +1791,50 @@ func NillableInt8NEQ(v int8) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNillableInt8, p.NEQ(v))
+		},
+	)
+}
+
+// NillableInt8In applies the In predicate on the "nillable_int8" field.
+func NillableInt8In(vs ...int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNillableInt8), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt8, p.Within(v...))
+		},
+	)
+}
+
+// NillableInt8NotIn applies the NotIn predicate on the "nillable_int8" field.
+func NillableInt8NotIn(vs ...int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNillableInt8), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt8, p.Without(v...))
 		},
 	)
 }
@@ -1843,50 +1887,6 @@ func NillableInt8LTE(v int8) predicate.FieldType {
 	)
 }
 
-// NillableInt8In applies the In predicate on the "nillable_int8" field.
-func NillableInt8In(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldNillableInt8), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt8, p.Within(v...))
-		},
-	)
-}
-
-// NillableInt8NotIn applies the NotIn predicate on the "nillable_int8" field.
-func NillableInt8NotIn(vs ...int8) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldNillableInt8), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt8, p.Without(v...))
-		},
-	)
-}
-
 // NillableInt8IsNil applies the IsNil predicate on the "nillable_int8" field.
 func NillableInt8IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -1931,6 +1931,50 @@ func NillableInt16NEQ(v int16) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNillableInt16, p.NEQ(v))
+		},
+	)
+}
+
+// NillableInt16In applies the In predicate on the "nillable_int16" field.
+func NillableInt16In(vs ...int16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNillableInt16), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt16, p.Within(v...))
+		},
+	)
+}
+
+// NillableInt16NotIn applies the NotIn predicate on the "nillable_int16" field.
+func NillableInt16NotIn(vs ...int16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNillableInt16), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt16, p.Without(v...))
 		},
 	)
 }
@@ -1983,50 +2027,6 @@ func NillableInt16LTE(v int16) predicate.FieldType {
 	)
 }
 
-// NillableInt16In applies the In predicate on the "nillable_int16" field.
-func NillableInt16In(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldNillableInt16), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt16, p.Within(v...))
-		},
-	)
-}
-
-// NillableInt16NotIn applies the NotIn predicate on the "nillable_int16" field.
-func NillableInt16NotIn(vs ...int16) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldNillableInt16), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt16, p.Without(v...))
-		},
-	)
-}
-
 // NillableInt16IsNil applies the IsNil predicate on the "nillable_int16" field.
 func NillableInt16IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -2071,6 +2071,50 @@ func NillableInt32NEQ(v int32) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNillableInt32, p.NEQ(v))
+		},
+	)
+}
+
+// NillableInt32In applies the In predicate on the "nillable_int32" field.
+func NillableInt32In(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNillableInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt32, p.Within(v...))
+		},
+	)
+}
+
+// NillableInt32NotIn applies the NotIn predicate on the "nillable_int32" field.
+func NillableInt32NotIn(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNillableInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt32, p.Without(v...))
 		},
 	)
 }
@@ -2123,50 +2167,6 @@ func NillableInt32LTE(v int32) predicate.FieldType {
 	)
 }
 
-// NillableInt32In applies the In predicate on the "nillable_int32" field.
-func NillableInt32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldNillableInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt32, p.Within(v...))
-		},
-	)
-}
-
-// NillableInt32NotIn applies the NotIn predicate on the "nillable_int32" field.
-func NillableInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldNillableInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt32, p.Without(v...))
-		},
-	)
-}
-
 // NillableInt32IsNil applies the IsNil predicate on the "nillable_int32" field.
 func NillableInt32IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -2211,6 +2211,50 @@ func NillableInt64NEQ(v int64) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldNillableInt64, p.NEQ(v))
+		},
+	)
+}
+
+// NillableInt64In applies the In predicate on the "nillable_int64" field.
+func NillableInt64In(vs ...int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldNillableInt64), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt64, p.Within(v...))
+		},
+	)
+}
+
+// NillableInt64NotIn applies the NotIn predicate on the "nillable_int64" field.
+func NillableInt64NotIn(vs ...int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldNillableInt64), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldNillableInt64, p.Without(v...))
 		},
 	)
 }
@@ -2263,50 +2307,6 @@ func NillableInt64LTE(v int64) predicate.FieldType {
 	)
 }
 
-// NillableInt64In applies the In predicate on the "nillable_int64" field.
-func NillableInt64In(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldNillableInt64), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt64, p.Within(v...))
-		},
-	)
-}
-
-// NillableInt64NotIn applies the NotIn predicate on the "nillable_int64" field.
-func NillableInt64NotIn(vs ...int64) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldNillableInt64), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldNillableInt64, p.Without(v...))
-		},
-	)
-}
-
 // NillableInt64IsNil applies the IsNil predicate on the "nillable_int64" field.
 func NillableInt64IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -2351,6 +2351,50 @@ func ValidateOptionalInt32NEQ(v int32) predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldValidateOptionalInt32, p.NEQ(v))
+		},
+	)
+}
+
+// ValidateOptionalInt32In applies the In predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldValidateOptionalInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.Within(v...))
+		},
+	)
+}
+
+// ValidateOptionalInt32NotIn applies the NotIn predicate on the "validate_optional_int32" field.
+func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldValidateOptionalInt32), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldValidateOptionalInt32, p.Without(v...))
 		},
 	)
 }
@@ -2403,50 +2447,6 @@ func ValidateOptionalInt32LTE(v int32) predicate.FieldType {
 	)
 }
 
-// ValidateOptionalInt32In applies the In predicate on the "validate_optional_int32" field.
-func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldValidateOptionalInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldValidateOptionalInt32, p.Within(v...))
-		},
-	)
-}
-
-// ValidateOptionalInt32NotIn applies the NotIn predicate on the "validate_optional_int32" field.
-func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.FieldTypePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldValidateOptionalInt32), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldValidateOptionalInt32, p.Without(v...))
-		},
-	)
-}
-
 // ValidateOptionalInt32IsNil applies the IsNil predicate on the "validate_optional_int32" field.
 func ValidateOptionalInt32IsNil() predicate.FieldType {
 	return predicate.FieldTypePerDialect(
@@ -2467,6 +2467,98 @@ func ValidateOptionalInt32NotNil() predicate.FieldType {
 		},
 		func(t *dsl.Traversal) {
 			t.HasLabel(Label).Has(FieldValidateOptionalInt32)
+		},
+	)
+}
+
+// StateEQ applies the EQ predicate on the "state" field.
+func StateEQ(v State) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldState), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldState, p.EQ(v))
+		},
+	)
+}
+
+// StateNEQ applies the NEQ predicate on the "state" field.
+func StateNEQ(v State) predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldState), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldState, p.NEQ(v))
+		},
+	)
+}
+
+// StateIn applies the In predicate on the "state" field.
+func StateIn(vs ...State) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldState), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldState, p.Within(v...))
+		},
+	)
+}
+
+// StateNotIn applies the NotIn predicate on the "state" field.
+func StateNotIn(vs ...State) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldState), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldState, p.Without(v...))
+		},
+	)
+}
+
+// StateIsNil applies the IsNil predicate on the "state" field.
+func StateIsNil() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldState)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).HasNot(FieldState)
+		},
+	)
+}
+
+// StateNotNil applies the NotNil predicate on the "state" field.
+func StateNotNil() predicate.FieldType {
+	return predicate.FieldTypePerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldState)))
+		},
+		func(t *dsl.Traversal) {
+			t.HasLabel(Label).Has(FieldState)
 		},
 	)
 }

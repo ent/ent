@@ -11,6 +11,8 @@ import (
 	"log"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 )
 
 // dsn for the database. In order to run the tests locally, run the following command:
@@ -40,6 +42,7 @@ func ExampleUser() {
 		SetAddress("string").
 		SetRenamed("string").
 		SetBlob(nil).
+		SetState(user.StateLoggedIn).
 		SaveX(ctx)
 	log.Println("user created:", u)
 

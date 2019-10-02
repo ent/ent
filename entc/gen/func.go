@@ -46,6 +46,7 @@ var (
 		"hasField":    hasField,
 		"indirect":    indirect,
 		"hasSuffix":   strings.HasSuffix,
+		"trimPackage": trimPackage,
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
 	}
@@ -61,6 +62,8 @@ func ops(f *Field) (op []Op) {
 		op = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
 		op = stringOps
+	case t == field.TypeEnum:
+		op = enumOps
 	default:
 		op = numericOps
 	}
@@ -282,6 +285,11 @@ func hasTemplate(name string) bool {
 func hasField(v interface{}, name string) bool {
 	vr := reflect.Indirect(reflect.ValueOf(v))
 	return vr.FieldByName(name).IsValid()
+}
+
+// trimPackage trims the package name from the given identifier.
+func trimPackage(ident, pkg string) string {
+	return strings.TrimPrefix(ident, pkg+".")
 }
 
 // indirect returns the item at the end of indirection.

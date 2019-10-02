@@ -154,6 +154,12 @@ func NewType(c Config, schema *load.Schema) (*Type, error) {
 			return nil, fmt.Errorf("unique field %q cannot have default value", f.Name)
 		case typ.fields[f.Name] != nil:
 			return nil, fmt.Errorf("field %q redeclared for type %q", f.Name, typ.Name)
+		case f.Info.Type == field.TypeEnum:
+			if err := validEnums(f); err != nil {
+				return nil, err
+			}
+			// enum types should be named as follows: typepkg.Field.
+			f.Info.Ident = fmt.Sprintf("%s.%s", typ.Package(), pascal(f.Name))
 		}
 		typ.Fields[i] = &Field{
 			def:           f,
@@ -427,6 +433,14 @@ func (f Field) StructField() string {
 	return f.Name
 }
 
+// Enums returns the enum values of a field.
+func (f Field) Enums() []string {
+	if f.IsEnum() {
+		return f.def.Enums
+	}
+	return nil
+}
+
 // Validator returns the validator name.
 func (f Field) Validator() string { return pascal(f.Name) + "Validator" }
 
@@ -442,12 +456,15 @@ func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.Ty
 // IsInt returns true if the field is an int field.
 func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeInt }
 
+// IsEnum returns true if the field is an enum field.
+func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
+
 // NullType returns the sql null-type for optional and nullable fields.
 func (f Field) NullType() string {
 	switch f.Type.Type {
 	case field.TypeJSON:
 		return "[]byte"
-	case field.TypeString:
+	case field.TypeString, field.TypeEnum:
 		return "sql.NullString"
 	case field.TypeBool:
 		return "sql.NullBool"
@@ -466,6 +483,8 @@ func (f Field) NullType() string {
 // It also does the type conversion if needed.
 func (f Field) NullTypeField(rec string) string {
 	switch f.Type.Type {
+	case field.TypeEnum:
+		return fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
 		return fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.String()))
 	case field.TypeTime:
@@ -481,12 +500,14 @@ func (f Field) NullTypeField(rec string) string {
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
 func (f Field) Column() *schema.Column {
+	f.Enums()
 	pk := f.Name == "id"
 	c := &schema.Column{
 		Name:     f.StorageKey(),
 		Type:     f.Type.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
+		Enums:    f.Enums(),
 	}
 	if pk {
 		c.Type = field.TypeInt
@@ -513,7 +534,14 @@ func (f Field) ExampleCode() string {
 	case t == field.TypeTime:
 		return "time.Now()"
 	case t == field.TypeString:
-		return "\"string\""
+		return `"string"`
+	case t == field.TypeEnum:
+		enums := f.Enums()
+		if len(enums) == 0 {
+			return `""`
+		}
+		parts := strings.Split(f.Type.Ident, ".")
+		return fmt.Sprintf("%s.%s%s", parts[0], pascal(f.Name), pascal(enums[0]))
 	default:
 		return "nil"
 	}
@@ -636,4 +664,22 @@ func structTag(name, tag string) string {
 		tag = t + " " + tag
 	}
 	return tag
+}
+
+func validEnums(f *load.Field) error {
+	if len(f.Enums) == 0 {
+		return fmt.Errorf("missing values for enum field %q", f.Name)
+	}
+	values := make(map[string]bool, len(f.Enums))
+	for _, e := range f.Enums {
+		switch {
+		case e == "":
+			return fmt.Errorf("%q field value cannot be empty", f.Name)
+		case values[e]:
+			return fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
+		default:
+			values[e] = true
+		}
+	}
+	return nil
 }

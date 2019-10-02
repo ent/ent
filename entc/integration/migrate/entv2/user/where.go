@@ -38,42 +38,6 @@ func IDNEQ(id int) predicate.User {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.User {
 	return predicate.User(
@@ -108,6 +72,42 @@ func IDNotIn(ids ...int) predicate.User {
 				v[i] = ids[i]
 			}
 			s.Where(sql.NotIn(s.C(FieldID), v...))
+		},
+	)
+}
+
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldID), id))
 		},
 	)
 }
@@ -193,42 +193,6 @@ func AgeNEQ(v int) predicate.User {
 	)
 }
 
-// AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldAge), v))
-		},
-	)
-}
-
-// AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldAge), v))
-		},
-	)
-}
-
 // AgeIn applies the In predicate on the "age" field.
 func AgeIn(vs ...int) predicate.User {
 	v := make([]interface{}, len(vs))
@@ -267,6 +231,42 @@ func AgeNotIn(vs ...int) predicate.User {
 	)
 }
 
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldAge), v))
+		},
+	)
+}
+
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldAge), v))
+		},
+	)
+}
+
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldAge), v))
+		},
+	)
+}
+
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v int) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldAge), v))
+		},
+	)
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.User {
 	return predicate.User(
@@ -281,42 +281,6 @@ func NameNEQ(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.NEQ(s.C(FieldName), v))
-		},
-	)
-}
-
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldName), v))
-		},
-	)
-}
-
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldName), v))
-		},
-	)
-}
-
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldName), v))
-		},
-	)
-}
-
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldName), v))
 		},
 	)
 }
@@ -355,6 +319,42 @@ func NameNotIn(vs ...string) predicate.User {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldName), v...))
+		},
+	)
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldName), v))
+		},
+	)
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldName), v))
+		},
+	)
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldName), v))
+		},
+	)
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldName), v))
 		},
 	)
 }
@@ -422,42 +422,6 @@ func PhoneNEQ(v string) predicate.User {
 	)
 }
 
-// PhoneGT applies the GT predicate on the "phone" field.
-func PhoneGT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldPhone), v))
-		},
-	)
-}
-
-// PhoneGTE applies the GTE predicate on the "phone" field.
-func PhoneGTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldPhone), v))
-		},
-	)
-}
-
-// PhoneLT applies the LT predicate on the "phone" field.
-func PhoneLT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldPhone), v))
-		},
-	)
-}
-
-// PhoneLTE applies the LTE predicate on the "phone" field.
-func PhoneLTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldPhone), v))
-		},
-	)
-}
-
 // PhoneIn applies the In predicate on the "phone" field.
 func PhoneIn(vs ...string) predicate.User {
 	v := make([]interface{}, len(vs))
@@ -492,6 +456,42 @@ func PhoneNotIn(vs ...string) predicate.User {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldPhone), v...))
+		},
+	)
+}
+
+// PhoneGT applies the GT predicate on the "phone" field.
+func PhoneGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldPhone), v))
+		},
+	)
+}
+
+// PhoneGTE applies the GTE predicate on the "phone" field.
+func PhoneGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldPhone), v))
+		},
+	)
+}
+
+// PhoneLT applies the LT predicate on the "phone" field.
+func PhoneLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldPhone), v))
+		},
+	)
+}
+
+// PhoneLTE applies the LTE predicate on the "phone" field.
+func PhoneLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldPhone), v))
 		},
 	)
 }
@@ -559,42 +559,6 @@ func BufferNEQ(v []byte) predicate.User {
 	)
 }
 
-// BufferGT applies the GT predicate on the "buffer" field.
-func BufferGT(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldBuffer), v))
-		},
-	)
-}
-
-// BufferGTE applies the GTE predicate on the "buffer" field.
-func BufferGTE(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldBuffer), v))
-		},
-	)
-}
-
-// BufferLT applies the LT predicate on the "buffer" field.
-func BufferLT(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldBuffer), v))
-		},
-	)
-}
-
-// BufferLTE applies the LTE predicate on the "buffer" field.
-func BufferLTE(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldBuffer), v))
-		},
-	)
-}
-
 // BufferIn applies the In predicate on the "buffer" field.
 func BufferIn(vs ...[]byte) predicate.User {
 	v := make([]interface{}, len(vs))
@@ -633,6 +597,42 @@ func BufferNotIn(vs ...[]byte) predicate.User {
 	)
 }
 
+// BufferGT applies the GT predicate on the "buffer" field.
+func BufferGT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferGTE applies the GTE predicate on the "buffer" field.
+func BufferGTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferLT applies the LT predicate on the "buffer" field.
+func BufferLT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldBuffer), v))
+		},
+	)
+}
+
+// BufferLTE applies the LTE predicate on the "buffer" field.
+func BufferLTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldBuffer), v))
+		},
+	)
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.User {
 	return predicate.User(
@@ -647,42 +647,6 @@ func TitleNEQ(v string) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.NEQ(s.C(FieldTitle), v))
-		},
-	)
-}
-
-// TitleGT applies the GT predicate on the "title" field.
-func TitleGT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldTitle), v))
-		},
-	)
-}
-
-// TitleGTE applies the GTE predicate on the "title" field.
-func TitleGTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldTitle), v))
-		},
-	)
-}
-
-// TitleLT applies the LT predicate on the "title" field.
-func TitleLT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldTitle), v))
-		},
-	)
-}
-
-// TitleLTE applies the LTE predicate on the "title" field.
-func TitleLTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldTitle), v))
 		},
 	)
 }
@@ -721,6 +685,42 @@ func TitleNotIn(vs ...string) predicate.User {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldTitle), v...))
+		},
+	)
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldTitle), v))
+		},
+	)
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldTitle), v))
 		},
 	)
 }
@@ -788,42 +788,6 @@ func NewNameNEQ(v string) predicate.User {
 	)
 }
 
-// NewNameGT applies the GT predicate on the "new_name" field.
-func NewNameGT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNewName), v))
-		},
-	)
-}
-
-// NewNameGTE applies the GTE predicate on the "new_name" field.
-func NewNameGTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNewName), v))
-		},
-	)
-}
-
-// NewNameLT applies the LT predicate on the "new_name" field.
-func NewNameLT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNewName), v))
-		},
-	)
-}
-
-// NewNameLTE applies the LTE predicate on the "new_name" field.
-func NewNameLTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNewName), v))
-		},
-	)
-}
-
 // NewNameIn applies the In predicate on the "new_name" field.
 func NewNameIn(vs ...string) predicate.User {
 	v := make([]interface{}, len(vs))
@@ -858,6 +822,42 @@ func NewNameNotIn(vs ...string) predicate.User {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldNewName), v...))
+		},
+	)
+}
+
+// NewNameGT applies the GT predicate on the "new_name" field.
+func NewNameGT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameGTE applies the GTE predicate on the "new_name" field.
+func NewNameGTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameLT applies the LT predicate on the "new_name" field.
+func NewNameLT(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldNewName), v))
+		},
+	)
+}
+
+// NewNameLTE applies the LTE predicate on the "new_name" field.
+func NewNameLTE(v string) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldNewName), v))
 		},
 	)
 }
@@ -943,42 +943,6 @@ func BlobNEQ(v []byte) predicate.User {
 	)
 }
 
-// BlobGT applies the GT predicate on the "blob" field.
-func BlobGT(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldBlob), v))
-		},
-	)
-}
-
-// BlobGTE applies the GTE predicate on the "blob" field.
-func BlobGTE(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldBlob), v))
-		},
-	)
-}
-
-// BlobLT applies the LT predicate on the "blob" field.
-func BlobLT(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldBlob), v))
-		},
-	)
-}
-
-// BlobLTE applies the LTE predicate on the "blob" field.
-func BlobLTE(v []byte) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldBlob), v))
-		},
-	)
-}
-
 // BlobIn applies the In predicate on the "blob" field.
 func BlobIn(vs ...[]byte) predicate.User {
 	v := make([]interface{}, len(vs))
@@ -1017,6 +981,42 @@ func BlobNotIn(vs ...[]byte) predicate.User {
 	)
 }
 
+// BlobGT applies the GT predicate on the "blob" field.
+func BlobGT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobGTE applies the GTE predicate on the "blob" field.
+func BlobGTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobLT applies the LT predicate on the "blob" field.
+func BlobLT(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldBlob), v))
+		},
+	)
+}
+
+// BlobLTE applies the LTE predicate on the "blob" field.
+func BlobLTE(v []byte) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldBlob), v))
+		},
+	)
+}
+
 // BlobIsNil applies the IsNil predicate on the "blob" field.
 func BlobIsNil() predicate.User {
 	return predicate.User(
@@ -1031,6 +1031,80 @@ func BlobNotNil() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			s.Where(sql.NotNull(s.C(FieldBlob)))
+		},
+	)
+}
+
+// StateEQ applies the EQ predicate on the "state" field.
+func StateEQ(v State) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldState), v))
+		},
+	)
+}
+
+// StateNEQ applies the NEQ predicate on the "state" field.
+func StateNEQ(v State) predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldState), v))
+		},
+	)
+}
+
+// StateIn applies the In predicate on the "state" field.
+func StateIn(vs ...State) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldState), v...))
+		},
+	)
+}
+
+// StateNotIn applies the NotIn predicate on the "state" field.
+func StateNotIn(vs ...State) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldState), v...))
+		},
+	)
+}
+
+// StateIsNil applies the IsNil predicate on the "state" field.
+func StateIsNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldState)))
+		},
+	)
+}
+
+// StateNotNil applies the NotNil predicate on the "state" field.
+func StateNotNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldState)))
 		},
 	)
 }

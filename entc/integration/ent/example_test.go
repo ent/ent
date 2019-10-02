@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 )
 
 // dsn for the database. In order to run the tests locally, run the following command:
@@ -104,6 +106,7 @@ func ExampleFieldType() {
 		SetNillableInt32(1).
 		SetNillableInt64(1).
 		SetValidateOptionalInt32(1).
+		SetState(fieldtype.StateOn).
 		SaveX(ctx)
 	log.Println("fieldtype created:", ft)
 

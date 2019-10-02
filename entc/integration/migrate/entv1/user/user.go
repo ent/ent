@@ -7,6 +7,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/schema"
 )
 
@@ -25,6 +27,8 @@ const (
 	FieldRenamed = "renamed"
 	// FieldBlob holds the string denoting the blob vertex property in the database.
 	FieldBlob = "blob"
+	// FieldState holds the string denoting the state vertex property in the database.
+	FieldState = "state"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -38,6 +42,7 @@ var Columns = []string{
 	FieldAddress,
 	FieldRenamed,
 	FieldBlob,
+	FieldState,
 }
 
 var (
@@ -48,3 +53,25 @@ var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator = descName.Validators[0].(func(string) error)
 )
+
+// State defines the type for the state enum field.
+type State string
+
+const (
+	StateLoggedIn  State = "logged_in"
+	StateLoggedOut State = "logged_out"
+)
+
+func (s State) String() string {
+	return string(s)
+}
+
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
+func StateValidator(state State) error {
+	switch state {
+	case StateLoggedIn, StateLoggedOut:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for state field: %q", state)
+	}
+}

@@ -36,5 +36,8 @@ func (FieldType) Fields() []ent.Field {
 		field.Int32("validate_optional_int32").
 			Optional().
 			Max(100),
+		field.Enum("state").
+			Values("on", "off").
+			Optional(),
 	}
 }

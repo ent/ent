@@ -23,6 +23,7 @@ type UserCreate struct {
 	address *string
 	renamed *string
 	blob    *[]byte
+	state   *user.State
 }
 
 // SetAge sets the age field.
@@ -71,6 +72,20 @@ func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
 	return uc
 }
 
+// SetState sets the state field.
+func (uc *UserCreate) SetState(u user.State) *UserCreate {
+	uc.state = &u
+	return uc
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
+	if u != nil {
+		uc.SetState(*u)
+	}
+	return uc
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.age == nil {
@@ -81,6 +96,11 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	}
 	if err := user.NameValidator(*uc.name); err != nil {
 		return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
+	}
+	if uc.state != nil {
+		if err := user.StateValidator(*uc.state); err != nil {
+			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
+		}
 	}
 	return uc.sqlSave(ctx)
 }
@@ -123,6 +143,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if value := uc.blob; value != nil {
 		builder.Set(user.FieldBlob, *value)
 		u.Blob = *value
+	}
+	if value := uc.state; value != nil {
+		builder.Set(user.FieldState, *value)
+		u.State = *value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {

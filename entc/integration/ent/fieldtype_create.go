@@ -39,6 +39,7 @@ type FieldTypeCreate struct {
 	nillable_int32          *int32
 	nillable_int64          *int64
 	validate_optional_int32 *int32
+	state                   *fieldtype.State
 }
 
 // SetInt sets the int field.
@@ -225,6 +226,20 @@ func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 	return ftc
 }
 
+// SetState sets the state field.
+func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
+	ftc.state = &f
+	return ftc
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreate {
+	if f != nil {
+		ftc.SetState(*f)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if ftc.int == nil {
@@ -245,6 +260,11 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if ftc.validate_optional_int32 != nil {
 		if err := fieldtype.ValidateOptionalInt32Validator(*ftc.validate_optional_int32); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+		}
+	}
+	if ftc.state != nil {
+		if err := fieldtype.StateValidator(*ftc.state); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
 	switch ftc.driver.Dialect() {
@@ -340,6 +360,10 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		builder.Set(fieldtype.FieldValidateOptionalInt32, *value)
 		ft.ValidateOptionalInt32 = *value
 	}
+	if value := ftc.state; value != nil {
+		builder.Set(fieldtype.FieldState, *value)
+		ft.State = *value
+	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)
@@ -420,6 +444,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if ftc.validate_optional_int32 != nil {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
+	}
+	if ftc.state != nil {
+		v.Property(dsl.Single, fieldtype.FieldState, *ftc.state)
 	}
 	return v.ValueMap(true)
 }

@@ -38,6 +38,7 @@ type Field struct {
 	Info          *field.TypeInfo `json:"type,omitempty"`
 	Tag           string          `json:"tag,omitempty"`
 	Size          *int            `json:"size,omitempty"`
+	Enums         []string        `json:"enums,omitempty"`
 	Unique        bool            `json:"unique,omitempty"`
 	Nillable      bool            `json:"nillable,omitempty"`
 	Optional      bool            `json:"optional,omitempty"`
@@ -101,6 +102,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Name:          fd.Name,
 		Info:          fd.Info,
 		Tag:           fd.Tag,
+		Enums:         fd.Enums,
 		Unique:        fd.Unique,
 		Nillable:      fd.Nillable,
 		Optional:      fd.Optional,

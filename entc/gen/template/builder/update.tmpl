@@ -229,7 +229,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{ $receiver }}.{{ $f.StructField }} = &v
 		}
 	{{ end -}}
-	{{ with $f.Validators -}}
+	{{ with or $f.Validators $f.IsEnum -}}
 		if {{ $receiver }}.{{ $f.StructField }} != nil {
 			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
