@@ -122,17 +122,15 @@ import (
 
 	"<project>/ent"
 
-	"github.com/facebookincubator/ent/dialect/sql"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	defer db.Close()
-	client := ent.NewClient(ent.Driver(db))
+	defer client.Close()
 	// run the auto migration tool.
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)

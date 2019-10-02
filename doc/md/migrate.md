@@ -35,17 +35,15 @@ import (
 	
 	"<project>/ent"
 	"<project>/ent/migrate"
-	
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
 	if err != nil {
 		log.Fatalf("failed connecting to mysql: %v", err)
 	}
+	defer client.Close()
 	ctx := context.Background()
-	client := ent.NewClient(ent.Driver(db))
 	// Run migration.
 	err = client.Schema.Create(
 		ctx, 
@@ -90,17 +88,15 @@ import (
 	
 	"<project>/ent"
 	"<project>/ent/migrate"
-	
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
 	if err != nil {
 		log.Fatalf("failed connecting to mysql: %v", err)
 	}
+	defer client.Close()
 	ctx := context.Background()
-	client := ent.NewClient(ent.Driver(db))
 	// Run migration.
 	if err := client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
@@ -131,17 +127,15 @@ import (
 	
 	"<project>/ent"
 	"<project>/ent/migrate"
-	
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
 	if err != nil {
 		log.Fatalf("failed connecting to mysql: %v", err)
 	}
+	defer client.Close()
 	ctx := context.Background()
-	client := ent.NewClient(ent.Driver(db))
 	// Dump migration changes to stdout.
 	if err := client.Schema.WriteTo(ctx, os.Stdout); err != nil {
 		log.Fatalf("failed printing schema changes: %v", err)
@@ -160,17 +154,15 @@ import (
 	
 	"<project>/ent"
 	"<project>/ent/migrate"
-	
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
 	if err != nil {
 		log.Fatalf("failed connecting to mysql: %v", err)
 	}
+	defer client.Close()
 	ctx := context.Background()
-	client := ent.NewClient(ent.Driver(db))
 	// Dump migration changes to an SQL script.
 	f, err := os.Create("migrate.sql")
 	if err != nil {

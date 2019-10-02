@@ -25,16 +25,14 @@ import (
 	"<project>/ent"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {
-	drv, err := sql.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
+	client, err := ent.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer drv.Close()
-	client := ent.NewClient(ent.Driver(drv))
+	defer client.Close()
 }
 ```
 
@@ -49,16 +47,14 @@ import (
 	"<project>/ent"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 func main() {
-	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer drv.Close()
-	client := ent.NewClient(ent.Driver(drv))
+	defer client.Close()
 }
 ```
 
@@ -70,26 +66,15 @@ package main
 
 import (
 	"log"
-	"net/url"
 
 	"<project>/ent"
-
-	"github.com/facebookincubator/ent/dialect/gremlin"
 )
 
 func main() {
-	c, err := gremlin.NewClient(gremlin.Config{
-		Endpoint: gremlin.Endpoint{
-			URL: &url.URL{
-				Scheme: "http",
-				Host:   "localhost:8182",
-			},
-		},
-	})
+	client, err := ent.Open("gremlin", "http://localhost:8182")
 	if err != nil {
 		log.Fatal(err)
 	}
-	client := ent.NewClient(ent.Driver(gremlin.NewDriver(c)))
 }
 ```
 
