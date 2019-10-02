@@ -55,58 +55,6 @@ func IDNEQ(id string) predicate.GroupInfo {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.GroupInfo {
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GT(id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.GroupInfo {
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GTE(id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.GroupInfo {
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LT(id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.GroupInfo {
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LTE(id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
@@ -159,6 +107,58 @@ func IDNotIn(ids ...string) predicate.GroupInfo {
 	)
 }
 
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id string) predicate.GroupInfo {
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.GT(id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id string) predicate.GroupInfo {
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.GTE(id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id string) predicate.GroupInfo {
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.LT(id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id string) predicate.GroupInfo {
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			id, _ := strconv.Atoi(id)
+			s.Where(sql.LTE(s.C(FieldID), id))
+		},
+		func(t *dsl.Traversal) {
+			t.HasID(p.LTE(id))
+		},
+	)
+}
+
 // Desc applies equality check predicate on the "desc" field. It's identical to DescEQ.
 func Desc(v string) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
@@ -207,6 +207,50 @@ func DescNEQ(v string) predicate.GroupInfo {
 	)
 }
 
+// DescIn applies the In predicate on the "desc" field.
+func DescIn(vs ...string) predicate.GroupInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldDesc), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldDesc, p.Within(v...))
+		},
+	)
+}
+
+// DescNotIn applies the NotIn predicate on the "desc" field.
+func DescNotIn(vs ...string) predicate.GroupInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldDesc), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldDesc, p.Without(v...))
+		},
+	)
+}
+
 // DescGT applies the GT predicate on the "desc" field.
 func DescGT(v string) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
@@ -251,50 +295,6 @@ func DescLTE(v string) predicate.GroupInfo {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldDesc, p.LTE(v))
-		},
-	)
-}
-
-// DescIn applies the In predicate on the "desc" field.
-func DescIn(vs ...string) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldDesc), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldDesc, p.Within(v...))
-		},
-	)
-}
-
-// DescNotIn applies the NotIn predicate on the "desc" field.
-func DescNotIn(vs ...string) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldDesc), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldDesc, p.Without(v...))
 		},
 	)
 }
@@ -359,6 +359,50 @@ func MaxUsersNEQ(v int) predicate.GroupInfo {
 	)
 }
 
+// MaxUsersIn applies the In predicate on the "max_users" field.
+func MaxUsersIn(vs ...int) predicate.GroupInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldMaxUsers), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldMaxUsers, p.Within(v...))
+		},
+	)
+}
+
+// MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
+func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupInfoPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldMaxUsers), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldMaxUsers, p.Without(v...))
+		},
+	)
+}
+
 // MaxUsersGT applies the GT predicate on the "max_users" field.
 func MaxUsersGT(v int) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
@@ -403,50 +447,6 @@ func MaxUsersLTE(v int) predicate.GroupInfo {
 		},
 		func(t *dsl.Traversal) {
 			t.Has(Label, FieldMaxUsers, p.LTE(v))
-		},
-	)
-}
-
-// MaxUsersIn applies the In predicate on the "max_users" field.
-func MaxUsersIn(vs ...int) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldMaxUsers), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldMaxUsers, p.Within(v...))
-		},
-	)
-}
-
-// MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
-func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupInfoPerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldMaxUsers), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldMaxUsers, p.Without(v...))
 		},
 	)
 }

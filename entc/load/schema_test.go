@@ -30,6 +30,9 @@ func (User) Fields() []ent.Field {
 			Nillable(),
 		field.String("optional").
 			Optional(),
+		field.Enum("state").
+			Values("on", "off").
+			Optional(),
 	}
 }
 
@@ -72,7 +75,7 @@ func TestMarshalSchema(t *testing.T) {
 		schema := &Schema{}
 		require.NoError(t, json.Unmarshal(buf, schema))
 		require.Equal(t, "User", schema.Name)
-		require.Len(t, schema.Fields, 4)
+		require.Len(t, schema.Fields, 5)
 		require.Equal(t, "age", schema.Fields[0].Name)
 		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
 
@@ -88,6 +91,10 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, field.TypeString, schema.Fields[3].Info.Type)
 		require.False(t, schema.Fields[3].Nillable)
 		require.True(t, schema.Fields[3].Optional)
+
+		require.Equal(t, "state", schema.Fields[4].Name)
+		require.Equal(t, field.TypeEnum, schema.Fields[4].Info.Type)
+		require.Equal(t, []string{"on", "off"}, schema.Fields[4].Enums)
 
 		require.Len(t, schema.Edges, 2)
 		require.Equal(t, "groups", schema.Edges[0].Name)

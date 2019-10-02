@@ -40,6 +40,10 @@ func (User) Fields() []ent.Field {
 		field.Bytes("blob").
 			Optional().
 			MaxLen(1000),
+		// adding enum to the `state` column.
+		field.Enum("state").
+			Optional().
+			Values("logged_in", "logged_out", "online"),
 		// deleting the `address` column.
 	}
 }

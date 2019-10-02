@@ -26,6 +26,7 @@ type Descriptor struct {
 	UpdateDefault interface{}   // default value on update.
 	Validators    []interface{} // validator functions.
 	StorageKey    string        // sql column or gremlin property.
+	Enums         []string      // enum values.
 }
 
 // String returns a new Field with type string.
@@ -111,6 +112,22 @@ func Ints(name string) *jsonsBuilder {
 // Floats returns a new JSON Field with type []float.
 func Floats(name string) *jsonsBuilder {
 	return JSON(name, []float64{})
+}
+
+// Enum returns a new Field with type enum. An example for defining enum is as follows:
+//
+//	field.Enum("state").
+//		Values(
+//			"on",
+//			"off",
+//		).
+//		Default("on")
+//
+func Enum(name string) *enumBuilder {
+	return &enumBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeEnum},
+	}}
 }
 
 // stringBuilder is the builder for string fields.
@@ -438,7 +455,67 @@ func (b *jsonsBuilder) Comment(c string) *jsonsBuilder {
 	return b
 }
 
+// StructTag sets the struct tag of the field.
+func (b *jsonsBuilder) StructTag(s string) *jsonsBuilder {
+	b.desc.Tag = s
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *jsonsBuilder) Descriptor() *Descriptor {
+	return b.desc
+}
+
+// enumBuilder is the builder for enum fields.
+type enumBuilder struct {
+	desc *Descriptor
+}
+
+// Value sets the numeric value of the enum. Defaults to its index in the declaration.
+func (b *enumBuilder) Values(values ...string) *enumBuilder {
+	b.desc.Enums = values
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *enumBuilder) StorageKey(key string) *enumBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *enumBuilder) Optional() *enumBuilder {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *enumBuilder) Immutable() *enumBuilder {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *enumBuilder) Comment(c string) *enumBuilder {
+	return b
+}
+
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *enumBuilder) Nillable() *enumBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *enumBuilder) StructTag(s string) *enumBuilder {
+	b.desc.Tag = s
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *enumBuilder) Descriptor() *Descriptor {
 	return b.desc
 }

@@ -42,7 +42,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 				{{ end -}}
 			}
 		{{ end -}}
-		{{ with $f.Validators -}}
+		{{ with or $f.Validators $f.IsEnum -}}
 			{{/* add nullable check only for optional fields without default value */ -}}
 			{{ $nullable := and $f.Optional (not $f.Default) -}}
 			{{- if $nullable }} if {{ $receiver }}.{{ $f.StructField }} != nil { {{ end -}}

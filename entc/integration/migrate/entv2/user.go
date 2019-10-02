@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 )
 
 // User is the model entity for the User schema.
@@ -32,6 +33,8 @@ type User struct {
 	NewName string `json:"new_name,omitempty"`
 	// Blob holds the value of the "blob" field.
 	Blob []byte `json:"blob,omitempty"`
+	// State holds the value of the "state" field.
+	State user.State `json:"state,omitempty"`
 }
 
 // FromRows scans the sql response data into User.
@@ -45,6 +48,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		Title   sql.NullString
 		NewName sql.NullString
 		Blob    []byte
+		State   sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
@@ -56,6 +60,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		&vu.Title,
 		&vu.NewName,
 		&vu.Blob,
+		&vu.State,
 	); err != nil {
 		return err
 	}
@@ -67,6 +72,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Title = vu.Title.String
 	u.NewName = vu.NewName.String
 	u.Blob = vu.Blob
+	u.State = user.State(vu.State.String)
 	return nil
 }
 
@@ -100,6 +106,7 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf(", title=%v", u.Title))
 	buf.WriteString(fmt.Sprintf(", new_name=%v", u.NewName))
 	buf.WriteString(fmt.Sprintf(", blob=%v", u.Blob))
+	buf.WriteString(fmt.Sprintf(", state=%v", u.State))
 	buf.WriteString(")")
 	return buf.String()
 }

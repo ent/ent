@@ -67,6 +67,8 @@ type FieldTypeUpdate struct {
 	validate_optional_int32      *int32
 	addvalidate_optional_int32   *int32
 	clearvalidate_optional_int32 bool
+	state                        *fieldtype.State
+	clearstate                   bool
 	predicates                   []predicate.FieldType
 }
 
@@ -513,11 +515,37 @@ func (ftu *FieldTypeUpdate) ClearValidateOptionalInt32() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetState sets the state field.
+func (ftu *FieldTypeUpdate) SetState(f fieldtype.State) *FieldTypeUpdate {
+	ftu.state = &f
+	return ftu
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableState(f *fieldtype.State) *FieldTypeUpdate {
+	if f != nil {
+		ftu.SetState(*f)
+	}
+	return ftu
+}
+
+// ClearState clears the value of state.
+func (ftu *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
+	ftu.state = nil
+	ftu.clearstate = true
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if ftu.validate_optional_int32 != nil {
 		if err := fieldtype.ValidateOptionalInt32Validator(*ftu.validate_optional_int32); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+		}
+	}
+	if ftu.state != nil {
+		if err := fieldtype.StateValidator(*ftu.state); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
 	switch ftu.driver.Dialect() {
@@ -712,6 +740,12 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ftu.clearvalidate_optional_int32 {
 		builder.SetNull(fieldtype.FieldValidateOptionalInt32)
 	}
+	if value := ftu.state; value != nil {
+		builder.Set(fieldtype.FieldState, *value)
+	}
+	if ftu.clearstate {
+		builder.SetNull(fieldtype.FieldState)
+	}
 	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -840,6 +874,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value := ftu.addvalidate_optional_int32; value != nil {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, __.Union(__.Values(fieldtype.FieldValidateOptionalInt32), __.Constant(*value)).Sum())
 	}
+	if value := ftu.state; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldState, *value)
+	}
 	var properties []interface{}
 	if ftu.clearoptional_int {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -873,6 +910,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.clearvalidate_optional_int32 {
 		properties = append(properties, fieldtype.FieldValidateOptionalInt32)
+	}
+	if ftu.clearstate {
+		properties = append(properties, fieldtype.FieldState)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -929,6 +969,8 @@ type FieldTypeUpdateOne struct {
 	validate_optional_int32      *int32
 	addvalidate_optional_int32   *int32
 	clearvalidate_optional_int32 bool
+	state                        *fieldtype.State
+	clearstate                   bool
 }
 
 // SetInt sets the int field.
@@ -1368,11 +1410,37 @@ func (ftuo *FieldTypeUpdateOne) ClearValidateOptionalInt32() *FieldTypeUpdateOne
 	return ftuo
 }
 
+// SetState sets the state field.
+func (ftuo *FieldTypeUpdateOne) SetState(f fieldtype.State) *FieldTypeUpdateOne {
+	ftuo.state = &f
+	return ftuo
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableState(f *fieldtype.State) *FieldTypeUpdateOne {
+	if f != nil {
+		ftuo.SetState(*f)
+	}
+	return ftuo
+}
+
+// ClearState clears the value of state.
+func (ftuo *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
+	ftuo.state = nil
+	ftuo.clearstate = true
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if ftuo.validate_optional_int32 != nil {
 		if err := fieldtype.ValidateOptionalInt32Validator(*ftuo.validate_optional_int32); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+		}
+	}
+	if ftuo.state != nil {
+		if err := fieldtype.StateValidator(*ftuo.state); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
 	switch ftuo.driver.Dialect() {
@@ -1639,6 +1707,15 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		ft.ValidateOptionalInt32 = value
 		builder.SetNull(fieldtype.FieldValidateOptionalInt32)
 	}
+	if value := ftuo.state; value != nil {
+		builder.Set(fieldtype.FieldState, *value)
+		ft.State = *value
+	}
+	if ftuo.clearstate {
+		var value fieldtype.State
+		ft.State = value
+		builder.SetNull(fieldtype.FieldState)
+	}
 	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -1768,6 +1845,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value := ftuo.addvalidate_optional_int32; value != nil {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, __.Union(__.Values(fieldtype.FieldValidateOptionalInt32), __.Constant(*value)).Sum())
 	}
+	if value := ftuo.state; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldState, *value)
+	}
 	var properties []interface{}
 	if ftuo.clearoptional_int {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1801,6 +1881,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.clearvalidate_optional_int32 {
 		properties = append(properties, fieldtype.FieldValidateOptionalInt32)
+	}
+	if ftuo.clearstate {
+		properties = append(properties, fieldtype.FieldState)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

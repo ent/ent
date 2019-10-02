@@ -7,6 +7,8 @@
 package fieldtype
 
 import (
+	"fmt"
+
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
@@ -47,6 +49,8 @@ const (
 	FieldNillableInt64 = "nillable_int64"
 	// FieldValidateOptionalInt32 holds the string denoting the validate_optional_int32 vertex property in the database.
 	FieldValidateOptionalInt32 = "validate_optional_int32"
+	// FieldState holds the string denoting the state vertex property in the database.
+	FieldState = "state"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -71,6 +75,7 @@ var Columns = []string{
 	FieldNillableInt32,
 	FieldNillableInt64,
 	FieldValidateOptionalInt32,
+	FieldState,
 }
 
 var (
@@ -81,3 +86,25 @@ var (
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator = descValidateOptionalInt32.Validators[0].(func(int32) error)
 )
+
+// State defines the type for the state enum field.
+type State string
+
+const (
+	StateOn  State = "on"
+	StateOff State = "off"
+)
+
+func (s State) String() string {
+	return string(s)
+}
+
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
+func StateValidator(state State) error {
+	switch state {
+	case StateOn, StateOff:
+		return nil
+	default:
+		return fmt.Errorf("fieldtype: invalid enum value for state field: %q", state)
+	}
+}

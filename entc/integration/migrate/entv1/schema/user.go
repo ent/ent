@@ -26,6 +26,9 @@ func (User) Fields() []ent.Field {
 		field.Bytes("blob").
 			Optional().
 			MaxLen(255),
+		field.Enum("state").
+			Optional().
+			Values("logged_in", "logged_out"),
 	}
 }
 

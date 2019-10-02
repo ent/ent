@@ -42,6 +42,24 @@ func TestType(t *testing.T) {
 	})
 	require.Error(err, "field foo redeclared")
 	require.Nil(typ)
+
+	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+		Name: "T",
+		Fields: []*load.Field{
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
+		},
+	})
+	require.Error(err, "duplicate enums")
+	require.Nil(typ)
+
+	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+		Name: "T",
+		Fields: []*load.Field{
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
+		},
+	})
+	require.Error(err, "empty value for enums")
+	require.Nil(typ)
 }
 
 func TestType_Label(t *testing.T) {

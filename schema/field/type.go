@@ -10,6 +10,7 @@ const (
 	TypeTime
 	TypeJSON
 	TypeBytes
+	TypeEnum
 	TypeString
 	TypeInt8
 	TypeInt16
@@ -39,16 +40,19 @@ func (t Type) Numeric() bool {
 	return t >= TypeInt8 && t < endTypes
 }
 
+// Valid reports if the given type if known type.
+func (t Type) Valid() bool {
+	return t > TypeInvalid && t < endTypes
+}
+
 // ConstName returns the constant name of a info type.
 // It's used by entc for printing the constant name in templates.
 func (t Type) ConstName() string {
-	switch t {
-	case TypeJSON:
-		return "TypeJSON"
-	case TypeTime:
-		return "TypeTime"
-	case TypeBytes:
-		return "TypeBytes"
+	switch {
+	case !t.Valid():
+		return typeNames[TypeInvalid]
+	case int(t) < len(constNames) && constNames[t] != "":
+		return constNames[t]
 	default:
 		return "Type" + strings.Title(typeNames[t])
 	}
@@ -75,7 +79,7 @@ func (t TypeInfo) String() string {
 
 // Valid reports if the given type if known type.
 func (t TypeInfo) Valid() bool {
-	return t.Type > TypeInvalid && t.Type < endTypes
+	return t.Type.Valid()
 }
 
 // Numeric reports if the given type is a numeric type.
@@ -83,23 +87,32 @@ func (t TypeInfo) Numeric() bool {
 	return t.Type.Numeric()
 }
 
-var typeNames = [...]string{
-	TypeInvalid: "invalid",
-	TypeBool:    "bool",
-	TypeTime:    "time.Time",
-	TypeJSON:    "json.RawMessage",
-	TypeBytes:   "[]byte",
-	TypeString:  "string",
-	TypeInt:     "int",
-	TypeInt8:    "int8",
-	TypeInt16:   "int16",
-	TypeInt32:   "int32",
-	TypeInt64:   "int64",
-	TypeUint:    "uint",
-	TypeUint8:   "uint8",
-	TypeUint16:  "uint16",
-	TypeUint32:  "uint32",
-	TypeUint64:  "uint64",
-	TypeFloat32: "float32",
-	TypeFloat64: "float64",
-}
+var (
+	typeNames = [...]string{
+		TypeInvalid: "invalid",
+		TypeBool:    "bool",
+		TypeTime:    "time.Time",
+		TypeJSON:    "json.RawMessage",
+		TypeBytes:   "[]byte",
+		TypeEnum:    "string",
+		TypeString:  "string",
+		TypeInt:     "int",
+		TypeInt8:    "int8",
+		TypeInt16:   "int16",
+		TypeInt32:   "int32",
+		TypeInt64:   "int64",
+		TypeUint:    "uint",
+		TypeUint8:   "uint8",
+		TypeUint16:  "uint16",
+		TypeUint32:  "uint32",
+		TypeUint64:  "uint64",
+		TypeFloat32: "float32",
+		TypeFloat64: "float64",
+	}
+	constNames = [...]string{
+		TypeJSON:  "TypeJSON",
+		TypeTime:  "TypeTime",
+		TypeEnum:  "TypeEnum",
+		TypeBytes: "TypeBytes",
+	}
+)

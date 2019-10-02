@@ -12,6 +12,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
 	migratev1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/migrate"
+	userv1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2"
 	migratev2 "github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
@@ -93,7 +94,7 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	require.Error(t, err, "name is limited to 10 chars")
 
 	// unique index on (name, address).
-	client.User.Create().SetAge(3).SetName("foo").SetAddress("tlv").SaveX(ctx)
+	client.User.Create().SetAge(3).SetName("foo").SetAddress("tlv").SetState(userv1.StateLoggedIn).SaveX(ctx)
 	_, err = client.User.Create().SetAge(4).SetName("foo").SetAddress("tlv").Save(ctx)
 	require.Error(t, err)
 
@@ -102,18 +103,28 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	require.Equal(t, "hello", string(u.Blob))
 	u, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
 	require.Error(t, err, "data too long for column 'blob' error")
+
+	// invalid enum value.
+	_, err = client.User.Create().SetAge(1).SetName("bar").SetState(userv1.State("unknown")).Save(ctx)
+	require.Error(t, err)
 }
 
 func SanityV2(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("bar").SetPhone("100").SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("bar").SetPhone("100").SetState(user.StateLoggedOut).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
 	require.Equal(t, []byte("{}"), u.Buffer)
 	u = u.Update().SetBuffer([]byte("[]")).SaveX(ctx)
 	require.Equal(t, []byte("[]"), u.Buffer)
+	require.Equal(t, user.StateLoggedOut, u.State)
 
-	_, err := client.User.Create().SetAge(1).SetName("foobarbazqux").SetPhone("200").Save(ctx)
+	_, err := u.Update().SetState(user.State("boring")).Save(ctx)
+	require.Error(t, err, "invalid enum value")
+	u = u.Update().SetState(user.StateOnline).SaveX(ctx)
+	require.Equal(t, user.StateOnline, u.State)
+
+	_, err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetPhone("200").Save(ctx)
 	require.NoError(t, err, "name is not limited to 10 chars")
 
 	// new unique index was added to (age, phone).
@@ -129,7 +140,7 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	)
 
 	// blob type was extended.
-	u, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
+	u, err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
 }

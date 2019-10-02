@@ -141,3 +141,15 @@ func TestField_Tag(t *testing.T) {
 		Descriptor()
 	assert.Equal(t, `json:"expired,omitempty"`, fd.Tag)
 }
+
+func TestField_Enums(t *testing.T) {
+	fd := field.Enum("role").
+		Values(
+			"user",
+			"admin",
+			"master",
+		).
+		Descriptor()
+	require.Equal(t, "role", fd.Name)
+	require.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+}

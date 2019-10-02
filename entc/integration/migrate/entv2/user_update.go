@@ -28,6 +28,8 @@ type UserUpdate struct {
 	clearnew_name bool
 	blob          *[]byte
 	clearblob     bool
+	state         *user.State
+	clearstate    bool
 	predicates    []predicate.User
 }
 
@@ -120,8 +122,34 @@ func (uu *UserUpdate) ClearBlob() *UserUpdate {
 	return uu
 }
 
+// SetState sets the state field.
+func (uu *UserUpdate) SetState(u user.State) *UserUpdate {
+	uu.state = &u
+	return uu
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (uu *UserUpdate) SetNillableState(u *user.State) *UserUpdate {
+	if u != nil {
+		uu.SetState(*u)
+	}
+	return uu
+}
+
+// ClearState clears the value of state.
+func (uu *UserUpdate) ClearState() *UserUpdate {
+	uu.state = nil
+	uu.clearstate = true
+	return uu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	if uu.state != nil {
+		if err := user.StateValidator(*uu.state); err != nil {
+			return 0, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
+		}
+	}
 	return uu.sqlSave(ctx)
 }
 
@@ -208,6 +236,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.clearblob {
 		builder.SetNull(user.FieldBlob)
 	}
+	if value := uu.state; value != nil {
+		builder.Set(user.FieldState, *value)
+	}
+	if uu.clearstate {
+		builder.SetNull(user.FieldState)
+	}
 	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -234,6 +268,8 @@ type UserUpdateOne struct {
 	clearnew_name bool
 	blob          *[]byte
 	clearblob     bool
+	state         *user.State
+	clearstate    bool
 }
 
 // SetAge sets the age field.
@@ -319,8 +355,34 @@ func (uuo *UserUpdateOne) ClearBlob() *UserUpdateOne {
 	return uuo
 }
 
+// SetState sets the state field.
+func (uuo *UserUpdateOne) SetState(u user.State) *UserUpdateOne {
+	uuo.state = &u
+	return uuo
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableState(u *user.State) *UserUpdateOne {
+	if u != nil {
+		uuo.SetState(*u)
+	}
+	return uuo
+}
+
+// ClearState clears the value of state.
+func (uuo *UserUpdateOne) ClearState() *UserUpdateOne {
+	uuo.state = nil
+	uuo.clearstate = true
+	return uuo
+}
+
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if uuo.state != nil {
+		if err := user.StateValidator(*uuo.state); err != nil {
+			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
+		}
+	}
 	return uuo.sqlSave(ctx)
 }
 
@@ -421,6 +483,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		var value []byte
 		u.Blob = value
 		builder.SetNull(user.FieldBlob)
+	}
+	if value := uuo.state; value != nil {
+		builder.Set(user.FieldState, *value)
+		u.State = *value
+	}
+	if uuo.clearstate {
+		var value user.State
+		u.State = value
+		builder.SetNull(user.FieldState)
 	}
 	if !builder.Empty() {
 		query, args := builder.Query()

@@ -7,6 +7,7 @@ package schema
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -182,6 +183,7 @@ type Column struct {
 	Nullable  bool        // null or not null attribute.
 	Default   interface{} // default value.
 	indexes   Indexes     // linked indexes.
+	Enums     []string    // enum values.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -275,6 +277,13 @@ func (c *Column) MySQLType(version string) (t string) {
 		// in MySQL timestamp columns are `NOT NULL by default, and assigning NULL
 		// assigns the current_timestamp(). We avoid this if not set otherwise.
 		c.Nullable = true
+	case field.TypeEnum:
+		values := make([]string, len(c.Enums))
+		for i, e := range c.Enums {
+			values[i] = fmt.Sprintf("'%s'", e)
+		}
+		sort.Strings(values)
+		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}
@@ -292,7 +301,7 @@ func (c *Column) SQLiteType() (t string) {
 		t = "bigint"
 	case field.TypeBytes:
 		t = "blob"
-	case field.TypeString:
+	case field.TypeString, field.TypeEnum:
 		size := c.Size
 		if size == 0 {
 			size = DefaultStringLen
@@ -325,7 +334,7 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		c.Nullable = nullable.String == "YES"
 	}
 	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
-		return r == '(' || r == ')' || r == ' '
+		return r == '(' || r == ')' || r == ' ' || r == ','
 	}); parts[0] {
 	case "int":
 		c.Type = field.TypeInt32
@@ -380,6 +389,12 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		c.Type = field.TypeString
 	case "json":
 		c.Type = field.TypeJSON
+	case "enum":
+		c.Type = field.TypeEnum
+		c.Enums = make([]string, len(parts)-1)
+		for i, e := range parts[1:] {
+			c.Enums[i] = strings.Trim(e, "'")
+		}
 	}
 	if defaults.Valid && defaults.String != Null {
 		return c.ScanDefault(defaults.String)
