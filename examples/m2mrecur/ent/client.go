@@ -39,6 +39,23 @@ func NewClient(opts ...Option) *Client {
 	}
 }
 
+// Open opens a connection to the database specified by the driver name and a
+// driver-specific data source name, and returns a new client attached to it.
+// Optional parameters can be added for configuring the client.
+func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
+	switch driverName {
+	case dialect.MySQL, dialect.SQLite:
+		drv, err := sql.Open(driverName, dataSourceName)
+		if err != nil {
+			return nil, err
+		}
+		return NewClient(append(options, Driver(drv))...), nil
+
+	default:
+		return nil, fmt.Errorf("unsupported driver: %q", driverName)
+	}
+}
+
 // Tx returns a new transactional client.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
@@ -72,6 +89,11 @@ func (c *Client) Debug() *Client {
 		Schema: migrate.NewSchema(cfg.driver),
 		User:   NewUserClient(cfg),
 	}
+}
+
+// Close closes the database connection and prevents new queries from starting.
+func (c *Client) Close() error {
+	return c.driver.Close()
 }
 
 // UserClient is a client for the User schema.

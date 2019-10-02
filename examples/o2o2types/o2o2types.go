@@ -12,17 +12,15 @@ import (
 
 	"github.com/facebookincubator/ent/examples/o2o2types/ent"
 
-	"github.com/facebookincubator/ent/dialect/sql"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "file:o2o2types?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	defer db.Close()
-	client := ent.NewClient(ent.Driver(db))
+	defer client.Close()
 	ctx := context.Background()
 	// run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {

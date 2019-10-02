@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
 	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -73,6 +75,36 @@ func NewClient(opts ...Option) *Client {
 		Node:      NewNodeClient(c),
 		Pet:       NewPetClient(c),
 		User:      NewUserClient(c),
+	}
+}
+
+// Open opens a connection to the database specified by the driver name and a
+// driver-specific data source name, and returns a new client attached to it.
+// Optional parameters can be added for configuring the client.
+func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
+	switch driverName {
+	case dialect.MySQL, dialect.SQLite:
+		drv, err := sql.Open(driverName, dataSourceName)
+		if err != nil {
+			return nil, err
+		}
+		return NewClient(append(options, Driver(drv))...), nil
+
+	case dialect.Gremlin:
+		u, err := url.Parse(dataSourceName)
+		if err != nil {
+			return nil, err
+		}
+		c, err := gremlin.NewClient(gremlin.Config{
+			Endpoint: gremlin.Endpoint{
+				URL: u,
+			},
+		})
+		drv := gremlin.NewDriver(c)
+		return NewClient(append(options, Driver(drv))...), nil
+
+	default:
+		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
 }
 
@@ -127,6 +159,11 @@ func (c *Client) Debug() *Client {
 		Pet:       NewPetClient(cfg),
 		User:      NewUserClient(cfg),
 	}
+}
+
+// Close closes the database connection and prevents new queries from starting.
+func (c *Client) Close() error {
+	return c.driver.Close()
 }
 
 // CardClient is a client for the Card schema.

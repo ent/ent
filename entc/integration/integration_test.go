@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"net/url"
 	"reflect"
 	"runtime"
 	"sort"
@@ -16,8 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
@@ -33,10 +30,9 @@ import (
 )
 
 func TestSQLite(t *testing.T) {
-	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
-	defer drv.Close()
-	client := ent.NewClient(ent.Driver(drv))
+	defer client.Close()
 	require.NoError(t, client.Schema.Create(context.Background()))
 	for _, tt := range tests {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -50,10 +46,9 @@ func TestSQLite(t *testing.T) {
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
 		t.Run(version, func(t *testing.T) {
-			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/test?parseTime=True", port))
+			client, err := ent.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/test?parseTime=True", port))
 			require.NoError(t, err)
-			defer drv.Close()
-			client := ent.NewClient(ent.Driver(drv))
+			defer client.Close()
 			require.NoError(t, client.Schema.Create(context.Background()))
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -67,16 +62,9 @@ func TestMySQL(t *testing.T) {
 }
 
 func TestGremlin(t *testing.T) {
-	c, err := gremlin.NewClient(gremlin.Config{
-		Endpoint: gremlin.Endpoint{
-			URL: &url.URL{
-				Scheme: "http",
-				Host:   "localhost:8182",
-			},
-		},
-	})
+	client, err := ent.Open("gremlin", "http://localhost:8182")
 	require.NoError(t, err)
-	client := ent.NewClient(ent.Driver(gremlin.NewDriver(c)))
+	defer client.Close()
 	// run all tests except transaction and index tests.
 	for _, tt := range tests[2:] {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
