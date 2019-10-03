@@ -583,17 +583,18 @@ Now when we have a graph with data, we can run a few queries on it:
 		"<project>/ent/group"
 	)
 
-	func Do(context context.Context, client *ent.Client) {
-		groups, err := client.Group.
-			Query().
-			Where(group.HasUsers()).
-			All(ctx)
-		if err != nil {
-			log.Fatal("failed getting groups:", err)
-		}
-		log.Println("groups returned:", cars)
-		// Output: (Group(Name=GitHub), Group(Name=GitLab),)
-	}
+	func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {
+    	groups, err := client.Group.
+    		Query().
+    		Where(group.HasUsers()).
+    		All(ctx)
+    	if err != nil {
+    		return fmt.Errorf("failed getting groups: %v", err)
+    	}
+    	log.Println("groups returned:", groups)
+    	// Output: (Group(Name=GitHub), Group(Name=GitLab),)
+    	return nil
+    }
     ```
 
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/start).
