@@ -153,7 +153,7 @@ func receiver(s string) (r string) {
 		for _, w := range parts[1:] {
 			r += w[:i]
 		}
-		if _, ok := imports[r]; !ok {
+		if _, ok := importPkg[r]; !ok {
 			return r
 		}
 	}

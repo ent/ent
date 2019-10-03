@@ -11,7 +11,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"text/template"
 	"text/template/parse"
@@ -19,6 +18,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
 	"github.com/facebookincubator/ent/schema/field"
+
+	"golang.org/x/tools/imports"
 )
 
 type (
@@ -86,7 +87,7 @@ func (g *Graph) Gen() (err error) {
 			b := bytes.NewBuffer(nil)
 			check(templates.ExecuteTemplate(b, tmpl.Name, n), "execute template %q", tmpl.Name)
 			target := filepath.Join(g.Config.Target, tmpl.Format(n))
-			check(ioutil.WriteFile(target, b.Bytes(), 0644), "create file %q", target)
+			check(writefmt(target, b.Bytes()), "write file %s", target)
 		}
 	}
 	for _, tmpl := range append(GraphTemplates[:], external...) {
@@ -100,9 +101,9 @@ func (g *Graph) Gen() (err error) {
 		b := bytes.NewBuffer(nil)
 		check(templates.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
 		target := filepath.Join(g.Config.Target, tmpl.Format)
-		check(ioutil.WriteFile(target, b.Bytes(), 0644), "create file %q", target)
+		check(writefmt(target, b.Bytes()), "write file %s", target)
 	}
-	return goimports(g.Config.Target)
+	return
 }
 
 // Describe writes a description of the graph to the given writer.
@@ -439,17 +440,15 @@ func catch(err *error) {
 	}
 }
 
-// goimports runs goimports on the given target.
-func goimports(target string) error {
-	cmd := exec.Command("goimports", "-w", target)
-	out := bytes.NewBuffer(nil)
-	cmd.Stderr = out
-	switch err := cmd.Run(); err.(type) {
-	case nil:
-		return nil
-	case *exec.ExitError:
-		return fmt.Errorf("entc/gen: goimports: %s", out)
-	default:
-		return fmt.Errorf("entc/gen: %s", err)
+func writefmt(target string, src []byte) error {
+	source, err := imports.Process(target, src, &imports.Options{
+		TabWidth:  8,
+		TabIndent: true,
+		Comments:  true,
+		Fragment:  true,
+	})
+	if err != nil {
+		return fmt.Errorf("running goimports %s", string(src))
 	}
+	return ioutil.WriteFile(target, source, 0644)
 }
