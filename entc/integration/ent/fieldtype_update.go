@@ -1496,7 +1496,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: FieldType not found with id: %v", ftuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("FieldType with id: %v", ftuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one FieldType with the same id: %v", ftuo.id)
 	}

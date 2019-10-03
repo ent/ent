@@ -326,7 +326,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: User not found with id: %v", uuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("User with id: %v", uuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one User with the same id: %v", uuo.id)
 	}

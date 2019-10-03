@@ -402,7 +402,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: Node not found with id: %v", nuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Node with id: %v", nuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one Node with the same id: %v", nuo.id)
 	}

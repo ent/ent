@@ -374,7 +374,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: Card not found with id: %v", cuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Card with id: %v", cuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one Card with the same id: %v", cuo.id)
 	}

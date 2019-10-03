@@ -614,7 +614,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: File not found with id: %v", fuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("File with id: %v", fuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one File with the same id: %v", fuo.id)
 	}

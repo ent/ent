@@ -289,7 +289,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: City not found with id: %v", cuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("City with id: %v", cuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one City with the same id: %v", cuo.id)
 	}

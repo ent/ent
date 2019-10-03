@@ -382,7 +382,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: FileType not found with id: %v", ftuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("FileType with id: %v", ftuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one FileType with the same id: %v", ftuo.id)
 	}

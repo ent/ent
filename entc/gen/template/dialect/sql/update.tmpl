@@ -46,7 +46,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- if $one }}
 		switch n := len(ids); {
 		case n == 0:
-			return {{ $zero }}, fmt.Errorf("{{ $pkg }}: {{ $.Name }} not found with id: %v", {{ $receiver }}.id)
+			return {{ $zero }}, &ErrNotFound{fmt.Sprintf("{{ $.Name }} with id: %v", {{ $receiver }}.id)}
 		case n > 1:
 			return {{ $zero }}, fmt.Errorf("{{ $pkg }}: more than one {{ $.Name }} with the same id: %v", {{ $receiver }}.id)
 		}
