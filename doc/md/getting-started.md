@@ -198,7 +198,7 @@ entc init Car Group
 And then we add the rest of the fields manually:
 ```go
 import (
-	"log"
+	"regexp"
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
