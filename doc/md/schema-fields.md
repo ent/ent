@@ -52,6 +52,7 @@ The following types are currently supported by the framework:
 - `time.Time`
 - `[]byte` (only supported by SQL dialects).
 - `JSON` (only supported by SQL dialects) - **experimental**.
+- `Enum` (only supported by SQL dialects).
 
 <br/>
 ```go
@@ -85,6 +86,9 @@ func (User) Fields() []ent.Field {
 		field.JSON("url", &url.URL{}).
 			Optional(),
 		field.JSON("strings", []string{}).
+			Optional(),
+		field.Enum("state").
+			Values("on", "off").
 			Optional(),
 	}
 }
