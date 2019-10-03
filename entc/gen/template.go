@@ -113,8 +113,8 @@ var (
 	// the init function below initializes the templates and its
 	// funcs to avoid initialization loop.
 	templates = template.New("templates")
-	// imports are the import packages used for code generation.
-	imports = make(map[string]string)
+	// importPkg are the import packages used for code generation.
+	importPkg = make(map[string]string)
 )
 
 func init() {
@@ -129,11 +129,11 @@ func init() {
 	for _, spec := range f.Imports {
 		path, err := strconv.Unquote(spec.Path.Value)
 		check(err, "unquote import path")
-		imports[filepath.Base(path)] = path
+		importPkg[filepath.Base(path)] = path
 	}
 	for _, s := range drivers {
 		for _, path := range s.Imports {
-			imports[filepath.Base(path)] = path
+			importPkg[filepath.Base(path)] = path
 		}
 	}
 }
