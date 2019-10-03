@@ -283,7 +283,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: Pet not found with id: %v", puo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Pet with id: %v", puo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one Pet with the same id: %v", puo.id)
 	}

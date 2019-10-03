@@ -444,7 +444,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: GroupInfo not found with id: %v", giuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("GroupInfo with id: %v", giuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one GroupInfo with the same id: %v", giuo.id)
 	}

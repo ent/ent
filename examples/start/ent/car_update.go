@@ -274,7 +274,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: Car not found with id: %v", cuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Car with id: %v", cuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one Car with the same id: %v", cuo.id)
 	}

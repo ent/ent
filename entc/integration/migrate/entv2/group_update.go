@@ -141,7 +141,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("entv2: Group not found with id: %v", guo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Group with id: %v", guo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("entv2: more than one Group with the same id: %v", guo.id)
 	}

@@ -256,7 +256,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: Street not found with id: %v", suo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Street with id: %v", suo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one Street with the same id: %v", suo.id)
 	}

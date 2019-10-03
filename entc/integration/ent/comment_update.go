@@ -425,7 +425,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 	}
 	switch n := len(ids); {
 	case n == 0:
-		return nil, fmt.Errorf("ent: Comment not found with id: %v", cuo.id)
+		return nil, &ErrNotFound{fmt.Sprintf("Comment with id: %v", cuo.id)}
 	case n > 1:
 		return nil, fmt.Errorf("ent: more than one Comment with the same id: %v", cuo.id)
 	}
