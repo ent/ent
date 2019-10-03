@@ -138,18 +138,18 @@ func main() {
 }
 ```
 
-Now, we're ready to create our user. Let's call this function `Do` for the sake of example:
+Now, we're ready to create our user. Let's call this function `CreateUser` for the sake of example:
 ```go
-func Do(ctx context.Context, client *ent.Client) (*ent.User, error) {
+func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Create().
 		SetAge(30).
 		SetName("a8m").
-		Save()
+		Save(ctx)
 	if err != nil {
-		return nil, fmt.Error("failed creating user: %v", err)
+		return nil, fmt.Errorf("failed creating user: %v", err)
 	}
-	log.Println("user was created: %v", u)
+	log.Println("user was created: ", u)
 	return u, nil
 }
 ```
@@ -169,7 +169,7 @@ import (
 	"<project>/ent/user"
 )
 
-func Query(ctx context.Context, client *ent.Client) (*ent.User, error) {
+func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Query().
 		Where(user.NameEQ("a8m")).
@@ -177,11 +177,12 @@ func Query(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		// or more than 1 user returned.
 		Only(ctx)
 	if err != nil {
-		return nil, fmt.Error("failed querying user: %v", err)
+		return nil, fmt.Errorf("failed querying user: %v", err)
 	}
-	log.Println("user: %v", u)
+	log.Println("user returned: ", u)
 	return u, nil
 }
+
 ```
 
 
@@ -247,7 +248,7 @@ Let's add the `"cars"` edge to the `User` schema, and run `entc generate ./ent/s
 
 We continue our example by creating 2 cars and adding them to a user.
 ```go
-func Do(ctx context.Context, client *ent.Client) error {
+func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	// creating new car with model "Tesla".
 	tesla, err := client.Car.
 		Create().
@@ -255,7 +256,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetRegisteredAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed creating car: %v", err)
+		return nil, fmt.Errorf("failed creating car: %v", err)
 	}
 
 	// creating new car with model "Ford".
@@ -265,9 +266,9 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetRegisteredAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed creating car: %v", err)
+		return nil, fmt.Errorf("failed creating car: %v", err)
 	}
-	log.Println("car was created: %v", ford)
+	log.Println("car was created: ", ford)
 
 	// create a new user, and add it the 2 cars.
 	a8m, err := client.User.
@@ -277,9 +278,10 @@ func Do(ctx context.Context, client *ent.Client) error {
 		AddCars(tesla, ford).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed creating user: %v", err)
+		return nil, fmt.Errorf("failed creating user: %v", err)
 	}
-	log.Println("user was created: %v", a8m)
+	log.Println("user was created: ", a8m)
+	return a8m, nil
 }
 ```
 But what about querying the `cars` edge (relation)? Here's how we do it:
@@ -291,24 +293,22 @@ import (
 	"<project>/ent/car"
 )
 
-func Do(ctx context.Context, client *ent.Client) error {
-	// <continuation of the code block above>
-	// ...
-
+func QueryCars(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
 		return fmt.Errorf("failed querying user cars: %v", err)
 	}
-	log.Println(cars...)
+	log.Println("returned cars:", cars)
 
 	// what about filtering specific cars.
 	ford, err := a8m.QueryCars().
-		Where(car.NameEQ("Ford")).
+		Where(car.ModelEQ("Ford")).
 		Only(ctx)
 	if err != nil {
 		return fmt.Errorf("failed querying user cars: %v", err)
 	}
 	log.Println(ford)
+	return nil
 }
 ```
 
@@ -335,15 +335,15 @@ import (
 
 // Edges of the Car.
 func (Car) Edges() []ent.Edge {
- return []ent.Edge{
-	 // create an inverse-edge called "owner" of type `User`
-	 // and reference it to the "cars" edge (in User schema)
-	 // explicitly using the `Ref` method.
-	 edge.From("owner", User.Type).
-	 	Ref("cars").
-		// setting the edge to unique, ensure
-		// that a car can have only one owner.
-		Unique(),
+	return []ent.Edge{
+		// create an inverse-edge called "owner" of type `User`
+	 	// and reference it to the "cars" edge (in User schema)
+	 	// explicitly using the `Ref` method.
+	 	edge.From("owner", User.Type).
+	 		Ref("cars").
+			// setting the edge to unique, ensure
+			// that a car can have only one owner.
+			Unique(),
 	}
 }
 ```
@@ -356,23 +356,20 @@ import (
 	"<project>/ent"
 )
 
-func Do(ctx context.Context, client *ent.Client) error {
-	// <continuation of the code block above>
-	// ...
-
+func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
 		return fmt.Errorf("failed querying user cars: %v", err)
 	}
-
 	// query the inverse edge.
-	for _, car := range cars {
-		owner, err := car.QueryOwner().Only(ctx)
+	for _, ca := range cars {
+		owner, err := ca.QueryOwner().Only(ctx)
 		if err != nil {
-			return fmt.Errorf("failed querying car %q owner: %v", car.Model, err)
+			return fmt.Errorf("failed querying car %q owner: %v", ca.Model, err)
 		}
-		log.Printf("car %q owner: %q", car.Model, owner.Name)
+		log.Printf("car %q owner: %q\n", ca.Model, owner.Name)
 	}
+	return nil
 }
 ```
 
@@ -441,6 +438,7 @@ entities and relations). Let's create the following graph using the framework:
 
 
 ```go
+
 func CreateGraph(ctx context.Context, client *ent.Client) error {
 	// first, create the users.
 	a8m, err := client.User.
@@ -463,8 +461,8 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	_, err = client.Car.
 		Create().
 		SetModel("Tesla").
-		SetRegisteredAt(time.Now()).	// ignore the time in the graph.
-		SetOwner(a8m).					// attach this graph to Ariel.
+		SetRegisteredAt(time.Now()). // ignore the time in the graph.
+		SetOwner(a8m).               // attach this graph to Ariel.
 		Save(ctx)
 	if err != nil {
 		return err
@@ -472,8 +470,8 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	_, err = client.Car.
 		Create().
 		SetModel("Mazda").
-		SetRegisteredAt(time.Now()).	// ignore the time in the graph.
-		SetOwner(a8m).					// attach this graph to Ariel.
+		SetRegisteredAt(time.Now()). // ignore the time in the graph.
+		SetOwner(a8m).               // attach this graph to Ariel.
 		Save(ctx)
 	if err != nil {
 		return err
@@ -481,8 +479,8 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	_, err = client.Car.
 		Create().
 		SetModel("Ford").
-		SetRegisteredAt(time.Now()).	// ignore the time in the graph.
-		SetOwner(neta).					// attach this graph to Neta.
+		SetRegisteredAt(time.Now()). // ignore the time in the graph.
+		SetOwner(neta).              // attach this graph to Neta.
 		Save(ctx)
 	if err != nil {
 		return err
@@ -490,7 +488,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	// create the groups, and add their users in the creation.
 	_, err = client.Group.
 		Create().
-		SetModel("GitLab").
+		SetName("GitLab").
 		AddUsers(neta, a8m).
 		Save(ctx)
 	if err != nil {
@@ -498,7 +496,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	}
 	_, err = client.Group.
 		Create().
-		SetModel("GitHab").
+		SetName("GitHab").
 		AddUsers(a8m).
 		Save(ctx)
 	if err != nil {
@@ -521,17 +519,19 @@ Now when we have a graph with data, we can run a few queries on it:
 		"<project>/ent/group"
 	)
 
-	func Do(context context.Context, client *ent.Client) {
+	func QueryGithub(ctx context.Context, client *ent.Client) error {
 		cars, err := client.Group.
-			Query(group.Name("Github")).	// (Group(Name=GitHub),)
-			QueryUsers().					// (User(Name=Ariel, Age=30),)
-			QueryCars().					// (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
+			Query().
+			Where(group.Name("GitHub")). // (Group(Name=GitHub),)
+			QueryUsers().                // (User(Name=Ariel, Age=30),)
+			QueryCars().                 // (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
 			All(ctx)
 		if err != nil {
-			log.Fatal("failed getting cars:", err)
+			return fmt.Errorf("failed getting cars: %v", err)
 		}
 		log.Println("cars returned:", cars)
 		// Output: (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
+		return nil
 	}
 	```
 
@@ -545,25 +545,31 @@ Now when we have a graph with data, we can run a few queries on it:
 		"<project>/ent/car"
 	)
 
-	func Do(context context.Context, client *ent.Client) {
-		// <continuation of the code block that creates the graph>
-    	// ...
-
-		cars, err := a8m.					// Get the groups, that a8m is connected to:
-			QueryGroups().					// (Group(Name=GitHub), Group(Name=GitLab),)
-			QueryUsers().					// (User(Name=Ariel, Age=30), User(Name=Neta, Age=28),)
-			QueryCars().					//
-			Where(							//
-				car.Not(					//	Get Neta and Ariel cars, but filter out
-					car.ModelEQ("Mazda")	//	those who named "Mazda"
-				),							//
-			).								//
+	func QueryArielCars(ctx context.Context, client *ent.Client) error {
+		// Get "Ariel" from previous steps.
+		a8m := client.User.
+			Query().
+			Where(
+				user.HasCars(),
+				user.Name("Ariel"),
+			).
+			OnlyX(ctx)
+		cars, err := a8m. 					// Get the groups, that a8m is connected to:
+					QueryGroups(). 			// (Group(Name=GitHub), Group(Name=GitLab),)
+					QueryUsers().  			// (User(Name=Ariel, Age=30), User(Name=Neta, Age=28),)
+					QueryCars().   			//
+					Where(         			//
+				car.Not( 					//	Get Neta and Ariel cars, but filter out
+					car.ModelEQ("Mazda"), 	//	those who named "Mazda"
+				), //
+			). //
 			All(ctx)
 		if err != nil {
-			log.Fatal("failed getting cars:", err)
+			return fmt.Errorf("failed getting cars: %v", err)
 		}
 		log.Println("cars returned:", cars)
 		// Output: (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Ford, RegisteredAt=<Time>),)
+		return nil
 	}
 	```
 
@@ -588,3 +594,6 @@ Now when we have a graph with data, we can run a few queries on it:
 		log.Println("groups returned:", cars)
 		// Output: (Group(Name=GitHub), Group(Name=GitLab),)
 	}
+    ```
+
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/start).

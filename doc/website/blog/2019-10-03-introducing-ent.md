@@ -27,9 +27,9 @@ with this model internally.
 The lack of a proper Graph-based ORM for Go, led us to write one here with the following principles:
 
 - **Schema As Code** - defining types, relations and constraints should be in Go code (not struct
-  tags), and should be validated using a CLI tool. We have good experience with a similar tools
+  tags), and should be validated using a CLI tool. We have good experience with a similar tool
   internally at Facebook.
-- **Statically typed and explicit API** using codegen - API with `interface{}`s everywhere effects
+- **Statically typed and explicit API** using codegen - API with `interface{}`s everywhere affects
   developers efficiency; especially project newbies.
 - **Queries, aggregations and graph traversals** should be simple - developers don’t want to deal
   with raw SQL queries nor SQL terms.
