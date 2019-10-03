@@ -37,7 +37,7 @@ type Field struct {
 	Name          string          `json:"name,omitempty"`
 	Info          *field.TypeInfo `json:"type,omitempty"`
 	Tag           string          `json:"tag,omitempty"`
-	Size          *int            `json:"size,omitempty"`
+	Size          *int64          `json:"size,omitempty"`
 	Enums         []string        `json:"enums,omitempty"`
 	Unique        bool            `json:"unique,omitempty"`
 	Nillable      bool            `json:"nillable,omitempty"`
@@ -115,8 +115,8 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	if sf.Info == nil {
 		return nil, fmt.Errorf("missing type info for field %q", sf.Name)
 	}
-	if fd.Size != 0 {
-		sf.Size = &fd.Size
+	if size := int64(fd.Size); size != 0 {
+		sf.Size = &size
 	}
 	return sf, nil
 }

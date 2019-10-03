@@ -554,16 +554,16 @@ Now when we have a graph with data, we can run a few queries on it:
 				user.Name("Ariel"),
 			).
 			OnlyX(ctx)
-		cars, err := a8m. 					// Get the groups, that a8m is connected to:
-					QueryGroups(). 			// (Group(Name=GitHub), Group(Name=GitLab),)
-					QueryUsers().  			// (User(Name=Ariel, Age=30), User(Name=Neta, Age=28),)
-					QueryCars().   			//
-					Where(         			//
-				car.Not( 					//	Get Neta and Ariel cars, but filter out
-					car.ModelEQ("Mazda"), 	//	those who named "Mazda"
-				), //
-			). //
-			All(ctx)
+		cars, err := a8m. 						// Get the groups, that a8m is connected to:
+				QueryGroups(). 					// (Group(Name=GitHub), Group(Name=GitLab),)
+				QueryUsers().  					// (User(Name=Ariel, Age=30), User(Name=Neta, Age=28),)
+				QueryCars().   					//
+				Where(         					//
+					car.Not( 					//	Get Neta and Ariel cars, but filter out
+						car.ModelEQ("Mazda"),	//	those who named "Mazda"
+					), 							//
+				). 								//
+				All(ctx)
 		if err != nil {
 			return fmt.Errorf("failed getting cars: %v", err)
 		}

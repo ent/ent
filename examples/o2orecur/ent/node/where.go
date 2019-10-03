@@ -38,42 +38,6 @@ func IDNEQ(id int) predicate.Node {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Node {
 	return predicate.Node(
@@ -112,6 +76,42 @@ func IDNotIn(ids ...int) predicate.Node {
 	)
 }
 
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldID), id))
+		},
+	)
+}
+
 // Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
 func Value(v int) predicate.Node {
 	return predicate.Node(
@@ -135,42 +135,6 @@ func ValueNEQ(v int) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
 			s.Where(sql.NEQ(s.C(FieldValue), v))
-		},
-	)
-}
-
-// ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldValue), v))
-		},
-	)
-}
-
-// ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldValue), v))
-		},
-	)
-}
-
-// ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldValue), v))
-		},
-	)
-}
-
-// ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v int) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldValue), v))
 		},
 	)
 }
@@ -209,6 +173,42 @@ func ValueNotIn(vs ...int) predicate.Node {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldValue), v...))
+		},
+	)
+}
+
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldValue), v))
+		},
+	)
+}
+
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldValue), v))
+		},
+	)
+}
+
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldValue), v))
+		},
+	)
+}
+
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v int) predicate.Node {
+	return predicate.Node(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldValue), v))
 		},
 	)
 }

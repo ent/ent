@@ -40,42 +40,6 @@ func IDNEQ(id int) predicate.Card {
 	)
 }
 
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-	)
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-	)
-}
-
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Card {
 	return predicate.Card(
@@ -114,6 +78,42 @@ func IDNotIn(ids ...int) predicate.Card {
 	)
 }
 
+// IDGT applies the GT predicate on the ID field.
+func IDGT(id int) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDGTE applies the GTE predicate on the ID field.
+func IDGTE(id int) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLT applies the LT predicate on the ID field.
+func IDLT(id int) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldID), id))
+		},
+	)
+}
+
+// IDLTE applies the LTE predicate on the ID field.
+func IDLTE(id int) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldID), id))
+		},
+	)
+}
+
 // Expired applies equality check predicate on the "expired" field. It's identical to ExpiredEQ.
 func Expired(v time.Time) predicate.Card {
 	return predicate.Card(
@@ -146,42 +146,6 @@ func ExpiredNEQ(v time.Time) predicate.Card {
 	return predicate.Card(
 		func(s *sql.Selector) {
 			s.Where(sql.NEQ(s.C(FieldExpired), v))
-		},
-	)
-}
-
-// ExpiredGT applies the GT predicate on the "expired" field.
-func ExpiredGT(v time.Time) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldExpired), v))
-		},
-	)
-}
-
-// ExpiredGTE applies the GTE predicate on the "expired" field.
-func ExpiredGTE(v time.Time) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldExpired), v))
-		},
-	)
-}
-
-// ExpiredLT applies the LT predicate on the "expired" field.
-func ExpiredLT(v time.Time) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldExpired), v))
-		},
-	)
-}
-
-// ExpiredLTE applies the LTE predicate on the "expired" field.
-func ExpiredLTE(v time.Time) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldExpired), v))
 		},
 	)
 }
@@ -224,6 +188,42 @@ func ExpiredNotIn(vs ...time.Time) predicate.Card {
 	)
 }
 
+// ExpiredGT applies the GT predicate on the "expired" field.
+func ExpiredGT(v time.Time) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldExpired), v))
+		},
+	)
+}
+
+// ExpiredGTE applies the GTE predicate on the "expired" field.
+func ExpiredGTE(v time.Time) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldExpired), v))
+		},
+	)
+}
+
+// ExpiredLT applies the LT predicate on the "expired" field.
+func ExpiredLT(v time.Time) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldExpired), v))
+		},
+	)
+}
+
+// ExpiredLTE applies the LTE predicate on the "expired" field.
+func ExpiredLTE(v time.Time) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldExpired), v))
+		},
+	)
+}
+
 // NumberEQ applies the EQ predicate on the "number" field.
 func NumberEQ(v string) predicate.Card {
 	return predicate.Card(
@@ -238,42 +238,6 @@ func NumberNEQ(v string) predicate.Card {
 	return predicate.Card(
 		func(s *sql.Selector) {
 			s.Where(sql.NEQ(s.C(FieldNumber), v))
-		},
-	)
-}
-
-// NumberGT applies the GT predicate on the "number" field.
-func NumberGT(v string) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldNumber), v))
-		},
-	)
-}
-
-// NumberGTE applies the GTE predicate on the "number" field.
-func NumberGTE(v string) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldNumber), v))
-		},
-	)
-}
-
-// NumberLT applies the LT predicate on the "number" field.
-func NumberLT(v string) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldNumber), v))
-		},
-	)
-}
-
-// NumberLTE applies the LTE predicate on the "number" field.
-func NumberLTE(v string) predicate.Card {
-	return predicate.Card(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldNumber), v))
 		},
 	)
 }
@@ -312,6 +276,42 @@ func NumberNotIn(vs ...string) predicate.Card {
 				return
 			}
 			s.Where(sql.NotIn(s.C(FieldNumber), v...))
+		},
+	)
+}
+
+// NumberGT applies the GT predicate on the "number" field.
+func NumberGT(v string) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldNumber), v))
+		},
+	)
+}
+
+// NumberGTE applies the GTE predicate on the "number" field.
+func NumberGTE(v string) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldNumber), v))
+		},
+	)
+}
+
+// NumberLT applies the LT predicate on the "number" field.
+func NumberLT(v string) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldNumber), v))
+		},
+	)
+}
+
+// NumberLTE applies the LTE predicate on the "number" field.
+func NumberLTE(v string) predicate.Card {
+	return predicate.Card(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldNumber), v))
 		},
 	)
 }
