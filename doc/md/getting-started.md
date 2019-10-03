@@ -496,7 +496,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	}
 	_, err = client.Group.
 		Create().
-		SetName("GitHab").
+		SetName("GitHub").
 		AddUsers(a8m).
 		Save(ctx)
 	if err != nil {
@@ -509,7 +509,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 
 Now when we have a graph with data, we can run a few queries on it:
 
-1. Get all user's cars within the group named "Github":
+1. Get all user's cars within the group named "GitHub":
 
 	```go
 	import (
