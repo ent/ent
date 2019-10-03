@@ -151,7 +151,7 @@ func TestType_Package(t *testing.T) {
 }
 
 func TestType_AddIndex(t *testing.T) {
-	size := 1024
+	size := int64(1024)
 	typ, err := NewType(Config{}, &load.Schema{
 		Name: "User",
 		Fields: []*load.Field{

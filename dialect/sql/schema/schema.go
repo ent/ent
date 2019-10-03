@@ -17,7 +17,7 @@ import (
 
 const (
 	// DefaultStringLen describes the default length for string/varchar types.
-	DefaultStringLen = 255
+	DefaultStringLen int64 = 255
 	// Null is the string representation of NULL in SQL.
 	Null = "NULL"
 	// PrimaryKey is the string representation of PKs in SQL.
@@ -176,7 +176,7 @@ type Column struct {
 	Type      field.Type  // column type.
 	typ       string      // row column type (used for Rows.Scan).
 	Attr      string      // extra attributes.
-	Size      int         // max size parameter for string, blob, etc.
+	Size      int64       // max size parameter for string, blob, etc.
 	Key       string      // key definition (PRI, UNI or MUL).
 	Unique    bool        // column with unique constraint.
 	Increment bool        // auto increment attribute.
@@ -241,7 +241,7 @@ func (c *Column) MySQLType(version string) (t string) {
 	case field.TypeUint, field.TypeUint64:
 		t = "bigint unsigned"
 	case field.TypeBytes:
-		size := math.MaxUint16
+		size := int64(math.MaxUint16)
 		if c.Size > 0 {
 			size = c.Size
 		}
@@ -379,7 +379,7 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 		c.Type = field.TypeBytes
 	case "varchar":
 		c.Type = field.TypeString
-		size, err := strconv.Atoi(parts[1])
+		size, err := strconv.ParseInt(parts[1], 10, 64)
 		if err != nil {
 			return fmt.Errorf("converting varchar size to int: %v", err)
 		}
@@ -521,7 +521,7 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 // defaultSize returns the default size for MySQL varchar type based
 // on column size, charset and table indexes, in order to avoid index
 // prefix key limit (767).
-func (c *Column) defaultSize(version string) int {
+func (c *Column) defaultSize(version string) int64 {
 	size := DefaultStringLen
 	switch {
 	// version is >= 5.7.

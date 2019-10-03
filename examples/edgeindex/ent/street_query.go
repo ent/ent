@@ -351,7 +351,7 @@ func (sq *StreetQuery) sqlQuery() *sql.Selector {
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
-		selector.Offset(*offset).Limit(math.MaxInt64)
+		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
 	if limit := sq.limit; limit != nil {
 		selector.Limit(*limit)

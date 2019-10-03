@@ -363,7 +363,7 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 	if offset := nq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
-		selector.Offset(*offset).Limit(math.MaxInt64)
+		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
 	if limit := nq.limit; limit != nil {
 		selector.Limit(*limit)

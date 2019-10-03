@@ -615,7 +615,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
-		selector.Offset(*offset).Limit(math.MaxInt64)
+		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
 	if limit := uq.limit; limit != nil {
 		selector.Limit(*limit)
@@ -690,7 +690,7 @@ func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
-		v.Range(*offset, math.MaxInt64)
+		v.Range(*offset, math.MaxInt32)
 	case limit != nil:
 		v.Limit(*limit)
 	}
