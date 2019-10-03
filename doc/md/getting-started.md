@@ -397,15 +397,10 @@ relationship named `groups`. Let's define this relationship in our schemas:
 		"github.com/facebookincubator/ent/schema/edge"
 	 )
 	
-	 // Edges of the User.
-	 func (User) Edges() []ent.Edge {
+	 // Edges of the Group.
+	 func (Group) Edges() []ent.Edge {
 		return []ent.Edge{
-			edge.To("cars", Car.Type),
-			// create an inverse-edge called "groups" of type `Group`
-			// and reference it to the "users" edge (in Group schema)
-			// explicitly using the `Ref` method.
-			edge.From("groups", Group.Type).
-				Ref("users"),
+			edge.To("users", User.Type),
 		}
 	 }
 	```
