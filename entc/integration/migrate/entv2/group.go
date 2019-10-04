@@ -78,7 +78,7 @@ func (gr *Groups) FromRows(rows *sql.Rows) error {
 }
 
 func (gr Groups) config(cfg config) {
-	for i := range gr {
-		gr[i].config = cfg
+	for _i := range gr {
+		gr[_i].config = cfg
 	}
 }

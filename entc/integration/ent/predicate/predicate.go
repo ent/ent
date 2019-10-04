@@ -132,6 +132,23 @@ func GroupInfoPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) GroupI
 	})
 }
 
+// Item is the predicate function for item builders.
+type Item func(interface{})
+
+// ItemPerDialect construct a predicate for graph traversals based on dialect type.
+func ItemPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Item {
+	return Item(func(v interface{}) {
+		switch v := v.(type) {
+		case *sql.Selector:
+			f0(v)
+		case *dsl.Traversal:
+			f1(v)
+		default:
+			panic(fmt.Sprintf("unknown type for predicate: %T", v))
+		}
+	})
+}
+
 // Node is the predicate function for node builders.
 type Node func(interface{})
 

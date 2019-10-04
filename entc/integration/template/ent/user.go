@@ -94,7 +94,7 @@ func (u *Users) FromRows(rows *sql.Rows) error {
 }
 
 func (u Users) config(cfg config) {
-	for i := range u {
-		u[i].config = cfg
+	for _i := range u {
+		u[_i].config = cfg
 	}
 }

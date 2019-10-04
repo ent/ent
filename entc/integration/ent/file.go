@@ -177,7 +177,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 }
 
 func (f Files) config(cfg config) {
-	for i := range f {
-		f[i].config = cfg
+	for _i := range f {
+		f[_i].config = cfg
 	}
 }

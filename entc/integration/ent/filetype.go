@@ -137,7 +137,7 @@ func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
 }
 
 func (ft FileTypes) config(cfg config) {
-	for i := range ft {
-		ft[i].config = cfg
+	for _i := range ft {
+		ft[_i].config = cfg
 	}
 }

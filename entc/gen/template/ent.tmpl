@@ -106,8 +106,8 @@ type {{ $slice }} []*{{ $.Name }}
 {{ end }}
 
 func ({{ $receiver }} {{ $slice }}) config(cfg config) {
-	for i := range {{ $receiver }} {
-		{{ $receiver }}[i].config = cfg
+	for _i := range {{ $receiver }} {
+		{{ $receiver }}[_i].config = cfg
 	}
 }
 {{ end }}

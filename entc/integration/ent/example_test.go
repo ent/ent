@@ -275,6 +275,29 @@ func ExampleGroupInfo() {
 
 	// Output:
 }
+func ExampleItem() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the item's edges.
+
+	// create item vertex with its edges.
+	i := client.Item.
+		Create().
+		SaveX(ctx)
+	log.Println("item created:", i)
+
+	// query edges.
+
+	// Output:
+}
 func ExampleNode() {
 	if dsn == "" {
 		return

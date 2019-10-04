@@ -147,7 +147,7 @@ func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 }
 
 func (gi GroupInfos) config(cfg config) {
-	for i := range gi {
-		gi[i].config = cfg
+	for _i := range gi {
+		gi[_i].config = cfg
 	}
 }

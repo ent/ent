@@ -21,6 +21,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/item"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
@@ -50,6 +51,8 @@ type Client struct {
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
 	GroupInfo *GroupInfoClient
+	// Item is the client for interacting with the Item builders.
+	Item *ItemClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
@@ -72,6 +75,7 @@ func NewClient(opts ...Option) *Client {
 		FileType:  NewFileTypeClient(c),
 		Group:     NewGroupClient(c),
 		GroupInfo: NewGroupInfoClient(c),
+		Item:      NewItemClient(c),
 		Node:      NewNodeClient(c),
 		Pet:       NewPetClient(c),
 		User:      NewUserClient(c),
@@ -127,6 +131,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		FileType:  NewFileTypeClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
+		Item:      NewItemClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
 		User:      NewUserClient(cfg),
@@ -155,6 +160,7 @@ func (c *Client) Debug() *Client {
 		FileType:  NewFileTypeClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
+		Item:      NewItemClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
 		User:      NewUserClient(cfg),
@@ -778,6 +784,70 @@ func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 
 	}
 	return query
+}
+
+// ItemClient is a client for the Item schema.
+type ItemClient struct {
+	config
+}
+
+// NewItemClient returns a client for the Item from the given config.
+func NewItemClient(c config) *ItemClient {
+	return &ItemClient{config: c}
+}
+
+// Create returns a create builder for Item.
+func (c *ItemClient) Create() *ItemCreate {
+	return &ItemCreate{config: c.config}
+}
+
+// Update returns an update builder for Item.
+func (c *ItemClient) Update() *ItemUpdate {
+	return &ItemUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemClient) UpdateOne(i *Item) *ItemUpdateOne {
+	return c.UpdateOneID(i.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemClient) UpdateOneID(id string) *ItemUpdateOne {
+	return &ItemUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for Item.
+func (c *ItemClient) Delete() *ItemDelete {
+	return &ItemDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ItemClient) DeleteOne(i *Item) *ItemDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ItemClient) DeleteOneID(id string) *ItemDeleteOne {
+	return &ItemDeleteOne{c.Delete().Where(item.ID(id))}
+}
+
+// Create returns a query builder for Item.
+func (c *ItemClient) Query() *ItemQuery {
+	return &ItemQuery{config: c.config}
+}
+
+// Get returns a Item entity by its id.
+func (c *ItemClient) Get(ctx context.Context, id string) (*Item, error) {
+	return c.Query().Where(item.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
+	i, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
 
 // NodeClient is a client for the Node schema.
