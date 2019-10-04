@@ -19,6 +19,7 @@ type Pet struct {
 func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("age"),
+		field.Time("licensed_at").Optional().Nillable(),
 	}
 }
 

@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -60,6 +61,7 @@ func ExamplePet() {
 	pe := client.Pet.
 		Create().
 		SetAge(1).
+		SetLicensedAt(time.Now()).
 		SaveX(ctx)
 	log.Println("pet created:", pe)
 
@@ -82,6 +84,7 @@ func ExampleUser() {
 	pe0 := client.Pet.
 		Create().
 		SetAge(1).
+		SetLicensedAt(time.Now()).
 		SaveX(ctx)
 	log.Println("pet created:", pe0)
 	u1 := client.User.

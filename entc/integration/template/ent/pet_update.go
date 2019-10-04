@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
@@ -20,11 +21,13 @@ import (
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	age          *int
-	addage       *int
-	owner        map[int]struct{}
-	clearedOwner bool
-	predicates   []predicate.Pet
+	age              *int
+	addage           *int
+	licensed_at      *time.Time
+	clearlicensed_at bool
+	owner            map[int]struct{}
+	clearedOwner     bool
+	predicates       []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
@@ -47,6 +50,27 @@ func (pu *PetUpdate) AddAge(i int) *PetUpdate {
 	} else {
 		*pu.addage += i
 	}
+	return pu
+}
+
+// SetLicensedAt sets the licensed_at field.
+func (pu *PetUpdate) SetLicensedAt(t time.Time) *PetUpdate {
+	pu.licensed_at = &t
+	return pu
+}
+
+// SetNillableLicensedAt sets the licensed_at field if the given value is not nil.
+func (pu *PetUpdate) SetNillableLicensedAt(t *time.Time) *PetUpdate {
+	if t != nil {
+		pu.SetLicensedAt(*t)
+	}
+	return pu
+}
+
+// ClearLicensedAt clears the value of licensed_at.
+func (pu *PetUpdate) ClearLicensedAt() *PetUpdate {
+	pu.licensed_at = nil
+	pu.clearlicensed_at = true
 	return pu
 }
 
@@ -145,6 +169,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value := pu.addage; value != nil {
 		builder.Add(pet.FieldAge, *value)
 	}
+	if value := pu.licensed_at; value != nil {
+		builder.Set(pet.FieldLicensedAt, *value)
+	}
+	if pu.clearlicensed_at {
+		builder.SetNull(pet.FieldLicensedAt)
+	}
 	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -180,11 +210,13 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id           int
-	age          *int
-	addage       *int
-	owner        map[int]struct{}
-	clearedOwner bool
+	id               int
+	age              *int
+	addage           *int
+	licensed_at      *time.Time
+	clearlicensed_at bool
+	owner            map[int]struct{}
+	clearedOwner     bool
 }
 
 // SetAge sets the age field.
@@ -201,6 +233,27 @@ func (puo *PetUpdateOne) AddAge(i int) *PetUpdateOne {
 	} else {
 		*puo.addage += i
 	}
+	return puo
+}
+
+// SetLicensedAt sets the licensed_at field.
+func (puo *PetUpdateOne) SetLicensedAt(t time.Time) *PetUpdateOne {
+	puo.licensed_at = &t
+	return puo
+}
+
+// SetNillableLicensedAt sets the licensed_at field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableLicensedAt(t *time.Time) *PetUpdateOne {
+	if t != nil {
+		puo.SetLicensedAt(*t)
+	}
+	return puo
+}
+
+// ClearLicensedAt clears the value of licensed_at.
+func (puo *PetUpdateOne) ClearLicensedAt() *PetUpdateOne {
+	puo.licensed_at = nil
+	puo.clearlicensed_at = true
 	return puo
 }
 
@@ -303,6 +356,14 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	if value := puo.addage; value != nil {
 		builder.Add(pet.FieldAge, *value)
 		pe.Age += *value
+	}
+	if value := puo.licensed_at; value != nil {
+		builder.Set(pet.FieldLicensedAt, *value)
+		pe.LicensedAt = value
+	}
+	if puo.clearlicensed_at {
+		pe.LicensedAt = nil
+		builder.SetNull(pet.FieldLicensedAt)
 	}
 	if !builder.Empty() {
 		query, args := builder.Query()

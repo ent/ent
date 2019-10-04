@@ -28,6 +28,7 @@ var (
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt},
+		{Name: "licensed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
@@ -38,7 +39,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "pets_users_pets",
-				Columns: []*schema.Column{PetsColumns[2]},
+				Columns: []*schema.Column{PetsColumns[3]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,

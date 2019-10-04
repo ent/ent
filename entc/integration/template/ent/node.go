@@ -68,7 +68,7 @@ func (pe *Pet) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     pe.ID,
 		Type:   "Pet",
-		Fields: make([]*Field, 1),
+		Fields: make([]*Field, 2),
 		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
@@ -78,6 +78,14 @@ func (pe *Pet) Node(ctx context.Context) (node *Node, err error) {
 	node.Fields[0] = &Field{
 		Type:  "int",
 		Name:  "Age",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(pe.LicensedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "time.Time",
+		Name:  "LicensedAt",
 		Value: string(buf),
 	}
 	var ids []int
