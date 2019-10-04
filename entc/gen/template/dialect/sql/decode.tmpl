@@ -34,14 +34,10 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 				}
 			}
 		{{- else if $f.Nillable }}
-			{{- if $f.IsTime }}
-				{{ $receiver }}.{{ pascal $f.Name }} = &{{ $scan }}.{{ pascal $f.Name }}
-			{{- else }}
-				if {{ $scan }}.{{- pascal $f.Name }}.Valid {
-					{{ $receiver }}.{{ pascal $f.Name }} = new({{ $f.Type }})
-					*{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
-				}
-			{{- end }}
+			if {{ $scan }}.{{- pascal $f.Name }}.Valid {
+				{{ $receiver }}.{{ pascal $f.Name }} = new({{ $f.Type }})
+				*{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
+			}
 		{{- else }}
 			{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
 		{{- end }}

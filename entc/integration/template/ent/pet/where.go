@@ -7,6 +7,8 @@
 package pet
 
 import (
+	"time"
+
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
 )
@@ -121,6 +123,15 @@ func Age(v int) predicate.Pet {
 	)
 }
 
+// LicensedAt applies equality check predicate on the "licensed_at" field. It's identical to LicensedAtEQ.
+func LicensedAt(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v int) predicate.Pet {
 	return predicate.Pet(
@@ -209,6 +220,116 @@ func AgeLTE(v int) predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
 			s.Where(sql.LTE(s.C(FieldAge), v))
+		},
+	)
+}
+
+// LicensedAtEQ applies the EQ predicate on the "licensed_at" field.
+func LicensedAtEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
+// LicensedAtNEQ applies the NEQ predicate on the "licensed_at" field.
+func LicensedAtNEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
+// LicensedAtIn applies the In predicate on the "licensed_at" field.
+func LicensedAtIn(vs ...time.Time) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldLicensedAt), v...))
+		},
+	)
+}
+
+// LicensedAtNotIn applies the NotIn predicate on the "licensed_at" field.
+func LicensedAtNotIn(vs ...time.Time) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldLicensedAt), v...))
+		},
+	)
+}
+
+// LicensedAtGT applies the GT predicate on the "licensed_at" field.
+func LicensedAtGT(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.GT(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
+// LicensedAtGTE applies the GTE predicate on the "licensed_at" field.
+func LicensedAtGTE(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.GTE(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
+// LicensedAtLT applies the LT predicate on the "licensed_at" field.
+func LicensedAtLT(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.LT(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
+// LicensedAtLTE applies the LTE predicate on the "licensed_at" field.
+func LicensedAtLTE(v time.Time) predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.LTE(s.C(FieldLicensedAt), v))
+		},
+	)
+}
+
+// LicensedAtIsNil applies the IsNil predicate on the "licensed_at" field.
+func LicensedAtIsNil() predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldLicensedAt)))
+		},
+	)
+}
+
+// LicensedAtNotNil applies the NotNil predicate on the "licensed_at" field.
+func LicensedAtNotNil() predicate.Pet {
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldLicensedAt)))
 		},
 	)
 }

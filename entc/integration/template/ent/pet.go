@@ -9,6 +9,7 @@ package ent
 import (
 	"bytes"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -20,23 +21,31 @@ type Pet struct {
 	ID int `json:"id,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
+	// LicensedAt holds the value of the "licensed_at" field.
+	LicensedAt *time.Time `json:"licensed_at,omitempty"`
 }
 
 // FromRows scans the sql response data into Pet.
 func (pe *Pet) FromRows(rows *sql.Rows) error {
 	var vpe struct {
-		ID  int
-		Age sql.NullInt64
+		ID         int
+		Age        sql.NullInt64
+		LicensedAt sql.NullTime
 	}
 	// the order here should be the same as in the `pet.Columns`.
 	if err := rows.Scan(
 		&vpe.ID,
 		&vpe.Age,
+		&vpe.LicensedAt,
 	); err != nil {
 		return err
 	}
 	pe.ID = vpe.ID
 	pe.Age = int(vpe.Age.Int64)
+	if vpe.LicensedAt.Valid {
+		pe.LicensedAt = new(time.Time)
+		*pe.LicensedAt = vpe.LicensedAt.Time
+	}
 	return nil
 }
 
@@ -69,6 +78,9 @@ func (pe *Pet) String() string {
 	buf.WriteString("Pet(")
 	buf.WriteString(fmt.Sprintf("id=%v", pe.ID))
 	buf.WriteString(fmt.Sprintf(", age=%v", pe.Age))
+	if v := pe.LicensedAt; v != nil {
+		buf.WriteString(fmt.Sprintf(", licensed_at=%v", *v))
+	}
 	buf.WriteString(")")
 	return buf.String()
 }

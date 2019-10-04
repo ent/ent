@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
@@ -17,13 +18,28 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	age   *int
-	owner map[int]struct{}
+	age         *int
+	licensed_at *time.Time
+	owner       map[int]struct{}
 }
 
 // SetAge sets the age field.
 func (pc *PetCreate) SetAge(i int) *PetCreate {
 	pc.age = &i
+	return pc
+}
+
+// SetLicensedAt sets the licensed_at field.
+func (pc *PetCreate) SetLicensedAt(t time.Time) *PetCreate {
+	pc.licensed_at = &t
+	return pc
+}
+
+// SetNillableLicensedAt sets the licensed_at field if the given value is not nil.
+func (pc *PetCreate) SetNillableLicensedAt(t *time.Time) *PetCreate {
+	if t != nil {
+		pc.SetLicensedAt(*t)
+	}
 	return pc
 }
 
@@ -82,6 +98,10 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	if value := pc.age; value != nil {
 		builder.Set(pet.FieldAge, *value)
 		pe.Age = *value
+	}
+	if value := pc.licensed_at; value != nil {
+		builder.Set(pet.FieldLicensedAt, *value)
+		pe.LicensedAt = value
 	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
