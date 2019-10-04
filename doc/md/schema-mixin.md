@@ -3,7 +3,7 @@ id: schema-mixin
 title: Mixin
 ---
  
-A `Mixim` allows you to create reusable pieces of `ent.Schema` code.
+A `Mixin` allows you to create reusable pieces of `ent.Schema` code.
 
 The `ent.Mixin` interface is as follows:
 
