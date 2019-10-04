@@ -318,7 +318,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 }
 
 func (ft FieldTypes) config(cfg config) {
-	for i := range ft {
-		ft[i].config = cfg
+	for _i := range ft {
+		ft[_i].config = cfg
 	}
 }

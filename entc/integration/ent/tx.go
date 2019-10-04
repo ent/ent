@@ -30,6 +30,8 @@ type Tx struct {
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
 	GroupInfo *GroupInfoClient
+	// Item is the client for interacting with the Item builders.
+	Item *ItemClient
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
@@ -60,6 +62,7 @@ func (tx *Tx) Client() *Client {
 		FileType:  NewFileTypeClient(tx.config),
 		Group:     NewGroupClient(tx.config),
 		GroupInfo: NewGroupInfoClient(tx.config),
+		Item:      NewItemClient(tx.config),
 		Node:      NewNodeClient(tx.config),
 		Pet:       NewPetClient(tx.config),
 		User:      NewUserClient(tx.config),

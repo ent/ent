@@ -142,7 +142,7 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 }
 
 func (pe Pets) config(cfg config) {
-	for i := range pe {
-		pe[i].config = cfg
+	for _i := range pe {
+		pe[_i].config = cfg
 	}
 }

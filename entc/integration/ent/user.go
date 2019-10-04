@@ -227,7 +227,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 }
 
 func (u Users) config(cfg config) {
-	for i := range u {
-		u[i].config = cfg
+	for _i := range u {
+		u[_i].config = cfg
 	}
 }
