@@ -87,7 +87,7 @@ func (g *Graph) Gen() (err error) {
 			b := bytes.NewBuffer(nil)
 			check(templates.ExecuteTemplate(b, tmpl.Name, n), "execute template %q", tmpl.Name)
 			target := filepath.Join(g.Config.Target, tmpl.Format(n))
-			check(writefmt(target, b.Bytes()), "write file %s", target)
+			check(writeFile(target, b.Bytes()), "write file %s", target)
 		}
 	}
 	for _, tmpl := range append(GraphTemplates[:], external...) {
@@ -101,7 +101,7 @@ func (g *Graph) Gen() (err error) {
 		b := bytes.NewBuffer(nil)
 		check(templates.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
 		target := filepath.Join(g.Config.Target, tmpl.Format)
-		check(writefmt(target, b.Bytes()), "write file %s", target)
+		check(writeFile(target, b.Bytes()), "write file %s", target)
 	}
 	return
 }
@@ -440,15 +440,10 @@ func catch(err *error) {
 	}
 }
 
-func writefmt(target string, src []byte) error {
-	source, err := imports.Process(target, src, &imports.Options{
-		TabWidth:  8,
-		TabIndent: true,
-		Comments:  true,
-		Fragment:  true,
-	})
+func writeFile(target string, src []byte) error {
+	source, err := imports.Process(target, src, nil)
 	if err != nil {
-		return fmt.Errorf("running goimports %s", string(src))
+		return fmt.Errorf("formatting source: %v", err)
 	}
 	return ioutil.WriteFile(target, source, 0644)
 }
