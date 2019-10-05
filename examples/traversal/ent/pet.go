@@ -94,7 +94,7 @@ func (pe *Pets) FromRows(rows *sql.Rows) error {
 }
 
 func (pe Pets) config(cfg config) {
-	for i := range pe {
-		pe[i].config = cfg
+	for _i := range pe {
+		pe[_i].config = cfg
 	}
 }

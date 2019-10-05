@@ -89,7 +89,7 @@ func (s *Streets) FromRows(rows *sql.Rows) error {
 }
 
 func (s Streets) config(cfg config) {
-	for i := range s {
-		s[i].config = cfg
+	for _i := range s {
+		s[_i].config = cfg
 	}
 }

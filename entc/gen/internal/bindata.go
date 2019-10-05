@@ -594,7 +594,7 @@ func templateDialectSqlDecodeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/decode.tmpl", size: 2142, mode: os.FileMode(420), modTime: time.Unix(1570172976, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/decode.tmpl", size: 2142, mode: os.FileMode(420), modTime: time.Unix(1570187959, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
