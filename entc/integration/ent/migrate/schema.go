@@ -85,7 +85,7 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "size", Type: field.TypeInt, Default: file.DefaultSize},
+		{Name: "fsize", Type: field.TypeInt, Default: file.DefaultSize},
 		{Name: "name", Type: field.TypeString},
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
@@ -123,7 +123,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "name_size",
+				Name:    "name_fsize",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[1]},
 			},

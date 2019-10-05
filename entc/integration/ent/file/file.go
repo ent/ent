@@ -16,7 +16,7 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 	// FieldSize holds the string denoting the size vertex property in the database.
-	FieldSize = "size"
+	FieldSize = "fsize"
 	// FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
 	// FieldUser holds the string denoting the user vertex property in the database.
