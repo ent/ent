@@ -97,8 +97,8 @@ type (
 		// type with the same name (symmetric relation). For example, a User
 		// type have one of following edges:
 		//
-		//	edge.To("friends", User.Type)			// many 2 many.
-		//	edge.To("spouse", User.Type).Unique()	// one 2 one.
+		//	edge.To("friends", User.Type)           // many 2 many.
+		//	edge.To("spouse", User.Type).Unique()   // one 2 one.
 		//
 		SelfRef bool
 	}
