@@ -9,9 +9,6 @@ jobs:
     - image: circleci/golang
     working_directory: /go/src/github.com/facebookincubator/ent
     steps:
-    - run: &goimports_install
-        name: Install goimports
-        command: go get -u golang.org/x/tools/cmd/goimports
     - checkout
     - run:
         name: Dialect tests
@@ -45,7 +42,6 @@ jobs:
         command: conf/gremlin-server.yaml
     steps:
       - checkout
-      - run: *goimports_install
       - run:
           name: Run integration tests
           working_directory: entc/integration
