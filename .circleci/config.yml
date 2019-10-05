@@ -7,33 +7,41 @@ jobs:
   unit:
     docker:
     - image: circleci/golang
-    working_directory: /go/src/github.com/facebookincubator/ent
     steps:
     - checkout
+    - run: &mktestdir
+        name: Create results directory
+        command: mkdir -p ~/test-results
     - run:
         name: Dialect tests
-        command: go test -v ./dialect/...
+        command: gotestsum --junitfile ~/test-results/dialect.xml
+        working_directory: dialect
     - run:
         name: Schema tests
-        command: go test -v ./schema/...
+        command: gotestsum --junitfile ~/test-results/schema.xml
+        working_directory: schema
     - run:
         name: Loader tests
-        command: go test -v ./entc/load/...
+        command: gotestsum --junitfile ~/test-results/load.xml
+        working_directory: entc/load
     - run:
         name: Codegen tests
-        command: go test -v ./entc/gen/...
+        command: gotestsum --junitfile ~/test-results/gen.xml
+        working_directory: entc/gen
+    - store_test_results:
+        path: ~/test-results
   integration:
     docker:
       - image: circleci/golang
-      - image: mysql:5.6.35
+      - image: circleci/mysql:5.6.35
         environment: &mysql_env
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
-      - image: mysql:5.7.26
+      - image: circleci/mysql:5.7.26
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3307
-      - image: mysql:8
+      - image: circleci/mysql:8
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
@@ -43,9 +51,20 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Wait for databases
+          command: >-
+            dockerize -timeout 1m
+            -wait tcp://localhost:3306
+            -wait tcp://localhost:3307
+            -wait tcp://localhost:3308
+            -wait tcp://localhost:8182
+      - run: *mktestdir
+      - run:
           name: Run integration tests
           working_directory: entc/integration
-          command: go test -v -race ./...
+          command: gotestsum --junitfile ~/test-results/integration.xml -- -race ./...
+      - store_test_results:
+          path: ~/test-results
   docs:
     docker:
     - image: circleci/node

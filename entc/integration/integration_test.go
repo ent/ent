@@ -8,9 +8,11 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net"
 	"reflect"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -23,8 +25,8 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/go-sql-driver/mysql"
 
-	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -45,8 +47,12 @@ func TestSQLite(t *testing.T) {
 
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
+		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
 		t.Run(version, func(t *testing.T) {
-			client, err := ent.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/test?parseTime=True", port))
+			client, err := ent.Open("mysql", (&mysql.Config{
+				User: "root", Passwd: "pass", Net: "tcp", Addr: addr,
+				DBName: "test", ParseTime: true, AllowNativePasswords: true,
+			}).FormatDSN())
 			require.NoError(t, err)
 			defer client.Close()
 			require.NoError(t, client.Schema.Create(context.Background()))

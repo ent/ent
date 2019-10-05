@@ -6,37 +6,42 @@ package json
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
-	"fmt"
+	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"testing"
 
 	"github.com/facebookincubator/ent/entc/integration/json/ent"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/migrate"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
+		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
 		t.Run(version, func(t *testing.T) {
-			root, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/", port))
+			cfg := mysql.Config{
+				User: "root", Passwd: "pass", Net: "tcp", Addr: addr,
+				AllowNativePasswords: true, ParseTime: true,
+			}
+			db, err := sql.Open("mysql", cfg.FormatDSN())
 			require.NoError(t, err)
-			defer root.Close()
-			ctx := context.Background()
-			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS json", []interface{}{}, new(sql.Result))
+			defer db.Close()
+			_, err = db.Exec("CREATE DATABASE IF NOT EXISTS json")
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE IF EXISTS json", []interface{}{}, new(sql.Result))
+			defer db.Exec("DROP DATABASE IF EXISTS json")
 
-			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/json?parseTime=True", port))
-			require.NoError(t, err, "connecting to migrate database")
-			client := ent.NewClient(ent.Driver(drv))
-			require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+			cfg.DBName = "json"
+			client, err := ent.Open("mysql", cfg.FormatDSN())
+			require.NoError(t, err, "connecting to json database")
+			err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
+			require.NoError(t, err)
 
 			URL(t, client)
 			Dirs(t, client)
