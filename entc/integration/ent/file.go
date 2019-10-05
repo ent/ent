@@ -68,7 +68,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	}
 	var vf struct {
 		ID    string  `json:"id,omitempty"`
-		Size  int     `json:"size,omitempty"`
+		Size  int     `json:"fsize,omitempty"`
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
@@ -156,7 +156,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 	}
 	var vf []struct {
 		ID    string  `json:"id,omitempty"`
-		Size  int     `json:"size,omitempty"`
+		Size  int     `json:"fsize,omitempty"`
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`

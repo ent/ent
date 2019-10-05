@@ -22,6 +22,7 @@ type File struct {
 func (File) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("size").
+			StorageKey("fsize").
 			Default(math.MaxInt32).
 			Positive(),
 		field.String("name"),
