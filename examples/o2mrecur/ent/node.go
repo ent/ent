@@ -94,7 +94,7 @@ func (n *Nodes) FromRows(rows *sql.Rows) error {
 }
 
 func (n Nodes) config(cfg config) {
-	for i := range n {
-		n[i].config = cfg
+	for _i := range n {
+		n[_i].config = cfg
 	}
 }
