@@ -3,7 +3,7 @@
 # in the LICENSE file in the root directory of this source tree.
 
 # Application base
-FROM golang:1.13
+FROM golang:1.13-alpine
 
 # Install tools required to build the project
 RUN apk add --no-cache git gcc musl-dev
