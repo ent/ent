@@ -36,7 +36,7 @@ func (TimeMixin) Fields() []ent.Field {
 	}
 }
 
-// TimeMixin implements the ent.Mixin for sharing
+// DetailsMixin implements the ent.Mixin for sharing
 // entity details fields with package schemas.
 type DetailsMixin struct{}
 
