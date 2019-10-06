@@ -133,6 +133,7 @@ func loadGraph(path string, cfg gen.Config) (*gen.Graph, error) {
 	}
 	cfg.Schema = spec.PkgPath
 	cfg.Package = filepath.Dir(spec.PkgPath)
+	cfg.Package = strings.Replace(cfg.Package, "\\", "/", -1)
 	return gen.NewGraph(cfg, spec.Schemas...)
 }
 
