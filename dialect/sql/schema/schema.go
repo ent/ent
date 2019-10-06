@@ -119,6 +119,18 @@ func (t *Table) MySQL(version string) *sql.TableBuilder {
 	return b
 }
 
+// PostgreSQL returns the PostgreSQL DSL query for table creation.
+func (t *Table) PostgreSQL() *sql.TableBuilder {
+	b := sql.CreateTable(t.Name).IfNotExists()
+	for _, c := range t.Columns {
+		b.Column(c.PostgreSQL())
+	}
+	for _, pk := range t.PrimaryKey {
+		b.PrimaryKey(pk.Name)
+	}
+	return b
+}
+
 // SQLite returns the SQLite query for table creation.
 func (t *Table) SQLite() *sql.TableBuilder {
 	b := sql.CreateTable(t.Name)
@@ -201,6 +213,25 @@ func (c *Column) MySQL(version string) *sql.ColumnBuilder {
 	c.unique(b)
 	if c.Increment {
 		b.Attr("AUTO_INCREMENT")
+	}
+	c.nullable(b)
+	c.defaultValue(b)
+	return b
+}
+
+// PostgreSQL returns the PostgreSQL DSL query for table creation.
+// The syntax/order is: datatype [Charset] [Unique|Increment] [Collation] [Nullable].
+func (c *Column) PostgreSQL() *sql.ColumnBuilder {
+	b := sql.Column(c.Name).Type(c.PostgreSQLType()).Attr(c.Attr)
+	c.unique(b)
+	if c.Increment {
+		if c.Key == "PRI" {
+			b.Attr("GENERATED ALWAYS AS IDENTITY")
+		} else {
+			// #TODO: remove
+			// Maybe just return error?
+			panic("Figure out how to support auto increment")
+		}
 	}
 	c.nullable(b)
 	c.defaultValue(b)
@@ -290,6 +321,65 @@ func (c *Column) MySQLType(version string) (t string) {
 	return t
 }
 
+// PostgreSQLType returns the MySQL string type for this column.
+func (c *Column) PostgreSQLType() (t string) {
+	switch c.Type {
+	case field.TypeBool:
+		t = "boolean"
+	case field.TypeInt8:
+		// TODO: is smallint smallest size postgres has?
+		t = "smallint"
+	case field.TypeUint8:
+		t = "smallint unsigned"
+	case field.TypeInt16:
+		t = "smallint"
+	case field.TypeUint16:
+		t = "smallint unsigned"
+	case field.TypeInt32:
+		t = "int"
+	case field.TypeUint32:
+		t = "int unsigned"
+	case field.TypeInt, field.TypeInt64:
+		t = "bigint"
+	case field.TypeUint, field.TypeUint64:
+		t = "bigint unsigned"
+	case field.TypeBytes:
+		t = "bytea"
+	case field.TypeJSON:
+		// TODO: jsonb vs json
+		t = "jsonb"
+	case field.TypeString:
+		size := c.Size
+
+		if size == 0 {
+			// TODO: should this come from config?
+			size = 255
+		}
+
+		if size <= math.MaxUint16 {
+			// TODO: https://wiki.postgresql.org/wiki/Don't_Do_This#Don.27t_use_varchar.28n.29_by_default
+			t = fmt.Sprintf("varchar(%d)", size)
+		} else {
+			t = "text"
+		}
+	case field.TypeFloat32, field.TypeFloat64:
+		t = "double precision"
+	case field.TypeTime:
+		// TODO timezone or not?
+		t = "timestamp"
+	case field.TypeEnum:
+		values := make([]string, len(c.Enums))
+		for i, e := range c.Enums {
+			values[i] = fmt.Sprintf("'%s'", e)
+		}
+		sort.Strings(values)
+		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
+	default:
+		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
+	}
+	return t
+}
+
 // SQLiteType returns the SQLite string type for this column.
 func (c *Column) SQLiteType() (t string) {
 	switch c.Type {
@@ -322,6 +412,90 @@ func (c *Column) SQLiteType() (t string) {
 
 // ScanMySQL scans the information from MySQL column description.
 func (c *Column) ScanMySQL(rows *sql.Rows) error {
+	var (
+		nullable sql.NullString
+		defaults sql.NullString
+	)
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &sql.NullString{}, &sql.NullString{}); err != nil {
+		return fmt.Errorf("scanning column description: %v", err)
+	}
+	c.Unique = c.UniqueKey()
+	if nullable.Valid {
+		c.Nullable = nullable.String == "YES"
+	}
+	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
+		return r == '(' || r == ')' || r == ' ' || r == ','
+	}); parts[0] {
+	case "int":
+		c.Type = field.TypeInt32
+	case "smallint":
+		c.Type = field.TypeInt16
+		if len(parts) == 3 { // smallint(5) unsigned.
+			c.Type = field.TypeUint16
+		}
+	case "bigint":
+		c.Type = field.TypeInt64
+		if len(parts) == 3 { // bigint(20) unsigned.
+			c.Type = field.TypeUint64
+		}
+	case "tinyint":
+		size, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return fmt.Errorf("converting varchar size to int: %v", err)
+		}
+		switch {
+		case size == 1:
+			c.Type = field.TypeBool
+		case len(parts) == 3: // tinyint(3) unsigned.
+			c.Type = field.TypeUint8
+		default:
+			c.Type = field.TypeInt8
+		}
+	case "double":
+		c.Type = field.TypeFloat64
+	case "timestamp", "datetime":
+		c.Type = field.TypeTime
+	case "tinyblob":
+		c.Size = math.MaxUint8
+		c.Type = field.TypeBytes
+	case "blob":
+		c.Size = math.MaxUint16
+		c.Type = field.TypeBytes
+	case "mediumblob":
+		c.Size = 1<<24 - 1
+		c.Type = field.TypeBytes
+	case "longblob":
+		c.Size = math.MaxUint32
+		c.Type = field.TypeBytes
+	case "varchar":
+		c.Type = field.TypeString
+		size, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("converting varchar size to int: %v", err)
+		}
+		c.Size = size
+	case "longtext":
+		c.Size = math.MaxInt32
+		c.Type = field.TypeString
+	case "json":
+		c.Type = field.TypeJSON
+	case "enum":
+		c.Type = field.TypeEnum
+		c.Enums = make([]string, len(parts)-1)
+		for i, e := range parts[1:] {
+			c.Enums[i] = strings.Trim(e, "'")
+		}
+	}
+	if defaults.Valid && defaults.String != Null {
+		return c.ScanDefault(defaults.String)
+	}
+	return nil
+}
+
+// ScanPostgreSQL scans the information from MySQL column description.
+func (c *Column) ScanPostgreSQL(rows *sql.Rows) error {
+	// TODO: copied form MySQL
+
 	var (
 		nullable sql.NullString
 		defaults sql.NullString
@@ -634,6 +808,36 @@ func (i *Indexes) append(idx1 *Index) {
 // should return the following 4 columns: INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX.
 // SEQ_IN_INDEX specifies the position of the column in the index columns.
 func (i *Indexes) ScanMySQL(rows *sql.Rows) error {
+	names := make(map[string]*Index)
+	for rows.Next() {
+		var (
+			name     string
+			column   string
+			nonuniq  bool
+			seqindex int
+		)
+		if err := rows.Scan(&name, &column, &nonuniq, &seqindex); err != nil {
+			return fmt.Errorf("scanning index description: %v", err)
+		}
+		idx, ok := names[name]
+		if !ok {
+			idx = &Index{Name: name, Unique: !nonuniq}
+			// ignore primary keys.
+			if idx.Primary() {
+				continue
+			}
+			*i = append(*i, idx)
+			names[name] = idx
+		}
+		idx.columns = append(idx.columns, column)
+	}
+	return nil
+}
+
+// ScanPostgreSQL scans sql.Rows into an Indexes list. The query for returning the rows,
+// should return the following 4 columns: INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX.
+// SEQ_IN_INDEX specifies the position of the column in the index columns.
+func (i *Indexes) ScanPostgreSQL(rows *sql.Rows) error {
 	names := make(map[string]*Index)
 	for rows.Next() {
 		var (

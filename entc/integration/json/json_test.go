@@ -53,6 +53,32 @@ func TestMySQL(t *testing.T) {
 	}
 }
 
+func TestPostgreSQL(t *testing.T) {
+	for version, port := range map[string]int{"11": 5432} {
+		t.Run(version, func(t *testing.T) {
+			root, err := sql.Open("mysql", fmt.Sprintf("postgres:pass@tcp(localhost:%d)/", port))
+			require.NoError(t, err)
+			defer root.Close()
+			ctx := context.Background()
+			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS json", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, "creating database")
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS json", []interface{}{}, new(sql.Result))
+
+			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/json?parseTime=True", port))
+			require.NoError(t, err, "connecting to migrate database")
+			client := ent.NewClient(ent.Driver(drv))
+			require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+			URL(t, client)
+			Dirs(t, client)
+			Ints(t, client)
+			Floats(t, client)
+			Strings(t, client)
+			RawMessage(t, client)
+		})
+	}
+}
+
 func Ints(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	ints := []int{1, 2, 3}

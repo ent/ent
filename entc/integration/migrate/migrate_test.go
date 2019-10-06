@@ -62,6 +62,47 @@ func TestMySQL(t *testing.T) {
 	}
 }
 
+func TestPostgreSQL(t *testing.T) {
+	for version, port := range map[string]int{"11": 5432} {
+		t.Run(version, func(t *testing.T) {
+			root, err := sql.Open("mysql", fmt.Sprintf("postgres:pass@tcp(localhost:%d)/", port))
+			require.NoError(t, err)
+			defer root.Close()
+			ctx := context.Background()
+			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, "creating database")
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result))
+
+			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
+			require.NoError(t, err, "connecting to migrate database")
+
+			// run migration and execute queries on v1.
+			clientv1 := entv1.NewClient(entv1.Driver(drv))
+			require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
+			SanityV1(t, clientv1)
+
+			// run migration and execute queries on v2.
+			clientv2 := entv2.NewClient(entv2.Driver(drv))
+			require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
+			SanityV2(t, clientv2)
+
+			// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
+			// even though they are ordered differently in the migration of v2 (groups, pets, users).
+			idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
+			idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
+			idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+
+			// sql specific predicates.
+			EqualFold(t, clientv2)
+			ContainsFold(t, clientv2)
+
+			// "renamed" field was renamed to "new_name".
+			exist := clientv2.User.Query().Where(user.NewName("renamed")).ExistX(ctx)
+			require.True(t, exist, "expect renamed column to have previous values")
+		})
+	}
+}
+
 func TestSQLite(t *testing.T) {
 	drv, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)

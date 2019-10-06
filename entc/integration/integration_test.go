@@ -28,6 +28,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 	"github.com/go-sql-driver/mysql"
 
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -54,6 +55,24 @@ func TestMySQL(t *testing.T) {
 				User: "root", Passwd: "pass", Net: "tcp", Addr: addr,
 				DBName: "test", ParseTime: true, AllowNativePasswords: true,
 			}).FormatDSN())
+			require.NoError(t, err)
+			defer client.Close()
+			require.NoError(t, client.Schema.Create(context.Background()))
+			for _, tt := range tests {
+				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
+					drop(t, client)
+					tt(t, client)
+				})
+			}
+		})
+	}
+}
+
+func TestPostgreSQL(t *testing.T) {
+	for version, port := range map[string]int{"11": 5432} {
+		t.Run(version, func(t *testing.T) {
+			client, err := ent.Open("postgres", fmt.Sprintf("postgres://postgres:pass@localhost:%d/test?sslmode=disable", port))
 			require.NoError(t, err)
 			defer client.Close()
 			require.NoError(t, client.Schema.Create(context.Background()))

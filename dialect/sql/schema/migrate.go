@@ -64,6 +64,8 @@ type Migrate struct {
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 	m := &Migrate{}
 	switch d.Dialect() {
+	case dialect.Postgres:
+		m.sqlDialect = &PostgreSQL{Driver: d}
 	case dialect.MySQL:
 		m.sqlDialect = &MySQL{Driver: d}
 	case dialect.SQLite:
@@ -123,8 +125,11 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			if err := m.apply(ctx, tx, t.Name, change); err != nil {
 				return err
 			}
+
 		default: // !exist
-			query, args := m.tBuilder(t).Query()
+			builder := m.tBuilder(t)
+			builder.SetDialect(m.Dialect())
+			query, args := builder.Query()
 			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
 				return fmt.Errorf("create table %q: %v", t.Name, err)
 			}
@@ -333,7 +338,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 		return nil
 	}
 	rows := &sql.Rows{}
-	query, args := sql.Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
+	query, args := sql.Dialect(m.Dialect()).Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return fmt.Errorf("query types table: %v", err)
 	}
@@ -355,7 +360,7 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 		if len(m.typeRanges) > MaxTypes {
 			return fmt.Errorf("max number of types exceeded: %d", MaxTypes)
 		}
-		query, args := sql.Insert(TypeTable).Columns("type").Values(t.Name).Query()
+		query, args := sql.Dialect(m.Dialect()).Insert(TypeTable).Columns("type").Values(t.Name).Query()
 		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
 			return fmt.Errorf("insert into type: %v", err)
 		}

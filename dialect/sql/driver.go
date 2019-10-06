@@ -43,7 +43,7 @@ func (d Driver) DB() *sql.DB {
 // Dialect implements the dialect.Dialect method.
 func (d Driver) Dialect() string {
 	// if the underlying driver is wrapped with opencensus driver.
-	for _, name := range []string{dialect.MySQL, dialect.SQLite} {
+	for _, name := range []string{dialect.MySQL, dialect.Postgres, dialect.SQLite} {
 		if strings.HasPrefix(d.dialect, name) {
 			return name
 		}

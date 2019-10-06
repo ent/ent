@@ -71,6 +71,10 @@ jobs:
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
+      - image: postgres:11
+        environment: &postgresql_env
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
       - image: entgo/gremlin-server
         entrypoint: /opt/gremlin-server/bin/gremlin-server.sh
         command: conf/gremlin-server.yaml

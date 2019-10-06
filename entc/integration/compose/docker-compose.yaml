@@ -36,6 +36,17 @@ services:
     ports:
       - 3308:3306
 
+  postgres11:
+    image: postgres:11
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    # TODO
+    # healthcheck:
+    #  test: mysqladmin ping -ppass
+    ports:
+      - 5432:5432
+
   gremlin:
     build: gremlin-server
     restart: on-failure
