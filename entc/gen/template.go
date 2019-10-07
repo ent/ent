@@ -16,7 +16,7 @@ import (
 	"github.com/facebookincubator/ent/entc/gen/internal"
 )
 
-//go:generate go-bindata -o=internal/bindata.go -pkg=internal ./template/...
+//go:generate go run github.com/go-bindata/go-bindata/go-bindata -o=internal/bindata.go -pkg=internal ./template/...
 
 type (
 	// TypeTemplate specifies a template that is executed with

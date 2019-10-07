@@ -192,7 +192,7 @@ func indirectType(typ types.Type) types.Type {
 	}
 }
 
-//go:generate go-bindata -pkg=internal -o=internal/bindata.go ./template/... schema.go
+//go:generate go run github.com/go-bindata/go-bindata/go-bindata -pkg=internal -o=internal/bindata.go ./template/... schema.go
 
 var buildTmpl = templates()
 

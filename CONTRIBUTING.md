@@ -15,20 +15,10 @@ possible.
   - `entc/load` - `entc` loader API for loading user schemas into a Go objects at runtime.
   - `entc/gen` - The actual code generation logic resides in this package (and its `templates` package).
   - `integration` - Integration tests for `entc`.
-  
+
 - `doc` - Documentation code for `entgo.io` (uses [Docusaurus](https://docusaurus.io)).
   - `doc/md` - Markdown files for documentation.
   - `doc/website` - Website code and assets.
-
-# Working on `entc`
-
-If you work on one of the template files (`gen/templates`, `load/templates`, `load/schema.go`), you should
-run `go-bindata`, in order to embedded these files in `entc` binary. Please install it by running the following
-command in your `$HOME` directory.
-
-```
-go get -u github.com/go-bindata/go-bindata
-```
 
 # Run integration tests
 If you touch any file in `entc`, run the following command in `entc/integration`:
