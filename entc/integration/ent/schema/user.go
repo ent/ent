@@ -30,6 +30,9 @@ func (User) Fields() []ent.Field {
 		field.String("phone").
 			Optional().
 			Unique(),
+		field.String("password").
+			Optional().
+			Sensitive(),
 	}
 }
 

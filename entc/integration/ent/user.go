@@ -30,6 +30,8 @@ type User struct {
 	Nickname string `json:"nickname,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `graphql:"-" json:"-"`
 }
 
 // FromRows scans the sql response data into User.
@@ -41,6 +43,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		Last     sql.NullString
 		Nickname sql.NullString
 		Phone    sql.NullString
+		Password sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
@@ -50,6 +53,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		&vu.Last,
 		&vu.Nickname,
 		&vu.Phone,
+		&vu.Password,
 	); err != nil {
 		return err
 	}
@@ -59,6 +63,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Last = vu.Last.String
 	u.Nickname = vu.Nickname.String
 	u.Phone = vu.Phone.String
+	u.Password = vu.Password.String
 	return nil
 }
 
@@ -75,6 +80,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Last     string `json:"last,omitempty"`
 		Nickname string `json:"nickname,omitempty"`
 		Phone    string `json:"phone,omitempty"`
+		Password string `json:"password,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
@@ -85,6 +91,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Last = vu.Last
 	u.Nickname = vu.Nickname
 	u.Phone = vu.Phone
+	u.Password = vu.Password
 	return nil
 }
 
@@ -171,6 +178,7 @@ func (u *User) String() string {
 	buf.WriteString(fmt.Sprintf(", last=%v", u.Last))
 	buf.WriteString(fmt.Sprintf(", nickname=%v", u.Nickname))
 	buf.WriteString(fmt.Sprintf(", phone=%v", u.Phone))
+	buf.WriteString(", password=<sensitive>")
 	buf.WriteString(")")
 	return buf.String()
 }
@@ -209,6 +217,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		Last     string `json:"last,omitempty"`
 		Nickname string `json:"nickname,omitempty"`
 		Phone    string `json:"phone,omitempty"`
+		Password string `json:"password,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
@@ -221,6 +230,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Last:     v.Last,
 			Nickname: v.Nickname,
 			Phone:    v.Phone,
+			Password: v.Password,
 		})
 	}
 	return nil

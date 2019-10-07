@@ -154,6 +154,8 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			return nil, fmt.Errorf("unique field %q cannot have default value", f.Name)
 		case typ.fields[f.Name] != nil:
 			return nil, fmt.Errorf("field %q redeclared for type %q", f.Name, typ.Name)
+		case f.Sensitive && f.Tag != "":
+			return nil, fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
 		case f.Info.Type == field.TypeEnum:
 			if err := validEnums(f); err != nil {
 				return nil, err
@@ -458,6 +460,9 @@ func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeI
 
 // IsEnum returns true if the field is an enum field.
 func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
+
+// Sensitive returns true if the field is a sensitive field.
+func (f Field) Sensitive() bool { return f.def != nil && f.def.Sensitive }
 
 // NullType returns the sql null-type for optional and nullable fields.
 func (f Field) NullType() string {

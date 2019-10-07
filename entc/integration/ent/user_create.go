@@ -33,6 +33,7 @@ type UserCreate struct {
 	last      *string
 	nickname  *string
 	phone     *string
+	password  *string
 	card      map[string]struct{}
 	pets      map[string]struct{}
 	files     map[string]struct{}
@@ -96,6 +97,20 @@ func (uc *UserCreate) SetPhone(s string) *UserCreate {
 func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	if s != nil {
 		uc.SetPhone(*s)
+	}
+	return uc
+}
+
+// SetPassword sets the password field.
+func (uc *UserCreate) SetPassword(s string) *UserCreate {
+	uc.password = &s
+	return uc
+}
+
+// SetNillablePassword sets the password field if the given value is not nil.
+func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
+	if s != nil {
+		uc.SetPassword(*s)
 	}
 	return uc
 }
@@ -401,6 +416,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		builder.Set(user.FieldPhone, *value)
 		u.Phone = *value
 	}
+	if value := uc.password; value != nil {
+		builder.Set(user.FieldPassword, *value)
+		u.Password = *value
+	}
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)
@@ -680,6 +699,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *uc.phone)),
 		})
 		v.Property(dsl.Single, user.FieldPhone, *uc.phone)
+	}
+	if uc.password != nil {
+		v.Property(dsl.Single, user.FieldPassword, *uc.password)
 	}
 	for id := range uc.card {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()

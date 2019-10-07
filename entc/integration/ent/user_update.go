@@ -37,6 +37,8 @@ type UserUpdate struct {
 	clearnickname    bool
 	phone            *string
 	clearphone       bool
+	password         *string
+	clearpassword    bool
 	card             map[string]struct{}
 	pets             map[string]struct{}
 	files            map[string]struct{}
@@ -144,6 +146,27 @@ func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 func (uu *UserUpdate) ClearPhone() *UserUpdate {
 	uu.phone = nil
 	uu.clearphone = true
+	return uu
+}
+
+// SetPassword sets the password field.
+func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
+	uu.password = &s
+	return uu
+}
+
+// SetNillablePassword sets the password field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPassword(*s)
+	}
+	return uu
+}
+
+// ClearPassword clears the value of password.
+func (uu *UserUpdate) ClearPassword() *UserUpdate {
+	uu.password = nil
+	uu.clearpassword = true
 	return uu
 }
 
@@ -639,6 +662,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.clearphone {
 		builder.SetNull(user.FieldPhone)
+	}
+	if value := uu.password; value != nil {
+		builder.Set(user.FieldPassword, *value)
+	}
+	if uu.clearpassword {
+		builder.SetNull(user.FieldPassword)
 	}
 	if !builder.Empty() {
 		query, args := builder.Query()
@@ -1145,12 +1174,18 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 		})
 		v.Property(dsl.Single, user.FieldPhone, *value)
 	}
+	if value := uu.password; value != nil {
+		v.Property(dsl.Single, user.FieldPassword, *value)
+	}
 	var properties []interface{}
 	if uu.clearnickname {
 		properties = append(properties, user.FieldNickname)
 	}
 	if uu.clearphone {
 		properties = append(properties, user.FieldPhone)
+	}
+	if uu.clearpassword {
+		properties = append(properties, user.FieldPassword)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1287,6 +1322,8 @@ type UserUpdateOne struct {
 	clearnickname    bool
 	phone            *string
 	clearphone       bool
+	password         *string
+	clearpassword    bool
 	card             map[string]struct{}
 	pets             map[string]struct{}
 	files            map[string]struct{}
@@ -1387,6 +1424,27 @@ func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 func (uuo *UserUpdateOne) ClearPhone() *UserUpdateOne {
 	uuo.phone = nil
 	uuo.clearphone = true
+	return uuo
+}
+
+// SetPassword sets the password field.
+func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
+	uuo.password = &s
+	return uuo
+}
+
+// SetNillablePassword sets the password field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPassword(*s)
+	}
+	return uuo
+}
+
+// ClearPassword clears the value of password.
+func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
+	uuo.password = nil
+	uuo.clearpassword = true
 	return uuo
 }
 
@@ -1896,6 +1954,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		u.Phone = value
 		builder.SetNull(user.FieldPhone)
 	}
+	if value := uuo.password; value != nil {
+		builder.Set(user.FieldPassword, *value)
+		u.Password = *value
+	}
+	if uuo.clearpassword {
+		var value string
+		u.Password = value
+		builder.SetNull(user.FieldPassword)
+	}
 	if !builder.Empty() {
 		query, args := builder.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -2402,12 +2469,18 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 		})
 		v.Property(dsl.Single, user.FieldPhone, *value)
 	}
+	if value := uuo.password; value != nil {
+		v.Property(dsl.Single, user.FieldPassword, *value)
+	}
 	var properties []interface{}
 	if uuo.clearnickname {
 		properties = append(properties, user.FieldNickname)
 	}
 	if uuo.clearphone {
 		properties = append(properties, user.FieldPhone)
+	}
+	if uuo.clearpassword {
+		properties = append(properties, user.FieldPassword)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

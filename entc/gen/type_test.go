@@ -31,7 +31,13 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "unique field can not have default")
-	require.Nil(typ)
+
+	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+		Fields: []*load.Field{
+			{Sensitive: true, Tag: `yaml:"pwd"`, Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+	})
+	require.Error(err, "sensitive field cannot have tags")
 
 	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -41,7 +47,6 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "field foo redeclared")
-	require.Nil(typ)
 
 	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -50,7 +55,6 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "duplicate enums")
-	require.Nil(typ)
 
 	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -59,7 +63,6 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "empty value for enums")
-	require.Nil(typ)
 }
 
 func TestType_Label(t *testing.T) {

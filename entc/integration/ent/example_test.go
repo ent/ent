@@ -206,6 +206,7 @@ func ExampleGroup() {
 		SetLast("string").
 		SetNickname("string").
 		SetPhone("string").
+		SetPassword("string").
 		SaveX(ctx)
 	log.Println("user created:", u1)
 	gi3 := client.GroupInfo.
@@ -406,6 +407,7 @@ func ExampleUser() {
 		SetLast("string").
 		SetNickname("string").
 		SetPhone("string").
+		SetPassword("string").
 		SaveX(ctx)
 	log.Println("user created:", u4)
 	u6 := client.User.
@@ -415,6 +417,7 @@ func ExampleUser() {
 		SetLast("string").
 		SetNickname("string").
 		SetPhone("string").
+		SetPassword("string").
 		SaveX(ctx)
 	log.Println("user created:", u6)
 	pe7 := client.Pet.
@@ -429,6 +432,7 @@ func ExampleUser() {
 		SetLast("string").
 		SetNickname("string").
 		SetPhone("string").
+		SetPassword("string").
 		SaveX(ctx)
 	log.Println("user created:", u8)
 	u10 := client.User.
@@ -438,6 +442,7 @@ func ExampleUser() {
 		SetLast("string").
 		SetNickname("string").
 		SetPhone("string").
+		SetPassword("string").
 		SaveX(ctx)
 	log.Println("user created:", u10)
 
@@ -449,6 +454,7 @@ func ExampleUser() {
 		SetLast("string").
 		SetNickname("string").
 		SetPhone("string").
+		SetPassword("string").
 		SetCard(c0).
 		AddPets(pe1).
 		AddFiles(f2).

@@ -25,6 +25,8 @@ const (
 	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone vertex property in the database.
 	FieldPhone = "phone"
+	// FieldPassword holds the string denoting the password vertex property in the database.
+	FieldPassword = "password"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -112,6 +114,7 @@ var Columns = []string{
 	FieldLast,
 	FieldNickname,
 	FieldPhone,
+	FieldPassword,
 }
 
 var (

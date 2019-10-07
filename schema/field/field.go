@@ -27,6 +27,7 @@ type Descriptor struct {
 	Validators    []interface{} // validator functions.
 	StorageKey    string        // sql column or gremlin property.
 	Enums         []string      // enum values.
+	Sensitive     bool          // sensitive info string field.
 }
 
 // String returns a new Field with type string.
@@ -138,6 +139,12 @@ type stringBuilder struct {
 // Unique makes the field unique within all vertices of this type.
 func (b *stringBuilder) Unique() *stringBuilder {
 	b.desc.Unique = true
+	return b
+}
+
+// Sensitive fields not printable and not serializable.
+func (b *stringBuilder) Sensitive() *stringBuilder {
+	b.desc.Sensitive = true
 	return b
 }
 

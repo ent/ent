@@ -360,3 +360,25 @@ type User struct {
 	Logger	*log.Logger
 }
 ```
+
+## Sensitive Fields
+
+String fields can be defined as sensitive using the `Sensitive` method. Sensitive fields
+won't be printed and they will be omitted when encoding.  
+
+Note that sensitive fields cannot have struct tags.
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("password").
+			Sensitive(),
+	}
+}
+```
