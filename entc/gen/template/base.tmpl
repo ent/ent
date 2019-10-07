@@ -168,7 +168,7 @@ func IsConstraintFailure(err error) bool {
 // keys returns the keys/ids from the edge map.
 func keys(m map[{{ $id }}]struct{}) []{{ $id }} {
 	s := make([]{{ $id }}, 0, len(m))
-	for id, _ := range m {
+	for id := range m {
 		s = append(s, id)
 	}
 	return s

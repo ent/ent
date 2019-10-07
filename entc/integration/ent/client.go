@@ -104,6 +104,9 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 				URL: u,
 			},
 		})
+		if err != nil {
+			return nil, err
+		}
 		drv := gremlin.NewDriver(c)
 		return NewClient(append(options, Driver(drv))...), nil
 

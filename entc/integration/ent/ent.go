@@ -326,7 +326,7 @@ func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
 // keys returns the keys/ids from the edge map.
 func keys(m map[string]struct{}) []string {
 	s := make([]string, 0, len(m))
-	for id, _ := range m {
+	for id := range m {
 		s = append(s, id)
 	}
 	return s
