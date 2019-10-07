@@ -15,8 +15,8 @@ import (
 	"text/template"
 	"unicode"
 
+	"github.com/facebookincubator/ent/entc"
 	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/entc/load"
 	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/spf13/cobra"
@@ -70,7 +70,7 @@ func main() {
 			),
 			Args: cobra.ExactArgs(1),
 			Run: func(cmd *cobra.Command, path []string) {
-				graph, err := loadGraph(path[0], gen.Config{})
+				graph, err := entc.LoadGraph(path[0], &gen.Config{})
 				failOnErr(err)
 				graph.Describe(os.Stdout)
 			},
@@ -90,23 +90,13 @@ func main() {
 					),
 					Args: cobra.ExactArgs(1),
 					Run: func(cmd *cobra.Command, path []string) {
-						if cfg.Target == "" {
-							abs, err := filepath.Abs(path[0])
-							failOnErr(err)
-							cfg.Target = filepath.Dir(abs)
-						}
-						for _, s := range storage {
-							sr, err := gen.NewStorage(s)
-							failOnErr(err)
-							cfg.Storage = append(cfg.Storage, sr)
-						}
-						if len(template) > 0 {
-							cfg.Template = loadTemplate(template)
+						opts := []entc.Option{entc.Storage(storage...)}
+						for _, tmpl := range template {
+							opts = append(opts, entc.TemplateDir(tmpl))
 						}
 						cfg.IDType = &field.TypeInfo{Type: field.Type(idtype)}
-						graph, err := loadGraph(path[0], cfg)
+						err := entc.Generate(path[0], &cfg, opts...)
 						failOnErr(err)
-						failOnErr(graph.Gen())
 					},
 				}
 			)
@@ -119,49 +109,6 @@ func main() {
 		}(),
 	)
 	cmd.Execute()
-}
-
-// loadGraph loads the given schema package from the given path
-// and construct a *gen.Graph. The path can be either a package
-// path (e.g github.com/a8m/x) or a filepath.
-//
-// The second argument is an optional config for the graph creation.
-func loadGraph(path string, cfg gen.Config) (*gen.Graph, error) {
-	spec, err := (&load.Config{Path: path}).Load()
-	if err != nil {
-		return nil, err
-	}
-	cfg.Schema = spec.PkgPath
-	cfg.Package = filepath.Dir(spec.PkgPath)
-	return gen.NewGraph(cfg, spec.Schemas...)
-}
-
-// loadTemplate loads templates from files or directory.
-func loadTemplate(paths []string) *template.Template {
-	t := template.New("external").
-		Funcs(gen.Funcs)
-	for _, path := range paths {
-		info, err := os.Stat(path)
-		failOnErr(err)
-		if !info.IsDir() {
-			buf, err := ioutil.ReadFile(path)
-			failOnErr(err)
-			t, err = t.Parse(string(buf))
-			failOnErr(err)
-			continue
-		}
-		infos, err := ioutil.ReadDir(path)
-		failOnErr(err)
-		paths := make([]string, len(infos))
-		for i := range infos {
-			paths[i] = filepath.Join(path, infos[0].Name())
-		}
-		for _, tt := range loadTemplate(paths).Templates() {
-			t, err = t.AddParseTree(tt.Name(), tt.Tree)
-			failOnErr(err)
-		}
-	}
-	return t
 }
 
 // schema template for the "init" command.

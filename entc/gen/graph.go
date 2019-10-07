@@ -48,7 +48,7 @@ type (
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
 	Graph struct {
-		Config
+		*Config
 		// Nodes are list of Go types that mapped to the types in the loaded schema.
 		Nodes []*Type
 		// Schemas holds the raw interfaces for the loaded schemas.
@@ -58,7 +58,7 @@ type (
 
 // NewGraph creates a new Graph for the code generation from the given schema definitions.
 // It fails if one of the schemas is invalid.
-func NewGraph(c Config, schemas ...*load.Schema) (g *Graph, err error) {
+func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
 	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
 	for _, schema := range schemas {

@@ -14,11 +14,11 @@ Simple, yet powerful ORM for modeling and querying data.
 
 ## Installation
 ```console
-go get github.com/facebookincubator/ent/entc/cmd/entc
+go get github.com/facebookincubator/ent/cmd/entc
 ```
 
 ## Docs
-The documentation for developing and using ent is avaliable at: https://entgo.io
+The documentation for developing and using ent is available at: https://entgo.io
 
 ## Join the ent Community
 See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.

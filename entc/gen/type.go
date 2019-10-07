@@ -25,7 +25,7 @@ type (
 	// Type represents one node-type in the graph, its relations and
 	// the information it holds.
 	Type struct {
-		Config
+		*Config
 		// schema definition.
 		schema *load.Schema
 		// Name holds the type/ent name.
@@ -130,7 +130,7 @@ type (
 )
 
 // NewType creates a new type and its fields from the given schema.
-func NewType(c Config, schema *load.Schema) (*Type, error) {
+func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	typ := &Type{
 		Config: c,
 		ID: &Field{
