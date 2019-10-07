@@ -134,7 +134,7 @@ func templateBaseTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/base.tmpl", size: 5214, mode: os.FileMode(420), modTime: time.Unix(1570417800, 0)}
+	info := bindataFileInfo{name: "template/base.tmpl", size: 5214, mode: os.FileMode(420), modTime: time.Unix(1570437111, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -454,7 +454,7 @@ func templateDialectGremlinOpenTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/gremlin/open.tmpl", size: 542, mode: os.FileMode(420), modTime: time.Unix(1570417365, 0)}
+	info := bindataFileInfo{name: "template/dialect/gremlin/open.tmpl", size: 542, mode: os.FileMode(420), modTime: time.Unix(1570437111, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -694,7 +694,7 @@ func templateDialectSqlOpenTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/dialect/sql/open.tmpl", size: 389, mode: os.FileMode(420), modTime: time.Unix(1570008618, 0)}
+	info := bindataFileInfo{name: "template/dialect/sql/open.tmpl", size: 389, mode: os.FileMode(420), modTime: time.Unix(1570420017, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
