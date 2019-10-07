@@ -13,12 +13,12 @@ in the LICENSE file in the root directory of this source tree.
 
 // {{ $.Name }} is the model entity for the {{ $.Name }} schema.
 type {{ $.Name }} struct {
-	config {{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}
+	config {{ template "model/omittags" $ }}
 	// ID of the ent.
 	ID {{ $.ID.Type }} `json:"id,omitempty"`
 	{{ range $_, $f := $.Fields -}}
 		// {{ pascal $f.Name }} holds the value of the "{{ $f.Name }}" field.
-    	{{ pascal $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} `{{ $f.StructTag }}`
+    	{{ pascal $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $f.StructTag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
 	{{ end -}}
 	{{ range $_, $e := $.Edges -}}
 		{{/* ignore generating edge fields */}}
@@ -74,12 +74,16 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 	buf.WriteString("{{ $.Name }}(")
 	buf.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
 	{{- range $i, $f := $.Fields }}
-		{{- if $f.Nillable }}
-			if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
-				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", *v))
-			}
+		{{- if $f.Sensitive }}
+			buf.WriteString(", {{ $f.Name }}={{ printf "<sensitive>" }}")
 		{{- else }}
-			buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
+			{{- if $f.Nillable }}
+				if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
+					buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", *v))
+				}
+			{{- else }}
+				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	buf.WriteString(")")
@@ -111,3 +115,5 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	}
 }
 {{ end }}
+
+{{ define "model/omittags" }}{{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}{{ end }}

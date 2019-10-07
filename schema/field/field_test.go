@@ -76,12 +76,13 @@ func TestBytes(t *testing.T) {
 
 func TestString(t *testing.T) {
 	re := regexp.MustCompile("[a-zA-Z0-9]")
-	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil })
+	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil }).Sensitive()
 	fd := f.Descriptor()
 	assert.Equal(t, field.TypeString, fd.Info.Type)
 	assert.Equal(t, "name", fd.Name)
 	assert.True(t, fd.Unique)
 	assert.Len(t, fd.Validators, 2)
+	assert.True(t, fd.Sensitive)
 }
 
 func TestTime(t *testing.T) {

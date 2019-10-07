@@ -33,6 +33,8 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
+		field.String("sensitive").
+			Sensitive(),
 	}
 }
 
@@ -75,7 +77,7 @@ func TestMarshalSchema(t *testing.T) {
 		schema := &Schema{}
 		require.NoError(t, json.Unmarshal(buf, schema))
 		require.Equal(t, "User", schema.Name)
-		require.Len(t, schema.Fields, 5)
+		require.Len(t, schema.Fields, 6)
 		require.Equal(t, "age", schema.Fields[0].Name)
 		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
 
@@ -86,6 +88,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, field.TypeString, schema.Fields[2].Info.Type)
 		require.True(t, schema.Fields[2].Nillable)
 		require.False(t, schema.Fields[2].Optional)
+		require.False(t, schema.Fields[2].Sensitive)
 
 		require.Equal(t, "optional", schema.Fields[3].Name)
 		require.Equal(t, field.TypeString, schema.Fields[3].Info.Type)
@@ -95,6 +98,10 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "state", schema.Fields[4].Name)
 		require.Equal(t, field.TypeEnum, schema.Fields[4].Info.Type)
 		require.Equal(t, []string{"on", "off"}, schema.Fields[4].Enums)
+
+		require.Equal(t, "sensitive", schema.Fields[5].Name)
+		require.Equal(t, field.TypeString, schema.Fields[5].Info.Type)
+		require.True(t, schema.Fields[5].Sensitive)
 
 		require.Len(t, schema.Edges, 2)
 		require.Equal(t, "groups", schema.Edges[0].Name)

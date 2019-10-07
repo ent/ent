@@ -47,6 +47,7 @@ type Field struct {
 	Validators    int             `json:"validators,omitempty"`
 	StorageKey    string          `json:"storage_key,omitempty"`
 	Position      *Position       `json:"position,omitempty"`
+	Sensitive     bool            `json:"sensitive,omitempty"`
 }
 
 // StructField represents an external struct field defined in the schema.
@@ -110,6 +111,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Validators:    len(fd.Validators),
 		Default:       fd.Default != nil,
 		UpdateDefault: fd.UpdateDefault != nil,
+		Sensitive:     fd.Sensitive,
 	}
 	if sf.Info == nil {
 		return nil, fmt.Errorf("missing type info for field %q", sf.Name)

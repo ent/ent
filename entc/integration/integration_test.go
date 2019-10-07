@@ -6,6 +6,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"net"
@@ -106,6 +107,7 @@ var tests = []func(*testing.T, *ent.Client){
 	M2MTwoTypes,
 	DefaultValue,
 	ImmutableValue,
+	Sensitive,
 }
 
 func Sanity(t *testing.T, client *ent.Client) {
@@ -1971,6 +1973,17 @@ func ImmutableValue(t *testing.T, client *ent.Client) {
 		require.False(t, v.MethodByName("SetNillableCreatedAt").IsValid())
 		require.True(t, v.MethodByName("SetNumber").IsValid())
 	}
+}
+
+func Sensitive(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	usr := client.User.Create().SetName("foo").SetAge(20).SetPassword("secret-password").SaveX(ctx)
+	require.Equal("secret-password", usr.Password)
+	require.Contains(usr.String(), "password=<sensitive>")
+	b, err := json.Marshal(usr)
+	require.NoError(err)
+	require.NotContains(string(b), "secret-password")
 }
 
 func drop(t *testing.T, client *ent.Client) {
