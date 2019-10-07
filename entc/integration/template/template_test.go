@@ -27,16 +27,19 @@ func TestCustomTemplate(t *testing.T) {
 	g := client.Group.Create().SetMaxUsers(10).SaveX(ctx)
 
 	node, err := client.Node(ctx, p.ID)
+	require.NoError(t, err)
 	require.Equal(t, p.ID, node.ID)
 	require.Equal(t, &ent.Field{Type: "int", Name: "Age", Value: "1"}, node.Fields[0])
 	require.Equal(t, &ent.Edge{Type: "User", Name: "Owner", IDs: []int{u.ID}}, node.Edges[0])
 
 	node, err = client.Node(ctx, u.ID)
+	require.NoError(t, err)
 	require.Equal(t, u.ID, node.ID)
 	require.Equal(t, &ent.Field{Type: "string", Name: "Name", Value: "\"a8m\""}, node.Fields[0])
 	require.Equal(t, &ent.Edge{Type: "Pet", Name: "Pets", IDs: []int{p.ID}}, node.Edges[0])
 
 	node, err = client.Node(ctx, g.ID)
+	require.NoError(t, err)
 	require.Equal(t, g.ID, node.ID)
 	require.Equal(t, &ent.Field{Type: "int", Name: "MaxUsers", Value: "10"}, node.Fields[0])
 }

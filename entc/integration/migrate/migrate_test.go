@@ -101,11 +101,11 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	// blob type limited to 255.
 	u = u.Update().SetBlob([]byte("hello")).SaveX(ctx)
 	require.Equal(t, "hello", string(u.Blob))
-	u, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
+	_, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
 	require.Error(t, err, "data too long for column 'blob' error")
 
 	// invalid enum value.
-	_, err = client.User.Create().SetAge(1).SetName("bar").SetState(userv1.State("unknown")).Save(ctx)
+	_, err = client.User.Create().SetAge(1).SetName("bar").SetState("unknown").Save(ctx)
 	require.Error(t, err)
 }
 

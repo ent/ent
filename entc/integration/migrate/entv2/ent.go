@@ -189,7 +189,7 @@ func rollback(tx dialect.Tx, err error) error {
 // keys returns the keys/ids from the edge map.
 func keys(m map[int]struct{}) []int {
 	s := make([]int, 0, len(m))
-	for id, _ := range m {
+	for id := range m {
 		s = append(s, id)
 	}
 	return s
