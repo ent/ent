@@ -17,7 +17,7 @@ import (
 
 func TestType(t *testing.T) {
 	require := require.New(t)
-	typ, err := NewType(Config{Package: "entc/gen"}, T1)
+	typ, err := NewType(&Config{Package: "entc/gen"}, T1)
 	require.NoError(err)
 	require.NotNil(typ)
 	require.Equal("T1", typ.Name)
@@ -25,7 +25,7 @@ func TestType(t *testing.T) {
 	require.Equal("t1", typ.Package())
 	require.Equal("t", typ.Receiver())
 
-	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
 			{Unique: true, Default: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
@@ -33,7 +33,7 @@ func TestType(t *testing.T) {
 	require.Error(err, "unique field can not have default")
 	require.Nil(typ)
 
-	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
 			{Name: "foo", Unique: true, Info: &field.TypeInfo{Type: field.TypeInt}},
@@ -43,7 +43,7 @@ func TestType(t *testing.T) {
 	require.Error(err, "field foo redeclared")
 	require.Nil(typ)
 
-	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
 			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
@@ -52,7 +52,7 @@ func TestType(t *testing.T) {
 	require.Error(err, "duplicate enums")
 	require.Nil(typ)
 
-	typ, err = NewType(Config{Package: "entc/gen"}, &load.Schema{
+	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
 			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
@@ -112,7 +112,7 @@ func TestType_Receiver(t *testing.T) {
 		{"[]byte", "b"},
 	}
 	for _, tt := range tests {
-		typ := &Type{Name: tt.name, Config: Config{Package: "entc/gen"}}
+		typ := &Type{Name: tt.name, Config: &Config{Package: "entc/gen"}}
 		require.Equal(t, tt.receiver, typ.Receiver())
 	}
 }
@@ -152,7 +152,7 @@ func TestType_Package(t *testing.T) {
 
 func TestType_AddIndex(t *testing.T) {
 	size := int64(1024)
-	typ, err := NewType(Config{}, &load.Schema{
+	typ, err := NewType(&Config{}, &load.Schema{
 		Name: "User",
 		Fields: []*load.Field{
 			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},

@@ -63,10 +63,10 @@ var (
 
 func TestNewGraph(t *testing.T) {
 	require := require.New(t)
-	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1)
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers}, T1)
 	require.Error(err, "should fail due to missing types")
 
-	graph, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1, T2)
+	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers}, T1, T2)
 	require.NoError(err)
 	require.NotNil(graph)
 	require.Len(graph.Nodes, 2)
@@ -121,7 +121,7 @@ func TestNewGraph(t *testing.T) {
 }
 
 func TestNewGraphRequiredLoop(t *testing.T) {
-	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, &load.Schema{
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers}, &load.Schema{
 		Name: "T1",
 		Edges: []*load.Edge{
 			{Name: "parent", Type: "T1", Unique: true, Required: true},
@@ -130,7 +130,7 @@ func TestNewGraphRequiredLoop(t *testing.T) {
 	})
 	require.Error(t, err, "require loop")
 
-	_, err = NewGraph(Config{Package: "entc/gen", Storage: drivers},
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers},
 		&load.Schema{
 			Name: "User",
 			Edges: []*load.Edge{
@@ -147,7 +147,7 @@ func TestNewGraphRequiredLoop(t *testing.T) {
 }
 
 func TestNewGraphBadInverse(t *testing.T) {
-	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers},
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers},
 		&load.Schema{
 			Name: "User",
 			Edges: []*load.Edge{
@@ -172,10 +172,10 @@ func TestNewGraphBadInverse(t *testing.T) {
 
 func TestRelation(t *testing.T) {
 	require := require.New(t)
-	_, err := NewGraph(Config{Package: "entc/gen", Storage: drivers}, T1)
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers}, T1)
 	require.Error(err, "should fail due to missing types")
 
-	graph, err := NewGraph(Config{Package: "entc/gen"}, T1, T2)
+	graph, err := NewGraph(&Config{Package: "entc/gen"}, T1, T2)
 	require.NoError(err)
 	require.NotNil(graph)
 	require.Len(graph.Nodes, 2)
@@ -209,7 +209,7 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.Remove(target)
 	external := template.Must(template.New("external").Parse("package external"))
-	graph, err := NewGraph(Config{
+	graph, err := NewGraph(&Config{
 		Package:  "entc/gen",
 		Target:   target,
 		Storage:  drivers,

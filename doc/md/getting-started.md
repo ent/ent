@@ -17,7 +17,7 @@ sidebar_label: Quick Introduction
 ## Installation
 
 ```console
-go get github.com/facebookincubator/ent/entc/cmd/entc
+go get github.com/facebookincubator/ent/cmd/entc
 ```
 
 After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.

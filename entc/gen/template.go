@@ -123,7 +123,7 @@ func init() {
 		templates = template.Must(templates.Parse(string(internal.MustAsset(asset))))
 	}
 	b := bytes.NewBuffer([]byte("package main\n"))
-	check(templates.ExecuteTemplate(b, "import", Type{}), "load imports")
+	check(templates.ExecuteTemplate(b, "import", Type{Config: &Config{}}), "load imports")
 	f, err := parser.ParseFile(token.NewFileSet(), "", b, parser.ImportsOnly)
 	check(err, "parse imports")
 	for _, spec := range f.Imports {
