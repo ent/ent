@@ -25,21 +25,21 @@ func TestType(t *testing.T) {
 	require.Equal("t1", typ.Package())
 	require.Equal("t", typ.Receiver())
 
-	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
 			{Unique: true, Default: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
 	require.Error(err, "unique field can not have default")
 
-	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
 			{Sensitive: true, Tag: `yaml:"pwd"`, Info: &field.TypeInfo{Type: field.TypeString}},
 		},
 	})
 	require.Error(err, "sensitive field cannot have tags")
 
-	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
 			{Name: "foo", Unique: true, Info: &field.TypeInfo{Type: field.TypeInt}},
@@ -48,7 +48,7 @@ func TestType(t *testing.T) {
 	})
 	require.Error(err, "field foo redeclared")
 
-	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
 			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
@@ -56,7 +56,7 @@ func TestType(t *testing.T) {
 	})
 	require.Error(err, "duplicate enums")
 
-	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
 			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
