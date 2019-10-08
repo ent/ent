@@ -425,7 +425,7 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	```
 
 We run `entc` on the schema directory to re-generate the assets.
-```cosole
+```console
 entc generate ./ent/schema
 ```
 
