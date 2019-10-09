@@ -1,17 +1,41 @@
 version: 2.1
 
+aliases:
+  - &getmods
+    run:
+      name: Downloading go modules
+      command: go mod download
+
+  - &mktestdir
+    run:
+      name: Create results directory
+      command: mkdir -p ~/test-results
+
+  - &storetestdir
+    store_test_results:
+      path: ~/test-results
+
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
 
 jobs:
+  lint:
+    docker:
+    - image: golangci/golangci-lint
+    steps:
+      - checkout
+      - *mktestdir
+      - run:
+          name: Run linters
+          command: golangci-lint run --out-format junit-xml > ~/test-results/lint.xml
+      - *storetestdir
   unit:
     docker:
     - image: circleci/golang
     steps:
     - checkout
-    - run: &mktestdir
-        name: Create results directory
-        command: mkdir -p ~/test-results
+    - *mktestdir
+    - *getmods
     - run:
         name: Dialect tests
         command: gotestsum --junitfile ~/test-results/dialect.xml
@@ -28,8 +52,8 @@ jobs:
         name: Codegen tests
         command: gotestsum --junitfile ~/test-results/gen.xml
         working_directory: entc/gen
-    - store_test_results:
-        path: ~/test-results
+    - *storetestdir
+
   integration:
     docker:
       - image: circleci/golang
@@ -58,13 +82,14 @@ jobs:
             -wait tcp://localhost:3307
             -wait tcp://localhost:3308
             -wait tcp://localhost:8182
-      - run: *mktestdir
+      - *mktestdir
+      - *getmods
       - run:
           name: Run integration tests
           working_directory: entc/integration
           command: gotestsum --junitfile ~/test-results/integration.xml -- -race ./...
-      - store_test_results:
-          path: ~/test-results
+      - *storetestdir
+
   docs:
     docker:
     - image: circleci/node
@@ -99,13 +124,10 @@ workflows:
   version: 2.1
   all:
     jobs:
+    - lint
     - unit
-    - integration:
-        requires:
-        - unit
+    - integration
     - docs:
-        requires:
-        - integration
         filters:
           branches:
             only: master

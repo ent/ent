@@ -90,7 +90,7 @@ func (g *Graph) Gen() (err error) {
 			check(writeFile(target, b.Bytes()), "write file %s", target)
 		}
 	}
-	for _, tmpl := range append(GraphTemplates[:], external...) {
+	for _, tmpl := range append(GraphTemplates, external...) {
 		if tmpl.Skip != nil && tmpl.Skip(g) {
 			continue
 		}
