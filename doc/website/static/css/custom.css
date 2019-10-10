@@ -519,11 +519,6 @@ header > .navigationSlider {
   margin: 0 20px;
 }
 
-.blog .headerWrapper.wrapper header,
-.sideNavVisible .headerWrapper.wrapper header {
-  width: 100vw;
-}
-
 .blog .headerWrapper.wrapper header > a,
 .sideNavVisible .headerWrapper.wrapper header > a {
   width: 288px;

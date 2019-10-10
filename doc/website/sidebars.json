@@ -23,6 +23,9 @@
     "Migration": [
       "migrate",
       "dialects"
+    ],
+    "Misc": [
+      "sql-integration"
     ]
   }
 }
