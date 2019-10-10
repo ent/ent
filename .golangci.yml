@@ -1,0 +1,57 @@
+run:
+  tests: true
+  deadline: 2m
+
+linters-settings:
+  errcheck:
+    ignore: fmt:.*,Read|Write|Close|Exec,io:Copy
+  dupl:
+    threshold: 100
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dupl
+    - errcheck
+    - gocritic
+    - gofmt
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - misspell
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    - varcheck
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+    - linters:
+        - unused
+      source: ent.Schema
+    - path: entc/integration/ent/schema/card.go
+      text: "`internal` is unused"
+    - path: dialect/sql/builder.go
+      text: "can be `Querier`"
+      linters:
+        - interfacer
+    - path: dialect/sql/builder.go
+      text: "SQL string concatenation"
+      linters:
+        - gosec
+    - path: dialect/sql/schema/migrate.go
+      text: "weak cryptographic primitive"
+      linters:
+        - gosec

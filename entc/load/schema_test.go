@@ -57,9 +57,7 @@ func (User) Indexes() []ent.Index {
 	}
 }
 
-type Group struct {
-	ent.Schema
-}
+type Group struct{ ent.Schema }
 
 func (Group) Fields() []ent.Field { return nil }
 

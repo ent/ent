@@ -65,8 +65,8 @@ var (
 	}
 	// operations per type.
 	boolOps     = []Op{EQ, NEQ}
-	enumOps     = append(boolOps[:], In, NotIn)
-	numericOps  = append(enumOps[:], GT, GTE, LT, LTE)
-	stringOps   = append(numericOps[:], Contains, HasPrefix, HasSuffix)
+	enumOps     = append(boolOps, In, NotIn)
+	numericOps  = append(enumOps, GT, GTE, LT, LTE)
+	stringOps   = append(numericOps, Contains, HasPrefix, HasSuffix)
 	nillableOps = []Op{IsNil, NotNil}
 )

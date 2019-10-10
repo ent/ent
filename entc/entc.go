@@ -112,11 +112,12 @@ func TemplateGlob(pattern string) Option {
 // TemplateDir parses the template definitions from the files in the directory
 // and associates the resulting templates with codegen templates.
 func TemplateDir(path string) Option {
-	return templateOption(func(cfg *gen.Config) (err error) {
-		return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	return templateOption(func(cfg *gen.Config) error {
+		return filepath.Walk(path, func(path string, info os.FileInfo, _ error) error {
 			if info.IsDir() {
 				return nil
 			}
+			var err error
 			cfg.Template, err = cfg.Template.ParseFiles(path)
 			return err
 		})
