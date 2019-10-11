@@ -1,11 +1,6 @@
 version: 2.1
 
 aliases:
-  - &getmods
-    run:
-      name: Downloading go modules
-      command: go mod download
-
   - &mktestdir
     run:
       name: Create results directory
@@ -17,6 +12,14 @@ aliases:
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
+  go: circleci/go@0.2.0
+
+commands:
+  getmods:
+    steps:
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
 
 jobs:
   lint:
@@ -30,12 +33,11 @@ jobs:
           command: golangci-lint run --out-format junit-xml > ~/test-results/lint.xml
       - *storetestdir
   unit:
-    docker:
-    - image: circleci/golang
+    executor: go/default
     steps:
     - checkout
     - *mktestdir
-    - *getmods
+    - getmods
     - run:
         name: Dialect tests
         command: gotestsum --junitfile ~/test-results/dialect.xml
@@ -83,7 +85,7 @@ jobs:
             -wait tcp://localhost:3308
             -wait tcp://localhost:8182
       - *mktestdir
-      - *getmods
+      - getmods
       - run:
           name: Run integration tests
           working_directory: entc/integration

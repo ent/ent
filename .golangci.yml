@@ -1,6 +1,5 @@
 run:
-  tests: true
-  deadline: 2m
+  timeout: 2m
 
 linters-settings:
   errcheck:
