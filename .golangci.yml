@@ -61,3 +61,7 @@ issues:
       text: "weak cryptographic primitive"
       linters:
         - gosec
+    - path: entc/load/load.go
+      text: "packages.LoadSyntax is deprecated"
+      linters:
+        - staticcheck
