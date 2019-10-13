@@ -171,7 +171,9 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(file.Table).Default(fc.driver.Dialect())
+	builder := sql.Dialect(fc.driver.Dialect()).
+		Insert(file.Table).
+		Default()
 	if value := fc.size; value != nil {
 		builder.Set(file.FieldSize, *value)
 		f.Size = *value

@@ -91,7 +91,9 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(comment.Table).Default(cc.driver.Dialect())
+	builder := sql.Dialect(cc.driver.Dialect()).
+		Insert(comment.Table).
+		Default()
 	if value := cc.unique_int; value != nil {
 		builder.Set(comment.FieldUniqueInt, *value)
 		c.UniqueInt = *value

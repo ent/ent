@@ -121,7 +121,9 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(user.Table).Default(uc.driver.Dialect())
+	builder := sql.Dialect(uc.driver.Dialect()).
+		Insert(user.Table).
+		Default()
 	if value := uc.name; value != nil {
 		builder.Set(user.FieldName, *value)
 		u.Name = *value

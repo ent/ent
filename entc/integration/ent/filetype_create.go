@@ -89,7 +89,9 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(filetype.Table).Default(ftc.driver.Dialect())
+	builder := sql.Dialect(ftc.driver.Dialect()).
+		Insert(filetype.Table).
+		Default()
 	if value := ftc.name; value != nil {
 		builder.Set(filetype.FieldName, *value)
 		ft.Name = *value

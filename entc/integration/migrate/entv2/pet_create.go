@@ -41,7 +41,9 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(pet.Table).Default(pc.driver.Dialect())
+	builder := sql.Dialect(pc.driver.Dialect()).
+		Insert(pet.Table).
+		Default()
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)

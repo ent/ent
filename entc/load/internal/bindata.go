@@ -93,7 +93,7 @@ func templateMainTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/main.tmpl", size: 843, mode: os.FileMode(420), modTime: time.Unix(1567406598, 0)}
+	info := bindataFileInfo{name: "template/main.tmpl", size: 843, mode: os.FileMode(420), modTime: time.Unix(1567330508, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -113,7 +113,7 @@ func schemaGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "schema.go", size: 7340, mode: os.FileMode(420), modTime: time.Unix(1570458335, 0)}
+	info := bindataFileInfo{name: "schema.go", size: 7340, mode: os.FileMode(420), modTime: time.Unix(1570646976, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

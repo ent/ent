@@ -75,7 +75,9 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(city.Table).Default(cc.driver.Dialect())
+	builder := sql.Dialect(cc.driver.Dialect()).
+		Insert(city.Table).
+		Default()
 	if value := cc.name; value != nil {
 		builder.Set(city.FieldName, *value)
 		c.Name = *value

@@ -202,7 +202,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 		}
 	}
 	// if there's actual action to execute on ALTER TABLE.
-	if len(b.Queriers) != 0 {
+	if len(b.Queries) != 0 {
 		query, args := b.Query()
 		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
 			return fmt.Errorf("alter table %q: %v", table, err)
