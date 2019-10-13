@@ -1903,7 +1903,6 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 			// bar
 			FirstX(ctx).Name,
 	)
-
 }
 
 func Tx(t *testing.T, client *ent.Client) {

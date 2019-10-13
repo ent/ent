@@ -1,12 +1,14 @@
 run:
-  tests: true
-  deadline: 2m
+  timeout: 2m
 
 linters-settings:
   errcheck:
     ignore: fmt:.*,Read|Write|Close|Exec,io:Copy
   dupl:
     threshold: 100
+  funlen:
+    lines: 100
+    statements: 70
 
 linters:
   disable-all: true
@@ -14,8 +16,10 @@ linters:
     - bodyclose
     - deadcode
     - depguard
+    - dogsled
     - dupl
     - errcheck
+    - funlen
     - gocritic
     - gofmt
     - gosec
@@ -31,12 +35,14 @@ linters:
     - unconvert
     - unused
     - varcheck
+    - whitespace
 
 issues:
   exclude-rules:
     - path: _test\.go
       linters:
         - dupl
+        - funlen
         - gosec
     - linters:
         - unused

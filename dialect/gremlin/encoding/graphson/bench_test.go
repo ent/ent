@@ -75,7 +75,6 @@ func BenchmarkMarshalInterface(b *testing.B) {
 			b.Fatal(err)
 		}
 	}
-
 }
 
 func BenchmarkUnmarshalInterface(b *testing.B) {
