@@ -85,7 +85,9 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(card.Table).Default(cc.driver.Dialect())
+	builder := sql.Dialect(cc.driver.Dialect()).
+		Insert(card.Table).
+		Default()
 	if value := cc.expired; value != nil {
 		builder.Set(card.FieldExpired, *value)
 		c.Expired = *value

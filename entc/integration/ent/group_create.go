@@ -228,7 +228,9 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(group.Table).Default(gc.driver.Dialect())
+	builder := sql.Dialect(gc.driver.Dialect()).
+		Insert(group.Table).
+		Default()
 	if value := gc.active; value != nil {
 		builder.Set(group.FieldActive, *value)
 		gr.Active = *value

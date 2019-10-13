@@ -54,7 +54,9 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(item.Table).Default(ic.driver.Dialect())
+	builder := sql.Dialect(ic.driver.Dialect()).
+		Insert(item.Table).
+		Default()
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)

@@ -99,7 +99,9 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(pet.Table).Default(pc.driver.Dialect())
+	builder := sql.Dialect(pc.driver.Dialect()).
+		Insert(pet.Table).
+		Default()
 	if value := pc.name; value != nil {
 		builder.Set(pet.FieldName, *value)
 		pe.Name = *value

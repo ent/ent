@@ -108,7 +108,9 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(groupinfo.Table).Default(gic.driver.Dialect())
+	builder := sql.Dialect(gic.driver.Dialect()).
+		Insert(groupinfo.Table).
+		Default()
 	if value := gic.desc; value != nil {
 		builder.Set(groupinfo.FieldDesc, *value)
 		gi.Desc = *value

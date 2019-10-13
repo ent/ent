@@ -78,7 +78,9 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(street.Table).Default(sc.driver.Dialect())
+	builder := sql.Dialect(sc.driver.Dialect()).
+		Insert(street.Table).
+		Default()
 	if value := sc.name; value != nil {
 		builder.Set(street.FieldName, *value)
 		s.Name = *value

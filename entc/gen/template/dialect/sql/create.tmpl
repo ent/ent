@@ -17,7 +17,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert({{ $.Package }}.Table).Default({{ $receiver }}.driver.Dialect())
+	builder := sql.Dialect({{ $receiver }}.driver.Dialect()).
+		Insert({{ $.Package }}.Table).
+		Default()
 	{{- range $_, $f := $.Fields }}
 		if value := {{ $receiver }}.{{- $f.StructField }}; value != nil {
 			{{- if $f.IsJSON }}
