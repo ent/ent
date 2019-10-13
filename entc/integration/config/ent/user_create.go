@@ -41,7 +41,9 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(user.Table).Default(uc.driver.Dialect())
+	builder := sql.Dialect(uc.driver.Dialect()).
+		Insert(user.Table).
+		Default()
 	query, args := builder.Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return nil, rollback(tx, err)

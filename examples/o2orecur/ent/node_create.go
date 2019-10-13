@@ -105,7 +105,9 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(node.Table).Default(nc.driver.Dialect())
+	builder := sql.Dialect(nc.driver.Dialect()).
+		Insert(node.Table).
+		Default()
 	if value := nc.value; value != nil {
 		builder.Set(node.FieldValue, *value)
 		n.Value = *value

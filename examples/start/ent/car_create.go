@@ -89,7 +89,9 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(car.Table).Default(cc.driver.Dialect())
+	builder := sql.Dialect(cc.driver.Dialect()).
+		Insert(car.Table).
+		Default()
 	if value := cc.model; value != nil {
 		builder.Set(car.FieldModel, *value)
 		c.Model = *value

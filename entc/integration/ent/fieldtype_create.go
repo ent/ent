@@ -295,7 +295,9 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Insert(fieldtype.Table).Default(ftc.driver.Dialect())
+	builder := sql.Dialect(ftc.driver.Dialect()).
+		Insert(fieldtype.Table).
+		Default()
 	if value := ftc.int; value != nil {
 		builder.Set(fieldtype.FieldInt, *value)
 		ft.Int = *value
