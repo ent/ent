@@ -79,7 +79,10 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 // Gen generates the artifacts for the graph.
 func (g *Graph) Gen() (err error) {
 	defer catch(&err)
-	templates, external := g.templates()
+	var (
+		written             []string
+		templates, external = g.templates()
+	)
 	for _, n := range g.Nodes {
 		path := filepath.Join(g.Config.Target, n.Package())
 		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
@@ -87,7 +90,8 @@ func (g *Graph) Gen() (err error) {
 			b := bytes.NewBuffer(nil)
 			check(templates.ExecuteTemplate(b, tmpl.Name, n), "execute template %q", tmpl.Name)
 			target := filepath.Join(g.Config.Target, tmpl.Format(n))
-			check(writeFile(target, b.Bytes()), "write file %s", target)
+			check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
+			written = append(written, target)
 		}
 	}
 	for _, tmpl := range append(GraphTemplates, external...) {
@@ -101,9 +105,13 @@ func (g *Graph) Gen() (err error) {
 		b := bytes.NewBuffer(nil)
 		check(templates.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
 		target := filepath.Join(g.Config.Target, tmpl.Format)
-		check(writeFile(target, b.Bytes()), "write file %s", target)
+		check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
+		written = append(written, target)
 	}
-	return
+	// We can't run "imports" on files when the state is not completed.
+	// Because, "goimports" will drop undefined package. Therefore, it's
+	// suspended to end of the writing.
+	return formatFiles(written)
 }
 
 // Describe writes a description of the graph to the given writer.
@@ -409,6 +417,24 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 	return templates, external
 }
 
+// formatFiles runs "goimports" on given paths.
+func formatFiles(paths []string) error {
+	for _, path := range paths {
+		buf, err := ioutil.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("read file %s: %v", path, err)
+		}
+		src, err := imports.Process(path, buf, nil)
+		if err != nil {
+			return fmt.Errorf("format file %s: %v", path, err)
+		}
+		if err := ioutil.WriteFile(path, src, 0644); err != nil {
+			return fmt.Errorf("write file %s: %v", path, err)
+		}
+	}
+	return nil
+}
+
 // expect panic if the condition is false.
 func expect(cond bool, msg string, args ...interface{}) {
 	if !cond {
@@ -438,12 +464,4 @@ func catch(err *error) {
 		}
 		*err = gerr
 	}
-}
-
-func writeFile(target string, src []byte) error {
-	source, err := imports.Process(target, src, nil)
-	if err != nil {
-		return fmt.Errorf("formatting source: %v", err)
-	}
-	return ioutil.WriteFile(target, source, 0644)
 }

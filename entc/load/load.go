@@ -103,6 +103,9 @@ func (c *Config) load() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if len(pkgs) == 0 {
+		return "", fmt.Errorf("missing package information for: %s", c.Path)
+	}
 	entPkg, pkg := pkgs[0], pkgs[1]
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
