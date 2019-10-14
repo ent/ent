@@ -8,23 +8,6 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-func ({{ $receiver }} *{{ $builder }}) gremlinIDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]{{ $.ID.Type }}, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.({{ $.ID.Type }}))
-	}
-	return ids, nil
-}
-
 func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlinQuery().ValueMap(true).Query()

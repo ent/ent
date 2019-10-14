@@ -196,14 +196,11 @@ func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
 
 // IDs executes the query and returns a list of FileType ids.
 func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return ftq.sqlIDs(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinIDs(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
+	var ids []string
+	if err := ftq.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
 	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -374,18 +371,6 @@ func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (ftq *FileTypeQuery) sqlIDs(ctx context.Context) ([]string, error) {
-	vs, err := ftq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []string
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
-}
-
 func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
 	t1 := sql.Table(filetype.Table)
 	selector := sql.Select(t1.Columns(filetype.Columns...)...).From(t1)
@@ -408,23 +393,6 @@ func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-func (ftq *FileTypeQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
 }
 
 func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
@@ -796,7 +764,11 @@ func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v interface{}) error
 		res       = &gremlin.Response{}
 	)
 	if len(fts.fields) == 1 {
-		traversal = fts.gremlin.Values(fts.fields...)
+		if fts.fields[0] != filetype.FieldID {
+			traversal = fts.gremlin.Values(fts.fields...)
+		} else {
+			traversal = fts.gremlin.ID()
+		}
 	} else {
 		fields := make([]interface{}, len(fts.fields))
 		for i, f := range fts.fields {

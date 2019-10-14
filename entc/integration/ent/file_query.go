@@ -216,14 +216,11 @@ func (fq *FileQuery) AllX(ctx context.Context) []*File {
 
 // IDs executes the query and returns a list of File ids.
 func (fq *FileQuery) IDs(ctx context.Context) ([]string, error) {
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return fq.sqlIDs(ctx)
-	case dialect.Gremlin:
-		return fq.gremlinIDs(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
+	var ids []string
+	if err := fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
 	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -394,18 +391,6 @@ func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (fq *FileQuery) sqlIDs(ctx context.Context) ([]string, error) {
-	vs, err := fq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []string
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
-}
-
 func (fq *FileQuery) sqlQuery() *sql.Selector {
 	t1 := sql.Table(file.Table)
 	selector := sql.Select(t1.Columns(file.Columns...)...).From(t1)
@@ -428,23 +413,6 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-func (fq *FileQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := fq.gremlinQuery().Query()
-	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
 }
 
 func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {
@@ -816,7 +784,11 @@ func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {
 		res       = &gremlin.Response{}
 	)
 	if len(fs.fields) == 1 {
-		traversal = fs.gremlin.Values(fs.fields...)
+		if fs.fields[0] != file.FieldID {
+			traversal = fs.gremlin.Values(fs.fields...)
+		} else {
+			traversal = fs.gremlin.ID()
+		}
 	} else {
 		fields := make([]interface{}, len(fs.fields))
 		for i, f := range fs.fields {

@@ -182,7 +182,11 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 
 // IDs executes the query and returns a list of Group ids.
 func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
-	return gq.sqlIDs(ctx)
+	var ids []int
+	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -326,18 +330,6 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (gq *GroupQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := gq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (gq *GroupQuery) sqlQuery() *sql.Selector {

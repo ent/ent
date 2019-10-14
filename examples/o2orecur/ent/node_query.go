@@ -189,7 +189,11 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 
 // IDs executes the query and returns a list of Node ids.
 func (nq *NodeQuery) IDs(ctx context.Context) ([]int, error) {
-	return nq.sqlIDs(ctx)
+	var ids []int
+	if err := nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -333,18 +337,6 @@ func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (nq *NodeQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := nq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (nq *NodeQuery) sqlQuery() *sql.Selector {

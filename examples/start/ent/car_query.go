@@ -177,7 +177,11 @@ func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 
 // IDs executes the query and returns a list of Car ids.
 func (cq *CarQuery) IDs(ctx context.Context) ([]int, error) {
-	return cq.sqlIDs(ctx)
+	var ids []int
+	if err := cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -321,18 +325,6 @@ func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (cq *CarQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := cq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (cq *CarQuery) sqlQuery() *sql.Selector {

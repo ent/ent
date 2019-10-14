@@ -177,7 +177,11 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 
 // IDs executes the query and returns a list of Card ids.
 func (cq *CardQuery) IDs(ctx context.Context) ([]int, error) {
-	return cq.sqlIDs(ctx)
+	var ids []int
+	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -321,18 +325,6 @@ func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (cq *CardQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := cq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (cq *CardQuery) sqlQuery() *sql.Selector {
