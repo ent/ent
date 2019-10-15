@@ -48,8 +48,6 @@ type Config struct {
 	// Names are the schema names to run the code generation on.
 	// Empty means all schemas in the directory.
 	Names []string
-	// schema types and their exported struct fields.
-	fields map[string][]*StructField
 }
 
 // Build loads the schemas package and build the Go plugin with this info.
@@ -88,7 +86,6 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		if err := json.Unmarshal([]byte(line), schema); err != nil {
 			return nil, errors.WithMessagef(err, "unmarshal schema %s", line)
 		}
-		schema.StructFields = c.fields[schema.Name]
 		spec.Schemas = append(spec.Schemas, schema)
 	}
 	return spec, nil
@@ -121,12 +118,8 @@ func (c *Config) load() (string, error) {
 		if !ok {
 			return "", fmt.Errorf("invalid declaration %T for %s", k.Obj.Decl, k.Name)
 		}
-		specType, ok := spec.Type.(*ast.StructType)
-		if !ok {
+		if _, ok := spec.Type.(*ast.StructType); !ok {
 			return "", fmt.Errorf("invalid spec type %T for %s", spec.Type, k.Name)
-		}
-		if err := c.structFields(k.Name, v, specType); err != nil {
-			return "", err
 		}
 		names = append(names, k.Name)
 	}
@@ -135,64 +128,6 @@ func (c *Config) load() (string, error) {
 	}
 	sort.Strings(c.Names)
 	return pkg.PkgPath, err
-}
-
-// structFields loads schema type fields if exist.
-func (c *Config) structFields(name string, obj types.Object, spec *ast.StructType) (err error) {
-	typ, ok := obj.(*types.TypeName)
-	if !ok {
-		return
-	}
-	st, ok := typ.Type().Underlying().(*types.Struct)
-	if !ok {
-		return
-	}
-	if c.fields == nil {
-		c.fields = make(map[string][]*StructField)
-	}
-	for i := 0; i < st.NumFields(); i++ {
-		f := st.Field(i)
-		// skip non-exported fields, because they
-		// cannot be used outside the package.
-		if !f.Exported() {
-			continue
-		}
-		sf := &StructField{
-			Tag:      st.Tag(i),
-			Name:     f.Name(),
-			Embedded: f.Embedded(),
-			Comment:  strings.TrimSpace(spec.Fields.List[i].Comment.Text()),
-			Type: types.TypeString(f.Type(), func(p *types.Package) string {
-				return p.Name()
-			}),
-		}
-		switch typ := indirectType(f.Type()).(type) {
-		case *types.Named:
-			sf.PkgPath = typ.Obj().Pkg().Path()
-			// skip fields used for schema definition.
-			if sf.PkgPath == entInterface.PkgPath() {
-				continue
-			}
-			c.fields[name] = append(c.fields[name], sf)
-		default:
-			if f.Embedded() {
-				return fmt.Errorf("field %s for schema %q cannot be embbeded", f.Type(), name)
-			}
-			c.fields[name] = append(c.fields[name], sf)
-		}
-	}
-	return
-}
-
-// indirectType returns the type at the end of indirection.
-func indirectType(typ types.Type) types.Type {
-	for {
-		ptr, ok := typ.(*types.Pointer)
-		if !ok {
-			return typ
-		}
-		typ = ptr.Elem()
-	}
 }
 
 //go:generate go run github.com/go-bindata/go-bindata/go-bindata -pkg=internal -o=internal/bindata.go ./template/... schema.go

@@ -9,7 +9,6 @@ package ent
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -28,9 +27,9 @@ type Card struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
-	// additional struct fields defined in the schema.
-	RequestID string      // RequestID.
-	Logger    *log.Logger // Logger.
+
+	// StaticField defined by templates.
+	StaticField string `json:"boring,omitempty"`
 }
 
 // FromRows scans the sql response data into Card.

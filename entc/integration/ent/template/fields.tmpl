@@ -1,0 +1,8 @@
+{{/* A template for adding additional fields to specific types. */}}
+{{ define "model/fields/additional" }}
+	{{- /* Add static fields to the "Card" entity. */}}
+	{{- if eq $.Name "Card" }}
+		// StaticField defined by templates.
+		StaticField string `json:"boring,omitempty"`
+	{{- end }}
+{{ end }}

@@ -40,9 +40,6 @@ type (
 		Edges []*Edge
 		// Indexes are the configured indexes for this type.
 		Indexes []*Index
-		// StructFields are additional struct fields to be added to
-		// the generated entity.
-		StructFields []*load.StructField
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -138,11 +135,10 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Type:      c.IDType,
 			StructTag: `json:"id,omitempty"`,
 		},
-		schema:       schema,
-		Name:         schema.Name,
-		Fields:       make([]*Field, len(schema.Fields)),
-		fields:       make(map[string]*Field, len(schema.Fields)),
-		StructFields: schema.StructFields,
+		schema: schema,
+		Name:   schema.Name,
+		Fields: make([]*Field, len(schema.Fields)),
+		fields: make(map[string]*Field, len(schema.Fields)),
 	}
 	for i, f := range schema.Fields {
 		switch {
