@@ -58,7 +58,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	)
 	{{- range $_, $f := $.Fields }}
 		{{- if or (not $f.Immutable) $f.UpdateDefault }}
-			if value := {{ $receiver }}.{{ $f.StructField }}; value != nil {
+			if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
 				{{- if $f.Unique }}
 					constraints = append(constraints, &constraint{
 						pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *value).Count(),
@@ -68,7 +68,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *value)
 			}
 			{{- if $f.Type.Numeric }}
-				if value := {{ $receiver }}.add{{ $f.StructField }}; value != nil {
+				if value := {{ $receiver }}.add{{ $f.BuilderField }}; value != nil {
 					{{- if $f.Unique }}
 						addValue := rv.Clone().Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(*value)).Sum().Next()
 						constraints = append(constraints, &constraint{
@@ -86,7 +86,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		var properties []interface{}
 		{{- range $_, $f := $.Fields }}
 			{{- if $f.Optional }}
-				if {{ $receiver }}.clear{{ $f.StructField }} {
+				if {{ $receiver }}.clear{{ $f.BuilderField }} {
 					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})
 				}
 			{{- end }}
@@ -118,7 +118,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			trs = append(trs, tr)
 		}
 		{{- /* update edges */}}
-		for id := range {{ $receiver }}.{{ $e.StructField }} {
+		for id := range {{ $receiver }}.{{ $e.BuilderField }} {
 		{{- if $e.IsInverse }}
 			v.AddE({{ $name }}).From(g.V(id)).InV()
 		{{- else }}

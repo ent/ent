@@ -19,10 +19,10 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $func := print "Set" (pascal $f.Name) }}
 	// {{ $func }} sets the {{ $f.Name }} field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
-		{{ $receiver }}.{{ $f.StructField }} = &{{ $p }}
+		{{ $receiver }}.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $f.Type.Numeric $updater }}
-			{{ $receiver }}.add{{ $f.StructField }} = nil
+			{{ $receiver }}.add{{ $f.BuilderField }} = nil
 		{{- end }}
 		return {{ $receiver }}
 	}
@@ -43,10 +43,10 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $func := print "Add" (pascal $f.Name) }}
 		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
-			if {{ $receiver }}.add{{ $f.StructField }} == nil {
-				{{ $receiver }}.add{{ $f.StructField }} = &{{ $p }}
+			if {{ $receiver }}.add{{ $f.BuilderField }} == nil {
+				{{ $receiver }}.add{{ $f.BuilderField }} = &{{ $p }}
 			} else {
-				*{{ $receiver }}.add{{ $f.StructField }} += {{ $p }}
+				*{{ $receiver }}.add{{ $f.BuilderField }} += {{ $p }}
 			}
 			return {{ $receiver }}
 		}
@@ -56,8 +56,8 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $func := print "Clear" (pascal $f.Name) }}
 		// {{ $func }} clears the value of {{ $f.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{ $receiver }}.{{ $f.StructField }} = nil
-			{{ $receiver }}.clear{{ $f.StructField }} = true
+			{{ $receiver }}.{{ $f.BuilderField }} = nil
+			{{ $receiver }}.clear{{ $f.BuilderField }} = true
 			return {{ $receiver }}
 		}
 	{{ end }}
@@ -68,14 +68,14 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $idsFunc := print (pascal $op) (singular $e.Name | pascal) "IDs" }}{{ if $e.Unique }}{{ $idsFunc = print (pascal $op) (pascal $e.Name) "ID" }}{{ end }}
 	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
 	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $.ID.Type }}) *{{ $builder }} {
-		if {{ $receiver }}.{{ $e.StructField }} == nil {
-			{{ $receiver }}.{{ $e.StructField }} = make(map[{{ $.ID.Type }}]struct{})
+		if {{ $receiver }}.{{ $e.BuilderField }} == nil {
+			{{ $receiver }}.{{ $e.BuilderField }} = make(map[{{ $.ID.Type }}]struct{})
 		}
 		{{ if $e.Unique -}}
-			{{ $receiver }}.{{ $e.StructField }}[id] = struct{}{}
+			{{ $receiver }}.{{ $e.BuilderField }}[id] = struct{}{}
 		{{- else -}}
 			for i := range ids {
-				{{ $receiver }}.{{ $e.StructField }}[ids[i]] = struct{}{}
+				{{ $receiver }}.{{ $e.BuilderField }}[ids[i]] = struct{}{}
 			}
 		{{- end }}
 		return {{ $receiver }}
