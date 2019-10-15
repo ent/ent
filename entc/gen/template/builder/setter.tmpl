@@ -16,7 +16,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ range $_, $f := $fields }}
 	{{ $p := receiver $f.Type.String }}
-	{{ $func := print "Set" (pascal $f.Name) }}
+	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the {{ $f.Name }} field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{ $receiver }}.{{ $f.BuilderField }} = &{{ $p }}
@@ -29,7 +29,7 @@ in the LICENSE file in the root directory of this source tree.
 
 	{{/* avoid generting nillable setters for nillable types. */}}
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
-		{{ $nillableFunc := print "SetNillable" (pascal $f.Name) }}
+		{{ $nillableFunc := print "SetNillable" $f.StructField }}
 		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
 			if {{ $p }} != nil {
@@ -40,7 +40,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ end }}
 
 	{{ if and $f.Type.Numeric $updater }}
-		{{ $func := print "Add" (pascal $f.Name) }}
+		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 			if {{ $receiver }}.add{{ $f.BuilderField }} == nil {
@@ -53,7 +53,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ end }}
 
 	{{ if and $f.Optional $updater }}
-		{{ $func := print "Clear" (pascal $f.Name) }}
+		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of {{ $f.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
 			{{ $receiver }}.{{ $f.BuilderField }} = nil
@@ -81,7 +81,7 @@ in the LICENSE file in the root directory of this source tree.
 		return {{ $receiver }}
 	}
 	{{ if and $e.Unique $e.Optional }}
-		{{ $nillableIDsFunc := print "SetNillable" (pascal $e.Name) "ID" }}
+		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
 		// {{ $nillableIDsFunc }} sets the {{ $e.Name }} edge to {{ $e.Type.Name }} by id if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $.ID.Type }}) *{{ $builder }} {
 			if id != nil {
@@ -92,7 +92,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ end }}
 	{{ $p := lower (printf "%.1s" $e.Type.Name) }}
 	{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
-	{{ $func := print (pascal $op) (pascal $e.Name) }}
+	{{ $func := print (pascal $op) $e.StructField }}
 	// {{ $func }} {{ $op }}s the {{ $e.Name }} edge{{if not $e.Unique}}s{{ end }} to {{ $e.Type.Name }}.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
 		{{ if $e.Unique -}}

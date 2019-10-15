@@ -41,7 +41,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ range $_, $f := $.Fields }}
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{- if not (or $f.IsJSON $f.IsEnum) }}
-		{{ $func := pascal $f.Name }}
+		{{ $func := $f.StructField }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 		func {{ $func }}(v {{ $f.Type }}) predicate.{{ $.Name }} {
 			return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
@@ -65,7 +65,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ end }}
 	{{ range $_, $op := $ops }}
 	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
-	{{ $func := print (pascal $f.Name) ($op.Name) }}
+	{{ $func := print $f.StructField $op.Name }}
 	{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
 	func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
@@ -88,7 +88,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ end }}
 
 {{ range $_, $e := $.Edges }}
-	{{ $func := pascal $e.Name | printf "Has%s" }}
+	{{ $func := print "Has" $e.StructField }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
 	func {{ $func }}() predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(

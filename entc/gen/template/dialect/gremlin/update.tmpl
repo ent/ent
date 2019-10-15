@@ -104,9 +104,9 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{- end }}
 		{{- /* remove edges */}}
 		{{- if $e.Unique }}
-		if {{ $receiver }}.cleared{{ pascal $e.Name }} {
+		if {{ $receiver }}.cleared{{ $e.StructField }} {
 		{{- else }}
-		for id := range {{ $receiver }}.removed{{ pascal $e.Name }} {
+		for id := range {{ $receiver }}.removed{{ $e.StructField }} {
 		{{- end }}
 		{{- if $e.SelfRef }}
 			tr := rv.Clone().BothE({{ $name }}){{ if not $e.Unique }}.Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))){{ end }}.Drop().Iterate()

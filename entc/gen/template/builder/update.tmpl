@@ -171,7 +171,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ end }}
 {{- range $_, $e := $.Edges }}
 	{{- $p := "removed" }}{{ if $e.Unique }}{{ $p = "cleared" }}{{ end }}
-	{{- print $p (pascal $e.Name) }} {{ if $e.Unique }}bool{{ else }}map[{{ $.ID.Type }}]struct{}{{ end }}
+	{{- print $p $e.StructField }} {{ if $e.Unique }}bool{{ else }}map[{{ $.ID.Type }}]struct{}{{ end }}
 {{ end -}}
 {{ end }}
 
@@ -182,10 +182,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 
 {{ range $_, $e := $.Edges }}
 	{{ if $e.Unique }}
-		{{ $func := print "Clear" (pascal $e.Name) }}
+		{{ $func := print "Clear" $e.StructField }}
 		// {{ $func }} clears the {{ $e.Name }} edge to {{ $e.Type.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{ $receiver }}.cleared{{ pascal $e.Name }} = true
+			{{ $receiver }}.cleared{{ $e.StructField }} = true
 			return {{ $receiver }}
 		}
 	{{ else }}
@@ -195,15 +195,15 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the {{ $e.Name }} edge to {{ $e.Type.Name }} by ids.
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $.ID.Type }}) *{{ $builder }} {
-			if {{ $receiver }}.removed{{ pascal $e.Name }} == nil {
-				{{ $receiver }}.removed{{ pascal $e.Name }} = make(map[{{ $.ID.Type }}]struct{})
+			if {{ $receiver }}.removed{{ $e.StructField }} == nil {
+				{{ $receiver }}.removed{{ $e.StructField }} = make(map[{{ $.ID.Type }}]struct{})
 			}
 			for i := range ids {
-				{{ $receiver }}.removed{{ pascal $e.Name }}[ids[i]] = struct{}{}
+				{{ $receiver }}.removed{{ $e.StructField }}[ids[i]] = struct{}{}
 			}
 			return {{ $receiver }}
 		}
-		{{ $func := print "Remove" (pascal $e.Name) }}
+		{{ $func := print "Remove" $e.StructField }}
 		// {{ $func }} removes {{ $e.Name }} edges to {{ $e.Type.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} ...*{{ $e.Type.Name }}) *{{ $builder }} {
 			ids := make([]{{ $.ID.Type }}, len({{ $p }}))
@@ -243,7 +243,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			return {{ $zero }}, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
 		}
 		{{ if not $e.Optional -}}
-			if {{ $receiver }}.cleared{{ pascal $e.Name }} && {{ $receiver }}.{{ $e.BuilderField }} == nil {
+			if {{ $receiver }}.cleared{{ $e.StructField }} && {{ $receiver }}.{{ $e.BuilderField }} == nil {
 				return {{ $zero }}, errors.New("{{ $pkg }}: clearing a unique edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}

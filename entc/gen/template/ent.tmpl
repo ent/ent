@@ -17,14 +17,14 @@ type {{ $.Name }} struct {
 	// ID of the ent.
 	ID {{ $.ID.Type }} `json:"id,omitempty"`
 	{{ range $_, $f := $.Fields -}}
-		// {{ pascal $f.Name }} holds the value of the "{{ $f.Name }}" field.
-    	{{ pascal $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $f.StructTag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
+		// {{ $f.StructField }} holds the value of the "{{ $f.Name }}" field.
+    	{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $f.StructTag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
 	{{ end -}}
 	{{ range $_, $e := $.Edges -}}
 		{{/* ignore generating edge fields */}}
 		{{- with $e.StructTag -}}
-			// {{ pascal $e.Name }} holds the value of the {{ $e.Name }} edge. The value set to nil, and should be updated manually.
-			{{ pascal $e.Name }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} `{{ $e.StructTag }}`
+			// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge. The value set to nil, and should be updated manually.
+			{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} `{{ $e.StructTag }}`
 		{{ end -}}
 	{{ end -}}
 	{{ with $.StructFields -}}
@@ -43,7 +43,7 @@ type {{ $.Name }} struct {
 {{ $receiver := $.Receiver }}
 
 {{ range $_, $e := $.Edges }}
-	{{ $func := print "Query" (pascal $e.Name) }}
+	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the {{ $e.Name }} edge of the {{ $.Name }}.
 	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.Name}}Query {
 		return (&{{ $.Name }}Client{ {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
@@ -78,11 +78,11 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 			buf.WriteString(", {{ $f.Name }}={{ printf "<sensitive>" }}")
 		{{- else }}
 			{{- if $f.Nillable }}
-				if v := {{ $receiver }}.{{ pascal $f.Name }}; v != nil {
+				if v := {{ $receiver }}.{{ $f.StructField }}; v != nil {
 					buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", *v))
 				}
 			{{- else }}
-				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", {{ $receiver }}.{{ pascal $f.Name }}))
+				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", {{ $receiver }}.{{ $f.StructField }}))
 			{{- end }}
 		{{- end }}
 	{{- end }}

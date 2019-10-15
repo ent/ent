@@ -78,7 +78,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						builder.Set({{ $.Package }}.{{ $f.Constant }}, *value)
 					{{- end }}
 					{{- if $one }}
-						{{ $.Receiver }}.{{ pascal $f.Name }} = {{ if not $f.Nillable }}*{{ end }}value
+						{{ $.Receiver }}.{{ $f.StructField }} = {{ if not $f.Nillable }}*{{ end }}value
 					{{- end }}
 				}
 				{{- if $f.Type.Numeric }}
@@ -86,13 +86,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						builder.Add({{ $.Package }}.{{ $f.Constant }}, *value)
 						{{- if $one }}
 							{{- if $f.Nillable }}
-								if {{ $.Receiver }}.{{ pascal $f.Name }} != nil {
-									*{{ $.Receiver }}.{{ pascal $f.Name }} += *value
+								if {{ $.Receiver }}.{{ $f.StructField }} != nil {
+									*{{ $.Receiver }}.{{ $f.StructField }} += *value
 								} else {
-									{{ $.Receiver }}.{{ pascal $f.Name }} = value
+									{{ $.Receiver }}.{{ $f.StructField }} = value
 								}
 							{{- else }}
-								{{ $.Receiver }}.{{ pascal $f.Name }} += *value
+								{{ $.Receiver }}.{{ $f.StructField }} += *value
 							{{- end }}
 						{{- end }}
 					}
@@ -102,10 +102,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				if {{ $receiver }}.clear{{ $f.BuilderField }} {
 					{{- if $one }}
 						{{- if $f.Nillable }}
-							{{ $.Receiver }}.{{ pascal $f.Name }} = nil
+							{{ $.Receiver }}.{{ $f.StructField }} = nil
 						{{- else }}
 							var value {{ $f.Type }}
-							{{ $.Receiver }}.{{ pascal $f.Name }} = value
+							{{ $.Receiver }}.{{ $f.StructField }} = value
 						{{- end }}
 					{{- end }}
 					builder.SetNull({{ $.Package }}.{{ $f.Constant }})
@@ -123,10 +123,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
 		{{- if $e.M2M }}
-			if len({{ $receiver }}.removed{{ pascal $e.Name }}) > 0 {
+			if len({{ $receiver }}.removed{{ $e.StructField }}) > 0 {
 				{{- $a := 0 }}{{ $b := 1 }}{{ if $e.IsInverse }}{{ $a = 1 }}{{ $b = 0 }}{{ end }}
-				eids := make([]int, len({{ $receiver }}.removed{{ pascal $e.Name }}))
-				for eid := range {{ $receiver }}.removed{{ pascal $e.Name }} {
+				eids := make([]int, len({{ $receiver }}.removed{{ $e.StructField }}))
+				for eid := range {{ $receiver }}.removed{{ $e.StructField }} {
 					{{- template "dialect/sql/update/convertid" $e -}}
 					eids = append(eids, eid)
 				}
@@ -148,9 +148,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				{{- end }}
 			}
 		{{- else if $e.O2M }}
-			if len({{ $receiver }}.removed{{ pascal $e.Name }}) > 0 {
-				eids := make([]int, len({{ $receiver }}.removed{{ pascal $e.Name }}))
-				for eid := range {{ $receiver }}.removed{{ pascal $e.Name }} {
+			if len({{ $receiver }}.removed{{ $e.StructField }}) > 0 {
+				eids := make([]int, len({{ $receiver }}.removed{{ $e.StructField }}))
+				for eid := range {{ $receiver }}.removed{{ $e.StructField }} {
 					{{- template "dialect/sql/update/convertid" $e -}}
 					eids = append(eids, eid)
 				}
@@ -164,7 +164,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				}
 			}
 		{{- else }}{{/* O2O or M2O */}}
-			if {{ $receiver }}.cleared{{ pascal $e.Name }} {
+			if {{ $receiver }}.cleared{{ $e.StructField }} {
 				query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
 					SetNull({{ $.Package }}.{{ $e.ColumnConstant }}).
 					Where(sql.InInts({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, ids...)).
