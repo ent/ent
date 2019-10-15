@@ -205,6 +205,12 @@ func Clone(t *testing.T, client *ent.Client) {
 	base := client.File.Query().Where(file.Name("foo"))
 	require.Equal(t, f1.Size, base.Clone().Where(file.Size(f1.Size)).OnlyX(ctx).Size)
 	require.Equal(t, f2.Size, base.Clone().Where(file.Size(f2.Size)).OnlyX(ctx).Size)
+	// ensure clone emits valid code.
+	query := client.Pet.Query().Where(pet.Name("unknown")).QueryTeam()
+	for i := 0; i < 10; i++ {
+		_, err := query.Clone().Where(user.Name("unknown")).First(ctx)
+		require.True(t, ent.IsNotFound(err), "should not return syntax error")
+	}
 }
 
 func Paging(t *testing.T, client *ent.Client) {
