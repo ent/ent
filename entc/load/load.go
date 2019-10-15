@@ -100,7 +100,7 @@ func (c *Config) load() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if len(pkgs) == 0 {
+	if len(pkgs) < 2 {
 		return "", fmt.Errorf("missing package information for: %s", c.Path)
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
