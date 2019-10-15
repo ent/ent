@@ -427,12 +427,17 @@ func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
 // UpdateDefaultName returns the variable name of the update default value of this field.
 func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 
-// BuilderField returns the struct member of the field.
+// BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
 	if token.Lookup(f.Name).IsKeyword() {
 		return "_" + f.Name
 	}
 	return f.Name
+}
+
+// StructField returns the struct member of the field in the model.
+func (f Field) StructField() string {
+	return pascal(f.Name)
 }
 
 // Enums returns the enum values of a field.
@@ -616,12 +621,17 @@ func (e Edge) HasConstraint() bool {
 	return e.Rel.Type == O2O || e.Rel.Type == O2M
 }
 
-// BuilderField returns the struct member of the edge.
+// BuilderField returns the struct member of the edge in the builder.
 func (e Edge) BuilderField() string {
 	if token.Lookup(e.Name).IsKeyword() {
 		return "_" + e.Name
 	}
 	return e.Name
+}
+
+// StructField returns the struct member of the edge in the model.
+func (e Edge) StructField() string {
+	return pascal(e.Name)
 }
 
 // Column returns the first element from the columns slice.

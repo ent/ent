@@ -293,7 +293,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 // Example:
 //
 //	var v []struct {
-//		{{ pascal $f.Name }} {{ $f.Type }} `{{ $f.StructTag }}`
+//		{{ $f.StructField }} {{ $f.Type }} `{{ $f.StructTag }}`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -328,7 +328,7 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 // Example:
 //
 //	var v []struct {
-//		{{ pascal $f.Name }} {{ $f.Type }} `{{ $f.StructTag }}`
+//		{{ $f.StructField }} {{ $f.Type }} `{{ $f.StructTag }}`
 //	}
 //
 //	client.{{ pascal $.Name }}.Query().

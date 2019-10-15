@@ -13,14 +13,14 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 	var {{ $scan }} struct {
 		ID   {{ if $.ID.IsString }}int{{ else }}{{ $.ID.Type }}{{ end }}
 		{{ range $_, $f := $.Fields }}
-			{{- pascal $f.Name }} {{ $f.NullType }}
+			{{- $f.StructField }} {{ $f.NullType }}
 		{{ end }}
 	}
 	// the order here should be the same as in the `{{ $.Package }}.Columns`.
 	if err := rows.Scan(
 			&{{ $scan }}.ID,
 			{{- range $_, $f := $.Fields }}
-				&{{ $scan }}.{{- pascal $f.Name }},
+				&{{ $scan }}.{{ $f.StructField }},
 			{{- end }}
 	); err != nil {
 		return err
@@ -28,18 +28,18 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 	{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.Itoa({{ $scan }}.ID){{ else }}{{ $scan }}.ID{{ end }}
 	{{- range $_, $f := $.Fields }}
 		{{- if $f.IsJSON }}
-			if value := {{ $scan }}.{{ pascal $f.Name }}; len(value) > 0 {
-				if err := json.Unmarshal(value, &{{ $receiver }}.{{ pascal $f.Name }}); err != nil {
+			if value := {{ $scan }}.{{ $f.StructField }}; len(value) > 0 {
+				if err := json.Unmarshal(value, &{{ $receiver }}.{{ $f.StructField }}); err != nil {
 					return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
 				}
 			}
 		{{- else if $f.Nillable }}
-			if {{ $scan }}.{{- pascal $f.Name }}.Valid {
-				{{ $receiver }}.{{ pascal $f.Name }} = new({{ $f.Type }})
-				*{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
+			if {{ $scan }}.{{ $f.StructField }}.Valid {
+				{{ $receiver }}.{{ $f.StructField }} = new({{ $f.Type }})
+				*{{ $receiver }}.{{ $f.StructField }} = {{ printf "%s.%s" $scan $f.StructField | $f.NullTypeField }}
 			}
 		{{- else }}
-			{{ $receiver }}.{{ pascal $f.Name }} = {{ printf "%s.%s" $scan (pascal $f.Name) | $f.NullTypeField }}
+			{{ $receiver }}.{{ $f.StructField }} = {{ printf "%s.%s" $scan $f.StructField | $f.NullTypeField }}
 		{{- end }}
 	{{- end }}
 	return nil
