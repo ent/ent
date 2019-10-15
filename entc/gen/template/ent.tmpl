@@ -27,12 +27,7 @@ type {{ $.Name }} struct {
 			{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} `{{ $e.StructTag }}`
 		{{ end -}}
 	{{ end -}}
-	{{ with $.StructFields -}}
-		// additional struct fields defined in the schema.
-		{{ range $_, $f := $.StructFields -}}
-			{{ $f.Name }} {{ $f.Type }} {{ with $f.Tag -}}`{{ . }}`{{ end }} {{ with $f.Comment -}}// {{ . }}{{ end }}
-		{{ end -}}
-	{{ end -}}
+	{{ template "model/fields/additional" $ }}
 }
 
 {{ range $_, $storage := $.Storage }}
@@ -116,4 +111,8 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 }
 {{ end }}
 
+{{/* A template for omitting struct-tags. */}}
 {{ define "model/omittags" }}{{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}{{ end }}
+
+{{/* A template that can be overrided in order to add additional fields to the each type.*/}}
+{{ define "model/fields/additional" }}{{end}}

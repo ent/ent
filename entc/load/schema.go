@@ -16,12 +16,11 @@ import (
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name         string         `json:"name,omitempty"`
-	Config       ent.Config     `json:"config,omitempty"`
-	Edges        []*Edge        `json:"edges,omitempty"`
-	Fields       []*Field       `json:"fields,omitempty"`
-	Indexes      []*Index       `json:"indexes,omitempty"`
-	StructFields []*StructField `json:"struct_fields,omitempty"`
+	Name    string     `json:"name,omitempty"`
+	Config  ent.Config `json:"config,omitempty"`
+	Edges   []*Edge    `json:"edges,omitempty"`
+	Fields  []*Field   `json:"fields,omitempty"`
+	Indexes []*Index   `json:"indexes,omitempty"`
 }
 
 // Position describes a field position in the schema.
@@ -48,16 +47,6 @@ type Field struct {
 	StorageKey    string          `json:"storage_key,omitempty"`
 	Position      *Position       `json:"position,omitempty"`
 	Sensitive     bool            `json:"sensitive,omitempty"`
-}
-
-// StructField represents an external struct field defined in the schema.
-type StructField struct {
-	Tag      string `json:"tag,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Type     string `json:"type,omitempty"`
-	Comment  string `json:"comment,omitempty"`
-	PkgPath  string `json:"pkg_path,omitempty"`
-	Embedded bool   `json:"embedded,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.

@@ -297,7 +297,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-## Struct Fields
+## Additional Struct Fields
 
 By default, `entc` generates the entity model with fields that are configured in the `schema.Fields` method.
 For example, given this schema configuration:
@@ -333,17 +333,15 @@ type User struct {
 ```
 
 In order to add additional fields to the generated struct **that are not stored in the database**,
-add them to the schema struct as follows:
+use [external templates](code-gen.md/#external-templates). For example:
 
-```go
-// User schema.
-type User struct {
-	ent.Schema
-	// Additional struct-only fields.
-	Tenant	string
-	Logger	*log.Logger
-}
-
+```gotemplate
+{{ define "model/fields/additional" }}
+	{{- if eq $.Name "User" }}
+		// StaticField defined by template.
+		StaticField string `json:"static,omitempty"`
+	{{- end }}
+{{ end }}
 ```
 
 The generated model will be as follows:
@@ -355,9 +353,8 @@ type User struct {
 	Age  *int	`json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty" gqlgen:"gql_name"` 
-	// additional struct fields defined in the schema.
-	Tenant	string
-	Logger	*log.Logger
+	// StaticField defined by template.
+	StaticField string `json:"static,omitempty"`
 }
 ```
 
