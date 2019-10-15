@@ -794,7 +794,7 @@ func templateEntTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/ent.tmpl", size: 4173, mode: os.FileMode(420), modTime: time.Unix(1571161760, 0)}
+	info := bindataFileInfo{name: "template/ent.tmpl", size: 4173, mode: os.FileMode(420), modTime: time.Unix(1571167239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -854,7 +854,7 @@ func templateImportTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "template/import.tmpl", size: 1048, mode: os.FileMode(420), modTime: time.Unix(1571161760, 0)}
+	info := bindataFileInfo{name: "template/import.tmpl", size: 1048, mode: os.FileMode(420), modTime: time.Unix(1571167239, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
