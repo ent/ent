@@ -199,6 +199,7 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // IDs executes the query and returns a list of {{ $.Name }} ids.
 func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
+	var ids []{{ $.ID.Type }}
 	if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
