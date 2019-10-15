@@ -67,7 +67,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		)
 		{{- range $_, $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
-				if value := {{ $receiver }}.{{ $f.StructField }}; value != nil {
+				if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
 					{{- if $f.IsJSON }}
 						buf, err := json.Marshal(*value)
 						if err != nil {
@@ -82,7 +82,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					{{- end }}
 				}
 				{{- if $f.Type.Numeric }}
-					if value := {{ $receiver }}.add{{ $f.StructField }}; value != nil {
+					if value := {{ $receiver }}.add{{ $f.BuilderField }}; value != nil {
 						builder.Add({{ $.Package }}.{{ $f.Constant }}, *value)
 						{{- if $one }}
 							{{- if $f.Nillable }}
@@ -99,7 +99,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				{{- end }}
 			{{- end }}
 			{{- if $f.Optional }}
-				if {{ $receiver }}.clear{{ $f.StructField }} {
+				if {{ $receiver }}.clear{{ $f.BuilderField }} {
 					{{- if $one }}
 						{{- if $f.Nillable }}
 							{{ $.Receiver }}.{{ pascal $f.Name }} = nil
@@ -183,12 +183,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				{{- end }}
 			}
 		{{- end }}
-		if len({{ $receiver }}.{{ $e.StructField }}) > 0 {
+		if len({{ $receiver }}.{{ $e.BuilderField }}) > 0 {
 			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}
 				if n := len(ids); n > 1 {
 					return {{ $zero }}, rollback(tx, fmt.Errorf("{{ $pkg }}: can't link O2O edge \"{{ $e.Name }}\" to %d vertices (> 1)", n))
 				}
-				for eid := range {{ $receiver }}.{{ $e.StructField }} {
+				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 					{{- template "dialect/sql/update/convertid" $e -}}
 					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
 							Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
@@ -206,14 +206,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					if err != nil {
 						return {{ $zero }}, rollback(tx, err)
 					}
-					if int(affected) < len({{ $receiver }}.{{ $e.StructField }}) {
+					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
 						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("\"{{ $e.Name }}\" (%v) already connected to a different \"{{ $.Name }}\"", eid)})
 					}
 				}
 			{{- else if $e.M2M  }}
 				values := make([][]int, 0, len(ids))
 				for _, id := range ids {
-					for eid := range {{ $receiver }}.{{ $e.StructField }} {
+					for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 						{{- template "dialect/sql/update/convertid" $e -}}
 						values = append(values, []int{id, eid}, {{- if $e.SelfRef }}[]int{eid, id}{{ end }}){{/* self-ref creates the edges in both ways. */}}
 					}
@@ -229,7 +229,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					return {{ $zero }}, rollback(tx, err)
 				}
 			{{- else if $e.M2O }}
-				for eid := range {{ $receiver }}.{{ $e.StructField }} {
+				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 					{{- template "dialect/sql/update/convertid" $e -}}
 					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
 						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
@@ -242,7 +242,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{- else if $e.O2M }}
 				for _, id := range ids {
 					p := sql.P()
-					for eid := range {{ $receiver }}.{{ $e.StructField }} {
+					for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 						{{- template "dialect/sql/update/convertid" $e -}}
 						p.Or().EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid)
 					}
@@ -257,19 +257,19 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					if err != nil {
 						return {{ $zero }}, rollback(tx, err)
 					}
-					if int(affected) < len({{ $receiver }}.{{ $e.StructField }}) {
-						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.StructField }}))})
+					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
+						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
 					}
 				}
 			{{- else }}{{/* O2O */}}
 				for _, id := range ids {
 					{{- if $.Type.ID.IsString }}
-						eid, serr := strconv.Atoi(keys({{ $receiver }}.{{ $e.StructField }})[0])
+						eid, serr := strconv.Atoi(keys({{ $receiver }}.{{ $e.BuilderField }})[0])
 						if serr != nil {
 							return {{ $zero }}, rollback(tx, err)
 						}
 					{{- else }}
-						eid := keys({{ $receiver }}.{{ $e.StructField }})[0]
+						eid := keys({{ $receiver }}.{{ $e.BuilderField }})[0]
 					{{- end }}
 					{{- if $e.IsInverse }}
 						query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
@@ -289,8 +289,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 					if err != nil {
 						return {{ $zero }}, rollback(tx, err)
 					}
-					if int(affected) < len({{ $receiver }}.{{ $e.StructField }}) {
-						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.StructField }}))})
+					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
+						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
 					}
 				}
 			{{- end }}

@@ -18,10 +18,10 @@ in the LICENSE file in the root directory of this source tree.
 type {{ $builder }} struct {
 	config
 	{{ range $_, $f := $.Fields }}
-		{{- $f.StructField }} *{{ $f.Type }}
+		{{- $f.BuilderField }} *{{ $f.Type }}
 	{{ end }}
 	{{- range $_, $e := $.Edges }}
-		{{- $e.StructField }} map[{{ $.ID.Type }}]struct{}
+		{{- $e.BuilderField }} map[{{ $.ID.Type }}]struct{}
 	{{ end -}}
 }
 
@@ -33,10 +33,10 @@ type {{ $builder }} struct {
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
 	{{ range $_, $f := $.Fields -}}
 		{{- if or $f.Default (not $f.Optional) -}}
-			if {{ $receiver }}.{{ $f.StructField }} == nil {
+			if {{ $receiver }}.{{ $f.BuilderField }} == nil {
 				{{ if $f.Default -}}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if $f.IsTime }}(){{ end }}
-					{{ $receiver }}.{{ $f.StructField }} = &v
+					{{ $receiver }}.{{ $f.BuilderField }} = &v
 				{{ else -}}
 					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")
 				{{ end -}}
@@ -45,8 +45,8 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		{{ with or $f.Validators $f.IsEnum -}}
 			{{/* add nullable check only for optional fields without default value */ -}}
 			{{ $nullable := and $f.Optional (not $f.Default) -}}
-			{{- if $nullable }} if {{ $receiver }}.{{ $f.StructField }} != nil { {{ end -}}
-				if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {
+			{{- if $nullable }} if {{ $receiver }}.{{ $f.BuilderField }} != nil { {{ end -}}
+				if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.BuilderField }}); err != nil {
 					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
 				}
 			{{- if $nullable }} } {{ end }}
@@ -54,12 +54,12 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 	{{ end -}}
 	{{- range $_, $e := $.Edges }}
 		{{- if $e.Unique -}}
-			if len({{ $receiver }}.{{ $e.StructField }}) > 1 {
+			if len({{ $receiver }}.{{ $e.BuilderField }}) > 1 {
 				return nil, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}
 		{{- if not $e.Optional -}}
-			if {{ $receiver }}.{{ $e.StructField }} == nil {
+			if {{ $receiver }}.{{ $e.BuilderField }} == nil {
 				return nil, errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}

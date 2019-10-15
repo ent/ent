@@ -427,8 +427,8 @@ func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
 // UpdateDefaultName returns the variable name of the update default value of this field.
 func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 
-// StructField returns the struct member of the field.
-func (f Field) StructField() string {
+// BuilderField returns the struct member of the field.
+func (f Field) BuilderField() string {
 	if token.Lookup(f.Name).IsKeyword() {
 		return "_" + f.Name
 	}
@@ -616,8 +616,8 @@ func (e Edge) HasConstraint() bool {
 	return e.Rel.Type == O2O || e.Rel.Type == O2M
 }
 
-// StructField returns the struct member of the edge.
-func (e Edge) StructField() string {
+// BuilderField returns the struct member of the edge.
+func (e Edge) BuilderField() string {
 	if token.Lookup(e.Name).IsKeyword() {
 		return "_" + e.Name
 	}

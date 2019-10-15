@@ -157,17 +157,17 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ define "update/fields"}}
 {{ range $_, $f := $.Fields }}
 	{{- if or (not $f.Immutable) $f.UpdateDefault }}
-		{{- $f.StructField }} *{{ $f.Type }}
+		{{- $f.BuilderField }} *{{ $f.Type }}
 		{{- if $f.Type.Numeric }}
-			add{{ $f.StructField }} *{{ $f.Type }}
+			add{{ $f.BuilderField }} *{{ $f.Type }}
 		{{- end }}
 	{{- end }}
 	{{- if $f.Optional }}
-		clear{{ $f.StructField }} bool
+		clear{{ $f.BuilderField }} bool
 	{{- end }}
 {{ end }}
 {{- range $_, $e := $.Edges }}
-	{{- $e.StructField }} map[{{ $.ID.Type }}]struct{}
+	{{- $e.BuilderField }} map[{{ $.ID.Type }}]struct{}
 {{ end }}
 {{- range $_, $e := $.Edges }}
 	{{- $p := "removed" }}{{ if $e.Unique }}{{ $p = "cleared" }}{{ end }}
@@ -224,14 +224,14 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{- $receiver := .Scope.Receiver -}}
 {{- range $_, $f := $.Fields -}}
 	{{- if $f.UpdateDefault -}}
-		if {{ $receiver }}.{{ $f.StructField }} == nil {{ if $f.Optional }} && !{{ $receiver }}.clear{{ $f.StructField }} {{ end }} {
+		if {{ $receiver }}.{{ $f.BuilderField }} == nil {{ if $f.Optional }} && !{{ $receiver }}.clear{{ $f.BuilderField }} {{ end }} {
 			v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
-			{{ $receiver }}.{{ $f.StructField }} = &v
+			{{ $receiver }}.{{ $f.BuilderField }} = &v
 		}
 	{{ end -}}
 	{{ with or $f.Validators $f.IsEnum -}}
-		if {{ $receiver }}.{{ $f.StructField }} != nil {
-			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.StructField }}); err != nil {
+		if {{ $receiver }}.{{ $f.BuilderField }} != nil {
+			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.BuilderField }}); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
 			}
 		}
@@ -239,11 +239,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ end -}}
 {{- range $_, $e := $.Edges }}
 	{{- if $e.Unique -}}
-		if len({{ $receiver }}.{{ $e.StructField }}) > 1 {
+		if len({{ $receiver }}.{{ $e.BuilderField }}) > 1 {
 			return {{ $zero }}, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
 		}
 		{{ if not $e.Optional -}}
-			if {{ $receiver }}.cleared{{ pascal $e.Name }} && {{ $receiver }}.{{ $e.StructField }} == nil {
+			if {{ $receiver }}.cleared{{ pascal $e.Name }} && {{ $receiver }}.{{ $e.BuilderField }} == nil {
 				return {{ $zero }}, errors.New("{{ $pkg }}: clearing a unique edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}
