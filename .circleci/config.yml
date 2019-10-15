@@ -87,6 +87,18 @@ jobs:
       - *mktestdir
       - getmods
       - run:
+          name: Run codegen for entc/load
+          working_directory: entc/load
+          command: go generate
+      - run:
+          name: Run codegen for entc/gen
+          working_directory: entc/gen
+          command: go generate
+      - run:
+          name: Run codegen for entc/integration
+          working_directory: entc/integration
+          command: go generate
+      - run:
           name: Run integration tests
           working_directory: entc/integration
           command: gotestsum --junitfile ~/test-results/integration.xml -- -race ./...
