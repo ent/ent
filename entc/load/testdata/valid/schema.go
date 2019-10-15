@@ -5,9 +5,6 @@
 package valid
 
 import (
-	"log"
-	"sync"
-
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -15,13 +12,6 @@ import (
 // User holds the user schema.
 type User struct {
 	ent.Schema
-
-	// add additional struct-only
-	// fields to the generated model.
-	Tenant string      `json:"tenant,omitempty"`
-	Logger *log.Logger // Comment.
-	sync.Mutex
-	Ignored ent.Interface // Ignored comment.
 }
 
 func (User) Fields() []ent.Field {

@@ -20,11 +20,6 @@ import (
 		{{- with $.Config.Schema  }}
 			"{{ . }}"
 		{{- end }}
-		{{- range $_, $f := $.StructFields }}
-			{{- with $f.PkgPath }}
-				"{{ . }}"
-			{{- end }}
-		{{- end }}
 		{{- range $_, $f := $.Fields }}
 			{{- with $f.Type.PkgPath }}
 				"{{ . }}"
@@ -38,5 +33,9 @@ import (
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}
+	{{ template "imports/additional" $ }}
 )
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional imports to packages.*/}}
+{{ define "imports/additional" }}{{end}}

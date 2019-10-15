@@ -5,7 +5,6 @@
 package schema
 
 import (
-	"log"
 	"time"
 
 	"github.com/facebookincubator/ent"
@@ -30,11 +29,6 @@ func (TimeMixin) Fields() []ent.Field {
 // Card holds the schema definition for the CreditCard entity.
 type Card struct {
 	ent.Schema
-
-	// additional fields to be added to the schema.
-	internal  int         // internal.
-	RequestID string      // RequestID.
-	Logger    *log.Logger // Logger.
 }
 
 func (Card) Mixin() []ent.Mixin {
