@@ -28,7 +28,7 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	{{- if gt (len $.Storage) 1 -}}
+	{{- if $.MultiStorage -}}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:

@@ -417,6 +417,11 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 	return templates, external
 }
 
+// MultiStorage reports whether c has more than 1 storage driver.
+func (c *Config) MultiStorage() bool {
+	return len(c.Storage) > 1
+}
+
 // formatFiles runs "goimports" on given paths.
 func formatFiles(paths []string) error {
 	for _, path := range paths {

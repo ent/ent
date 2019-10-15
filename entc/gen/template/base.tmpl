@@ -12,9 +12,9 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "import" $ }}
 
 // Order applies an ordering on either graph traversal or sql selector.
-type Order func({{ if gt (len $.Storage) 1 }}interface{}{{ else }}{{ (index $.Storage 0).Builder }}{{ end }})
+type Order func({{ if $.MultiStorage }}interface{}{{ else }}{{ (index $.Storage 0).Builder }}{{ end }})
 
-{{ if gt (len $.Storage) 1 }}
+{{ if $.MultiStorage }}
 // OrderPerDialect construct the "order by" clause for graph traversals based on dialect type.
 func OrderPerDialect({{ range $i, $storage := $.Storage }}{{ if $i }},{{ end }}f{{ $i }} func({{ $storage.Builder }}){{ end }}) Order {
 	return Order(func (v interface{}) {
@@ -34,7 +34,7 @@ func OrderPerDialect({{ range $i, $storage := $.Storage }}{{ if $i }},{{ end }}f
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
 	func {{ $f }}(fields ...string) Order {
-		return Order{{ if gt (len $.Storage) 1 }}PerDialect{{ end }}(
+		return Order{{ if $.MultiStorage }}PerDialect{{ end }}(
 			{{ range $_, $storage := $.Storage -}}
 				{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
 					{{ $tmpl := printf "dialect/%s/order" $storage }}
