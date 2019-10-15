@@ -182,7 +182,11 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 
 // IDs executes the query and returns a list of User ids.
 func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
-	return uq.sqlIDs(ctx)
+	var ids []int
+	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -326,18 +330,6 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (uq *UserQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := uq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {

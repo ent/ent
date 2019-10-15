@@ -260,14 +260,11 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 
 // IDs executes the query and returns a list of Group ids.
 func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
-	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return gq.sqlIDs(ctx)
-	case dialect.Gremlin:
-		return gq.gremlinIDs(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
+	var ids []string
+	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
 	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -438,18 +435,6 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (gq *GroupQuery) sqlIDs(ctx context.Context) ([]string, error) {
-	vs, err := gq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []string
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
-}
-
 func (gq *GroupQuery) sqlQuery() *sql.Selector {
 	t1 := sql.Table(group.Table)
 	selector := sql.Select(t1.Columns(group.Columns...)...).From(t1)
@@ -472,23 +457,6 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-func (gq *GroupQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().Query()
-	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
 }
 
 func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
@@ -860,7 +828,11 @@ func (gs *GroupSelect) gremlinScan(ctx context.Context, v interface{}) error {
 		res       = &gremlin.Response{}
 	)
 	if len(gs.fields) == 1 {
-		traversal = gs.gremlin.Values(gs.fields...)
+		if gs.fields[0] != group.FieldID {
+			traversal = gs.gremlin.Values(gs.fields...)
+		} else {
+			traversal = gs.gremlin.ID()
+		}
 	} else {
 		fields := make([]interface{}, len(gs.fields))
 		for i, f := range gs.fields {

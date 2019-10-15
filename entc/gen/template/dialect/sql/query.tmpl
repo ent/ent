@@ -60,18 +60,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, erro
 	return n > 0, nil
 }
 
-func ({{ $receiver }} *{{ $builder }}) sqlIDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	vs, err := {{ $receiver }}.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []{{ $.ID.Type }}
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
-}
-
 func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	t1 := sql.Table({{ $.Package }}.Table)
 	selector := sql.Select(t1.Columns({{ $.Package }}.Columns...)...).From(t1)

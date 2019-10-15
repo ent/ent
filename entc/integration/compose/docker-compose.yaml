@@ -37,6 +37,7 @@ services:
       - 3308:3306
 
   gremlin:
+    image: entgo/gremlin-server
     build: gremlin-server
     restart: on-failure
     ports:

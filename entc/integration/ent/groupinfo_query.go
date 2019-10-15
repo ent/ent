@@ -196,14 +196,11 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 
 // IDs executes the query and returns a list of GroupInfo ids.
 func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]string, error) {
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		return giq.sqlIDs(ctx)
-	case dialect.Gremlin:
-		return giq.gremlinIDs(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
+	var ids []string
+	if err := giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
 	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -374,18 +371,6 @@ func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (giq *GroupInfoQuery) sqlIDs(ctx context.Context) ([]string, error) {
-	vs, err := giq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []string
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
-}
-
 func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 	t1 := sql.Table(groupinfo.Table)
 	selector := sql.Select(t1.Columns(groupinfo.Columns...)...).From(t1)
@@ -408,23 +393,6 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-func (giq *GroupInfoQuery) gremlinIDs(ctx context.Context) ([]string, error) {
-	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery().Query()
-	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	vertices, err := res.ReadVertices()
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]string, 0, len(vertices))
-	for _, vertex := range vertices {
-		ids = append(ids, vertex.ID.(string))
-	}
-	return ids, nil
 }
 
 func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error) {
@@ -796,7 +764,11 @@ func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v interface{}) erro
 		res       = &gremlin.Response{}
 	)
 	if len(gis.fields) == 1 {
-		traversal = gis.gremlin.Values(gis.fields...)
+		if gis.fields[0] != groupinfo.FieldID {
+			traversal = gis.gremlin.Values(gis.fields...)
+		} else {
+			traversal = gis.gremlin.ID()
+		}
 	} else {
 		fields := make([]interface{}, len(gis.fields))
 		for i, f := range gis.fields {

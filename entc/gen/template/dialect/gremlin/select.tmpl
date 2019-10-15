@@ -14,7 +14,11 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, v interf
 		res = &gremlin.Response{}
 	)
 	if len({{ $receiver }}.fields) == 1 {
-		traversal = {{ $receiver }}.gremlin.Values({{ $receiver }}.fields...)
+		if {{ $receiver }}.fields[0] != {{ $.Package }}.FieldID {
+			traversal = {{ $receiver }}.gremlin.Values({{ $receiver }}.fields...)
+		} else {
+			traversal = {{ $receiver }}.gremlin.ID()
+		}
 	} else {
 		fields := make([]interface{}, len({{ $receiver }}.fields))
 		for i, f := range {{ $receiver }}.fields {

@@ -177,7 +177,11 @@ func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
 
 // IDs executes the query and returns a list of Street ids.
 func (sq *StreetQuery) IDs(ctx context.Context) ([]int, error) {
-	return sq.sqlIDs(ctx)
+	var ids []int
+	if err := sq.Select(street.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -321,18 +325,6 @@ func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (sq *StreetQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := sq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (sq *StreetQuery) sqlQuery() *sql.Selector {

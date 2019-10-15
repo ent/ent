@@ -200,18 +200,11 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // IDs executes the query and returns a list of {{ $.Name }} ids.
 func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	{{- if $multistorage }}
-		switch {{ $receiver }}.driver.Dialect() {
-		{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			return {{ $receiver }}.{{ $storage }}IDs(ctx)
-		{{- end }}
-		default:
-			return nil, errors.New("{{ $pkg }}: unsupported dialect")
-		}
-	{{- else }}
-		return {{ $receiver }}.{{ index $.Storage 0 }}IDs(ctx)
-	{{- end }}
+	var ids []{{ $.ID.Type }}
+	if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.

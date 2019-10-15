@@ -177,7 +177,11 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 
 // IDs executes the query and returns a list of Pet ids.
 func (pq *PetQuery) IDs(ctx context.Context) ([]int, error) {
-	return pq.sqlIDs(ctx)
+	var ids []int
+	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
@@ -321,18 +325,6 @@ func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
-}
-
-func (pq *PetQuery) sqlIDs(ctx context.Context) ([]int, error) {
-	vs, err := pq.sqlAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var ids []int
-	for _, v := range vs {
-		ids = append(ids, v.ID)
-	}
-	return ids, nil
 }
 
 func (pq *PetQuery) sqlQuery() *sql.Selector {
