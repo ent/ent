@@ -78,3 +78,16 @@ client.Pet.
 	).
 	All(ctx)
 ```
+
+## Custom Predicates
+
+Custom predicates can be useful if you want to write your own dialect-specific logic.
+
+```go
+pets := client.Pet.
+	Query().
+	Where(predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.InInts(pet.OwnerColumn, 1, 2, 3))
+	})).
+	AllX(ctx)
+```
