@@ -64,7 +64,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			}
 		{{ end -}}
 	{{ end -}}
-	{{- if gt (len $.Storage) 1 -}}
+	{{- if $.MultiStorage -}}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:

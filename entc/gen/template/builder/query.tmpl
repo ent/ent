@@ -13,7 +13,6 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ $builder := print (pascal $.Name) "Query" }}
 {{ $receiver := receiver $builder }}
-{{ $multistorage := gt (len $.Storage) 1 }}
 
 // {{ $builder }} is the builder for querying {{ pascal $.Name }} entities.
 type {{ $builder }} struct {
@@ -59,7 +58,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
 		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
-		{{- if $multistorage }}
+		{{- if $.MultiStorage }}
 			switch {{ $receiver }}.driver.Dialect() {
 			{{- range $_, $storage := $.Storage -}}
 			case {{ join $storage.Dialects ", " }}:
@@ -175,7 +174,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -200,7 +199,6 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // IDs executes the query and returns a list of {{ $.Name }} ids.
 func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	var ids []{{ $.ID.Type }}
 	if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -218,7 +216,7 @@ func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type 
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -243,7 +241,7 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -306,7 +304,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
 	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
 	group.fields = append([]string{field}, fields...)
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -339,7 +337,7 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
 	selector := &{{ $selectBuilder }}{config: {{ $receiver }}.config}
 	selector.fields = append([]string{field}, fields...)
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -382,7 +380,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{
 
 // Scan applies the group-by query and scan the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $groupReceiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -451,7 +449,7 @@ type {{ $selectBuilder }} struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
-	{{- if $multistorage }}
+	{{- if $.MultiStorage }}
 		switch {{ $selectReceiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:

@@ -19,9 +19,9 @@ import (
 
 {{ range $_, $n := $.Nodes -}}
 // {{ $n.Name }} is the predicate function for {{ $n.Package }} builders.
-type {{ $n.Name }} func({{ if gt (len $.Storage) 1 }}interface{}{{ else }}{{ (index $.Storage 0).Builder }}{{ end }})
+type {{ $n.Name }} func({{ if $.MultiStorage }}interface{}{{ else }}{{ (index $.Storage 0).Builder }}{{ end }})
 
-{{ if gt (len $.Storage) 1 }}
+{{ if $.MultiStorage }}
 // {{ $n.Name }}PerDialect construct a predicate for graph traversals based on dialect type.
 func {{ $n.Name }}PerDialect({{ range $i, $storage := $.Storage }}{{ if $i }},{{ end }}f{{ $i }} func({{ $storage.Builder }}){{ end }}) {{ $n.Name }} {
 	return {{ $n.Name }}(func (v interface{}) {

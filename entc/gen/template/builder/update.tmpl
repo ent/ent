@@ -13,7 +13,6 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ $builder := print (pascal $.Name) "Update" }}
 {{ $receiver := receiver $builder }}
-{{ $multistorage := gt (len $.Storage) 1 }}
 
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
@@ -41,7 +40,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" 0 -}}
 		{{ template "update/save" . }}
 	{{- end -}}
-	{{- if $multistorage -}}
+	{{- if $.MultiStorage -}}
 		switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
@@ -108,7 +107,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" "nil" -}}
 		{{ template "update/save" . }}
 	{{- end -}}
-	{{- if $multistorage -}}
+	{{- if $.MultiStorage -}}
 	switch {{ $receiver }}.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:

@@ -181,7 +181,7 @@ func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Na
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
 	query := &{{ $e.Type.Name }}Query{config: c.config}
-	{{ if gt (len $.Storage) 1 -}}
+	{{ if $.MultiStorage -}}
 		switch c.driver.Dialect() {
 		{{- range $_, $storage := $.Storage }}
 		case {{ join $storage.Dialects ", " }}:
