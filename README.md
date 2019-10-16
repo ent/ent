@@ -12,10 +12,12 @@ Simple, yet powerful ORM for modeling and querying data.
 - **Statically Typed And Explicit API** - 100% statically typed and explicit API using code generation.
 - **Multi Storage Driver** - supports MySQL, SQLite and Gremlin.
 
-## Installation
+## Quick Installation
 ```console
 go get github.com/facebookincubator/ent/cmd/entc
 ```
+
+For proper installation using [Go modules], visit [entgo.io website][entgo instal].
 
 ## Docs
 The documentation for developing and using ent is available at: https://entgo.io
@@ -31,3 +33,7 @@ Read more about the motivation of the project [here](https://entgo.io/blog/2019/
 
 ## License
 ent is licensed under Apache 2.0 as found in the [LICENSE file](LICENSE).
+
+
+[entgo instal]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
+[Go modules]: https://github.com/golang/go/wiki/Modules#quick-start

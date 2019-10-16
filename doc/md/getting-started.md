@@ -22,6 +22,15 @@ go get github.com/facebookincubator/ent/cmd/entc
 
 After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.
 
+## Setup A Go Environment
+
+If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
+GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-start) project as follows:
+
+```console
+go mod init <project>
+```
+
 ## Create Your First Schema
 
 Go to the root directory of your project, and run:

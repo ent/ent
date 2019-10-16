@@ -47,7 +47,18 @@ When working with `entc` in a project, you want to make sure that the version be
 used by `entc` is **identical** to the `ent` version used by your project.
 
 One of the options for achieving this is asking `go generate` to use the version
-mentioned in the `go.mod` file when running `entc`. 
+mentioned in the `go.mod` file when running `entc`. If your project does not use
+[Go modules](https://github.com/golang/go/wiki/Modules#quick-start), setup one as follows:
+
+```console
+go mod init <project>
+```
+
+And then, re-run the following command in order to add `ent` to your `go.mod` file:
+
+```console
+go get github.com/facebookincubator/ent/cmd/entc
+```
 
 Add a `generate.go` file to your project under `<project>/ent`:
 
@@ -57,7 +68,8 @@ package ent
 //go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema
 ```
 
-And run `go generate ./ent` from your project root directory in order to run `entc` for your project.
+Finally, you can run `go generate ./ent` from the root directory of your project
+in order to run `entc` code generation on your project schemas.
 
 ## Code Generation Options
 
