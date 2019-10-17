@@ -12,7 +12,7 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 )
 
-// WriterDriver is a driver that writes all driver exec operations to its writer.
+// WriteDriver is a driver that writes all driver exec operations to its writer.
 type WriteDriver struct {
 	dialect.Driver // underlying driver.
 	io.Writer      // target for exec statements.
