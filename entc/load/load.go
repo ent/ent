@@ -130,7 +130,7 @@ func (c *Config) load() (string, error) {
 	return pkg.PkgPath, err
 }
 
-//go:generate go run github.com/go-bindata/go-bindata/go-bindata -pkg=internal -o=internal/bindata.go ./template/... schema.go
+//go:generate go run github.com/go-bindata/go-bindata/go-bindata -pkg=internal -o=internal/bindata.go -modtime=1 ./template/... schema.go
 
 var buildTmpl = templates()
 
