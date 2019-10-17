@@ -507,9 +507,30 @@ header > .navigationSlider {
   display: flex;
 }
 
+li.navSearchWrapper.reactNavSearchWrapper {
+  display: none!important;
+}
+
 @media only screen and (min-width: 1024px) {
   .navigationSlider {
     height: 12px;
+  }
+  /* show search in only in doc pages */
+  .sideNavVisible.separateOnPageNav li.navSearchWrapper.reactNavSearchWrapper {
+    display: inline-block!important;
+  }
+  .navSearchWrapper {
+    top: -10px;
+  }
+  .navigationSlider .slidingNav .navSearchWrapper .algolia-docsearch-footer a {
+    height: auto;
+    color: transparent!important;
+    right: 0;
+    position: absolute;
+  }
+  .algolia-docsearch-footer {
+    position: relative;
+    height: 20px;
   }
 }
 
@@ -604,4 +625,18 @@ ol {
 
 .nav-footer .copyright {
   margin: 0 auto 10px;
+}
+
+input#search_input_react {
+    color: #3d3e3f;
+    background: white;
+    border: 1px solid #3d3e3f;
+}
+
+input#search_input_react:focus, input#search_input_react:active {
+    color: #3d3e3f;
+}
+
+input#search_input_react::placeholder {
+    color: #cccccc;
 }
