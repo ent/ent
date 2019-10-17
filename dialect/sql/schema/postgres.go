@@ -93,15 +93,15 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	//
 	// Get PK and UNI columns of a table:
 	//
-	// 	SELECT a.attname                            AS COLUMN,
+	//	SELECT a.attname                           AS column,
 	//		format_type(a.atttypid, a.atttypmod)   AS data_type,
-	//		i.indisprimary                         AS PRIMARY,
+	//		i.indisprimary                         AS primary,
 	//		i.indisunique                          AS unique
-	// 	FROM   pg_index i
-	// 	join pg_attribute a
-	// 	ON a.attrelid = i.indrelid
-	// 	AND a.attnum = ANY ( i.indkey )
-	// 	WHERE  i.indrelid = '<TABLE>' :: regclass;
+	//	FROM pg_index i
+	//	join pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
+	//	join pg_stat_user_tables t ON t.relid = i.indrelid
+	//	WHERE t.schemaname = CURRENT_SCHEMA()
+	//		AND i.indrelid = '<TABLE>' :: regclass;
 	//
 	//   column | data_type | primary | unique
 	//	--------+-----------+---------+--------
@@ -124,6 +124,9 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	)
 	if err := rows.Scan(&c.Name, &c.typ, &maxlen, &nullable, &defaults); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
+	}
+	if nullable.Valid {
+		c.Nullable = nullable.String == "YES"
 	}
 	switch c.typ {
 	case "boolean":
