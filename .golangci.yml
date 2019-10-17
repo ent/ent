@@ -65,3 +65,7 @@ issues:
       text: "packages.LoadSyntax is deprecated"
       linters:
         - staticcheck
+    # should be removed after postgres is enabled.
+    - path: dialect/sql/schema/postgres.go
+      linters:
+        - unused
