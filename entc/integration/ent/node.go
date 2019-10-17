@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -90,12 +90,13 @@ func (n *Node) Unwrap() *Node {
 
 // String implements the fmt.Stringer.
 func (n *Node) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Node(")
-	buf.WriteString(fmt.Sprintf("id=%v", n.ID))
-	buf.WriteString(fmt.Sprintf(", value=%v", n.Value))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Node(")
+	builder.WriteString(fmt.Sprintf("id=%v", n.ID))
+	builder.WriteString(", value=")
+	builder.WriteString(fmt.Sprintf("%v", n.Value))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.

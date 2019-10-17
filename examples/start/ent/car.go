@@ -7,8 +7,8 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -71,13 +71,15 @@ func (c *Car) Unwrap() *Car {
 
 // String implements the fmt.Stringer.
 func (c *Car) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Car(")
-	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
-	buf.WriteString(fmt.Sprintf(", model=%v", c.Model))
-	buf.WriteString(fmt.Sprintf(", registered_at=%v", c.RegisteredAt))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Car(")
+	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(", model=")
+	builder.WriteString(c.Model)
+	builder.WriteString(", registered_at=")
+	builder.WriteString(c.RegisteredAt.Format(time.ANSIC))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Cars is a parsable slice of Car.

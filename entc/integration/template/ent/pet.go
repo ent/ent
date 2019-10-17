@@ -7,8 +7,8 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -74,15 +74,17 @@ func (pe *Pet) Unwrap() *Pet {
 
 // String implements the fmt.Stringer.
 func (pe *Pet) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Pet(")
-	buf.WriteString(fmt.Sprintf("id=%v", pe.ID))
-	buf.WriteString(fmt.Sprintf(", age=%v", pe.Age))
+	var builder strings.Builder
+	builder.WriteString("Pet(")
+	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Age))
 	if v := pe.LicensedAt; v != nil {
-		buf.WriteString(fmt.Sprintf(", licensed_at=%v", *v))
+		builder.WriteString(", licensed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
 	}
-	buf.WriteString(")")
-	return buf.String()
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Pets is a parsable slice of Pet.

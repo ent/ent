@@ -65,24 +65,39 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 
 // String implements the fmt.Stringer.
 func ({{ $receiver }} *{{ $.Name }}) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("{{ $.Name }}(")
-	buf.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
+	var builder strings.Builder
+	builder.WriteString("{{ $.Name }}(")
+	builder.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
 	{{- range $i, $f := $.Fields }}
 		{{- if $f.Sensitive }}
-			buf.WriteString(", {{ $f.Name }}={{ printf "<sensitive>" }}")
+			builder.WriteString(", {{ $f.Name }}=<sensitive>")
 		{{- else }}
+			{{- $sf := printf "%s.%s" $receiver $f.StructField }}
 			{{- if $f.Nillable }}
-				if v := {{ $receiver }}.{{ $f.StructField }}; v != nil {
-					buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", *v))
+				if v := {{ $sf }}; v != nil {
+					builder.WriteString(", {{ $f.Name }}=")
+					{{- if $f.IsTime }}
+						builder.WriteString(v.Format(time.ANSIC))
+					{{- else if $f.IsString }}
+						builder.WriteString(*v)
+					{{- else }}
+						builder.WriteString(fmt.Sprintf("%v", *v))
+					{{- end }}
 				}
 			{{- else }}
-				buf.WriteString(fmt.Sprintf(", {{ $f.Name }}=%v", {{ $receiver }}.{{ $f.StructField }}))
+				builder.WriteString(", {{ $f.Name }}=")
+				{{- if $f.IsTime }}
+					builder.WriteString({{ $sf }}.Format(time.ANSIC))
+				{{- else if $f.IsString }}
+					builder.WriteString({{ $sf }})
+				{{- else }}
+					builder.WriteString(fmt.Sprintf("%v", {{ $sf }}))
+				{{- end }}
 			{{- end }}
 		{{- end }}
 	{{- end }}
-	buf.WriteString(")")
-	return buf.String()
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 {{- if $.ID.IsString }}

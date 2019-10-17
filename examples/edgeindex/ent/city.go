@@ -7,8 +7,8 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -65,12 +65,13 @@ func (c *City) Unwrap() *City {
 
 // String implements the fmt.Stringer.
 func (c *City) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("City(")
-	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
-	buf.WriteString(fmt.Sprintf(", name=%v", c.Name))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("City(")
+	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(", name=")
+	builder.WriteString(c.Name)
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Cities is a parsable slice of City.

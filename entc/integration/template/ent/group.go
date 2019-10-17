@@ -7,8 +7,8 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -60,12 +60,13 @@ func (gr *Group) Unwrap() *Group {
 
 // String implements the fmt.Stringer.
 func (gr *Group) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Group(")
-	buf.WriteString(fmt.Sprintf("id=%v", gr.ID))
-	buf.WriteString(fmt.Sprintf(", max_users=%v", gr.MaxUsers))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Group(")
+	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
+	builder.WriteString(", max_users=")
+	builder.WriteString(fmt.Sprintf("%v", gr.MaxUsers))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Groups is a parsable slice of Group.

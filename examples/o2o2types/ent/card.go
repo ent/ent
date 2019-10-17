@@ -7,8 +7,8 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -71,13 +71,15 @@ func (c *Card) Unwrap() *Card {
 
 // String implements the fmt.Stringer.
 func (c *Card) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Card(")
-	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
-	buf.WriteString(fmt.Sprintf(", expired=%v", c.Expired))
-	buf.WriteString(fmt.Sprintf(", number=%v", c.Number))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Card(")
+	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(", expired=")
+	builder.WriteString(c.Expired.Format(time.ANSIC))
+	builder.WriteString(", number=")
+	builder.WriteString(c.Number)
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Cards is a parsable slice of Card.

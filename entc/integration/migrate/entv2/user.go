@@ -7,8 +7,8 @@
 package entv2
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
@@ -96,19 +96,27 @@ func (u *User) Unwrap() *User {
 
 // String implements the fmt.Stringer.
 func (u *User) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("User(")
-	buf.WriteString(fmt.Sprintf("id=%v", u.ID))
-	buf.WriteString(fmt.Sprintf(", age=%v", u.Age))
-	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
-	buf.WriteString(fmt.Sprintf(", phone=%v", u.Phone))
-	buf.WriteString(fmt.Sprintf(", buffer=%v", u.Buffer))
-	buf.WriteString(fmt.Sprintf(", title=%v", u.Title))
-	buf.WriteString(fmt.Sprintf(", new_name=%v", u.NewName))
-	buf.WriteString(fmt.Sprintf(", blob=%v", u.Blob))
-	buf.WriteString(fmt.Sprintf(", state=%v", u.State))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("User(")
+	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(", name=")
+	builder.WriteString(u.Name)
+	builder.WriteString(", phone=")
+	builder.WriteString(u.Phone)
+	builder.WriteString(", buffer=")
+	builder.WriteString(fmt.Sprintf("%v", u.Buffer))
+	builder.WriteString(", title=")
+	builder.WriteString(u.Title)
+	builder.WriteString(", new_name=")
+	builder.WriteString(u.NewName)
+	builder.WriteString(", blob=")
+	builder.WriteString(fmt.Sprintf("%v", u.Blob))
+	builder.WriteString(", state=")
+	builder.WriteString(fmt.Sprintf("%v", u.State))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Users is a parsable slice of User.

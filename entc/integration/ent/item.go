@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -73,11 +73,11 @@ func (i *Item) Unwrap() *Item {
 
 // String implements the fmt.Stringer.
 func (i *Item) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Item(")
-	buf.WriteString(fmt.Sprintf("id=%v", i.ID))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Item(")
+	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.

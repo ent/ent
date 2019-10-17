@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -85,12 +85,13 @@ func (ft *FileType) Unwrap() *FileType {
 
 // String implements the fmt.Stringer.
 func (ft *FileType) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("FileType(")
-	buf.WriteString(fmt.Sprintf("id=%v", ft.ID))
-	buf.WriteString(fmt.Sprintf(", name=%v", ft.Name))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("FileType(")
+	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
+	builder.WriteString(", name=")
+	builder.WriteString(ft.Name)
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.

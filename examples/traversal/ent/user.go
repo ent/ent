@@ -7,8 +7,8 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -85,13 +85,15 @@ func (u *User) Unwrap() *User {
 
 // String implements the fmt.Stringer.
 func (u *User) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("User(")
-	buf.WriteString(fmt.Sprintf("id=%v", u.ID))
-	buf.WriteString(fmt.Sprintf(", age=%v", u.Age))
-	buf.WriteString(fmt.Sprintf(", name=%v", u.Name))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("User(")
+	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(", name=")
+	builder.WriteString(u.Name)
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Users is a parsable slice of User.
