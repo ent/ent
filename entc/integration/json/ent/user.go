@@ -7,11 +7,11 @@
 package ent
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -112,17 +112,23 @@ func (u *User) Unwrap() *User {
 
 // String implements the fmt.Stringer.
 func (u *User) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("User(")
-	buf.WriteString(fmt.Sprintf("id=%v", u.ID))
-	buf.WriteString(fmt.Sprintf(", url=%v", u.URL))
-	buf.WriteString(fmt.Sprintf(", raw=%v", u.Raw))
-	buf.WriteString(fmt.Sprintf(", dirs=%v", u.Dirs))
-	buf.WriteString(fmt.Sprintf(", ints=%v", u.Ints))
-	buf.WriteString(fmt.Sprintf(", floats=%v", u.Floats))
-	buf.WriteString(fmt.Sprintf(", strings=%v", u.Strings))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("User(")
+	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", url=")
+	builder.WriteString(fmt.Sprintf("%v", u.URL))
+	builder.WriteString(", raw=")
+	builder.WriteString(fmt.Sprintf("%v", u.Raw))
+	builder.WriteString(", dirs=")
+	builder.WriteString(fmt.Sprintf("%v", u.Dirs))
+	builder.WriteString(", ints=")
+	builder.WriteString(fmt.Sprintf("%v", u.Ints))
+	builder.WriteString(", floats=")
+	builder.WriteString(fmt.Sprintf("%v", u.Floats))
+	builder.WriteString(", strings=")
+	builder.WriteString(fmt.Sprintf("%v", u.Strings))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Users is a parsable slice of User.

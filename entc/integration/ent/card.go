@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -103,14 +103,17 @@ func (c *Card) Unwrap() *Card {
 
 // String implements the fmt.Stringer.
 func (c *Card) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Card(")
-	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
-	buf.WriteString(fmt.Sprintf(", created_at=%v", c.CreatedAt))
-	buf.WriteString(fmt.Sprintf(", updated_at=%v", c.UpdatedAt))
-	buf.WriteString(fmt.Sprintf(", number=%v", c.Number))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Card(")
+	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", number=")
+	builder.WriteString(c.Number)
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.

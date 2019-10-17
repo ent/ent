@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -97,16 +97,19 @@ func (c *Comment) Unwrap() *Comment {
 
 // String implements the fmt.Stringer.
 func (c *Comment) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Comment(")
-	buf.WriteString(fmt.Sprintf("id=%v", c.ID))
-	buf.WriteString(fmt.Sprintf(", unique_int=%v", c.UniqueInt))
-	buf.WriteString(fmt.Sprintf(", unique_float=%v", c.UniqueFloat))
+	var builder strings.Builder
+	builder.WriteString("Comment(")
+	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(", unique_int=")
+	builder.WriteString(fmt.Sprintf("%v", c.UniqueInt))
+	builder.WriteString(", unique_float=")
+	builder.WriteString(fmt.Sprintf("%v", c.UniqueFloat))
 	if v := c.NillableInt; v != nil {
-		buf.WriteString(fmt.Sprintf(", nillable_int=%v", *v))
+		builder.WriteString(", nillable_int=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	buf.WriteString(")")
-	return buf.String()
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.

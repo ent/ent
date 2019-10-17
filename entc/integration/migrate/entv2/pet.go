@@ -7,8 +7,8 @@
 package entv2
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 )
@@ -55,11 +55,11 @@ func (pe *Pet) Unwrap() *Pet {
 
 // String implements the fmt.Stringer.
 func (pe *Pet) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Pet(")
-	buf.WriteString(fmt.Sprintf("id=%v", pe.ID))
-	buf.WriteString(")")
-	return buf.String()
+	var builder strings.Builder
+	builder.WriteString("Pet(")
+	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // Pets is a parsable slice of Pet.

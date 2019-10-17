@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -132,18 +132,23 @@ func (gr *Group) Unwrap() *Group {
 
 // String implements the fmt.Stringer.
 func (gr *Group) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("Group(")
-	buf.WriteString(fmt.Sprintf("id=%v", gr.ID))
-	buf.WriteString(fmt.Sprintf(", active=%v", gr.Active))
-	buf.WriteString(fmt.Sprintf(", expire=%v", gr.Expire))
+	var builder strings.Builder
+	builder.WriteString("Group(")
+	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
+	builder.WriteString(", active=")
+	builder.WriteString(fmt.Sprintf("%v", gr.Active))
+	builder.WriteString(", expire=")
+	builder.WriteString(gr.Expire.Format(time.ANSIC))
 	if v := gr.Type; v != nil {
-		buf.WriteString(fmt.Sprintf(", type=%v", *v))
+		builder.WriteString(", type=")
+		builder.WriteString(*v)
 	}
-	buf.WriteString(fmt.Sprintf(", max_users=%v", gr.MaxUsers))
-	buf.WriteString(fmt.Sprintf(", name=%v", gr.Name))
-	buf.WriteString(")")
-	return buf.String()
+	builder.WriteString(", max_users=")
+	builder.WriteString(fmt.Sprintf("%v", gr.MaxUsers))
+	builder.WriteString(", name=")
+	builder.WriteString(gr.Name)
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.

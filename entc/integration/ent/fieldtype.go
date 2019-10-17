@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -208,38 +208,55 @@ func (ft *FieldType) Unwrap() *FieldType {
 
 // String implements the fmt.Stringer.
 func (ft *FieldType) String() string {
-	buf := bytes.NewBuffer(nil)
-	buf.WriteString("FieldType(")
-	buf.WriteString(fmt.Sprintf("id=%v", ft.ID))
-	buf.WriteString(fmt.Sprintf(", int=%v", ft.Int))
-	buf.WriteString(fmt.Sprintf(", int8=%v", ft.Int8))
-	buf.WriteString(fmt.Sprintf(", int16=%v", ft.Int16))
-	buf.WriteString(fmt.Sprintf(", int32=%v", ft.Int32))
-	buf.WriteString(fmt.Sprintf(", int64=%v", ft.Int64))
-	buf.WriteString(fmt.Sprintf(", optional_int=%v", ft.OptionalInt))
-	buf.WriteString(fmt.Sprintf(", optional_int8=%v", ft.OptionalInt8))
-	buf.WriteString(fmt.Sprintf(", optional_int16=%v", ft.OptionalInt16))
-	buf.WriteString(fmt.Sprintf(", optional_int32=%v", ft.OptionalInt32))
-	buf.WriteString(fmt.Sprintf(", optional_int64=%v", ft.OptionalInt64))
+	var builder strings.Builder
+	builder.WriteString("FieldType(")
+	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
+	builder.WriteString(", int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Int))
+	builder.WriteString(", int8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Int8))
+	builder.WriteString(", int16=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Int16))
+	builder.WriteString(", int32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Int32))
+	builder.WriteString(", int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Int64))
+	builder.WriteString(", optional_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt))
+	builder.WriteString(", optional_int8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt8))
+	builder.WriteString(", optional_int16=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt16))
+	builder.WriteString(", optional_int32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt32))
+	builder.WriteString(", optional_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt64))
 	if v := ft.NillableInt; v != nil {
-		buf.WriteString(fmt.Sprintf(", nillable_int=%v", *v))
+		builder.WriteString(", nillable_int=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	if v := ft.NillableInt8; v != nil {
-		buf.WriteString(fmt.Sprintf(", nillable_int8=%v", *v))
+		builder.WriteString(", nillable_int8=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	if v := ft.NillableInt16; v != nil {
-		buf.WriteString(fmt.Sprintf(", nillable_int16=%v", *v))
+		builder.WriteString(", nillable_int16=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	if v := ft.NillableInt32; v != nil {
-		buf.WriteString(fmt.Sprintf(", nillable_int32=%v", *v))
+		builder.WriteString(", nillable_int32=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	if v := ft.NillableInt64; v != nil {
-		buf.WriteString(fmt.Sprintf(", nillable_int64=%v", *v))
+		builder.WriteString(", nillable_int64=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	buf.WriteString(fmt.Sprintf(", validate_optional_int32=%v", ft.ValidateOptionalInt32))
-	buf.WriteString(fmt.Sprintf(", state=%v", ft.State))
-	buf.WriteString(")")
-	return buf.String()
+	builder.WriteString(", validate_optional_int32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.ValidateOptionalInt32))
+	builder.WriteString(", state=")
+	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteByte(')')
+	return builder.String()
 }
 
 // id returns the int representation of the ID field.
