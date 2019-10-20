@@ -593,11 +593,8 @@ type Index struct {
 	Unique  bool      // uniqueness.
 	Columns []*Column // actual table columns.
 	columns []string  // columns loaded from query scan.
+	primary bool      // primary key index.
 }
-
-// Primary indicates if this index is a primary key.
-// Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
-func (i *Index) Primary() bool { return i.Name == "PRIMARY" }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.
 func (i *Index) Builder(table string) *sql.IndexBuilder {
@@ -646,13 +643,13 @@ func (i *Indexes) ScanMySQL(rows *sql.Rows) error {
 		if err := rows.Scan(&name, &column, &nonuniq, &seqindex); err != nil {
 			return fmt.Errorf("scanning index description: %v", err)
 		}
+		// ignore primary keys.
+		if name == "PRIMARY" {
+			continue
+		}
 		idx, ok := names[name]
 		if !ok {
 			idx = &Index{Name: name, Unique: !nonuniq}
-			// ignore primary keys.
-			if idx.Primary() {
-				continue
-			}
 			*i = append(*i, idx)
 			names[name] = idx
 		}

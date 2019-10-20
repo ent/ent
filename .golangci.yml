@@ -69,3 +69,6 @@ issues:
     - path: dialect/sql/schema/postgres.go
       linters:
         - unused
+    - path: dialect/sql/schema/schema.go
+      linters:
+        - unused

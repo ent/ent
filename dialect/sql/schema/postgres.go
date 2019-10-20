@@ -25,22 +25,22 @@ type Postgres struct {
 func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, "SHOW server_version_num", []interface{}{}, rows); err != nil {
-		return fmt.Errorf("postgres: querying server version %v", err)
+		return fmt.Errorf("querying server version %v", err)
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return fmt.Errorf("postgres: server_version_num variable was not found")
+		return fmt.Errorf("server_version_num variable was not found")
 	}
 	var version string
 	if err := rows.Scan(&version); err != nil {
-		return fmt.Errorf("postgres: scanning version: %v", err)
+		return fmt.Errorf("scanning version: %v", err)
 	}
 	if len(version) < 6 {
-		return fmt.Errorf("postgres: malformed version: %s", version)
+		return fmt.Errorf("malformed version: %s", version)
 	}
 	d.version = fmt.Sprintf("%s.%s.%s", version[:2], version[2:4], version[4:])
 	if compareVersions(d.version, "10.0.0") == -1 {
-		return fmt.Errorf("postgres: unsupported version: %s", d.version)
+		return fmt.Errorf("unsupported postgres version: %s", d.version)
 	}
 	return nil
 }
@@ -82,34 +82,95 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	for rows.Next() {
 		c := &Column{}
 		if err := d.scanColumn(c, rows); err != nil {
-			return nil, fmt.Errorf("postgres: %v", err)
+			return nil, err
 		}
 		t.AddColumn(c)
 	}
 	if err := rows.Close(); err != nil {
-		return nil, fmt.Errorf("postgres: closing rows %v", err)
+		return nil, fmt.Errorf("closing rows %v", err)
 	}
-	// TODO: populate PK/UNI information for columns and tables and scan indexes.
-	//
-	// Get PK and UNI columns of a table:
-	//
-	//	SELECT a.attname                           AS column,
-	//		format_type(a.atttypid, a.atttypmod)   AS data_type,
-	//		i.indisprimary                         AS primary,
-	//		i.indisunique                          AS unique
-	//	FROM pg_index i
-	//	join pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY (i.indkey)
-	//	join pg_stat_user_tables t ON t.relid = i.indrelid
-	//	WHERE t.schemaname = CURRENT_SCHEMA()
-	//		AND i.indrelid = '<TABLE>' :: regclass;
-	//
-	//   column | data_type | primary | unique
-	//	--------+-----------+---------+--------
-	//	 a1     | integer   | t       | t
-	//	 a2     | integer   | t       | t
-	// 	 a0     | integer   | f       | t
-	//
+	idxs, err := d.indexes(ctx, tx, name)
+	if err != nil {
+		return nil, err
+	}
+	// Populate the index information to the table and its columns.
+	// We do it manually, because PK and uniqueness information does
+	// not exist when querying the INFORMATION_SCHEMA.COLUMNS above.
+	for _, idx := range idxs {
+		switch {
+		case idx.primary:
+			for _, name := range idx.columns {
+				c, ok := t.column(name)
+				if !ok {
+					return nil, fmt.Errorf("index %q column %q was not found in table %q", idx.Name, name, t.Name)
+				}
+				c.Key = PrimaryKey
+				t.PrimaryKey = append(t.PrimaryKey, c)
+			}
+		case idx.Unique && len(idx.columns) == 1:
+			name := idx.columns[0]
+			c, ok := t.column(name)
+			if !ok {
+				return nil, fmt.Errorf("index %q column %q was not found in table %q", idx.Name, name, t.Name)
+			}
+			c.Key = UniqueKey
+			c.Unique = true
+		default:
+			t.AddIndex(idx.Name, idx.Unique, idx.columns)
+		}
+	}
 	return t, nil
+}
+
+// indexesQuery holds a query format for retrieving
+// table indexes of the current schema.
+const indexesQuery = `
+SELECT i.relname AS index_name,
+       a.attname AS column_name,
+       idx.indisprimary AS primary,
+       idx.indisunique AS unique
+FROM pg_class t,
+     pg_class i,
+     pg_index idx,
+     pg_attribute a,
+     pg_namespace n
+WHERE t.oid = idx.indrelid
+  AND i.oid = idx.indexrelid
+  AND n.oid = t.relnamespace
+  AND a.attrelid = t.oid
+  AND a.attnum = ANY(idx.indkey)
+  AND t.relkind = 'r'
+  AND n.nspname = CURRENT_SCHEMA()
+  AND t.relname = '%s';
+`
+
+func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (Indexes, error) {
+	rows := &sql.Rows{}
+	if err := tx.Query(ctx, fmt.Sprintf(indexesQuery, table), []interface{}{}, rows); err != nil {
+		return nil, fmt.Errorf("querying indexes for table %s", table)
+	}
+	defer rows.Close()
+	var (
+		idxs  Indexes
+		names = make(map[string]*Index)
+	)
+	for rows.Next() {
+		var (
+			name, column    string
+			unique, primary bool
+		)
+		if err := rows.Scan(&name, &column, &primary, &unique); err != nil {
+			return nil, fmt.Errorf("scanning index description: %v", err)
+		}
+		idx, ok := names[name]
+		if !ok {
+			idx = &Index{Name: name, Unique: unique, primary: primary}
+			idxs = append(idxs, idx)
+			names[name] = idx
+		}
+		idx.columns = append(idx.columns, column)
+	}
+	return idxs, nil
 }
 
 // maxCharSize defines the maximum size of limited character types in Postgres (10 MB).
