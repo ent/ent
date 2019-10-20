@@ -226,3 +226,39 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		return c.ScanDefault(defaults.String)
 	}
 }
+
+// cType returns the PostgreSQL string type for this column.
+func (d *Postgres) cType(c *Column) (t string) {
+	switch c.Type {
+	case field.TypeBool:
+		t = "boolean"
+	case field.TypeUint8, field.TypeInt8, field.TypeInt16, field.TypeUint16:
+		t = "smallint"
+	case field.TypeInt32, field.TypeUint32:
+		t = "int"
+	case field.TypeInt, field.TypeUint, field.TypeInt64, field.TypeUint64:
+		t = "bigint"
+	case field.TypeFloat32:
+		t = "real"
+	case field.TypeFloat64:
+		t = "double precision"
+	case field.TypeBytes:
+		t = "bytea"
+	case field.TypeJSON:
+		t = "jsonb"
+	case field.TypeString:
+		t = "varchar"
+		if c.Size > maxCharSize {
+			t = "text"
+		}
+	case field.TypeTime:
+		t = "timestamp with time zone"
+	case field.TypeEnum:
+		// Currently, the support for enums is weak (application level only.
+		// like SQLite). Dialect needs to create and maintain its enum type.
+		t = "varchar"
+	default:
+		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
+	}
+	return t
+}
