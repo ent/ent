@@ -28,7 +28,8 @@ func (Group) Fields() []ent.Field {
 		field.String("type").
 			Optional().
 			Nillable().
-			MinLen(3),
+			MinLen(3).
+			MaxLen(255),
 		field.Int("max_users").
 			Optional().
 			Positive().

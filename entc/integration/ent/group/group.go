@@ -92,7 +92,21 @@ var (
 	// descType is the schema descriptor for type field.
 	descType = fields[2].Descriptor()
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	TypeValidator = descType.Validators[0].(func(string) error)
+	TypeValidator = func() func(string) error {
+		validators := descType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_type string) error {
+			for _, fn := range fns {
+				if err := fn(_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 
 	// descMaxUsers is the schema descriptor for max_users field.
 	descMaxUsers = fields[3].Descriptor()
