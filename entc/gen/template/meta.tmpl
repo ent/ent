@@ -80,9 +80,9 @@ var (
 							validators[{{ $j }}].(func({{ $f.Type }}) error),
 						{{- end }}
 					}
-					return func({{ $f.Name }} {{ $f.Type }}) error {
+					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
 						for _, fn := range fns {
-							if err := fn({{ $f.Name }}); err != nil {
+							if err := fn({{ $f.BuilderField }}); err != nil {
 								return err
 							}
 						}

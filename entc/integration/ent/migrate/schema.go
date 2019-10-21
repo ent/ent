@@ -156,7 +156,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "active", Type: field.TypeBool, Default: group.DefaultActive},
 		{Name: "expire", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeString, Nullable: true},
+		{Name: "type", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: group.DefaultMaxUsers},
 		{Name: "name", Type: field.TypeString},
 		{Name: "info_id", Type: field.TypeInt, Nullable: true},
