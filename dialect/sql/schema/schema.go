@@ -397,7 +397,7 @@ func (c *Column) ScanMySQL(rows *sql.Rows) error {
 			c.Enums[i] = strings.Trim(e, "'")
 		}
 	}
-	if defaults.Valid && defaults.String != Null {
+	if defaults.Valid {
 		return c.ScanDefault(defaults.String)
 	}
 	return nil
@@ -429,6 +429,7 @@ func (c Column) FloatType() bool { return c.Type == field.TypeFloat32 || c.Type 
 // ScanDefault scans the default value string to its interface type.
 func (c *Column) ScanDefault(value string) (err error) {
 	switch {
+	case value == Null: // ignore.
 	case c.IntType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
