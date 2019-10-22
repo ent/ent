@@ -68,6 +68,8 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 		m.sqlDialect = &MySQL{Driver: d}
 	case dialect.SQLite:
 		m.sqlDialect = &SQLite{Driver: d}
+	case dialect.Postgres:
+		m.sqlDialect = &Postgres{Driver: d}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
 	}
@@ -164,7 +166,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 		if len(fks) == 0 {
 			continue
 		}
-		b := sql.AlterTable(t.Name)
+		b := sql.Dialect(m.Dialect()).AlterTable(t.Name)
 		for _, fk := range fks {
 			b.AddForeignKey(fk.DSL())
 		}
