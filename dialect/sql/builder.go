@@ -1892,6 +1892,17 @@ func (d *dialectBuilder) AlterTable(name string) *TableAlter {
 	return b
 }
 
+// Column creates a ColumnBuilder for the configured dialect.
+//
+//	Dialect(dialect.Postgres)..
+//		Column("group_id").Type("int").Attr("UNIQUE")
+//
+func (d *dialectBuilder) Column(name string) *ColumnBuilder {
+	b := Column(name)
+	b.SetDialect(d.dialect)
+	return b
+}
+
 // Insert creates a InsertBuilder for the configured dialect.
 //
 //	Dialect(dialect.Postgres).
