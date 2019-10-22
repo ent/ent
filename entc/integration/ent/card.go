@@ -21,10 +21,10 @@ type Card struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
 
@@ -35,23 +35,23 @@ type Card struct {
 // FromRows scans the sql response data into Card.
 func (c *Card) FromRows(rows *sql.Rows) error {
 	var vc struct {
-		ID        int
-		CreatedAt sql.NullTime
-		UpdatedAt sql.NullTime
-		Number    sql.NullString
+		ID         int
+		CreateTime sql.NullTime
+		UpdateTime sql.NullTime
+		Number     sql.NullString
 	}
 	// the order here should be the same as in the `card.Columns`.
 	if err := rows.Scan(
 		&vc.ID,
-		&vc.CreatedAt,
-		&vc.UpdatedAt,
+		&vc.CreateTime,
+		&vc.UpdateTime,
 		&vc.Number,
 	); err != nil {
 		return err
 	}
 	c.ID = strconv.Itoa(vc.ID)
-	c.CreatedAt = vc.CreatedAt.Time
-	c.UpdatedAt = vc.UpdatedAt.Time
+	c.CreateTime = vc.CreateTime.Time
+	c.UpdateTime = vc.UpdateTime.Time
 	c.Number = vc.Number.String
 	return nil
 }
@@ -63,17 +63,17 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vc struct {
-		ID        string `json:"id,omitempty"`
-		CreatedAt int64  `json:"created_at,omitempty"`
-		UpdatedAt int64  `json:"updated_at,omitempty"`
-		Number    string `json:"number,omitempty"`
+		ID         string `json:"id,omitempty"`
+		CreateTime int64  `json:"create_time,omitempty"`
+		UpdateTime int64  `json:"update_time,omitempty"`
+		Number     string `json:"number,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
 	}
 	c.ID = vc.ID
-	c.CreatedAt = time.Unix(0, vc.CreatedAt)
-	c.UpdatedAt = time.Unix(0, vc.UpdatedAt)
+	c.CreateTime = time.Unix(0, vc.CreateTime)
+	c.UpdateTime = time.Unix(0, vc.UpdateTime)
 	c.Number = vc.Number
 	return nil
 }
@@ -106,10 +106,10 @@ func (c *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", create_time=")
+	builder.WriteString(c.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", number=")
 	builder.WriteString(c.Number)
 	builder.WriteByte(')')
@@ -144,20 +144,20 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vc []struct {
-		ID        string `json:"id,omitempty"`
-		CreatedAt int64  `json:"created_at,omitempty"`
-		UpdatedAt int64  `json:"updated_at,omitempty"`
-		Number    string `json:"number,omitempty"`
+		ID         string `json:"id,omitempty"`
+		CreateTime int64  `json:"create_time,omitempty"`
+		UpdateTime int64  `json:"update_time,omitempty"`
+		Number     string `json:"number,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
 	}
 	for _, v := range vc {
 		*c = append(*c, &Card{
-			ID:        v.ID,
-			CreatedAt: time.Unix(0, v.CreatedAt),
-			UpdatedAt: time.Unix(0, v.UpdatedAt),
-			Number:    v.Number,
+			ID:         v.ID,
+			CreateTime: time.Unix(0, v.CreateTime),
+			UpdateTime: time.Unix(0, v.UpdateTime),
+			Number:     v.Number,
 		})
 	}
 	return nil

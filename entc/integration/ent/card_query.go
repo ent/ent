@@ -276,12 +276,12 @@ func (cq *CardQuery) Clone() *CardQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Card.Query().
-//		GroupBy(card.FieldCreatedAt).
+//		GroupBy(card.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -302,11 +302,11 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Card.Query().
-//		Select(card.FieldCreatedAt).
+//		Select(card.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {

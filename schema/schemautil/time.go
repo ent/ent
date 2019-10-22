@@ -17,7 +17,7 @@ type CreateTimeMixin struct{}
 // Fields of the create time mixin.
 func (CreateTimeMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
+		field.Time("create_time").
 			Default(time.Now).
 			Immutable(),
 	}
@@ -32,7 +32,7 @@ type UpdateTimeMixin struct{}
 // Fields of the update time mixin.
 func (UpdateTimeMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("updated_at").
+		field.Time("update_time").
 			Default(time.Now).
 			UpdateDefault(time.Now).
 			Immutable(),
