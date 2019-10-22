@@ -70,7 +70,7 @@ func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, name string, val
 func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Dialect(dialect.Postgres).
-		Select("column_name", "data_type", "character_maximum_length", "is_nullable", "column_default").
+		Select("column_name", "data_type", "is_nullable", "column_default").
 		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
 		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("table_name", name)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -147,7 +147,7 @@ WHERE t.oid = idx.indrelid
 func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (Indexes, error) {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, fmt.Sprintf(indexesQuery, table), []interface{}{}, rows); err != nil {
-		return nil, fmt.Errorf("querying indexes for table %s", table)
+		return nil, fmt.Errorf("querying indexes for table %s: %v", table, err)
 	}
 	defer rows.Close()
 	var (
@@ -179,11 +179,10 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		maxlen   sql.NullInt64
 		nullable sql.NullString
 		defaults sql.NullString
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &maxlen, &nullable, &defaults); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
 	}
 	if nullable.Valid {
@@ -205,9 +204,8 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	case "text":
 		c.Type = field.TypeString
 		c.Size = maxCharSize + 1
-	case "character":
+	case "character", "character varying":
 		c.Type = field.TypeString
-		c.Size = maxlen.Int64
 	case "timestamp with time zone":
 		c.Type = field.TypeTime
 	case "bytea":

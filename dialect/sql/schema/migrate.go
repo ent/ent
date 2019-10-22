@@ -191,7 +191,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 			}
 		}
 	}
-	b := sql.AlterTable(table)
+	b := sql.Dialect(m.Dialect()).AlterTable(table)
 	for _, c := range change.column.add {
 		b.AddColumn(m.cBuilder(c))
 	}
@@ -200,7 +200,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	}
 	if m.dropColumn {
 		for _, c := range change.column.drop {
-			b.DropColumn(sql.Column(c.Name))
+			b.DropColumn(sql.Dialect(m.Dialect()).Column(c.Name))
 		}
 	}
 	// if there's actual action to execute on ALTER TABLE.
