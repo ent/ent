@@ -55,11 +55,13 @@ The following types are currently supported by the framework:
 - `Enum` (only supported by SQL dialects).
 
 <br/>
+
 ```go
 package schema
 
 import (
 	"time"
+	"net/url"
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
