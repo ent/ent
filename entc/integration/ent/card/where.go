@@ -160,26 +160,26 @@ func IDLTE(id string) predicate.Card {
 	)
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Card {
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+			s.Where(sql.EQ(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.EQ(v))
+			t.Has(Label, FieldCreateTime, p.EQ(v))
 		},
 	)
 }
 
-// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v time.Time) predicate.Card {
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+			s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.EQ(v))
+			t.Has(Label, FieldUpdateTime, p.EQ(v))
 		},
 	)
 }
@@ -196,32 +196,32 @@ func Number(v string) predicate.Card {
 	)
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Card {
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+			s.Where(sql.EQ(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.EQ(v))
+			t.Has(Label, FieldCreateTime, p.EQ(v))
 		},
 	)
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Card {
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+			s.Where(sql.NEQ(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.NEQ(v))
+			t.Has(Label, FieldCreateTime, p.NEQ(v))
 		},
 	)
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Card {
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Card {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -234,16 +234,16 @@ func CreatedAtIn(vs ...time.Time) predicate.Card {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldCreatedAt), v...))
+			s.Where(sql.In(s.C(FieldCreateTime), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.Within(v...))
+			t.Has(Label, FieldCreateTime, p.Within(v...))
 		},
 	)
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Card {
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -256,88 +256,88 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Card {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+			s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.Without(v...))
+			t.Has(Label, FieldCreateTime, p.Without(v...))
 		},
 	)
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Card {
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldCreatedAt), v))
+			s.Where(sql.GT(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.GT(v))
+			t.Has(Label, FieldCreateTime, p.GT(v))
 		},
 	)
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Card {
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+			s.Where(sql.GTE(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.GTE(v))
+			t.Has(Label, FieldCreateTime, p.GTE(v))
 		},
 	)
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Card {
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldCreatedAt), v))
+			s.Where(sql.LT(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.LT(v))
+			t.Has(Label, FieldCreateTime, p.LT(v))
 		},
 	)
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Card {
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+			s.Where(sql.LTE(s.C(FieldCreateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldCreatedAt, p.LTE(v))
+			t.Has(Label, FieldCreateTime, p.LTE(v))
 		},
 	)
 }
 
-// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v time.Time) predicate.Card {
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+			s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.EQ(v))
+			t.Has(Label, FieldUpdateTime, p.EQ(v))
 		},
 	)
 }
 
-// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v time.Time) predicate.Card {
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
+			s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.NEQ(v))
+			t.Has(Label, FieldUpdateTime, p.NEQ(v))
 		},
 	)
 }
 
-// UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...time.Time) predicate.Card {
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Card {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -350,16 +350,16 @@ func UpdatedAtIn(vs ...time.Time) predicate.Card {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.In(s.C(FieldUpdatedAt), v...))
+			s.Where(sql.In(s.C(FieldUpdateTime), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.Within(v...))
+			t.Has(Label, FieldUpdateTime, p.Within(v...))
 		},
 	)
 }
 
-// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...time.Time) predicate.Card {
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -372,58 +372,58 @@ func UpdatedAtNotIn(vs ...time.Time) predicate.Card {
 				s.Where(sql.False())
 				return
 			}
-			s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
+			s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.Without(v...))
+			t.Has(Label, FieldUpdateTime, p.Without(v...))
 		},
 	)
 }
 
-// UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v time.Time) predicate.Card {
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldUpdatedAt), v))
+			s.Where(sql.GT(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.GT(v))
+			t.Has(Label, FieldUpdateTime, p.GT(v))
 		},
 	)
 }
 
-// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v time.Time) predicate.Card {
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
+			s.Where(sql.GTE(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.GTE(v))
+			t.Has(Label, FieldUpdateTime, p.GTE(v))
 		},
 	)
 }
 
-// UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v time.Time) predicate.Card {
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldUpdatedAt), v))
+			s.Where(sql.LT(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.LT(v))
+			t.Has(Label, FieldUpdateTime, p.LT(v))
 		},
 	)
 }
 
-// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v time.Time) predicate.Card {
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+			s.Where(sql.LTE(s.C(FieldUpdateTime), v))
 		},
 		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUpdatedAt, p.LTE(v))
+			t.Has(Label, FieldUpdateTime, p.LTE(v))
 		},
 	)
 }

@@ -38,8 +38,8 @@ func ExampleCard() {
 	// create card vertex with its edges.
 	c := client.Card.
 		Create().
-		SetCreatedAt(time.Now()).
-		SetUpdatedAt(time.Now()).
+		SetCreateTime(time.Now()).
+		SetUpdateTime(time.Now()).
 		SetNumber("string").
 		SaveX(ctx)
 	log.Println("card created:", c)
@@ -373,8 +373,8 @@ func ExampleUser() {
 	// creating vertices for the user's edges.
 	c0 := client.Card.
 		Create().
-		SetCreatedAt(time.Now()).
-		SetUpdatedAt(time.Now()).
+		SetCreateTime(time.Now()).
+		SetUpdateTime(time.Now()).
 		SetNumber("string").
 		SaveX(ctx)
 	log.Println("card created:", c0)

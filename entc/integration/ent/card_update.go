@@ -29,7 +29,7 @@ import (
 type CardUpdate struct {
 	config
 
-	updated_at   *time.Time
+	update_time  *time.Time
 	number       *string
 	owner        map[string]struct{}
 	clearedOwner bool
@@ -78,9 +78,9 @@ func (cu *CardUpdate) ClearOwner() *CardUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-	if cu.updated_at == nil {
-		v := card.UpdateDefaultUpdatedAt()
-		cu.updated_at = &v
+	if cu.update_time == nil {
+		v := card.UpdateDefaultUpdateTime()
+		cu.update_time = &v
 	}
 	if cu.number != nil {
 		if err := card.NumberValidator(*cu.number); err != nil {
@@ -153,8 +153,8 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
-	if value := cu.updated_at; value != nil {
-		builder.Set(card.FieldUpdatedAt, *value)
+	if value := cu.update_time; value != nil {
+		builder.Set(card.FieldUpdateTime, *value)
 	}
 	if value := cu.number; value != nil {
 		builder.Set(card.FieldNumber, *value)
@@ -230,8 +230,8 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := cu.updated_at; value != nil {
-		v.Property(dsl.Single, card.FieldUpdatedAt, *value)
+	if value := cu.update_time; value != nil {
+		v.Property(dsl.Single, card.FieldUpdateTime, *value)
 	}
 	if value := cu.number; value != nil {
 		v.Property(dsl.Single, card.FieldNumber, *value)
@@ -267,7 +267,7 @@ type CardUpdateOne struct {
 	config
 	id string
 
-	updated_at   *time.Time
+	update_time  *time.Time
 	number       *string
 	owner        map[string]struct{}
 	clearedOwner bool
@@ -309,9 +309,9 @@ func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	if cuo.updated_at == nil {
-		v := card.UpdateDefaultUpdatedAt()
-		cuo.updated_at = &v
+	if cuo.update_time == nil {
+		v := card.UpdateDefaultUpdateTime()
+		cuo.update_time = &v
 	}
 	if cuo.number != nil {
 		if err := card.NumberValidator(*cuo.number); err != nil {
@@ -387,9 +387,9 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		res     sql.Result
 		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
-	if value := cuo.updated_at; value != nil {
-		builder.Set(card.FieldUpdatedAt, *value)
-		c.UpdatedAt = *value
+	if value := cuo.update_time; value != nil {
+		builder.Set(card.FieldUpdateTime, *value)
+		c.UpdateTime = *value
 	}
 	if value := cuo.number; value != nil {
 		builder.Set(card.FieldNumber, *value)
@@ -467,8 +467,8 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := cuo.updated_at; value != nil {
-		v.Property(dsl.Single, card.FieldUpdatedAt, *value)
+	if value := cuo.update_time; value != nil {
+		v.Property(dsl.Single, card.FieldUpdateTime, *value)
 	}
 	if value := cuo.number; value != nil {
 		v.Property(dsl.Single, card.FieldNumber, *value)

@@ -27,36 +27,36 @@ import (
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	created_at *time.Time
-	updated_at *time.Time
-	number     *string
-	owner      map[string]struct{}
+	create_time *time.Time
+	update_time *time.Time
+	number      *string
+	owner       map[string]struct{}
 }
 
-// SetCreatedAt sets the created_at field.
-func (cc *CardCreate) SetCreatedAt(t time.Time) *CardCreate {
-	cc.created_at = &t
+// SetCreateTime sets the create_time field.
+func (cc *CardCreate) SetCreateTime(t time.Time) *CardCreate {
+	cc.create_time = &t
 	return cc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
-func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
+// SetNillableCreateTime sets the create_time field if the given value is not nil.
+func (cc *CardCreate) SetNillableCreateTime(t *time.Time) *CardCreate {
 	if t != nil {
-		cc.SetCreatedAt(*t)
+		cc.SetCreateTime(*t)
 	}
 	return cc
 }
 
-// SetUpdatedAt sets the updated_at field.
-func (cc *CardCreate) SetUpdatedAt(t time.Time) *CardCreate {
-	cc.updated_at = &t
+// SetUpdateTime sets the update_time field.
+func (cc *CardCreate) SetUpdateTime(t time.Time) *CardCreate {
+	cc.update_time = &t
 	return cc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
-func (cc *CardCreate) SetNillableUpdatedAt(t *time.Time) *CardCreate {
+// SetNillableUpdateTime sets the update_time field if the given value is not nil.
+func (cc *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
 	if t != nil {
-		cc.SetUpdatedAt(*t)
+		cc.SetUpdateTime(*t)
 	}
 	return cc
 }
@@ -91,13 +91,13 @@ func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if cc.created_at == nil {
-		v := card.DefaultCreatedAt()
-		cc.created_at = &v
+	if cc.create_time == nil {
+		v := card.DefaultCreateTime()
+		cc.create_time = &v
 	}
-	if cc.updated_at == nil {
-		v := card.DefaultUpdatedAt()
-		cc.updated_at = &v
+	if cc.update_time == nil {
+		v := card.DefaultUpdateTime()
+		cc.update_time = &v
 	}
 	if cc.number == nil {
 		return nil, errors.New("ent: missing required field \"number\"")
@@ -139,13 +139,13 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	builder := sql.Dialect(cc.driver.Dialect()).
 		Insert(card.Table).
 		Default()
-	if value := cc.created_at; value != nil {
-		builder.Set(card.FieldCreatedAt, *value)
-		c.CreatedAt = *value
+	if value := cc.create_time; value != nil {
+		builder.Set(card.FieldCreateTime, *value)
+		c.CreateTime = *value
 	}
-	if value := cc.updated_at; value != nil {
-		builder.Set(card.FieldUpdatedAt, *value)
-		c.UpdatedAt = *value
+	if value := cc.update_time; value != nil {
+		builder.Set(card.FieldUpdateTime, *value)
+		c.UpdateTime = *value
 	}
 	if value := cc.number; value != nil {
 		builder.Set(card.FieldNumber, *value)
@@ -209,11 +209,11 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(card.Label)
-	if cc.created_at != nil {
-		v.Property(dsl.Single, card.FieldCreatedAt, *cc.created_at)
+	if cc.create_time != nil {
+		v.Property(dsl.Single, card.FieldCreateTime, *cc.create_time)
 	}
-	if cc.updated_at != nil {
-		v.Property(dsl.Single, card.FieldUpdatedAt, *cc.updated_at)
+	if cc.update_time != nil {
+		v.Property(dsl.Single, card.FieldUpdateTime, *cc.update_time)
 	}
 	if cc.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cc.number)

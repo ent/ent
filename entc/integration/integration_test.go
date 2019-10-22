@@ -1945,13 +1945,13 @@ func Tx(t *testing.T, client *ent.Client) {
 func DefaultValue(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	c1 := client.Card.Create().SetNumber("102030").SaveX(ctx)
-	utime, ctime := c1.UpdatedAt, c1.CreatedAt
+	ctime, mtime := c1.CreateTime, c1.UpdateTime
 	require.False(t, ctime.IsZero())
-	require.False(t, utime.IsZero())
+	require.False(t, mtime.IsZero())
 	c1 = c1.Update().SetNumber("302010").SaveX(ctx)
-	require.False(t, c1.CreatedAt.IsZero())
-	require.False(t, c1.UpdatedAt.IsZero())
-	require.False(t, utime.Equal(c1.UpdatedAt))
+	require.False(t, c1.CreateTime.IsZero())
+	require.False(t, c1.UpdateTime.IsZero())
+	require.False(t, mtime.Equal(c1.UpdateTime))
 }
 
 func ImmutableValue(t *testing.T, client *ent.Client) {
