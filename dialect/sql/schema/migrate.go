@@ -193,10 +193,10 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	}
 	b := sql.Dialect(m.Dialect()).AlterTable(table)
 	for _, c := range change.column.add {
-		b.AddColumn(m.cBuilder(c))
+		b.AddColumn(m.addColumn(c))
 	}
 	for _, c := range change.column.modify {
-		b.ModifyColumn(m.cBuilder(c))
+		b.ModifyColumns(m.alterColumn(c)...)
 	}
 	if m.dropColumn {
 		for _, c := range change.column.drop {
@@ -412,5 +412,6 @@ type sqlDialect interface {
 	// table, column and index builder per dialect.
 	cType(*Column) string
 	tBuilder(*Table) *sql.TableBuilder
-	cBuilder(*Column) *sql.ColumnBuilder
+	addColumn(*Column) *sql.ColumnBuilder
+	alterColumn(*Column) []*sql.ColumnBuilder
 }

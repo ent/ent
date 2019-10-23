@@ -105,6 +105,9 @@ func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, name string, value 
 	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", name, value), []interface{}{}, new(sql.Result))
 }
 
-func (d *MySQL) cType(c *Column) string                { return c.MySQLType(d.version) }
-func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder   { return t.MySQL(d.version) }
-func (d *MySQL) cBuilder(c *Column) *sql.ColumnBuilder { return c.MySQL(d.version) }
+func (d *MySQL) cType(c *Column) string                 { return c.MySQLType(d.version) }
+func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder    { return t.MySQL(d.version) }
+func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder { return c.MySQL(d.version) }
+func (d *MySQL) alterColumn(c *Column) []*sql.ColumnBuilder {
+	return []*sql.ColumnBuilder{c.MySQL(d.version)}
+}
