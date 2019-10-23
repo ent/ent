@@ -474,14 +474,11 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 	if c.Default != nil && c.supportDefault() {
 		attr := "DEFAULT "
 		switch v := c.Default.(type) {
-		case string:
-			attr += strconv.Quote(v)
 		case bool:
-			if v {
-				attr += "1"
-			} else {
-				attr += "0"
-			}
+			attr += strconv.FormatBool(v)
+		case string:
+			// escape single quote by replacing each with 2.
+			attr += fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
 		default:
 			attr += fmt.Sprint(v)
 		}
