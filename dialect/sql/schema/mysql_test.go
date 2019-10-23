@@ -524,7 +524,7 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "modify column",
+			name: "modify column to nullable",
 			tables: []*Table{
 				{
 					Name: "users",

@@ -230,7 +230,7 @@ func (d *Postgres) tBuilder(t *Table) *sql.TableBuilder {
 	b := sql.Dialect(dialect.Postgres).
 		CreateTable(t.Name).IfNotExists()
 	for _, c := range t.Columns {
-		b.Column(d.cBuilder(c))
+		b.Column(d.addColumn(c))
 	}
 	for _, pk := range t.PrimaryKey {
 		b.PrimaryKey(pk.Name)
@@ -275,7 +275,7 @@ func (d *Postgres) cType(c *Column) (t string) {
 }
 
 // cBuilder returns the ColumnBuilder for the given column.
-func (d *Postgres) cBuilder(c *Column) *sql.ColumnBuilder {
+func (d *Postgres) addColumn(c *Column) *sql.ColumnBuilder {
 	b := sql.Dialect(dialect.Postgres).
 		Column(c.Name).Type(d.cType(c)).Attr(c.Attr)
 	c.unique(b)
@@ -285,4 +285,16 @@ func (d *Postgres) cBuilder(c *Column) *sql.ColumnBuilder {
 	c.nullable(b)
 	c.defaultValue(b)
 	return b
+}
+
+// alterColumn returns list of ColumnBuilder for applying in order to alter a column.
+func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
+	b := sql.Dialect(dialect.Postgres)
+	ops = append(ops, b.Column(c.Name).Type(d.cType(c)))
+	if c.Nullable {
+		ops = append(ops, b.Column(c.Name).Attr("DROP NOT NULL"))
+	} else {
+		ops = append(ops, b.Column(c.Name).Attr("SET NOT NULL"))
+	}
+	return ops
 }

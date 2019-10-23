@@ -54,10 +54,10 @@ func (c *ColumnBuilder) Attr(attr string) *ColumnBuilder {
 // Query returns query representation of a Column.
 func (c *ColumnBuilder) Query() (string, []interface{}) {
 	c.Ident(c.name)
-	if c.postgres() && c.modify {
-		c.Pad().WriteString("TYPE")
-	}
 	if c.typ != "" {
+		if c.postgres() && c.modify {
+			c.Pad().WriteString("TYPE")
+		}
 		c.Pad().WriteString(c.typ)
 	}
 	if c.attr != "" {
@@ -225,7 +225,7 @@ func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
 	return t
 }
 
-// Modify appends the `MODIFY COLUMN` clause to the given `ALTER TABLE` statement.
+// Modify appends the `MODIFY/ALTER COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 	switch {
 	case t.postgres():
@@ -233,6 +233,14 @@ func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 		t.Queries = append(t.Queries, &Wrapper{"ALTER COLUMN %s", c})
 	default:
 		t.Queries = append(t.Queries, &Wrapper{"MODIFY COLUMN %s", c})
+	}
+	return t
+}
+
+// ModifyColumns calls ModifyColumn with each of the given builders.
+func (t *TableAlter) ModifyColumns(cs ...*ColumnBuilder) *TableAlter {
+	for _, c := range cs {
+		t.ModifyColumn(c)
 	}
 	return t
 }
