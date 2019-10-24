@@ -71,6 +71,10 @@ jobs:
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
+      - image: circleci/postgres:12
+        environment:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
       - image: entgo/gremlin-server
         entrypoint: /opt/gremlin-server/bin/gremlin-server.sh
         command: conf/gremlin-server.yaml
@@ -83,6 +87,7 @@ jobs:
             -wait tcp://localhost:3306
             -wait tcp://localhost:3307
             -wait tcp://localhost:3308
+            -wait tcp://localhost:5432
             -wait tcp://localhost:8182
       - *mktestdir
       - getmods
