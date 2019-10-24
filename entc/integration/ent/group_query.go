@@ -66,7 +66,7 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(file.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.FieldID))
@@ -85,7 +85,7 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.FieldID))
@@ -104,7 +104,7 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.FieldID))
@@ -128,7 +128,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(groupinfo.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.InfoColumn))
@@ -240,7 +240,7 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return gq.gremlinAll(ctx)
@@ -279,7 +279,7 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return gq.gremlinCount(ctx)
@@ -300,7 +300,7 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return gq.gremlinExist(ctx)
@@ -353,7 +353,7 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	group := &GroupGroupBy{config: gq.config}
 	group.fields = append([]string{field}, fields...)
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = gq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = gq.gremlinQuery()
@@ -377,7 +377,7 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 	selector := &GroupSelect{config: gq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch gq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = gq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = gq.gremlinQuery()
@@ -538,7 +538,7 @@ func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ggb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ggb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ggb.gremlinScan(ctx, v)
@@ -707,7 +707,7 @@ type GroupSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
 	switch gs.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gs.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return gs.gremlinScan(ctx, v)

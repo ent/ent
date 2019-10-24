@@ -27,7 +27,7 @@ type ItemCreate struct {
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 	switch ic.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ic.sqlSave(ctx)
 	case dialect.Gremlin:
 		return ic.gremlinSave(ctx)

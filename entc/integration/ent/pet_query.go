@@ -64,7 +64,7 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := pq.sqlQuery()
 		t2.Select(t2.C(pet.TeamColumn))
@@ -83,7 +83,7 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := pq.sqlQuery()
 		t2.Select(t2.C(pet.OwnerColumn))
@@ -195,7 +195,7 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return pq.gremlinAll(ctx)
@@ -234,7 +234,7 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return pq.gremlinCount(ctx)
@@ -255,7 +255,7 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return pq.gremlinExist(ctx)
@@ -308,7 +308,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	group := &PetGroupBy{config: pq.config}
 	group.fields = append([]string{field}, fields...)
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = pq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = pq.gremlinQuery()
@@ -332,7 +332,7 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	selector := &PetSelect{config: pq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = pq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = pq.gremlinQuery()
@@ -493,7 +493,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch pgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pgb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return pgb.gremlinScan(ctx, v)
@@ -662,7 +662,7 @@ type PetSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	switch ps.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ps.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ps.gremlinScan(ctx, v)

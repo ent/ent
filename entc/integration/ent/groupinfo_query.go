@@ -64,7 +64,7 @@ func (giq *GroupInfoQuery) Order(o ...Order) *GroupInfoQuery {
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
 	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(group.Table)
 		t2 := giq.sqlQuery()
 		t2.Select(t2.C(groupinfo.FieldID))
@@ -176,7 +176,7 @@ func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return giq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return giq.gremlinAll(ctx)
@@ -215,7 +215,7 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
 	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return giq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return giq.gremlinCount(ctx)
@@ -236,7 +236,7 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
 	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return giq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return giq.gremlinExist(ctx)
@@ -289,7 +289,7 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 	group := &GroupInfoGroupBy{config: giq.config}
 	group.fields = append([]string{field}, fields...)
 	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = giq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = giq.gremlinQuery()
@@ -313,7 +313,7 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 	selector := &GroupInfoSelect{config: giq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = giq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = giq.gremlinQuery()
@@ -474,7 +474,7 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...Aggregate) *GroupInfoGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch gigb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gigb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return gigb.gremlinScan(ctx, v)
@@ -643,7 +643,7 @@ type GroupInfoSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
 	switch gis.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gis.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return gis.gremlinScan(ctx, v)

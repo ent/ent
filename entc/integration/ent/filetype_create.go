@@ -62,7 +62,7 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
 	switch ftc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return ftc.gremlinSave(ctx)

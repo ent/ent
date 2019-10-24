@@ -35,7 +35,7 @@ func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
 	switch fd.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fd.sqlExec(ctx)
 	case dialect.Gremlin:
 		return fd.gremlinExec(ctx)

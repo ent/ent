@@ -139,7 +139,7 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
 	switch nu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return nu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return nu.gremlinSave(ctx)
@@ -472,7 +472,7 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
 	switch nuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return nuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return nuo.gremlinSave(ctx)

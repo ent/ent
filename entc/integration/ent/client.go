@@ -87,7 +87,7 @@ func NewClient(opts ...Option) *Client {
 // Optional parameters can be added for configuring the client.
 func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
 	switch driverName {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		drv, err := sql.Open(driverName, dataSourceName)
 		if err != nil {
 			return nil, err
@@ -243,7 +243,7 @@ func (c *CardClient) GetX(ctx context.Context, id string) *Card {
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := ca.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Select(card.OwnerColumn).
@@ -454,7 +454,7 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := f.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Select(file.OwnerColumn).
@@ -473,7 +473,7 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	query := &FileTypeQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := f.id()
 		t1 := sql.Table(filetype.Table)
 		t2 := sql.Select(file.TypeColumn).
@@ -556,7 +556,7 @@ func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := ft.id()
 		query.sql = sql.Select().From(sql.Table(file.Table)).
 			Where(sql.EQ(filetype.FilesColumn, id))
@@ -636,7 +636,7 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	query := &FileQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
 		query.sql = sql.Select().From(sql.Table(file.Table)).
 			Where(sql.EQ(group.FilesColumn, id))
@@ -652,7 +652,7 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
 		query.sql = sql.Select().From(sql.Table(user.Table)).
 			Where(sql.EQ(group.BlockedColumn, id))
@@ -668,7 +668,7 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Table(group.Table)
@@ -694,7 +694,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	query := &GroupInfoQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
 		t1 := sql.Table(groupinfo.Table)
 		t2 := sql.Select(group.InfoColumn).
@@ -777,7 +777,7 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gi.id()
 		query.sql = sql.Select().From(sql.Table(group.Table)).
 			Where(sql.EQ(groupinfo.GroupsColumn, id))
@@ -921,7 +921,7 @@ func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := n.id()
 		t1 := sql.Table(node.Table)
 		t2 := sql.Select(node.PrevColumn).
@@ -940,7 +940,7 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := n.id()
 		query.sql = sql.Select().From(sql.Table(node.Table)).
 			Where(sql.EQ(node.NextColumn, id))
@@ -1020,7 +1020,7 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := pe.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Select(pet.TeamColumn).
@@ -1039,7 +1039,7 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := pe.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Select(pet.OwnerColumn).
@@ -1122,7 +1122,7 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(card.Table)).
 			Where(sql.EQ(user.CardColumn, id))
@@ -1138,7 +1138,7 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(pet.Table)).
 			Where(sql.EQ(user.PetsColumn, id))
@@ -1154,7 +1154,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	query := &FileQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(file.Table)).
 			Where(sql.EQ(user.FilesColumn, id))
@@ -1170,7 +1170,7 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		t1 := sql.Table(group.Table)
 		t2 := sql.Table(user.Table)
@@ -1196,7 +1196,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Table(user.Table)
@@ -1222,7 +1222,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Table(user.Table)
@@ -1248,7 +1248,7 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Table(user.Table)
@@ -1274,7 +1274,7 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(pet.Table)).
 			Where(sql.EQ(user.TeamColumn, id))
@@ -1290,7 +1290,7 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(user.Table)).
 			Where(sql.EQ(user.SpouseColumn, id))
@@ -1306,7 +1306,7 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		query.sql = sql.Select().From(sql.Table(user.Table)).
 			Where(sql.EQ(user.ChildrenColumn, id))
@@ -1322,7 +1322,7 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
 		t1 := sql.Table(user.Table)
 		t2 := sql.Select(user.ParentColumn).

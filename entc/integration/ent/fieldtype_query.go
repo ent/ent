@@ -156,7 +156,7 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return ftq.gremlinAll(ctx)
@@ -195,7 +195,7 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return ftq.gremlinCount(ctx)
@@ -216,7 +216,7 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return ftq.gremlinExist(ctx)
@@ -269,7 +269,7 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 	group := &FieldTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = ftq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = ftq.gremlinQuery()
@@ -293,7 +293,7 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 	selector := &FieldTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = ftq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = ftq.gremlinQuery()
@@ -454,7 +454,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...Aggregate) *FieldTypeGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ftgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftgb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ftgb.gremlinScan(ctx, v)
@@ -623,7 +623,7 @@ type FieldTypeSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	switch fts.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fts.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return fts.gremlinScan(ctx, v)

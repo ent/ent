@@ -35,7 +35,7 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
 	switch pd.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pd.sqlExec(ctx)
 	case dialect.Gremlin:
 		return pd.gremlinExec(ctx)

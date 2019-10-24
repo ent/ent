@@ -144,7 +144,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
 	switch fc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return fc.gremlinSave(ctx)

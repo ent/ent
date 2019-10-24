@@ -368,7 +368,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
 	switch uc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return uc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return uc.gremlinSave(ctx)
