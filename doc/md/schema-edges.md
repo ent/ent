@@ -277,19 +277,13 @@ func (Node) Edges() []ent.Edge {
 As you can see, in cases of relations of the same type, you can declare the edge and its
 reference in the same builder.
 
-```diff
+```go
 func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
-+		edge.To("next", Node.Type).
-+			Unique().
-+			From("prev").
-+			Unique(),
-
--		edge.To("next", Node.Type).
--			Unique(),
--		edge.From("prev", Node.Type).
--			Ref("next).
--			Unique(),
+		edge.To("next", Node.Type).
+			Unique().
+			From("prev").
+			Unique(),
 	}
 }
 ```
@@ -529,17 +523,12 @@ func (Node) Edges() []ent.Edge {
 As you can see, in cases of relations of the same type, you can declare the edge and its
 reference in the same builder.
 
-```diff
+```go
 func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
-+		edge.To("children", Node.Type).
-+			From("parent").
-+			Unique(),
-
--		edge.To("children", Node.Type),
--		edge.From("parent", Node.Type).
--			Ref("children").
--			Unique(),
+		edge.To("children", Node.Type).
+			From("parent").
+			Unique(),
 	}
 }
 ```
@@ -728,15 +717,11 @@ func (User) Edges() []ent.Edge {
 As you can see, in cases of relations of the same type, you can declare the edge and its
 reference in the same builder.
 
-```diff
+```go
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-+		edge.To("following", User.Type).
-+			From("followers"),
-
--		edge.To("following", User.Type),
--		edge.From("followers", User.Type).
--			Ref("following"),
+		edge.To("following", User.Type).
+			From("followers"),
 	}
 }
 ```
