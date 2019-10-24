@@ -97,7 +97,7 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
 	switch nc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return nc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return nc.gremlinSave(ctx)

@@ -35,7 +35,7 @@ func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 	switch id.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return id.sqlExec(ctx)
 	case dialect.Gremlin:
 		return id.gremlinExec(ctx)

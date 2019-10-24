@@ -35,7 +35,7 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 	switch ud.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ud.sqlExec(ctx)
 	case dialect.Gremlin:
 		return ud.gremlinExec(ctx)

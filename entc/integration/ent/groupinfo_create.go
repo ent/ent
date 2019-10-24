@@ -81,7 +81,7 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		gic.max_users = &v
 	}
 	switch gic.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gic.sqlSave(ctx)
 	case dialect.Gremlin:
 		return gic.gremlinSave(ctx)

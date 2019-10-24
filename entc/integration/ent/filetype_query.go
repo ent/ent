@@ -64,7 +64,7 @@ func (ftq *FileTypeQuery) Order(o ...Order) *FileTypeQuery {
 func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: ftq.config}
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(file.Table)
 		t2 := ftq.sqlQuery()
 		t2.Select(t2.C(filetype.FieldID))
@@ -176,7 +176,7 @@ func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of FileTypes.
 func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return ftq.gremlinAll(ctx)
@@ -215,7 +215,7 @@ func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (ftq *FileTypeQuery) Count(ctx context.Context) (int, error) {
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return ftq.gremlinCount(ctx)
@@ -236,7 +236,7 @@ func (ftq *FileTypeQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return ftq.gremlinExist(ctx)
@@ -289,7 +289,7 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 	group := &FileTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = ftq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = ftq.gremlinQuery()
@@ -313,7 +313,7 @@ func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect
 	selector := &FileTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = ftq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = ftq.gremlinQuery()
@@ -474,7 +474,7 @@ func (ftgb *FileTypeGroupBy) Aggregate(fns ...Aggregate) *FileTypeGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ftgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftgb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ftgb.gremlinScan(ctx, v)
@@ -643,7 +643,7 @@ type FileTypeSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	switch fts.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fts.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return fts.gremlinScan(ctx, v)

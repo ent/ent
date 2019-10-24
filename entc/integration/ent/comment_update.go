@@ -110,7 +110,7 @@ func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 	switch cu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return cu.gremlinSave(ctx)
@@ -373,7 +373,7 @@ func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 // Save executes the query and returns the updated entity.
 func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 	switch cuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return cuo.gremlinSave(ctx)

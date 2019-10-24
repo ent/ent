@@ -35,7 +35,7 @@ func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 	switch iu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return iu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return iu.gremlinSave(ctx)
@@ -133,7 +133,7 @@ type ItemUpdateOne struct {
 // Save executes the query and returns the updated entity.
 func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 	switch iuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return iuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return iuo.gremlinSave(ctx)

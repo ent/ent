@@ -64,7 +64,7 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 		return nil, errors.New("ent: missing required field \"unique_float\"")
 	}
 	switch cc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return cc.gremlinSave(ctx)

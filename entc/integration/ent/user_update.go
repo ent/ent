@@ -577,7 +577,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
 	switch uu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return uu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return uu.gremlinSave(ctx)
@@ -1855,7 +1855,7 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
 	switch uuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return uuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return uuo.gremlinSave(ctx)

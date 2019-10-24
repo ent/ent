@@ -67,7 +67,7 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(card.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -86,7 +86,7 @@ func (uq *UserQuery) QueryCard() *CardQuery {
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(pet.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -105,7 +105,7 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(file.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -124,7 +124,7 @@ func (uq *UserQuery) QueryFiles() *FileQuery {
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(group.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -148,7 +148,7 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -172,7 +172,7 @@ func (uq *UserQuery) QueryFriends() *UserQuery {
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -196,7 +196,7 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -220,7 +220,7 @@ func (uq *UserQuery) QueryFollowing() *UserQuery {
 func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(pet.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -239,7 +239,7 @@ func (uq *UserQuery) QueryTeam() *PetQuery {
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -258,7 +258,7 @@ func (uq *UserQuery) QuerySpouse() *UserQuery {
 func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.FieldID))
@@ -277,7 +277,7 @@ func (uq *UserQuery) QueryChildren() *UserQuery {
 func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := uq.sqlQuery()
 		t2.Select(t2.C(user.ParentColumn))
@@ -389,7 +389,7 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return uq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return uq.gremlinAll(ctx)
@@ -428,7 +428,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return uq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return uq.gremlinCount(ctx)
@@ -449,7 +449,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return uq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return uq.gremlinExist(ctx)
@@ -502,7 +502,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	group := &UserGroupBy{config: uq.config}
 	group.fields = append([]string{field}, fields...)
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = uq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = uq.gremlinQuery()
@@ -526,7 +526,7 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 	selector := &UserSelect{config: uq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = uq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = uq.gremlinQuery()
@@ -687,7 +687,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ugb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ugb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ugb.gremlinScan(ctx, v)
@@ -856,7 +856,7 @@ type UserSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
 	switch us.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return us.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return us.gremlinScan(ctx, v)

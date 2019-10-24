@@ -190,7 +190,7 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
 	switch fu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return fu.gremlinSave(ctx)
@@ -562,7 +562,7 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
 	switch fuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return fuo.gremlinSave(ctx)

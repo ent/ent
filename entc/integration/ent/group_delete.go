@@ -35,7 +35,7 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 	switch gd.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gd.sqlExec(ctx)
 	case dialect.Gremlin:
 		return gd.gremlinExec(ctx)

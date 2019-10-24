@@ -64,7 +64,7 @@ func (cq *CardQuery) Order(o ...Order) *CardQuery {
 func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := cq.sqlQuery()
 		t2.Select(t2.C(card.OwnerColumn))
@@ -176,7 +176,7 @@ func (cq *CardQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return cq.gremlinAll(ctx)
@@ -215,7 +215,7 @@ func (cq *CardQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (cq *CardQuery) Count(ctx context.Context) (int, error) {
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return cq.gremlinCount(ctx)
@@ -236,7 +236,7 @@ func (cq *CardQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return cq.gremlinExist(ctx)
@@ -289,7 +289,7 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	group := &CardGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = cq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = cq.gremlinQuery()
@@ -313,7 +313,7 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 	selector := &CardSelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = cq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = cq.gremlinQuery()
@@ -474,7 +474,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...Aggregate) *CardGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch cgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cgb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return cgb.gremlinScan(ctx, v)
@@ -643,7 +643,7 @@ type CardSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	switch cs.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cs.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return cs.gremlinScan(ctx, v)

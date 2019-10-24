@@ -268,7 +268,7 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 		}
 	}
 	switch ftc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return ftc.gremlinSave(ctx)
