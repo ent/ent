@@ -47,7 +47,7 @@ var drivers = []*Storage{
 		Name:      "sql",
 		IdentName: "SQL",
 		Builder:   reflect.TypeOf(&sql.Selector{}),
-		Dialects:  []string{"dialect.SQLite", "dialect.MySQL"},
+		Dialects:  []string{"dialect.SQLite", "dialect.MySQL", "dialect.Postgres"},
 		Imports: []string{
 			"github.com/facebookincubator/ent/dialect/sql",
 		},

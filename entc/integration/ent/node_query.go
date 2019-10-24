@@ -63,7 +63,7 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(node.Table)
 		t2 := nq.sqlQuery()
 		t2.Select(t2.C(node.PrevColumn))
@@ -82,7 +82,7 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(node.Table)
 		t2 := nq.sqlQuery()
 		t2.Select(t2.C(node.FieldID))
@@ -194,7 +194,7 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return nq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return nq.gremlinAll(ctx)
@@ -233,7 +233,7 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return nq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return nq.gremlinCount(ctx)
@@ -254,7 +254,7 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return nq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return nq.gremlinExist(ctx)
@@ -307,7 +307,7 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	group := &NodeGroupBy{config: nq.config}
 	group.fields = append([]string{field}, fields...)
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = nq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = nq.gremlinQuery()
@@ -331,7 +331,7 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector := &NodeSelect{config: nq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = nq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = nq.gremlinQuery()
@@ -492,7 +492,7 @@ func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch ngb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ngb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ngb.gremlinScan(ctx, v)
@@ -661,7 +661,7 @@ type NodeSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
 	switch ns.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ns.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return ns.gremlinScan(ctx, v)

@@ -112,7 +112,7 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch pu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return pu.gremlinSave(ctx)
@@ -391,7 +391,7 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch puo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return puo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return puo.gremlinSave(ctx)

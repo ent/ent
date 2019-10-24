@@ -65,7 +65,7 @@ func (fq *FileQuery) Order(o ...Order) *FileQuery {
 func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(user.Table)
 		t2 := fq.sqlQuery()
 		t2.Select(t2.C(file.OwnerColumn))
@@ -84,7 +84,7 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		t1 := sql.Table(filetype.Table)
 		t2 := fq.sqlQuery()
 		t2.Select(t2.C(file.TypeColumn))
@@ -196,7 +196,7 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return fq.gremlinAll(ctx)
@@ -235,7 +235,7 @@ func (fq *FileQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (fq *FileQuery) Count(ctx context.Context) (int, error) {
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return fq.gremlinCount(ctx)
@@ -256,7 +256,7 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return fq.gremlinExist(ctx)
@@ -309,7 +309,7 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	group := &FileGroupBy{config: fq.config}
 	group.fields = append([]string{field}, fields...)
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = fq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = fq.gremlinQuery()
@@ -333,7 +333,7 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 	selector := &FileSelect{config: fq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = fq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = fq.gremlinQuery()
@@ -494,7 +494,7 @@ func (fgb *FileGroupBy) Aggregate(fns ...Aggregate) *FileGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch fgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fgb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return fgb.gremlinScan(ctx, v)
@@ -663,7 +663,7 @@ type FileSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
 	switch fs.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return fs.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return fs.gremlinScan(ctx, v)

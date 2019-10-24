@@ -109,7 +109,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch cc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return cc.gremlinSave(ctx)

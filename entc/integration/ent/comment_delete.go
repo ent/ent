@@ -35,7 +35,7 @@ func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
 	switch cd.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cd.sqlExec(ctx)
 	case dialect.Gremlin:
 		return cd.gremlinExec(ctx)

@@ -156,7 +156,7 @@ func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return iq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return iq.gremlinAll(ctx)
@@ -195,7 +195,7 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
 	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return iq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return iq.gremlinCount(ctx)
@@ -216,7 +216,7 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
 	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return iq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return iq.gremlinExist(ctx)
@@ -256,7 +256,7 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
 	group.fields = append([]string{field}, fields...)
 	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = iq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = iq.gremlinQuery()
@@ -269,7 +269,7 @@ func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 	selector := &ItemSelect{config: iq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = iq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = iq.gremlinQuery()
@@ -430,7 +430,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...Aggregate) *ItemGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch igb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return igb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return igb.gremlinScan(ctx, v)
@@ -599,7 +599,7 @@ type ItemSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	switch is.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return is.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return is.gremlinScan(ctx, v)

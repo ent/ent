@@ -93,7 +93,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch pc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return pc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return pc.gremlinSave(ctx)

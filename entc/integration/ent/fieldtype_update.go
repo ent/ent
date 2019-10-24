@@ -549,7 +549,7 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 		}
 	}
 	switch ftu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return ftu.gremlinSave(ctx)
@@ -1444,7 +1444,7 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 		}
 	}
 	switch ftuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return ftuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return ftuo.gremlinSave(ctx)

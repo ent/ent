@@ -201,7 +201,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 		return nil, errors.New("ent: missing required edge \"info\"")
 	}
 	switch gc.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gc.sqlSave(ctx)
 	case dialect.Gremlin:
 		return gc.gremlinSave(ctx)

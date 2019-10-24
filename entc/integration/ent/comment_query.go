@@ -156,7 +156,7 @@ func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cq.sqlAll(ctx)
 	case dialect.Gremlin:
 		return cq.gremlinAll(ctx)
@@ -195,7 +195,7 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []string {
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cq.sqlCount(ctx)
 	case dialect.Gremlin:
 		return cq.gremlinCount(ctx)
@@ -216,7 +216,7 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cq.sqlExist(ctx)
 	case dialect.Gremlin:
 		return cq.gremlinExist(ctx)
@@ -269,7 +269,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 	group := &CommentGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		group.sql = cq.sqlQuery()
 	case dialect.Gremlin:
 		group.gremlin = cq.gremlinQuery()
@@ -293,7 +293,7 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 	selector := &CommentSelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
 	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		selector.sql = cq.sqlQuery()
 	case dialect.Gremlin:
 		selector.gremlin = cq.gremlinQuery()
@@ -454,7 +454,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...Aggregate) *CommentGroupBy {
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
 	switch cgb.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cgb.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return cgb.gremlinScan(ctx, v)
@@ -623,7 +623,7 @@ type CommentSelect struct {
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	switch cs.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cs.sqlScan(ctx, v)
 	case dialect.Gremlin:
 		return cs.gremlinScan(ctx, v)

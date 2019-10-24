@@ -298,7 +298,7 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: clearing a unique edge \"info\"")
 	}
 	switch gu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return gu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return gu.gremlinSave(ctx)
@@ -925,7 +925,7 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 		return nil, errors.New("ent: clearing a unique edge \"info\"")
 	}
 	switch guo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return guo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return guo.gremlinSave(ctx)

@@ -115,7 +115,7 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 	switch giu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return giu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return giu.gremlinSave(ctx)
@@ -392,7 +392,7 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 // Save executes the query and returns the updated entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 	switch giuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return giuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return giuo.gremlinSave(ctx)

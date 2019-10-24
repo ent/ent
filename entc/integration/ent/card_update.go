@@ -91,7 +91,7 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch cu.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cu.sqlSave(ctx)
 	case dialect.Gremlin:
 		return cu.gremlinSave(ctx)
@@ -322,7 +322,7 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
 	switch cuo.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		return cuo.sqlSave(ctx)
 	case dialect.Gremlin:
 		return cuo.gremlinSave(ctx)
