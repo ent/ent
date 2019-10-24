@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/facebookincubator/ent/schema/field"
@@ -512,6 +513,56 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("users_pkey", "id", "t", "t").
 						AddRow("users_age_key", "age", "f", "t"))
 				mock.ExpectExec(escape(`DROP INDEX "users_age_key"`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add edge to table",
+			tables: func() []*Table {
+				var (
+					c1 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "spouse_id", Type: field.TypeInt, Nullable: true},
+					}
+					t1 = &Table{
+						Name:       "users",
+						Columns:    c1,
+						PrimaryKey: c1[0:1],
+						ForeignKeys: []*ForeignKey{
+							{
+								Symbol:     "user_spouse" + strings.Repeat("_", 64), // super long fk.
+								Columns:    c1[2:],
+								RefColumns: c1[0:1],
+								OnDelete:   Cascade,
+							},
+						},
+					}
+				)
+				t1.ForeignKeys[0].RefTable = t1
+				return []*Table{t1}
+			}(),
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW server_version_num")).
+					WillReturnRows(sqlmock.NewRows([]string{"server_version_num"}).AddRow("120000"))
+				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
+						AddRow("id", "bigint", "YES", "NULL").
+						AddRow("name", "character", "YES", "NULL"))
+				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique"}).
+						AddRow("users_pkey", "id", "t", "t"))
+				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "spouse_id" bigint NULL`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(`ALTER TABLE "users" ADD CONSTRAINT ".{63}" FOREIGN KEY\("spouse_id"\) REFERENCES "users"\("id"\) ON DELETE CASCADE`).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
