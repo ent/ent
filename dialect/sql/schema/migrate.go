@@ -154,7 +154,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 		}
 		fks := make([]*ForeignKey, 0, len(t.ForeignKeys))
 		for _, fk := range t.ForeignKeys {
-			fk.Symbol = symbol(fk.Symbol)
+			fk.Symbol = m.symbol(fk.Symbol)
 			exist, err := m.fkExist(ctx, tx, fk.Symbol)
 			if err != nil {
 				return err
@@ -368,12 +368,16 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 	return m.setRange(ctx, tx, t.Name, id<<32)
 }
 
-// symbol makes sure the symbol length is not longer than the maxlength in MySQL standard (64).
-func symbol(name string) string {
-	if len(name) <= 64 {
+// symbol makes sure the symbol length is not longer than the maxlength in the dialect.
+func (m *Migrate) symbol(name string) string {
+	size := 64
+	if m.Dialect() == dialect.Postgres {
+		size = 63
+	}
+	if len(name) <= size {
 		return name
 	}
-	return fmt.Sprintf("%s_%x", name[:31], md5.Sum([]byte(name)))
+	return fmt.Sprintf("%s_%x", name[:size-33], md5.Sum([]byte(name)))
 }
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
