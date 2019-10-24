@@ -36,6 +36,16 @@ services:
     ports:
       - 3308:3306
 
+  postgres12:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5432:5432
+
   gremlin:
     image: entgo/gremlin-server
     build: gremlin-server

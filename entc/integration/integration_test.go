@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
@@ -26,8 +27,9 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/go-sql-driver/mysql"
 
+	"github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -66,6 +68,13 @@ func TestMySQL(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPostgres(t *testing.T) {
+	client, err := ent.Open(dialect.Postgres, "host=localhost port=5432 user=postgres dbname=test password=pass sslmode=disable")
+	require.NoError(t, err)
+	defer client.Close()
+	require.NoError(t, client.Schema.Create(context.Background()))
 }
 
 func TestGremlin(t *testing.T) {
