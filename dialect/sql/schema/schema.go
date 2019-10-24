@@ -163,8 +163,14 @@ func (t *Table) index(name string) (*Index, bool) {
 		if idx.Name == name {
 			return idx, true
 		}
+		// Same as below, there are cases where the index name
+		// is unknown (created automatically on column constraint).
+		if len(idx.Columns) == 1 && idx.Columns[0].Name == name {
+			return idx, true
+		}
 	}
-	// if it is an "implicit index" (unique constraint on table creation).
+	// If it is an "implicit index" (unique constraint on
+	// table creation) and it didn't load on table scanning.
 	if c, ok := t.column(name); ok && c.Unique {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
 	}

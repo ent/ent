@@ -61,11 +61,19 @@ func (d *SQLite) setRange(ctx context.Context, tx dialect.Tx, name string, value
 	return tx.Exec(ctx, query, args, new(sql.Result))
 }
 
+// fkExist returns always true to disable foreign-keys creation after the table was created.
+func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
+func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }
+
 func (*SQLite) cType(c *Column) string                     { return c.SQLiteType() }
 func (*SQLite) tBuilder(t *Table) *sql.TableBuilder        { return t.SQLite() }
 func (*SQLite) addColumn(c *Column) *sql.ColumnBuilder     { return c.SQLite() }
 func (*SQLite) alterColumn(c *Column) []*sql.ColumnBuilder { return []*sql.ColumnBuilder{c.SQLite()} }
 
-// fkExist returns always tru to disable foreign-keys creation after the table was created.
-func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
-func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }
+func (d *SQLite) addIndex(i *Index, table string) *sql.IndexBuilder {
+	return i.Builder(table)
+}
+
+func (d *SQLite) dropIndex(i *Index, _ string) *sql.DropIndexBuilder {
+	return i.DropBuilder("")
+}

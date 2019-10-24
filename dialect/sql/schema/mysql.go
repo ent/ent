@@ -111,3 +111,13 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder { return c.MySQL(d.versi
 func (d *MySQL) alterColumn(c *Column) []*sql.ColumnBuilder {
 	return []*sql.ColumnBuilder{c.MySQL(d.version)}
 }
+
+// addIndex returns the querying for adding an index to MySQL.
+func (d *MySQL) addIndex(i *Index, table string) *sql.IndexBuilder {
+	return i.Builder(table)
+}
+
+// addIndex returns the querying for dropping an index in MySQL.
+func (d *MySQL) dropIndex(i *Index, table string) *sql.DropIndexBuilder {
+	return i.DropBuilder(table)
+}
