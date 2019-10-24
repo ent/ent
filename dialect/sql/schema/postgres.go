@@ -63,6 +63,9 @@ func (d *Postgres) fkExist(ctx context.Context, tx dialect.Tx, name string) (boo
 
 // setRange sets restart the identity column to the given offset. Used by the universal-id option.
 func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {
+	if value == 0 {
+		value = 1 // RESTART value cannot be < 1.
+	}
 	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH %d", name, value), []interface{}{}, new(sql.Result))
 }
 
