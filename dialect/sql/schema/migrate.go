@@ -39,7 +39,7 @@ func WithGlobalUniqueID(b bool) MigrateOption {
 // Defaults to false.
 func WithDropColumn(b bool) MigrateOption {
 	return func(m *Migrate) {
-		m.dropColumn = b
+		m.dropColumns = b
 	}
 }
 
@@ -47,7 +47,7 @@ func WithDropColumn(b bool) MigrateOption {
 // Defaults to false.
 func WithDropIndex(b bool) MigrateOption {
 	return func(m *Migrate) {
-		m.dropIndex = b
+		m.dropIndexes = b
 	}
 }
 
@@ -55,8 +55,8 @@ func WithDropIndex(b bool) MigrateOption {
 type Migrate struct {
 	sqlDialect
 	universalID bool     // global unique ids.
-	dropColumn  bool     // drop deleted columns.
-	dropIndex   bool     // drop deleted indexes.
+	dropColumns bool     // drop deleted columns.
+	dropIndexes bool     // drop deleted indexes.
 	typeRanges  []string // types order by their range.
 }
 
@@ -139,7 +139,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			}
 			// indexes.
 			for _, idx := range t.Indexes {
-				query, args := idx.Builder(t.Name).Query()
+				query, args := m.addIndex(idx, t.Name).Query()
 				if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
 					return fmt.Errorf("create index %q: %v", idx.Name, err)
 				}
@@ -183,9 +183,9 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	// constraints should be dropped before dropping columns, because if a column
 	// is a part of multi-column constraints (like, unique index), ALTER TABLE
 	// might fail if the intermediate state violates the constraints.
-	if m.dropIndex {
+	if m.dropIndexes {
 		for _, idx := range change.index.drop {
-			query, args := idx.DropBuilder(table).Query()
+			query, args := m.dropIndex(idx, table).Query()
 			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
 				return fmt.Errorf("drop index of table %q: %v", table, err)
 			}
@@ -198,7 +198,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	for _, c := range change.column.modify {
 		b.ModifyColumns(m.alterColumn(c)...)
 	}
-	if m.dropColumn {
+	if m.dropColumns {
 		for _, c := range change.column.drop {
 			b.DropColumn(sql.Dialect(m.Dialect()).Column(c.Name))
 		}
@@ -211,7 +211,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 		}
 	}
 	for _, idx := range change.index.add {
-		query, args := idx.Builder(table).Query()
+		query, args := m.addIndex(idx, table).Query()
 		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
 			return fmt.Errorf("create index %q: %v", table, err)
 		}
@@ -414,4 +414,6 @@ type sqlDialect interface {
 	tBuilder(*Table) *sql.TableBuilder
 	addColumn(*Column) *sql.ColumnBuilder
 	alterColumn(*Column) []*sql.ColumnBuilder
+	addIndex(*Index, string) *sql.IndexBuilder
+	dropIndex(*Index, string) *sql.DropIndexBuilder
 }

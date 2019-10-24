@@ -115,6 +115,8 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 			}
 			c.Key = UniqueKey
 			c.Unique = true
+			c.indexes.append(idx)
+			fallthrough
 		default:
 			t.AddIndex(idx.Name, idx.Unique, idx.columns)
 		}
@@ -162,6 +164,9 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 		if err := rows.Scan(&name, &column, &primary, &unique); err != nil {
 			return nil, fmt.Errorf("scanning index description: %v", err)
 		}
+		// If the index is prefixed with the table, it's probably was
+		// added by this driver (and not entc) and it should be trimmed.
+		name = strings.TrimPrefix(name, table+"_")
 		idx, ok := names[name]
 		if !ok {
 			idx = &Index{Name: name, Unique: unique, primary: primary}
@@ -297,4 +302,26 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 		ops = append(ops, b.Column(c.Name).Attr("SET NOT NULL"))
 	}
 	return ops
+}
+
+// addIndex returns the querying for adding an index to PostgreSQL.
+func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
+	// Since index name should be unique in pg_class for schema,
+	// we prefix it with the table name and remove on read.
+	name := fmt.Sprintf("%s_%s", table, i.Name)
+	idx := sql.Dialect(dialect.Postgres).
+		CreateIndex(name).Table(table)
+	if i.Unique {
+		idx.Unique()
+	}
+	for _, c := range i.Columns {
+		idx.Column(c.Name)
+	}
+	return idx
+}
+
+// dropIndex returns a DropIndexBuilder for the given table index.
+func (d *Postgres) dropIndex(i *Index, table string) *sql.DropIndexBuilder {
+	name := fmt.Sprintf("%s_%s", table, i.Name)
+	return sql.Dialect(dialect.Postgres).DropIndex(name)
 }
