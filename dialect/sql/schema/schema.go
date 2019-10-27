@@ -103,31 +103,6 @@ func (t *Table) setup() {
 	}
 }
 
-// SQLite returns the SQLite query for table creation.
-func (t *Table) SQLite() *sql.TableBuilder {
-	b := sql.CreateTable(t.Name)
-	for _, c := range t.Columns {
-		b.Column(c.SQLite())
-	}
-	// Unlike in MySQL, we're not able to add foreign-key constraints to table
-	// after it was created, and adding them to the `CREATE TABLE` statement is
-	// not always valid (because circular foreign-keys situation is possible).
-	// We stay consistent by not using constraints at all, and just defining the
-	// foreign keys in the `CREATE TABLE` statement.
-	for _, fk := range t.ForeignKeys {
-		b.ForeignKeys(fk.DSL())
-	}
-	// if it's an ID based primary key, we add the `PRIMARY KEY`
-	// clause to the column declaration.
-	if len(t.PrimaryKey) == 1 {
-		return b
-	}
-	for _, pk := range t.PrimaryKey {
-		b.PrimaryKey(pk.Name)
-	}
-	return b
-}
-
 // column returns a table column by its name.
 // faster than map lookup for most cases.
 func (t *Table) column(name string) (*Column, bool) {
@@ -183,48 +158,6 @@ func (c *Column) UniqueKey() bool { return c.Key == UniqueKey }
 // PrimaryKey returns boolean indicates if this column is on of the primary key columns.
 // Used by the migration tool when parsing the `DESCRIBE TABLE` output Go objects.
 func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
-
-// SQLite returns a SQLite DSL node for this column.
-func (c *Column) SQLite() *sql.ColumnBuilder {
-	b := sql.Column(c.Name).Type(c.SQLiteType()).Attr(c.Attr)
-	c.unique(b)
-	if c.Increment {
-		b.Attr("PRIMARY KEY AUTOINCREMENT")
-	}
-	c.nullable(b)
-	c.defaultValue(b)
-	return b
-}
-
-// SQLiteType returns the SQLite string type for this column.
-func (c *Column) SQLiteType() (t string) {
-	switch c.Type {
-	case field.TypeBool:
-		t = "bool"
-	case field.TypeInt8, field.TypeUint8, field.TypeInt, field.TypeInt16, field.TypeInt32, field.TypeUint, field.TypeUint16, field.TypeUint32:
-		t = "integer"
-	case field.TypeInt64, field.TypeUint64:
-		t = "bigint"
-	case field.TypeBytes:
-		t = "blob"
-	case field.TypeString, field.TypeEnum:
-		size := c.Size
-		if size == 0 {
-			size = DefaultStringLen
-		}
-		// sqlite has no size limit on varchar.
-		t = fmt.Sprintf("varchar(%d)", size)
-	case field.TypeFloat32, field.TypeFloat64:
-		t = "real"
-	case field.TypeTime:
-		t = "datetime"
-	case field.TypeJSON:
-		t = "json"
-	default:
-		panic("unsupported type " + c.Type.String())
-	}
-	return t
-}
 
 // ConvertibleTo reports whether a column can be converted to the new column without altering its data.
 func (c *Column) ConvertibleTo(d *Column) bool {
