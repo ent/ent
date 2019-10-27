@@ -93,20 +93,3 @@ func TestColumn_ScanDefault(t *testing.T) {
 	require.Equal(t, false, c1.Default)
 	require.Error(t, c1.ScanDefault("foo"))
 }
-
-func TestColumn_MySQLType(t *testing.T) {
-	c1 := &Column{Type: field.TypeString, Unique: true}
-	require.Equal(t, "varchar(191)", c1.MySQLType("5.5"))
-	require.Equal(t, "varchar(191)", c1.MySQLType("5.6.1"))
-	require.Equal(t, "varchar(191)", c1.MySQLType("5.6.8"))
-	require.Equal(t, "varchar(255)", c1.MySQLType("5.7"))
-	require.Equal(t, "varchar(255)", c1.MySQLType("5.7.0"))
-	require.Equal(t, "varchar(255)", c1.MySQLType("5.7.26-log"))
-	require.Equal(t, "varchar(255)", c1.MySQLType("8-log"))
-
-	c1 = &Column{Type: field.TypeJSON}
-	require.Equal(t, "json", c1.MySQLType("5.7.8"))
-	require.Equal(t, "json", c1.MySQLType("5.7.8-log"))
-	require.Equal(t, "longblob", c1.MySQLType("5.5"))
-	require.Equal(t, "longblob", c1.MySQLType("5.7"))
-}
