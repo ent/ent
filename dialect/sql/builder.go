@@ -486,10 +486,11 @@ func (d *DropIndexBuilder) Query() (string, []interface{}) {
 // InsertBuilder is a builder for `INSERT INTO` statement.
 type InsertBuilder struct {
 	Builder
-	table    string
-	columns  []string
-	defaults string
-	values   [][]interface{}
+	table     string
+	columns   []string
+	defaults  string
+	returning []string
+	values    [][]interface{}
 }
 
 // Insert creates a builder for the `INSERT INTO` statement.
@@ -536,23 +537,35 @@ func (i *InsertBuilder) Default() *InsertBuilder {
 	return i
 }
 
+// Returning adds the `RETURNING` clause to the insert statement. PostgreSQL only.
+func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
+	i.returning = append(i.returning, columns...)
+	return i
+}
+
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []interface{}) {
 	i.WriteString("INSERT INTO ")
+	i.Ident(i.table).Pad()
 	if i.defaults != "" && len(i.columns) == 0 {
-		return i.Ident(i.table).Pad().String() + i.defaults, nil
-	}
-	i.Ident(i.table).Pad().Nested(func(b *Builder) {
-		b.IdentComma(i.columns...)
-	})
-	i.WriteString(" VALUES ")
-	for j, v := range i.values {
-		if j > 0 {
-			i.Comma()
-		}
+		i.WriteString(i.defaults)
+	} else {
 		i.Nested(func(b *Builder) {
-			b.Args(v...)
+			b.IdentComma(i.columns...)
 		})
+		i.WriteString(" VALUES ")
+		for j, v := range i.values {
+			if j > 0 {
+				i.Comma()
+			}
+			i.Nested(func(b *Builder) {
+				b.Args(v...)
+			})
+		}
+	}
+	if len(i.returning) > 0 && i.postgres() {
+		i.WriteString(" RETURNING ")
+		i.IdentComma(i.returning...)
 	}
 	return i.String(), i.args
 }
@@ -1457,7 +1470,7 @@ func (s *Selector) Having(p *Predicate) *Selector {
 }
 
 // Query returns query representation of a `SELECT` statement.
-func (s Selector) Query() (string, []interface{}) {
+func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
 	b.WriteString("SELECT ")
 	if s.distinct {
@@ -1475,13 +1488,11 @@ func (s Selector) Query() (string, []interface{}) {
 		b.WriteString(t.ref())
 	case *Selector:
 		t.SetDialect(s.dialect)
-		query, args := t.Query()
 		b.Nested(func(b *Builder) {
-			b.WriteString(query)
+			b.Join(t)
 		})
 		b.WriteString(" AS ")
 		b.Ident(t.as)
-		b.args = append(b.args, args...)
 	}
 	for _, join := range s.joins {
 		b.WriteString(" " + join.kind + " ")
@@ -1491,13 +1502,11 @@ func (s Selector) Query() (string, []interface{}) {
 			b.WriteString(view.ref())
 		case *Selector:
 			view.SetDialect(s.dialect)
-			query, args := view.Query()
 			b.Nested(func(b *Builder) {
-				b.WriteString(query)
+				b.Join(view)
 			})
 			b.WriteString(" AS ")
 			b.Ident(view.as)
-			b.args = append(b.args, args...)
 		}
 		if join.on != "" {
 			b.WriteString(" ON ")
@@ -1528,6 +1537,7 @@ func (s Selector) Query() (string, []interface{}) {
 		b.WriteString(" OFFSET ")
 		b.Arg(*s.offset)
 	}
+	s.total = b.total
 	return b.String(), b.args
 }
 
@@ -1817,7 +1827,7 @@ func (b Builder) Query() (string, []interface{}) {
 
 // clone returns a shallow clone of a builder.
 func (b Builder) clone() Builder {
-	c := Builder{dialect: b.dialect}
+	c := Builder{dialect: b.dialect, total: b.total}
 	if len(b.args) > 0 {
 		c.args = append(c.args, b.args...)
 	}

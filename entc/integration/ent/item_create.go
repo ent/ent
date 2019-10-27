@@ -47,21 +47,15 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 	var (
-		res sql.Result
-		i   = &Item{config: ic.config}
+		builder = sql.Dialect(ic.driver.Dialect())
+		i       = &Item{config: ic.config}
 	)
 	tx, err := ic.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(ic.driver.Dialect()).
-		Insert(item.Table).
-		Default()
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	insert := builder.Insert(item.Table).Default()
+	id, err := insertLastID(ctx, tx, insert.Returning(item.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}

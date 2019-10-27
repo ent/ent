@@ -34,21 +34,15 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		res sql.Result
-		gr  = &Group{config: gc.config}
+		builder = sql.Dialect(gc.driver.Dialect())
+		gr      = &Group{config: gc.config}
 	)
 	tx, err := gc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(gc.driver.Dialect()).
-		Insert(group.Table).
-		Default()
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	insert := builder.Insert(group.Table).Default()
+	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}

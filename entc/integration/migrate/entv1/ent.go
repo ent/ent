@@ -7,6 +7,7 @@
 package entv1
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -168,9 +169,19 @@ func IsConstraintFailure(err error) bool {
 }
 
 func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
-	// Error number 1062 is ER_DUP_ENTRY in mysql, and "UNIQUE constraint failed" is SQLite prefix.
-	if msg := err.Error(); strings.HasPrefix(msg, "Error 1062") || strings.HasPrefix(msg, "UNIQUE constraint failed") {
-		return &ErrConstraintFailed{msg, err}, true
+	var (
+		msg = err.Error()
+		// error format per dialect.
+		errors = [...]string{
+			"Error 1062",               // MySQL 1062 error (ER_DUP_ENTRY).
+			"UNIQUE constraint failed", // SQLite.
+			"duplicate key value violates unique constraint", // PostgreSQL.
+		}
+	)
+	for i := range errors {
+		if strings.Contains(msg, errors[i]) {
+			return &ErrConstraintFailed{msg, err}, true
+		}
 	}
 	return nil, false
 }
@@ -184,6 +195,38 @@ func rollback(tx dialect.Tx, err error) error {
 		return err
 	}
 	return err
+}
+
+// insertLastID invokes the insert query on the transaction and returns the LastInsertID.
+func insertLastID(ctx context.Context, tx dialect.Tx, insert *sql.InsertBuilder) (int64, error) {
+	query, args := insert.Query()
+	// PostgreSQL does not support the LastInsertId() method of sql.Result
+	// on Exec, and should be extracted manually using the `RETURNING` clause.
+	if insert.Dialect() == dialect.Postgres {
+		rows := &sql.Rows{}
+		if err := tx.Query(ctx, query, args, rows); err != nil {
+			return 0, err
+		}
+		defer rows.Close()
+		if !rows.Next() {
+			return 0, fmt.Errorf("no rows found for query: %v", query)
+		}
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return 0, err
+		}
+		return id, nil
+	}
+	// MySQL, SQLite, etc.
+	var res sql.Result
+	if err := tx.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 // keys returns the keys/ids from the edge map.

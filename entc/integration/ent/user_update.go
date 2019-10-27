@@ -609,7 +609,10 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(user.FieldID).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uu.driver.Dialect())
+		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
+	)
 	for _, p := range uu.predicates {
 		p(selector)
 	}
@@ -637,46 +640,46 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 	}
 	if value := uu.last; value != nil {
-		builder.Set(user.FieldLast, *value)
+		updater.Set(user.FieldLast, *value)
 	}
 	if value := uu.nickname; value != nil {
-		builder.Set(user.FieldNickname, *value)
+		updater.Set(user.FieldNickname, *value)
 	}
 	if uu.clearnickname {
-		builder.SetNull(user.FieldNickname)
+		updater.SetNull(user.FieldNickname)
 	}
 	if value := uu.phone; value != nil {
-		builder.Set(user.FieldPhone, *value)
+		updater.Set(user.FieldPhone, *value)
 	}
 	if uu.clearphone {
-		builder.SetNull(user.FieldPhone)
+		updater.SetNull(user.FieldPhone)
 	}
 	if value := uu.password; value != nil {
-		builder.Set(user.FieldPassword, *value)
+		updater.Set(user.FieldPassword, *value)
 	}
 	if uu.clearpassword {
-		builder.SetNull(user.FieldPassword)
+		updater.SetNull(user.FieldPassword)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if uu.clearedCard {
-		query, args := sql.Update(user.CardTable).
+		query, args := builder.Update(user.CardTable).
 			SetNull(user.CardColumn).
 			Where(sql.InInts(card.FieldID, ids...)).
 			Query()
@@ -690,7 +693,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			if serr != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args := sql.Update(user.CardTable).
+			query, args := builder.Update(user.CardTable).
 				Set(user.CardColumn, id).
 				Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
 				Query()
@@ -716,7 +719,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.PetsTable).
+		query, args := builder.Update(user.PetsTable).
 			SetNull(user.PetsColumn).
 			Where(sql.InInts(user.PetsColumn, ids...)).
 			Where(sql.InInts(pet.FieldID, eids...)).
@@ -736,7 +739,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(pet.FieldID, eid)
 			}
-			query, args := sql.Update(user.PetsTable).
+			query, args := builder.Update(user.PetsTable).
 				Set(user.PetsColumn, id).
 				Where(sql.And(p, sql.IsNull(user.PetsColumn))).
 				Query()
@@ -762,7 +765,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.FilesTable).
+		query, args := builder.Update(user.FilesTable).
 			SetNull(user.FilesColumn).
 			Where(sql.InInts(user.FilesColumn, ids...)).
 			Where(sql.InInts(file.FieldID, eids...)).
@@ -782,7 +785,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(file.FieldID, eid)
 			}
-			query, args := sql.Update(user.FilesTable).
+			query, args := builder.Update(user.FilesTable).
 				Set(user.FilesColumn, id).
 				Where(sql.And(p, sql.IsNull(user.FilesColumn))).
 				Query()
@@ -808,7 +811,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.GroupsTable).
+		query, args := builder.Delete(user.GroupsTable).
 			Where(sql.InInts(user.GroupsPrimaryKey[0], ids...)).
 			Where(sql.InInts(user.GroupsPrimaryKey[1], eids...)).
 			Query()
@@ -828,7 +831,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.GroupsTable).
+		builder := builder.Insert(user.GroupsTable).
 			Columns(user.GroupsPrimaryKey[0], user.GroupsPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -848,14 +851,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.FriendsTable).
+		query, args := builder.Delete(user.FriendsTable).
 			Where(sql.InInts(user.FriendsPrimaryKey[0], ids...)).
 			Where(sql.InInts(user.FriendsPrimaryKey[1], eids...)).
 			Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
-		query, args = sql.Delete(user.FriendsTable).
+		query, args = builder.Delete(user.FriendsTable).
 			Where(sql.InInts(user.FriendsPrimaryKey[1], ids...)).
 			Where(sql.InInts(user.FriendsPrimaryKey[0], eids...)).
 			Query()
@@ -875,7 +878,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid}, []int{eid, id})
 			}
 		}
-		builder := sql.Insert(user.FriendsTable).
+		builder := builder.Insert(user.FriendsTable).
 			Columns(user.FriendsPrimaryKey[0], user.FriendsPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -895,7 +898,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.FollowersTable).
+		query, args := builder.Delete(user.FollowersTable).
 			Where(sql.InInts(user.FollowersPrimaryKey[1], ids...)).
 			Where(sql.InInts(user.FollowersPrimaryKey[0], eids...)).
 			Query()
@@ -915,7 +918,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.FollowersTable).
+		builder := builder.Insert(user.FollowersTable).
 			Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -935,7 +938,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.FollowingTable).
+		query, args := builder.Delete(user.FollowingTable).
 			Where(sql.InInts(user.FollowingPrimaryKey[0], ids...)).
 			Where(sql.InInts(user.FollowingPrimaryKey[1], eids...)).
 			Query()
@@ -955,7 +958,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.FollowingTable).
+		builder := builder.Insert(user.FollowingTable).
 			Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -966,7 +969,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if uu.clearedTeam {
-		query, args := sql.Update(user.TeamTable).
+		query, args := builder.Update(user.TeamTable).
 			SetNull(user.TeamColumn).
 			Where(sql.InInts(pet.FieldID, ids...)).
 			Query()
@@ -980,7 +983,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			if serr != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args := sql.Update(user.TeamTable).
+			query, args := builder.Update(user.TeamTable).
 				Set(user.TeamColumn, id).
 				Where(sql.EQ(pet.FieldID, eid).And().IsNull(user.TeamColumn)).
 				Query()
@@ -997,14 +1000,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if uu.clearedSpouse {
-		query, args := sql.Update(user.SpouseTable).
+		query, args := builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
-		query, args = sql.Update(user.SpouseTable).
+		query, args = builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.SpouseColumn, ids...)).
 			Query()
@@ -1022,13 +1025,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, ids[0])).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, ids[0]).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -1053,7 +1056,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.ChildrenTable).
+		query, args := builder.Update(user.ChildrenTable).
 			SetNull(user.ChildrenColumn).
 			Where(sql.InInts(user.ChildrenColumn, ids...)).
 			Where(sql.InInts(user.FieldID, eids...)).
@@ -1073,7 +1076,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(user.FieldID, eid)
 			}
-			query, args := sql.Update(user.ChildrenTable).
+			query, args := builder.Update(user.ChildrenTable).
 				Set(user.ChildrenColumn, id).
 				Where(sql.And(p, sql.IsNull(user.ChildrenColumn))).
 				Query()
@@ -1090,7 +1093,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if uu.clearedParent {
-		query, args := sql.Update(user.ParentTable).
+		query, args := builder.Update(user.ParentTable).
 			SetNull(user.ParentColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -1105,7 +1108,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(user.ParentTable).
+			query, args := builder.Update(user.ParentTable).
 				Set(user.ParentColumn, eid).
 				Where(sql.InInts(user.FieldID, ids...)).
 				Query()
@@ -1887,7 +1890,10 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	selector := sql.Select(user.Columns...).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uuo.driver.Dialect())
+		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
+	)
 	user.ID(uuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -1918,59 +1924,59 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 		u.Name = *value
 	}
 	if value := uuo.last; value != nil {
-		builder.Set(user.FieldLast, *value)
+		updater.Set(user.FieldLast, *value)
 		u.Last = *value
 	}
 	if value := uuo.nickname; value != nil {
-		builder.Set(user.FieldNickname, *value)
+		updater.Set(user.FieldNickname, *value)
 		u.Nickname = *value
 	}
 	if uuo.clearnickname {
 		var value string
 		u.Nickname = value
-		builder.SetNull(user.FieldNickname)
+		updater.SetNull(user.FieldNickname)
 	}
 	if value := uuo.phone; value != nil {
-		builder.Set(user.FieldPhone, *value)
+		updater.Set(user.FieldPhone, *value)
 		u.Phone = *value
 	}
 	if uuo.clearphone {
 		var value string
 		u.Phone = value
-		builder.SetNull(user.FieldPhone)
+		updater.SetNull(user.FieldPhone)
 	}
 	if value := uuo.password; value != nil {
-		builder.Set(user.FieldPassword, *value)
+		updater.Set(user.FieldPassword, *value)
 		u.Password = *value
 	}
 	if uuo.clearpassword {
 		var value string
 		u.Password = value
-		builder.SetNull(user.FieldPassword)
+		updater.SetNull(user.FieldPassword)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if uuo.clearedCard {
-		query, args := sql.Update(user.CardTable).
+		query, args := builder.Update(user.CardTable).
 			SetNull(user.CardColumn).
 			Where(sql.InInts(card.FieldID, ids...)).
 			Query()
@@ -1984,7 +1990,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			if serr != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(user.CardTable).
+			query, args := builder.Update(user.CardTable).
 				Set(user.CardColumn, id).
 				Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
 				Query()
@@ -2010,7 +2016,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.PetsTable).
+		query, args := builder.Update(user.PetsTable).
 			SetNull(user.PetsColumn).
 			Where(sql.InInts(user.PetsColumn, ids...)).
 			Where(sql.InInts(pet.FieldID, eids...)).
@@ -2030,7 +2036,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				}
 				p.Or().EQ(pet.FieldID, eid)
 			}
-			query, args := sql.Update(user.PetsTable).
+			query, args := builder.Update(user.PetsTable).
 				Set(user.PetsColumn, id).
 				Where(sql.And(p, sql.IsNull(user.PetsColumn))).
 				Query()
@@ -2056,7 +2062,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.FilesTable).
+		query, args := builder.Update(user.FilesTable).
 			SetNull(user.FilesColumn).
 			Where(sql.InInts(user.FilesColumn, ids...)).
 			Where(sql.InInts(file.FieldID, eids...)).
@@ -2076,7 +2082,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				}
 				p.Or().EQ(file.FieldID, eid)
 			}
-			query, args := sql.Update(user.FilesTable).
+			query, args := builder.Update(user.FilesTable).
 				Set(user.FilesColumn, id).
 				Where(sql.And(p, sql.IsNull(user.FilesColumn))).
 				Query()
@@ -2102,7 +2108,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.GroupsTable).
+		query, args := builder.Delete(user.GroupsTable).
 			Where(sql.InInts(user.GroupsPrimaryKey[0], ids...)).
 			Where(sql.InInts(user.GroupsPrimaryKey[1], eids...)).
 			Query()
@@ -2122,7 +2128,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.GroupsTable).
+		builder := builder.Insert(user.GroupsTable).
 			Columns(user.GroupsPrimaryKey[0], user.GroupsPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -2142,14 +2148,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.FriendsTable).
+		query, args := builder.Delete(user.FriendsTable).
 			Where(sql.InInts(user.FriendsPrimaryKey[0], ids...)).
 			Where(sql.InInts(user.FriendsPrimaryKey[1], eids...)).
 			Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
-		query, args = sql.Delete(user.FriendsTable).
+		query, args = builder.Delete(user.FriendsTable).
 			Where(sql.InInts(user.FriendsPrimaryKey[1], ids...)).
 			Where(sql.InInts(user.FriendsPrimaryKey[0], eids...)).
 			Query()
@@ -2169,7 +2175,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				values = append(values, []int{id, eid}, []int{eid, id})
 			}
 		}
-		builder := sql.Insert(user.FriendsTable).
+		builder := builder.Insert(user.FriendsTable).
 			Columns(user.FriendsPrimaryKey[0], user.FriendsPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -2189,7 +2195,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.FollowersTable).
+		query, args := builder.Delete(user.FollowersTable).
 			Where(sql.InInts(user.FollowersPrimaryKey[1], ids...)).
 			Where(sql.InInts(user.FollowersPrimaryKey[0], eids...)).
 			Query()
@@ -2209,7 +2215,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.FollowersTable).
+		builder := builder.Insert(user.FollowersTable).
 			Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -2229,7 +2235,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.FollowingTable).
+		query, args := builder.Delete(user.FollowingTable).
 			Where(sql.InInts(user.FollowingPrimaryKey[0], ids...)).
 			Where(sql.InInts(user.FollowingPrimaryKey[1], eids...)).
 			Query()
@@ -2249,7 +2255,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.FollowingTable).
+		builder := builder.Insert(user.FollowingTable).
 			Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -2260,7 +2266,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 	}
 	if uuo.clearedTeam {
-		query, args := sql.Update(user.TeamTable).
+		query, args := builder.Update(user.TeamTable).
 			SetNull(user.TeamColumn).
 			Where(sql.InInts(pet.FieldID, ids...)).
 			Query()
@@ -2274,7 +2280,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			if serr != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(user.TeamTable).
+			query, args := builder.Update(user.TeamTable).
 				Set(user.TeamColumn, id).
 				Where(sql.EQ(pet.FieldID, eid).And().IsNull(user.TeamColumn)).
 				Query()
@@ -2291,14 +2297,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 	}
 	if uuo.clearedSpouse {
-		query, args := sql.Update(user.SpouseTable).
+		query, args := builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
-		query, args = sql.Update(user.SpouseTable).
+		query, args = builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.SpouseColumn, ids...)).
 			Query()
@@ -2316,13 +2322,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, ids[0])).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, ids[0]).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -2347,7 +2353,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.ChildrenTable).
+		query, args := builder.Update(user.ChildrenTable).
 			SetNull(user.ChildrenColumn).
 			Where(sql.InInts(user.ChildrenColumn, ids...)).
 			Where(sql.InInts(user.FieldID, eids...)).
@@ -2367,7 +2373,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				}
 				p.Or().EQ(user.FieldID, eid)
 			}
-			query, args := sql.Update(user.ChildrenTable).
+			query, args := builder.Update(user.ChildrenTable).
 				Set(user.ChildrenColumn, id).
 				Where(sql.And(p, sql.IsNull(user.ChildrenColumn))).
 				Query()
@@ -2384,7 +2390,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 	}
 	if uuo.clearedParent {
-		query, args := sql.Update(user.ParentTable).
+		query, args := builder.Update(user.ParentTable).
 			SetNull(user.ParentColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -2399,7 +2405,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(user.ParentTable).
+			query, args := builder.Update(user.ParentTable).
 				Set(user.ParentColumn, eid).
 				Where(sql.InInts(user.FieldID, ids...)).
 				Query()

@@ -328,11 +328,12 @@ func HasFiles() predicate.FileType {
 	return predicate.FileTypePerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FilesColumn).
-						From(sql.Table(FilesTable)).
+					builder.Select(FilesColumn).
+						From(builder.Table(FilesTable)).
 						Where(sql.NotNull(FilesColumn)),
 				),
 			)
@@ -347,8 +348,9 @@ func HasFiles() predicate.FileType {
 func HasFilesWith(preds ...predicate.File) predicate.FileType {
 	return predicate.FileTypePerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FilesColumn).From(sql.Table(FilesTable))
+			t2 := builder.Select(FilesColumn).From(builder.Table(FilesTable))
 			for _, p := range preds {
 				p(t2)
 			}

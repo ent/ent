@@ -290,8 +290,9 @@ func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (pq *PetQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(pet.Table)
-	selector := sql.Select(t1.Columns(pet.Columns...)...).From(t1)
+	builder := sql.Dialect(pq.driver.Dialect())
+	t1 := builder.Table(pet.Table)
+	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
 		selector.Select(selector.Columns(pet.Columns...)...)
@@ -560,5 +561,6 @@ func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ps *PetSelect) sqlQuery() sql.Querier {
 	view := "pet_view"
-	return sql.Select(ps.fields...).From(ps.sql.As(view))
+	return sql.Dialect(ps.driver.Dialect()).
+		Select(ps.fields...).From(ps.sql.As(view))
 }

@@ -54,12 +54,15 @@ func (ftd *FileTypeDelete) ExecX(ctx context.Context) int {
 }
 
 func (ftd *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(filetype.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(ftd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(filetype.Table))
 	for _, p := range ftd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(filetype.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(filetype.Table).FromSelect(selector).Query()
 	if err := ftd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

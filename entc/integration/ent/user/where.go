@@ -1184,11 +1184,12 @@ func HasCard() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(CardColumn).
-						From(sql.Table(CardTable)).
+					builder.Select(CardColumn).
+						From(builder.Table(CardTable)).
 						Where(sql.NotNull(CardColumn)),
 				),
 			)
@@ -1203,8 +1204,9 @@ func HasCard() predicate.User {
 func HasCardWith(preds ...predicate.Card) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(CardColumn).From(sql.Table(CardTable))
+			t2 := builder.Select(CardColumn).From(builder.Table(CardTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -1225,11 +1227,12 @@ func HasPets() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(PetsColumn).
-						From(sql.Table(PetsTable)).
+					builder.Select(PetsColumn).
+						From(builder.Table(PetsTable)).
 						Where(sql.NotNull(PetsColumn)),
 				),
 			)
@@ -1244,8 +1247,9 @@ func HasPets() predicate.User {
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(PetsColumn).From(sql.Table(PetsTable))
+			t2 := builder.Select(PetsColumn).From(builder.Table(PetsTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -1266,11 +1270,12 @@ func HasFiles() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FilesColumn).
-						From(sql.Table(FilesTable)).
+					builder.Select(FilesColumn).
+						From(builder.Table(FilesTable)).
 						Where(sql.NotNull(FilesColumn)),
 				),
 			)
@@ -1285,8 +1290,9 @@ func HasFiles() predicate.User {
 func HasFilesWith(preds ...predicate.File) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FilesColumn).From(sql.Table(FilesTable))
+			t2 := builder.Select(FilesColumn).From(builder.Table(FilesTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -1307,10 +1313,12 @@ func HasGroups() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(GroupsPrimaryKey[0]).From(sql.Table(GroupsTable)),
+					builder.Select(GroupsPrimaryKey[0]).
+						From(builder.Table(GroupsTable)),
 				),
 			)
 		},
@@ -1324,14 +1332,15 @@ func HasGroups() predicate.User {
 func HasGroupsWith(preds ...predicate.Group) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(GroupsInverseTable)
-			t3 := sql.Table(GroupsTable)
-			t4 := sql.Select(t3.C(GroupsPrimaryKey[0])).
+			t2 := builder.Table(GroupsInverseTable)
+			t3 := builder.Table(GroupsTable)
+			t4 := builder.Select(t3.C(GroupsPrimaryKey[0])).
 				From(t3).
 				Join(t2).
 				On(t3.C(GroupsPrimaryKey[1]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -1353,10 +1362,12 @@ func HasFriends() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FriendsPrimaryKey[0]).From(sql.Table(FriendsTable)),
+					builder.Select(FriendsPrimaryKey[0]).
+						From(builder.Table(FriendsTable)),
 				),
 			)
 		},
@@ -1370,14 +1381,15 @@ func HasFriends() predicate.User {
 func HasFriendsWith(preds ...predicate.User) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(Table)
-			t3 := sql.Table(FriendsTable)
-			t4 := sql.Select(t3.C(FriendsPrimaryKey[0])).
+			t2 := builder.Table(Table)
+			t3 := builder.Table(FriendsTable)
+			t4 := builder.Select(t3.C(FriendsPrimaryKey[0])).
 				From(t3).
 				Join(t2).
 				On(t3.C(FriendsPrimaryKey[1]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -1405,10 +1417,12 @@ func HasFollowers() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FollowersPrimaryKey[1]).From(sql.Table(FollowersTable)),
+					builder.Select(FollowersPrimaryKey[1]).
+						From(builder.Table(FollowersTable)),
 				),
 			)
 		},
@@ -1422,14 +1436,15 @@ func HasFollowers() predicate.User {
 func HasFollowersWith(preds ...predicate.User) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(Table)
-			t3 := sql.Table(FollowersTable)
-			t4 := sql.Select(t3.C(FollowersPrimaryKey[1])).
+			t2 := builder.Table(Table)
+			t3 := builder.Table(FollowersTable)
+			t4 := builder.Select(t3.C(FollowersPrimaryKey[1])).
 				From(t3).
 				Join(t2).
 				On(t3.C(FollowersPrimaryKey[0]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -1451,10 +1466,12 @@ func HasFollowing() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FollowingPrimaryKey[0]).From(sql.Table(FollowingTable)),
+					builder.Select(FollowingPrimaryKey[0]).
+						From(builder.Table(FollowingTable)),
 				),
 			)
 		},
@@ -1468,14 +1485,15 @@ func HasFollowing() predicate.User {
 func HasFollowingWith(preds ...predicate.User) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(Table)
-			t3 := sql.Table(FollowingTable)
-			t4 := sql.Select(t3.C(FollowingPrimaryKey[0])).
+			t2 := builder.Table(Table)
+			t3 := builder.Table(FollowingTable)
+			t4 := builder.Select(t3.C(FollowingPrimaryKey[0])).
 				From(t3).
 				Join(t2).
 				On(t3.C(FollowingPrimaryKey[1]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -1497,11 +1515,12 @@ func HasTeam() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(TeamColumn).
-						From(sql.Table(TeamTable)).
+					builder.Select(TeamColumn).
+						From(builder.Table(TeamTable)).
 						Where(sql.NotNull(TeamColumn)),
 				),
 			)
@@ -1516,8 +1535,9 @@ func HasTeam() predicate.User {
 func HasTeamWith(preds ...predicate.Pet) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(TeamColumn).From(sql.Table(TeamTable))
+			t2 := builder.Select(TeamColumn).From(builder.Table(TeamTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -1538,11 +1558,12 @@ func HasSpouse() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(SpouseColumn).
-						From(sql.Table(SpouseTable)).
+					builder.Select(SpouseColumn).
+						From(builder.Table(SpouseTable)).
 						Where(sql.NotNull(SpouseColumn)),
 				),
 			)
@@ -1557,8 +1578,9 @@ func HasSpouse() predicate.User {
 func HasSpouseWith(preds ...predicate.User) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(SpouseColumn).From(sql.Table(SpouseTable))
+			t2 := builder.Select(SpouseColumn).From(builder.Table(SpouseTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -1585,11 +1607,12 @@ func HasChildren() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(ChildrenColumn).
-						From(sql.Table(ChildrenTable)).
+					builder.Select(ChildrenColumn).
+						From(builder.Table(ChildrenTable)).
 						Where(sql.NotNull(ChildrenColumn)),
 				),
 			)
@@ -1604,8 +1627,9 @@ func HasChildren() predicate.User {
 func HasChildrenWith(preds ...predicate.User) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(ChildrenColumn).From(sql.Table(ChildrenTable))
+			t2 := builder.Select(ChildrenColumn).From(builder.Table(ChildrenTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -1638,8 +1662,9 @@ func HasParent() predicate.User {
 func HasParentWith(preds ...predicate.User) predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(ParentTable))
+			t2 := builder.Select(FieldID).From(builder.Table(ParentTable))
 			for _, p := range preds {
 				p(t2)
 			}

@@ -66,10 +66,12 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(user.Table)
+
+		builder := sql.Dialect(fq.driver.Dialect())
+		t1 := builder.Table(user.Table)
 		t2 := fq.sqlQuery()
 		t2.Select(t2.C(file.OwnerColumn))
-		query.sql = sql.Select(t1.Columns(user.Columns...)...).
+		query.sql = builder.Select(t1.Columns(user.Columns...)...).
 			From(t1).
 			Join(t2).
 			On(t1.C(user.FieldID), t2.C(file.OwnerColumn))
@@ -85,10 +87,12 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(filetype.Table)
+
+		builder := sql.Dialect(fq.driver.Dialect())
+		t1 := builder.Table(filetype.Table)
 		t2 := fq.sqlQuery()
 		t2.Select(t2.C(file.TypeColumn))
-		query.sql = sql.Select(t1.Columns(filetype.Columns...)...).
+		query.sql = builder.Select(t1.Columns(filetype.Columns...)...).
 			From(t1).
 			Join(t2).
 			On(t1.C(filetype.FieldID), t2.C(file.TypeColumn))
@@ -392,8 +396,9 @@ func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (fq *FileQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(file.Table)
-	selector := sql.Select(t1.Columns(file.Columns...)...).From(t1)
+	builder := sql.Dialect(fq.driver.Dialect())
+	t1 := builder.Table(file.Table)
+	selector := builder.Select(t1.Columns(file.Columns...)...).From(t1)
 	if fq.sql != nil {
 		selector = fq.sql
 		selector.Select(selector.Columns(file.Columns...)...)
@@ -775,7 +780,8 @@ func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (fs *FileSelect) sqlQuery() sql.Querier {
 	view := "file_view"
-	return sql.Select(fs.fields...).From(fs.sql.As(view))
+	return sql.Dialect(fs.driver.Dialect()).
+		Select(fs.fields...).From(fs.sql.As(view))
 }
 
 func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {

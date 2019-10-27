@@ -388,45 +388,40 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		res     sql.Result
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
+	insert := builder.Insert(user.Table).Default()
 	if value := uc.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		insert.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uc.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		insert.Set(user.FieldName, *value)
 		u.Name = *value
 	}
 	if value := uc.last; value != nil {
-		builder.Set(user.FieldLast, *value)
+		insert.Set(user.FieldLast, *value)
 		u.Last = *value
 	}
 	if value := uc.nickname; value != nil {
-		builder.Set(user.FieldNickname, *value)
+		insert.Set(user.FieldNickname, *value)
 		u.Nickname = *value
 	}
 	if value := uc.phone; value != nil {
-		builder.Set(user.FieldPhone, *value)
+		insert.Set(user.FieldPhone, *value)
 		u.Phone = *value
 	}
 	if value := uc.password; value != nil {
-		builder.Set(user.FieldPassword, *value)
+		insert.Set(user.FieldPassword, *value)
 		u.Password = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -436,7 +431,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		query, args := sql.Update(user.CardTable).
+		query, args := builder.Update(user.CardTable).
 			Set(user.CardColumn, id).
 			Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
 			Query()
@@ -460,7 +455,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			p.Or().EQ(pet.FieldID, eid)
 		}
-		query, args := sql.Update(user.PetsTable).
+		query, args := builder.Update(user.PetsTable).
 			Set(user.PetsColumn, id).
 			Where(sql.And(p, sql.IsNull(user.PetsColumn))).
 			Query()
@@ -484,7 +479,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			p.Or().EQ(file.FieldID, eid)
 		}
-		query, args := sql.Update(user.FilesTable).
+		query, args := builder.Update(user.FilesTable).
 			Set(user.FilesColumn, id).
 			Where(sql.And(p, sql.IsNull(user.FilesColumn))).
 			Query()
@@ -506,7 +501,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				return nil, rollback(tx, err)
 			}
 
-			query, args := sql.Insert(user.GroupsTable).
+			query, args := builder.Insert(user.GroupsTable).
 				Columns(user.GroupsPrimaryKey[0], user.GroupsPrimaryKey[1]).
 				Values(id, eid).
 				Query()
@@ -522,7 +517,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				return nil, rollback(tx, err)
 			}
 
-			query, args := sql.Insert(user.FriendsTable).
+			query, args := builder.Insert(user.FriendsTable).
 				Columns(user.FriendsPrimaryKey[0], user.FriendsPrimaryKey[1]).
 				Values(id, eid).
 				Values(eid, id).
@@ -539,7 +534,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				return nil, rollback(tx, err)
 			}
 
-			query, args := sql.Insert(user.FollowersTable).
+			query, args := builder.Insert(user.FollowersTable).
 				Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0]).
 				Values(id, eid).
 				Query()
@@ -555,7 +550,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				return nil, rollback(tx, err)
 			}
 
-			query, args := sql.Insert(user.FollowingTable).
+			query, args := builder.Insert(user.FollowingTable).
 				Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1]).
 				Values(id, eid).
 				Query()
@@ -569,7 +564,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		query, args := sql.Update(user.TeamTable).
+		query, args := builder.Update(user.TeamTable).
 			Set(user.TeamColumn, id).
 			Where(sql.EQ(pet.FieldID, eid).And().IsNull(user.TeamColumn)).
 			Query()
@@ -590,13 +585,13 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			if err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, id)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, id).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -620,7 +615,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			p.Or().EQ(user.FieldID, eid)
 		}
-		query, args := sql.Update(user.ChildrenTable).
+		query, args := builder.Update(user.ChildrenTable).
 			Set(user.ChildrenColumn, id).
 			Where(sql.And(p, sql.IsNull(user.ChildrenColumn))).
 			Query()
@@ -641,7 +636,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			if err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(user.ParentTable).
+			query, args := builder.Update(user.ParentTable).
 				Set(user.ParentColumn, eid).
 				Where(sql.EQ(user.FieldID, id)).
 				Query()

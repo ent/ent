@@ -65,10 +65,12 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: ftq.config}
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(file.Table)
+
+		builder := sql.Dialect(ftq.driver.Dialect())
+		t1 := builder.Table(file.Table)
 		t2 := ftq.sqlQuery()
 		t2.Select(t2.C(filetype.FieldID))
-		query.sql = sql.Select().
+		query.sql = builder.Select().
 			From(t1).
 			Join(t2).
 			On(t1.C(filetype.FilesColumn), t2.C(filetype.FieldID))
@@ -372,8 +374,9 @@ func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(filetype.Table)
-	selector := sql.Select(t1.Columns(filetype.Columns...)...).From(t1)
+	builder := sql.Dialect(ftq.driver.Dialect())
+	t1 := builder.Table(filetype.Table)
+	selector := builder.Select(t1.Columns(filetype.Columns...)...).From(t1)
 	if ftq.sql != nil {
 		selector = ftq.sql
 		selector.Select(selector.Columns(filetype.Columns...)...)
@@ -755,7 +758,8 @@ func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (fts *FileTypeSelect) sqlQuery() sql.Querier {
 	view := "filetype_view"
-	return sql.Select(fts.fields...).From(fts.sql.As(view))
+	return sql.Dialect(fts.driver.Dialect()).
+		Select(fts.fields...).From(fts.sql.As(view))
 }
 
 func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {

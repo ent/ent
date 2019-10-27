@@ -456,11 +456,12 @@ func HasGroups() predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(GroupsColumn).
-						From(sql.Table(GroupsTable)).
+					builder.Select(GroupsColumn).
+						From(builder.Table(GroupsTable)).
 						Where(sql.NotNull(GroupsColumn)),
 				),
 			)
@@ -475,8 +476,9 @@ func HasGroups() predicate.GroupInfo {
 func HasGroupsWith(preds ...predicate.Group) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(GroupsColumn).From(sql.Table(GroupsTable))
+			t2 := builder.Select(GroupsColumn).From(builder.Table(GroupsTable))
 			for _, p := range preds {
 				p(t2)
 			}

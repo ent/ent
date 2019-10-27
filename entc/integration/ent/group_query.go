@@ -67,10 +67,12 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(file.Table)
+
+		builder := sql.Dialect(gq.driver.Dialect())
+		t1 := builder.Table(file.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.FieldID))
-		query.sql = sql.Select().
+		query.sql = builder.Select().
 			From(t1).
 			Join(t2).
 			On(t1.C(group.FilesColumn), t2.C(group.FieldID))
@@ -86,10 +88,12 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(user.Table)
+
+		builder := sql.Dialect(gq.driver.Dialect())
+		t1 := builder.Table(user.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.FieldID))
-		query.sql = sql.Select().
+		query.sql = builder.Select().
 			From(t1).
 			Join(t2).
 			On(t1.C(group.BlockedColumn), t2.C(group.FieldID))
@@ -105,15 +109,17 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(user.Table)
+
+		builder := sql.Dialect(gq.driver.Dialect())
+		t1 := builder.Table(user.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.FieldID))
-		t3 := sql.Table(group.UsersTable)
-		t4 := sql.Select(t3.C(group.UsersPrimaryKey[0])).
+		t3 := builder.Table(group.UsersTable)
+		t4 := builder.Select(t3.C(group.UsersPrimaryKey[0])).
 			From(t3).
 			Join(t2).
 			On(t3.C(group.UsersPrimaryKey[1]), t2.C(group.FieldID))
-		query.sql = sql.Select().
+		query.sql = builder.Select().
 			From(t1).
 			Join(t4).
 			On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[0]))
@@ -129,10 +135,12 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(groupinfo.Table)
+
+		builder := sql.Dialect(gq.driver.Dialect())
+		t1 := builder.Table(groupinfo.Table)
 		t2 := gq.sqlQuery()
 		t2.Select(t2.C(group.InfoColumn))
-		query.sql = sql.Select(t1.Columns(groupinfo.Columns...)...).
+		query.sql = builder.Select(t1.Columns(groupinfo.Columns...)...).
 			From(t1).
 			Join(t2).
 			On(t1.C(groupinfo.FieldID), t2.C(group.InfoColumn))
@@ -436,8 +444,9 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (gq *GroupQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(group.Table)
-	selector := sql.Select(t1.Columns(group.Columns...)...).From(t1)
+	builder := sql.Dialect(gq.driver.Dialect())
+	t1 := builder.Table(group.Table)
+	selector := builder.Select(t1.Columns(group.Columns...)...).From(t1)
 	if gq.sql != nil {
 		selector = gq.sql
 		selector.Select(selector.Columns(group.Columns...)...)
@@ -819,7 +828,8 @@ func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (gs *GroupSelect) sqlQuery() sql.Querier {
 	view := "group_view"
-	return sql.Select(gs.fields...).From(gs.sql.As(view))
+	return sql.Dialect(gs.driver.Dialect()).
+		Select(gs.fields...).From(gs.sql.As(view))
 }
 
 func (gs *GroupSelect) gremlinScan(ctx context.Context, v interface{}) error {

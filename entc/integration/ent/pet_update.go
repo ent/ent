@@ -144,7 +144,10 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 }
 
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(pet.FieldID).From(sql.Table(pet.Table))
+	var (
+		builder  = sql.Dialect(pu.driver.Dialect())
+		selector = builder.Select(pet.FieldID).From(builder.Table(pet.Table))
+	)
 	for _, p := range pu.predicates {
 		p(selector)
 	}
@@ -172,19 +175,19 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
+		updater = builder.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
 	if value := pu.name; value != nil {
-		builder.Set(pet.FieldName, *value)
+		updater.Set(pet.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if pu.clearedTeam {
-		query, args := sql.Update(pet.TeamTable).
+		query, args := builder.Update(pet.TeamTable).
 			SetNull(pet.TeamColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -198,7 +201,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			if serr != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args := sql.Update(pet.TeamTable).
+			query, args := builder.Update(pet.TeamTable).
 				Set(pet.TeamColumn, eid).
 				Where(sql.EQ(pet.FieldID, id).And().IsNull(pet.TeamColumn)).
 				Query()
@@ -215,7 +218,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if pu.clearedOwner {
-		query, args := sql.Update(pet.OwnerTable).
+		query, args := builder.Update(pet.OwnerTable).
 			SetNull(pet.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -230,7 +233,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(pet.OwnerTable).
+			query, args := builder.Update(pet.OwnerTable).
 				Set(pet.OwnerColumn, eid).
 				Where(sql.InInts(pet.FieldID, ids...)).
 				Query()
@@ -423,7 +426,10 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
-	selector := sql.Select(pet.Columns...).From(sql.Table(pet.Table))
+	var (
+		builder  = sql.Dialect(puo.driver.Dialect())
+		selector = builder.Select(pet.Columns...).From(builder.Table(pet.Table))
+	)
 	pet.ID(puo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -454,20 +460,20 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
+		updater = builder.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
 	)
 	if value := puo.name; value != nil {
-		builder.Set(pet.FieldName, *value)
+		updater.Set(pet.FieldName, *value)
 		pe.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if puo.clearedTeam {
-		query, args := sql.Update(pet.TeamTable).
+		query, args := builder.Update(pet.TeamTable).
 			SetNull(pet.TeamColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -481,7 +487,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			if serr != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(pet.TeamTable).
+			query, args := builder.Update(pet.TeamTable).
 				Set(pet.TeamColumn, eid).
 				Where(sql.EQ(pet.FieldID, id).And().IsNull(pet.TeamColumn)).
 				Query()
@@ -498,7 +504,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		}
 	}
 	if puo.clearedOwner {
-		query, args := sql.Update(pet.OwnerTable).
+		query, args := builder.Update(pet.OwnerTable).
 			SetNull(pet.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -513,7 +519,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(pet.OwnerTable).
+			query, args := builder.Update(pet.OwnerTable).
 				Set(pet.OwnerColumn, eid).
 				Where(sql.InInts(pet.FieldID, ids...)).
 				Query()

@@ -34,21 +34,15 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	var (
-		res sql.Result
-		pe  = &Pet{config: pc.config}
+		builder = sql.Dialect(pc.driver.Dialect())
+		pe      = &Pet{config: pc.config}
 	)
 	tx, err := pc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(pc.driver.Dialect()).
-		Insert(pet.Table).
-		Default()
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	insert := builder.Insert(pet.Table).Default()
+	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}

@@ -4,12 +4,22 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
-{{/* custom errors and errors handlers from sql dialects */}}
+{{/* custom errors and errors handlers for sql dialects */}}
 {{ define "dialect/sql/errors" }}
 func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
-	// Error number 1062 is ER_DUP_ENTRY in mysql, and "UNIQUE constraint failed" is SQLite prefix.
-	if msg := err.Error(); strings.HasPrefix(msg, "Error 1062") || strings.HasPrefix(msg, "UNIQUE constraint failed") {
-		return &ErrConstraintFailed{msg, err}, true
+	var (
+		msg = err.Error()
+		// error format per dialect.
+		errors = [...]string{
+			"Error 1062",										// MySQL 1062 error (ER_DUP_ENTRY).
+			"UNIQUE constraint failed",							// SQLite.
+			"duplicate key value violates unique constraint",	// PostgreSQL.
+		}
+	)
+	for i := range errors {
+		if strings.Contains(msg, errors[i]) {
+			return &ErrConstraintFailed{msg, err}, true
+		}
 	}
 	return nil, false
 }

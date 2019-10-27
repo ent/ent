@@ -54,12 +54,15 @@ func (gid *GroupInfoDelete) ExecX(ctx context.Context) int {
 }
 
 func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(groupinfo.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(gid.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(groupinfo.Table))
 	for _, p := range gid.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(groupinfo.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(groupinfo.Table).FromSelect(selector).Query()
 	if err := gid.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

@@ -328,8 +328,9 @@ func (iq *ItemQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (iq *ItemQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(item.Table)
-	selector := sql.Select(t1.Columns(item.Columns...)...).From(t1)
+	builder := sql.Dialect(iq.driver.Dialect())
+	t1 := builder.Table(item.Table)
+	selector := builder.Select(t1.Columns(item.Columns...)...).From(t1)
 	if iq.sql != nil {
 		selector = iq.sql
 		selector.Select(selector.Columns(item.Columns...)...)
@@ -711,7 +712,8 @@ func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (is *ItemSelect) sqlQuery() sql.Querier {
 	view := "item_view"
-	return sql.Select(is.fields...).From(is.sql.As(view))
+	return sql.Dialect(is.driver.Dialect()).
+		Select(is.fields...).From(is.sql.As(view))
 }
 
 func (is *ItemSelect) gremlinScan(ctx context.Context, v interface{}) error {

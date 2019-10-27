@@ -147,7 +147,10 @@ func (giu *GroupInfoUpdate) ExecX(ctx context.Context) {
 }
 
 func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(groupinfo.FieldID).From(sql.Table(groupinfo.Table))
+	var (
+		builder  = sql.Dialect(giu.driver.Dialect())
+		selector = builder.Select(groupinfo.FieldID).From(builder.Table(groupinfo.Table))
+	)
 	for _, p := range giu.predicates {
 		p(selector)
 	}
@@ -175,19 +178,19 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
+		updater = builder.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
 	)
 	if value := giu.desc; value != nil {
-		builder.Set(groupinfo.FieldDesc, *value)
+		updater.Set(groupinfo.FieldDesc, *value)
 	}
 	if value := giu.max_users; value != nil {
-		builder.Set(groupinfo.FieldMaxUsers, *value)
+		updater.Set(groupinfo.FieldMaxUsers, *value)
 	}
 	if value := giu.addmax_users; value != nil {
-		builder.Add(groupinfo.FieldMaxUsers, *value)
+		updater.Add(groupinfo.FieldMaxUsers, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -202,7 +205,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(groupinfo.GroupsTable).
+		query, args := builder.Update(groupinfo.GroupsTable).
 			SetNull(groupinfo.GroupsColumn).
 			Where(sql.InInts(groupinfo.GroupsColumn, ids...)).
 			Where(sql.InInts(group.FieldID, eids...)).
@@ -222,7 +225,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(group.FieldID, eid)
 			}
-			query, args := sql.Update(groupinfo.GroupsTable).
+			query, args := builder.Update(groupinfo.GroupsTable).
 				Set(groupinfo.GroupsColumn, id).
 				Where(sql.And(p, sql.IsNull(groupinfo.GroupsColumn))).
 				Query()
@@ -424,7 +427,10 @@ func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err error) {
-	selector := sql.Select(groupinfo.Columns...).From(sql.Table(groupinfo.Table))
+	var (
+		builder  = sql.Dialect(giuo.driver.Dialect())
+		selector = builder.Select(groupinfo.Columns...).From(builder.Table(groupinfo.Table))
+	)
 	groupinfo.ID(giuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -455,22 +461,22 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
+		updater = builder.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
 	)
 	if value := giuo.desc; value != nil {
-		builder.Set(groupinfo.FieldDesc, *value)
+		updater.Set(groupinfo.FieldDesc, *value)
 		gi.Desc = *value
 	}
 	if value := giuo.max_users; value != nil {
-		builder.Set(groupinfo.FieldMaxUsers, *value)
+		updater.Set(groupinfo.FieldMaxUsers, *value)
 		gi.MaxUsers = *value
 	}
 	if value := giuo.addmax_users; value != nil {
-		builder.Add(groupinfo.FieldMaxUsers, *value)
+		updater.Add(groupinfo.FieldMaxUsers, *value)
 		gi.MaxUsers += *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
@@ -485,7 +491,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(groupinfo.GroupsTable).
+		query, args := builder.Update(groupinfo.GroupsTable).
 			SetNull(groupinfo.GroupsColumn).
 			Where(sql.InInts(groupinfo.GroupsColumn, ids...)).
 			Where(sql.InInts(group.FieldID, eids...)).
@@ -505,7 +511,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 				}
 				p.Or().EQ(group.FieldID, eid)
 			}
-			query, args := sql.Update(groupinfo.GroupsTable).
+			query, args := builder.Update(groupinfo.GroupsTable).
 				Set(groupinfo.GroupsColumn, id).
 				Where(sql.And(p, sql.IsNull(groupinfo.GroupsColumn))).
 				Query()

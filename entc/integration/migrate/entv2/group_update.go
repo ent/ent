@@ -55,7 +55,10 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(group.FieldID).From(sql.Table(group.Table))
+	var (
+		builder  = sql.Dialect(gu.driver.Dialect())
+		selector = builder.Select(group.FieldID).From(builder.Table(group.Table))
+	)
 	for _, p := range gu.predicates {
 		p(selector)
 	}
@@ -121,7 +124,10 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	selector := sql.Select(group.Columns...).From(sql.Table(group.Table))
+	var (
+		builder  = sql.Dialect(guo.driver.Dialect())
+		selector = builder.Select(group.Columns...).From(builder.Table(group.Table))
+	)
 	group.ID(guo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()

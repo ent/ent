@@ -164,37 +164,32 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	var (
-		res sql.Result
-		f   = &File{config: fc.config}
+		res     sql.Result
+		builder = sql.Dialect(fc.driver.Dialect())
+		f       = &File{config: fc.config}
 	)
 	tx, err := fc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(fc.driver.Dialect()).
-		Insert(file.Table).
-		Default()
+	insert := builder.Insert(file.Table).Default()
 	if value := fc.size; value != nil {
-		builder.Set(file.FieldSize, *value)
+		insert.Set(file.FieldSize, *value)
 		f.Size = *value
 	}
 	if value := fc.name; value != nil {
-		builder.Set(file.FieldName, *value)
+		insert.Set(file.FieldName, *value)
 		f.Name = *value
 	}
 	if value := fc.user; value != nil {
-		builder.Set(file.FieldUser, *value)
+		insert.Set(file.FieldUser, *value)
 		f.User = value
 	}
 	if value := fc.group; value != nil {
-		builder.Set(file.FieldGroup, *value)
+		insert.Set(file.FieldGroup, *value)
 		f.Group = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(file.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -205,7 +200,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			if err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(file.OwnerTable).
+			query, args := builder.Update(file.OwnerTable).
 				Set(file.OwnerColumn, eid).
 				Where(sql.EQ(file.FieldID, id)).
 				Query()
@@ -220,7 +215,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			if err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(file.TypeTable).
+			query, args := builder.Update(file.TypeTable).
 				Set(file.TypeColumn, eid).
 				Where(sql.EQ(file.FieldID, id)).
 				Query()

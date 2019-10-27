@@ -101,29 +101,24 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	var (
-		res sql.Result
-		gi  = &GroupInfo{config: gic.config}
+		res     sql.Result
+		builder = sql.Dialect(gic.driver.Dialect())
+		gi      = &GroupInfo{config: gic.config}
 	)
 	tx, err := gic.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(gic.driver.Dialect()).
-		Insert(groupinfo.Table).
-		Default()
+	insert := builder.Insert(groupinfo.Table).Default()
 	if value := gic.desc; value != nil {
-		builder.Set(groupinfo.FieldDesc, *value)
+		insert.Set(groupinfo.FieldDesc, *value)
 		gi.Desc = *value
 	}
 	if value := gic.max_users; value != nil {
-		builder.Set(groupinfo.FieldMaxUsers, *value)
+		insert.Set(groupinfo.FieldMaxUsers, *value)
 		gi.MaxUsers = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(groupinfo.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -137,7 +132,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 			}
 			p.Or().EQ(group.FieldID, eid)
 		}
-		query, args := sql.Update(groupinfo.GroupsTable).
+		query, args := builder.Update(groupinfo.GroupsTable).
 			Set(groupinfo.GroupsColumn, id).
 			Where(sql.And(p, sql.IsNull(groupinfo.GroupsColumn))).
 			Query()

@@ -120,7 +120,10 @@ func (ftu *FileTypeUpdate) ExecX(ctx context.Context) {
 }
 
 func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(filetype.FieldID).From(sql.Table(filetype.Table))
+	var (
+		builder  = sql.Dialect(ftu.driver.Dialect())
+		selector = builder.Select(filetype.FieldID).From(builder.Table(filetype.Table))
+	)
 	for _, p := range ftu.predicates {
 		p(selector)
 	}
@@ -148,13 +151,13 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(filetype.Table).Where(sql.InInts(filetype.FieldID, ids...))
+		updater = builder.Update(filetype.Table).Where(sql.InInts(filetype.FieldID, ids...))
 	)
 	if value := ftu.name; value != nil {
-		builder.Set(filetype.FieldName, *value)
+		updater.Set(filetype.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -169,7 +172,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(filetype.FilesTable).
+		query, args := builder.Update(filetype.FilesTable).
 			SetNull(filetype.FilesColumn).
 			Where(sql.InInts(filetype.FilesColumn, ids...)).
 			Where(sql.InInts(file.FieldID, eids...)).
@@ -189,7 +192,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(file.FieldID, eid)
 			}
-			query, args := sql.Update(filetype.FilesTable).
+			query, args := builder.Update(filetype.FilesTable).
 				Set(filetype.FilesColumn, id).
 				Where(sql.And(p, sql.IsNull(filetype.FilesColumn))).
 				Query()
@@ -362,7 +365,10 @@ func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err error) {
-	selector := sql.Select(filetype.Columns...).From(sql.Table(filetype.Table))
+	var (
+		builder  = sql.Dialect(ftuo.driver.Dialect())
+		selector = builder.Select(filetype.Columns...).From(builder.Table(filetype.Table))
+	)
 	filetype.ID(ftuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -393,14 +399,14 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(filetype.Table).Where(sql.InInts(filetype.FieldID, ids...))
+		updater = builder.Update(filetype.Table).Where(sql.InInts(filetype.FieldID, ids...))
 	)
 	if value := ftuo.name; value != nil {
-		builder.Set(filetype.FieldName, *value)
+		updater.Set(filetype.FieldName, *value)
 		ft.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
@@ -415,7 +421,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(filetype.FilesTable).
+		query, args := builder.Update(filetype.FilesTable).
 			SetNull(filetype.FilesColumn).
 			Where(sql.InInts(filetype.FilesColumn, ids...)).
 			Where(sql.InInts(file.FieldID, eids...)).
@@ -435,7 +441,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 				}
 				p.Or().EQ(file.FieldID, eid)
 			}
-			query, args := sql.Update(filetype.FilesTable).
+			query, args := builder.Update(filetype.FilesTable).
 				Set(filetype.FilesColumn, id).
 				Where(sql.And(p, sql.IsNull(filetype.FilesColumn))).
 				Query()

@@ -84,33 +84,27 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	var (
-		res sql.Result
-		c   = &Comment{config: cc.config}
+		builder = sql.Dialect(cc.driver.Dialect())
+		c       = &Comment{config: cc.config}
 	)
 	tx, err := cc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(cc.driver.Dialect()).
-		Insert(comment.Table).
-		Default()
+	insert := builder.Insert(comment.Table).Default()
 	if value := cc.unique_int; value != nil {
-		builder.Set(comment.FieldUniqueInt, *value)
+		insert.Set(comment.FieldUniqueInt, *value)
 		c.UniqueInt = *value
 	}
 	if value := cc.unique_float; value != nil {
-		builder.Set(comment.FieldUniqueFloat, *value)
+		insert.Set(comment.FieldUniqueFloat, *value)
 		c.UniqueFloat = *value
 	}
 	if value := cc.nillable_int; value != nil {
-		builder.Set(comment.FieldNillableInt, *value)
+		insert.Set(comment.FieldNillableInt, *value)
 		c.NillableInt = value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(comment.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}

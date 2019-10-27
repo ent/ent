@@ -79,22 +79,20 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
+	insert := builder.Insert(user.Table).Default()
 	if value := uc.url; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldURL, buf)
+		insert.Set(user.FieldURL, buf)
 		u.URL = *value
 	}
 	if value := uc.raw; value != nil {
@@ -102,7 +100,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldRaw, buf)
+		insert.Set(user.FieldRaw, buf)
 		u.Raw = *value
 	}
 	if value := uc.dirs; value != nil {
@@ -110,7 +108,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldDirs, buf)
+		insert.Set(user.FieldDirs, buf)
 		u.Dirs = *value
 	}
 	if value := uc.ints; value != nil {
@@ -118,7 +116,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldInts, buf)
+		insert.Set(user.FieldInts, buf)
 		u.Ints = *value
 	}
 	if value := uc.floats; value != nil {
@@ -126,7 +124,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldFloats, buf)
+		insert.Set(user.FieldFloats, buf)
 		u.Floats = *value
 	}
 	if value := uc.strings; value != nil {
@@ -134,14 +132,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldStrings, buf)
+		insert.Set(user.FieldStrings, buf)
 		u.Strings = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}

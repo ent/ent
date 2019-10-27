@@ -222,7 +222,10 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 }
 
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(file.FieldID).From(sql.Table(file.Table))
+	var (
+		builder  = sql.Dialect(fu.driver.Dialect())
+		selector = builder.Select(file.FieldID).From(builder.Table(file.Table))
+	)
 	for _, p := range fu.predicates {
 		p(selector)
 	}
@@ -250,37 +253,37 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
+		updater = builder.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
 	)
 	if value := fu.size; value != nil {
-		builder.Set(file.FieldSize, *value)
+		updater.Set(file.FieldSize, *value)
 	}
 	if value := fu.addsize; value != nil {
-		builder.Add(file.FieldSize, *value)
+		updater.Add(file.FieldSize, *value)
 	}
 	if value := fu.name; value != nil {
-		builder.Set(file.FieldName, *value)
+		updater.Set(file.FieldName, *value)
 	}
 	if value := fu.user; value != nil {
-		builder.Set(file.FieldUser, *value)
+		updater.Set(file.FieldUser, *value)
 	}
 	if fu.clearuser {
-		builder.SetNull(file.FieldUser)
+		updater.SetNull(file.FieldUser)
 	}
 	if value := fu.group; value != nil {
-		builder.Set(file.FieldGroup, *value)
+		updater.Set(file.FieldGroup, *value)
 	}
 	if fu.cleargroup {
-		builder.SetNull(file.FieldGroup)
+		updater.SetNull(file.FieldGroup)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if fu.clearedOwner {
-		query, args := sql.Update(file.OwnerTable).
+		query, args := builder.Update(file.OwnerTable).
 			SetNull(file.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -295,7 +298,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(file.OwnerTable).
+			query, args := builder.Update(file.OwnerTable).
 				Set(file.OwnerColumn, eid).
 				Where(sql.InInts(file.FieldID, ids...)).
 				Query()
@@ -305,7 +308,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if fu.clearedType {
-		query, args := sql.Update(file.TypeTable).
+		query, args := builder.Update(file.TypeTable).
 			SetNull(file.TypeColumn).
 			Where(sql.InInts(filetype.FieldID, ids...)).
 			Query()
@@ -320,7 +323,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(file.TypeTable).
+			query, args := builder.Update(file.TypeTable).
 				Set(file.TypeColumn, eid).
 				Where(sql.InInts(file.FieldID, ids...)).
 				Query()
@@ -594,7 +597,10 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
-	selector := sql.Select(file.Columns...).From(sql.Table(file.Table))
+	var (
+		builder  = sql.Dialect(fuo.driver.Dialect())
+		selector = builder.Select(file.Columns...).From(builder.Table(file.Table))
+	)
 	file.ID(fuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -625,45 +631,45 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
+		updater = builder.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
 	)
 	if value := fuo.size; value != nil {
-		builder.Set(file.FieldSize, *value)
+		updater.Set(file.FieldSize, *value)
 		f.Size = *value
 	}
 	if value := fuo.addsize; value != nil {
-		builder.Add(file.FieldSize, *value)
+		updater.Add(file.FieldSize, *value)
 		f.Size += *value
 	}
 	if value := fuo.name; value != nil {
-		builder.Set(file.FieldName, *value)
+		updater.Set(file.FieldName, *value)
 		f.Name = *value
 	}
 	if value := fuo.user; value != nil {
-		builder.Set(file.FieldUser, *value)
+		updater.Set(file.FieldUser, *value)
 		f.User = value
 	}
 	if fuo.clearuser {
 		f.User = nil
-		builder.SetNull(file.FieldUser)
+		updater.SetNull(file.FieldUser)
 	}
 	if value := fuo.group; value != nil {
-		builder.Set(file.FieldGroup, *value)
+		updater.Set(file.FieldGroup, *value)
 		f.Group = *value
 	}
 	if fuo.cleargroup {
 		var value string
 		f.Group = value
-		builder.SetNull(file.FieldGroup)
+		updater.SetNull(file.FieldGroup)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if fuo.clearedOwner {
-		query, args := sql.Update(file.OwnerTable).
+		query, args := builder.Update(file.OwnerTable).
 			SetNull(file.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -678,7 +684,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(file.OwnerTable).
+			query, args := builder.Update(file.OwnerTable).
 				Set(file.OwnerColumn, eid).
 				Where(sql.InInts(file.FieldID, ids...)).
 				Query()
@@ -688,7 +694,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 	}
 	if fuo.clearedType {
-		query, args := sql.Update(file.TypeTable).
+		query, args := builder.Update(file.TypeTable).
 			SetNull(file.TypeColumn).
 			Where(sql.InInts(filetype.FieldID, ids...)).
 			Query()
@@ -703,7 +709,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(file.TypeTable).
+			query, args := builder.Update(file.TypeTable).
 				Set(file.TypeColumn, eid).
 				Where(sql.InInts(file.FieldID, ids...)).
 				Query()

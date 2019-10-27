@@ -116,45 +116,39 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
+	insert := builder.Insert(user.Table).Default()
 	if value := uc.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		insert.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uc.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		insert.Set(user.FieldName, *value)
 		u.Name = *value
 	}
 	if value := uc.address; value != nil {
-		builder.Set(user.FieldAddress, *value)
+		insert.Set(user.FieldAddress, *value)
 		u.Address = *value
 	}
 	if value := uc.renamed; value != nil {
-		builder.Set(user.FieldRenamed, *value)
+		insert.Set(user.FieldRenamed, *value)
 		u.Renamed = *value
 	}
 	if value := uc.blob; value != nil {
-		builder.Set(user.FieldBlob, *value)
+		insert.Set(user.FieldBlob, *value)
 		u.Blob = *value
 	}
 	if value := uc.state; value != nil {
-		builder.Set(user.FieldState, *value)
+		insert.Set(user.FieldState, *value)
 		u.State = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
