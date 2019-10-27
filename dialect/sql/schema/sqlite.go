@@ -10,6 +10,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // SQLite is an SQLite migration driver.
@@ -61,19 +62,87 @@ func (d *SQLite) setRange(ctx context.Context, tx dialect.Tx, name string, value
 	return tx.Exec(ctx, query, args, new(sql.Result))
 }
 
-// fkExist returns always true to disable foreign-keys creation after the table was created.
-func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
-func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }
+func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder {
+	b := sql.CreateTable(t.Name)
+	for _, c := range t.Columns {
+		b.Column(d.addColumn(c))
+	}
+	// Unlike in MySQL, we're not able to add foreign-key constraints to table
+	// after it was created, and adding them to the `CREATE TABLE` statement is
+	// not always valid (because circular foreign-keys situation is possible).
+	// We stay consistent by not using constraints at all, and just defining the
+	// foreign keys in the `CREATE TABLE` statement.
+	for _, fk := range t.ForeignKeys {
+		b.ForeignKeys(fk.DSL())
+	}
+	// if it's an ID based primary key, we add the `PRIMARY KEY`
+	// clause to the column declaration.
+	if len(t.PrimaryKey) == 1 {
+		return b
+	}
+	for _, pk := range t.PrimaryKey {
+		b.PrimaryKey(pk.Name)
+	}
+	return b
+}
 
-func (*SQLite) cType(c *Column) string                     { return c.SQLiteType() }
-func (*SQLite) tBuilder(t *Table) *sql.TableBuilder        { return t.SQLite() }
-func (*SQLite) addColumn(c *Column) *sql.ColumnBuilder     { return c.SQLite() }
-func (*SQLite) alterColumn(c *Column) []*sql.ColumnBuilder { return []*sql.ColumnBuilder{c.SQLite()} }
+// cType returns the SQLite string type for the given column.
+func (*SQLite) cType(c *Column) (t string) {
+	switch c.Type {
+	case field.TypeBool:
+		t = "bool"
+	case field.TypeInt8, field.TypeUint8, field.TypeInt, field.TypeInt16, field.TypeInt32, field.TypeUint, field.TypeUint16, field.TypeUint32:
+		t = "integer"
+	case field.TypeInt64, field.TypeUint64:
+		t = "bigint"
+	case field.TypeBytes:
+		t = "blob"
+	case field.TypeString, field.TypeEnum:
+		size := c.Size
+		if size == 0 {
+			size = DefaultStringLen
+		}
+		// sqlite has no size limit on varchar.
+		t = fmt.Sprintf("varchar(%d)", size)
+	case field.TypeFloat32, field.TypeFloat64:
+		t = "real"
+	case field.TypeTime:
+		t = "datetime"
+	case field.TypeJSON:
+		t = "json"
+	default:
+		panic("unsupported type " + c.Type.String())
+	}
+	return t
+}
 
+// addColumn returns the DSL query for adding the given column to a table.
+func (d *SQLite) addColumn(c *Column) *sql.ColumnBuilder {
+	b := sql.Column(c.Name).Type(d.cType(c)).Attr(c.Attr)
+	c.unique(b)
+	if c.Increment {
+		b.Attr("PRIMARY KEY AUTOINCREMENT")
+	}
+	c.nullable(b)
+	c.defaultValue(b)
+	return b
+}
+
+// alterColumn returns the DSL query for modifying the given column.
+func (d *SQLite) alterColumn(c *Column) []*sql.ColumnBuilder {
+	return []*sql.ColumnBuilder{d.addColumn(c)}
+}
+
+// addIndex returns the querying for adding an index to SQLite.
 func (d *SQLite) addIndex(i *Index, table string) *sql.IndexBuilder {
 	return i.Builder(table)
 }
 
+// dropIndex returns the querying for dropping an index in SQLite.
 func (d *SQLite) dropIndex(i *Index, _ string) *sql.DropIndexBuilder {
 	return i.DropBuilder("")
 }
+
+// fkExist returns always true to disable foreign-keys creation after the table was created.
+func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
+func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }

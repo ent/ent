@@ -219,7 +219,7 @@ func (d *MySQL) addIndex(i *Index, table string) *sql.IndexBuilder {
 	return i.Builder(table)
 }
 
-// addIndex returns the querying for dropping an index in MySQL.
+// dropIndex returns the querying for dropping an index in MySQL.
 func (d *MySQL) dropIndex(i *Index, table string) *sql.DropIndexBuilder {
 	return i.DropBuilder(table)
 }
