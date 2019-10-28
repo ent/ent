@@ -57,10 +57,12 @@ func (cq *CardQuery) Order(o ...Order) *CardQuery {
 // QueryOwner chains the current query on the owner edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
-	t1 := sql.Table(user.Table)
+
+	builder := sql.Dialect(cq.driver.Dialect())
+	t1 := builder.Table(user.Table)
 	t2 := cq.sqlQuery()
 	t2.Select(t2.C(card.OwnerColumn))
-	query.sql = sql.Select(t1.Columns(user.Columns...)...).
+	query.sql = builder.Select(t1.Columns(user.Columns...)...).
 		From(t1).
 		Join(t2).
 		On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
@@ -328,8 +330,9 @@ func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (cq *CardQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(card.Table)
-	selector := sql.Select(t1.Columns(card.Columns...)...).From(t1)
+	builder := sql.Dialect(cq.driver.Dialect())
+	t1 := builder.Table(card.Table)
+	selector := builder.Select(t1.Columns(card.Columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
 		selector.Select(selector.Columns(card.Columns...)...)
@@ -598,5 +601,6 @@ func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (cs *CardSelect) sqlQuery() sql.Querier {
 	view := "card_view"
-	return sql.Select(cs.fields...).From(cs.sql.As(view))
+	return sql.Dialect(cs.driver.Dialect()).
+		Select(cs.fields...).From(cs.sql.As(view))
 }

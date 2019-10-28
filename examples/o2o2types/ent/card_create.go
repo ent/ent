@@ -78,36 +78,31 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	var (
-		res sql.Result
-		c   = &Card{config: cc.config}
+		res     sql.Result
+		builder = sql.Dialect(cc.driver.Dialect())
+		c       = &Card{config: cc.config}
 	)
 	tx, err := cc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(cc.driver.Dialect()).
-		Insert(card.Table).
-		Default()
+	insert := builder.Insert(card.Table).Default()
 	if value := cc.expired; value != nil {
-		builder.Set(card.FieldExpired, *value)
+		insert.Set(card.FieldExpired, *value)
 		c.Expired = *value
 	}
 	if value := cc.number; value != nil {
-		builder.Set(card.FieldNumber, *value)
+		insert.Set(card.FieldNumber, *value)
 		c.Number = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(card.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	c.ID = int(id)
 	if len(cc.owner) > 0 {
 		eid := keys(cc.owner)[0]
-		query, args := sql.Update(card.OwnerTable).
+		query, args := builder.Update(card.OwnerTable).
 			Set(card.OwnerColumn, eid).
 			Where(sql.EQ(card.FieldID, id).And().IsNull(card.OwnerColumn)).
 			Query()

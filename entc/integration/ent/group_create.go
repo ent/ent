@@ -221,41 +221,36 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		res sql.Result
-		gr  = &Group{config: gc.config}
+		res     sql.Result
+		builder = sql.Dialect(gc.driver.Dialect())
+		gr      = &Group{config: gc.config}
 	)
 	tx, err := gc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(gc.driver.Dialect()).
-		Insert(group.Table).
-		Default()
+	insert := builder.Insert(group.Table).Default()
 	if value := gc.active; value != nil {
-		builder.Set(group.FieldActive, *value)
+		insert.Set(group.FieldActive, *value)
 		gr.Active = *value
 	}
 	if value := gc.expire; value != nil {
-		builder.Set(group.FieldExpire, *value)
+		insert.Set(group.FieldExpire, *value)
 		gr.Expire = *value
 	}
 	if value := gc._type; value != nil {
-		builder.Set(group.FieldType, *value)
+		insert.Set(group.FieldType, *value)
 		gr.Type = value
 	}
 	if value := gc.max_users; value != nil {
-		builder.Set(group.FieldMaxUsers, *value)
+		insert.Set(group.FieldMaxUsers, *value)
 		gr.MaxUsers = *value
 	}
 	if value := gc.name; value != nil {
-		builder.Set(group.FieldName, *value)
+		insert.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -269,7 +264,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			}
 			p.Or().EQ(file.FieldID, eid)
 		}
-		query, args := sql.Update(group.FilesTable).
+		query, args := builder.Update(group.FilesTable).
 			Set(group.FilesColumn, id).
 			Where(sql.And(p, sql.IsNull(group.FilesColumn))).
 			Query()
@@ -293,7 +288,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			}
 			p.Or().EQ(user.FieldID, eid)
 		}
-		query, args := sql.Update(group.BlockedTable).
+		query, args := builder.Update(group.BlockedTable).
 			Set(group.BlockedColumn, id).
 			Where(sql.And(p, sql.IsNull(group.BlockedColumn))).
 			Query()
@@ -315,7 +310,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 				return nil, rollback(tx, err)
 			}
 
-			query, args := sql.Insert(group.UsersTable).
+			query, args := builder.Insert(group.UsersTable).
 				Columns(group.UsersPrimaryKey[1], group.UsersPrimaryKey[0]).
 				Values(id, eid).
 				Query()
@@ -330,7 +325,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			if err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(group.InfoTable).
+			query, args := builder.Update(group.InfoTable).
 				Set(group.InfoColumn, eid).
 				Where(sql.EQ(group.FieldID, id)).
 				Query()

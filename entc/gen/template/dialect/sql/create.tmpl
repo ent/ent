@@ -10,16 +10,15 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	var (
-		res sql.Result
+		{{ with $.Edges }}res sql.Result{{ end }}
+		builder = sql.Dialect({{ $receiver }}.driver.Dialect())
 		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
 	)
 	tx, err := {{ $receiver }}.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect({{ $receiver }}.driver.Dialect()).
-		Insert({{ $.Package }}.Table).
-		Default()
+	insert := builder.Insert({{ $.Package }}.Table).Default()
 	{{- range $_, $f := $.Fields }}
 		if value := {{ $receiver }}.{{- $f.BuilderField }}; value != nil {
 			{{- if $f.IsJSON }}
@@ -27,18 +26,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 				if err != nil {
 					return nil, err
 				}
-				builder.Set({{ $.Package }}.{{ $f.Constant }}, buf)
+				insert.Set({{ $.Package }}.{{ $f.Constant }}, buf)
 			{{- else }}
-				builder.Set({{ $.Package }}.{{ $f.Constant }}, *value)
+			insert.Set({{ $.Package }}.{{ $f.Constant }}, *value)
 			{{- end }}
 			{{ $.Receiver }}.{{ $f.StructField }} = {{ if not $f.Nillable }}*{{ end }}value
 		}
 	{{- end }}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning({{ $.Package }}.{{ $.ID.Constant }}))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -48,13 +43,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}
 				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 					{{- template "dialect/sql/create/convertid" $e -}}
-					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
 							Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
 							Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id)).Query()
 					if err := tx.Exec(ctx, query, args, &res); err != nil {
 						return nil, rollback(tx, err)
 					}
-					query, args = sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+					query, args = builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
 							Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
 							Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).Query()
 					if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -72,7 +67,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 					{{- template "dialect/sql/create/convertid" $e -}}
 					{{ $a := 0 }}{{ $b := 1 }}{{- if $e.IsInverse }}{{ $a = 1 }}{{ $b = 0 }}{{ end }}
-					query, args := sql.Insert({{ $.Package }}.{{ $e.TableConstant }}).
+					query, args := builder.Insert({{ $.Package }}.{{ $e.TableConstant }}).
 							Columns({{ $.Package }}.{{ $e.PKConstant }}[{{ $a }}], {{ $.Package }}.{{ $e.PKConstant }}[{{ $b }}]).
 							Values(id, eid).
 							{{- if $e.SelfRef }}{{/* self-ref creates the edges in both ways. */}}
@@ -86,7 +81,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			{{- else if $e.M2O }}
 				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
 					{{- template "dialect/sql/create/convertid" $e -}}
-					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
 						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
 						Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id)).
 						Query()
@@ -100,7 +95,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 					{{- template "dialect/sql/create/convertid" $e -}}
 					p.Or().EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid)
 				}
-				query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+				query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
 					Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
 					Where(sql.And(p, sql.IsNull({{ $.Package }}.{{ $e.ColumnConstant }}))).
 					Query()
@@ -124,12 +119,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 					eid := keys({{ $receiver }}.{{ $e.BuilderField }})[0]
 				{{- end }}
 				{{- if $e.IsInverse }}
-					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
 						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
 						Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
 						Query()
 				{{- else }}
-					query, args := sql.Update({{ $.Package }}.{{ $e.TableConstant }}).
+					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
 						Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
 						Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
 						Query()

@@ -41,12 +41,15 @@ func (nd *NodeDelete) ExecX(ctx context.Context) int {
 }
 
 func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(node.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(nd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(node.Table))
 	for _, p := range nd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(node.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(node.Table).FromSelect(selector).Query()
 	if err := nd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

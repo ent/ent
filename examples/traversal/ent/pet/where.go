@@ -263,10 +263,12 @@ func HasFriends() predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FriendsPrimaryKey[0]).From(sql.Table(FriendsTable)),
+					builder.Select(FriendsPrimaryKey[0]).
+						From(builder.Table(FriendsTable)),
 				),
 			)
 		},
@@ -277,14 +279,15 @@ func HasFriends() predicate.Pet {
 func HasFriendsWith(preds ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(Table)
-			t3 := sql.Table(FriendsTable)
-			t4 := sql.Select(t3.C(FriendsPrimaryKey[0])).
+			t2 := builder.Table(Table)
+			t3 := builder.Table(FriendsTable)
+			t4 := builder.Select(t3.C(FriendsPrimaryKey[0])).
 				From(t3).
 				Join(t2).
 				On(t3.C(FriendsPrimaryKey[1]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -308,8 +311,9 @@ func HasOwner() predicate.Pet {
 func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(OwnerInverseTable))
+			t2 := builder.Select(FieldID).From(builder.Table(OwnerInverseTable))
 			for _, p := range preds {
 				p(t2)
 			}

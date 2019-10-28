@@ -164,7 +164,8 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	query.sql = sql.Select().From(sql.Table(user.Table)).
+	builder := sql.Dialect(u.driver.Dialect())
+	query.sql = builder.Select().From(builder.Table(user.Table)).
 		Where(sql.EQ(user.SpouseColumn, id))
 
 	return query

@@ -55,7 +55,10 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 }
 
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(pet.FieldID).From(sql.Table(pet.Table))
+	var (
+		builder  = sql.Dialect(pu.driver.Dialect())
+		selector = builder.Select(pet.FieldID).From(builder.Table(pet.Table))
+	)
 	for _, p := range pu.predicates {
 		p(selector)
 	}
@@ -121,7 +124,10 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
-	selector := sql.Select(pet.Columns...).From(sql.Table(pet.Table))
+	var (
+		builder  = sql.Dialect(puo.driver.Dialect())
+		selector = builder.Select(pet.Columns...).From(builder.Table(pet.Table))
+	)
 	pet.ID(puo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()

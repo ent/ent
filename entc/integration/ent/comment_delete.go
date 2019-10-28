@@ -54,12 +54,15 @@ func (cd *CommentDelete) ExecX(ctx context.Context) int {
 }
 
 func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(comment.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(cd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(comment.Table))
 	for _, p := range cd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(comment.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(comment.Table).FromSelect(selector).Query()
 	if err := cd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

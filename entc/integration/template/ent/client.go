@@ -240,11 +240,12 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := pe.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Select(pet.OwnerColumn).
-		From(sql.Table(pet.OwnerTable)).
+	builder := sql.Dialect(pe.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Select(pet.OwnerColumn).
+		From(builder.Table(pet.OwnerTable)).
 		Where(sql.EQ(pet.FieldID, id))
-	query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
 
 	return query
 }
@@ -317,7 +318,8 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := u.ID
-	query.sql = sql.Select().From(sql.Table(pet.Table)).
+	builder := sql.Dialect(u.driver.Dialect())
+	query.sql = builder.Select().From(builder.Table(pet.Table)).
 		Where(sql.EQ(user.PetsColumn, id))
 
 	return query
@@ -327,15 +329,16 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Table(user.Table)
-	t3 := sql.Table(user.FriendsTable)
-	t4 := sql.Select(t3.C(user.FriendsPrimaryKey[1])).
+	builder := sql.Dialect(u.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Table(user.Table)
+	t3 := builder.Table(user.FriendsTable)
+	t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID)).
 		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))

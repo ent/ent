@@ -54,12 +54,15 @@ func (fd *FileDelete) ExecX(ctx context.Context) int {
 }
 
 func (fd *FileDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(file.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(fd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(file.Table))
 	for _, p := range fd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(file.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(file.Table).FromSelect(selector).Query()
 	if err := fd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

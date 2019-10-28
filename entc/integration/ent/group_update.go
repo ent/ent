@@ -330,7 +330,10 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(group.FieldID).From(sql.Table(group.Table))
+	var (
+		builder  = sql.Dialect(gu.driver.Dialect())
+		selector = builder.Select(group.FieldID).From(builder.Table(group.Table))
+	)
 	for _, p := range gu.predicates {
 		p(selector)
 	}
@@ -358,34 +361,34 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
+		updater = builder.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := gu.active; value != nil {
-		builder.Set(group.FieldActive, *value)
+		updater.Set(group.FieldActive, *value)
 	}
 	if value := gu.expire; value != nil {
-		builder.Set(group.FieldExpire, *value)
+		updater.Set(group.FieldExpire, *value)
 	}
 	if value := gu._type; value != nil {
-		builder.Set(group.FieldType, *value)
+		updater.Set(group.FieldType, *value)
 	}
 	if gu.clear_type {
-		builder.SetNull(group.FieldType)
+		updater.SetNull(group.FieldType)
 	}
 	if value := gu.max_users; value != nil {
-		builder.Set(group.FieldMaxUsers, *value)
+		updater.Set(group.FieldMaxUsers, *value)
 	}
 	if value := gu.addmax_users; value != nil {
-		builder.Add(group.FieldMaxUsers, *value)
+		updater.Add(group.FieldMaxUsers, *value)
 	}
 	if gu.clearmax_users {
-		builder.SetNull(group.FieldMaxUsers)
+		updater.SetNull(group.FieldMaxUsers)
 	}
 	if value := gu.name; value != nil {
-		builder.Set(group.FieldName, *value)
+		updater.Set(group.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -400,7 +403,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(group.FilesTable).
+		query, args := builder.Update(group.FilesTable).
 			SetNull(group.FilesColumn).
 			Where(sql.InInts(group.FilesColumn, ids...)).
 			Where(sql.InInts(file.FieldID, eids...)).
@@ -420,7 +423,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(file.FieldID, eid)
 			}
-			query, args := sql.Update(group.FilesTable).
+			query, args := builder.Update(group.FilesTable).
 				Set(group.FilesColumn, id).
 				Where(sql.And(p, sql.IsNull(group.FilesColumn))).
 				Query()
@@ -446,7 +449,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(group.BlockedTable).
+		query, args := builder.Update(group.BlockedTable).
 			SetNull(group.BlockedColumn).
 			Where(sql.InInts(group.BlockedColumn, ids...)).
 			Where(sql.InInts(user.FieldID, eids...)).
@@ -466,7 +469,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				}
 				p.Or().EQ(user.FieldID, eid)
 			}
-			query, args := sql.Update(group.BlockedTable).
+			query, args := builder.Update(group.BlockedTable).
 				Set(group.BlockedColumn, id).
 				Where(sql.And(p, sql.IsNull(group.BlockedColumn))).
 				Query()
@@ -492,7 +495,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(group.UsersTable).
+		query, args := builder.Delete(group.UsersTable).
 			Where(sql.InInts(group.UsersPrimaryKey[1], ids...)).
 			Where(sql.InInts(group.UsersPrimaryKey[0], eids...)).
 			Query()
@@ -512,7 +515,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(group.UsersTable).
+		builder := builder.Insert(group.UsersTable).
 			Columns(group.UsersPrimaryKey[1], group.UsersPrimaryKey[0])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -523,7 +526,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if gu.clearedInfo {
-		query, args := sql.Update(group.InfoTable).
+		query, args := builder.Update(group.InfoTable).
 			SetNull(group.InfoColumn).
 			Where(sql.InInts(groupinfo.FieldID, ids...)).
 			Query()
@@ -538,7 +541,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(group.InfoTable).
+			query, args := builder.Update(group.InfoTable).
 				Set(group.InfoColumn, eid).
 				Where(sql.InInts(group.FieldID, ids...)).
 				Query()
@@ -957,7 +960,10 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	selector := sql.Select(group.Columns...).From(sql.Table(group.Table))
+	var (
+		builder  = sql.Dialect(guo.driver.Dialect())
+		selector = builder.Select(group.Columns...).From(builder.Table(group.Table))
+	)
 	group.ID(guo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -988,43 +994,43 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
+		updater = builder.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := guo.active; value != nil {
-		builder.Set(group.FieldActive, *value)
+		updater.Set(group.FieldActive, *value)
 		gr.Active = *value
 	}
 	if value := guo.expire; value != nil {
-		builder.Set(group.FieldExpire, *value)
+		updater.Set(group.FieldExpire, *value)
 		gr.Expire = *value
 	}
 	if value := guo._type; value != nil {
-		builder.Set(group.FieldType, *value)
+		updater.Set(group.FieldType, *value)
 		gr.Type = value
 	}
 	if guo.clear_type {
 		gr.Type = nil
-		builder.SetNull(group.FieldType)
+		updater.SetNull(group.FieldType)
 	}
 	if value := guo.max_users; value != nil {
-		builder.Set(group.FieldMaxUsers, *value)
+		updater.Set(group.FieldMaxUsers, *value)
 		gr.MaxUsers = *value
 	}
 	if value := guo.addmax_users; value != nil {
-		builder.Add(group.FieldMaxUsers, *value)
+		updater.Add(group.FieldMaxUsers, *value)
 		gr.MaxUsers += *value
 	}
 	if guo.clearmax_users {
 		var value int
 		gr.MaxUsers = value
-		builder.SetNull(group.FieldMaxUsers)
+		updater.SetNull(group.FieldMaxUsers)
 	}
 	if value := guo.name; value != nil {
-		builder.Set(group.FieldName, *value)
+		updater.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
@@ -1039,7 +1045,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(group.FilesTable).
+		query, args := builder.Update(group.FilesTable).
 			SetNull(group.FilesColumn).
 			Where(sql.InInts(group.FilesColumn, ids...)).
 			Where(sql.InInts(file.FieldID, eids...)).
@@ -1059,7 +1065,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				}
 				p.Or().EQ(file.FieldID, eid)
 			}
-			query, args := sql.Update(group.FilesTable).
+			query, args := builder.Update(group.FilesTable).
 				Set(group.FilesColumn, id).
 				Where(sql.And(p, sql.IsNull(group.FilesColumn))).
 				Query()
@@ -1085,7 +1091,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(group.BlockedTable).
+		query, args := builder.Update(group.BlockedTable).
 			SetNull(group.BlockedColumn).
 			Where(sql.InInts(group.BlockedColumn, ids...)).
 			Where(sql.InInts(user.FieldID, eids...)).
@@ -1105,7 +1111,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				}
 				p.Or().EQ(user.FieldID, eid)
 			}
-			query, args := sql.Update(group.BlockedTable).
+			query, args := builder.Update(group.BlockedTable).
 				Set(group.BlockedColumn, id).
 				Where(sql.And(p, sql.IsNull(group.BlockedColumn))).
 				Query()
@@ -1131,7 +1137,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			}
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(group.UsersTable).
+		query, args := builder.Delete(group.UsersTable).
 			Where(sql.InInts(group.UsersPrimaryKey[1], ids...)).
 			Where(sql.InInts(group.UsersPrimaryKey[0], eids...)).
 			Query()
@@ -1151,7 +1157,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(group.UsersTable).
+		builder := builder.Insert(group.UsersTable).
 			Columns(group.UsersPrimaryKey[1], group.UsersPrimaryKey[0])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -1162,7 +1168,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 	}
 	if guo.clearedInfo {
-		query, args := sql.Update(group.InfoTable).
+		query, args := builder.Update(group.InfoTable).
 			SetNull(group.InfoColumn).
 			Where(sql.InInts(groupinfo.FieldID, ids...)).
 			Query()
@@ -1177,7 +1183,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				err = rollback(tx, serr)
 				return
 			}
-			query, args := sql.Update(group.InfoTable).
+			query, args := builder.Update(group.InfoTable).
 				Set(group.InfoColumn, eid).
 				Where(sql.InInts(group.FieldID, ids...)).
 				Query()

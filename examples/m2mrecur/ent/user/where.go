@@ -364,10 +364,12 @@ func HasFollowers() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FollowersPrimaryKey[1]).From(sql.Table(FollowersTable)),
+					builder.Select(FollowersPrimaryKey[1]).
+						From(builder.Table(FollowersTable)),
 				),
 			)
 		},
@@ -378,14 +380,15 @@ func HasFollowers() predicate.User {
 func HasFollowersWith(preds ...predicate.User) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(Table)
-			t3 := sql.Table(FollowersTable)
-			t4 := sql.Select(t3.C(FollowersPrimaryKey[1])).
+			t2 := builder.Table(Table)
+			t3 := builder.Table(FollowersTable)
+			t4 := builder.Select(t3.C(FollowersPrimaryKey[1])).
 				From(t3).
 				Join(t2).
 				On(t3.C(FollowersPrimaryKey[0]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -400,10 +403,12 @@ func HasFollowing() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FollowingPrimaryKey[0]).From(sql.Table(FollowingTable)),
+					builder.Select(FollowingPrimaryKey[0]).
+						From(builder.Table(FollowingTable)),
 				),
 			)
 		},
@@ -414,14 +419,15 @@ func HasFollowing() predicate.User {
 func HasFollowingWith(preds ...predicate.User) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(Table)
-			t3 := sql.Table(FollowingTable)
-			t4 := sql.Select(t3.C(FollowingPrimaryKey[0])).
+			t2 := builder.Table(Table)
+			t3 := builder.Table(FollowingTable)
+			t4 := builder.Select(t3.C(FollowingPrimaryKey[0])).
 				From(t3).
 				Join(t2).
 				On(t3.C(FollowingPrimaryKey[1]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}

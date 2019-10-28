@@ -65,10 +65,12 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		t1 := sql.Table(group.Table)
+
+		builder := sql.Dialect(giq.driver.Dialect())
+		t1 := builder.Table(group.Table)
 		t2 := giq.sqlQuery()
 		t2.Select(t2.C(groupinfo.FieldID))
-		query.sql = sql.Select().
+		query.sql = builder.Select().
 			From(t1).
 			Join(t2).
 			On(t1.C(groupinfo.GroupsColumn), t2.C(groupinfo.FieldID))
@@ -372,8 +374,9 @@ func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(groupinfo.Table)
-	selector := sql.Select(t1.Columns(groupinfo.Columns...)...).From(t1)
+	builder := sql.Dialect(giq.driver.Dialect())
+	t1 := builder.Table(groupinfo.Table)
+	selector := builder.Select(t1.Columns(groupinfo.Columns...)...).From(t1)
 	if giq.sql != nil {
 		selector = giq.sql
 		selector.Select(selector.Columns(groupinfo.Columns...)...)
@@ -755,7 +758,8 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
 	view := "groupinfo_view"
-	return sql.Select(gis.fields...).From(gis.sql.As(view))
+	return sql.Dialect(gis.driver.Dialect()).
+		Select(gis.fields...).From(gis.sql.As(view))
 }
 
 func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v interface{}) error {

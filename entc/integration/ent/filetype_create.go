@@ -82,25 +82,20 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	var (
-		res sql.Result
-		ft  = &FileType{config: ftc.config}
+		res     sql.Result
+		builder = sql.Dialect(ftc.driver.Dialect())
+		ft      = &FileType{config: ftc.config}
 	)
 	tx, err := ftc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(ftc.driver.Dialect()).
-		Insert(filetype.Table).
-		Default()
+	insert := builder.Insert(filetype.Table).Default()
 	if value := ftc.name; value != nil {
-		builder.Set(filetype.FieldName, *value)
+		insert.Set(filetype.FieldName, *value)
 		ft.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(filetype.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -114,7 +109,7 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 			}
 			p.Or().EQ(file.FieldID, eid)
 		}
-		query, args := sql.Update(filetype.FilesTable).
+		query, args := builder.Update(filetype.FilesTable).
 			Set(filetype.FilesColumn, id).
 			Where(sql.And(p, sql.IsNull(filetype.FilesColumn))).
 			Query()

@@ -57,10 +57,12 @@ func (sq *StreetQuery) Order(o ...Order) *StreetQuery {
 // QueryCity chains the current query on the city edge.
 func (sq *StreetQuery) QueryCity() *CityQuery {
 	query := &CityQuery{config: sq.config}
-	t1 := sql.Table(city.Table)
+
+	builder := sql.Dialect(sq.driver.Dialect())
+	t1 := builder.Table(city.Table)
 	t2 := sq.sqlQuery()
 	t2.Select(t2.C(street.CityColumn))
-	query.sql = sql.Select(t1.Columns(city.Columns...)...).
+	query.sql = builder.Select(t1.Columns(city.Columns...)...).
 		From(t1).
 		Join(t2).
 		On(t1.C(city.FieldID), t2.C(street.CityColumn))
@@ -328,8 +330,9 @@ func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (sq *StreetQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(street.Table)
-	selector := sql.Select(t1.Columns(street.Columns...)...).From(t1)
+	builder := sql.Dialect(sq.driver.Dialect())
+	t1 := builder.Table(street.Table)
+	selector := builder.Select(t1.Columns(street.Columns...)...).From(t1)
 	if sq.sql != nil {
 		selector = sq.sql
 		selector.Select(selector.Columns(street.Columns...)...)
@@ -598,5 +601,6 @@ func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ss *StreetSelect) sqlQuery() sql.Querier {
 	view := "street_view"
-	return sql.Select(ss.fields...).From(ss.sql.As(view))
+	return sql.Dialect(ss.driver.Dialect()).
+		Select(ss.fields...).From(ss.sql.As(view))
 }

@@ -115,7 +115,10 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(user.FieldID).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uu.driver.Dialect())
+		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
+	)
 	for _, p := range uu.predicates {
 		p(selector)
 	}
@@ -143,32 +146,32 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if uu.clearedSpouse {
-		query, args := sql.Update(user.SpouseTable).
+		query, args := builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
-		query, args = sql.Update(user.SpouseTable).
+		query, args = builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.SpouseColumn, ids...)).
 			Query()
@@ -181,13 +184,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			return 0, rollback(tx, fmt.Errorf("ent: can't link O2O edge \"spouse\" to %d vertices (> 1)", n))
 		}
 		for eid := range uu.spouse {
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, ids[0])).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, ids[0]).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -301,7 +304,10 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	selector := sql.Select(user.Columns...).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uuo.driver.Dialect())
+		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
+	)
 	user.ID(uuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -332,35 +338,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if uuo.clearedSpouse {
-		query, args := sql.Update(user.SpouseTable).
+		query, args := builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
-		query, args = sql.Update(user.SpouseTable).
+		query, args = builder.Update(user.SpouseTable).
 			SetNull(user.SpouseColumn).
 			Where(sql.InInts(user.SpouseColumn, ids...)).
 			Query()
@@ -373,13 +379,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			return nil, rollback(tx, fmt.Errorf("ent: can't link O2O edge \"spouse\" to %d vertices (> 1)", n))
 		}
 		for eid := range uuo.spouse {
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, ids[0])).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, ids[0]).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {

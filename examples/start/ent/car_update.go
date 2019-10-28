@@ -105,7 +105,10 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(car.FieldID).From(sql.Table(car.Table))
+	var (
+		builder  = sql.Dialect(cu.driver.Dialect())
+		selector = builder.Select(car.FieldID).From(builder.Table(car.Table))
+	)
 	for _, p := range cu.predicates {
 		p(selector)
 	}
@@ -133,22 +136,22 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(car.Table).Where(sql.InInts(car.FieldID, ids...))
+		updater = builder.Update(car.Table).Where(sql.InInts(car.FieldID, ids...))
 	)
 	if value := cu.model; value != nil {
-		builder.Set(car.FieldModel, *value)
+		updater.Set(car.FieldModel, *value)
 	}
 	if value := cu.registered_at; value != nil {
-		builder.Set(car.FieldRegisteredAt, *value)
+		updater.Set(car.FieldRegisteredAt, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if cu.clearedOwner {
-		query, args := sql.Update(car.OwnerTable).
+		query, args := builder.Update(car.OwnerTable).
 			SetNull(car.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -158,7 +161,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if len(cu.owner) > 0 {
 		for eid := range cu.owner {
-			query, args := sql.Update(car.OwnerTable).
+			query, args := builder.Update(car.OwnerTable).
 				Set(car.OwnerColumn, eid).
 				Where(sql.InInts(car.FieldID, ids...)).
 				Query()
@@ -254,7 +257,10 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
-	selector := sql.Select(car.Columns...).From(sql.Table(car.Table))
+	var (
+		builder  = sql.Dialect(cuo.driver.Dialect())
+		selector = builder.Select(car.Columns...).From(builder.Table(car.Table))
+	)
 	car.ID(cuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -285,24 +291,24 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(car.Table).Where(sql.InInts(car.FieldID, ids...))
+		updater = builder.Update(car.Table).Where(sql.InInts(car.FieldID, ids...))
 	)
 	if value := cuo.model; value != nil {
-		builder.Set(car.FieldModel, *value)
+		updater.Set(car.FieldModel, *value)
 		c.Model = *value
 	}
 	if value := cuo.registered_at; value != nil {
-		builder.Set(car.FieldRegisteredAt, *value)
+		updater.Set(car.FieldRegisteredAt, *value)
 		c.RegisteredAt = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if cuo.clearedOwner {
-		query, args := sql.Update(car.OwnerTable).
+		query, args := builder.Update(car.OwnerTable).
 			SetNull(car.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -312,7 +318,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 	}
 	if len(cuo.owner) > 0 {
 		for eid := range cuo.owner {
-			query, args := sql.Update(car.OwnerTable).
+			query, args := builder.Update(car.OwnerTable).
 				Set(car.OwnerColumn, eid).
 				Where(sql.InInts(car.FieldID, ids...)).
 				Query()

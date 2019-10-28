@@ -227,8 +227,9 @@ func HasParent() predicate.Node {
 func HasParentWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(ParentTable))
+			t2 := builder.Select(FieldID).From(builder.Table(ParentTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -242,11 +243,12 @@ func HasChildren() predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(ChildrenColumn).
-						From(sql.Table(ChildrenTable)).
+					builder.Select(ChildrenColumn).
+						From(builder.Table(ChildrenTable)).
 						Where(sql.NotNull(ChildrenColumn)),
 				),
 			)
@@ -258,8 +260,9 @@ func HasChildren() predicate.Node {
 func HasChildrenWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(ChildrenColumn).From(sql.Table(ChildrenTable))
+			t2 := builder.Select(ChildrenColumn).From(builder.Table(ChildrenTable))
 			for _, p := range preds {
 				p(t2)
 			}

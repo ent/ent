@@ -41,12 +41,15 @@ func (sd *StreetDelete) ExecX(ctx context.Context) int {
 }
 
 func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(street.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(sd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(street.Table))
 	for _, p := range sd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(street.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(street.Table).FromSelect(selector).Query()
 	if err := sd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

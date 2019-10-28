@@ -290,8 +290,9 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (gq *GroupQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(group.Table)
-	selector := sql.Select(t1.Columns(group.Columns...)...).From(t1)
+	builder := sql.Dialect(gq.driver.Dialect())
+	t1 := builder.Table(group.Table)
+	selector := builder.Select(t1.Columns(group.Columns...)...).From(t1)
 	if gq.sql != nil {
 		selector = gq.sql
 		selector.Select(selector.Columns(group.Columns...)...)
@@ -560,5 +561,6 @@ func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (gs *GroupSelect) sqlQuery() sql.Querier {
 	view := "group_view"
-	return sql.Select(gs.fields...).From(gs.sql.As(view))
+	return sql.Dialect(gs.driver.Dialect()).
+		Select(gs.fields...).From(gs.sql.As(view))
 }

@@ -41,12 +41,15 @@ func (cd *CarDelete) ExecX(ctx context.Context) int {
 }
 
 func (cd *CarDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(car.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(cd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(car.Table))
 	for _, p := range cd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(car.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(car.Table).FromSelect(selector).Query()
 	if err := cd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

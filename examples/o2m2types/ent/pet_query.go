@@ -57,10 +57,12 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	t1 := sql.Table(user.Table)
+
+	builder := sql.Dialect(pq.driver.Dialect())
+	t1 := builder.Table(user.Table)
 	t2 := pq.sqlQuery()
 	t2.Select(t2.C(pet.OwnerColumn))
-	query.sql = sql.Select(t1.Columns(user.Columns...)...).
+	query.sql = builder.Select(t1.Columns(user.Columns...)...).
 		From(t1).
 		Join(t2).
 		On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
@@ -328,8 +330,9 @@ func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (pq *PetQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(pet.Table)
-	selector := sql.Select(t1.Columns(pet.Columns...)...).From(t1)
+	builder := sql.Dialect(pq.driver.Dialect())
+	t1 := builder.Table(pet.Table)
+	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
 		selector.Select(selector.Columns(pet.Columns...)...)
@@ -598,5 +601,6 @@ func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ps *PetSelect) sqlQuery() sql.Querier {
 	view := "pet_view"
-	return sql.Select(ps.fields...).From(ps.sql.As(view))
+	return sql.Dialect(ps.driver.Dialect()).
+		Select(ps.fields...).From(ps.sql.As(view))
 }

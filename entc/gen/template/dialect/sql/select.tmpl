@@ -21,6 +21,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery() sql.Querier {
 	view := "{{ $.Package }}_view"
-	return sql.Select({{ $receiver }}.fields...).From({{ $receiver }}.sql.As(view))
+	return sql.Dialect({{ $receiver }}.driver.Dialect()).
+		Select({{ $receiver }}.fields...).From({{ $receiver }}.sql.As(view))
 }
 {{ end }}

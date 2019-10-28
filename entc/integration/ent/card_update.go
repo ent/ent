@@ -123,7 +123,10 @@ func (cu *CardUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(card.FieldID).From(sql.Table(card.Table))
+	var (
+		builder  = sql.Dialect(cu.driver.Dialect())
+		selector = builder.Select(card.FieldID).From(builder.Table(card.Table))
+	)
 	for _, p := range cu.predicates {
 		p(selector)
 	}
@@ -151,22 +154,22 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
+		updater = builder.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
 	if value := cu.update_time; value != nil {
-		builder.Set(card.FieldUpdateTime, *value)
+		updater.Set(card.FieldUpdateTime, *value)
 	}
 	if value := cu.number; value != nil {
-		builder.Set(card.FieldNumber, *value)
+		updater.Set(card.FieldNumber, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if cu.clearedOwner {
-		query, args := sql.Update(card.OwnerTable).
+		query, args := builder.Update(card.OwnerTable).
 			SetNull(card.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -180,7 +183,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			if serr != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args := sql.Update(card.OwnerTable).
+			query, args := builder.Update(card.OwnerTable).
 				Set(card.OwnerColumn, eid).
 				Where(sql.EQ(card.FieldID, id).And().IsNull(card.OwnerColumn)).
 				Query()
@@ -354,7 +357,10 @@ func (cuo *CardUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
-	selector := sql.Select(card.Columns...).From(sql.Table(card.Table))
+	var (
+		builder  = sql.Dialect(cuo.driver.Dialect())
+		selector = builder.Select(card.Columns...).From(builder.Table(card.Table))
+	)
 	card.ID(cuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -385,24 +391,24 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
+		updater = builder.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
 	)
 	if value := cuo.update_time; value != nil {
-		builder.Set(card.FieldUpdateTime, *value)
+		updater.Set(card.FieldUpdateTime, *value)
 		c.UpdateTime = *value
 	}
 	if value := cuo.number; value != nil {
-		builder.Set(card.FieldNumber, *value)
+		updater.Set(card.FieldNumber, *value)
 		c.Number = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if cuo.clearedOwner {
-		query, args := sql.Update(card.OwnerTable).
+		query, args := builder.Update(card.OwnerTable).
 			SetNull(card.OwnerColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -416,7 +422,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 			if serr != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(card.OwnerTable).
+			query, args := builder.Update(card.OwnerTable).
 				Set(card.OwnerColumn, eid).
 				Where(sql.EQ(card.FieldID, id).And().IsNull(card.OwnerColumn)).
 				Query()

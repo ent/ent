@@ -364,11 +364,12 @@ func HasCard() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(CardColumn).
-						From(sql.Table(CardTable)).
+					builder.Select(CardColumn).
+						From(builder.Table(CardTable)).
 						Where(sql.NotNull(CardColumn)),
 				),
 			)
@@ -380,8 +381,9 @@ func HasCard() predicate.User {
 func HasCardWith(preds ...predicate.Card) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(CardColumn).From(sql.Table(CardTable))
+			t2 := builder.Select(CardColumn).From(builder.Table(CardTable))
 			for _, p := range preds {
 				p(t2)
 			}

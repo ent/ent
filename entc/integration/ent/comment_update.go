@@ -142,7 +142,10 @@ func (cu *CommentUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(comment.FieldID).From(sql.Table(comment.Table))
+	var (
+		builder  = sql.Dialect(cu.driver.Dialect())
+		selector = builder.Select(comment.FieldID).From(builder.Table(comment.Table))
+	)
 	for _, p := range cu.predicates {
 		p(selector)
 	}
@@ -170,31 +173,31 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
+		updater = builder.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
 	)
 	if value := cu.unique_int; value != nil {
-		builder.Set(comment.FieldUniqueInt, *value)
+		updater.Set(comment.FieldUniqueInt, *value)
 	}
 	if value := cu.addunique_int; value != nil {
-		builder.Add(comment.FieldUniqueInt, *value)
+		updater.Add(comment.FieldUniqueInt, *value)
 	}
 	if value := cu.unique_float; value != nil {
-		builder.Set(comment.FieldUniqueFloat, *value)
+		updater.Set(comment.FieldUniqueFloat, *value)
 	}
 	if value := cu.addunique_float; value != nil {
-		builder.Add(comment.FieldUniqueFloat, *value)
+		updater.Add(comment.FieldUniqueFloat, *value)
 	}
 	if value := cu.nillable_int; value != nil {
-		builder.Set(comment.FieldNillableInt, *value)
+		updater.Set(comment.FieldNillableInt, *value)
 	}
 	if value := cu.addnillable_int; value != nil {
-		builder.Add(comment.FieldNillableInt, *value)
+		updater.Add(comment.FieldNillableInt, *value)
 	}
 	if cu.clearnillable_int {
-		builder.SetNull(comment.FieldNillableInt)
+		updater.SetNull(comment.FieldNillableInt)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -405,7 +408,10 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error) {
-	selector := sql.Select(comment.Columns...).From(sql.Table(comment.Table))
+	var (
+		builder  = sql.Dialect(cuo.driver.Dialect())
+		selector = builder.Select(comment.Columns...).From(builder.Table(comment.Table))
+	)
 	comment.ID(cuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -436,30 +442,30 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
+		updater = builder.Update(comment.Table).Where(sql.InInts(comment.FieldID, ids...))
 	)
 	if value := cuo.unique_int; value != nil {
-		builder.Set(comment.FieldUniqueInt, *value)
+		updater.Set(comment.FieldUniqueInt, *value)
 		c.UniqueInt = *value
 	}
 	if value := cuo.addunique_int; value != nil {
-		builder.Add(comment.FieldUniqueInt, *value)
+		updater.Add(comment.FieldUniqueInt, *value)
 		c.UniqueInt += *value
 	}
 	if value := cuo.unique_float; value != nil {
-		builder.Set(comment.FieldUniqueFloat, *value)
+		updater.Set(comment.FieldUniqueFloat, *value)
 		c.UniqueFloat = *value
 	}
 	if value := cuo.addunique_float; value != nil {
-		builder.Add(comment.FieldUniqueFloat, *value)
+		updater.Add(comment.FieldUniqueFloat, *value)
 		c.UniqueFloat += *value
 	}
 	if value := cuo.nillable_int; value != nil {
-		builder.Set(comment.FieldNillableInt, *value)
+		updater.Set(comment.FieldNillableInt, *value)
 		c.NillableInt = value
 	}
 	if value := cuo.addnillable_int; value != nil {
-		builder.Add(comment.FieldNillableInt, *value)
+		updater.Add(comment.FieldNillableInt, *value)
 		if c.NillableInt != nil {
 			*c.NillableInt += *value
 		} else {
@@ -468,10 +474,10 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 	}
 	if cuo.clearnillable_int {
 		c.NillableInt = nil
-		builder.SetNull(comment.FieldNillableInt)
+		updater.SetNull(comment.FieldNillableInt)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}

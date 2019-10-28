@@ -352,8 +352,9 @@ func (ftq *FieldTypeQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(fieldtype.Table)
-	selector := sql.Select(t1.Columns(fieldtype.Columns...)...).From(t1)
+	builder := sql.Dialect(ftq.driver.Dialect())
+	t1 := builder.Table(fieldtype.Table)
+	selector := builder.Select(t1.Columns(fieldtype.Columns...)...).From(t1)
 	if ftq.sql != nil {
 		selector = ftq.sql
 		selector.Select(selector.Columns(fieldtype.Columns...)...)
@@ -735,7 +736,8 @@ func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (fts *FieldTypeSelect) sqlQuery() sql.Querier {
 	view := "fieldtype_view"
-	return sql.Select(fts.fields...).From(fts.sql.As(view))
+	return sql.Dialect(fts.driver.Dialect()).
+		Select(fts.fields...).From(fts.sql.As(view))
 }
 
 func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {

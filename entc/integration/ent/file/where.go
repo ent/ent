@@ -844,8 +844,9 @@ func HasOwner() predicate.File {
 func HasOwnerWith(preds ...predicate.User) predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(OwnerInverseTable))
+			t2 := builder.Select(FieldID).From(builder.Table(OwnerInverseTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -878,8 +879,9 @@ func HasType() predicate.File {
 func HasTypeWith(preds ...predicate.FileType) predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(TypeInverseTable))
+			t2 := builder.Select(FieldID).From(builder.Table(TypeInverseTable))
 			for _, p := range preds {
 				p(t2)
 			}

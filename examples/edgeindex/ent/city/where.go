@@ -263,11 +263,12 @@ func HasStreets() predicate.City {
 	return predicate.City(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(StreetsColumn).
-						From(sql.Table(StreetsTable)).
+					builder.Select(StreetsColumn).
+						From(builder.Table(StreetsTable)).
 						Where(sql.NotNull(StreetsColumn)),
 				),
 			)
@@ -279,8 +280,9 @@ func HasStreets() predicate.City {
 func HasStreetsWith(preds ...predicate.Street) predicate.City {
 	return predicate.City(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(StreetsColumn).From(sql.Table(StreetsTable))
+			t2 := builder.Select(StreetsColumn).From(builder.Table(StreetsTable))
 			for _, p := range preds {
 				p(t2)
 			}

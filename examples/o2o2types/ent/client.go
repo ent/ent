@@ -170,11 +170,12 @@ func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := ca.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Select(card.OwnerColumn).
-		From(sql.Table(card.OwnerTable)).
+	builder := sql.Dialect(ca.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Select(card.OwnerColumn).
+		From(builder.Table(card.OwnerTable)).
 		Where(sql.EQ(card.FieldID, id))
-	query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
+	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
 
 	return query
 }
@@ -247,7 +248,8 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
 	id := u.ID
-	query.sql = sql.Select().From(sql.Table(card.Table)).
+	builder := sql.Dialect(u.driver.Dialect())
+	query.sql = builder.Select().From(builder.Table(card.Table)).
 		Where(sql.EQ(user.CardColumn, id))
 
 	return query

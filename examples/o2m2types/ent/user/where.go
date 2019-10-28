@@ -364,11 +364,12 @@ func HasPets() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(PetsColumn).
-						From(sql.Table(PetsTable)).
+					builder.Select(PetsColumn).
+						From(builder.Table(PetsTable)).
 						Where(sql.NotNull(PetsColumn)),
 				),
 			)
@@ -380,8 +381,9 @@ func HasPets() predicate.User {
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(PetsColumn).From(sql.Table(PetsTable))
+			t2 := builder.Select(PetsColumn).From(builder.Table(PetsTable))
 			for _, p := range preds {
 				p(t2)
 			}

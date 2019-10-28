@@ -113,25 +113,20 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	var (
-		res sql.Result
-		pe  = &Pet{config: pc.config}
+		res     sql.Result
+		builder = sql.Dialect(pc.driver.Dialect())
+		pe      = &Pet{config: pc.config}
 	)
 	tx, err := pc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(pc.driver.Dialect()).
-		Insert(pet.Table).
-		Default()
+	insert := builder.Insert(pet.Table).Default()
 	if value := pc.name; value != nil {
-		builder.Set(pet.FieldName, *value)
+		insert.Set(pet.FieldName, *value)
 		pe.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -141,7 +136,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		if err != nil {
 			return nil, err
 		}
-		query, args := sql.Update(pet.TeamTable).
+		query, args := builder.Update(pet.TeamTable).
 			Set(pet.TeamColumn, eid).
 			Where(sql.EQ(pet.FieldID, id).And().IsNull(pet.TeamColumn)).
 			Query()
@@ -162,7 +157,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			if err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(pet.OwnerTable).
+			query, args := builder.Update(pet.OwnerTable).
 				Set(pet.OwnerColumn, eid).
 				Where(sql.EQ(pet.FieldID, id)).
 				Query()

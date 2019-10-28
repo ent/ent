@@ -34,21 +34,15 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	insert := builder.Insert(user.Table).Default()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}

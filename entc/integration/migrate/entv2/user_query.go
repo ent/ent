@@ -314,8 +314,9 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(user.Table)
-	selector := sql.Select(t1.Columns(user.Columns...)...).From(t1)
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	selector := builder.Select(t1.Columns(user.Columns...)...).From(t1)
 	if uq.sql != nil {
 		selector = uq.sql
 		selector.Select(selector.Columns(user.Columns...)...)
@@ -584,5 +585,6 @@ func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (us *UserSelect) sqlQuery() sql.Querier {
 	view := "user_view"
-	return sql.Select(us.fields...).From(us.sql.As(view))
+	return sql.Dialect(us.driver.Dialect()).
+		Select(us.fields...).From(us.sql.As(view))
 }

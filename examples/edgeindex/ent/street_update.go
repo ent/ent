@@ -97,7 +97,10 @@ func (su *StreetUpdate) ExecX(ctx context.Context) {
 }
 
 func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(street.FieldID).From(sql.Table(street.Table))
+	var (
+		builder  = sql.Dialect(su.driver.Dialect())
+		selector = builder.Select(street.FieldID).From(builder.Table(street.Table))
+	)
 	for _, p := range su.predicates {
 		p(selector)
 	}
@@ -125,19 +128,19 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
+		updater = builder.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
 	)
 	if value := su.name; value != nil {
-		builder.Set(street.FieldName, *value)
+		updater.Set(street.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if su.clearedCity {
-		query, args := sql.Update(street.CityTable).
+		query, args := builder.Update(street.CityTable).
 			SetNull(street.CityColumn).
 			Where(sql.InInts(city.FieldID, ids...)).
 			Query()
@@ -147,7 +150,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if len(su.city) > 0 {
 		for eid := range su.city {
-			query, args := sql.Update(street.CityTable).
+			query, args := builder.Update(street.CityTable).
 				Set(street.CityColumn, eid).
 				Where(sql.InInts(street.FieldID, ids...)).
 				Query()
@@ -236,7 +239,10 @@ func (suo *StreetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) {
-	selector := sql.Select(street.Columns...).From(sql.Table(street.Table))
+	var (
+		builder  = sql.Dialect(suo.driver.Dialect())
+		selector = builder.Select(street.Columns...).From(builder.Table(street.Table))
+	)
 	street.ID(suo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -267,20 +273,20 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
+		updater = builder.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
 	)
 	if value := suo.name; value != nil {
-		builder.Set(street.FieldName, *value)
+		updater.Set(street.FieldName, *value)
 		s.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if suo.clearedCity {
-		query, args := sql.Update(street.CityTable).
+		query, args := builder.Update(street.CityTable).
 			SetNull(street.CityColumn).
 			Where(sql.InInts(city.FieldID, ids...)).
 			Query()
@@ -290,7 +296,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 	}
 	if len(suo.city) > 0 {
 		for eid := range suo.city {
-			query, args := sql.Update(street.CityTable).
+			query, args := builder.Update(street.CityTable).
 				Set(street.CityColumn, eid).
 				Where(sql.InInts(street.FieldID, ids...)).
 				Query()

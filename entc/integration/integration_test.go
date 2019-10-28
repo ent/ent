@@ -75,6 +75,13 @@ func TestPostgres(t *testing.T) {
 	require.NoError(t, err)
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(context.Background()))
+	for _, tt := range tests {
+		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
+			drop(t, client)
+			tt(t, client)
+		})
+	}
 }
 
 func TestGremlin(t *testing.T) {
@@ -1926,7 +1933,6 @@ func Tx(t *testing.T, client *ent.Client) {
 
 	tx, err := client.Tx(ctx)
 	require.NoError(err)
-
 	tx.Node.Create().SaveX(ctx)
 
 	require.NoError(tx.Rollback())

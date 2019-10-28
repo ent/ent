@@ -56,10 +56,12 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryParent chains the current query on the parent edge.
 func (nq *NodeQuery) QueryParent() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	t1 := sql.Table(node.Table)
+
+	builder := sql.Dialect(nq.driver.Dialect())
+	t1 := builder.Table(node.Table)
 	t2 := nq.sqlQuery()
 	t2.Select(t2.C(node.ParentColumn))
-	query.sql = sql.Select(t1.Columns(node.Columns...)...).
+	query.sql = builder.Select(t1.Columns(node.Columns...)...).
 		From(t1).
 		Join(t2).
 		On(t1.C(node.FieldID), t2.C(node.ParentColumn))
@@ -69,10 +71,12 @@ func (nq *NodeQuery) QueryParent() *NodeQuery {
 // QueryChildren chains the current query on the children edge.
 func (nq *NodeQuery) QueryChildren() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	t1 := sql.Table(node.Table)
+
+	builder := sql.Dialect(nq.driver.Dialect())
+	t1 := builder.Table(node.Table)
 	t2 := nq.sqlQuery()
 	t2.Select(t2.C(node.FieldID))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t2).
 		On(t1.C(node.ChildrenColumn), t2.C(node.FieldID))
@@ -340,8 +344,9 @@ func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (nq *NodeQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(node.Table)
-	selector := sql.Select(t1.Columns(node.Columns...)...).From(t1)
+	builder := sql.Dialect(nq.driver.Dialect())
+	t1 := builder.Table(node.Table)
+	selector := builder.Select(t1.Columns(node.Columns...)...).From(t1)
 	if nq.sql != nil {
 		selector = nq.sql
 		selector.Select(selector.Columns(node.Columns...)...)
@@ -610,5 +615,6 @@ func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ns *NodeSelect) sqlQuery() sql.Querier {
 	view := "node_view"
-	return sql.Select(ns.fields...).From(ns.sql.As(view))
+	return sql.Dialect(ns.driver.Dialect()).
+		Select(ns.fields...).From(ns.sql.As(view))
 }

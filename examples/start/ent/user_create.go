@@ -111,29 +111,24 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		res     sql.Result
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
+	insert := builder.Insert(user.Table).Default()
 	if value := uc.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		insert.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uc.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		insert.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -143,7 +138,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		for eid := range uc.cars {
 			p.Or().EQ(car.FieldID, eid)
 		}
-		query, args := sql.Update(user.CarsTable).
+		query, args := builder.Update(user.CarsTable).
 			Set(user.CarsColumn, id).
 			Where(sql.And(p, sql.IsNull(user.CarsColumn))).
 			Query()
@@ -161,7 +156,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if len(uc.groups) > 0 {
 		for eid := range uc.groups {
 
-			query, args := sql.Insert(user.GroupsTable).
+			query, args := builder.Insert(user.GroupsTable).
 				Columns(user.GroupsPrimaryKey[1], user.GroupsPrimaryKey[0]).
 				Values(id, eid).
 				Query()

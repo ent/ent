@@ -56,15 +56,17 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	t1 := sql.Table(user.Table)
+
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(user.Table)
 	t2 := uq.sqlQuery()
 	t2.Select(t2.C(user.FieldID))
-	t3 := sql.Table(user.FollowersTable)
-	t4 := sql.Select(t3.C(user.FollowersPrimaryKey[0])).
+	t3 := builder.Table(user.FollowersTable)
+	t4 := builder.Select(t3.C(user.FollowersPrimaryKey[0])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.FollowersPrimaryKey[1]), t2.C(user.FieldID))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
@@ -74,15 +76,17 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	t1 := sql.Table(user.Table)
+
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(user.Table)
 	t2 := uq.sqlQuery()
 	t2.Select(t2.C(user.FieldID))
-	t3 := sql.Table(user.FollowingTable)
-	t4 := sql.Select(t3.C(user.FollowingPrimaryKey[1])).
+	t3 := builder.Table(user.FollowingTable)
+	t4 := builder.Select(t3.C(user.FollowingPrimaryKey[1])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.FollowingPrimaryKey[0]), t2.C(user.FieldID))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
@@ -350,8 +354,9 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(user.Table)
-	selector := sql.Select(t1.Columns(user.Columns...)...).From(t1)
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	selector := builder.Select(t1.Columns(user.Columns...)...).From(t1)
 	if uq.sql != nil {
 		selector = uq.sql
 		selector.Select(selector.Columns(user.Columns...)...)
@@ -620,5 +625,6 @@ func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (us *UserSelect) sqlQuery() sql.Querier {
 	view := "user_view"
-	return sql.Select(us.fields...).From(us.sql.As(view))
+	return sql.Dialect(us.driver.Dialect()).
+		Select(us.fields...).From(us.sql.As(view))
 }

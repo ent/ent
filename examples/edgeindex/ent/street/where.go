@@ -272,8 +272,9 @@ func HasCity() predicate.Street {
 func HasCityWith(preds ...predicate.City) predicate.Street {
 	return predicate.Street(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(CityInverseTable))
+			t2 := builder.Select(FieldID).From(builder.Table(CityInverseTable))
 			for _, p := range preds {
 				p(t2)
 			}

@@ -41,12 +41,15 @@ func (gd *GroupDelete) ExecX(ctx context.Context) int {
 }
 
 func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(group.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(gd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(group.Table))
 	for _, p := range gd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(group.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(group.Table).FromSelect(selector).Query()
 	if err := gd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

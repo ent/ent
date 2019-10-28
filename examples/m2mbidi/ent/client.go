@@ -164,15 +164,16 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Table(user.Table)
-	t3 := sql.Table(user.FriendsTable)
-	t4 := sql.Select(t3.C(user.FriendsPrimaryKey[1])).
+	builder := sql.Dialect(u.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Table(user.Table)
+	t3 := builder.Table(user.FriendsTable)
+	t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID)).
 		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))

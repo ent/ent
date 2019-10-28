@@ -54,12 +54,15 @@ func (id *ItemDelete) ExecX(ctx context.Context) int {
 }
 
 func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(item.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(id.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(item.Table))
 	for _, p := range id.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(item.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(item.Table).FromSelect(selector).Query()
 	if err := id.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

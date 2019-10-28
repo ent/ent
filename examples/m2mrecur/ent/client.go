@@ -164,15 +164,16 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Table(user.Table)
-	t3 := sql.Table(user.FollowersTable)
-	t4 := sql.Select(t3.C(user.FollowersPrimaryKey[0])).
+	builder := sql.Dialect(u.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Table(user.Table)
+	t3 := builder.Table(user.FollowersTable)
+	t4 := builder.Select(t3.C(user.FollowersPrimaryKey[0])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.FollowersPrimaryKey[1]), t2.C(user.FieldID)).
 		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
@@ -184,15 +185,16 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Table(user.Table)
-	t3 := sql.Table(user.FollowingTable)
-	t4 := sql.Select(t3.C(user.FollowingPrimaryKey[1])).
+	builder := sql.Dialect(u.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Table(user.Table)
+	t3 := builder.Table(user.FollowingTable)
+	t4 := builder.Select(t3.C(user.FollowingPrimaryKey[1])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.FollowingPrimaryKey[0]), t2.C(user.FieldID)).
 		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))

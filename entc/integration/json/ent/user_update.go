@@ -148,7 +148,10 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(user.FieldID).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uu.driver.Dialect())
+		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
+	)
 	for _, p := range uu.predicates {
 		p(selector)
 	}
@@ -176,70 +179,70 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.url; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return 0, err
 		}
-		builder.Set(user.FieldURL, buf)
+		updater.Set(user.FieldURL, buf)
 	}
 	if uu.clearurl {
-		builder.SetNull(user.FieldURL)
+		updater.SetNull(user.FieldURL)
 	}
 	if value := uu.raw; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return 0, err
 		}
-		builder.Set(user.FieldRaw, buf)
+		updater.Set(user.FieldRaw, buf)
 	}
 	if uu.clearraw {
-		builder.SetNull(user.FieldRaw)
+		updater.SetNull(user.FieldRaw)
 	}
 	if value := uu.dirs; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return 0, err
 		}
-		builder.Set(user.FieldDirs, buf)
+		updater.Set(user.FieldDirs, buf)
 	}
 	if uu.cleardirs {
-		builder.SetNull(user.FieldDirs)
+		updater.SetNull(user.FieldDirs)
 	}
 	if value := uu.ints; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return 0, err
 		}
-		builder.Set(user.FieldInts, buf)
+		updater.Set(user.FieldInts, buf)
 	}
 	if uu.clearints {
-		builder.SetNull(user.FieldInts)
+		updater.SetNull(user.FieldInts)
 	}
 	if value := uu.floats; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return 0, err
 		}
-		builder.Set(user.FieldFloats, buf)
+		updater.Set(user.FieldFloats, buf)
 	}
 	if uu.clearfloats {
-		builder.SetNull(user.FieldFloats)
+		updater.SetNull(user.FieldFloats)
 	}
 	if value := uu.strings; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return 0, err
 		}
-		builder.Set(user.FieldStrings, buf)
+		updater.Set(user.FieldStrings, buf)
 	}
 	if uu.clearstrings {
-		builder.SetNull(user.FieldStrings)
+		updater.SetNull(user.FieldStrings)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -374,7 +377,10 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	selector := sql.Select(user.Columns...).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uuo.driver.Dialect())
+		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
+	)
 	user.ID(uuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -405,88 +411,88 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.url; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldURL, buf)
+		updater.Set(user.FieldURL, buf)
 		u.URL = *value
 	}
 	if uuo.clearurl {
 		var value *url.URL
 		u.URL = value
-		builder.SetNull(user.FieldURL)
+		updater.SetNull(user.FieldURL)
 	}
 	if value := uuo.raw; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldRaw, buf)
+		updater.Set(user.FieldRaw, buf)
 		u.Raw = *value
 	}
 	if uuo.clearraw {
 		var value json.RawMessage
 		u.Raw = value
-		builder.SetNull(user.FieldRaw)
+		updater.SetNull(user.FieldRaw)
 	}
 	if value := uuo.dirs; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldDirs, buf)
+		updater.Set(user.FieldDirs, buf)
 		u.Dirs = *value
 	}
 	if uuo.cleardirs {
 		var value []http.Dir
 		u.Dirs = value
-		builder.SetNull(user.FieldDirs)
+		updater.SetNull(user.FieldDirs)
 	}
 	if value := uuo.ints; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldInts, buf)
+		updater.Set(user.FieldInts, buf)
 		u.Ints = *value
 	}
 	if uuo.clearints {
 		var value []int
 		u.Ints = value
-		builder.SetNull(user.FieldInts)
+		updater.SetNull(user.FieldInts)
 	}
 	if value := uuo.floats; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldFloats, buf)
+		updater.Set(user.FieldFloats, buf)
 		u.Floats = *value
 	}
 	if uuo.clearfloats {
 		var value []float64
 		u.Floats = value
-		builder.SetNull(user.FieldFloats)
+		updater.SetNull(user.FieldFloats)
 	}
 	if value := uuo.strings; value != nil {
 		buf, err := json.Marshal(*value)
 		if err != nil {
 			return nil, err
 		}
-		builder.Set(user.FieldStrings, buf)
+		updater.Set(user.FieldStrings, buf)
 		u.Strings = *value
 	}
 	if uuo.clearstrings {
 		var value []string
 		u.Strings = value
-		builder.SetNull(user.FieldStrings)
+		updater.SetNull(user.FieldStrings)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}

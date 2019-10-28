@@ -58,10 +58,12 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryCars chains the current query on the cars edge.
 func (uq *UserQuery) QueryCars() *CarQuery {
 	query := &CarQuery{config: uq.config}
-	t1 := sql.Table(car.Table)
+
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(car.Table)
 	t2 := uq.sqlQuery()
 	t2.Select(t2.C(user.FieldID))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t2).
 		On(t1.C(user.CarsColumn), t2.C(user.FieldID))
@@ -71,15 +73,17 @@ func (uq *UserQuery) QueryCars() *CarQuery {
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	t1 := sql.Table(group.Table)
+
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(group.Table)
 	t2 := uq.sqlQuery()
 	t2.Select(t2.C(user.FieldID))
-	t3 := sql.Table(user.GroupsTable)
-	t4 := sql.Select(t3.C(user.GroupsPrimaryKey[0])).
+	t3 := builder.Table(user.GroupsTable)
+	t4 := builder.Select(t3.C(user.GroupsPrimaryKey[0])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.GroupsPrimaryKey[1]), t2.C(user.FieldID))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[0]))
@@ -347,8 +351,9 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(user.Table)
-	selector := sql.Select(t1.Columns(user.Columns...)...).From(t1)
+	builder := sql.Dialect(uq.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	selector := builder.Select(t1.Columns(user.Columns...)...).From(t1)
 	if uq.sql != nil {
 		selector = uq.sql
 		selector.Select(selector.Columns(user.Columns...)...)
@@ -617,5 +622,6 @@ func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (us *UserSelect) sqlQuery() sql.Querier {
 	view := "user_view"
-	return sql.Select(us.fields...).From(us.sql.As(view))
+	return sql.Dialect(us.driver.Dialect()).
+		Select(us.fields...).From(us.sql.As(view))
 }

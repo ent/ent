@@ -67,7 +67,10 @@ func (iu *ItemUpdate) ExecX(ctx context.Context) {
 }
 
 func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(item.FieldID).From(sql.Table(item.Table))
+	var (
+		builder  = sql.Dialect(iu.driver.Dialect())
+		selector = builder.Select(item.FieldID).From(builder.Table(item.Table))
+	)
 	for _, p := range iu.predicates {
 		p(selector)
 	}
@@ -165,7 +168,10 @@ func (iuo *ItemUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (i *Item, err error) {
-	selector := sql.Select(item.Columns...).From(sql.Table(item.Table))
+	var (
+		builder  = sql.Dialect(iuo.driver.Dialect())
+		selector = builder.Select(item.Columns...).From(builder.Table(item.Table))
+	)
 	item.ID(iuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()

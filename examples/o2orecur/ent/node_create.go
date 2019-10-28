@@ -98,32 +98,27 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	var (
-		res sql.Result
-		n   = &Node{config: nc.config}
+		res     sql.Result
+		builder = sql.Dialect(nc.driver.Dialect())
+		n       = &Node{config: nc.config}
 	)
 	tx, err := nc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(nc.driver.Dialect()).
-		Insert(node.Table).
-		Default()
+	insert := builder.Insert(node.Table).Default()
 	if value := nc.value; value != nil {
-		builder.Set(node.FieldValue, *value)
+		insert.Set(node.FieldValue, *value)
 		n.Value = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(node.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	n.ID = int(id)
 	if len(nc.prev) > 0 {
 		eid := keys(nc.prev)[0]
-		query, args := sql.Update(node.PrevTable).
+		query, args := builder.Update(node.PrevTable).
 			Set(node.PrevColumn, eid).
 			Where(sql.EQ(node.FieldID, id).And().IsNull(node.PrevColumn)).
 			Query()
@@ -140,7 +135,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	}
 	if len(nc.next) > 0 {
 		eid := keys(nc.next)[0]
-		query, args := sql.Update(node.NextTable).
+		query, args := builder.Update(node.NextTable).
 			Set(node.NextColumn, id).
 			Where(sql.EQ(node.FieldID, eid).And().IsNull(node.NextColumn)).
 			Query()

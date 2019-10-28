@@ -171,7 +171,10 @@ func (nu *NodeUpdate) ExecX(ctx context.Context) {
 }
 
 func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(node.FieldID).From(sql.Table(node.Table))
+	var (
+		builder  = sql.Dialect(nu.driver.Dialect())
+		selector = builder.Select(node.FieldID).From(builder.Table(node.Table))
+	)
 	for _, p := range nu.predicates {
 		p(selector)
 	}
@@ -199,25 +202,25 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
+		updater = builder.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
 	if value := nu.value; value != nil {
-		builder.Set(node.FieldValue, *value)
+		updater.Set(node.FieldValue, *value)
 	}
 	if value := nu.addvalue; value != nil {
-		builder.Add(node.FieldValue, *value)
+		updater.Add(node.FieldValue, *value)
 	}
 	if nu.clearvalue {
-		builder.SetNull(node.FieldValue)
+		updater.SetNull(node.FieldValue)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if nu.clearedPrev {
-		query, args := sql.Update(node.PrevTable).
+		query, args := builder.Update(node.PrevTable).
 			SetNull(node.PrevColumn).
 			Where(sql.InInts(node.FieldID, ids...)).
 			Query()
@@ -231,7 +234,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			if serr != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args := sql.Update(node.PrevTable).
+			query, args := builder.Update(node.PrevTable).
 				Set(node.PrevColumn, eid).
 				Where(sql.EQ(node.FieldID, id).And().IsNull(node.PrevColumn)).
 				Query()
@@ -248,7 +251,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if nu.clearedNext {
-		query, args := sql.Update(node.NextTable).
+		query, args := builder.Update(node.NextTable).
 			SetNull(node.NextColumn).
 			Where(sql.InInts(node.FieldID, ids...)).
 			Query()
@@ -262,7 +265,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			if serr != nil {
 				return 0, rollback(tx, err)
 			}
-			query, args := sql.Update(node.NextTable).
+			query, args := builder.Update(node.NextTable).
 				Set(node.NextColumn, id).
 				Where(sql.EQ(node.FieldID, eid).And().IsNull(node.NextColumn)).
 				Query()
@@ -504,7 +507,10 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
-	selector := sql.Select(node.Columns...).From(sql.Table(node.Table))
+	var (
+		builder  = sql.Dialect(nuo.driver.Dialect())
+		selector = builder.Select(node.Columns...).From(builder.Table(node.Table))
+	)
 	node.ID(nuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -535,29 +541,29 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
+		updater = builder.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
 	if value := nuo.value; value != nil {
-		builder.Set(node.FieldValue, *value)
+		updater.Set(node.FieldValue, *value)
 		n.Value = *value
 	}
 	if value := nuo.addvalue; value != nil {
-		builder.Add(node.FieldValue, *value)
+		updater.Add(node.FieldValue, *value)
 		n.Value += *value
 	}
 	if nuo.clearvalue {
 		var value int
 		n.Value = value
-		builder.SetNull(node.FieldValue)
+		updater.SetNull(node.FieldValue)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if nuo.clearedPrev {
-		query, args := sql.Update(node.PrevTable).
+		query, args := builder.Update(node.PrevTable).
 			SetNull(node.PrevColumn).
 			Where(sql.InInts(node.FieldID, ids...)).
 			Query()
@@ -571,7 +577,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			if serr != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(node.PrevTable).
+			query, args := builder.Update(node.PrevTable).
 				Set(node.PrevColumn, eid).
 				Where(sql.EQ(node.FieldID, id).And().IsNull(node.PrevColumn)).
 				Query()
@@ -588,7 +594,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		}
 	}
 	if nuo.clearedNext {
-		query, args := sql.Update(node.NextTable).
+		query, args := builder.Update(node.NextTable).
 			SetNull(node.NextColumn).
 			Where(sql.InInts(node.FieldID, ids...)).
 			Query()
@@ -602,7 +608,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			if serr != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args := sql.Update(node.NextTable).
+			query, args := builder.Update(node.NextTable).
 				Set(node.NextColumn, id).
 				Where(sql.EQ(node.FieldID, eid).And().IsNull(node.NextColumn)).
 				Query()

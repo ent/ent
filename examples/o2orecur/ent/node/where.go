@@ -227,8 +227,9 @@ func HasPrev() predicate.Node {
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(PrevTable))
+			t2 := builder.Select(FieldID).From(builder.Table(PrevTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -242,11 +243,12 @@ func HasNext() predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(NextColumn).
-						From(sql.Table(NextTable)).
+					builder.Select(NextColumn).
+						From(builder.Table(NextTable)).
 						Where(sql.NotNull(NextColumn)),
 				),
 			)
@@ -258,8 +260,9 @@ func HasNext() predicate.Node {
 func HasNextWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(NextColumn).From(sql.Table(NextTable))
+			t2 := builder.Select(NextColumn).From(builder.Table(NextTable))
 			for _, p := range preds {
 				p(t2)
 			}

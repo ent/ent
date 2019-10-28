@@ -176,11 +176,12 @@ func (c *CarClient) GetX(ctx context.Context, id int) *Car {
 func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := ca.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Select(car.OwnerColumn).
-		From(sql.Table(car.OwnerTable)).
+	builder := sql.Dialect(ca.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Select(car.OwnerColumn).
+		From(builder.Table(car.OwnerTable)).
 		Where(sql.EQ(car.FieldID, id))
-	query.sql = sql.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(car.OwnerColumn))
+	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(car.OwnerColumn))
 
 	return query
 }
@@ -253,15 +254,16 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.ID
-	t1 := sql.Table(user.Table)
-	t2 := sql.Table(group.Table)
-	t3 := sql.Table(group.UsersTable)
-	t4 := sql.Select(t3.C(group.UsersPrimaryKey[1])).
+	builder := sql.Dialect(gr.driver.Dialect())
+	t1 := builder.Table(user.Table)
+	t2 := builder.Table(group.Table)
+	t3 := builder.Table(group.UsersTable)
+	t4 := builder.Select(t3.C(group.UsersPrimaryKey[1])).
 		From(t3).
 		Join(t2).
 		On(t3.C(group.UsersPrimaryKey[0]), t2.C(group.FieldID)).
 		Where(sql.EQ(t2.C(group.FieldID), id))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[1]))
@@ -337,7 +339,8 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryCars(u *User) *CarQuery {
 	query := &CarQuery{config: c.config}
 	id := u.ID
-	query.sql = sql.Select().From(sql.Table(car.Table)).
+	builder := sql.Dialect(u.driver.Dialect())
+	query.sql = builder.Select().From(builder.Table(car.Table)).
 		Where(sql.EQ(user.CarsColumn, id))
 
 	return query
@@ -347,15 +350,16 @@ func (c *UserClient) QueryCars(u *User) *CarQuery {
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := u.ID
-	t1 := sql.Table(group.Table)
-	t2 := sql.Table(user.Table)
-	t3 := sql.Table(user.GroupsTable)
-	t4 := sql.Select(t3.C(user.GroupsPrimaryKey[0])).
+	builder := sql.Dialect(u.driver.Dialect())
+	t1 := builder.Table(group.Table)
+	t2 := builder.Table(user.Table)
+	t3 := builder.Table(user.GroupsTable)
+	t4 := builder.Select(t3.C(user.GroupsPrimaryKey[0])).
 		From(t3).
 		Join(t2).
 		On(t3.C(user.GroupsPrimaryKey[1]), t2.C(user.FieldID)).
 		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[0]))

@@ -41,12 +41,15 @@ func (pd *PetDelete) ExecX(ctx context.Context) int {
 }
 
 func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(pet.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(pd.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(pet.Table))
 	for _, p := range pd.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(pet.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(pet.Table).FromSelect(selector).Query()
 	if err := pd.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

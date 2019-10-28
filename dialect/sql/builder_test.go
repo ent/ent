@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/facebookincubator/ent/dialect"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -194,6 +193,11 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1),
 			wantQuery: `INSERT INTO "users" ("age") VALUES ($1)`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1).Returning("id"),
+			wantQuery: `INSERT INTO "users" ("age") VALUES ($1) RETURNING "id"`,
 			wantArgs:  []interface{}{1},
 		},
 		{
@@ -1003,6 +1007,25 @@ func TestBuilder(t *testing.T) {
 			}(),
 			wantQuery: "WITH groups AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
 			wantArgs:  []interface{}{"bar"},
+		},
+		{
+			input: func() Querier {
+				builder := Dialect(dialect.Postgres)
+				t1 := builder.Table("groups")
+				t2 := builder.Table("users")
+				t3 := builder.Table("user_groups")
+				t4 := builder.Select(t3.C("id")).
+					From(t3).
+					Join(t2).
+					On(t3.C("id"), t2.C("id2")).
+					Where(EQ(t2.C("id"), "baz"))
+				return builder.Select().
+					From(t1).
+					Join(t4).
+					On(t1.C("id"), t4.C("id")).Limit(1)
+			}(),
+			wantQuery: `SELECT * FROM "groups" JOIN (SELECT "user_groups"."id" FROM "user_groups" JOIN "users" AS "t0" ON "user_groups"."id" = "t0"."id2" WHERE "t0"."id" = $1) AS "t1" ON "groups"."id" = "t1"."id" LIMIT $2`,
+			wantArgs:  []interface{}{"baz", 1},
 		},
 		{
 			input:     CreateIndex("name_index").Table("users").Column("name"),

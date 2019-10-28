@@ -41,12 +41,15 @@ func (ud *UserDelete) ExecX(ctx context.Context) int {
 }
 
 func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table(user.Table))
+	var (
+		res     sql.Result
+		builder = sql.Dialect(ud.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table(user.Table))
 	for _, p := range ud.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete(user.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(user.Table).FromSelect(selector).Query()
 	if err := ud.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

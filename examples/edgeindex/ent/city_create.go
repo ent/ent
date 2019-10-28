@@ -68,25 +68,20 @@ func (cc *CityCreate) SaveX(ctx context.Context) *City {
 
 func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 	var (
-		res sql.Result
-		c   = &City{config: cc.config}
+		res     sql.Result
+		builder = sql.Dialect(cc.driver.Dialect())
+		c       = &City{config: cc.config}
 	)
 	tx, err := cc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(cc.driver.Dialect()).
-		Insert(city.Table).
-		Default()
+	insert := builder.Insert(city.Table).Default()
 	if value := cc.name; value != nil {
-		builder.Set(city.FieldName, *value)
+		insert.Set(city.FieldName, *value)
 		c.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(city.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -96,7 +91,7 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		for eid := range cc.streets {
 			p.Or().EQ(street.FieldID, eid)
 		}
-		query, args := sql.Update(city.StreetsTable).
+		query, args := builder.Update(city.StreetsTable).
 			Set(city.StreetsColumn, id).
 			Where(sql.And(p, sql.IsNull(city.StreetsColumn))).
 			Query()

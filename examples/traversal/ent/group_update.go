@@ -139,7 +139,10 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(group.FieldID).From(sql.Table(group.Table))
+	var (
+		builder  = sql.Dialect(gu.driver.Dialect())
+		selector = builder.Select(group.FieldID).From(builder.Table(group.Table))
+	)
 	for _, p := range gu.predicates {
 		p(selector)
 	}
@@ -167,13 +170,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
+		updater = builder.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := gu.name; value != nil {
-		builder.Set(group.FieldName, *value)
+		updater.Set(group.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -183,7 +186,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range gu.removedUsers {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(group.UsersTable).
+		query, args := builder.Delete(group.UsersTable).
 			Where(sql.InInts(group.UsersPrimaryKey[0], ids...)).
 			Where(sql.InInts(group.UsersPrimaryKey[1], eids...)).
 			Query()
@@ -198,7 +201,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(group.UsersTable).
+		builder := builder.Insert(group.UsersTable).
 			Columns(group.UsersPrimaryKey[0], group.UsersPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -209,7 +212,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if gu.clearedAdmin {
-		query, args := sql.Update(group.AdminTable).
+		query, args := builder.Update(group.AdminTable).
 			SetNull(group.AdminColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -219,7 +222,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if len(gu.admin) > 0 {
 		for eid := range gu.admin {
-			query, args := sql.Update(group.AdminTable).
+			query, args := builder.Update(group.AdminTable).
 				Set(group.AdminColumn, eid).
 				Where(sql.InInts(group.FieldID, ids...)).
 				Query()
@@ -350,7 +353,10 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	selector := sql.Select(group.Columns...).From(sql.Table(group.Table))
+	var (
+		builder  = sql.Dialect(guo.driver.Dialect())
+		selector = builder.Select(group.Columns...).From(builder.Table(group.Table))
+	)
 	group.ID(guo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -381,14 +387,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
+		updater = builder.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
 	)
 	if value := guo.name; value != nil {
-		builder.Set(group.FieldName, *value)
+		updater.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
@@ -398,7 +404,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for eid := range guo.removedUsers {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(group.UsersTable).
+		query, args := builder.Delete(group.UsersTable).
 			Where(sql.InInts(group.UsersPrimaryKey[0], ids...)).
 			Where(sql.InInts(group.UsersPrimaryKey[1], eids...)).
 			Query()
@@ -413,7 +419,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(group.UsersTable).
+		builder := builder.Insert(group.UsersTable).
 			Columns(group.UsersPrimaryKey[0], group.UsersPrimaryKey[1])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -424,7 +430,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 	}
 	if guo.clearedAdmin {
-		query, args := sql.Update(group.AdminTable).
+		query, args := builder.Update(group.AdminTable).
 			SetNull(group.AdminColumn).
 			Where(sql.InInts(user.FieldID, ids...)).
 			Query()
@@ -434,7 +440,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	if len(guo.admin) > 0 {
 		for eid := range guo.admin {
-			query, args := sql.Update(group.AdminTable).
+			query, args := builder.Update(group.AdminTable).
 				Set(group.AdminColumn, eid).
 				Where(sql.InInts(group.FieldID, ids...)).
 				Query()

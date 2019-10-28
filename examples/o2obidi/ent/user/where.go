@@ -364,11 +364,12 @@ func HasSpouse() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(SpouseColumn).
-						From(sql.Table(SpouseTable)).
+					builder.Select(SpouseColumn).
+						From(builder.Table(SpouseTable)).
 						Where(sql.NotNull(SpouseColumn)),
 				),
 			)
@@ -380,8 +381,9 @@ func HasSpouse() predicate.User {
 func HasSpouseWith(preds ...predicate.User) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(SpouseColumn).From(sql.Table(SpouseTable))
+			t2 := builder.Select(SpouseColumn).From(builder.Table(SpouseTable))
 			for _, p := range preds {
 				p(t2)
 			}

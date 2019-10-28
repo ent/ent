@@ -82,42 +82,37 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		res     sql.Result
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
+	insert := builder.Insert(user.Table).Default()
 	if value := uc.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		insert.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uc.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		insert.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	u.ID = int(id)
 	if len(uc.spouse) > 0 {
 		for eid := range uc.spouse {
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, id)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, id).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {

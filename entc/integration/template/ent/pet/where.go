@@ -348,8 +348,9 @@ func HasOwner() predicate.Pet {
 func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(OwnerInverseTable))
+			t2 := builder.Select(FieldID).From(builder.Table(OwnerInverseTable))
 			for _, p := range preds {
 				p(t2)
 			}

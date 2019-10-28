@@ -82,36 +82,31 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 	var (
-		res sql.Result
-		c   = &Car{config: cc.config}
+		res     sql.Result
+		builder = sql.Dialect(cc.driver.Dialect())
+		c       = &Car{config: cc.config}
 	)
 	tx, err := cc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(cc.driver.Dialect()).
-		Insert(car.Table).
-		Default()
+	insert := builder.Insert(car.Table).Default()
 	if value := cc.model; value != nil {
-		builder.Set(car.FieldModel, *value)
+		insert.Set(car.FieldModel, *value)
 		c.Model = *value
 	}
 	if value := cc.registered_at; value != nil {
-		builder.Set(car.FieldRegisteredAt, *value)
+		insert.Set(car.FieldRegisteredAt, *value)
 		c.RegisteredAt = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(car.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	c.ID = int(id)
 	if len(cc.owner) > 0 {
 		for eid := range cc.owner {
-			query, args := sql.Update(car.OwnerTable).
+			query, args := builder.Update(car.OwnerTable).
 				Set(car.OwnerColumn, eid).
 				Where(sql.EQ(car.FieldID, id)).
 				Query()

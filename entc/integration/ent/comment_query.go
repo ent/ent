@@ -352,8 +352,9 @@ func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (cq *CommentQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(comment.Table)
-	selector := sql.Select(t1.Columns(comment.Columns...)...).From(t1)
+	builder := sql.Dialect(cq.driver.Dialect())
+	t1 := builder.Table(comment.Table)
+	selector := builder.Select(t1.Columns(comment.Columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
 		selector.Select(selector.Columns(comment.Columns...)...)
@@ -735,7 +736,8 @@ func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (cs *CommentSelect) sqlQuery() sql.Querier {
 	view := "comment_view"
-	return sql.Select(cs.fields...).From(cs.sql.As(view))
+	return sql.Dialect(cs.driver.Dialect()).
+		Select(cs.fields...).From(cs.sql.As(view))
 }
 
 func (cs *CommentSelect) gremlinScan(ctx context.Context, v interface{}) error {

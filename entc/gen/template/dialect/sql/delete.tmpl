@@ -9,12 +9,15 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
-	var res sql.Result
-	selector := sql.Select().From(sql.Table({{ $.Package }}.Table))
+	var (
+		res sql.Result
+		builder = sql.Dialect({{ $receiver }}.driver.Dialect())
+	)
+	selector := builder.Select().From(sql.Table({{ $.Package }}.Table))
 	for _, p := range {{ $receiver }}.predicates {
 		p(selector)
 	}
-	query, args := sql.Delete({{ $.Package }}.Table).FromSelect(selector).Query()
+	query, args := builder.Delete({{ $.Package }}.Table).FromSelect(selector).Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

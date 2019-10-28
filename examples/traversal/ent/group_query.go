@@ -57,15 +57,17 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	t1 := sql.Table(user.Table)
+
+	builder := sql.Dialect(gq.driver.Dialect())
+	t1 := builder.Table(user.Table)
 	t2 := gq.sqlQuery()
 	t2.Select(t2.C(group.FieldID))
-	t3 := sql.Table(group.UsersTable)
-	t4 := sql.Select(t3.C(group.UsersPrimaryKey[1])).
+	t3 := builder.Table(group.UsersTable)
+	t4 := builder.Select(t3.C(group.UsersPrimaryKey[1])).
 		From(t3).
 		Join(t2).
 		On(t3.C(group.UsersPrimaryKey[0]), t2.C(group.FieldID))
-	query.sql = sql.Select().
+	query.sql = builder.Select().
 		From(t1).
 		Join(t4).
 		On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[1]))
@@ -75,10 +77,12 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 // QueryAdmin chains the current query on the admin edge.
 func (gq *GroupQuery) QueryAdmin() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	t1 := sql.Table(user.Table)
+
+	builder := sql.Dialect(gq.driver.Dialect())
+	t1 := builder.Table(user.Table)
 	t2 := gq.sqlQuery()
 	t2.Select(t2.C(group.AdminColumn))
-	query.sql = sql.Select(t1.Columns(user.Columns...)...).
+	query.sql = builder.Select(t1.Columns(user.Columns...)...).
 		From(t1).
 		Join(t2).
 		On(t1.C(user.FieldID), t2.C(group.AdminColumn))
@@ -346,8 +350,9 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (gq *GroupQuery) sqlQuery() *sql.Selector {
-	t1 := sql.Table(group.Table)
-	selector := sql.Select(t1.Columns(group.Columns...)...).From(t1)
+	builder := sql.Dialect(gq.driver.Dialect())
+	t1 := builder.Table(group.Table)
+	selector := builder.Select(t1.Columns(group.Columns...)...).From(t1)
 	if gq.sql != nil {
 		selector = gq.sql
 		selector.Select(selector.Columns(group.Columns...)...)
@@ -616,5 +621,6 @@ func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 
 func (gs *GroupSelect) sqlQuery() sql.Querier {
 	view := "group_view"
-	return sql.Select(gs.fields...).From(gs.sql.As(view))
+	return sql.Dialect(gs.driver.Dialect()).
+		Select(gs.fields...).From(gs.sql.As(view))
 }

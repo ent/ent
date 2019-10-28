@@ -179,7 +179,10 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(user.FieldID).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uu.driver.Dialect())
+		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
+	)
 	for _, p := range uu.predicates {
 		p(selector)
 	}
@@ -207,19 +210,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -229,7 +232,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedCars {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.CarsTable).
+		query, args := builder.Update(user.CarsTable).
 			SetNull(user.CarsColumn).
 			Where(sql.InInts(user.CarsColumn, ids...)).
 			Where(sql.InInts(car.FieldID, eids...)).
@@ -244,7 +247,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range uu.cars {
 				p.Or().EQ(car.FieldID, eid)
 			}
-			query, args := sql.Update(user.CarsTable).
+			query, args := builder.Update(user.CarsTable).
 				Set(user.CarsColumn, id).
 				Where(sql.And(p, sql.IsNull(user.CarsColumn))).
 				Query()
@@ -265,7 +268,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range uu.removedGroups {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.GroupsTable).
+		query, args := builder.Delete(user.GroupsTable).
 			Where(sql.InInts(user.GroupsPrimaryKey[1], ids...)).
 			Where(sql.InInts(user.GroupsPrimaryKey[0], eids...)).
 			Query()
@@ -280,7 +283,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.GroupsTable).
+		builder := builder.Insert(user.GroupsTable).
 			Columns(user.GroupsPrimaryKey[1], user.GroupsPrimaryKey[0])
 		for _, v := range values {
 			builder.Values(v[0], v[1])
@@ -453,7 +456,10 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	selector := sql.Select(user.Columns...).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uuo.driver.Dialect())
+		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
+	)
 	user.ID(uuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -484,22 +490,22 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
@@ -509,7 +515,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedCars {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(user.CarsTable).
+		query, args := builder.Update(user.CarsTable).
 			SetNull(user.CarsColumn).
 			Where(sql.InInts(user.CarsColumn, ids...)).
 			Where(sql.InInts(car.FieldID, eids...)).
@@ -524,7 +530,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			for eid := range uuo.cars {
 				p.Or().EQ(car.FieldID, eid)
 			}
-			query, args := sql.Update(user.CarsTable).
+			query, args := builder.Update(user.CarsTable).
 				Set(user.CarsColumn, id).
 				Where(sql.And(p, sql.IsNull(user.CarsColumn))).
 				Query()
@@ -545,7 +551,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		for eid := range uuo.removedGroups {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Delete(user.GroupsTable).
+		query, args := builder.Delete(user.GroupsTable).
 			Where(sql.InInts(user.GroupsPrimaryKey[1], ids...)).
 			Where(sql.InInts(user.GroupsPrimaryKey[0], eids...)).
 			Query()
@@ -560,7 +566,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				values = append(values, []int{id, eid})
 			}
 		}
-		builder := sql.Insert(user.GroupsTable).
+		builder := builder.Insert(user.GroupsTable).
 			Columns(user.GroupsPrimaryKey[1], user.GroupsPrimaryKey[0])
 		for _, v := range values {
 			builder.Values(v[0], v[1])

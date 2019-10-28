@@ -833,11 +833,12 @@ func HasFiles() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(FilesColumn).
-						From(sql.Table(FilesTable)).
+					builder.Select(FilesColumn).
+						From(builder.Table(FilesTable)).
 						Where(sql.NotNull(FilesColumn)),
 				),
 			)
@@ -852,8 +853,9 @@ func HasFiles() predicate.Group {
 func HasFilesWith(preds ...predicate.File) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FilesColumn).From(sql.Table(FilesTable))
+			t2 := builder.Select(FilesColumn).From(builder.Table(FilesTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -874,11 +876,12 @@ func HasBlocked() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(BlockedColumn).
-						From(sql.Table(BlockedTable)).
+					builder.Select(BlockedColumn).
+						From(builder.Table(BlockedTable)).
 						Where(sql.NotNull(BlockedColumn)),
 				),
 			)
@@ -893,8 +896,9 @@ func HasBlocked() predicate.Group {
 func HasBlockedWith(preds ...predicate.User) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(BlockedColumn).From(sql.Table(BlockedTable))
+			t2 := builder.Select(BlockedColumn).From(builder.Table(BlockedTable))
 			for _, p := range preds {
 				p(t2)
 			}
@@ -915,10 +919,12 @@ func HasUsers() predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
 			t1 := s.Table()
+			builder := sql.Dialect(s.Dialect())
 			s.Where(
 				sql.In(
 					t1.C(FieldID),
-					sql.Select(UsersPrimaryKey[1]).From(sql.Table(UsersTable)),
+					builder.Select(UsersPrimaryKey[1]).
+						From(builder.Table(UsersTable)),
 				),
 			)
 		},
@@ -932,14 +938,15 @@ func HasUsers() predicate.Group {
 func HasUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Table(UsersInverseTable)
-			t3 := sql.Table(UsersTable)
-			t4 := sql.Select(t3.C(UsersPrimaryKey[1])).
+			t2 := builder.Table(UsersInverseTable)
+			t3 := builder.Table(UsersTable)
+			t4 := builder.Select(t3.C(UsersPrimaryKey[1])).
 				From(t3).
 				Join(t2).
 				On(t3.C(UsersPrimaryKey[0]), t2.C(FieldID))
-			t5 := sql.Select().From(t2)
+			t5 := builder.Select().From(t2)
 			for _, p := range preds {
 				p(t5)
 			}
@@ -973,8 +980,9 @@ func HasInfo() predicate.Group {
 func HasInfoWith(preds ...predicate.GroupInfo) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
+			builder := sql.Dialect(s.Dialect())
 			t1 := s.Table()
-			t2 := sql.Select(FieldID).From(sql.Table(InfoInverseTable))
+			t2 := builder.Select(FieldID).From(builder.Table(InfoInverseTable))
 			for _, p := range preds {
 				p(t2)
 			}

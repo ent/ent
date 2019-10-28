@@ -116,7 +116,10 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(user.FieldID).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uu.driver.Dialect())
+		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
+	)
 	for _, p := range uu.predicates {
 		p(selector)
 	}
@@ -144,25 +147,25 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uu.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 	}
 	if value := uu.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 	}
 	if value := uu.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if uu.clearedCard {
-		query, args := sql.Update(user.CardTable).
+		query, args := builder.Update(user.CardTable).
 			SetNull(user.CardColumn).
 			Where(sql.InInts(card.FieldID, ids...)).
 			Query()
@@ -173,7 +176,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if len(uu.card) > 0 {
 		for _, id := range ids {
 			eid := keys(uu.card)[0]
-			query, args := sql.Update(user.CardTable).
+			query, args := builder.Update(user.CardTable).
 				Set(user.CardColumn, id).
 				Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
 				Query()
@@ -288,7 +291,10 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	selector := sql.Select(user.Columns...).From(sql.Table(user.Table))
+	var (
+		builder  = sql.Dialect(uuo.driver.Dialect())
+		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
+	)
 	user.ID(uuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -319,28 +325,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
 	)
 	if value := uuo.age; value != nil {
-		builder.Set(user.FieldAge, *value)
+		updater.Set(user.FieldAge, *value)
 		u.Age = *value
 	}
 	if value := uuo.addage; value != nil {
-		builder.Add(user.FieldAge, *value)
+		updater.Add(user.FieldAge, *value)
 		u.Age += *value
 	}
 	if value := uuo.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		updater.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if uuo.clearedCard {
-		query, args := sql.Update(user.CardTable).
+		query, args := builder.Update(user.CardTable).
 			SetNull(user.CardColumn).
 			Where(sql.InInts(card.FieldID, ids...)).
 			Query()
@@ -351,7 +357,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	if len(uuo.card) > 0 {
 		for _, id := range ids {
 			eid := keys(uuo.card)[0]
-			query, args := sql.Update(user.CardTable).
+			query, args := builder.Update(user.CardTable).
 				Set(user.CardColumn, id).
 				Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
 				Query()

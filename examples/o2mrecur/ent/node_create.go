@@ -93,32 +93,27 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	var (
-		res sql.Result
-		n   = &Node{config: nc.config}
+		res     sql.Result
+		builder = sql.Dialect(nc.driver.Dialect())
+		n       = &Node{config: nc.config}
 	)
 	tx, err := nc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(nc.driver.Dialect()).
-		Insert(node.Table).
-		Default()
+	insert := builder.Insert(node.Table).Default()
 	if value := nc.value; value != nil {
-		builder.Set(node.FieldValue, *value)
+		insert.Set(node.FieldValue, *value)
 		n.Value = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(node.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	n.ID = int(id)
 	if len(nc.parent) > 0 {
 		for eid := range nc.parent {
-			query, args := sql.Update(node.ParentTable).
+			query, args := builder.Update(node.ParentTable).
 				Set(node.ParentColumn, eid).
 				Where(sql.EQ(node.FieldID, id)).
 				Query()
@@ -132,7 +127,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		for eid := range nc.children {
 			p.Or().EQ(node.FieldID, eid)
 		}
-		query, args := sql.Update(node.ChildrenTable).
+		query, args := builder.Update(node.ChildrenTable).
 			Set(node.ChildrenColumn, id).
 			Where(sql.And(p, sql.IsNull(node.ChildrenColumn))).
 			Query()

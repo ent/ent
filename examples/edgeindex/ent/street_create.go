@@ -71,32 +71,27 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	var (
-		res sql.Result
-		s   = &Street{config: sc.config}
+		res     sql.Result
+		builder = sql.Dialect(sc.driver.Dialect())
+		s       = &Street{config: sc.config}
 	)
 	tx, err := sc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(sc.driver.Dialect()).
-		Insert(street.Table).
-		Default()
+	insert := builder.Insert(street.Table).Default()
 	if value := sc.name; value != nil {
-		builder.Set(street.FieldName, *value)
+		insert.Set(street.FieldName, *value)
 		s.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(street.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	s.ID = int(id)
 	if len(sc.city) > 0 {
 		for eid := range sc.city {
-			query, args := sql.Update(street.CityTable).
+			query, args := builder.Update(street.CityTable).
 				Set(street.CityColumn, eid).
 				Where(sql.EQ(street.FieldID, id)).
 				Query()

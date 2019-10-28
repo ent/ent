@@ -150,7 +150,10 @@ func (nu *NodeUpdate) ExecX(ctx context.Context) {
 }
 
 func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(node.FieldID).From(sql.Table(node.Table))
+	var (
+		builder  = sql.Dialect(nu.driver.Dialect())
+		selector = builder.Select(node.FieldID).From(builder.Table(node.Table))
+	)
 	for _, p := range nu.predicates {
 		p(selector)
 	}
@@ -178,22 +181,22 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
+		updater = builder.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
 	if value := nu.value; value != nil {
-		builder.Set(node.FieldValue, *value)
+		updater.Set(node.FieldValue, *value)
 	}
 	if value := nu.addvalue; value != nil {
-		builder.Add(node.FieldValue, *value)
+		updater.Add(node.FieldValue, *value)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
 	}
 	if nu.clearedParent {
-		query, args := sql.Update(node.ParentTable).
+		query, args := builder.Update(node.ParentTable).
 			SetNull(node.ParentColumn).
 			Where(sql.InInts(node.FieldID, ids...)).
 			Query()
@@ -203,7 +206,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if len(nu.parent) > 0 {
 		for eid := range nu.parent {
-			query, args := sql.Update(node.ParentTable).
+			query, args := builder.Update(node.ParentTable).
 				Set(node.ParentColumn, eid).
 				Where(sql.InInts(node.FieldID, ids...)).
 				Query()
@@ -217,7 +220,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for eid := range nu.removedChildren {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(node.ChildrenTable).
+		query, args := builder.Update(node.ChildrenTable).
 			SetNull(node.ChildrenColumn).
 			Where(sql.InInts(node.ChildrenColumn, ids...)).
 			Where(sql.InInts(node.FieldID, eids...)).
@@ -232,7 +235,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			for eid := range nu.children {
 				p.Or().EQ(node.FieldID, eid)
 			}
-			query, args := sql.Update(node.ChildrenTable).
+			query, args := builder.Update(node.ChildrenTable).
 				Set(node.ChildrenColumn, id).
 				Where(sql.And(p, sql.IsNull(node.ChildrenColumn))).
 				Query()
@@ -382,7 +385,10 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
-	selector := sql.Select(node.Columns...).From(sql.Table(node.Table))
+	var (
+		builder  = sql.Dialect(nuo.driver.Dialect())
+		selector = builder.Select(node.Columns...).From(builder.Table(node.Table))
+	)
 	node.ID(nuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -413,24 +419,24 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
+		updater = builder.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
 	)
 	if value := nuo.value; value != nil {
-		builder.Set(node.FieldValue, *value)
+		updater.Set(node.FieldValue, *value)
 		n.Value = *value
 	}
 	if value := nuo.addvalue; value != nil {
-		builder.Add(node.FieldValue, *value)
+		updater.Add(node.FieldValue, *value)
 		n.Value += *value
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}
 	}
 	if nuo.clearedParent {
-		query, args := sql.Update(node.ParentTable).
+		query, args := builder.Update(node.ParentTable).
 			SetNull(node.ParentColumn).
 			Where(sql.InInts(node.FieldID, ids...)).
 			Query()
@@ -440,7 +446,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	if len(nuo.parent) > 0 {
 		for eid := range nuo.parent {
-			query, args := sql.Update(node.ParentTable).
+			query, args := builder.Update(node.ParentTable).
 				Set(node.ParentColumn, eid).
 				Where(sql.InInts(node.FieldID, ids...)).
 				Query()
@@ -454,7 +460,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		for eid := range nuo.removedChildren {
 			eids = append(eids, eid)
 		}
-		query, args := sql.Update(node.ChildrenTable).
+		query, args := builder.Update(node.ChildrenTable).
 			SetNull(node.ChildrenColumn).
 			Where(sql.InInts(node.ChildrenColumn, ids...)).
 			Where(sql.InInts(node.FieldID, eids...)).
@@ -469,7 +475,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			for eid := range nuo.children {
 				p.Or().EQ(node.FieldID, eid)
 			}
-			query, args := sql.Update(node.ChildrenTable).
+			query, args := builder.Update(node.ChildrenTable).
 				Set(node.ChildrenColumn, id).
 				Where(sql.And(p, sql.IsNull(node.ChildrenColumn))).
 				Query()

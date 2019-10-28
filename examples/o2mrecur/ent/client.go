@@ -164,11 +164,12 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	t1 := sql.Table(node.Table)
-	t2 := sql.Select(node.ParentColumn).
-		From(sql.Table(node.ParentTable)).
+	builder := sql.Dialect(n.driver.Dialect())
+	t1 := builder.Table(node.Table)
+	t2 := builder.Select(node.ParentColumn).
+		From(builder.Table(node.ParentTable)).
 		Where(sql.EQ(node.FieldID, id))
-	query.sql = sql.Select().From(t1).Join(t2).On(t1.C(node.FieldID), t2.C(node.ParentColumn))
+	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(node.FieldID), t2.C(node.ParentColumn))
 
 	return query
 }
@@ -177,7 +178,8 @@ func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	query.sql = sql.Select().From(sql.Table(node.Table)).
+	builder := sql.Dialect(n.driver.Dialect())
+	query.sql = builder.Select().From(builder.Table(node.Table)).
 		Where(sql.EQ(node.ChildrenColumn, id))
 
 	return query

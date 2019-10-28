@@ -114,38 +114,33 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res sql.Result
-		u   = &User{config: uc.config}
+		res     sql.Result
+		builder = sql.Dialect(uc.driver.Dialect())
+		u       = &User{config: uc.config}
 	)
 	tx, err := uc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(uc.driver.Dialect()).
-		Insert(user.Table).
-		Default()
+	insert := builder.Insert(user.Table).Default()
 	if value := uc.name; value != nil {
-		builder.Set(user.FieldName, *value)
+		insert.Set(user.FieldName, *value)
 		u.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
 	u.ID = uint64(id)
 	if len(uc.spouse) > 0 {
 		for eid := range uc.spouse {
-			query, args := sql.Update(user.SpouseTable).
+			query, args := builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, eid).
 				Where(sql.EQ(user.FieldID, id)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
 				return nil, rollback(tx, err)
 			}
-			query, args = sql.Update(user.SpouseTable).
+			query, args = builder.Update(user.SpouseTable).
 				Set(user.SpouseColumn, id).
 				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
 			if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -163,7 +158,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if len(uc.followers) > 0 {
 		for eid := range uc.followers {
 
-			query, args := sql.Insert(user.FollowersTable).
+			query, args := builder.Insert(user.FollowersTable).
 				Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0]).
 				Values(id, eid).
 				Query()
@@ -175,7 +170,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if len(uc.following) > 0 {
 		for eid := range uc.following {
 
-			query, args := sql.Insert(user.FollowingTable).
+			query, args := builder.Insert(user.FollowingTable).
 				Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1]).
 				Values(id, eid).
 				Query()

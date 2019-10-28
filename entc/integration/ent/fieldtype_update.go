@@ -581,7 +581,10 @@ func (ftu *FieldTypeUpdate) ExecX(ctx context.Context) {
 }
 
 func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	selector := sql.Select(fieldtype.FieldID).From(sql.Table(fieldtype.Table))
+	var (
+		builder  = sql.Dialect(ftu.driver.Dialect())
+		selector = builder.Select(fieldtype.FieldID).From(builder.Table(fieldtype.Table))
+	)
 	for _, p := range ftu.predicates {
 		p(selector)
 	}
@@ -609,145 +612,145 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(fieldtype.Table).Where(sql.InInts(fieldtype.FieldID, ids...))
+		updater = builder.Update(fieldtype.Table).Where(sql.InInts(fieldtype.FieldID, ids...))
 	)
 	if value := ftu.int; value != nil {
-		builder.Set(fieldtype.FieldInt, *value)
+		updater.Set(fieldtype.FieldInt, *value)
 	}
 	if value := ftu.addint; value != nil {
-		builder.Add(fieldtype.FieldInt, *value)
+		updater.Add(fieldtype.FieldInt, *value)
 	}
 	if value := ftu.int8; value != nil {
-		builder.Set(fieldtype.FieldInt8, *value)
+		updater.Set(fieldtype.FieldInt8, *value)
 	}
 	if value := ftu.addint8; value != nil {
-		builder.Add(fieldtype.FieldInt8, *value)
+		updater.Add(fieldtype.FieldInt8, *value)
 	}
 	if value := ftu.int16; value != nil {
-		builder.Set(fieldtype.FieldInt16, *value)
+		updater.Set(fieldtype.FieldInt16, *value)
 	}
 	if value := ftu.addint16; value != nil {
-		builder.Add(fieldtype.FieldInt16, *value)
+		updater.Add(fieldtype.FieldInt16, *value)
 	}
 	if value := ftu.int32; value != nil {
-		builder.Set(fieldtype.FieldInt32, *value)
+		updater.Set(fieldtype.FieldInt32, *value)
 	}
 	if value := ftu.addint32; value != nil {
-		builder.Add(fieldtype.FieldInt32, *value)
+		updater.Add(fieldtype.FieldInt32, *value)
 	}
 	if value := ftu.int64; value != nil {
-		builder.Set(fieldtype.FieldInt64, *value)
+		updater.Set(fieldtype.FieldInt64, *value)
 	}
 	if value := ftu.addint64; value != nil {
-		builder.Add(fieldtype.FieldInt64, *value)
+		updater.Add(fieldtype.FieldInt64, *value)
 	}
 	if value := ftu.optional_int; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt, *value)
+		updater.Set(fieldtype.FieldOptionalInt, *value)
 	}
 	if value := ftu.addoptional_int; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt, *value)
+		updater.Add(fieldtype.FieldOptionalInt, *value)
 	}
 	if ftu.clearoptional_int {
-		builder.SetNull(fieldtype.FieldOptionalInt)
+		updater.SetNull(fieldtype.FieldOptionalInt)
 	}
 	if value := ftu.optional_int8; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt8, *value)
+		updater.Set(fieldtype.FieldOptionalInt8, *value)
 	}
 	if value := ftu.addoptional_int8; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt8, *value)
+		updater.Add(fieldtype.FieldOptionalInt8, *value)
 	}
 	if ftu.clearoptional_int8 {
-		builder.SetNull(fieldtype.FieldOptionalInt8)
+		updater.SetNull(fieldtype.FieldOptionalInt8)
 	}
 	if value := ftu.optional_int16; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt16, *value)
+		updater.Set(fieldtype.FieldOptionalInt16, *value)
 	}
 	if value := ftu.addoptional_int16; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt16, *value)
+		updater.Add(fieldtype.FieldOptionalInt16, *value)
 	}
 	if ftu.clearoptional_int16 {
-		builder.SetNull(fieldtype.FieldOptionalInt16)
+		updater.SetNull(fieldtype.FieldOptionalInt16)
 	}
 	if value := ftu.optional_int32; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt32, *value)
+		updater.Set(fieldtype.FieldOptionalInt32, *value)
 	}
 	if value := ftu.addoptional_int32; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt32, *value)
+		updater.Add(fieldtype.FieldOptionalInt32, *value)
 	}
 	if ftu.clearoptional_int32 {
-		builder.SetNull(fieldtype.FieldOptionalInt32)
+		updater.SetNull(fieldtype.FieldOptionalInt32)
 	}
 	if value := ftu.optional_int64; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt64, *value)
+		updater.Set(fieldtype.FieldOptionalInt64, *value)
 	}
 	if value := ftu.addoptional_int64; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt64, *value)
+		updater.Add(fieldtype.FieldOptionalInt64, *value)
 	}
 	if ftu.clearoptional_int64 {
-		builder.SetNull(fieldtype.FieldOptionalInt64)
+		updater.SetNull(fieldtype.FieldOptionalInt64)
 	}
 	if value := ftu.nillable_int; value != nil {
-		builder.Set(fieldtype.FieldNillableInt, *value)
+		updater.Set(fieldtype.FieldNillableInt, *value)
 	}
 	if value := ftu.addnillable_int; value != nil {
-		builder.Add(fieldtype.FieldNillableInt, *value)
+		updater.Add(fieldtype.FieldNillableInt, *value)
 	}
 	if ftu.clearnillable_int {
-		builder.SetNull(fieldtype.FieldNillableInt)
+		updater.SetNull(fieldtype.FieldNillableInt)
 	}
 	if value := ftu.nillable_int8; value != nil {
-		builder.Set(fieldtype.FieldNillableInt8, *value)
+		updater.Set(fieldtype.FieldNillableInt8, *value)
 	}
 	if value := ftu.addnillable_int8; value != nil {
-		builder.Add(fieldtype.FieldNillableInt8, *value)
+		updater.Add(fieldtype.FieldNillableInt8, *value)
 	}
 	if ftu.clearnillable_int8 {
-		builder.SetNull(fieldtype.FieldNillableInt8)
+		updater.SetNull(fieldtype.FieldNillableInt8)
 	}
 	if value := ftu.nillable_int16; value != nil {
-		builder.Set(fieldtype.FieldNillableInt16, *value)
+		updater.Set(fieldtype.FieldNillableInt16, *value)
 	}
 	if value := ftu.addnillable_int16; value != nil {
-		builder.Add(fieldtype.FieldNillableInt16, *value)
+		updater.Add(fieldtype.FieldNillableInt16, *value)
 	}
 	if ftu.clearnillable_int16 {
-		builder.SetNull(fieldtype.FieldNillableInt16)
+		updater.SetNull(fieldtype.FieldNillableInt16)
 	}
 	if value := ftu.nillable_int32; value != nil {
-		builder.Set(fieldtype.FieldNillableInt32, *value)
+		updater.Set(fieldtype.FieldNillableInt32, *value)
 	}
 	if value := ftu.addnillable_int32; value != nil {
-		builder.Add(fieldtype.FieldNillableInt32, *value)
+		updater.Add(fieldtype.FieldNillableInt32, *value)
 	}
 	if ftu.clearnillable_int32 {
-		builder.SetNull(fieldtype.FieldNillableInt32)
+		updater.SetNull(fieldtype.FieldNillableInt32)
 	}
 	if value := ftu.nillable_int64; value != nil {
-		builder.Set(fieldtype.FieldNillableInt64, *value)
+		updater.Set(fieldtype.FieldNillableInt64, *value)
 	}
 	if value := ftu.addnillable_int64; value != nil {
-		builder.Add(fieldtype.FieldNillableInt64, *value)
+		updater.Add(fieldtype.FieldNillableInt64, *value)
 	}
 	if ftu.clearnillable_int64 {
-		builder.SetNull(fieldtype.FieldNillableInt64)
+		updater.SetNull(fieldtype.FieldNillableInt64)
 	}
 	if value := ftu.validate_optional_int32; value != nil {
-		builder.Set(fieldtype.FieldValidateOptionalInt32, *value)
+		updater.Set(fieldtype.FieldValidateOptionalInt32, *value)
 	}
 	if value := ftu.addvalidate_optional_int32; value != nil {
-		builder.Add(fieldtype.FieldValidateOptionalInt32, *value)
+		updater.Add(fieldtype.FieldValidateOptionalInt32, *value)
 	}
 	if ftu.clearvalidate_optional_int32 {
-		builder.SetNull(fieldtype.FieldValidateOptionalInt32)
+		updater.SetNull(fieldtype.FieldValidateOptionalInt32)
 	}
 	if value := ftu.state; value != nil {
-		builder.Set(fieldtype.FieldState, *value)
+		updater.Set(fieldtype.FieldState, *value)
 	}
 	if ftu.clearstate {
-		builder.SetNull(fieldtype.FieldState)
+		updater.SetNull(fieldtype.FieldState)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, rollback(tx, err)
 		}
@@ -1476,7 +1479,10 @@ func (ftuo *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err error) {
-	selector := sql.Select(fieldtype.Columns...).From(sql.Table(fieldtype.Table))
+	var (
+		builder  = sql.Dialect(ftuo.driver.Dialect())
+		selector = builder.Select(fieldtype.Columns...).From(builder.Table(fieldtype.Table))
+	)
 	fieldtype.ID(ftuo.id)(selector)
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -1507,119 +1513,119 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	var (
 		res     sql.Result
-		builder = sql.Update(fieldtype.Table).Where(sql.InInts(fieldtype.FieldID, ids...))
+		updater = builder.Update(fieldtype.Table).Where(sql.InInts(fieldtype.FieldID, ids...))
 	)
 	if value := ftuo.int; value != nil {
-		builder.Set(fieldtype.FieldInt, *value)
+		updater.Set(fieldtype.FieldInt, *value)
 		ft.Int = *value
 	}
 	if value := ftuo.addint; value != nil {
-		builder.Add(fieldtype.FieldInt, *value)
+		updater.Add(fieldtype.FieldInt, *value)
 		ft.Int += *value
 	}
 	if value := ftuo.int8; value != nil {
-		builder.Set(fieldtype.FieldInt8, *value)
+		updater.Set(fieldtype.FieldInt8, *value)
 		ft.Int8 = *value
 	}
 	if value := ftuo.addint8; value != nil {
-		builder.Add(fieldtype.FieldInt8, *value)
+		updater.Add(fieldtype.FieldInt8, *value)
 		ft.Int8 += *value
 	}
 	if value := ftuo.int16; value != nil {
-		builder.Set(fieldtype.FieldInt16, *value)
+		updater.Set(fieldtype.FieldInt16, *value)
 		ft.Int16 = *value
 	}
 	if value := ftuo.addint16; value != nil {
-		builder.Add(fieldtype.FieldInt16, *value)
+		updater.Add(fieldtype.FieldInt16, *value)
 		ft.Int16 += *value
 	}
 	if value := ftuo.int32; value != nil {
-		builder.Set(fieldtype.FieldInt32, *value)
+		updater.Set(fieldtype.FieldInt32, *value)
 		ft.Int32 = *value
 	}
 	if value := ftuo.addint32; value != nil {
-		builder.Add(fieldtype.FieldInt32, *value)
+		updater.Add(fieldtype.FieldInt32, *value)
 		ft.Int32 += *value
 	}
 	if value := ftuo.int64; value != nil {
-		builder.Set(fieldtype.FieldInt64, *value)
+		updater.Set(fieldtype.FieldInt64, *value)
 		ft.Int64 = *value
 	}
 	if value := ftuo.addint64; value != nil {
-		builder.Add(fieldtype.FieldInt64, *value)
+		updater.Add(fieldtype.FieldInt64, *value)
 		ft.Int64 += *value
 	}
 	if value := ftuo.optional_int; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt, *value)
+		updater.Set(fieldtype.FieldOptionalInt, *value)
 		ft.OptionalInt = *value
 	}
 	if value := ftuo.addoptional_int; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt, *value)
+		updater.Add(fieldtype.FieldOptionalInt, *value)
 		ft.OptionalInt += *value
 	}
 	if ftuo.clearoptional_int {
 		var value int
 		ft.OptionalInt = value
-		builder.SetNull(fieldtype.FieldOptionalInt)
+		updater.SetNull(fieldtype.FieldOptionalInt)
 	}
 	if value := ftuo.optional_int8; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt8, *value)
+		updater.Set(fieldtype.FieldOptionalInt8, *value)
 		ft.OptionalInt8 = *value
 	}
 	if value := ftuo.addoptional_int8; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt8, *value)
+		updater.Add(fieldtype.FieldOptionalInt8, *value)
 		ft.OptionalInt8 += *value
 	}
 	if ftuo.clearoptional_int8 {
 		var value int8
 		ft.OptionalInt8 = value
-		builder.SetNull(fieldtype.FieldOptionalInt8)
+		updater.SetNull(fieldtype.FieldOptionalInt8)
 	}
 	if value := ftuo.optional_int16; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt16, *value)
+		updater.Set(fieldtype.FieldOptionalInt16, *value)
 		ft.OptionalInt16 = *value
 	}
 	if value := ftuo.addoptional_int16; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt16, *value)
+		updater.Add(fieldtype.FieldOptionalInt16, *value)
 		ft.OptionalInt16 += *value
 	}
 	if ftuo.clearoptional_int16 {
 		var value int16
 		ft.OptionalInt16 = value
-		builder.SetNull(fieldtype.FieldOptionalInt16)
+		updater.SetNull(fieldtype.FieldOptionalInt16)
 	}
 	if value := ftuo.optional_int32; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt32, *value)
+		updater.Set(fieldtype.FieldOptionalInt32, *value)
 		ft.OptionalInt32 = *value
 	}
 	if value := ftuo.addoptional_int32; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt32, *value)
+		updater.Add(fieldtype.FieldOptionalInt32, *value)
 		ft.OptionalInt32 += *value
 	}
 	if ftuo.clearoptional_int32 {
 		var value int32
 		ft.OptionalInt32 = value
-		builder.SetNull(fieldtype.FieldOptionalInt32)
+		updater.SetNull(fieldtype.FieldOptionalInt32)
 	}
 	if value := ftuo.optional_int64; value != nil {
-		builder.Set(fieldtype.FieldOptionalInt64, *value)
+		updater.Set(fieldtype.FieldOptionalInt64, *value)
 		ft.OptionalInt64 = *value
 	}
 	if value := ftuo.addoptional_int64; value != nil {
-		builder.Add(fieldtype.FieldOptionalInt64, *value)
+		updater.Add(fieldtype.FieldOptionalInt64, *value)
 		ft.OptionalInt64 += *value
 	}
 	if ftuo.clearoptional_int64 {
 		var value int64
 		ft.OptionalInt64 = value
-		builder.SetNull(fieldtype.FieldOptionalInt64)
+		updater.SetNull(fieldtype.FieldOptionalInt64)
 	}
 	if value := ftuo.nillable_int; value != nil {
-		builder.Set(fieldtype.FieldNillableInt, *value)
+		updater.Set(fieldtype.FieldNillableInt, *value)
 		ft.NillableInt = value
 	}
 	if value := ftuo.addnillable_int; value != nil {
-		builder.Add(fieldtype.FieldNillableInt, *value)
+		updater.Add(fieldtype.FieldNillableInt, *value)
 		if ft.NillableInt != nil {
 			*ft.NillableInt += *value
 		} else {
@@ -1628,14 +1634,14 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	if ftuo.clearnillable_int {
 		ft.NillableInt = nil
-		builder.SetNull(fieldtype.FieldNillableInt)
+		updater.SetNull(fieldtype.FieldNillableInt)
 	}
 	if value := ftuo.nillable_int8; value != nil {
-		builder.Set(fieldtype.FieldNillableInt8, *value)
+		updater.Set(fieldtype.FieldNillableInt8, *value)
 		ft.NillableInt8 = value
 	}
 	if value := ftuo.addnillable_int8; value != nil {
-		builder.Add(fieldtype.FieldNillableInt8, *value)
+		updater.Add(fieldtype.FieldNillableInt8, *value)
 		if ft.NillableInt8 != nil {
 			*ft.NillableInt8 += *value
 		} else {
@@ -1644,14 +1650,14 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	if ftuo.clearnillable_int8 {
 		ft.NillableInt8 = nil
-		builder.SetNull(fieldtype.FieldNillableInt8)
+		updater.SetNull(fieldtype.FieldNillableInt8)
 	}
 	if value := ftuo.nillable_int16; value != nil {
-		builder.Set(fieldtype.FieldNillableInt16, *value)
+		updater.Set(fieldtype.FieldNillableInt16, *value)
 		ft.NillableInt16 = value
 	}
 	if value := ftuo.addnillable_int16; value != nil {
-		builder.Add(fieldtype.FieldNillableInt16, *value)
+		updater.Add(fieldtype.FieldNillableInt16, *value)
 		if ft.NillableInt16 != nil {
 			*ft.NillableInt16 += *value
 		} else {
@@ -1660,14 +1666,14 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	if ftuo.clearnillable_int16 {
 		ft.NillableInt16 = nil
-		builder.SetNull(fieldtype.FieldNillableInt16)
+		updater.SetNull(fieldtype.FieldNillableInt16)
 	}
 	if value := ftuo.nillable_int32; value != nil {
-		builder.Set(fieldtype.FieldNillableInt32, *value)
+		updater.Set(fieldtype.FieldNillableInt32, *value)
 		ft.NillableInt32 = value
 	}
 	if value := ftuo.addnillable_int32; value != nil {
-		builder.Add(fieldtype.FieldNillableInt32, *value)
+		updater.Add(fieldtype.FieldNillableInt32, *value)
 		if ft.NillableInt32 != nil {
 			*ft.NillableInt32 += *value
 		} else {
@@ -1676,14 +1682,14 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	if ftuo.clearnillable_int32 {
 		ft.NillableInt32 = nil
-		builder.SetNull(fieldtype.FieldNillableInt32)
+		updater.SetNull(fieldtype.FieldNillableInt32)
 	}
 	if value := ftuo.nillable_int64; value != nil {
-		builder.Set(fieldtype.FieldNillableInt64, *value)
+		updater.Set(fieldtype.FieldNillableInt64, *value)
 		ft.NillableInt64 = value
 	}
 	if value := ftuo.addnillable_int64; value != nil {
-		builder.Add(fieldtype.FieldNillableInt64, *value)
+		updater.Add(fieldtype.FieldNillableInt64, *value)
 		if ft.NillableInt64 != nil {
 			*ft.NillableInt64 += *value
 		} else {
@@ -1692,32 +1698,32 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 	}
 	if ftuo.clearnillable_int64 {
 		ft.NillableInt64 = nil
-		builder.SetNull(fieldtype.FieldNillableInt64)
+		updater.SetNull(fieldtype.FieldNillableInt64)
 	}
 	if value := ftuo.validate_optional_int32; value != nil {
-		builder.Set(fieldtype.FieldValidateOptionalInt32, *value)
+		updater.Set(fieldtype.FieldValidateOptionalInt32, *value)
 		ft.ValidateOptionalInt32 = *value
 	}
 	if value := ftuo.addvalidate_optional_int32; value != nil {
-		builder.Add(fieldtype.FieldValidateOptionalInt32, *value)
+		updater.Add(fieldtype.FieldValidateOptionalInt32, *value)
 		ft.ValidateOptionalInt32 += *value
 	}
 	if ftuo.clearvalidate_optional_int32 {
 		var value int32
 		ft.ValidateOptionalInt32 = value
-		builder.SetNull(fieldtype.FieldValidateOptionalInt32)
+		updater.SetNull(fieldtype.FieldValidateOptionalInt32)
 	}
 	if value := ftuo.state; value != nil {
-		builder.Set(fieldtype.FieldState, *value)
+		updater.Set(fieldtype.FieldState, *value)
 		ft.State = *value
 	}
 	if ftuo.clearstate {
 		var value fieldtype.State
 		ft.State = value
-		builder.SetNull(fieldtype.FieldState)
+		updater.SetNull(fieldtype.FieldState)
 	}
-	if !builder.Empty() {
-		query, args := builder.Query()
+	if !updater.Empty() {
+		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return nil, rollback(tx, err)
 		}

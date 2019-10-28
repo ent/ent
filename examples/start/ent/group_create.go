@@ -70,25 +70,20 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		res sql.Result
-		gr  = &Group{config: gc.config}
+		res     sql.Result
+		builder = sql.Dialect(gc.driver.Dialect())
+		gr      = &Group{config: gc.config}
 	)
 	tx, err := gc.driver.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	builder := sql.Dialect(gc.driver.Dialect()).
-		Insert(group.Table).
-		Default()
+	insert := builder.Insert(group.Table).Default()
 	if value := gc.name; value != nil {
-		builder.Set(group.FieldName, *value)
+		insert.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
-	query, args := builder.Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, rollback(tx, err)
-	}
-	id, err := res.LastInsertId()
+	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
@@ -96,7 +91,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	if len(gc.users) > 0 {
 		for eid := range gc.users {
 
-			query, args := sql.Insert(group.UsersTable).
+			query, args := builder.Insert(group.UsersTable).
 				Columns(group.UsersPrimaryKey[0], group.UsersPrimaryKey[1]).
 				Values(id, eid).
 				Query()
