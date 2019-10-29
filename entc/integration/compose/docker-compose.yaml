@@ -36,6 +36,26 @@ services:
     ports:
       - 3308:3306
 
+  postgres10:
+    image: postgres:10
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5430:5432
+
+  postgres11:
+    image: postgres:11
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5431:5432
+
   postgres12:
     image: postgres:12
     environment:
