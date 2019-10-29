@@ -7,8 +7,10 @@ package migrate
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
 	migratev1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/migrate"
@@ -16,7 +18,9 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2"
 	migratev2 "github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -35,29 +39,34 @@ func TestMySQL(t *testing.T) {
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
 
-			// run migration and execute queries on v1.
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
-			require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
-			SanityV1(t, clientv1)
-
-			// run migration and execute queries on v2.
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
-			require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
-			SanityV2(t, clientv2)
+			V1ToV2(t, clientv1, clientv2)
+		})
+	}
+}
 
-			// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
-			// even though they are ordered differently in the migration of v2 (groups, pets, users).
-			idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
-			idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-			idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+func TestPostgres(t *testing.T) {
+	// Version 12 is disabled here due to segfault on migration. It will be re-enabled on its next release.
+	// More info can be found here: https://www.postgresql.org/message-id/23031.1572362774%40sss.pgh.pa.us
+	for version, port := range map[string]int{"10": 5430, "11": 5431} {
+		t.Run(version, func(t *testing.T) {
+			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
+			root, err := sql.Open(dialect.Postgres, dsn)
+			require.NoError(t, err)
+			defer root.Close()
+			ctx := context.Background()
+			err = root.Exec(ctx, "CREATE DATABASE migrate", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, "creating database")
+			defer root.Exec(ctx, "DROP DATABASE migrate", []interface{}{}, new(sql.Result))
 
-			// sql specific predicates.
-			EqualFold(t, clientv2)
-			ContainsFold(t, clientv2)
+			drv, err := sql.Open(dialect.Postgres, dsn+" dbname=migrate")
+			require.NoError(t, err, "connecting to migrate database")
+			defer drv.Close()
 
-			// "renamed" field was renamed to "new_name".
-			exist := clientv2.User.Query().Where(user.NewName("renamed")).ExistX(ctx)
-			require.True(t, exist, "expect renamed column to have previous values")
+			clientv1 := entv1.NewClient(entv1.Driver(drv))
+			clientv2 := entv2.NewClient(entv2.Driver(drv))
+			V1ToV2(t, clientv1, clientv2)
 		})
 	}
 }
@@ -84,6 +93,32 @@ func TestSQLite(t *testing.T) {
 	ContainsFold(t, client)
 }
 
+func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
+	ctx := context.Background()
+
+	// run migration and execute queries on v1.
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
+	SanityV1(t, clientv1)
+
+	// run migration and execute queries on v2.
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
+	SanityV2(t, clientv2)
+
+	// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
+	// even though they are ordered differently in the migration of v2 (groups, pets, users).
+	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+
+	// sql specific predicates.
+	EqualFold(t, clientv2)
+	ContainsFold(t, clientv2)
+
+	// "renamed" field was renamed to "new_name".
+	exist := clientv2.User.Query().Where(user.NewName("renamed")).ExistX(ctx)
+	require.True(t, exist, "expect renamed column to have previous values")
+}
+
 func SanityV1(t *testing.T, client *entv1.Client) {
 	ctx := context.Background()
 	u := client.User.Create().SetAge(1).SetName("foo").SetRenamed("renamed").SaveX(ctx)
@@ -102,7 +137,7 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	u = u.Update().SetBlob([]byte("hello")).SaveX(ctx)
 	require.Equal(t, "hello", string(u.Blob))
 	_, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
-	require.Error(t, err, "data too long for column 'blob' error")
+	require.True(t, strings.Contains(t.Name(), "Postgres") || err != nil, "blob should be limited on SQLite and MySQL")
 
 	// invalid enum value.
 	_, err = client.User.Create().SetAge(1).SetName("bar").SetState("unknown").Save(ctx)
@@ -111,7 +146,7 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 
 func SanityV2(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("bar").SetPhone("100").SetState(user.StateLoggedOut).SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
 	require.Equal(t, []byte("{}"), u.Buffer)

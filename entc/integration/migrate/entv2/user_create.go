@@ -46,6 +46,14 @@ func (uc *UserCreate) SetPhone(s string) *UserCreate {
 	return uc
 }
 
+// SetNillablePhone sets the phone field if the given value is not nil.
+func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
+	if s != nil {
+		uc.SetPhone(*s)
+	}
+	return uc
+}
+
 // SetBuffer sets the buffer field.
 func (uc *UserCreate) SetBuffer(b []byte) *UserCreate {
 	uc.buffer = &b
@@ -109,11 +117,8 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		return nil, errors.New("entv2: missing required field \"name\"")
 	}
 	if uc.phone == nil {
-		return nil, errors.New("entv2: missing required field \"phone\"")
-	}
-	if uc.buffer == nil {
-		v := user.DefaultBuffer
-		uc.buffer = &v
+		v := user.DefaultPhone
+		uc.phone = &v
 	}
 	if uc.title == nil {
 		v := user.DefaultTitle
