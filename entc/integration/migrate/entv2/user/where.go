@@ -633,6 +633,24 @@ func BufferLTE(v []byte) predicate.User {
 	)
 }
 
+// BufferIsNil applies the IsNil predicate on the "buffer" field.
+func BufferIsNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.IsNull(s.C(FieldBuffer)))
+		},
+	)
+}
+
+// BufferNotNil applies the NotNil predicate on the "buffer" field.
+func BufferNotNil() predicate.User {
+	return predicate.User(
+		func(s *sql.Selector) {
+			s.Where(sql.NotNull(s.C(FieldBuffer)))
+		},
+	)
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.User {
 	return predicate.User(

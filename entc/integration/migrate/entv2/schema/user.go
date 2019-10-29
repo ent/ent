@@ -22,10 +22,11 @@ func (User) Fields() []ent.Field {
 		field.Int("age"),
 		// extending name field to longtext.
 		field.Text("name"),
-		// adding new columns.
-		field.String("phone"),
+		// adding new columns (must be either optional, or with a default value).
+		field.String("phone").
+			Default("unknown"),
 		field.Bytes("buffer").
-			Default([]byte("{}")),
+			Optional(),
 		// adding new column with supported default value
 		// in the database side, will append this value to
 		// all existing rows.

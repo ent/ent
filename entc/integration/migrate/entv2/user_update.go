@@ -23,6 +23,7 @@ type UserUpdate struct {
 	name          *string
 	phone         *string
 	buffer        *[]byte
+	clearbuffer   bool
 	title         *string
 	new_name      *string
 	clearnew_name bool
@@ -68,9 +69,24 @@ func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
 	return uu
 }
 
+// SetNillablePhone sets the phone field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPhone(*s)
+	}
+	return uu
+}
+
 // SetBuffer sets the buffer field.
 func (uu *UserUpdate) SetBuffer(b []byte) *UserUpdate {
 	uu.buffer = &b
+	return uu
+}
+
+// ClearBuffer clears the value of buffer.
+func (uu *UserUpdate) ClearBuffer() *UserUpdate {
+	uu.buffer = nil
+	uu.clearbuffer = true
 	return uu
 }
 
@@ -224,6 +240,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value := uu.buffer; value != nil {
 		updater.Set(user.FieldBuffer, *value)
 	}
+	if uu.clearbuffer {
+		updater.SetNull(user.FieldBuffer)
+	}
 	if value := uu.title; value != nil {
 		updater.Set(user.FieldTitle, *value)
 	}
@@ -266,6 +285,7 @@ type UserUpdateOne struct {
 	name          *string
 	phone         *string
 	buffer        *[]byte
+	clearbuffer   bool
 	title         *string
 	new_name      *string
 	clearnew_name bool
@@ -304,9 +324,24 @@ func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
 	return uuo
 }
 
+// SetNillablePhone sets the phone field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPhone(*s)
+	}
+	return uuo
+}
+
 // SetBuffer sets the buffer field.
 func (uuo *UserUpdateOne) SetBuffer(b []byte) *UserUpdateOne {
 	uuo.buffer = &b
+	return uuo
+}
+
+// ClearBuffer clears the value of buffer.
+func (uuo *UserUpdateOne) ClearBuffer() *UserUpdateOne {
+	uuo.buffer = nil
+	uuo.clearbuffer = true
 	return uuo
 }
 
@@ -467,6 +502,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	if value := uuo.buffer; value != nil {
 		updater.Set(user.FieldBuffer, *value)
 		u.Buffer = *value
+	}
+	if uuo.clearbuffer {
+		var value []byte
+		u.Buffer = value
+		updater.SetNull(user.FieldBuffer)
 	}
 	if value := uuo.title; value != nil {
 		updater.Set(user.FieldTitle, *value)
