@@ -8,17 +8,20 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 	"testing"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/entc/integration/json/ent"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/migrate"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
 
 	"github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,6 +43,33 @@ func TestMySQL(t *testing.T) {
 			cfg.DBName = "json"
 			client, err := ent.Open("mysql", cfg.FormatDSN())
 			require.NoError(t, err, "connecting to json database")
+			err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
+			require.NoError(t, err)
+
+			URL(t, client)
+			Dirs(t, client)
+			Ints(t, client)
+			Floats(t, client)
+			Strings(t, client)
+			RawMessage(t, client)
+		})
+	}
+}
+
+func TestPostgres(t *testing.T) {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432} {
+		t.Run(version, func(t *testing.T) {
+			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
+			db, err := sql.Open(dialect.Postgres, dsn)
+			require.NoError(t, err)
+			defer db.Close()
+			_, err = db.Exec("CREATE DATABASE json")
+			require.NoError(t, err, "creating database")
+			defer db.Exec("DROP DATABASE json")
+
+			client, err := ent.Open(dialect.Postgres, dsn+" dbname=json")
+			require.NoError(t, err, "connecting to json database")
+			defer client.Close()
 			err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
 			require.NoError(t, err)
 
