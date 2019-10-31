@@ -40,19 +40,19 @@ jobs:
     - getmods
     - run:
         name: Dialect tests
-        command: gotestsum --junitfile ~/test-results/dialect.xml
+        command: gotestsum -f short-verbose --junitfile ~/test-results/dialect.xml
         working_directory: dialect
     - run:
         name: Schema tests
-        command: gotestsum --junitfile ~/test-results/schema.xml
+        command: gotestsum -f short-verbose --junitfile ~/test-results/schema.xml
         working_directory: schema
     - run:
         name: Loader tests
-        command: gotestsum --junitfile ~/test-results/load.xml
+        command: gotestsum -f short-verbose --junitfile ~/test-results/load.xml
         working_directory: entc/load
     - run:
         name: Codegen tests
-        command: gotestsum --junitfile ~/test-results/gen.xml
+        command: gotestsum -f short-verbose --junitfile ~/test-results/gen.xml
         working_directory: entc/gen
     - *storetestdir
 
@@ -119,7 +119,7 @@ jobs:
       - run:
           name: Run integration tests
           working_directory: entc/integration
-          command: gotestsum --junitfile ~/test-results/integration.xml -- -race ./...
+          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race ./...
       - *storetestdir
 
   docs:
