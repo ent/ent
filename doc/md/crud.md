@@ -36,6 +36,28 @@ func main() {
 }
 ```
 
+**PostgreSQL**
+
+```go
+package main
+
+import (
+	"log"
+
+	"<project>/ent"
+
+	_ "github.com/lib/pq"
+)
+
+func main() {
+	client, err := ent.Open("postgres","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+}
+```
+
 **SQLite**
 
 ```go
