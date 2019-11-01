@@ -58,8 +58,13 @@ var (
 		{{ end -}}
 		{{ if $f.Default }}
 			{{- $default := $f.DefaultName -}}
-			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.Default.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+			{{ if $f.IsEnum }}
+			    // {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+			    {{ $default }} = {{ $f.Type }}({{ $desc }}.Default.(string))
+			{{ else -}}
+			    // {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+			    {{ $default }} = {{ $desc }}.Default.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+            {{ end -}}
 		{{ end -}}
 		{{ if $f.UpdateDefault }}
 			{{- $default := $f.UpdateDefaultName -}}
