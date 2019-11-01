@@ -437,6 +437,12 @@ type jsonsBuilder struct {
 	desc *Descriptor
 }
 
+// Default sets the default value of the field.
+func (b *jsonsBuilder) Default(value interface{}) *jsonsBuilder {
+	b.desc.Default = value
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *jsonsBuilder) StorageKey(key string) *jsonsBuilder {
