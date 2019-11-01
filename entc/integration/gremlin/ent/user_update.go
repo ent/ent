@@ -36,6 +36,7 @@ type UserUpdate struct {
 	clearphone        bool
 	password          *string
 	clearpassword     bool
+	role              *user.Role
 	card              map[string]struct{}
 	pets              map[string]struct{}
 	files             map[string]struct{}
@@ -196,6 +197,20 @@ func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
 func (uu *UserUpdate) ClearPassword() *UserUpdate {
 	uu.password = nil
 	uu.clearpassword = true
+	return uu
+}
+
+// SetRole sets the role field.
+func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
+	uu.role = &u
+	return uu
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
+	if u != nil {
+		uu.SetRole(*u)
+	}
 	return uu
 }
 
@@ -598,6 +613,11 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
+	if uu.role != nil {
+		if err := user.RoleValidator(*uu.role); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+		}
+	}
 	if len(uu.card) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -697,6 +717,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	if value := uu.password; value != nil {
 		v.Property(dsl.Single, user.FieldPassword, *value)
+	}
+	if value := uu.role; value != nil {
+		v.Property(dsl.Single, user.FieldRole, *value)
 	}
 	var properties []interface{}
 	if uu.clearoptional_int {
@@ -851,6 +874,7 @@ type UserUpdateOne struct {
 	clearphone        bool
 	password          *string
 	clearpassword     bool
+	role              *user.Role
 	card              map[string]struct{}
 	pets              map[string]struct{}
 	files             map[string]struct{}
@@ -1004,6 +1028,20 @@ func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
 	uuo.password = nil
 	uuo.clearpassword = true
+	return uuo
+}
+
+// SetRole sets the role field.
+func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
+	uuo.role = &u
+	return uuo
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
+	if u != nil {
+		uuo.SetRole(*u)
+	}
 	return uuo
 }
 
@@ -1406,6 +1444,11 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
+	if uuo.role != nil {
+		if err := user.RoleValidator(*uuo.role); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+		}
+	}
 	if len(uuo.card) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -1506,6 +1549,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value := uuo.password; value != nil {
 		v.Property(dsl.Single, user.FieldPassword, *value)
+	}
+	if value := uuo.role; value != nil {
+		v.Property(dsl.Single, user.FieldRole, *value)
 	}
 	var properties []interface{}
 	if uuo.clearoptional_int {

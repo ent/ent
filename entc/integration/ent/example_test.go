@@ -14,6 +14,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // dsn for the database. In order to run the tests locally, run the following command:
@@ -209,6 +210,7 @@ func ExampleGroup() {
 		SetNickname("string").
 		SetPhone("string").
 		SetPassword("string").
+		SetRole(user.RoleUser).
 		SaveX(ctx)
 	log.Println("user created:", u1)
 	gi3 := client.GroupInfo.
@@ -412,6 +414,7 @@ func ExampleUser() {
 		SetNickname("string").
 		SetPhone("string").
 		SetPassword("string").
+		SetRole(user.RoleUser).
 		SaveX(ctx)
 	log.Println("user created:", u4)
 	u6 := client.User.
@@ -423,6 +426,7 @@ func ExampleUser() {
 		SetNickname("string").
 		SetPhone("string").
 		SetPassword("string").
+		SetRole(user.RoleUser).
 		SaveX(ctx)
 	log.Println("user created:", u6)
 	pe7 := client.Pet.
@@ -439,6 +443,7 @@ func ExampleUser() {
 		SetNickname("string").
 		SetPhone("string").
 		SetPassword("string").
+		SetRole(user.RoleUser).
 		SaveX(ctx)
 	log.Println("user created:", u8)
 	u10 := client.User.
@@ -450,6 +455,7 @@ func ExampleUser() {
 		SetNickname("string").
 		SetPhone("string").
 		SetPassword("string").
+		SetRole(user.RoleUser).
 		SaveX(ctx)
 	log.Println("user created:", u10)
 
@@ -463,6 +469,7 @@ func ExampleUser() {
 		SetNickname("string").
 		SetPhone("string").
 		SetPassword("string").
+		SetRole(user.RoleUser).
 		SetCard(c0).
 		AddPets(pe1).
 		AddFiles(f2).

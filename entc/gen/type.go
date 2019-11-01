@@ -408,6 +408,9 @@ func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
 // UpdateDefaultName returns the variable name of the update default value of this field.
 func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 
+// DefaultValue returns the default value of the field. Invoked by the template.
+func (f Field) DefaultValue() interface{} { return f.def.DefaultValue }
+
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
 	return builderField(f.Name)
@@ -424,6 +427,11 @@ func (f Field) Enums() []string {
 		return f.def.Enums
 	}
 	return nil
+}
+
+// EnumName returns the constant name of the enum value.
+func (f Field) EnumName(enum string) string {
+	return pascal(f.Name) + pascal(enum)
 }
 
 // Validator returns the validator name.
@@ -686,6 +694,11 @@ func validEnums(f *load.Field) error {
 			return fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
 		default:
 			values[e] = true
+		}
+	}
+	if value := f.DefaultValue; value != nil {
+		if value, ok := value.(string); !ok || !values[value] {
+			return fmt.Errorf("invalid default value for enum field %q", f.Name)
 		}
 	}
 	return nil

@@ -43,7 +43,8 @@ var (
 	fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
 	{{ range $i, $f := $.Fields -}}
 		{{- $desc := print "desc" $f.StructField -}}
-		{{ if or $f.Default $f.UpdateDefault $f.Validators -}}
+		{{- /* enum default values handled near their declarations. */}}
+		{{ if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators -}}
 			{{- if $f.Position.MixedIn }}
 				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
 				{{ $desc }} = mixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
@@ -52,7 +53,7 @@ var (
 				{{ $desc }} = fields[{{ $f.Position.Index }}].Descriptor()
 			{{- end }}
 		{{ end -}}
-		{{ if $f.Default }}
+		{{ if and $f.Default (not $f.IsEnum) }}
 			{{- $default := $f.DefaultName -}}
 			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
 			{{ $default }} = {{ $desc }}.Default.({{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }})
@@ -100,9 +101,21 @@ var (
 		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
 		type {{ $enum }} string
 
+		{{- if $f.Default }}
+			{{- /*  find the enum that holds the default value. */ -}}
+			{{- range $_, $e := $f.Enums }}
+				{{- if eq $e $f.DefaultValue }}
+					{{- $name := $f.EnumName $e }}
+					// {{ $name }} is the default {{ $enum }}.
+					const {{ $f.DefaultName }} = {{ $name }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
+
+		// {{ $enum }} values.
 		const (
 			{{- range $_, $e := $f.Enums }}
-				{{ pascal $f.Name }}{{ pascal $e }} {{ $enum }} = "{{ $e }}"
+				{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
 			{{-  end }}
 		)
 
