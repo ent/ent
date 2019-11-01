@@ -150,7 +150,9 @@ func TestField_Enums(t *testing.T) {
 			"admin",
 			"master",
 		).
+		Default("user").
 		Descriptor()
 	require.Equal(t, "role", fd.Name)
 	require.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+	require.Equal(t, "user", fd.Default)
 }
