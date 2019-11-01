@@ -59,8 +59,9 @@ var (
 		{{ if $f.Default }}
 			{{- $default := $f.DefaultName -}}
 			{{ if $f.IsEnum }}
+			    {{ $enum := trimPackage $f.Type.String $.Package }}
 			    // {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			    {{ $default }} = {{ $f.Type }}({{ $desc }}.Default.(string))
+			    {{ $default }} = {{ $enum }}({{ $desc }}.Default.(string))
 			{{ else -}}
 			    // {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
 			    {{ $default }} = {{ $desc }}.Default.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
