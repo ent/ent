@@ -26,6 +26,7 @@ func (Card) Mixin() []ent.Mixin {
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("number").
+			Immutable().
 			NotEmpty(),
 	}
 }

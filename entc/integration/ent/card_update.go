@@ -29,8 +29,8 @@ import (
 type CardUpdate struct {
 	config
 
-	update_time  *time.Time
-	number       *string
+	update_time *time.Time
+
 	owner        map[string]struct{}
 	clearedOwner bool
 	predicates   []predicate.Card
@@ -39,12 +39,6 @@ type CardUpdate struct {
 // Where adds a new predicate for the builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.predicates = append(cu.predicates, ps...)
-	return cu
-}
-
-// SetNumber sets the number field.
-func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
-	cu.number = &s
 	return cu
 }
 
@@ -159,9 +153,6 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value := cu.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
 	}
-	if value := cu.number; value != nil {
-		updater.Set(card.FieldNumber, *value)
-	}
 	if !updater.Empty() {
 		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -236,9 +227,6 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if value := cu.update_time; value != nil {
 		v.Property(dsl.Single, card.FieldUpdateTime, *value)
 	}
-	if value := cu.number; value != nil {
-		v.Property(dsl.Single, card.FieldNumber, *value)
-	}
 	if cu.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -270,16 +258,10 @@ type CardUpdateOne struct {
 	config
 	id string
 
-	update_time  *time.Time
-	number       *string
+	update_time *time.Time
+
 	owner        map[string]struct{}
 	clearedOwner bool
-}
-
-// SetNumber sets the number field.
-func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
-	cuo.number = &s
-	return cuo
 }
 
 // SetOwnerID sets the owner edge to User by id.
@@ -397,10 +379,6 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		updater.Set(card.FieldUpdateTime, *value)
 		c.UpdateTime = *value
 	}
-	if value := cuo.number; value != nil {
-		updater.Set(card.FieldNumber, *value)
-		c.Number = *value
-	}
 	if !updater.Empty() {
 		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -475,9 +453,6 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if value := cuo.update_time; value != nil {
 		v.Property(dsl.Single, card.FieldUpdateTime, *value)
-	}
-	if value := cuo.number; value != nil {
-		v.Property(dsl.Single, card.FieldNumber, *value)
 	}
 	if cuo.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
