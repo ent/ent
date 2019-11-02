@@ -37,7 +37,7 @@ type Field struct {
 	Tag           string          `json:"tag,omitempty"`
 	Size          *int64          `json:"size,omitempty"`
 	Enums         []string        `json:"enums,omitempty"`
-	EnumDefault 	string          `json:"enum_default,omitempty"`
+	EnumDefault   string          `json:"enum_default,omitempty"`
 	Unique        bool            `json:"unique,omitempty"`
 	Nillable      bool            `json:"nillable,omitempty"`
 	Optional      bool            `json:"optional,omitempty"`
