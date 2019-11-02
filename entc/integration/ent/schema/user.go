@@ -33,6 +33,9 @@ func (User) Fields() []ent.Field {
 		field.String("password").
 			Optional().
 			Sensitive(),
+		field.Enum("role").
+			Values("user", "admin").
+			Default("user"),
 	}
 }
 

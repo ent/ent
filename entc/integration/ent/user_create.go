@@ -34,6 +34,7 @@ type UserCreate struct {
 	nickname  *string
 	phone     *string
 	password  *string
+	role      *user.Role
 	card      map[string]struct{}
 	pets      map[string]struct{}
 	files     map[string]struct{}
@@ -111,6 +112,20 @@ func (uc *UserCreate) SetPassword(s string) *UserCreate {
 func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	if s != nil {
 		uc.SetPassword(*s)
+	}
+	return uc
+}
+
+// SetRole sets the role field.
+func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
+	uc.role = &u
+	return uc
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
+	if u != nil {
+		uc.SetRole(*u)
 	}
 	return uc
 }
@@ -355,6 +370,13 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		v := user.DefaultLast
 		uc.last = &v
 	}
+	if uc.role == nil {
+		v := user.DefaultRole
+		uc.role = &v
+	}
+	if err := user.RoleValidator(*uc.role); err != nil {
+		return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+	}
 	if len(uc.card) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -420,6 +442,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if value := uc.password; value != nil {
 		insert.Set(user.FieldPassword, *value)
 		u.Password = *value
+	}
+	if value := uc.role; value != nil {
+		insert.Set(user.FieldRole, *value)
+		u.Role = *value
 	}
 	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
@@ -699,6 +725,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	if uc.password != nil {
 		v.Property(dsl.Single, user.FieldPassword, *uc.password)
+	}
+	if uc.role != nil {
+		v.Property(dsl.Single, user.FieldRole, *uc.role)
 	}
 	for id := range uc.card {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()

@@ -692,5 +692,10 @@ func validEnums(f *load.Field) error {
 			values[e] = true
 		}
 	}
+	if f.EnumDefault != "" {
+		if _, ok := values[f.EnumDefault]; !ok {
+			return fmt.Errorf("default value for enum field %q is not one of the provided values", f.Name)
+		}
+	}
 	return nil
 }

@@ -7,6 +7,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
@@ -27,6 +29,8 @@ const (
 	FieldPhone = "phone"
 	// FieldPassword holds the string denoting the password vertex property in the database.
 	FieldPassword = "password"
+	// FieldRole holds the string denoting the role vertex property in the database.
+	FieldRole = "role"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -115,6 +119,7 @@ var Columns = []string{
 	FieldNickname,
 	FieldPhone,
 	FieldPassword,
+	FieldRole,
 }
 
 var (
@@ -139,4 +144,32 @@ var (
 	descLast = fields[2].Descriptor()
 	// DefaultLast holds the default value on creation for the last field.
 	DefaultLast = descLast.Default.(string)
+
+	// descRole is the schema descriptor for role field.
+	descRole = fields[6].Descriptor()
+
+	// DefaultRole holds the default value on creation for the role field.
+	DefaultRole = Role(descRole.Default.(string))
 )
+
+// Role defines the type for the role enum field.
+type Role string
+
+const (
+	RoleUser  Role = "user"
+	RoleAdmin Role = "admin"
+)
+
+func (s Role) String() string {
+	return string(s)
+}
+
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
+func RoleValidator(role Role) error {
+	switch role {
+	case RoleUser, RoleAdmin:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for role field: %q", role)
+	}
+}

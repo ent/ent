@@ -1179,6 +1179,74 @@ func PasswordNotNil() predicate.User {
 	)
 }
 
+// RoleEQ applies the EQ predicate on the "role" field.
+func RoleEQ(v Role) predicate.User {
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(s.C(FieldRole), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldRole, p.EQ(v))
+		},
+	)
+}
+
+// RoleNEQ applies the NEQ predicate on the "role" field.
+func RoleNEQ(v Role) predicate.User {
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			s.Where(sql.NEQ(s.C(FieldRole), v))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldRole, p.NEQ(v))
+		},
+	)
+}
+
+// RoleIn applies the In predicate on the "role" field.
+func RoleIn(vs ...Role) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.In(s.C(FieldRole), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldRole, p.Within(v...))
+		},
+	)
+}
+
+// RoleNotIn applies the NotIn predicate on the "role" field.
+func RoleNotIn(vs ...Role) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.UserPerDialect(
+		func(s *sql.Selector) {
+			// if not arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				s.Where(sql.False())
+				return
+			}
+			s.Where(sql.NotIn(s.C(FieldRole), v...))
+		},
+		func(t *dsl.Traversal) {
+			t.Has(Label, FieldRole, p.Without(v...))
+		},
+	)
+}
+
 // HasCard applies the HasEdge predicate on the "card" edge.
 func HasCard() predicate.User {
 	return predicate.UserPerDialect(

@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -32,6 +33,8 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `graphql:"-" json:"-"`
+	// Role holds the value of the "role" field.
+	Role user.Role `json:"role,omitempty"`
 }
 
 // FromRows scans the sql response data into User.
@@ -44,6 +47,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		Nickname sql.NullString
 		Phone    sql.NullString
 		Password sql.NullString
+		Role     sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
@@ -54,6 +58,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 		&vu.Nickname,
 		&vu.Phone,
 		&vu.Password,
+		&vu.Role,
 	); err != nil {
 		return err
 	}
@@ -64,6 +69,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Nickname = vu.Nickname.String
 	u.Phone = vu.Phone.String
 	u.Password = vu.Password.String
+	u.Role = user.Role(vu.Role.String)
 	return nil
 }
 
@@ -74,13 +80,14 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vu struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-		Password string `json:"password,omitempty"`
+		ID       string    `json:"id,omitempty"`
+		Age      int       `json:"age,omitempty"`
+		Name     string    `json:"name,omitempty"`
+		Last     string    `json:"last,omitempty"`
+		Nickname string    `json:"nickname,omitempty"`
+		Phone    string    `json:"phone,omitempty"`
+		Password string    `json:"password,omitempty"`
+		Role     user.Role `json:"role,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
@@ -92,6 +99,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Nickname = vu.Nickname
 	u.Phone = vu.Phone
 	u.Password = vu.Password
+	u.Role = vu.Role
 	return nil
 }
 
@@ -184,6 +192,8 @@ func (u *User) String() string {
 	builder.WriteString(", phone=")
 	builder.WriteString(u.Phone)
 	builder.WriteString(", password=<sensitive>")
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", u.Role))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -216,13 +226,14 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var vu []struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-		Password string `json:"password,omitempty"`
+		ID       string    `json:"id,omitempty"`
+		Age      int       `json:"age,omitempty"`
+		Name     string    `json:"name,omitempty"`
+		Last     string    `json:"last,omitempty"`
+		Nickname string    `json:"nickname,omitempty"`
+		Phone    string    `json:"phone,omitempty"`
+		Password string    `json:"password,omitempty"`
+		Role     user.Role `json:"role,omitempty"`
 	}
 	if err := vmap.Decode(&vu); err != nil {
 		return err
@@ -236,6 +247,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Nickname: v.Nickname,
 			Phone:    v.Phone,
 			Password: v.Password,
+			Role:     v.Role,
 		})
 	}
 	return nil

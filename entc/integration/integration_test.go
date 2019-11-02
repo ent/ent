@@ -812,6 +812,14 @@ func DefaultValue(t *testing.T, client *ent.Client) {
 	require.False(t, c1.CreateTime.IsZero())
 	require.False(t, c1.UpdateTime.IsZero())
 	require.False(t, mtime.Equal(c1.UpdateTime))
+
+	// Enum default value
+	usr := client.User.
+		Create().
+		SetAge(23).
+		SetName("dario").
+		SaveX(ctx)
+	require.Equal(t, usr.Role, user.Role("user"))
 }
 
 func ImmutableValue(t *testing.T, client *ent.Client) {

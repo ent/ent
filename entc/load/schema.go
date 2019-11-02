@@ -37,6 +37,7 @@ type Field struct {
 	Tag           string          `json:"tag,omitempty"`
 	Size          *int64          `json:"size,omitempty"`
 	Enums         []string        `json:"enums,omitempty"`
+	EnumDefault 	string          `json:"enum_default,omitempty"`
 	Unique        bool            `json:"unique,omitempty"`
 	Nillable      bool            `json:"nillable,omitempty"`
 	Optional      bool            `json:"optional,omitempty"`
@@ -107,6 +108,13 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	}
 	if size := int64(fd.Size); size != 0 {
 		sf.Size = &size
+	}
+	if sf.Enums != nil && fd.Default != nil {
+		if v, ok := fd.Default.(string); ok {
+			sf.EnumDefault = v
+		} else {
+			return nil, fmt.Errorf("default value for enum field %q is not a string", sf.Name)
+		}
 	}
 	return sf, nil
 }
