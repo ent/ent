@@ -804,11 +804,11 @@ func Tx(t *testing.T, client *ent.Client) {
 
 func DefaultValue(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	c1 := client.Card.Create().SetNumber("102030").SaveX(ctx)
+	c1 := client.Card.Create().SetNumber("102030").SetName("Firstname Lastname").SaveX(ctx)
 	ctime, mtime := c1.CreateTime, c1.UpdateTime
 	require.False(t, ctime.IsZero())
 	require.False(t, mtime.IsZero())
-	c1 = c1.Update().SetNumber("302010").SaveX(ctx)
+	c1 = c1.Update().SetName("F Lastname").SaveX(ctx)
 	require.False(t, c1.CreateTime.IsZero())
 	require.False(t, c1.UpdateTime.IsZero())
 	require.False(t, mtime.Equal(c1.UpdateTime))
@@ -836,7 +836,8 @@ func ImmutableValue(t *testing.T, client *ent.Client) {
 		v := reflect.ValueOf(tc.updater())
 		require.False(t, v.MethodByName("SetCreatedAt").IsValid())
 		require.False(t, v.MethodByName("SetNillableCreatedAt").IsValid())
-		require.True(t, v.MethodByName("SetNumber").IsValid())
+		require.False(t, v.MethodByName("SetNumber").IsValid())
+		require.True(t, v.MethodByName("SetName").IsValid())
 	}
 }
 

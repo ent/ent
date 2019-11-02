@@ -28,6 +28,10 @@ func (Card) Fields() []ent.Field {
 		field.String("number").
 			Immutable().
 			NotEmpty(),
+		field.String("name").
+			Optional().
+			Comment("Exact name written on card").
+			NotEmpty(),
 	}
 }
 

@@ -31,6 +31,8 @@ type CardUpdate struct {
 
 	update_time *time.Time
 
+	name         *string
+	clearname    bool
 	owner        map[string]struct{}
 	clearedOwner bool
 	predicates   []predicate.Card
@@ -39,6 +41,27 @@ type CardUpdate struct {
 // Where adds a new predicate for the builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.predicates = append(cu.predicates, ps...)
+	return cu
+}
+
+// SetName sets the name field.
+func (cu *CardUpdate) SetName(s string) *CardUpdate {
+	cu.name = &s
+	return cu
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetName(*s)
+	}
+	return cu
+}
+
+// ClearName clears the value of name.
+func (cu *CardUpdate) ClearName() *CardUpdate {
+	cu.name = nil
+	cu.clearname = true
 	return cu
 }
 
@@ -75,6 +98,11 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	if cu.update_time == nil {
 		v := card.UpdateDefaultUpdateTime()
 		cu.update_time = &v
+	}
+	if cu.name != nil {
+		if err := card.NameValidator(*cu.name); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+		}
 	}
 	if len(cu.owner) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -147,6 +175,12 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	)
 	if value := cu.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
+	}
+	if value := cu.name; value != nil {
+		updater.Set(card.FieldName, *value)
+	}
+	if cu.clearname {
+		updater.SetNull(card.FieldName)
 	}
 	if !updater.Empty() {
 		query, args := updater.Query()
@@ -222,6 +256,16 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if value := cu.update_time; value != nil {
 		v.Property(dsl.Single, card.FieldUpdateTime, *value)
 	}
+	if value := cu.name; value != nil {
+		v.Property(dsl.Single, card.FieldName, *value)
+	}
+	var properties []interface{}
+	if cu.clearname {
+		properties = append(properties, card.FieldName)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	if cu.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -255,8 +299,31 @@ type CardUpdateOne struct {
 
 	update_time *time.Time
 
+	name         *string
+	clearname    bool
 	owner        map[string]struct{}
 	clearedOwner bool
+}
+
+// SetName sets the name field.
+func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
+	cuo.name = &s
+	return cuo
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetName(*s)
+	}
+	return cuo
+}
+
+// ClearName clears the value of name.
+func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
+	cuo.name = nil
+	cuo.clearname = true
+	return cuo
 }
 
 // SetOwnerID sets the owner edge to User by id.
@@ -292,6 +359,11 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	if cuo.update_time == nil {
 		v := card.UpdateDefaultUpdateTime()
 		cuo.update_time = &v
+	}
+	if cuo.name != nil {
+		if err := card.NameValidator(*cuo.name); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+		}
 	}
 	if len(cuo.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -369,6 +441,15 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		updater.Set(card.FieldUpdateTime, *value)
 		c.UpdateTime = *value
 	}
+	if value := cuo.name; value != nil {
+		updater.Set(card.FieldName, *value)
+		c.Name = *value
+	}
+	if cuo.clearname {
+		var value string
+		c.Name = value
+		updater.SetNull(card.FieldName)
+	}
 	if !updater.Empty() {
 		query, args := updater.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
@@ -443,6 +524,16 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if value := cuo.update_time; value != nil {
 		v.Property(dsl.Single, card.FieldUpdateTime, *value)
+	}
+	if value := cuo.name; value != nil {
+		v.Property(dsl.Single, card.FieldName, *value)
+	}
+	var properties []interface{}
+	if cuo.clearname {
+		properties = append(properties, card.FieldName)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if cuo.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
