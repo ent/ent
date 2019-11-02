@@ -76,11 +76,6 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 		v := card.UpdateDefaultUpdateTime()
 		cu.update_time = &v
 	}
-	if cu.number != nil {
-		if err := card.NumberValidator(*cu.number); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
-		}
-	}
 	if len(cu.owner) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
@@ -297,11 +292,6 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	if cuo.update_time == nil {
 		v := card.UpdateDefaultUpdateTime()
 		cuo.update_time = &v
-	}
-	if cuo.number != nil {
-		if err := card.NumberValidator(*cuo.number); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
-		}
 	}
 	if len(cuo.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")

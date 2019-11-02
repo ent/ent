@@ -228,7 +228,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{ $receiver }}.{{ $f.BuilderField }} = &v
 		}
 	{{ end -}}
-	{{ with or $f.Validators $f.IsEnum -}}
+	{{ with and (or $f.Validators $f.IsEnum) (not $f.Immutable) -}}
 		if {{ $receiver }}.{{ $f.BuilderField }} != nil {
 			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.BuilderField }}); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
