@@ -23,6 +23,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "number", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
@@ -33,7 +34,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "cards_users_card",
-				Columns: []*schema.Column{CardsColumns[4]},
+				Columns: []*schema.Column{CardsColumns[5]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,

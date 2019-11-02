@@ -24,6 +24,8 @@ const (
 	FieldUpdateTime = "update_time"
 	// FieldNumber holds the string denoting the number vertex property in the database.
 	FieldNumber = "number"
+	// FieldName holds the string denoting the name vertex property in the database.
+	FieldName = "name"
 
 	// Table holds the table name of the card in the database.
 	Table = "cards"
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldNumber,
+	FieldName,
 }
 
 var (
@@ -70,4 +73,9 @@ var (
 	descNumber = fields[0].Descriptor()
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.
 	NumberValidator = descNumber.Validators[0].(func(string) error)
+
+	// descName is the schema descriptor for name field.
+	descName = fields[1].Descriptor()
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator = descName.Validators[0].(func(string) error)
 )

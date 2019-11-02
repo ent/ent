@@ -30,6 +30,7 @@ type CardCreate struct {
 	create_time *time.Time
 	update_time *time.Time
 	number      *string
+	name        *string
 	owner       map[string]struct{}
 }
 
@@ -64,6 +65,20 @@ func (cc *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
 // SetNumber sets the number field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	cc.number = &s
+	return cc
+}
+
+// SetName sets the name field.
+func (cc *CardCreate) SetName(s string) *CardCreate {
+	cc.name = &s
+	return cc
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
+	if s != nil {
+		cc.SetName(*s)
+	}
 	return cc
 }
 
@@ -104,6 +119,11 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	}
 	if err := card.NumberValidator(*cc.number); err != nil {
 		return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
+	}
+	if cc.name != nil {
+		if err := card.NameValidator(*cc.name); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+		}
 	}
 	if len(cc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
@@ -149,6 +169,10 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	if value := cc.number; value != nil {
 		insert.Set(card.FieldNumber, *value)
 		c.Number = *value
+	}
+	if value := cc.name; value != nil {
+		insert.Set(card.FieldName, *value)
+		c.Name = *value
 	}
 	id, err := insertLastID(ctx, tx, insert.Returning(card.FieldID))
 	if err != nil {
@@ -212,6 +236,9 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	}
 	if cc.number != nil {
 		v.Property(dsl.Single, card.FieldNumber, *cc.number)
+	}
+	if cc.name != nil {
+		v.Property(dsl.Single, card.FieldName, *cc.name)
 	}
 	for id := range cc.owner {
 		v.AddE(user.CardLabel).From(g.V(id)).InV()

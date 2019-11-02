@@ -27,6 +27,8 @@ type Card struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`
@@ -39,6 +41,7 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 		CreateTime sql.NullTime
 		UpdateTime sql.NullTime
 		Number     sql.NullString
+		Name       sql.NullString
 	}
 	// the order here should be the same as in the `card.Columns`.
 	if err := rows.Scan(
@@ -46,6 +49,7 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 		&vc.CreateTime,
 		&vc.UpdateTime,
 		&vc.Number,
+		&vc.Name,
 	); err != nil {
 		return err
 	}
@@ -53,6 +57,7 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 	c.CreateTime = vc.CreateTime.Time
 	c.UpdateTime = vc.UpdateTime.Time
 	c.Number = vc.Number.String
+	c.Name = vc.Name.String
 	return nil
 }
 
@@ -67,6 +72,7 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 		CreateTime int64  `json:"create_time,omitempty"`
 		UpdateTime int64  `json:"update_time,omitempty"`
 		Number     string `json:"number,omitempty"`
+		Name       string `json:"name,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
@@ -75,6 +81,7 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 	c.CreateTime = time.Unix(0, vc.CreateTime)
 	c.UpdateTime = time.Unix(0, vc.UpdateTime)
 	c.Number = vc.Number
+	c.Name = vc.Name
 	return nil
 }
 
@@ -112,6 +119,8 @@ func (c *Card) String() string {
 	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", number=")
 	builder.WriteString(c.Number)
+	builder.WriteString(", name=")
+	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -148,6 +157,7 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		CreateTime int64  `json:"create_time,omitempty"`
 		UpdateTime int64  `json:"update_time,omitempty"`
 		Number     string `json:"number,omitempty"`
+		Name       string `json:"name,omitempty"`
 	}
 	if err := vmap.Decode(&vc); err != nil {
 		return err
@@ -158,6 +168,7 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 			CreateTime: time.Unix(0, v.CreateTime),
 			UpdateTime: time.Unix(0, v.UpdateTime),
 			Number:     v.Number,
+			Name:       v.Name,
 		})
 	}
 	return nil

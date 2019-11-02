@@ -29,8 +29,10 @@ import (
 type CardUpdate struct {
 	config
 
-	update_time  *time.Time
-	number       *string
+	update_time *time.Time
+
+	name         *string
+	clearname    bool
 	owner        map[string]struct{}
 	clearedOwner bool
 	predicates   []predicate.Card
@@ -42,9 +44,24 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
-// SetNumber sets the number field.
-func (cu *CardUpdate) SetNumber(s string) *CardUpdate {
-	cu.number = &s
+// SetName sets the name field.
+func (cu *CardUpdate) SetName(s string) *CardUpdate {
+	cu.name = &s
+	return cu
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
+	if s != nil {
+		cu.SetName(*s)
+	}
+	return cu
+}
+
+// ClearName clears the value of name.
+func (cu *CardUpdate) ClearName() *CardUpdate {
+	cu.name = nil
+	cu.clearname = true
 	return cu
 }
 
@@ -82,9 +99,9 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 		v := card.UpdateDefaultUpdateTime()
 		cu.update_time = &v
 	}
-	if cu.number != nil {
-		if err := card.NumberValidator(*cu.number); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
+	if cu.name != nil {
+		if err := card.NameValidator(*cu.name); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
 	if len(cu.owner) > 1 {
@@ -159,8 +176,11 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value := cu.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
 	}
-	if value := cu.number; value != nil {
-		updater.Set(card.FieldNumber, *value)
+	if value := cu.name; value != nil {
+		updater.Set(card.FieldName, *value)
+	}
+	if cu.clearname {
+		updater.SetNull(card.FieldName)
 	}
 	if !updater.Empty() {
 		query, args := updater.Query()
@@ -236,8 +256,15 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if value := cu.update_time; value != nil {
 		v.Property(dsl.Single, card.FieldUpdateTime, *value)
 	}
-	if value := cu.number; value != nil {
-		v.Property(dsl.Single, card.FieldNumber, *value)
+	if value := cu.name; value != nil {
+		v.Property(dsl.Single, card.FieldName, *value)
+	}
+	var properties []interface{}
+	if cu.clearname {
+		properties = append(properties, card.FieldName)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if cu.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
@@ -270,15 +297,32 @@ type CardUpdateOne struct {
 	config
 	id string
 
-	update_time  *time.Time
-	number       *string
+	update_time *time.Time
+
+	name         *string
+	clearname    bool
 	owner        map[string]struct{}
 	clearedOwner bool
 }
 
-// SetNumber sets the number field.
-func (cuo *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
-	cuo.number = &s
+// SetName sets the name field.
+func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
+	cuo.name = &s
+	return cuo
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
+	if s != nil {
+		cuo.SetName(*s)
+	}
+	return cuo
+}
+
+// ClearName clears the value of name.
+func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
+	cuo.name = nil
+	cuo.clearname = true
 	return cuo
 }
 
@@ -316,9 +360,9 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 		v := card.UpdateDefaultUpdateTime()
 		cuo.update_time = &v
 	}
-	if cuo.number != nil {
-		if err := card.NumberValidator(*cuo.number); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
+	if cuo.name != nil {
+		if err := card.NameValidator(*cuo.name); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
 	if len(cuo.owner) > 1 {
@@ -397,9 +441,14 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		updater.Set(card.FieldUpdateTime, *value)
 		c.UpdateTime = *value
 	}
-	if value := cuo.number; value != nil {
-		updater.Set(card.FieldNumber, *value)
-		c.Number = *value
+	if value := cuo.name; value != nil {
+		updater.Set(card.FieldName, *value)
+		c.Name = *value
+	}
+	if cuo.clearname {
+		var value string
+		c.Name = value
+		updater.SetNull(card.FieldName)
 	}
 	if !updater.Empty() {
 		query, args := updater.Query()
@@ -476,8 +525,15 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value := cuo.update_time; value != nil {
 		v.Property(dsl.Single, card.FieldUpdateTime, *value)
 	}
-	if value := cuo.number; value != nil {
-		v.Property(dsl.Single, card.FieldNumber, *value)
+	if value := cuo.name; value != nil {
+		v.Property(dsl.Single, card.FieldName, *value)
+	}
+	var properties []interface{}
+	if cuo.clearname {
+		properties = append(properties, card.FieldName)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if cuo.clearedOwner {
 		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
