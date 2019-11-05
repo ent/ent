@@ -176,19 +176,17 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.ID
-	builder := sql.Dialect(gr.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Table(group.Table)
-	t3 := builder.Table(group.UsersTable)
-	t4 := builder.Select(t3.C(group.UsersPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(group.UsersPrimaryKey[0]), t2.C(group.FieldID)).
-		Where(sql.EQ(t2.C(group.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = group.Table
+	step.From.Column = group.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = group.UsersTable
+	step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -197,12 +195,17 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 func (c *GroupClient) QueryAdmin(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.ID
-	builder := sql.Dialect(gr.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Select(group.AdminColumn).
-		From(builder.Table(group.AdminTable)).
-		Where(sql.EQ(group.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(group.AdminColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = group.Table
+	step.From.Column = group.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = false
+	step.Edge.Table = group.AdminTable
+	step.Edge.Columns = append(step.Edge.Columns, group.AdminColumn)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -275,19 +278,17 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 func (c *PetClient) QueryFriends(pe *Pet) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := pe.ID
-	builder := sql.Dialect(pe.driver.Dialect())
-	t1 := builder.Table(pet.Table)
-	t2 := builder.Table(pet.Table)
-	t3 := builder.Table(pet.FriendsTable)
-	t4 := builder.Select(t3.C(pet.FriendsPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(pet.FriendsPrimaryKey[0]), t2.C(pet.FieldID)).
-		Where(sql.EQ(t2.C(pet.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(pet.FieldID), t4.C(pet.FriendsPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = pet.Table
+	step.From.Column = pet.FieldID
+	step.To.Table = pet.Table
+	step.To.Column = pet.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = pet.FriendsTable
+	step.Edge.Columns = append(step.Edge.Columns, pet.FriendsPrimaryKey...)
+	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
 	return query
 }
@@ -296,12 +297,17 @@ func (c *PetClient) QueryFriends(pe *Pet) *PetQuery {
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := pe.ID
-	builder := sql.Dialect(pe.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Select(pet.OwnerColumn).
-		From(builder.Table(pet.OwnerTable)).
-		Where(sql.EQ(pet.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = pet.Table
+	step.From.Column = pet.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = pet.OwnerTable
+	step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
 	return query
 }
@@ -374,9 +380,17 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(pet.Table)).
-		Where(sql.EQ(user.PetsColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = pet.Table
+	step.To.Column = pet.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.PetsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -385,19 +399,17 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Table(user.Table)
-	t3 := builder.Table(user.FriendsTable)
-	t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID)).
-		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.FriendsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -406,19 +418,17 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	t1 := builder.Table(group.Table)
-	t2 := builder.Table(user.Table)
-	t3 := builder.Table(user.GroupsTable)
-	t4 := builder.Select(t3.C(user.GroupsPrimaryKey[0])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.GroupsPrimaryKey[1]), t2.C(user.FieldID)).
-		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[0]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = group.Table
+	step.To.Column = group.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.GroupsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -427,9 +437,17 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 func (c *UserClient) QueryManage(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(group.Table)).
-		Where(sql.EQ(user.ManageColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = group.Table
+	step.To.Column = group.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.ManageTable
+	step.Edge.Columns = append(step.Edge.Columns, user.ManageColumn)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

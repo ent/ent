@@ -164,12 +164,17 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	builder := sql.Dialect(n.driver.Dialect())
-	t1 := builder.Table(node.Table)
-	t2 := builder.Select(node.ParentColumn).
-		From(builder.Table(node.ParentTable)).
-		Where(sql.EQ(node.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(node.FieldID), t2.C(node.ParentColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = node.Table
+	step.From.Column = node.FieldID
+	step.To.Table = node.Table
+	step.To.Column = node.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = node.ParentTable
+	step.Edge.Columns = append(step.Edge.Columns, node.ParentColumn)
+	query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
 	return query
 }
@@ -178,9 +183,17 @@ func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	builder := sql.Dialect(n.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(node.Table)).
-		Where(sql.EQ(node.ChildrenColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = node.Table
+	step.From.Column = node.FieldID
+	step.To.Table = node.Table
+	step.To.Column = node.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = node.ChildrenTable
+	step.Edge.Columns = append(step.Edge.Columns, node.ChildrenColumn)
+	query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
 	return query
 }

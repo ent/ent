@@ -170,9 +170,17 @@ func (c *CityClient) GetX(ctx context.Context, id int) *City {
 func (c *CityClient) QueryStreets(ci *City) *StreetQuery {
 	query := &StreetQuery{config: c.config}
 	id := ci.ID
-	builder := sql.Dialect(ci.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(street.Table)).
-		Where(sql.EQ(city.StreetsColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = city.Table
+	step.From.Column = city.FieldID
+	step.To.Table = street.Table
+	step.To.Column = street.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = city.StreetsTable
+	step.Edge.Columns = append(step.Edge.Columns, city.StreetsColumn)
+	query.sql = sql.Neighbors(ci.driver.Dialect(), step)
 
 	return query
 }
@@ -245,12 +253,17 @@ func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
 func (c *StreetClient) QueryCity(s *Street) *CityQuery {
 	query := &CityQuery{config: c.config}
 	id := s.ID
-	builder := sql.Dialect(s.driver.Dialect())
-	t1 := builder.Table(city.Table)
-	t2 := builder.Select(street.CityColumn).
-		From(builder.Table(street.CityTable)).
-		Where(sql.EQ(street.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(city.FieldID), t2.C(street.CityColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = street.Table
+	step.From.Column = street.FieldID
+	step.To.Table = city.Table
+	step.To.Column = city.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = street.CityTable
+	step.Edge.Columns = append(step.Edge.Columns, street.CityColumn)
+	query.sql = sql.Neighbors(s.driver.Dialect(), step)
 
 	return query
 }
