@@ -176,12 +176,17 @@ func (c *CarClient) GetX(ctx context.Context, id int) *Car {
 func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := ca.ID
-	builder := sql.Dialect(ca.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Select(car.OwnerColumn).
-		From(builder.Table(car.OwnerTable)).
-		Where(sql.EQ(car.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(car.OwnerColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = car.Table
+	step.From.Column = car.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = car.OwnerTable
+	step.Edge.Columns = append(step.Edge.Columns, car.OwnerColumn)
+	query.sql = sql.Neighbors(ca.driver.Dialect(), step)
 
 	return query
 }
@@ -254,19 +259,17 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.ID
-	builder := sql.Dialect(gr.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Table(group.Table)
-	t3 := builder.Table(group.UsersTable)
-	t4 := builder.Select(t3.C(group.UsersPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(group.UsersPrimaryKey[0]), t2.C(group.FieldID)).
-		Where(sql.EQ(t2.C(group.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = group.Table
+	step.From.Column = group.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = group.UsersTable
+	step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -339,9 +342,17 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryCars(u *User) *CarQuery {
 	query := &CarQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(car.Table)).
-		Where(sql.EQ(user.CarsColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = car.Table
+	step.To.Column = car.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.CarsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.CarsColumn)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -350,19 +361,17 @@ func (c *UserClient) QueryCars(u *User) *CarQuery {
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	t1 := builder.Table(group.Table)
-	t2 := builder.Table(user.Table)
-	t3 := builder.Table(user.GroupsTable)
-	t4 := builder.Select(t3.C(user.GroupsPrimaryKey[0])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.GroupsPrimaryKey[1]), t2.C(user.FieldID)).
-		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[0]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = group.Table
+	step.To.Column = group.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.GroupsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

@@ -245,12 +245,17 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := ca.id()
-		builder := sql.Dialect(ca.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Select(card.OwnerColumn).
-			From(builder.Table(card.OwnerTable)).
-			Where(sql.EQ(card.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = card.Table
+		step.From.Column = card.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = true
+		step.Edge.Table = card.OwnerTable
+		step.Edge.Columns = append(step.Edge.Columns, card.OwnerColumn)
+		query.sql = sql.Neighbors(ca.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(ca.ID).InE(user.CardLabel).OutV()
@@ -457,12 +462,17 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := f.id()
-		builder := sql.Dialect(f.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Select(file.OwnerColumn).
-			From(builder.Table(file.OwnerTable)).
-			Where(sql.EQ(file.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(file.OwnerColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = file.Table
+		step.From.Column = file.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = true
+		step.Edge.Table = file.OwnerTable
+		step.Edge.Columns = append(step.Edge.Columns, file.OwnerColumn)
+		query.sql = sql.Neighbors(f.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(f.ID).InE(user.FilesLabel).OutV()
@@ -477,12 +487,17 @@ func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := f.id()
-		builder := sql.Dialect(f.driver.Dialect())
-		t1 := builder.Table(filetype.Table)
-		t2 := builder.Select(file.TypeColumn).
-			From(builder.Table(file.TypeTable)).
-			Where(sql.EQ(file.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(filetype.FieldID), t2.C(file.TypeColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = file.Table
+		step.From.Column = file.FieldID
+		step.To.Table = filetype.Table
+		step.To.Column = filetype.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = true
+		step.Edge.Table = file.TypeTable
+		step.Edge.Columns = append(step.Edge.Columns, file.TypeColumn)
+		query.sql = sql.Neighbors(f.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(f.ID).InE(filetype.FilesLabel).OutV()
@@ -561,9 +576,17 @@ func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := ft.id()
-		builder := sql.Dialect(ft.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(file.Table)).
-			Where(sql.EQ(filetype.FilesColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = filetype.Table
+		step.From.Column = filetype.FieldID
+		step.To.Table = file.Table
+		step.To.Column = file.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = filetype.FilesTable
+		step.Edge.Columns = append(step.Edge.Columns, filetype.FilesColumn)
+		query.sql = sql.Neighbors(ft.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(ft.ID).OutE(filetype.FilesLabel).InV()
@@ -642,9 +665,17 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
-		builder := sql.Dialect(gr.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(file.Table)).
-			Where(sql.EQ(group.FilesColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = file.Table
+		step.To.Column = file.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = group.FilesTable
+		step.Edge.Columns = append(step.Edge.Columns, group.FilesColumn)
+		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(gr.ID).OutE(group.FilesLabel).InV()
@@ -659,9 +690,17 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
-		builder := sql.Dialect(gr.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(user.Table)).
-			Where(sql.EQ(group.BlockedColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = group.BlockedTable
+		step.Edge.Columns = append(step.Edge.Columns, group.BlockedColumn)
+		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(gr.ID).OutE(group.BlockedLabel).InV()
@@ -676,19 +715,17 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
-		builder := sql.Dialect(gr.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Table(group.Table)
-		t3 := builder.Table(group.UsersTable)
-		t4 := builder.Select(t3.C(group.UsersPrimaryKey[0])).
-			From(t3).
-			Join(t2).
-			On(t3.C(group.UsersPrimaryKey[1]), t2.C(group.FieldID)).
-			Where(sql.EQ(t2.C(group.FieldID), id))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[0]))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = true
+		step.Edge.Table = group.UsersTable
+		step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(gr.ID).InE(user.GroupsLabel).OutV()
@@ -703,12 +740,17 @@ func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gr.id()
-		builder := sql.Dialect(gr.driver.Dialect())
-		t1 := builder.Table(groupinfo.Table)
-		t2 := builder.Select(group.InfoColumn).
-			From(builder.Table(group.InfoTable)).
-			Where(sql.EQ(group.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(groupinfo.FieldID), t2.C(group.InfoColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = groupinfo.Table
+		step.To.Column = groupinfo.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = false
+		step.Edge.Table = group.InfoTable
+		step.Edge.Columns = append(step.Edge.Columns, group.InfoColumn)
+		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(gr.ID).OutE(group.InfoLabel).InV()
@@ -787,9 +829,17 @@ func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := gi.id()
-		builder := sql.Dialect(gi.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(group.Table)).
-			Where(sql.EQ(groupinfo.GroupsColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = groupinfo.Table
+		step.From.Column = groupinfo.FieldID
+		step.To.Table = group.Table
+		step.To.Column = group.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = true
+		step.Edge.Table = groupinfo.GroupsTable
+		step.Edge.Columns = append(step.Edge.Columns, groupinfo.GroupsColumn)
+		query.sql = sql.Neighbors(gi.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(gi.ID).InE(group.InfoLabel).OutV()
@@ -932,12 +982,17 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := n.id()
-		builder := sql.Dialect(n.driver.Dialect())
-		t1 := builder.Table(node.Table)
-		t2 := builder.Select(node.PrevColumn).
-			From(builder.Table(node.PrevTable)).
-			Where(sql.EQ(node.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(node.FieldID), t2.C(node.PrevColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = node.Table
+		step.From.Column = node.FieldID
+		step.To.Table = node.Table
+		step.To.Column = node.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = true
+		step.Edge.Table = node.PrevTable
+		step.Edge.Columns = append(step.Edge.Columns, node.PrevColumn)
+		query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(n.ID).InE(node.NextLabel).OutV()
@@ -952,9 +1007,17 @@ func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := n.id()
-		builder := sql.Dialect(n.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(node.Table)).
-			Where(sql.EQ(node.NextColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = node.Table
+		step.From.Column = node.FieldID
+		step.To.Table = node.Table
+		step.To.Column = node.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = node.NextTable
+		step.Edge.Columns = append(step.Edge.Columns, node.NextColumn)
+		query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(n.ID).OutE(node.NextLabel).InV()
@@ -1033,12 +1096,17 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := pe.id()
-		builder := sql.Dialect(pe.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Select(pet.TeamColumn).
-			From(builder.Table(pet.TeamTable)).
-			Where(sql.EQ(pet.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.TeamColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = pet.Table
+		step.From.Column = pet.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = true
+		step.Edge.Table = pet.TeamTable
+		step.Edge.Columns = append(step.Edge.Columns, pet.TeamColumn)
+		query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(pe.ID).InE(user.TeamLabel).OutV()
@@ -1053,12 +1121,17 @@ func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := pe.id()
-		builder := sql.Dialect(pe.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Select(pet.OwnerColumn).
-			From(builder.Table(pet.OwnerTable)).
-			Where(sql.EQ(pet.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = pet.Table
+		step.From.Column = pet.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = true
+		step.Edge.Table = pet.OwnerTable
+		step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+		query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(pe.ID).InE(user.PetsLabel).OutV()
@@ -1137,9 +1210,17 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(card.Table)).
-			Where(sql.EQ(user.CardColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = card.Table
+		step.To.Column = card.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.CardTable
+		step.Edge.Columns = append(step.Edge.Columns, user.CardColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.CardLabel).InV()
@@ -1154,9 +1235,17 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(pet.Table)).
-			Where(sql.EQ(user.PetsColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = pet.Table
+		step.To.Column = pet.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.PetsTable
+		step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.PetsLabel).InV()
@@ -1171,9 +1260,17 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(file.Table)).
-			Where(sql.EQ(user.FilesColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = file.Table
+		step.To.Column = file.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.FilesTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FilesColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.FilesLabel).InV()
@@ -1188,19 +1285,17 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		t1 := builder.Table(group.Table)
-		t2 := builder.Table(user.Table)
-		t3 := builder.Table(user.GroupsTable)
-		t4 := builder.Select(t3.C(user.GroupsPrimaryKey[1])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.GroupsPrimaryKey[0]), t2.C(user.FieldID)).
-			Where(sql.EQ(t2.C(user.FieldID), id))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[1]))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = group.Table
+		step.To.Column = group.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.GroupsTable
+		step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.GroupsLabel).InV()
@@ -1215,19 +1310,17 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Table(user.Table)
-		t3 := builder.Table(user.FriendsTable)
-		t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID)).
-			Where(sql.EQ(t2.C(user.FieldID), id))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.FriendsTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).Both(user.FriendsLabel)
@@ -1242,19 +1335,17 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Table(user.Table)
-		t3 := builder.Table(user.FollowersTable)
-		t4 := builder.Select(t3.C(user.FollowersPrimaryKey[0])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.FollowersPrimaryKey[1]), t2.C(user.FieldID)).
-			Where(sql.EQ(t2.C(user.FieldID), id))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = true
+		step.Edge.Table = user.FollowersTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FollowersPrimaryKey...)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).InE(user.FollowingLabel).OutV()
@@ -1269,19 +1360,17 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Table(user.Table)
-		t3 := builder.Table(user.FollowingTable)
-		t4 := builder.Select(t3.C(user.FollowingPrimaryKey[1])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.FollowingPrimaryKey[0]), t2.C(user.FieldID)).
-			Where(sql.EQ(t2.C(user.FieldID), id))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.FollowingTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FollowingPrimaryKey...)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.FollowingLabel).InV()
@@ -1296,9 +1385,17 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(pet.Table)).
-			Where(sql.EQ(user.TeamColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = pet.Table
+		step.To.Column = pet.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.TeamTable
+		step.Edge.Columns = append(step.Edge.Columns, user.TeamColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.TeamLabel).InV()
@@ -1313,9 +1410,17 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(user.Table)).
-			Where(sql.EQ(user.SpouseColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.SpouseTable
+		step.Edge.Columns = append(step.Edge.Columns, user.SpouseColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).Both(user.SpouseLabel)
@@ -1330,9 +1435,17 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		query.sql = builder.Select().From(builder.Table(user.Table)).
-			Where(sql.EQ(user.ChildrenColumn, id))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = true
+		step.Edge.Table = user.ChildrenTable
+		step.Edge.Columns = append(step.Edge.Columns, user.ChildrenColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).InE(user.ParentLabel).OutV()
@@ -1347,12 +1460,17 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 	switch c.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
 		id := u.id()
-		builder := sql.Dialect(u.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := builder.Select(user.ParentColumn).
-			From(builder.Table(user.ParentTable)).
-			Where(sql.EQ(user.FieldID, id))
-		query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(user.ParentColumn))
+		step := &sql.Step{}
+		step.From.V = id
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.ParentTable
+		step.Edge.Columns = append(step.Edge.Columns, user.ParentColumn)
+		query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	case dialect.Gremlin:
 		query.gremlin = g.V(u.ID).OutE(user.ParentLabel).InV()

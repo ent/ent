@@ -164,19 +164,17 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Table(user.Table)
-	t3 := builder.Table(user.FriendsTable)
-	t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID)).
-		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.FriendsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

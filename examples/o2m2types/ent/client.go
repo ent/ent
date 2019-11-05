@@ -170,12 +170,17 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := pe.ID
-	builder := sql.Dialect(pe.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Select(pet.OwnerColumn).
-		From(builder.Table(pet.OwnerTable)).
-		Where(sql.EQ(pet.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = pet.Table
+	step.From.Column = pet.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = pet.OwnerTable
+	step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
 	return query
 }
@@ -248,9 +253,17 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(pet.Table)).
-		Where(sql.EQ(user.PetsColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = pet.Table
+	step.To.Column = pet.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.PetsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

@@ -164,19 +164,17 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Table(user.Table)
-	t3 := builder.Table(user.FollowersTable)
-	t4 := builder.Select(t3.C(user.FollowersPrimaryKey[0])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FollowersPrimaryKey[1]), t2.C(user.FieldID)).
-		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.FollowersTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FollowersPrimaryKey...)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -185,19 +183,17 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Table(user.Table)
-	t3 := builder.Table(user.FollowingTable)
-	t4 := builder.Select(t3.C(user.FollowingPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FollowingPrimaryKey[0]), t2.C(user.FieldID)).
-		Where(sql.EQ(t2.C(user.FieldID), id))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.FollowingTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FollowingPrimaryKey...)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

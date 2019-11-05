@@ -170,12 +170,17 @@ func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := ca.ID
-	builder := sql.Dialect(ca.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := builder.Select(card.OwnerColumn).
-		From(builder.Table(card.OwnerTable)).
-		Where(sql.EQ(card.FieldID, id))
-	query.sql = builder.Select().From(t1).Join(t2).On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = card.Table
+	step.From.Column = card.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.O2O
+	step.Edge.Inverse = true
+	step.Edge.Table = card.OwnerTable
+	step.Edge.Columns = append(step.Edge.Columns, card.OwnerColumn)
+	query.sql = sql.Neighbors(ca.driver.Dialect(), step)
 
 	return query
 }
@@ -248,9 +253,17 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
 	id := u.ID
-	builder := sql.Dialect(u.driver.Dialect())
-	query.sql = builder.Select().From(builder.Table(card.Table)).
-		Where(sql.EQ(user.CardColumn, id))
+	step := &sql.Step{}
+	step.From.V = id
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = card.Table
+	step.To.Column = card.FieldID
+	step.Edge.Rel = sql.O2O
+	step.Edge.Inverse = false
+	step.Edge.Table = user.CardTable
+	step.Edge.Columns = append(step.Edge.Columns, user.CardColumn)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
