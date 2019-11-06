@@ -390,9 +390,11 @@ func HasOwnerWith(preds ...predicate.User) predicate.Car {
 func And(predicates ...predicate.Car) predicate.Car {
 	return predicate.Car(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for _, p := range predicates {
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }
@@ -401,12 +403,14 @@ func And(predicates ...predicate.Car) predicate.Car {
 func Or(predicates ...predicate.Car) predicate.Car {
 	return predicate.Car(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for i, p := range predicates {
 				if i > 0 {
-					s.Or()
+					s1.Or()
 				}
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }

@@ -731,6 +731,9 @@ func P() *Predicate { return &Predicate{} }
 //
 func Or(preds ...*Predicate) *Predicate {
 	return P().append(func(b *Builder) {
+		if len(preds) > 1 {
+			b.WriteString("(")
+		}
 		for i := range preds {
 			if i > 0 {
 				b.WriteString(" OR ")
@@ -738,6 +741,9 @@ func Or(preds ...*Predicate) *Predicate {
 			b.Nested(func(b *Builder) {
 				b.Join(preds[i])
 			})
+		}
+		if len(preds) > 1 {
+			b.WriteString(")")
 		}
 	})
 }
@@ -1314,6 +1320,19 @@ func (s *Selector) Where(p *Predicate) *Selector {
 	default:
 		s.where.merge(p)
 	}
+	return s
+}
+
+// P returns the predicate of a selector.
+func (s *Selector) P() *Predicate {
+	return s.where
+}
+
+// SetP sets explicitly the predicate function for the selector and clear its previous state.
+func (s *Selector) SetP(p *Predicate) *Selector {
+	s.where = p
+	s.or = false
+	s.not = false
 	return s
 }
 

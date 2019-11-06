@@ -321,6 +321,28 @@ func Predicate(t *testing.T, client *ent.Client) {
 		AllX(ctx)
 	require.Equal(f1.Name, files[0].Name)
 	require.Equal(f2.Name, files[1].Name)
+
+	match := client.File.Query().
+		Where(file.Or(file.Name(f1.Name), file.Name(f2.Name))).
+		Where(file.Size(f1.Size)).
+		OnlyX(ctx)
+	require.Equal(f1.Name, match.Name)
+
+	match = client.File.Query().
+		Where(file.Size(f2.Size)).
+		Where(file.Or(file.Name(f1.Name), file.Name(f2.Name))).
+		OnlyX(ctx)
+	require.Equal(f2.Name, match.Name)
+
+	files = client.File.Query().
+		Where(file.Or(file.Size(f3.Size), file.Size(f4.Size))).
+		Where(file.Or(file.Name(f3.Name), file.Name(f4.Name))).
+		Where(file.Not(file.Or(file.Name(f1.Name), file.Size(f1.Size)))).
+		Order(ent.Asc(file.FieldName)).
+		AllX(ctx)
+	require.Equal(f3.Name, files[0].Name)
+	require.Equal(f4.Name, files[1].Name)
+
 	files = client.File.Query().
 		Where(
 			file.Or(

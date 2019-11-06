@@ -217,9 +217,11 @@ func MaxUsersLTE(v int) predicate.Group {
 func And(predicates ...predicate.Group) predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for _, p := range predicates {
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }
@@ -228,12 +230,14 @@ func And(predicates ...predicate.Group) predicate.Group {
 func Or(predicates ...predicate.Group) predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for i, p := range predicates {
 				if i > 0 {
-					s.Or()
+					s1.Or()
 				}
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }

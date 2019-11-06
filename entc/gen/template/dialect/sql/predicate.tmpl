@@ -143,20 +143,24 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/and" -}}
 	func(s *sql.Selector) {
+		s1 := s.Clone().SetP(nil)
 		for _, p := range predicates {
-			p(s)
+			p(s1)
 		}
+		s.Where(s1.P())
 	}
 {{- end }}
 
 {{ define "dialect/sql/predicate/or" -}}
 	func(s *sql.Selector) {
+		s1 := s.Clone().SetP(nil)
 		for i, p := range predicates {
 			if i > 0 {
-				s.Or()
+				s1.Or()
 			}
-			p(s)
+			p(s1)
 		}
+		s.Where(s1.P())
 	}
 {{- end }}
 
