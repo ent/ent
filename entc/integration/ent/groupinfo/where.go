@@ -498,9 +498,11 @@ func HasGroupsWith(preds ...predicate.Group) predicate.GroupInfo {
 func And(predicates ...predicate.GroupInfo) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for _, p := range predicates {
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 		func(tr *dsl.Traversal) {
 			trs := make([]interface{}, 0, len(predicates))
@@ -518,12 +520,14 @@ func And(predicates ...predicate.GroupInfo) predicate.GroupInfo {
 func Or(predicates ...predicate.GroupInfo) predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for i, p := range predicates {
 				if i > 0 {
-					s.Or()
+					s1.Or()
 				}
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 		func(tr *dsl.Traversal) {
 			trs := make([]interface{}, 0, len(predicates))

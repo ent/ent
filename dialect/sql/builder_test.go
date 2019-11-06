@@ -492,7 +492,7 @@ func TestBuilder(t *testing.T) {
 						),
 					),
 				),
-			wantQuery: "DELETE FROM `users` WHERE (`name` = ? AND `age` = ?) OR (`name` = ? AND `age` = ?) OR ((`name` = ?) AND (`age` = ? OR `age` = ?))",
+			wantQuery: "DELETE FROM `users` WHERE ((`name` = ? AND `age` = ?) OR (`name` = ? AND `age` = ?) OR ((`name` = ?) AND (`age` = ? OR `age` = ?)))",
 			wantArgs:  []interface{}{"foo", 10, "bar", 20, "qux", 1, 2},
 		},
 		{
@@ -508,8 +508,33 @@ func TestBuilder(t *testing.T) {
 						),
 					),
 				),
-			wantQuery: `DELETE FROM "users" WHERE ("name" = $1 AND "age" = $2) OR ("name" = $3 AND "age" = $4) OR (("name" = $5) AND ("age" = $6 OR "age" = $7))`,
+			wantQuery: `DELETE FROM "users" WHERE (("name" = $1 AND "age" = $2) OR ("name" = $3 AND "age" = $4) OR (("name" = $5) AND ("age" = $6 OR "age" = $7)))`,
 			wantArgs:  []interface{}{"foo", 10, "bar", 20, "qux", 1, 2},
+		},
+		{
+			input: Delete("users").
+				Where(
+					Or(
+						EQ("name", "foo").And().EQ("age", 10),
+						EQ("name", "bar").And().EQ("age", 20),
+					),
+				).
+				Where(EQ("role", "admin")),
+			wantQuery: "DELETE FROM `users` WHERE ((`name` = ? AND `age` = ?) OR (`name` = ? AND `age` = ?)) AND `role` = ?",
+			wantArgs:  []interface{}{"foo", 10, "bar", 20, "admin"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Delete("users").
+				Where(
+					Or(
+						EQ("name", "foo").And().EQ("age", 10),
+						EQ("name", "bar").And().EQ("age", 20),
+					),
+				).
+				Where(EQ("role", "admin")),
+			wantQuery: `DELETE FROM "users" WHERE (("name" = $1 AND "age" = $2) OR ("name" = $3 AND "age" = $4)) AND "role" = $5`,
+			wantArgs:  []interface{}{"foo", 10, "bar", 20, "admin"},
 		},
 		{
 			input:     Select().From(Table("users")),
@@ -985,7 +1010,7 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input:     Select("age").From(Table("users")).Where(EQ("name", "foo")).Or().Where(EQ("name", "bar")),
-			wantQuery: "SELECT `age` FROM `users` WHERE (`name` = ?) OR (`name` = ?)",
+			wantQuery: "SELECT `age` FROM `users` WHERE ((`name` = ?) OR (`name` = ?))",
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -993,7 +1018,7 @@ func TestBuilder(t *testing.T) {
 				Select("age").
 				From(Table("users")).
 				Where(EQ("name", "foo")).Or().Where(EQ("name", "bar")),
-			wantQuery: `SELECT "age" FROM "users" WHERE ("name" = $1) OR ("name" = $2)`,
+			wantQuery: `SELECT "age" FROM "users" WHERE (("name" = $1) OR ("name" = $2))`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{

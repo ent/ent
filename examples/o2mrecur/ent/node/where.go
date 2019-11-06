@@ -275,9 +275,11 @@ func HasChildrenWith(preds ...predicate.Node) predicate.Node {
 func And(predicates ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for _, p := range predicates {
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }
@@ -286,12 +288,14 @@ func And(predicates ...predicate.Node) predicate.Node {
 func Or(predicates ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for i, p := range predicates {
 				if i > 0 {
-					s.Or()
+					s1.Or()
 				}
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }

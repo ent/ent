@@ -287,9 +287,11 @@ func HasCityWith(preds ...predicate.City) predicate.Street {
 func And(predicates ...predicate.Street) predicate.Street {
 	return predicate.Street(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for _, p := range predicates {
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }
@@ -298,12 +300,14 @@ func And(predicates ...predicate.Street) predicate.Street {
 func Or(predicates ...predicate.Street) predicate.Street {
 	return predicate.Street(
 		func(s *sql.Selector) {
+			s1 := s.Clone().SetP(nil)
 			for i, p := range predicates {
 				if i > 0 {
-					s.Or()
+					s1.Or()
 				}
-				p(s)
+				p(s1)
 			}
+			s.Where(s1.P())
 		},
 	)
 }
