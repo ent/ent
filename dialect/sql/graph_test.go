@@ -72,6 +72,41 @@ func TestNeighbors(t *testing.T) {
 			wantArgs:  []interface{}{1},
 		},
 		{
+			name: "O2O/2types",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = 2
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "card"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Table = "cards"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			wantQuery: "SELECT * FROM `card` WHERE `owner_id` = ?",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "O2O/2types/inverse",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = 2
+				step.From.Table = "card"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Table = "cards"
+				step.Edge.Inverse = true
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			wantQuery: "SELECT * FROM `users` JOIN (SELECT `owner_id` FROM `cards` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`owner_id`",
+			wantArgs:  []interface{}{2},
+		},
+		{
 			name: "O2M/2types",
 			input: func() *Step {
 				step := &Step{}
