@@ -18,20 +18,40 @@ func TestNeighbors(t *testing.T) {
 		wantArgs  []interface{}
 	}{
 		{
-			name: "O2M/2types",
+			name: "O2O/1type",
 			input: func() *Step {
 				step := &Step{}
+				// Since the relation is on the same table,
+				// V used as a reference value.
 				step.From.V = 1
 				step.From.Table = "users"
 				step.From.Column = "id"
-				step.To.Table = "pets"
+				step.To.Table = "users"
 				step.To.Column = "id"
-				step.Edge.Rel = O2M
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
+				step.Edge.Rel = O2O
+				step.Edge.Table = "users"
+				step.Edge.Columns = []string{"spouse_id"}
 				return step
 			}(),
-			wantQuery: "SELECT * FROM `pets` WHERE `owner_id` = ?",
+			wantQuery: "SELECT * FROM `users` WHERE `spouse_id` = ?",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			name: "O2O/1type/inverse",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = 1
+				step.From.Table = "nodes"
+				step.From.Column = "id"
+				step.To.Table = "nodes"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Table = "nodes"
+				step.Edge.Inverse = true
+				step.Edge.Columns = []string{"prev_id"}
+				return step
+			}(),
+			wantQuery: "SELECT * FROM `nodes` JOIN (SELECT `prev_id` FROM `nodes` WHERE `id` = ?) AS `t1` ON `nodes`.`id` = `t1`.`prev_id`",
 			wantArgs:  []interface{}{1},
 		},
 		{
@@ -49,6 +69,23 @@ func TestNeighbors(t *testing.T) {
 				return step
 			}(),
 			wantQuery: "SELECT * FROM `users` WHERE `parent_id` = ?",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			name: "O2M/2types",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = 1
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "pets"
+				step.To.Column = "id"
+				step.Edge.Rel = O2M
+				step.Edge.Table = "pets"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			wantQuery: "SELECT * FROM `pets` WHERE `owner_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
