@@ -232,6 +232,21 @@ func TestField_DefaultName(t *testing.T) {
 	}
 }
 
+func TestBuilderField(t *testing.T) {
+	tests := []struct {
+		name  string
+		field string
+	}{
+		{"active", "active"},
+		{"type", "_type"},
+		{"config", "_config"},
+	}
+	for _, tt := range tests {
+		require.Equal(t, tt.field, Edge{Name: tt.name}.BuilderField())
+		require.Equal(t, tt.field, Field{Name: tt.name}.BuilderField())
+	}
+}
+
 func TestEdge(t *testing.T) {
 	u, g := &Type{Name: "User"}, &Type{Name: "Group"}
 	groups := &Edge{Name: "groups", Type: g, Owner: u, Rel: Relation{Type: M2M}}

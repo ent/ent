@@ -425,10 +425,7 @@ func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
-	if token.Lookup(f.Name).IsKeyword() {
-		return "_" + f.Name
-	}
-	return f.Name
+	return builderField(f.Name)
 }
 
 // StructField returns the struct member of the field in the model.
@@ -619,10 +616,7 @@ func (e Edge) HasConstraint() bool {
 
 // BuilderField returns the struct member of the edge in the builder.
 func (e Edge) BuilderField() string {
-	if token.Lookup(e.Name).IsKeyword() {
-		return "_" + e.Name
-	}
-	return e.Name
+	return builderField(e.Name)
 }
 
 // StructField returns the struct member of the edge in the model.
@@ -693,4 +687,14 @@ func validEnums(f *load.Field) error {
 		}
 	}
 	return nil
+}
+
+// builderField returns the struct field for the given name
+// and ensures it doesn't conflict with Go keywords and other
+// private fields.
+func builderField(name string) string {
+	if token.Lookup(name).IsKeyword() || name == "config" {
+		return "_" + name
+	}
+	return name
 }
