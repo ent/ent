@@ -8,6 +8,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+import (
+	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/schema"
+)
+
 // Noder wraps the basic Node method.
 type Noder interface {
 	Node(context.Context) (*Node, error)
@@ -83,10 +88,18 @@ type Edge struct {
 var (
 	once sync.Once
 	types []string
-	typeNodes = make(map[string]func(context.Context, {{ $.IDType }})(*Node, error))
+	noders = make(map[string]func(context.Context, {{ $.IDType }}) (Noder, error))
 )
 
 func (c *Client) Node(ctx context.Context, id {{ $.IDType }}) (*Node, error) {
+	noder, err := c.Noder(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return noder.Node(ctx)
+}
+
+func (c *Client) Noder(ctx context.Context, id {{ $.IDType }}) (Noder, error) {
 	var err error
 	once.Do(func() {
 		err = c.loadTypes(ctx)
@@ -103,7 +116,12 @@ func (c *Client) Node(ctx context.Context, id {{ $.IDType }}) (*Node, error) {
 	{{- else }}
 		idx := id/(1<<32 - 1)
 	{{- end }}
-	return typeNodes[types[idx]](ctx, id)
+	if idx >= 0 && idx < len(types) {
+		if fn, ok := noders[types[idx]]; ok {
+			return fn(ctx, id)
+		}
+	}
+	return nil, fmt.Errorf("cannot resolve node type for id %v", id)
 }
 
 func (c *Client) loadTypes(ctx context.Context) error {
@@ -120,12 +138,8 @@ func (c *Client) loadTypes(ctx context.Context) error {
 		return err
 	}
 	{{- range $_, $n := $.Nodes }}
-		typeNodes[{{ $n.Package }}.Table] = func(ctx context.Context, id {{ $.IDType }})(*Node, error) {
-			nv, err := c.{{ $n.Name }}.Get(ctx, id)
-			if err != nil {
-				return nil, err
-			}
-			return nv.Node(ctx)
+		noders[{{ $n.Package }}.Table] = func(ctx context.Context, id {{ $.IDType }}) (Noder, error) {
+			return c.{{ $n.Name }}.Get(ctx, id)
 		}
 	{{- end }}
 	return nil
