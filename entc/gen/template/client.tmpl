@@ -34,6 +34,7 @@ type Client struct {
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
 	{{ end }}
+	{{ template "client/fields/additional" $ }}
 }
 
 // NewClient creates a new client configured with the given options.
@@ -203,4 +204,7 @@ func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{
 
 {{ end }}
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional fields to the client.*/}}
+{{ define "client/fields/additional" }}{{end}}
 

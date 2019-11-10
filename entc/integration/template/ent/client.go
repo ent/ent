@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/facebookincubator/ent/entc/integration/template/ent/migrate"
 
@@ -32,6 +33,10 @@ type Client struct {
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+
+	// additional fields.
+	sync.Mutex
+	tables []string
 }
 
 // NewClient creates a new client configured with the given options.
