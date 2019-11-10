@@ -377,8 +377,8 @@ func (t Type) Describe(w io.Writer) {
 // It fails if the schema index is invalid.
 func (t *Type) AddIndex(idx *load.Index) error {
 	index := &Index{Unique: idx.Unique}
-	if len(idx.Fields) == 0 {
-		return fmt.Errorf("missing fields")
+	if len(idx.Fields) == 0 && len(idx.Edges) == 0 {
+		return fmt.Errorf("missing fields or edges")
 	}
 	for _, name := range idx.Fields {
 		f, ok := t.fields[name]

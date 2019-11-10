@@ -170,7 +170,7 @@ func TestType_AddIndex(t *testing.T) {
 	)
 
 	err = typ.AddIndex(&load.Index{Unique: true})
-	require.Error(t, err, "missing fields")
+	require.Error(t, err, "missing fields or edges")
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"unknown"}})
 	require.Error(t, err, "unknown field for index")
@@ -183,6 +183,9 @@ func TestType_AddIndex(t *testing.T) {
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"next"}})
 	require.Error(t, err, "not an inverse edge for O2O relation")
+
+	err = typ.AddIndex(&load.Index{Unique: true, Edges: []string{"prev", "owner"}})
+	require.NoError(t, err, "valid index defined only on edges")
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"prev"}})
 	require.NoError(t, err, "valid index on O2O relation and field")
