@@ -54,6 +54,8 @@ func (File) Indexes() []ent.Index {
 		// unique index prevents duplicates records.
 		index.Fields("name", "user").
 			Unique(),
+		// index on edges only.
+		index.Edges("owner", "type"),
 		// unique index under the "owner" sub-tree.
 		// user/owner can't have files with duplicate names.
 		index.Fields("name").
