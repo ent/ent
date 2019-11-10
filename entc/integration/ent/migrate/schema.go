@@ -134,6 +134,11 @@ var (
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
 			},
 			{
+				Name:    "owner_id_type_id",
+				Unique:  false,
+				Columns: []*schema.Column{FilesColumns[7], FilesColumns[5]},
+			},
+			{
 				Name:    "name_owner_id_type_id",
 				Unique:  true,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7], FilesColumns[5]},
