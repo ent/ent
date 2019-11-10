@@ -159,6 +159,41 @@ func TestNeighbors(t *testing.T) {
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `parent_id` FROM `users` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`parent_id`",
 			wantArgs:  []interface{}{2},
 		},
+		{
+			name: "M2M/2type",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = 2
+				step.From.Table = "groups"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Table = "user_groups"
+				step.Edge.Columns = []string{"group_id", "user_id"}
+				return step
+			}(),
+			wantQuery: "SELECT * FROM `users` JOIN (SELECT `user_groups`.`user_id` FROM `user_groups` WHERE `user_groups`.`group_id` = ?) AS `t1` ON `users`.`id` = `t1`.`user_id`",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "M2M/2type/inverse",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = 2
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "groups"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Inverse = true
+				step.Edge.Table = "user_groups"
+				step.Edge.Columns = []string{"group_id", "user_id"}
+				return step
+			}(),
+			wantQuery: "SELECT * FROM `groups` JOIN (SELECT `user_groups`.`group_id` FROM `user_groups` WHERE `user_groups`.`user_id` = ?) AS `t1` ON `groups`.`id` = `t1`.`group_id`",
+			wantArgs:  []interface{}{2},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
