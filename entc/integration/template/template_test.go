@@ -42,4 +42,7 @@ func TestCustomTemplate(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, g.ID, node.ID)
 	require.Equal(t, &ent.Field{Type: "int", Name: "MaxUsers", Value: "10"}, node.Fields[0])
+
+	// compile time check for client fields.
+	_ = &client.Mutex
 }
