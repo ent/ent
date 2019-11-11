@@ -78,13 +78,10 @@ func Neighbors(dialect string, s *Step) (q *Selector) {
 			pk1, pk2 = pk2, pk1
 		}
 		to := builder.Table(s.To.Table)
-		from := builder.Table(s.From.Table)
 		join := builder.Table(s.Edge.Table)
 		match := builder.Select(join.C(pk1)).
 			From(join).
-			Join(from).
-			On(join.C(pk2), from.C(s.From.Column)).
-			Where(EQ(from.C(s.From.Column), s.From.V))
+			Where(EQ(join.C(pk2), s.From.V))
 		q = builder.Select().
 			From(to).
 			Join(match).
