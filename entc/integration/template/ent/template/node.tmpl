@@ -11,6 +11,8 @@ in the LICENSE file in the root directory of this source tree.
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/schema"
+
+	"golang.org/x/sync/semaphore"
 )
 
 // Noder wraps the basic Node method.
@@ -85,25 +87,16 @@ type Edge struct {
 
 {{/* add the node api to the client */}}
 
-var (
-	once sync.Once
-	types []string
-	noders = make(map[string]func(context.Context, {{ $.IDType }}) (Noder, error))
-)
-
 func (c *Client) Node(ctx context.Context, id {{ $.IDType }}) (*Node, error) {
-	noder, err := c.Noder(ctx, id)
+	n, err := c.Noder(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return noder.Node(ctx)
+	return n.Node(ctx)
 }
 
 func (c *Client) Noder(ctx context.Context, id {{ $.IDType }}) (Noder, error) {
-	var err error
-	once.Do(func() {
-		err = c.loadTypes(ctx)
-	})
+	tables, err := c.tables.Load(ctx, c.driver)
 	if err != nil {
 		return nil, err
 	}
@@ -116,32 +109,70 @@ func (c *Client) Noder(ctx context.Context, id {{ $.IDType }}) (Noder, error) {
 	{{- else }}
 		idx := id/(1<<32 - 1)
 	{{- end }}
-	if idx >= 0 && idx < len(types) {
-		if fn, ok := noders[types[idx]]; ok {
-			return fn(ctx, id)
-		}
+	if idx < 0 && idx >= len(tables) {
+		return nil, fmt.Errorf("cannot resolve table from id %v", id)
 	}
-	return nil, fmt.Errorf("cannot resolve node type for id %v", id)
+	return c.noder(ctx, tables[idx], id)
 }
 
-func (c *Client) loadTypes(ctx context.Context) error {
+func (c *Client) noder(ctx context.Context, tbl string, id {{ $.IDType }}) (Noder, error) {
+	switch tbl {
+	{{- range $_, $n := $.Nodes }}
+	case {{ $n.Package }}.Table:
+		return c.{{ $n.Name }}.Get(ctx, id)
+	{{- end }}
+	default:
+		return nil, fmt.Errorf("cannot resolve noder from table %q", tbl)
+	}
+}
+
+type (
+	tables struct {
+		once sync.Once
+		sem *semaphore.Weighted
+		value atomic.Value
+	}
+
+	querier interface {
+		Query(ctx context.Context, query string, args, v interface{}) error
+	}
+)
+
+func (t *tables) Load(ctx context.Context, querier querier) ([]string, error) {
+	if tables := t.value.Load(); tables != nil {
+		return tables.([]string), nil
+	}
+	t.once.Do(func() { t.sem = semaphore.NewWeighted(1) })
+	if err := t.sem.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+	defer t.sem.Release(1)
+	if tables := t.value.Load(); tables != nil {
+		return tables.([]string), nil
+	}
+	tables, err := t.load(ctx, querier)
+	if err == nil {
+		t.value.Store(tables)
+	}
+	return tables, err
+}
+
+func (tables) load(ctx context.Context, querier querier) ([]string, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("type").
 		From(sql.Table(schema.TypeTable)).
 		OrderBy(sql.Asc("id")).
 		Query()
-	if err := c.driver.Query(ctx, query, args, rows); err != nil {
-		return err
+	if err := querier.Query(ctx, query, args, rows); err != nil {
+		return nil, err
 	}
 	defer rows.Close()
-	if err := sql.ScanSlice(rows, &types); err != nil {
-		return err
-	}
-	{{- range $_, $n := $.Nodes }}
-		noders[{{ $n.Package }}.Table] = func(ctx context.Context, id {{ $.IDType }}) (Noder, error) {
-			return c.{{ $n.Name }}.Get(ctx, id)
-		}
-	{{- end }}
-	return nil
+	var tables []string
+	return tables, sql.ScanSlice(rows, &tables)
 }
+{{ end }}
+
+{{ define "client/fields/additional" }}
+	// additional fields for node api
+	tables tables
 {{ end }}
