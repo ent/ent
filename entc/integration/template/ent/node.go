@@ -11,12 +11,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
+
+	"golang.org/x/sync/semaphore"
 )
 
 // Noder wraps the basic Node method.
@@ -146,58 +149,80 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
-var (
-	once   sync.Once
-	types  []string
-	noders = make(map[string]func(context.Context, int) (Noder, error))
-)
-
 func (c *Client) Node(ctx context.Context, id int) (*Node, error) {
-	noder, err := c.Noder(ctx, id)
+	n, err := c.Noder(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return noder.Node(ctx)
+	return n.Node(ctx)
 }
 
 func (c *Client) Noder(ctx context.Context, id int) (Noder, error) {
-	var err error
-	once.Do(func() {
-		err = c.loadTypes(ctx)
-	})
+	tables, err := c.tables.Load(ctx, c.driver)
 	if err != nil {
 		return nil, err
 	}
 	idx := id / (1<<32 - 1)
-	if idx >= 0 && idx < len(types) {
-		if fn, ok := noders[types[idx]]; ok {
-			return fn(ctx, id)
-		}
+	if idx < 0 && idx >= len(tables) {
+		return nil, fmt.Errorf("cannot resolve table from id %v", id)
 	}
-	return nil, fmt.Errorf("cannot resolve node type for id %v", id)
+	return c.noder(ctx, tables[idx], id)
 }
 
-func (c *Client) loadTypes(ctx context.Context) error {
+func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
+	switch tbl {
+	case group.Table:
+		return c.Group.Get(ctx, id)
+	case pet.Table:
+		return c.Pet.Get(ctx, id)
+	case user.Table:
+		return c.User.Get(ctx, id)
+	default:
+		return nil, fmt.Errorf("cannot resolve noder from table %q", tbl)
+	}
+}
+
+type (
+	tables struct {
+		once  sync.Once
+		sem   *semaphore.Weighted
+		value atomic.Value
+	}
+
+	querier interface {
+		Query(ctx context.Context, query string, args, v interface{}) error
+	}
+)
+
+func (t *tables) Load(ctx context.Context, querier querier) ([]string, error) {
+	if tables := t.value.Load(); tables != nil {
+		return tables.([]string), nil
+	}
+	t.once.Do(func() { t.sem = semaphore.NewWeighted(1) })
+	if err := t.sem.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+	defer t.sem.Release(1)
+	if tables := t.value.Load(); tables != nil {
+		return tables.([]string), nil
+	}
+	tables, err := t.load(ctx, querier)
+	if err == nil {
+		t.value.Store(tables)
+	}
+	return tables, err
+}
+
+func (tables) load(ctx context.Context, querier querier) ([]string, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("type").
 		From(sql.Table(schema.TypeTable)).
 		OrderBy(sql.Asc("id")).
 		Query()
-	if err := c.driver.Query(ctx, query, args, rows); err != nil {
-		return err
+	if err := querier.Query(ctx, query, args, rows); err != nil {
+		return nil, err
 	}
 	defer rows.Close()
-	if err := sql.ScanSlice(rows, &types); err != nil {
-		return err
-	}
-	noders[group.Table] = func(ctx context.Context, id int) (Noder, error) {
-		return c.Group.Get(ctx, id)
-	}
-	noders[pet.Table] = func(ctx context.Context, id int) (Noder, error) {
-		return c.Pet.Get(ctx, id)
-	}
-	noders[user.Table] = func(ctx context.Context, id int) (Noder, error) {
-		return c.User.Get(ctx, id)
-	}
-	return nil
+	var tables []string
+	return tables, sql.ScanSlice(rows, &tables)
 }
