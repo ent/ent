@@ -5,6 +5,7 @@
 package sql
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -199,6 +200,112 @@ func TestNeighbors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			selector := Neighbors("", tt.input)
 			query, args := selector.Query()
+			require.Equal(t, tt.wantQuery, query)
+			require.Equal(t, tt.wantArgs, args)
+		})
+	}
+}
+
+func TestSetNeighbors(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     *Step
+		wantQuery string
+		wantArgs  []interface{}
+	}{
+		{
+			name: "O2M/2types",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = Select().From(Table("users")).Where(EQ("name", "a8m"))
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "pets"
+				step.To.Column = "id"
+				step.Edge.Rel = O2M
+				step.Edge.Table = "pets"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			wantQuery: `SELECT * FROM "pets" JOIN (SELECT "id" FROM "users" WHERE "name" = $1) AS "t1" ON "pets"."owner_id" = "t1"."id"`,
+			wantArgs:  []interface{}{"a8m"},
+		},
+		{
+			name: "M2O/2types",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = Select().From(Table("pets")).Where(EQ("name", "pedro"))
+				step.From.Table = "pets"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = M2O
+				step.Edge.Table = "pets"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			wantQuery: `SELECT * FROM "users" JOIN (SELECT "owner_id" FROM "pets" WHERE "name" = $1) AS "t1" ON "users"."id" = "t1"."owner_id"`,
+			wantArgs:  []interface{}{"pedro"},
+		},
+		{
+			name: "M2M/2types",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = Select().From(Table("users")).Where(EQ("name", "a8m"))
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "groups"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Table = "user_groups"
+				step.Edge.Columns = []string{"user_id", "group_id"}
+				return step
+			}(),
+			wantQuery: `
+SELECT *
+FROM "groups"
+JOIN
+  (SELECT "user_groups"."group_id"
+   FROM "user_groups"
+   JOIN
+     (SELECT "id"
+      FROM "users"
+      WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id") AS "t1" ON "groups"."id" = "t1"."group_id"`,
+			wantArgs: []interface{}{"a8m"},
+		},
+		{
+			name: "M2M/2types/inverse",
+			input: func() *Step {
+				step := &Step{}
+				step.From.V = Select().From(Table("groups")).Where(EQ("name", "GitHub"))
+				step.From.Table = "groups"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Inverse = true
+				step.Edge.Table = "user_groups"
+				step.Edge.Columns = []string{"user_id", "group_id"}
+				return step
+			}(),
+			wantQuery: `
+SELECT *
+FROM "users"
+JOIN
+  (SELECT "user_groups"."user_id"
+   FROM "user_groups"
+   JOIN
+     (SELECT "id"
+      FROM "groups"
+      WHERE "name" = $1) AS "t1" ON "user_groups"."group_id" = "t1"."id") AS "t1" ON "users"."id" = "t1"."user_id"`,
+			wantArgs: []interface{}{"GitHub"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			selector := SetNeighbors("postgres", tt.input)
+			query, args := selector.Query()
+			tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
 			require.Equal(t, tt.wantQuery, query)
 			require.Equal(t, tt.wantArgs, args)
 		})

@@ -68,7 +68,7 @@ type Step struct {
 }
 
 // Neighbors returns a Selector for evaluating the path-step
-// and getting the neighbors of one or more vertices.
+// and getting the neighbors of one vertex.
 func Neighbors(dialect string, s *Step) (q *Selector) {
 	builder := Dialect(dialect)
 	switch r := s.Edge.Rel; {
@@ -99,6 +99,46 @@ func Neighbors(dialect string, s *Step) (q *Selector) {
 		q = builder.Select().
 			From(builder.Table(s.To.Table)).
 			Where(EQ(s.Edge.Columns[0], s.From.V))
+	}
+	return q
+}
+
+// SetNeighbors returns a Selector for evaluating the path-step
+// and getting the neighbors of set of vertices.
+func SetNeighbors(dialect string, s *Step) (q *Selector) {
+	set := s.From.V.(*Selector)
+	builder := Dialect(dialect)
+	switch r := s.Edge.Rel; {
+	case r == M2M:
+		pk1, pk2 := s.Edge.Columns[1], s.Edge.Columns[0]
+		if s.Edge.Inverse {
+			pk1, pk2 = pk2, pk1
+		}
+		to := builder.Table(s.To.Table)
+		set.Select(s.From.Column)
+		join := builder.Table(s.Edge.Table)
+		match := builder.Select(join.C(pk1)).
+			From(join).
+			Join(set).
+			On(join.C(pk2), set.C(s.From.Column))
+		q = builder.Select().
+			From(to).
+			Join(match).
+			On(to.C(s.To.Column), match.C(pk1))
+	case r == M2O || (r == O2O && s.Edge.Inverse):
+		t1 := builder.Table(s.To.Table)
+		set.Select(s.Edge.Columns[0])
+		q = builder.Select().
+			From(t1).
+			Join(set).
+			On(t1.C(s.To.Column), set.C(s.Edge.Columns[0]))
+	case r == O2M || (r == O2O && !s.Edge.Inverse):
+		t1 := builder.Table(s.To.Table)
+		set.Select(s.From.Column)
+		q = builder.Select().
+			From(t1).
+			Join(set).
+			On(t1.C(s.Edge.Columns[0]), set.C(s.From.Column))
 	}
 	return q
 }
