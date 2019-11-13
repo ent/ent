@@ -7,6 +7,7 @@
 package entc
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -112,11 +113,13 @@ func TemplateGlob(pattern string) Option {
 // and associates the resulting templates with codegen templates.
 func TemplateDir(path string) Option {
 	return templateOption(func(cfg *gen.Config) error {
-		return filepath.Walk(path, func(path string, info os.FileInfo, _ error) error {
+		return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return fmt.Errorf("load template: %v", err)
+			}
 			if info.IsDir() {
 				return nil
 			}
-			var err error
 			cfg.Template, err = cfg.Template.ParseFiles(path)
 			return err
 		})
