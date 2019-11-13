@@ -13,7 +13,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	{{- $scan := print "v" $receiver }}
+	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $_, $f := $.Fields }}
@@ -41,7 +41,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	{{- $scan := print "v" $receiver }}
+	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $_, $f := $.Fields }}

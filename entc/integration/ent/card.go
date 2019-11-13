@@ -36,7 +36,7 @@ type Card struct {
 
 // FromRows scans the sql response data into Card.
 func (c *Card) FromRows(rows *sql.Rows) error {
-	var vc struct {
+	var scanc struct {
 		ID         int
 		CreateTime sql.NullTime
 		UpdateTime sql.NullTime
@@ -45,19 +45,19 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 	}
 	// the order here should be the same as in the `card.Columns`.
 	if err := rows.Scan(
-		&vc.ID,
-		&vc.CreateTime,
-		&vc.UpdateTime,
-		&vc.Number,
-		&vc.Name,
+		&scanc.ID,
+		&scanc.CreateTime,
+		&scanc.UpdateTime,
+		&scanc.Number,
+		&scanc.Name,
 	); err != nil {
 		return err
 	}
-	c.ID = strconv.Itoa(vc.ID)
-	c.CreateTime = vc.CreateTime.Time
-	c.UpdateTime = vc.UpdateTime.Time
-	c.Number = vc.Number.String
-	c.Name = vc.Name.String
+	c.ID = strconv.Itoa(scanc.ID)
+	c.CreateTime = scanc.CreateTime.Time
+	c.UpdateTime = scanc.UpdateTime.Time
+	c.Number = scanc.Number.String
+	c.Name = scanc.Name.String
 	return nil
 }
 
@@ -67,21 +67,21 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vc struct {
+	var scanc struct {
 		ID         string `json:"id,omitempty"`
 		CreateTime int64  `json:"create_time,omitempty"`
 		UpdateTime int64  `json:"update_time,omitempty"`
 		Number     string `json:"number,omitempty"`
 		Name       string `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vc); err != nil {
+	if err := vmap.Decode(&scanc); err != nil {
 		return err
 	}
-	c.ID = vc.ID
-	c.CreateTime = time.Unix(0, vc.CreateTime)
-	c.UpdateTime = time.Unix(0, vc.UpdateTime)
-	c.Number = vc.Number
-	c.Name = vc.Name
+	c.ID = scanc.ID
+	c.CreateTime = time.Unix(0, scanc.CreateTime)
+	c.UpdateTime = time.Unix(0, scanc.UpdateTime)
+	c.Number = scanc.Number
+	c.Name = scanc.Name
 	return nil
 }
 
@@ -137,11 +137,11 @@ type Cards []*Card
 // FromRows scans the sql response data into Cards.
 func (c *Cards) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vc := &Card{}
-		if err := vc.FromRows(rows); err != nil {
+		scanc := &Card{}
+		if err := scanc.FromRows(rows); err != nil {
 			return err
 		}
-		*c = append(*c, vc)
+		*c = append(*c, scanc)
 	}
 	return nil
 }
@@ -152,17 +152,17 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vc []struct {
+	var scanc []struct {
 		ID         string `json:"id,omitempty"`
 		CreateTime int64  `json:"create_time,omitempty"`
 		UpdateTime int64  `json:"update_time,omitempty"`
 		Number     string `json:"number,omitempty"`
 		Name       string `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vc); err != nil {
+	if err := vmap.Decode(&scanc); err != nil {
 		return err
 	}
-	for _, v := range vc {
+	for _, v := range scanc {
 		*c = append(*c, &Card{
 			ID:         v.ID,
 			CreateTime: time.Unix(0, v.CreateTime),

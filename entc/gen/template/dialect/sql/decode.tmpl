@@ -9,7 +9,7 @@ in the LICENSE file in the root directory of this source tree.
 
 // FromRows scans the sql response data into {{ $.Name }}.
 func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
-	{{- $scan := print "v" $receiver }}
+	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} struct {
 		ID   {{ if $.ID.IsString }}int{{ else }}{{ $.ID.Type }}{{ end }}
 		{{ range $_, $f := $.Fields }}
@@ -53,7 +53,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 // FromRows scans the sql response data into {{ $slice }}.
 func ({{ $receiver }} *{{ $slice }}) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		{{- $scan := print "v" $receiver }}
+		{{- $scan := print "scan" $receiver }}
 		{{ $scan }} := &{{ $.Name }}{}
 		if err := {{ $scan }}.FromRows(rows); err != nil {
 			return err

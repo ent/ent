@@ -26,19 +26,19 @@ type FileType struct {
 
 // FromRows scans the sql response data into FileType.
 func (ft *FileType) FromRows(rows *sql.Rows) error {
-	var vft struct {
+	var scanft struct {
 		ID   int
 		Name sql.NullString
 	}
 	// the order here should be the same as in the `filetype.Columns`.
 	if err := rows.Scan(
-		&vft.ID,
-		&vft.Name,
+		&scanft.ID,
+		&scanft.Name,
 	); err != nil {
 		return err
 	}
-	ft.ID = strconv.Itoa(vft.ID)
-	ft.Name = vft.Name.String
+	ft.ID = strconv.Itoa(scanft.ID)
+	ft.Name = scanft.Name.String
 	return nil
 }
 
@@ -48,15 +48,15 @@ func (ft *FileType) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vft struct {
+	var scanft struct {
 		ID   string `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vft); err != nil {
+	if err := vmap.Decode(&scanft); err != nil {
 		return err
 	}
-	ft.ID = vft.ID
-	ft.Name = vft.Name
+	ft.ID = scanft.ID
+	ft.Name = scanft.Name
 	return nil
 }
 
@@ -106,11 +106,11 @@ type FileTypes []*FileType
 // FromRows scans the sql response data into FileTypes.
 func (ft *FileTypes) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vft := &FileType{}
-		if err := vft.FromRows(rows); err != nil {
+		scanft := &FileType{}
+		if err := scanft.FromRows(rows); err != nil {
 			return err
 		}
-		*ft = append(*ft, vft)
+		*ft = append(*ft, scanft)
 	}
 	return nil
 }
@@ -121,14 +121,14 @@ func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vft []struct {
+	var scanft []struct {
 		ID   string `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vft); err != nil {
+	if err := vmap.Decode(&scanft); err != nil {
 		return err
 	}
-	for _, v := range vft {
+	for _, v := range scanft {
 		*ft = append(*ft, &FileType{
 			ID:   v.ID,
 			Name: v.Name,

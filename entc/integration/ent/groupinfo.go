@@ -28,22 +28,22 @@ type GroupInfo struct {
 
 // FromRows scans the sql response data into GroupInfo.
 func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
-	var vgi struct {
+	var scangi struct {
 		ID       int
 		Desc     sql.NullString
 		MaxUsers sql.NullInt64
 	}
 	// the order here should be the same as in the `groupinfo.Columns`.
 	if err := rows.Scan(
-		&vgi.ID,
-		&vgi.Desc,
-		&vgi.MaxUsers,
+		&scangi.ID,
+		&scangi.Desc,
+		&scangi.MaxUsers,
 	); err != nil {
 		return err
 	}
-	gi.ID = strconv.Itoa(vgi.ID)
-	gi.Desc = vgi.Desc.String
-	gi.MaxUsers = int(vgi.MaxUsers.Int64)
+	gi.ID = strconv.Itoa(scangi.ID)
+	gi.Desc = scangi.Desc.String
+	gi.MaxUsers = int(scangi.MaxUsers.Int64)
 	return nil
 }
 
@@ -53,17 +53,17 @@ func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vgi struct {
+	var scangi struct {
 		ID       string `json:"id,omitempty"`
 		Desc     string `json:"desc,omitempty"`
 		MaxUsers int    `json:"max_users,omitempty"`
 	}
-	if err := vmap.Decode(&vgi); err != nil {
+	if err := vmap.Decode(&scangi); err != nil {
 		return err
 	}
-	gi.ID = vgi.ID
-	gi.Desc = vgi.Desc
-	gi.MaxUsers = vgi.MaxUsers
+	gi.ID = scangi.ID
+	gi.Desc = scangi.Desc
+	gi.MaxUsers = scangi.MaxUsers
 	return nil
 }
 
@@ -115,11 +115,11 @@ type GroupInfos []*GroupInfo
 // FromRows scans the sql response data into GroupInfos.
 func (gi *GroupInfos) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vgi := &GroupInfo{}
-		if err := vgi.FromRows(rows); err != nil {
+		scangi := &GroupInfo{}
+		if err := scangi.FromRows(rows); err != nil {
 			return err
 		}
-		*gi = append(*gi, vgi)
+		*gi = append(*gi, scangi)
 	}
 	return nil
 }
@@ -130,15 +130,15 @@ func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vgi []struct {
+	var scangi []struct {
 		ID       string `json:"id,omitempty"`
 		Desc     string `json:"desc,omitempty"`
 		MaxUsers int    `json:"max_users,omitempty"`
 	}
-	if err := vmap.Decode(&vgi); err != nil {
+	if err := vmap.Decode(&scangi); err != nil {
 		return err
 	}
-	for _, v := range vgi {
+	for _, v := range scangi {
 		*gi = append(*gi, &GroupInfo{
 			ID:       v.ID,
 			Desc:     v.Desc,

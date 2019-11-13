@@ -22,16 +22,16 @@ type Group struct {
 
 // FromRows scans the sql response data into Group.
 func (gr *Group) FromRows(rows *sql.Rows) error {
-	var vgr struct {
+	var scangr struct {
 		ID int
 	}
 	// the order here should be the same as in the `group.Columns`.
 	if err := rows.Scan(
-		&vgr.ID,
+		&scangr.ID,
 	); err != nil {
 		return err
 	}
-	gr.ID = vgr.ID
+	gr.ID = scangr.ID
 	return nil
 }
 
@@ -68,11 +68,11 @@ type Groups []*Group
 // FromRows scans the sql response data into Groups.
 func (gr *Groups) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vgr := &Group{}
-		if err := vgr.FromRows(rows); err != nil {
+		scangr := &Group{}
+		if err := scangr.FromRows(rows); err != nil {
 			return err
 		}
-		*gr = append(*gr, vgr)
+		*gr = append(*gr, scangr)
 	}
 	return nil
 }

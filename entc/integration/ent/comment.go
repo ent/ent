@@ -30,7 +30,7 @@ type Comment struct {
 
 // FromRows scans the sql response data into Comment.
 func (c *Comment) FromRows(rows *sql.Rows) error {
-	var vc struct {
+	var scanc struct {
 		ID          int
 		UniqueInt   sql.NullInt64
 		UniqueFloat sql.NullFloat64
@@ -38,19 +38,19 @@ func (c *Comment) FromRows(rows *sql.Rows) error {
 	}
 	// the order here should be the same as in the `comment.Columns`.
 	if err := rows.Scan(
-		&vc.ID,
-		&vc.UniqueInt,
-		&vc.UniqueFloat,
-		&vc.NillableInt,
+		&scanc.ID,
+		&scanc.UniqueInt,
+		&scanc.UniqueFloat,
+		&scanc.NillableInt,
 	); err != nil {
 		return err
 	}
-	c.ID = strconv.Itoa(vc.ID)
-	c.UniqueInt = int(vc.UniqueInt.Int64)
-	c.UniqueFloat = vc.UniqueFloat.Float64
-	if vc.NillableInt.Valid {
+	c.ID = strconv.Itoa(scanc.ID)
+	c.UniqueInt = int(scanc.UniqueInt.Int64)
+	c.UniqueFloat = scanc.UniqueFloat.Float64
+	if scanc.NillableInt.Valid {
 		c.NillableInt = new(int)
-		*c.NillableInt = int(vc.NillableInt.Int64)
+		*c.NillableInt = int(scanc.NillableInt.Int64)
 	}
 	return nil
 }
@@ -61,19 +61,19 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vc struct {
+	var scanc struct {
 		ID          string  `json:"id,omitempty"`
 		UniqueInt   int     `json:"unique_int,omitempty"`
 		UniqueFloat float64 `json:"unique_float,omitempty"`
 		NillableInt *int    `json:"nillable_int,omitempty"`
 	}
-	if err := vmap.Decode(&vc); err != nil {
+	if err := vmap.Decode(&scanc); err != nil {
 		return err
 	}
-	c.ID = vc.ID
-	c.UniqueInt = vc.UniqueInt
-	c.UniqueFloat = vc.UniqueFloat
-	c.NillableInt = vc.NillableInt
+	c.ID = scanc.ID
+	c.UniqueInt = scanc.UniqueInt
+	c.UniqueFloat = scanc.UniqueFloat
+	c.NillableInt = scanc.NillableInt
 	return nil
 }
 
@@ -124,11 +124,11 @@ type Comments []*Comment
 // FromRows scans the sql response data into Comments.
 func (c *Comments) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vc := &Comment{}
-		if err := vc.FromRows(rows); err != nil {
+		scanc := &Comment{}
+		if err := scanc.FromRows(rows); err != nil {
 			return err
 		}
-		*c = append(*c, vc)
+		*c = append(*c, scanc)
 	}
 	return nil
 }
@@ -139,16 +139,16 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vc []struct {
+	var scanc []struct {
 		ID          string  `json:"id,omitempty"`
 		UniqueInt   int     `json:"unique_int,omitempty"`
 		UniqueFloat float64 `json:"unique_float,omitempty"`
 		NillableInt *int    `json:"nillable_int,omitempty"`
 	}
-	if err := vmap.Decode(&vc); err != nil {
+	if err := vmap.Decode(&scanc); err != nil {
 		return err
 	}
-	for _, v := range vc {
+	for _, v := range scanc {
 		*c = append(*c, &Comment{
 			ID:          v.ID,
 			UniqueInt:   v.UniqueInt,
