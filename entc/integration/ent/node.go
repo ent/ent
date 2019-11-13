@@ -26,19 +26,19 @@ type Node struct {
 
 // FromRows scans the sql response data into Node.
 func (n *Node) FromRows(rows *sql.Rows) error {
-	var vn struct {
+	var scann struct {
 		ID    int
 		Value sql.NullInt64
 	}
 	// the order here should be the same as in the `node.Columns`.
 	if err := rows.Scan(
-		&vn.ID,
-		&vn.Value,
+		&scann.ID,
+		&scann.Value,
 	); err != nil {
 		return err
 	}
-	n.ID = strconv.Itoa(vn.ID)
-	n.Value = int(vn.Value.Int64)
+	n.ID = strconv.Itoa(scann.ID)
+	n.Value = int(scann.Value.Int64)
 	return nil
 }
 
@@ -48,15 +48,15 @@ func (n *Node) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vn struct {
+	var scann struct {
 		ID    string `json:"id,omitempty"`
 		Value int    `json:"value,omitempty"`
 	}
-	if err := vmap.Decode(&vn); err != nil {
+	if err := vmap.Decode(&scann); err != nil {
 		return err
 	}
-	n.ID = vn.ID
-	n.Value = vn.Value
+	n.ID = scann.ID
+	n.Value = scann.Value
 	return nil
 }
 
@@ -111,11 +111,11 @@ type Nodes []*Node
 // FromRows scans the sql response data into Nodes.
 func (n *Nodes) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vn := &Node{}
-		if err := vn.FromRows(rows); err != nil {
+		scann := &Node{}
+		if err := scann.FromRows(rows); err != nil {
 			return err
 		}
-		*n = append(*n, vn)
+		*n = append(*n, scann)
 	}
 	return nil
 }
@@ -126,14 +126,14 @@ func (n *Nodes) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vn []struct {
+	var scann []struct {
 		ID    string `json:"id,omitempty"`
 		Value int    `json:"value,omitempty"`
 	}
-	if err := vmap.Decode(&vn); err != nil {
+	if err := vmap.Decode(&scann); err != nil {
 		return err
 	}
-	for _, v := range vn {
+	for _, v := range scann {
 		*n = append(*n, &Node{
 			ID:    v.ID,
 			Value: v.Value,

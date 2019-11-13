@@ -35,7 +35,7 @@ type Group struct {
 
 // FromRows scans the sql response data into Group.
 func (gr *Group) FromRows(rows *sql.Rows) error {
-	var vgr struct {
+	var scangr struct {
 		ID       int
 		Active   sql.NullBool
 		Expire   sql.NullTime
@@ -45,24 +45,24 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 	}
 	// the order here should be the same as in the `group.Columns`.
 	if err := rows.Scan(
-		&vgr.ID,
-		&vgr.Active,
-		&vgr.Expire,
-		&vgr.Type,
-		&vgr.MaxUsers,
-		&vgr.Name,
+		&scangr.ID,
+		&scangr.Active,
+		&scangr.Expire,
+		&scangr.Type,
+		&scangr.MaxUsers,
+		&scangr.Name,
 	); err != nil {
 		return err
 	}
-	gr.ID = strconv.Itoa(vgr.ID)
-	gr.Active = vgr.Active.Bool
-	gr.Expire = vgr.Expire.Time
-	if vgr.Type.Valid {
+	gr.ID = strconv.Itoa(scangr.ID)
+	gr.Active = scangr.Active.Bool
+	gr.Expire = scangr.Expire.Time
+	if scangr.Type.Valid {
 		gr.Type = new(string)
-		*gr.Type = vgr.Type.String
+		*gr.Type = scangr.Type.String
 	}
-	gr.MaxUsers = int(vgr.MaxUsers.Int64)
-	gr.Name = vgr.Name.String
+	gr.MaxUsers = int(scangr.MaxUsers.Int64)
+	gr.Name = scangr.Name.String
 	return nil
 }
 
@@ -72,7 +72,7 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vgr struct {
+	var scangr struct {
 		ID       string  `json:"id,omitempty"`
 		Active   bool    `json:"active,omitempty"`
 		Expire   int64   `json:"expire,omitempty"`
@@ -80,15 +80,15 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 		MaxUsers int     `json:"max_users,omitempty"`
 		Name     string  `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vgr); err != nil {
+	if err := vmap.Decode(&scangr); err != nil {
 		return err
 	}
-	gr.ID = vgr.ID
-	gr.Active = vgr.Active
-	gr.Expire = time.Unix(0, vgr.Expire)
-	gr.Type = vgr.Type
-	gr.MaxUsers = vgr.MaxUsers
-	gr.Name = vgr.Name
+	gr.ID = scangr.ID
+	gr.Active = scangr.Active
+	gr.Expire = time.Unix(0, scangr.Expire)
+	gr.Type = scangr.Type
+	gr.MaxUsers = scangr.MaxUsers
+	gr.Name = scangr.Name
 	return nil
 }
 
@@ -163,11 +163,11 @@ type Groups []*Group
 // FromRows scans the sql response data into Groups.
 func (gr *Groups) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vgr := &Group{}
-		if err := vgr.FromRows(rows); err != nil {
+		scangr := &Group{}
+		if err := scangr.FromRows(rows); err != nil {
 			return err
 		}
-		*gr = append(*gr, vgr)
+		*gr = append(*gr, scangr)
 	}
 	return nil
 }
@@ -178,7 +178,7 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vgr []struct {
+	var scangr []struct {
 		ID       string  `json:"id,omitempty"`
 		Active   bool    `json:"active,omitempty"`
 		Expire   int64   `json:"expire,omitempty"`
@@ -186,10 +186,10 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 		MaxUsers int     `json:"max_users,omitempty"`
 		Name     string  `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vgr); err != nil {
+	if err := vmap.Decode(&scangr); err != nil {
 		return err
 	}
-	for _, v := range vgr {
+	for _, v := range scangr {
 		*gr = append(*gr, &Group{
 			ID:       v.ID,
 			Active:   v.Active,

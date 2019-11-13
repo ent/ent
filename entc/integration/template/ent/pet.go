@@ -27,24 +27,24 @@ type Pet struct {
 
 // FromRows scans the sql response data into Pet.
 func (pe *Pet) FromRows(rows *sql.Rows) error {
-	var vpe struct {
+	var scanpe struct {
 		ID         int
 		Age        sql.NullInt64
 		LicensedAt sql.NullTime
 	}
 	// the order here should be the same as in the `pet.Columns`.
 	if err := rows.Scan(
-		&vpe.ID,
-		&vpe.Age,
-		&vpe.LicensedAt,
+		&scanpe.ID,
+		&scanpe.Age,
+		&scanpe.LicensedAt,
 	); err != nil {
 		return err
 	}
-	pe.ID = vpe.ID
-	pe.Age = int(vpe.Age.Int64)
-	if vpe.LicensedAt.Valid {
+	pe.ID = scanpe.ID
+	pe.Age = int(scanpe.Age.Int64)
+	if scanpe.LicensedAt.Valid {
 		pe.LicensedAt = new(time.Time)
-		*pe.LicensedAt = vpe.LicensedAt.Time
+		*pe.LicensedAt = scanpe.LicensedAt.Time
 	}
 	return nil
 }
@@ -93,11 +93,11 @@ type Pets []*Pet
 // FromRows scans the sql response data into Pets.
 func (pe *Pets) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vpe := &Pet{}
-		if err := vpe.FromRows(rows); err != nil {
+		scanpe := &Pet{}
+		if err := scanpe.FromRows(rows); err != nil {
 			return err
 		}
-		*pe = append(*pe, vpe)
+		*pe = append(*pe, scanpe)
 	}
 	return nil
 }

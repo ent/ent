@@ -39,7 +39,7 @@ type User struct {
 
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
-	var vu struct {
+	var scanu struct {
 		ID      int
 		Age     sql.NullInt64
 		Name    sql.NullString
@@ -52,27 +52,27 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
-		&vu.ID,
-		&vu.Age,
-		&vu.Name,
-		&vu.Phone,
-		&vu.Buffer,
-		&vu.Title,
-		&vu.NewName,
-		&vu.Blob,
-		&vu.State,
+		&scanu.ID,
+		&scanu.Age,
+		&scanu.Name,
+		&scanu.Phone,
+		&scanu.Buffer,
+		&scanu.Title,
+		&scanu.NewName,
+		&scanu.Blob,
+		&scanu.State,
 	); err != nil {
 		return err
 	}
-	u.ID = vu.ID
-	u.Age = int(vu.Age.Int64)
-	u.Name = vu.Name.String
-	u.Phone = vu.Phone.String
-	u.Buffer = vu.Buffer
-	u.Title = vu.Title.String
-	u.NewName = vu.NewName.String
-	u.Blob = vu.Blob
-	u.State = user.State(vu.State.String)
+	u.ID = scanu.ID
+	u.Age = int(scanu.Age.Int64)
+	u.Name = scanu.Name.String
+	u.Phone = scanu.Phone.String
+	u.Buffer = scanu.Buffer
+	u.Title = scanu.Title.String
+	u.NewName = scanu.NewName.String
+	u.Blob = scanu.Blob
+	u.State = user.State(scanu.State.String)
 	return nil
 }
 
@@ -125,11 +125,11 @@ type Users []*User
 // FromRows scans the sql response data into Users.
 func (u *Users) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vu := &User{}
-		if err := vu.FromRows(rows); err != nil {
+		scanu := &User{}
+		if err := scanu.FromRows(rows); err != nil {
 			return err
 		}
-		*u = append(*u, vu)
+		*u = append(*u, scanu)
 	}
 	return nil
 }

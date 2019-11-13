@@ -32,7 +32,7 @@ type File struct {
 
 // FromRows scans the sql response data into File.
 func (f *File) FromRows(rows *sql.Rows) error {
-	var vf struct {
+	var scanf struct {
 		ID    int
 		Size  sql.NullInt64
 		Name  sql.NullString
@@ -41,22 +41,22 @@ func (f *File) FromRows(rows *sql.Rows) error {
 	}
 	// the order here should be the same as in the `file.Columns`.
 	if err := rows.Scan(
-		&vf.ID,
-		&vf.Size,
-		&vf.Name,
-		&vf.User,
-		&vf.Group,
+		&scanf.ID,
+		&scanf.Size,
+		&scanf.Name,
+		&scanf.User,
+		&scanf.Group,
 	); err != nil {
 		return err
 	}
-	f.ID = strconv.Itoa(vf.ID)
-	f.Size = int(vf.Size.Int64)
-	f.Name = vf.Name.String
-	if vf.User.Valid {
+	f.ID = strconv.Itoa(scanf.ID)
+	f.Size = int(scanf.Size.Int64)
+	f.Name = scanf.Name.String
+	if scanf.User.Valid {
 		f.User = new(string)
-		*f.User = vf.User.String
+		*f.User = scanf.User.String
 	}
-	f.Group = vf.Group.String
+	f.Group = scanf.Group.String
 	return nil
 }
 
@@ -66,21 +66,21 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vf struct {
+	var scanf struct {
 		ID    string  `json:"id,omitempty"`
 		Size  int     `json:"fsize,omitempty"`
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
 	}
-	if err := vmap.Decode(&vf); err != nil {
+	if err := vmap.Decode(&scanf); err != nil {
 		return err
 	}
-	f.ID = vf.ID
-	f.Size = vf.Size
-	f.Name = vf.Name
-	f.User = vf.User
-	f.Group = vf.Group
+	f.ID = scanf.ID
+	f.Size = scanf.Size
+	f.Name = scanf.Name
+	f.User = scanf.User
+	f.Group = scanf.Group
 	return nil
 }
 
@@ -143,11 +143,11 @@ type Files []*File
 // FromRows scans the sql response data into Files.
 func (f *Files) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vf := &File{}
-		if err := vf.FromRows(rows); err != nil {
+		scanf := &File{}
+		if err := scanf.FromRows(rows); err != nil {
 			return err
 		}
-		*f = append(*f, vf)
+		*f = append(*f, scanf)
 	}
 	return nil
 }
@@ -158,17 +158,17 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vf []struct {
+	var scanf []struct {
 		ID    string  `json:"id,omitempty"`
 		Size  int     `json:"fsize,omitempty"`
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
 	}
-	if err := vmap.Decode(&vf); err != nil {
+	if err := vmap.Decode(&scanf); err != nil {
 		return err
 	}
-	for _, v := range vf {
+	for _, v := range scanf {
 		*f = append(*f, &File{
 			ID:    v.ID,
 			Size:  v.Size,

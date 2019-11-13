@@ -36,7 +36,7 @@ type User struct {
 
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
-	var vu struct {
+	var scanu struct {
 		ID       int
 		Age      sql.NullInt64
 		Name     sql.NullString
@@ -47,23 +47,23 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
-		&vu.ID,
-		&vu.Age,
-		&vu.Name,
-		&vu.Last,
-		&vu.Nickname,
-		&vu.Phone,
-		&vu.Password,
+		&scanu.ID,
+		&scanu.Age,
+		&scanu.Name,
+		&scanu.Last,
+		&scanu.Nickname,
+		&scanu.Phone,
+		&scanu.Password,
 	); err != nil {
 		return err
 	}
-	u.ID = strconv.Itoa(vu.ID)
-	u.Age = int(vu.Age.Int64)
-	u.Name = vu.Name.String
-	u.Last = vu.Last.String
-	u.Nickname = vu.Nickname.String
-	u.Phone = vu.Phone.String
-	u.Password = vu.Password.String
+	u.ID = strconv.Itoa(scanu.ID)
+	u.Age = int(scanu.Age.Int64)
+	u.Name = scanu.Name.String
+	u.Last = scanu.Last.String
+	u.Nickname = scanu.Nickname.String
+	u.Phone = scanu.Phone.String
+	u.Password = scanu.Password.String
 	return nil
 }
 
@@ -73,7 +73,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vu struct {
+	var scanu struct {
 		ID       string `json:"id,omitempty"`
 		Age      int    `json:"age,omitempty"`
 		Name     string `json:"name,omitempty"`
@@ -82,16 +82,16 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Phone    string `json:"phone,omitempty"`
 		Password string `json:"password,omitempty"`
 	}
-	if err := vmap.Decode(&vu); err != nil {
+	if err := vmap.Decode(&scanu); err != nil {
 		return err
 	}
-	u.ID = vu.ID
-	u.Age = vu.Age
-	u.Name = vu.Name
-	u.Last = vu.Last
-	u.Nickname = vu.Nickname
-	u.Phone = vu.Phone
-	u.Password = vu.Password
+	u.ID = scanu.ID
+	u.Age = scanu.Age
+	u.Name = scanu.Name
+	u.Last = scanu.Last
+	u.Nickname = scanu.Nickname
+	u.Phone = scanu.Phone
+	u.Password = scanu.Password
 	return nil
 }
 
@@ -200,11 +200,11 @@ type Users []*User
 // FromRows scans the sql response data into Users.
 func (u *Users) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vu := &User{}
-		if err := vu.FromRows(rows); err != nil {
+		scanu := &User{}
+		if err := scanu.FromRows(rows); err != nil {
 			return err
 		}
-		*u = append(*u, vu)
+		*u = append(*u, scanu)
 	}
 	return nil
 }
@@ -215,7 +215,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vu []struct {
+	var scanu []struct {
 		ID       string `json:"id,omitempty"`
 		Age      int    `json:"age,omitempty"`
 		Name     string `json:"name,omitempty"`
@@ -224,10 +224,10 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		Phone    string `json:"phone,omitempty"`
 		Password string `json:"password,omitempty"`
 	}
-	if err := vmap.Decode(&vu); err != nil {
+	if err := vmap.Decode(&scanu); err != nil {
 		return err
 	}
-	for _, v := range vu {
+	for _, v := range scanu {
 		*u = append(*u, &User{
 			ID:       v.ID,
 			Age:      v.Age,

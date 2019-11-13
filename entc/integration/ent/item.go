@@ -24,16 +24,16 @@ type Item struct {
 
 // FromRows scans the sql response data into Item.
 func (i *Item) FromRows(rows *sql.Rows) error {
-	var vi struct {
+	var scani struct {
 		ID int
 	}
 	// the order here should be the same as in the `item.Columns`.
 	if err := rows.Scan(
-		&vi.ID,
+		&scani.ID,
 	); err != nil {
 		return err
 	}
-	i.ID = strconv.Itoa(vi.ID)
+	i.ID = strconv.Itoa(scani.ID)
 	return nil
 }
 
@@ -43,13 +43,13 @@ func (i *Item) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vi struct {
+	var scani struct {
 		ID string `json:"id,omitempty"`
 	}
-	if err := vmap.Decode(&vi); err != nil {
+	if err := vmap.Decode(&scani); err != nil {
 		return err
 	}
-	i.ID = vi.ID
+	i.ID = scani.ID
 	return nil
 }
 
@@ -92,11 +92,11 @@ type Items []*Item
 // FromRows scans the sql response data into Items.
 func (i *Items) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vi := &Item{}
-		if err := vi.FromRows(rows); err != nil {
+		scani := &Item{}
+		if err := scani.FromRows(rows); err != nil {
 			return err
 		}
-		*i = append(*i, vi)
+		*i = append(*i, scani)
 	}
 	return nil
 }
@@ -107,13 +107,13 @@ func (i *Items) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vi []struct {
+	var scani []struct {
 		ID string `json:"id,omitempty"`
 	}
-	if err := vmap.Decode(&vi); err != nil {
+	if err := vmap.Decode(&scani); err != nil {
 		return err
 	}
-	for _, v := range vi {
+	for _, v := range scani {
 		*i = append(*i, &Item{
 			ID: v.ID,
 		})

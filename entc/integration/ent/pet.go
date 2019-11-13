@@ -26,19 +26,19 @@ type Pet struct {
 
 // FromRows scans the sql response data into Pet.
 func (pe *Pet) FromRows(rows *sql.Rows) error {
-	var vpe struct {
+	var scanpe struct {
 		ID   int
 		Name sql.NullString
 	}
 	// the order here should be the same as in the `pet.Columns`.
 	if err := rows.Scan(
-		&vpe.ID,
-		&vpe.Name,
+		&scanpe.ID,
+		&scanpe.Name,
 	); err != nil {
 		return err
 	}
-	pe.ID = strconv.Itoa(vpe.ID)
-	pe.Name = vpe.Name.String
+	pe.ID = strconv.Itoa(scanpe.ID)
+	pe.Name = scanpe.Name.String
 	return nil
 }
 
@@ -48,15 +48,15 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vpe struct {
+	var scanpe struct {
 		ID   string `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vpe); err != nil {
+	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
-	pe.ID = vpe.ID
-	pe.Name = vpe.Name
+	pe.ID = scanpe.ID
+	pe.Name = scanpe.Name
 	return nil
 }
 
@@ -111,11 +111,11 @@ type Pets []*Pet
 // FromRows scans the sql response data into Pets.
 func (pe *Pets) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vpe := &Pet{}
-		if err := vpe.FromRows(rows); err != nil {
+		scanpe := &Pet{}
+		if err := scanpe.FromRows(rows); err != nil {
 			return err
 		}
-		*pe = append(*pe, vpe)
+		*pe = append(*pe, scanpe)
 	}
 	return nil
 }
@@ -126,14 +126,14 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
-	var vpe []struct {
+	var scanpe []struct {
 		ID   string `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&vpe); err != nil {
+	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
-	for _, v := range vpe {
+	for _, v := range scanpe {
 		*pe = append(*pe, &Pet{
 			ID:   v.ID,
 			Name: v.Name,
