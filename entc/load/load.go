@@ -50,7 +50,7 @@ type Config struct {
 	Names []string
 }
 
-// Build loads the schemas package and build the Go plugin with this info.
+// Load loads the schemas package and build the Go plugin with this info.
 func (c *Config) Load() (*SchemaSpec, error) {
 	pkgPath, err := c.load()
 	if err != nil {

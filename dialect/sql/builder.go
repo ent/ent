@@ -225,7 +225,7 @@ func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
 	return t
 }
 
-// Modify appends the `MODIFY/ALTER COLUMN` clause to the given `ALTER TABLE` statement.
+// ModifyColumn appends the `MODIFY/ALTER COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 	switch {
 	case t.postgres():
