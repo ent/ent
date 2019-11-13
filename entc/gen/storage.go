@@ -12,12 +12,15 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
-// A SchemaOption defines what type of schema feature a storage driver support.
+// A SchemaMode defines what type of schema feature a storage driver support.
 type SchemaMode uint
 
 const (
 	// Unique defines field and edge uniqueness support.
 	Unique SchemaMode = 1 << iota
+
+	// Indexes defines indexes support.
+	Indexes
 
 	// Cascade defines cascading operations (e.g. cascade deletion).
 	Cascade
@@ -51,7 +54,7 @@ var drivers = []*Storage{
 		Imports: []string{
 			"github.com/facebookincubator/ent/dialect/sql",
 		},
-		SchemaMode: Unique | Cascade | Migrate,
+		SchemaMode: Unique | Indexes | Cascade | Migrate,
 		Ops: func(f *Field) []Op {
 			if !f.IsString() {
 				return nil
