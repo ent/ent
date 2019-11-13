@@ -4,7 +4,6 @@
 
 // Package entc provides an interface for interacting with
 // entc (ent codegen) as a package rather than an executable.
-
 package entc
 
 import (
