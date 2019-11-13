@@ -373,7 +373,7 @@ func (t Type) Describe(w io.Writer) {
 	io.WriteString(w, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
 }
 
-// NewIndex adds a new index for the given type table.
+// AddIndex adds a new index for the type.
 // It fails if the schema index is invalid.
 func (t *Type) AddIndex(idx *load.Index) error {
 	index := &Index{Unique: idx.Unique}

@@ -6,8 +6,10 @@ package field
 
 import "strings"
 
+// A Type represents a field type.
 type Type uint8
 
+// List of field types.
 const (
 	TypeInvalid Type = iota
 	TypeBool
@@ -62,6 +64,8 @@ func (t Type) ConstName() string {
 	}
 }
 
+// TypeInfo holds the information regarding field type.
+// Used by complex types like JSON and  Bytes.
 type TypeInfo struct {
 	Type     Type
 	Ident    string
