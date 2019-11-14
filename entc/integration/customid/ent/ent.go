@@ -226,8 +226,8 @@ func insertLastID(ctx context.Context, tx dialect.Tx, insert *sql.InsertBuilder)
 }
 
 // keys returns the keys/ids from the edge map.
-func keys(m map[string]struct{}) []string {
-	s := make([]string, 0, len(m))
+func keys(m map[int]struct{}) []int {
+	s := make([]int, 0, len(m))
 	for id := range m {
 		s = append(s, id)
 	}

@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
@@ -14,7 +13,7 @@ import (
 type UserCreate struct {
 	config
 	id     *int
-	groups map[string]struct{}
+	groups map[int]struct{}
 }
 
 // SetID sets the id field.
@@ -24,9 +23,9 @@ func (uc *UserCreate) SetID(i int) *UserCreate {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (uc *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
+func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
 	if uc.groups == nil {
-		uc.groups = make(map[string]struct{})
+		uc.groups = make(map[int]struct{})
 	}
 	for i := range ids {
 		uc.groups[ids[i]] = struct{}{}
@@ -36,7 +35,7 @@ func (uc *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
 
 // AddGroups adds the groups edges to Group.
 func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -68,6 +67,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	insert := builder.Insert(user.Table).Default()
+	if value := uc.id; value != nil {
+		insert.Set(user.FieldID, *value)
+		u.ID = *value
+	}
 	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
@@ -75,10 +78,6 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	u.ID = int(id)
 	if len(uc.groups) > 0 {
 		for eid := range uc.groups {
-			eid, err := strconv.Atoi(eid)
-			if err != nil {
-				return nil, rollback(tx, err)
-			}
 
 			query, args := builder.Insert(user.GroupsTable).
 				Columns(user.GroupsPrimaryKey[1], user.GroupsPrimaryKey[0]).

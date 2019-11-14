@@ -32,7 +32,7 @@ var (
 	}
 	// GroupUsersColumns holds the columns for the "group_users" table.
 	GroupUsersColumns = []*schema.Column{
-		{Name: "group_id", Type: field.TypeString},
+		{Name: "group_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
 	// GroupUsersTable holds the schema information for the "group_users" table.

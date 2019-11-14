@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
@@ -13,13 +12,13 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	id    *string
+	id    *int
 	users map[int]struct{}
 }
 
 // SetID sets the id field.
-func (gc *GroupCreate) SetID(s string) *GroupCreate {
-	gc.id = &s
+func (gc *GroupCreate) SetID(i int) *GroupCreate {
+	gc.id = &i
 	return gc
 }
 
@@ -68,11 +67,15 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	insert := builder.Insert(group.Table).Default()
+	if value := gc.id; value != nil {
+		insert.Set(group.FieldID, *value)
+		gr.ID = *value
+	}
 	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
-	gr.ID = strconv.FormatInt(id, 10)
+	gr.ID = int(id)
 	if len(gc.users) > 0 {
 		for eid := range gc.users {
 
