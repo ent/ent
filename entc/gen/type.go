@@ -7,18 +7,14 @@ package gen
 import (
 	"fmt"
 	"go/token"
-	"io"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
 	"github.com/facebookincubator/ent/schema/field"
-
-	"github.com/olekukonko/tablewriter"
 )
 
 type (
@@ -329,48 +325,6 @@ func (t Type) TagTypes() []string {
 	}
 	sort.Strings(r)
 	return r
-}
-
-// Describe returns description of a type. The format of the description is:
-//
-//	Type:
-//			<Fields Table>
-//
-//			<Edges Table>
-//
-func (t Type) Describe(w io.Writer) {
-	b := &strings.Builder{}
-	b.WriteString(t.Name + ":\n")
-	table := tablewriter.NewWriter(b)
-	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators"})
-	for _, f := range append([]*Field{t.ID}, t.Fields...) {
-		v := reflect.ValueOf(*f)
-		row := make([]string, v.NumField()-2)
-		for i := range row {
-			row[i] = fmt.Sprint(v.Field(i + 1).Interface())
-		}
-		table.Append(row)
-	}
-	table.Render()
-	table = tablewriter.NewWriter(b)
-	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional"})
-	for _, e := range t.Edges {
-		table.Append([]string{
-			e.Name,
-			e.Type.Name,
-			strconv.FormatBool(e.IsInverse()),
-			e.Inverse,
-			e.Rel.Type.String(),
-			strconv.FormatBool(e.Unique),
-			strconv.FormatBool(e.Optional),
-		})
-	}
-	if table.NumLines() > 0 {
-		table.Render()
-	}
-	io.WriteString(w, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
 }
 
 // AddIndex adds a new index for the type.
