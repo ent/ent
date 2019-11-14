@@ -1,0 +1,326 @@
+// Code generated (@generated) by entc, DO NOT EDIT.
+
+package ent
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
+)
+
+// UserUpdate is the builder for updating User entities.
+type UserUpdate struct {
+	config
+	groups        map[string]struct{}
+	removedGroups map[string]struct{}
+	predicates    []predicate.User
+}
+
+// Where adds a new predicate for the builder.
+func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	uu.predicates = append(uu.predicates, ps...)
+	return uu
+}
+
+// AddGroupIDs adds the groups edge to Group by ids.
+func (uu *UserUpdate) AddGroupIDs(ids ...string) *UserUpdate {
+	if uu.groups == nil {
+		uu.groups = make(map[string]struct{})
+	}
+	for i := range ids {
+		uu.groups[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// AddGroups adds the groups edges to Group.
+func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
+	ids := make([]string, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uu.AddGroupIDs(ids...)
+}
+
+// RemoveGroupIDs removes the groups edge to Group by ids.
+func (uu *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
+	if uu.removedGroups == nil {
+		uu.removedGroups = make(map[string]struct{})
+	}
+	for i := range ids {
+		uu.removedGroups[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// RemoveGroups removes groups edges to Group.
+func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
+	ids := make([]string, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uu.RemoveGroupIDs(ids...)
+}
+
+// Save executes the query and returns the number of rows/vertices matched by this operation.
+func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	return uu.sqlSave(ctx)
+}
+
+// SaveX is like Save, but panics if an error occurs.
+func (uu *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := uu.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return affected
+}
+
+// Exec executes the query.
+func (uu *UserUpdate) Exec(ctx context.Context) error {
+	_, err := uu.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (uu *UserUpdate) ExecX(ctx context.Context) {
+	if err := uu.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	var (
+		builder  = sql.Dialect(uu.driver.Dialect())
+		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
+	)
+	for _, p := range uu.predicates {
+		p(selector)
+	}
+	rows := &sql.Rows{}
+	query, args := selector.Query()
+	if err = uu.driver.Query(ctx, query, args, rows); err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	var ids []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+		}
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return 0, nil
+	}
+
+	tx, err := uu.driver.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	var res sql.Result
+	if len(uu.removedGroups) > 0 {
+		eids := make([]int, len(uu.removedGroups))
+		for eid := range uu.removedGroups {
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return
+			}
+			eids = append(eids, eid)
+		}
+		query, args := builder.Delete(user.GroupsTable).
+			Where(sql.InInts(user.GroupsPrimaryKey[1], ids...)).
+			Where(sql.InInts(user.GroupsPrimaryKey[0], eids...)).
+			Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return 0, rollback(tx, err)
+		}
+	}
+	if len(uu.groups) > 0 {
+		values := make([][]int, 0, len(ids))
+		for _, id := range ids {
+			for eid := range uu.groups {
+				eid, serr := strconv.Atoi(eid)
+				if serr != nil {
+					err = rollback(tx, serr)
+					return
+				}
+				values = append(values, []int{id, eid})
+			}
+		}
+		builder := builder.Insert(user.GroupsTable).
+			Columns(user.GroupsPrimaryKey[1], user.GroupsPrimaryKey[0])
+		for _, v := range values {
+			builder.Values(v[0], v[1])
+		}
+		query, args := builder.Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return 0, rollback(tx, err)
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return len(ids), nil
+}
+
+// UserUpdateOne is the builder for updating a single User entity.
+type UserUpdateOne struct {
+	config
+	id            int
+	groups        map[string]struct{}
+	removedGroups map[string]struct{}
+}
+
+// AddGroupIDs adds the groups edge to Group by ids.
+func (uuo *UserUpdateOne) AddGroupIDs(ids ...string) *UserUpdateOne {
+	if uuo.groups == nil {
+		uuo.groups = make(map[string]struct{})
+	}
+	for i := range ids {
+		uuo.groups[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// AddGroups adds the groups edges to Group.
+func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
+	ids := make([]string, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uuo.AddGroupIDs(ids...)
+}
+
+// RemoveGroupIDs removes the groups edge to Group by ids.
+func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
+	if uuo.removedGroups == nil {
+		uuo.removedGroups = make(map[string]struct{})
+	}
+	for i := range ids {
+		uuo.removedGroups[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// RemoveGroups removes groups edges to Group.
+func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
+	ids := make([]string, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uuo.RemoveGroupIDs(ids...)
+}
+
+// Save executes the query and returns the updated entity.
+func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return uuo.sqlSave(ctx)
+}
+
+// SaveX is like Save, but panics if an error occurs.
+func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
+	u, err := uuo.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
+
+// Exec executes the query on the entity.
+func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := uuo.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := uuo.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
+	var (
+		builder  = sql.Dialect(uuo.driver.Dialect())
+		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
+	)
+	user.ID(uuo.id)(selector)
+	rows := &sql.Rows{}
+	query, args := selector.Query()
+	if err = uuo.driver.Query(ctx, query, args, rows); err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []int
+	for rows.Next() {
+		var id int
+		u = &User{config: uuo.config}
+		if err := u.FromRows(rows); err != nil {
+			return nil, fmt.Errorf("ent: failed scanning row into User: %v", err)
+		}
+		id = u.ID
+		ids = append(ids, id)
+	}
+	switch n := len(ids); {
+	case n == 0:
+		return nil, &ErrNotFound{fmt.Sprintf("User with id: %v", uuo.id)}
+	case n > 1:
+		return nil, fmt.Errorf("ent: more than one User with the same id: %v", uuo.id)
+	}
+
+	tx, err := uuo.driver.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var res sql.Result
+	if len(uuo.removedGroups) > 0 {
+		eids := make([]int, len(uuo.removedGroups))
+		for eid := range uuo.removedGroups {
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return
+			}
+			eids = append(eids, eid)
+		}
+		query, args := builder.Delete(user.GroupsTable).
+			Where(sql.InInts(user.GroupsPrimaryKey[1], ids...)).
+			Where(sql.InInts(user.GroupsPrimaryKey[0], eids...)).
+			Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return nil, rollback(tx, err)
+		}
+	}
+	if len(uuo.groups) > 0 {
+		values := make([][]int, 0, len(ids))
+		for _, id := range ids {
+			for eid := range uuo.groups {
+				eid, serr := strconv.Atoi(eid)
+				if serr != nil {
+					err = rollback(tx, serr)
+					return
+				}
+				values = append(values, []int{id, eid})
+			}
+		}
+		builder := builder.Insert(user.GroupsTable).
+			Columns(user.GroupsPrimaryKey[1], user.GroupsPrimaryKey[0])
+		for _, v := range values {
+			builder.Values(v[0], v[1])
+		}
+		query, args := builder.Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return nil, rollback(tx, err)
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return u, nil
+}

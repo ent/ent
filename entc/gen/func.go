@@ -26,7 +26,8 @@ var (
 	Funcs = template.FuncMap{
 		"ops":         ops,
 		"add":         add,
-		"append":      reflect.AppendSlice,
+		"append":      reflect.Append,
+		"appends":     reflect.AppendSlice,
 		"order":       order,
 		"snake":       snake,
 		"pascal":      pascal,

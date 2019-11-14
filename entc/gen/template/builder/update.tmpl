@@ -166,11 +166,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{- end }}
 {{ end }}
 {{- range $_, $e := $.Edges }}
-	{{- $e.BuilderField }} map[{{ $.ID.Type }}]struct{}
+	{{- $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 {{ end }}
 {{- range $_, $e := $.Edges }}
 	{{- $p := "removed" }}{{ if $e.Unique }}{{ $p = "cleared" }}{{ end }}
-	{{- print $p $e.StructField }} {{ if $e.Unique }}bool{{ else }}map[{{ $.ID.Type }}]struct{}{{ end }}
+	{{- print $p $e.StructField }} {{ if $e.Unique }}bool{{ else }}map[{{ $e.Type.ID.Type }}]struct{}{{ end }}
 {{ end -}}
 {{ end }}
 
@@ -193,9 +193,9 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the {{ $e.Name }} edge to {{ $e.Type.Name }} by ids.
-		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $.ID.Type }}) *{{ $builder }} {
+		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			if {{ $receiver }}.removed{{ $e.StructField }} == nil {
-				{{ $receiver }}.removed{{ $e.StructField }} = make(map[{{ $.ID.Type }}]struct{})
+				{{ $receiver }}.removed{{ $e.StructField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
 			}
 			for i := range ids {
 				{{ $receiver }}.removed{{ $e.StructField }}[ids[i]] = struct{}{}
@@ -205,7 +205,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{ $func := print "Remove" $e.StructField }}
 		// {{ $func }} removes {{ $e.Name }} edges to {{ $e.Type.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} ...*{{ $e.Type.Name }}) *{{ $builder }} {
-			ids := make([]{{ $.ID.Type }}, len({{ $p }}))
+			ids := make([]{{ $e.Type.ID.Type }}, len({{ $p }}))
 			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
 			for {{ $i }} := range {{ $p }} {
 				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID

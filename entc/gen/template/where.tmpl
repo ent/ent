@@ -61,7 +61,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{/* storage specific predicates disabled for multi-storage codegen */}}
 	{{ if not $.MultiStorage }}
 		{{ $storage := index $.Storage 0 }}
-		{{ $ops = append $ops (call $storage.Ops $f) }}
+		{{ $ops = appends $ops (call $storage.Ops $f) }}
 	{{ end }}
 	{{ range $_, $op := $ops }}
 	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}

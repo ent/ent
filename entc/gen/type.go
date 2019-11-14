@@ -65,6 +65,9 @@ type (
 		Validators int
 		// Position info of the field.
 		Position *load.Position
+		// UserDefined indicates that this field was defined by the loaded schema.
+		// Unlike default id field, which is defined by the generator.
+		UserDefined bool
 	}
 
 	// Edge of a graph between two types.
@@ -133,10 +136,10 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		},
 		schema: schema,
 		Name:   schema.Name,
-		Fields: make([]*Field, len(schema.Fields)),
+		Fields: make([]*Field, 0, len(schema.Fields)),
 		fields: make(map[string]*Field, len(schema.Fields)),
 	}
-	for i, f := range schema.Fields {
+	for _, f := range schema.Fields {
 		switch {
 		case f.Info == nil || !f.Info.Valid():
 			return nil, fmt.Errorf("invalid type for field %s", f.Name)
@@ -155,7 +158,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			// enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", typ.Package(), pascal(f.Name))
 		}
-		typ.Fields[i] = &Field{
+		tf := &Field{
 			def:           f,
 			Name:          f.Name,
 			Type:          f.Info,
@@ -168,8 +171,15 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Immutable:     f.Immutable,
 			StructTag:     structTag(f.Name, f.Tag),
 			Validators:    f.Validators,
+			UserDefined:   true,
 		}
-		typ.fields[f.Name] = typ.Fields[i]
+		// user defined id field.
+		if tf.Name == typ.ID.Name {
+			typ.ID = tf
+		} else {
+			typ.Fields = append(typ.Fields, tf)
+			typ.fields[f.Name] = tf
+		}
 	}
 	return typ, nil
 }
