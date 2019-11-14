@@ -5,13 +5,11 @@
 package gen
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/facebookincubator/ent/entc/load"
 	"github.com/facebookincubator/ent/schema/field"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -264,96 +262,4 @@ func TestEdge(t *testing.T) {
 	require.Equal(t, "UsersInverseLabel", users.InverseConstant())
 	require.Equal(t, "user_groups", users.Label())
 	require.Equal(t, "user_groups", groups.Label())
-}
-
-func TestType_Describe(t *testing.T) {
-	tests := []struct {
-		typ *Type
-		out string
-	}{
-		{
-			typ: &Type{
-				Name: "User",
-				ID:   &Field{Name: "id", Type: &field.TypeInfo{Type: field.TypeInt}},
-				Fields: []*Field{
-					{Name: "name", Type: &field.TypeInfo{Type: field.TypeString}, Validators: 1},
-					{Name: "age", Type: &field.TypeInfo{Type: field.TypeInt}, Nillable: true},
-					{Name: "created_at", Type: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Immutable: true},
-				},
-			},
-			out: `
-User:
-	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	|   Field    |   Type    | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag | Validators |
-	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	| id         | int       | false  | false    | false    | false   | false         | false     |           |          0 |
-	| name       | string    | false  | false    | false    | false   | false         | false     |           |          1 |
-	| age        | int       | false  | false    | true     | false   | false         | false     |           |          0 |
-	| created_at | time.Time | false  | false    | true     | false   | false         | true      |           |          0 |
-	+------------+-----------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	
-`,
-		},
-		{
-			typ: &Type{
-				Name: "User",
-				ID:   &Field{Name: "id", Type: &field.TypeInfo{Type: field.TypeInt}},
-				Edges: []*Edge{
-					{Name: "groups", Type: &Type{Name: "Group"}, Rel: Relation{Type: M2M}, Optional: true},
-					{Name: "spouse", Type: &Type{Name: "User"}, Unique: true, Rel: Relation{Type: O2O}},
-				},
-			},
-			out: `
-User:
-	+-------+------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	| Field | Type | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag | Validators |
-	+-------+------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	| id    | int  | false  | false    | false    | false   | false         | false     |           |          0 |
-	+-------+------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	+--------+-------+---------+---------+----------+--------+----------+
-	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
-	+--------+-------+---------+---------+----------+--------+----------+
-	| groups | Group | false   |         | M2M      | false  | true     |
-	| spouse | User  | false   |         | O2O      | true   | false    |
-	+--------+-------+---------+---------+----------+--------+----------+
-	
-`,
-		},
-		{
-			typ: &Type{
-				Name: "User",
-				ID:   &Field{Name: "id", Type: &field.TypeInfo{Type: field.TypeInt}},
-				Fields: []*Field{
-					{Name: "name", Type: &field.TypeInfo{Type: field.TypeString}, Validators: 1},
-					{Name: "age", Type: &field.TypeInfo{Type: field.TypeInt}, Nillable: true},
-				},
-				Edges: []*Edge{
-					{Name: "groups", Type: &Type{Name: "Group"}, Rel: Relation{Type: M2M}, Optional: true},
-					{Name: "spouse", Type: &Type{Name: "User"}, Unique: true, Rel: Relation{Type: O2O}},
-				},
-			},
-			out: `
-User:
-	+-------+--------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	| Field |  Type  | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag | Validators |
-	+-------+--------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	| id    | int    | false  | false    | false    | false   | false         | false     |           |          0 |
-	| name  | string | false  | false    | false    | false   | false         | false     |           |          1 |
-	| age   | int    | false  | false    | true     | false   | false         | false     |           |          0 |
-	+-------+--------+--------+----------+----------+---------+---------------+-----------+-----------+------------+
-	+--------+-------+---------+---------+----------+--------+----------+
-	|  Edge  | Type  | Inverse | BackRef | Relation | Unique | Optional |
-	+--------+-------+---------+---------+----------+--------+----------+
-	| groups | Group | false   |         | M2M      | false  | true     |
-	| spouse | User  | false   |         | O2O      | true   | false    |
-	+--------+-------+---------+---------+----------+--------+----------+
-	
-`,
-		},
-	}
-	for _, tt := range tests {
-		b := &strings.Builder{}
-		tt.typ.Describe(b)
-		assert.Equal(t, tt.out, "\n"+b.String())
-	}
 }

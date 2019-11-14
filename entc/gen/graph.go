@@ -8,7 +8,6 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -112,13 +111,6 @@ func (g *Graph) Gen() (err error) {
 	// Because, "goimports" will drop undefined package. Therefore, it's
 	// suspended to end of the writing.
 	return formatFiles(written)
-}
-
-// Describe writes a description of the graph to the given writer.
-func (g *Graph) Describe(w io.Writer) {
-	for _, n := range g.Nodes {
-		n.Describe(w)
-	}
 }
 
 // addNode creates a new Type/Node/Ent to the graph.
