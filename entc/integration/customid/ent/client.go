@@ -124,7 +124,7 @@ func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupClient) UpdateOneID(id string) *GroupUpdateOne {
+func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
 	return &GroupUpdateOne{config: c.config, id: id}
 }
 
@@ -139,7 +139,7 @@ func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupClient) DeleteOneID(id string) *GroupDeleteOne {
+func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{c.Delete().Where(group.ID(id))}
 }
 
@@ -149,12 +149,12 @@ func (c *GroupClient) Query() *GroupQuery {
 }
 
 // Get returns a Group entity by its id.
-func (c *GroupClient) Get(ctx context.Context, id string) (*Group, error) {
+func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 	return c.Query().Where(group.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
+func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 	gr, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -165,7 +165,7 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := gr.id()
+	id := gr.ID
 	step := &sql.Step{}
 	step.From.V = id
 	step.From.Table = group.Table

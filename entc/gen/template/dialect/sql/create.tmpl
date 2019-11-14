@@ -7,6 +7,10 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/create" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $fields := $.Fields }}
+{{ if $.ID.UserDefined }}
+	{{ $fields = append $fields $.ID }}
+{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	var (
@@ -19,7 +23,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		return nil, err
 	}
 	insert := builder.Insert({{ $.Package }}.Table).Default()
-	{{- range $_, $f := $.Fields }}
+	{{- range $_, $f := $fields }}
 		if value := {{ $receiver }}.{{- $f.BuilderField }}; value != nil {
 			{{- if $f.IsJSON }}
 				buf, err := json.Marshal(*value)
@@ -37,7 +41,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	if err != nil {
 		return nil, rollback(tx, err)
 	}
-	{{ $.Receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
+	{{ $.Receiver }}.ID = {{ if and $.ID.IsString (not $.ID.UserDefined) }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
 	{{- range $_, $e := $.Edges }}
 		if len({{ $receiver }}.{{ $e.BuilderField }}) > 0 {
 			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}

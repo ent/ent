@@ -5,7 +5,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
@@ -15,8 +14,8 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	groups        map[string]struct{}
-	removedGroups map[string]struct{}
+	groups        map[int]struct{}
+	removedGroups map[int]struct{}
 	predicates    []predicate.User
 }
 
@@ -27,9 +26,9 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (uu *UserUpdate) AddGroupIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 	if uu.groups == nil {
-		uu.groups = make(map[string]struct{})
+		uu.groups = make(map[int]struct{})
 	}
 	for i := range ids {
 		uu.groups[ids[i]] = struct{}{}
@@ -39,7 +38,7 @@ func (uu *UserUpdate) AddGroupIDs(ids ...string) *UserUpdate {
 
 // AddGroups adds the groups edges to Group.
 func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -47,9 +46,9 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
-func (uu *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	if uu.removedGroups == nil {
-		uu.removedGroups = make(map[string]struct{})
+		uu.removedGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		uu.removedGroups[ids[i]] = struct{}{}
@@ -59,7 +58,7 @@ func (uu *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
 
 // RemoveGroups removes groups edges to Group.
 func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -127,11 +126,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if len(uu.removedGroups) > 0 {
 		eids := make([]int, len(uu.removedGroups))
 		for eid := range uu.removedGroups {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
 			eids = append(eids, eid)
 		}
 		query, args := builder.Delete(user.GroupsTable).
@@ -146,11 +140,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		values := make([][]int, 0, len(ids))
 		for _, id := range ids {
 			for eid := range uu.groups {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
 				values = append(values, []int{id, eid})
 			}
 		}
@@ -174,14 +163,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 type UserUpdateOne struct {
 	config
 	id            int
-	groups        map[string]struct{}
-	removedGroups map[string]struct{}
+	groups        map[int]struct{}
+	removedGroups map[int]struct{}
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (uuo *UserUpdateOne) AddGroupIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 	if uuo.groups == nil {
-		uuo.groups = make(map[string]struct{})
+		uuo.groups = make(map[int]struct{})
 	}
 	for i := range ids {
 		uuo.groups[ids[i]] = struct{}{}
@@ -191,7 +180,7 @@ func (uuo *UserUpdateOne) AddGroupIDs(ids ...string) *UserUpdateOne {
 
 // AddGroups adds the groups edges to Group.
 func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -199,9 +188,9 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
-func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	if uuo.removedGroups == nil {
-		uuo.removedGroups = make(map[string]struct{})
+		uuo.removedGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		uuo.removedGroups[ids[i]] = struct{}{}
@@ -211,7 +200,7 @@ func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
 
 // RemoveGroups removes groups edges to Group.
 func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -282,11 +271,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	if len(uuo.removedGroups) > 0 {
 		eids := make([]int, len(uuo.removedGroups))
 		for eid := range uuo.removedGroups {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
 			eids = append(eids, eid)
 		}
 		query, args := builder.Delete(user.GroupsTable).
@@ -301,11 +285,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		values := make([][]int, 0, len(ids))
 		for _, id := range ids {
 			for eid := range uuo.groups {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
 				values = append(values, []int{id, eid})
 			}
 		}

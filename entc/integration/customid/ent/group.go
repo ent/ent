@@ -4,7 +4,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -14,7 +13,7 @@ import (
 type Group struct {
 	config
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 }
 
 // FromRows scans the sql response data into Group.
@@ -28,7 +27,7 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 	); err != nil {
 		return err
 	}
-	gr.ID = strconv.Itoa(scangr.ID)
+	gr.ID = scangr.ID
 	return nil
 }
 
@@ -62,12 +61,6 @@ func (gr *Group) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (gr *Group) id() int {
-	id, _ := strconv.Atoi(gr.ID)
-	return id
 }
 
 // Groups is a parsable slice of Group.

@@ -162,7 +162,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
-	id           string
+	id           int
 	users        map[int]struct{}
 	removedUsers map[int]struct{}
 }
@@ -253,7 +253,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		if err := gr.FromRows(rows); err != nil {
 			return nil, fmt.Errorf("ent: failed scanning row into Group: %v", err)
 		}
-		id = gr.id()
+		id = gr.ID
 		ids = append(ids, id)
 	}
 	switch n := len(ids); {

@@ -92,8 +92,8 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 }
 
 // FirstID returns the first Group id in the query. Returns *ErrNotFound when no id was found.
-func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (gq *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -105,7 +105,7 @@ func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (gq *GroupQuery) FirstXID(ctx context.Context) string {
+func (gq *GroupQuery) FirstXID(ctx context.Context) int {
 	id, err := gq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -139,8 +139,8 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 }
 
 // OnlyID returns the only Group id in the query, returns an error if not exactly one id was returned.
-func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (gq *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = gq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -156,7 +156,7 @@ func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
+func (gq *GroupQuery) OnlyXID(ctx context.Context) int {
 	id, err := gq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +179,8 @@ func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 }
 
 // IDs executes the query and returns a list of Group ids.
-func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (gq *GroupQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := gq.Select(group.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (gq *GroupQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (gq *GroupQuery) IDsX(ctx context.Context) []string {
+func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 	ids, err := gq.IDs(ctx)
 	if err != nil {
 		panic(err)
