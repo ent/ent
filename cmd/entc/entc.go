@@ -72,7 +72,8 @@ func main() {
 			Run: func(cmd *cobra.Command, path []string) {
 				graph, err := entc.LoadGraph(path[0], &gen.Config{})
 				failOnErr(err)
-				graph.Describe(os.Stdout)
+				p := printer{os.Stdout}
+				p.Print(graph)
 			},
 		},
 		func() *cobra.Command {
