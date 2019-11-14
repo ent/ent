@@ -281,6 +281,13 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "longblob":
 		c.Size = math.MaxUint32
 		c.Type = field.TypeBytes
+	case "varbinary":
+		c.Type = field.TypeBytes
+		size, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("converting varbinary size to int: %v", err)
+		}
+		c.Size = size
 	case "varchar":
 		c.Type = field.TypeString
 		size, err := strconv.ParseInt(parts[1], 10, 64)
