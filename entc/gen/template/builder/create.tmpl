@@ -17,11 +17,14 @@ in the LICENSE file in the root directory of this source tree.
 // {{ $builder }} is the builder for creating a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	config
+	{{- if $.ID.UserDefined }}
+		{{ $.ID.BuilderField }} *{{ $.ID.Type }}
+	{{- end }}
 	{{ range $_, $f := $.Fields }}
 		{{- $f.BuilderField }} *{{ $f.Type }}
 	{{ end }}
 	{{- range $_, $e := $.Edges }}
-		{{- $e.BuilderField }} map[{{ $.ID.Type }}]struct{}
+		{{- $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 	{{ end -}}
 }
 

@@ -12,6 +12,8 @@ in the LICENSE file in the root directory of this source tree.
 {{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
 	{{ $updater = true }}
 	{{ $fields = $.MutableFields }}
+{{- else if $.ID.UserDefined }}
+	{{ $fields = append $fields $.ID }}
 {{- end }}
 
 {{ range $_, $f := $fields }}
@@ -67,9 +69,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $op := "add" }}{{ if $e.Unique }}{{ $op = "set" }}{{ end }}
 	{{ $idsFunc := print (pascal $op) (singular $e.Name | pascal) "IDs" }}{{ if $e.Unique }}{{ $idsFunc = print (pascal $op) (pascal $e.Name) "ID" }}{{ end }}
 	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
-	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $.ID.Type }}) *{{ $builder }} {
+	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
 		if {{ $receiver }}.{{ $e.BuilderField }} == nil {
-			{{ $receiver }}.{{ $e.BuilderField }} = make(map[{{ $.ID.Type }}]struct{})
+			{{ $receiver }}.{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
 		}
 		{{ if $e.Unique -}}
 			{{ $receiver }}.{{ $e.BuilderField }}[id] = struct{}{}
@@ -83,7 +85,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ if and $e.Unique $e.Optional }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
 		// {{ $nillableIDsFunc }} sets the {{ $e.Name }} edge to {{ $e.Type.Name }} by id if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $.ID.Type }}) *{{ $builder }} {
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			if id != nil {
 				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
 			}
@@ -98,7 +100,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{ if $e.Unique -}}
 			return {{ $receiver }}.{{ $idsFunc }}({{ $p }}.ID)
 		{{- else -}}
-			ids := make([]{{ $.ID.Type }}, len({{ $p }}))
+			ids := make([]{{ $e.Type.ID.Type }}, len({{ $p }}))
 			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
 			for {{ $i }} := range {{ $p }} {
 				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID

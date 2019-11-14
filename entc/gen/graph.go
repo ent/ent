@@ -331,8 +331,9 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				})
 			case M2M:
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
-				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt}
-				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: field.TypeInt}
+				fk1, fk2 := n.ID, e.Type.ID
+				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: fk1.Type.Type}
+				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: fk2.Type.Type}
 				all = append(all, &schema.Table{
 					Name:       e.Rel.Table,
 					Columns:    []*schema.Column{c1, c2},
