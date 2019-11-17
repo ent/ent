@@ -41,6 +41,7 @@ type Field struct {
 	Nillable      bool            `json:"nillable,omitempty"`
 	Optional      bool            `json:"optional,omitempty"`
 	Default       bool            `json:"default,omitempty"`
+	DefaultValue  interface{}     `json:"default_value,omitempty"`
 	UpdateDefault bool            `json:"update_default,omitempty"`
 	Immutable     bool            `json:"immutable,omitempty"`
 	Validators    int             `json:"validators,omitempty"`
@@ -95,11 +96,11 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Unique:        fd.Unique,
 		Nillable:      fd.Nillable,
 		Optional:      fd.Optional,
+		Default:       fd.Default != nil,
+		UpdateDefault: fd.UpdateDefault != nil,
 		Immutable:     fd.Immutable,
 		StorageKey:    fd.StorageKey,
 		Validators:    len(fd.Validators),
-		Default:       fd.Default != nil,
-		UpdateDefault: fd.UpdateDefault != nil,
 		Sensitive:     fd.Sensitive,
 	}
 	if sf.Info == nil {
@@ -107,6 +108,11 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	}
 	if size := int64(fd.Size); size != 0 {
 		sf.Size = &size
+	}
+	// If the default value can be encoded to the generator.
+	// For example, not a function like time.Now.
+	if _, err := json.Marshal(fd.Default); err == nil {
+		sf.DefaultValue = fd.Default
 	}
 	return sf, nil
 }
