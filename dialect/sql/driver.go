@@ -7,10 +7,8 @@ package sql
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/facebookincubator/ent/dialect"
 )
@@ -137,32 +135,3 @@ type (
 	// NullFloat64 is an alias to sql.NullFloat64.
 	NullFloat64 = sql.NullFloat64
 )
-
-// Note:
-// NullTime is a modified copy of database/sql.NullTime from Go 1.13,
-// It should be replaced with standard library code when Go 1.13 is released.
-
-// NullTime represents a time.Time that may be null.
-// NullTime implements the Scanner interface so
-// it can be used as a scan destination, similar to NullString.
-type NullTime struct {
-	Time  time.Time
-	Valid bool // Valid is true if Time is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (n *NullTime) Scan(v interface{}) error {
-	if v, ok := v.(time.Time); ok {
-		n.Time = v
-		n.Valid = true
-	}
-	return nil
-}
-
-// Value implements the driver Valuer interface.
-func (n NullTime) Value() (driver.Value, error) {
-	if !n.Valid {
-		return nil, nil
-	}
-	return n.Time, nil
-}
