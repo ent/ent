@@ -103,14 +103,14 @@ func (c *Client) Noder(ctx context.Context, id {{ $.IDType }}) (Noder, error) {
 	{{- if not $.IDType.Numeric }}
 		idv, err := strconv.Atoi(id)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%v: %w", err, &ErrNotFound{"invalid/unknown"})
 		}
 		idx := idv/(1<<32 - 1)
 	{{- else }}
 		idx := id/(1<<32 - 1)
 	{{- end }}
 	if idx < 0 && idx >= len(tables) {
-		return nil, fmt.Errorf("cannot resolve table from id %v", id)
+		return nil, fmt.Errorf("cannot resolve table from id %v: %w", id, &ErrNotFound{"invalid/unknown"})
 	}
 	return c.noder(ctx, tables[idx], id)
 }
@@ -119,10 +119,14 @@ func (c *Client) noder(ctx context.Context, tbl string, id {{ $.IDType }}) (Node
 	switch tbl {
 	{{- range $_, $n := $.Nodes }}
 	case {{ $n.Package }}.Table:
-		return c.{{ $n.Name }}.Get(ctx, id)
+		n, err := c.{{ $n.Name }}.Get(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	{{- end }}
 	default:
-		return nil, fmt.Errorf("cannot resolve noder from table %q", tbl)
+		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", tbl, &ErrNotFound{"invalid/unknown"})
 	}
 }
 
