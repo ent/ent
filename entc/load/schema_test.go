@@ -25,7 +25,8 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("age"),
-		field.String("name"),
+		field.String("name").
+			Default("unknown"),
 		field.String("nillable").
 			Nillable(),
 		field.String("optional").
@@ -35,6 +36,8 @@ func (User) Fields() []ent.Field {
 			Optional(),
 		field.String("sensitive").
 			Sensitive(),
+		field.Time("creation_time").
+			Default(time.Now),
 	}
 }
 
@@ -75,12 +78,13 @@ func TestMarshalSchema(t *testing.T) {
 		schema := &Schema{}
 		require.NoError(t, json.Unmarshal(buf, schema))
 		require.Equal(t, "User", schema.Name)
-		require.Len(t, schema.Fields, 6)
+		require.Len(t, schema.Fields, 7)
 		require.Equal(t, "age", schema.Fields[0].Name)
 		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
 
 		require.Equal(t, "name", schema.Fields[1].Name)
 		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
+		require.Equal(t, "unknown", schema.Fields[1].DefaultValue)
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)
 		require.Equal(t, field.TypeString, schema.Fields[2].Info.Type)
@@ -100,6 +104,10 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "sensitive", schema.Fields[5].Name)
 		require.Equal(t, field.TypeString, schema.Fields[5].Info.Type)
 		require.True(t, schema.Fields[5].Sensitive)
+
+		require.Equal(t, "creation_time", schema.Fields[6].Name)
+		require.Equal(t, field.TypeTime, schema.Fields[6].Info.Type)
+		require.Nil(t, schema.Fields[6].DefaultValue)
 
 		require.Len(t, schema.Edges, 2)
 		require.Equal(t, "groups", schema.Edges[0].Name)
