@@ -64,9 +64,10 @@ type Edge struct {
 
 // Index represents an ent.Index that was loaded from a complied user package.
 type Index struct {
-	Unique bool     `json:"unique,omitempty"`
-	Edges  []string `json:"edges,omitempty"`
-	Fields []string `json:"fields,omitempty"`
+	Unique     bool     `json:"unique,omitempty"`
+	Edges      []string `json:"edges,omitempty"`
+	Fields     []string `json:"fields,omitempty"`
+	StorageKey string   `json:"storage_key,omitempty"`
 }
 
 // NewEdge creates an loaded edge from edge descriptor.
@@ -141,9 +142,10 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	for _, idx := range indexes {
 		idx := idx.Descriptor()
 		s.Indexes = append(s.Indexes, &Index{
-			Edges:  idx.Edges,
-			Fields: idx.Fields,
-			Unique: idx.Unique,
+			Edges:      idx.Edges,
+			Fields:     idx.Fields,
+			Unique:     idx.Unique,
+			StorageKey: idx.StorageKey,
 		})
 	}
 	return json.Marshal(s)

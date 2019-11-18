@@ -340,7 +340,7 @@ func (t Type) TagTypes() []string {
 // AddIndex adds a new index for the type.
 // It fails if the schema index is invalid.
 func (t *Type) AddIndex(idx *load.Index) error {
-	index := &Index{Unique: idx.Unique}
+	index := &Index{Name: idx.StorageKey, Unique: idx.Unique}
 	if len(idx.Fields) == 0 && len(idx.Edges) == 0 {
 		return fmt.Errorf("missing fields or edges")
 	}
@@ -373,7 +373,10 @@ func (t *Type) AddIndex(idx *load.Index) error {
 			index.Columns = append(index.Columns, edge.Rel.Column())
 		}
 	}
-	index.Name += strings.Join(index.Columns, "_")
+	// If no storage-key was defined for this index, generate one.
+	if idx.StorageKey == "" {
+		index.Name += strings.Join(index.Columns, "_")
+	}
 	t.Indexes = append(t.Indexes, index)
 	return nil
 }

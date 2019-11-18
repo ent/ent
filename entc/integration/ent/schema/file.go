@@ -50,7 +50,8 @@ func (File) Edges() []ent.Edge {
 func (File) Indexes() []ent.Index {
 	return []ent.Index{
 		// non-unique index should not prevent duplicates.
-		index.Fields("name", "size"),
+		index.Fields("name", "size").
+			StorageKey("file_name_size"),
 		// unique index prevents duplicates records.
 		index.Fields("name", "user").
 			Unique(),

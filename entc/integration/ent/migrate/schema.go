@@ -124,7 +124,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "name_fsize",
+				Name:    "file_name_size",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[1]},
 			},
