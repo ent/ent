@@ -6,9 +6,10 @@ package index
 
 // A Descriptor for index configuration.
 type Descriptor struct {
-	Unique bool     // unique index.
-	Edges  []string // edge columns.
-	Fields []string // field columns.
+	Unique     bool     // unique index.
+	Edges      []string // edge columns.
+	Fields     []string // field columns.
+	StorageKey string   // custom index name.
 }
 
 // Builder for indexes on vertex columns and edges in the graph.
@@ -87,6 +88,12 @@ func (b *Builder) Edges(edges ...string) *Builder {
 // duplicates if one of the column contains NULL values.
 func (b *Builder) Unique() *Builder {
 	b.desc.Unique = true
+	return b
+}
+
+// StorageKey sets the storage key of the index. In SQL dialects, it's the index name.
+func (b *Builder) StorageKey(key string) *Builder {
+	b.desc.StorageKey = key
 	return b
 }
 

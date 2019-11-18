@@ -56,6 +56,7 @@ func (User) Indexes() []ent.Index {
 			Unique(),
 		index.Fields("name").
 			Edges("parent").
+			StorageKey("user_parent_name").
 			Unique(),
 	}
 }
@@ -123,6 +124,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.True(t, schema.Indexes[0].Unique)
 		require.Equal(t, []string{"name"}, schema.Indexes[1].Fields)
 		require.Equal(t, []string{"parent"}, schema.Indexes[1].Edges)
+		require.Equal(t, "user_parent_name", schema.Indexes[1].StorageKey)
 		require.True(t, schema.Indexes[1].Unique)
 	}
 }
