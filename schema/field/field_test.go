@@ -10,10 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/facebookincubator/ent/schema/field"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -111,29 +110,29 @@ func TestJSON(t *testing.T) {
 	fd := field.JSON("name", map[string]string{}).
 		Optional().
 		Descriptor()
-	require.True(t, fd.Optional)
-	require.Empty(t, fd.Info.PkgPath)
-	require.Equal(t, "name", fd.Name)
-	require.Equal(t, field.TypeJSON, fd.Info.Type)
-	require.Equal(t, "map[string]string", fd.Info.String())
+	assert.True(t, fd.Optional)
+	assert.Empty(t, fd.Info.PkgPath)
+	assert.Equal(t, "name", fd.Name)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.Equal(t, "map[string]string", fd.Info.String())
 
 	fd = field.JSON("dir", http.Dir("dir")).
 		Optional().
 		Descriptor()
-	require.True(t, fd.Optional)
-	require.Equal(t, field.TypeJSON, fd.Info.Type)
-	require.Equal(t, "dir", fd.Name)
-	require.Equal(t, "net/http", fd.Info.PkgPath)
-	require.Equal(t, "http.Dir", fd.Info.String())
+	assert.True(t, fd.Optional)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.Equal(t, "dir", fd.Name)
+	assert.Equal(t, "net/http", fd.Info.PkgPath)
+	assert.Equal(t, "http.Dir", fd.Info.String())
 
 	fd = field.Strings("strings").
 		Optional().
 		Descriptor()
-	require.True(t, fd.Optional)
-	require.Empty(t, fd.Info.PkgPath)
-	require.Equal(t, "strings", fd.Name)
-	require.Equal(t, field.TypeJSON, fd.Info.Type)
-	require.Equal(t, "[]string", fd.Info.String())
+	assert.True(t, fd.Optional)
+	assert.Empty(t, fd.Info.PkgPath)
+	assert.Equal(t, "strings", fd.Name)
+	assert.Equal(t, field.TypeJSON, fd.Info.Type)
+	assert.Equal(t, "[]string", fd.Info.String())
 }
 
 func TestField_Tag(t *testing.T) {
@@ -151,6 +150,23 @@ func TestField_Enums(t *testing.T) {
 			"master",
 		).
 		Descriptor()
-	require.Equal(t, "role", fd.Name)
-	require.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+	assert.Equal(t, "role", fd.Name)
+	assert.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+}
+
+func TestField_UUID(t *testing.T) {
+	fd := field.UUID("id").
+		Default(func() [16]byte { return uuid.New() }).
+		Descriptor()
+	assert.Equal(t, "id", fd.Name)
+	assert.Equal(t, "[16]byte", fd.Info.String())
+	assert.NotNil(t, fd.Default)
+
+	fd = field.UUID("id").
+		Type(uuid.UUID{}).
+		Descriptor()
+	assert.Equal(t, "id", fd.Name)
+	assert.Equal(t, "uuid.UUID", fd.Info.String())
+	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
+	assert.Nil(t, fd.Default)
 }

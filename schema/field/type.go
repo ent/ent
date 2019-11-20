@@ -15,6 +15,7 @@ const (
 	TypeBool
 	TypeTime
 	TypeJSON
+	TypeUUID
 	TypeBytes
 	TypeEnum
 	TypeString
@@ -101,6 +102,7 @@ var (
 		TypeBool:    "bool",
 		TypeTime:    "time.Time",
 		TypeJSON:    "json.RawMessage",
+		TypeUUID:    "[16]byte",
 		TypeBytes:   "[]byte",
 		TypeEnum:    "string",
 		TypeString:  "string",
@@ -119,6 +121,7 @@ var (
 	}
 	constNames = [...]string{
 		TypeJSON:  "TypeJSON",
+		TypeUUID:  "TypeUUID",
 		TypeTime:  "TypeTime",
 		TypeEnum:  "TypeEnum",
 		TypeBytes: "TypeBytes",

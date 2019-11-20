@@ -131,6 +131,18 @@ func Enum(name string) *enumBuilder {
 	}}
 }
 
+// UUID returns a new Field with type UUID. An example for defining UUID field is as follows:
+//
+//	field.UUID("id").
+//		Default(uuid.New)
+//
+func UUID(name string) *uuidBuilder {
+	return &uuidBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeUUID, Nillable: true},
+	}}
+}
+
 // stringBuilder is the builder for string fields.
 type stringBuilder struct {
 	desc *Descriptor
@@ -524,5 +536,65 @@ func (b *enumBuilder) StructTag(s string) *enumBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
+	return b.desc
+}
+
+// uuidBuilder is the builder for uuid fields.
+type uuidBuilder struct {
+	desc *Descriptor
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *uuidBuilder) StorageKey(key string) *uuidBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *uuidBuilder) Optional() *uuidBuilder {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *uuidBuilder) Immutable() *uuidBuilder {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *uuidBuilder) Comment(c string) *uuidBuilder {
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
+	b.desc.Tag = s
+	return b
+}
+
+// Type sets a custom type of the UUID field. It defaults to [16]byte.
+func (b *uuidBuilder) Type(typ interface{}) *uuidBuilder {
+	t := reflect.TypeOf(typ)
+	b.desc.Info.Ident = t.String()
+	b.desc.Info.PkgPath = t.PkgPath()
+	return b
+}
+
+// Default sets the function that is applied to set default value
+// of the field on creation. For example:
+//
+//	field.UUID("id").
+//		Default(uuid.New)
+//
+func (b *uuidBuilder) Default(f func() [16]byte) *uuidBuilder {
+	b.desc.Default = f
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
