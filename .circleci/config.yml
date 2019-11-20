@@ -71,17 +71,17 @@ jobs:
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
-      - image: circleci/postgres:10
+      - image: circleci/postgres:10.0
         environment:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         command: -p 5430
-      - image: circleci/postgres:11
+      - image: circleci/postgres:11.0
         environment:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         command: -p 5431
-      - image: circleci/postgres:12
+      - image: circleci/postgres:12.1
         environment:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
