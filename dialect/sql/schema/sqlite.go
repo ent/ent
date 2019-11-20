@@ -110,6 +110,8 @@ func (*SQLite) cType(c *Column) (t string) {
 		t = "datetime"
 	case field.TypeJSON:
 		t = "json"
+	case field.TypeUUID:
+		t = "uuid"
 	default:
 		panic("unsupported type " + c.Type.String())
 	}
