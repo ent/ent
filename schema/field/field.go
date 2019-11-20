@@ -83,7 +83,7 @@ func Time(name string) *timeBuilder {
 //	field.JSON("info", &Info{}).
 //		Optional()
 //
-func JSON(name string, typ interface{}) *jsonsBuilder {
+func JSON(name string, typ interface{}) *jsonBuilder {
 	t := reflect.TypeOf(typ)
 	info := &TypeInfo{
 		Type:    TypeJSON,
@@ -94,24 +94,24 @@ func JSON(name string, typ interface{}) *jsonsBuilder {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
-	return &jsonsBuilder{&Descriptor{
+	return &jsonBuilder{&Descriptor{
 		Name: name,
 		Info: info,
 	}}
 }
 
 // Strings returns a new JSON Field with type []string.
-func Strings(name string) *jsonsBuilder {
+func Strings(name string) *jsonBuilder {
 	return JSON(name, []string{})
 }
 
 // Ints returns a new JSON Field with type []int.
-func Ints(name string) *jsonsBuilder {
+func Ints(name string) *jsonBuilder {
 	return JSON(name, []int{})
 }
 
 // Floats returns a new JSON Field with type []float.
-func Floats(name string) *jsonsBuilder {
+func Floats(name string) *jsonBuilder {
 	return JSON(name, []float64{})
 }
 
@@ -432,44 +432,44 @@ func (b *bytesBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
-// jsonsBuilder is the builder for json fields.
-type jsonsBuilder struct {
+// jsonBuilder is the builder for json fields.
+type jsonBuilder struct {
 	desc *Descriptor
 }
 
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
-func (b *jsonsBuilder) StorageKey(key string) *jsonsBuilder {
+func (b *jsonBuilder) StorageKey(key string) *jsonBuilder {
 	b.desc.StorageKey = key
 	return b
 }
 
 // Optional indicates that this field is optional on create.
 // Unlike edges, fields are required by default.
-func (b *jsonsBuilder) Optional() *jsonsBuilder {
+func (b *jsonBuilder) Optional() *jsonBuilder {
 	b.desc.Optional = true
 	return b
 }
 
 // Immutable indicates that this field cannot be updated.
-func (b *jsonsBuilder) Immutable() *jsonsBuilder {
+func (b *jsonBuilder) Immutable() *jsonBuilder {
 	b.desc.Immutable = true
 	return b
 }
 
 // Comment sets the comment of the field.
-func (b *jsonsBuilder) Comment(c string) *jsonsBuilder {
+func (b *jsonBuilder) Comment(c string) *jsonBuilder {
 	return b
 }
 
 // StructTag sets the struct tag of the field.
-func (b *jsonsBuilder) StructTag(s string) *jsonsBuilder {
+func (b *jsonBuilder) StructTag(s string) *jsonBuilder {
 	b.desc.Tag = s
 	return b
 }
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
-func (b *jsonsBuilder) Descriptor() *Descriptor {
+func (b *jsonBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
