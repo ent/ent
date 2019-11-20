@@ -164,6 +164,7 @@ The framework provides a few built-in validators for each type:
 - Numeric types:
   - `Positive()`
   - `Negative()`
+  - `NonNegative()`
   - `Min(i)` - Validate that the given value is > i.
   - `Max(i)` - Validate that the given value is < i.
   - `Range(i, j)` - Validate that the given value is within the range [i, j].
@@ -264,7 +265,7 @@ func (User) Fields() []ent.Field {
 
 ## Storage Key
 
-Custom storage name can be configured using the `StorageKey` method.  
+Custom storage name can be configured using the `StorageKey` method.
 It's mapped to a column name in SQL dialects and to property name in Gremlin.
 
 ```go
@@ -354,7 +355,7 @@ type User struct {
 	// Age holds the value of the "age" field.
 	Age  *int	`json:"age,omitempty"`
 	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty" gqlgen:"gql_name"` 
+	Name string `json:"name,omitempty" gqlgen:"gql_name"`
 	// StaticField defined by template.
 	StaticField string `json:"static,omitempty"`
 }
@@ -363,7 +364,7 @@ type User struct {
 ## Sensitive Fields
 
 String fields can be defined as sensitive using the `Sensitive` method. Sensitive fields
-won't be printed and they will be omitted when encoding.  
+won't be printed and they will be omitted when encoding.
 
 Note that sensitive fields cannot have struct tags.
 
