@@ -27,22 +27,22 @@ type Card struct {
 
 // FromRows scans the sql response data into Card.
 func (c *Card) FromRows(rows *sql.Rows) error {
-	var vc struct {
+	var scanc struct {
 		ID      int
 		Expired sql.NullTime
 		Number  sql.NullString
 	}
 	// the order here should be the same as in the `card.Columns`.
 	if err := rows.Scan(
-		&vc.ID,
-		&vc.Expired,
-		&vc.Number,
+		&scanc.ID,
+		&scanc.Expired,
+		&scanc.Number,
 	); err != nil {
 		return err
 	}
-	c.ID = vc.ID
-	c.Expired = vc.Expired.Time
-	c.Number = vc.Number.String
+	c.ID = scanc.ID
+	c.Expired = scanc.Expired.Time
+	c.Number = scanc.Number.String
 	return nil
 }
 
@@ -88,11 +88,11 @@ type Cards []*Card
 // FromRows scans the sql response data into Cards.
 func (c *Cards) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vc := &Card{}
-		if err := vc.FromRows(rows); err != nil {
+		scanc := &Card{}
+		if err := scanc.FromRows(rows); err != nil {
 			return err
 		}
-		*c = append(*c, vc)
+		*c = append(*c, scanc)
 	}
 	return nil
 }

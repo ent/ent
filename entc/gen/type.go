@@ -375,7 +375,10 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	}
 	// If no storage-key was defined for this index, generate one.
 	if idx.StorageKey == "" {
-		index.Name += strings.Join(index.Columns, "_")
+		// Add the type name as a prefix to the index parts, because
+		// multiple types can share the same index attributes.
+		parts := append([]string{strings.ToLower(t.Name)}, index.Columns...)
+		index.Name = strings.Join(parts, "_")
 	}
 	t.Indexes = append(t.Indexes, index)
 	return nil

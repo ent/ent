@@ -30,7 +30,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{},
 		Indexes: []*schema.Index{
 			{
-				Name:    "name_address",
+				Name:    "user_name_address",
 				Unique:  true,
 				Columns: []*schema.Column{UsersColumns[2], UsersColumns[3]},
 			},

@@ -24,19 +24,19 @@ type Street struct {
 
 // FromRows scans the sql response data into Street.
 func (s *Street) FromRows(rows *sql.Rows) error {
-	var vs struct {
+	var scans struct {
 		ID   int
 		Name sql.NullString
 	}
 	// the order here should be the same as in the `street.Columns`.
 	if err := rows.Scan(
-		&vs.ID,
-		&vs.Name,
+		&scans.ID,
+		&scans.Name,
 	); err != nil {
 		return err
 	}
-	s.ID = vs.ID
-	s.Name = vs.Name.String
+	s.ID = scans.ID
+	s.Name = scans.Name.String
 	return nil
 }
 
@@ -80,11 +80,11 @@ type Streets []*Street
 // FromRows scans the sql response data into Streets.
 func (s *Streets) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vs := &Street{}
-		if err := vs.FromRows(rows); err != nil {
+		scans := &Street{}
+		if err := scans.FromRows(rows); err != nil {
 			return err
 		}
-		*s = append(*s, vs)
+		*s = append(*s, scans)
 	}
 	return nil
 }

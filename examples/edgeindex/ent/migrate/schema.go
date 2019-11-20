@@ -46,7 +46,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "name_city_id",
+				Name:    "street_name_city_id",
 				Unique:  true,
 				Columns: []*schema.Column{StreetsColumns[1], StreetsColumns[2]},
 			},

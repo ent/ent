@@ -62,5 +62,7 @@ func (File) Indexes() []ent.Index {
 		index.Fields("name").
 			Edges("owner", "type").
 			Unique(),
+		index.Fields("name").
+			Edges("owner"),
 	}
 }
