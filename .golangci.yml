@@ -8,7 +8,7 @@ linters-settings:
     threshold: 100
   funlen:
     lines: 100
-    statements: 70
+    statements: 80
 
 linters:
   disable-all: true

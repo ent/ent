@@ -190,6 +190,8 @@ func (d *MySQL) cType(c *Column) (t string) {
 		}
 		sort.Strings(values)
 		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
+	case field.TypeUUID:
+		t = "char(36) binary"
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}
@@ -306,6 +308,18 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		for i, e := range parts[1:] {
 			c.Enums[i] = strings.Trim(e, "'")
 		}
+	case "char":
+		size, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("converting char size to int: %v", err)
+		}
+		// UUID field has length of 36 characters (32 alphanumeric characters and 4 hyphens).
+		if size != 36 {
+			return fmt.Errorf("unknown char(%d) type (not a uuid)", size)
+		}
+		c.Type = field.TypeUUID
+	default:
+		return fmt.Errorf("unknown column type %q for version %q", parts[0], d.version)
 	}
 	if defaults.Valid {
 		return c.ScanDefault(defaults.String)
