@@ -24,19 +24,19 @@ type City struct {
 
 // FromRows scans the sql response data into City.
 func (c *City) FromRows(rows *sql.Rows) error {
-	var vc struct {
+	var scanc struct {
 		ID   int
 		Name sql.NullString
 	}
 	// the order here should be the same as in the `city.Columns`.
 	if err := rows.Scan(
-		&vc.ID,
-		&vc.Name,
+		&scanc.ID,
+		&scanc.Name,
 	); err != nil {
 		return err
 	}
-	c.ID = vc.ID
-	c.Name = vc.Name.String
+	c.ID = scanc.ID
+	c.Name = scanc.Name.String
 	return nil
 }
 
@@ -80,11 +80,11 @@ type Cities []*City
 // FromRows scans the sql response data into Cities.
 func (c *Cities) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vc := &City{}
-		if err := vc.FromRows(rows); err != nil {
+		scanc := &City{}
+		if err := scanc.FromRows(rows); err != nil {
 			return err
 		}
-		*c = append(*c, vc)
+		*c = append(*c, scanc)
 	}
 	return nil
 }

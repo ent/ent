@@ -24,19 +24,19 @@ type Node struct {
 
 // FromRows scans the sql response data into Node.
 func (n *Node) FromRows(rows *sql.Rows) error {
-	var vn struct {
+	var scann struct {
 		ID    int
 		Value sql.NullInt64
 	}
 	// the order here should be the same as in the `node.Columns`.
 	if err := rows.Scan(
-		&vn.ID,
-		&vn.Value,
+		&scann.ID,
+		&scann.Value,
 	); err != nil {
 		return err
 	}
-	n.ID = vn.ID
-	n.Value = int(vn.Value.Int64)
+	n.ID = scann.ID
+	n.Value = int(scann.Value.Int64)
 	return nil
 }
 
@@ -85,11 +85,11 @@ type Nodes []*Node
 // FromRows scans the sql response data into Nodes.
 func (n *Nodes) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vn := &Node{}
-		if err := vn.FromRows(rows); err != nil {
+		scann := &Node{}
+		if err := scann.FromRows(rows); err != nil {
 			return err
 		}
-		*n = append(*n, vn)
+		*n = append(*n, scann)
 	}
 	return nil
 }

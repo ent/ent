@@ -129,19 +129,24 @@ var (
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[1]},
 			},
 			{
-				Name:    "name_user",
+				Name:    "file_name_user",
 				Unique:  true,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
 			},
 			{
-				Name:    "owner_id_type_id",
+				Name:    "file_owner_id_type_id",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[7], FilesColumns[5]},
 			},
 			{
-				Name:    "name_owner_id_type_id",
+				Name:    "file_name_owner_id_type_id",
 				Unique:  true,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7], FilesColumns[5]},
+			},
+			{
+				Name:    "file_name_owner_id",
+				Unique:  false,
+				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7]},
 			},
 		},
 	}
@@ -253,6 +258,13 @@ var (
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pet_name_owner_id",
+				Unique:  false,
+				Columns: []*schema.Column{PetsColumns[1], PetsColumns[2]},
 			},
 		},
 	}

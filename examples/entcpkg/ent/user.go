@@ -22,16 +22,16 @@ type User struct {
 
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
-	var vu struct {
+	var scanu struct {
 		ID int
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
-		&vu.ID,
+		&scanu.ID,
 	); err != nil {
 		return err
 	}
-	u.ID = vu.ID
+	u.ID = scanu.ID
 	return nil
 }
 
@@ -68,11 +68,11 @@ type Users []*User
 // FromRows scans the sql response data into Users.
 func (u *Users) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vu := &User{}
-		if err := vu.FromRows(rows); err != nil {
+		scanu := &User{}
+		if err := scanu.FromRows(rows); err != nil {
 			return err
 		}
-		*u = append(*u, vu)
+		*u = append(*u, scanu)
 	}
 	return nil
 }

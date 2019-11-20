@@ -56,7 +56,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{},
 		Indexes: []*schema.Index{
 			{
-				Name:    "phone_age",
+				Name:    "user_phone_age",
 				Unique:  true,
 				Columns: []*schema.Column{UsersColumns[3], UsersColumns[1]},
 			},

@@ -27,22 +27,22 @@ type Car struct {
 
 // FromRows scans the sql response data into Car.
 func (c *Car) FromRows(rows *sql.Rows) error {
-	var vc struct {
+	var scanc struct {
 		ID           int
 		Model        sql.NullString
 		RegisteredAt sql.NullTime
 	}
 	// the order here should be the same as in the `car.Columns`.
 	if err := rows.Scan(
-		&vc.ID,
-		&vc.Model,
-		&vc.RegisteredAt,
+		&scanc.ID,
+		&scanc.Model,
+		&scanc.RegisteredAt,
 	); err != nil {
 		return err
 	}
-	c.ID = vc.ID
-	c.Model = vc.Model.String
-	c.RegisteredAt = vc.RegisteredAt.Time
+	c.ID = scanc.ID
+	c.Model = scanc.Model.String
+	c.RegisteredAt = scanc.RegisteredAt.Time
 	return nil
 }
 
@@ -88,11 +88,11 @@ type Cars []*Car
 // FromRows scans the sql response data into Cars.
 func (c *Cars) FromRows(rows *sql.Rows) error {
 	for rows.Next() {
-		vc := &Car{}
-		if err := vc.FromRows(rows); err != nil {
+		scanc := &Car{}
+		if err := scanc.FromRows(rows); err != nil {
 			return err
 		}
-		*c = append(*c, vc)
+		*c = append(*c, scanc)
 	}
 	return nil
 }
