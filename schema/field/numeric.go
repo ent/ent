@@ -158,6 +158,11 @@ func (b *intBuilder) Negative() *intBuilder {
 	return b.Max(-1)
 }
 
+// NonNegative adds a minimum value validator with the value of 0. Operation fails if the validator fails.
+func (b *intBuilder) NonNegative() *intBuilder {
+	return b.Min(0)
+}
+
 // Default sets the default value of the field.
 func (b *intBuilder) Default(i int) *intBuilder {
 	b.desc.Default = i
@@ -371,6 +376,11 @@ func (b *int8Builder) Negative() *int8Builder {
 	return b.Max(-1)
 }
 
+// NonNegative adds a minimum value validator with the value of 0. Operation fails if the validator fails.
+func (b *int8Builder) NonNegative() *int8Builder {
+	return b.Min(0)
+}
+
 // Default sets the default value of the field.
 func (b *int8Builder) Default(i int8) *int8Builder {
 	b.desc.Default = i
@@ -478,6 +488,11 @@ func (b *int16Builder) Positive() *int16Builder {
 // Negative adds a maximum value validator with the value of -1. Operation fails if the validator fails.
 func (b *int16Builder) Negative() *int16Builder {
 	return b.Max(-1)
+}
+
+// NonNegative adds a minimum value validator with the value of 0. Operation fails if the validator fails.
+func (b *int16Builder) NonNegative() *int16Builder {
+	return b.Min(0)
 }
 
 // Default sets the default value of the field.
@@ -589,6 +604,11 @@ func (b *int32Builder) Negative() *int32Builder {
 	return b.Max(-1)
 }
 
+// NonNegative adds a minimum value validator with the value of 0. Operation fails if the validator fails.
+func (b *int32Builder) NonNegative() *int32Builder {
+	return b.Min(0)
+}
+
 // Default sets the default value of the field.
 func (b *int32Builder) Default(i int32) *int32Builder {
 	b.desc.Default = i
@@ -696,6 +716,11 @@ func (b *int64Builder) Positive() *int64Builder {
 // Negative adds a maximum value validator with the value of -1. Operation fails if the validator fails.
 func (b *int64Builder) Negative() *int64Builder {
 	return b.Max(-1)
+}
+
+// NonNegative adds a minimum value validator with the value of 0. Operation fails if the validator fails.
+func (b *int64Builder) NonNegative() *int64Builder {
+	return b.Min(0)
 }
 
 // Default sets the default value of the field.

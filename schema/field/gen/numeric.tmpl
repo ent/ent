@@ -90,6 +90,11 @@ func (b *{{ $builder }}) Positive() *{{ $builder }} {
 	func (b *{{ $builder }}) Negative() *{{ $builder }} {
 		return b.Max(-1)
 	}
+
+	// NonNegative adds a minimum value validator with the value of 0. Operation fails if the validator fails.
+	func (b *{{ $builder }}) NonNegative() *{{ $builder }} {
+		return b.Min(0)
+	}
 {{ end }}
 
 // Default sets the default value of the field.
