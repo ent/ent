@@ -220,6 +220,8 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeBytes
 	case "jsonb":
 		c.Type = field.TypeJSON
+	case "uuid":
+		c.Type = field.TypeUUID
 	}
 	switch {
 	case !defaults.Valid:
@@ -265,6 +267,8 @@ func (d *Postgres) cType(c *Column) (t string) {
 		t = "bytea"
 	case field.TypeJSON:
 		t = "jsonb"
+	case field.TypeUUID:
+		t = "uuid"
 	case field.TypeString:
 		t = "varchar"
 		if c.Size > maxCharSize {
