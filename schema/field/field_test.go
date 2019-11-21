@@ -155,18 +155,12 @@ func TestField_Enums(t *testing.T) {
 }
 
 func TestField_UUID(t *testing.T) {
-	fd := field.UUID("id").
-		Default(func() [16]byte { return uuid.New() }).
-		Descriptor()
-	assert.Equal(t, "id", fd.Name)
-	assert.Equal(t, "[16]byte", fd.Info.String())
-	assert.NotNil(t, fd.Default)
-
-	fd = field.UUID("id").
-		Type(uuid.UUID{}).
+	fd := field.UUID("id", uuid.UUID{}).
+		Default(uuid.New).
 		Descriptor()
 	assert.Equal(t, "id", fd.Name)
 	assert.Equal(t, "uuid.UUID", fd.Info.String())
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
-	assert.Nil(t, fd.Default)
+	assert.NotNil(t, fd.Default)
+	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
 }

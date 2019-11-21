@@ -15,6 +15,7 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 	"github.com/facebookincubator/ent/schema/index"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,6 +39,8 @@ func (User) Fields() []ent.Field {
 			Sensitive(),
 		field.Time("creation_time").
 			Default(time.Now),
+		field.UUID("uuid", uuid.UUID{}).
+			Default(uuid.New),
 	}
 }
 
@@ -79,7 +82,7 @@ func TestMarshalSchema(t *testing.T) {
 		schema := &Schema{}
 		require.NoError(t, json.Unmarshal(buf, schema))
 		require.Equal(t, "User", schema.Name)
-		require.Len(t, schema.Fields, 7)
+		require.Len(t, schema.Fields, 8)
 		require.Equal(t, "age", schema.Fields[0].Name)
 		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
 
@@ -110,6 +113,10 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, field.TypeTime, schema.Fields[6].Info.Type)
 		require.Nil(t, schema.Fields[6].DefaultValue)
 
+		require.Equal(t, "uuid", schema.Fields[7].Name)
+		require.Equal(t, field.TypeUUID, schema.Fields[7].Info.Type)
+		require.True(t, schema.Fields[7].Default)
+
 		require.Len(t, schema.Edges, 2)
 		require.Equal(t, "groups", schema.Edges[0].Name)
 		require.Equal(t, "Group", schema.Edges[0].Type)
@@ -129,22 +136,38 @@ func TestMarshalSchema(t *testing.T) {
 	}
 }
 
-type Invalid struct {
+type InvalidEdge struct {
 	ent.Schema
 }
 
 // Edge panics because the edge declaration is invalid.
-func (Invalid) Edges() []ent.Edge {
+func (InvalidEdge) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("invalid", Invalid{}.Type),
+		edge.From("invalid", InvalidEdge{}.Type),
+	}
+}
+
+type InvalidUUID struct {
+	ent.Schema
+}
+
+func (InvalidUUID) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("invalid", uuid.New()).
+			Default(time.Now),
 	}
 }
 
 func TestMarshalFails(t *testing.T) {
-	i := Invalid{}
-	buf, err := MarshalSchema(i)
+	i1 := InvalidEdge{}
+	buf, err := MarshalSchema(i1)
 	require.Error(t, err)
 	require.Nil(t, buf)
+
+	i2 := InvalidUUID{}
+	buf, err = MarshalSchema(i2)
+	require.Nil(t, buf)
+	require.EqualError(t, err, `schema "InvalidUUID": expect type (func() uuid.UUID) for uuid default value`)
 }
 
 type WithDefaults struct {
