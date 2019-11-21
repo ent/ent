@@ -111,6 +111,7 @@ func TestType_Receiver(t *testing.T) {
 		{"PHBOrg", "po"},
 		{"DomainSpecificLang", "dospla"},
 		{"[]byte", "b"},
+		{"[16]byte", "b"},
 	}
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name, Config: &Config{Package: "entc/gen"}}
