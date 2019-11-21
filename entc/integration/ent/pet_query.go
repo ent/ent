@@ -65,15 +65,17 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(pq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := pq.sqlQuery()
-		t2.Select(t2.C(pet.TeamColumn))
-		query.sql = builder.Select(t1.Columns(user.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(user.FieldID), t2.C(pet.TeamColumn))
+		step := &sql.Step{}
+		step.From.V = pq.sqlQuery()
+		step.From.Table = pet.Table
+		step.From.Column = pet.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = true
+		step.Edge.Table = pet.TeamTable
+		step.Edge.Columns = append(step.Edge.Columns, pet.TeamColumn)
+		query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := pq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.TeamLabel).OutV()
@@ -86,15 +88,17 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(pq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := pq.sqlQuery()
-		t2.Select(t2.C(pet.OwnerColumn))
-		query.sql = builder.Select(t1.Columns(user.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+		step := &sql.Step{}
+		step.From.V = pq.sqlQuery()
+		step.From.Table = pet.Table
+		step.From.Column = pet.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = true
+		step.Edge.Table = pet.OwnerTable
+		step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+		query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := pq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.PetsLabel).OutV()

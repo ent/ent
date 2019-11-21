@@ -56,30 +56,34 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryParent chains the current query on the parent edge.
 func (nq *NodeQuery) QueryParent() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-
-	builder := sql.Dialect(nq.driver.Dialect())
-	t1 := builder.Table(node.Table)
-	t2 := nq.sqlQuery()
-	t2.Select(t2.C(node.ParentColumn))
-	query.sql = builder.Select(t1.Columns(node.Columns...)...).
-		From(t1).
-		Join(t2).
-		On(t1.C(node.FieldID), t2.C(node.ParentColumn))
+	step := &sql.Step{}
+	step.From.V = nq.sqlQuery()
+	step.From.Table = node.Table
+	step.From.Column = node.FieldID
+	step.To.Table = node.Table
+	step.To.Column = node.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = node.ParentTable
+	step.Edge.Columns = append(step.Edge.Columns, node.ParentColumn)
+	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (nq *NodeQuery) QueryChildren() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-
-	builder := sql.Dialect(nq.driver.Dialect())
-	t1 := builder.Table(node.Table)
-	t2 := nq.sqlQuery()
-	t2.Select(t2.C(node.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t2).
-		On(t1.C(node.ChildrenColumn), t2.C(node.FieldID))
+	step := &sql.Step{}
+	step.From.V = nq.sqlQuery()
+	step.From.Table = node.Table
+	step.From.Column = node.FieldID
+	step.To.Table = node.Table
+	step.To.Column = node.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = node.ChildrenTable
+	step.Edge.Columns = append(step.Edge.Columns, node.ChildrenColumn)
+	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
