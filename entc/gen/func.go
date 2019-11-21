@@ -136,12 +136,13 @@ func snake(s string) string {
 // receiver returns the receiver name of the given type.
 //
 //	[]T       => t
+//	[1]T      => t
 //	User      => u
 //	UserQuery => uq
 //
 func receiver(s string) (r string) {
-	// trim optional operators.
-	s = strings.Trim(s, "[]*&")
+	// trim invalid tokens for identifier prefix.
+	s = strings.Trim(s, "[]*&0123456789")
 	parts := strings.Split(snake(s), "_")
 	min := len(parts[0])
 	for _, w := range parts[1:] {
