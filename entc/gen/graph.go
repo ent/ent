@@ -291,7 +291,7 @@ func (g *Graph) resolve(t *Type) error {
 func (g *Graph) Tables() (all []*schema.Table) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
-		table := schema.NewTable(n.Table()).AddPrimary(n.ID.Column())
+		table := schema.NewTable(n.Table()).AddPrimary(n.ID.PK())
 		for _, f := range n.Fields {
 			table.AddColumn(f.Column())
 		}
