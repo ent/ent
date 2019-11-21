@@ -474,17 +474,12 @@ func (f Field) NullTypeField(rec string) string {
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
 func (f Field) Column() *schema.Column {
 	f.Enums()
-	pk := f.Name == "id"
 	c := &schema.Column{
 		Name:     f.StorageKey(),
 		Type:     f.Type.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
 		Enums:    f.Enums(),
-	}
-	if pk {
-		c.Type = field.TypeInt
-		c.Increment = true
 	}
 	if f.def != nil {
 		if f.def.Size != nil {
@@ -493,6 +488,22 @@ func (f Field) Column() *schema.Column {
 	}
 	if f.Default && !f.IsTime() {
 		c.Default = f.DefaultName()
+	}
+	return c
+}
+
+// PK is like Column, but for table primary key.
+func (f Field) PK() *schema.Column {
+	c := &schema.Column{
+		Name:      f.StorageKey(),
+		Type:      field.TypeInt,
+		Key:       schema.PrimaryKey,
+		Increment: true,
+	}
+	// If the PK was defined by the user and it's UUID or string.
+	if f.UserDefined && !f.Type.Numeric() {
+		c.Increment = false
+		c.Type = f.Type.Type
 	}
 	return c
 }

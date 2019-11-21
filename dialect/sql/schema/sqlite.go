@@ -75,9 +75,10 @@ func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder {
 	for _, fk := range t.ForeignKeys {
 		b.ForeignKeys(fk.DSL())
 	}
-	// if it's an ID based primary key, we add the `PRIMARY KEY`
-	// clause to the column declaration.
-	if len(t.PrimaryKey) == 1 {
+	// If it's an ID based primary key with autoincrement, we add
+	// the `PRIMARY KEY` clause to the column declaration. Otherwise,
+	// we append it to the constraint clause.
+	if len(t.PrimaryKey) == 1 && t.PrimaryKey[0].Increment {
 		return b
 	}
 	for _, pk := range t.PrimaryKey {
