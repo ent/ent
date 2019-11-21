@@ -115,6 +115,12 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	if _, err := json.Marshal(fd.Default); err == nil {
 		sf.DefaultValue = fd.Default
 	}
+	if fd.Info.Type == field.TypeUUID && fd.Default != nil {
+		typ := reflect.TypeOf(fd.Default)
+		if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != fd.Info.String() {
+			return nil, fmt.Errorf("expect type (func() %s) for uuid default value", fd.Info.String())
+		}
+	}
 	return sf, nil
 }
 

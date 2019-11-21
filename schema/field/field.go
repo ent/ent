@@ -5,6 +5,7 @@
 package field
 
 import (
+	"database/sql/driver"
 	"errors"
 	"math"
 	"reflect"
@@ -133,13 +134,18 @@ func Enum(name string) *enumBuilder {
 
 // UUID returns a new Field with type UUID. An example for defining UUID field is as follows:
 //
-//	field.UUID("id").
-//		Default(uuid.New)
+//	field.UUID("id", uuid.New())
 //
-func UUID(name string) *uuidBuilder {
+func UUID(name string, typ driver.Valuer) *uuidBuilder {
+	rt := reflect.TypeOf(typ)
 	return &uuidBuilder{&Descriptor{
 		Name: name,
-		Info: &TypeInfo{Type: TypeUUID, Nillable: true},
+		Info: &TypeInfo{
+			Type:     TypeUUID,
+			Nillable: true,
+			Ident:    rt.String(),
+			PkgPath:  rt.PkgPath(),
+		},
 	}}
 }
 
@@ -575,22 +581,15 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 	return b
 }
 
-// Type sets a custom type of the UUID field. It defaults to [16]byte.
-func (b *uuidBuilder) Type(typ interface{}) *uuidBuilder {
-	t := reflect.TypeOf(typ)
-	b.desc.Info.Ident = t.String()
-	b.desc.Info.PkgPath = t.PkgPath()
-	return b
-}
-
 // Default sets the function that is applied to set default value
-// of the field on creation. For example:
+// of the field on creation. Codegen fails if the default function
+// doesn't return the same concrete that was set for the UUID type.
 //
-//	field.UUID("id").
+//	field.UUID("id", uuid.UUID{}).
 //		Default(uuid.New)
 //
-func (b *uuidBuilder) Default(f func() [16]byte) *uuidBuilder {
-	b.desc.Default = f
+func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
+	b.desc.Default = fn
 	return b
 }
 
