@@ -68,15 +68,17 @@ func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(card.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(user.CardColumn), t2.C(user.FieldID))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = card.Table
+		step.To.Column = card.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.CardTable
+		step.Edge.Columns = append(step.Edge.Columns, user.CardColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.CardLabel).InV()
@@ -89,15 +91,17 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(pet.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(user.PetsColumn), t2.C(user.FieldID))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = pet.Table
+		step.To.Column = pet.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.PetsTable
+		step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.PetsLabel).InV()
@@ -110,15 +114,17 @@ func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(file.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(user.FilesColumn), t2.C(user.FieldID))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = file.Table
+		step.To.Column = file.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.FilesTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FilesColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.FilesLabel).InV()
@@ -131,20 +137,17 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(group.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		t3 := builder.Table(user.GroupsTable)
-		t4 := builder.Select(t3.C(user.GroupsPrimaryKey[1])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.GroupsPrimaryKey[0]), t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[1]))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = group.Table
+		step.To.Column = group.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.GroupsTable
+		step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.GroupsLabel).InV()
@@ -157,20 +160,17 @@ func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		t3 := builder.Table(user.FriendsTable)
-		t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.FriendsTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.Both(user.FriendsLabel)
@@ -183,20 +183,17 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		t3 := builder.Table(user.FollowersTable)
-		t4 := builder.Select(t3.C(user.FollowersPrimaryKey[0])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.FollowersPrimaryKey[1]), t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = true
+		step.Edge.Table = user.FollowersTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FollowersPrimaryKey...)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.FollowingLabel).OutV()
@@ -209,20 +206,17 @@ func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		t3 := builder.Table(user.FollowingTable)
-		t4 := builder.Select(t3.C(user.FollowingPrimaryKey[1])).
-			From(t3).
-			Join(t2).
-			On(t3.C(user.FollowingPrimaryKey[0]), t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = false
+		step.Edge.Table = user.FollowingTable
+		step.Edge.Columns = append(step.Edge.Columns, user.FollowingPrimaryKey...)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.FollowingLabel).InV()
@@ -235,15 +229,17 @@ func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(pet.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(user.TeamColumn), t2.C(user.FieldID))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = pet.Table
+		step.To.Column = pet.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.TeamTable
+		step.Edge.Columns = append(step.Edge.Columns, user.TeamColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.TeamLabel).InV()
@@ -256,15 +252,17 @@ func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(user.SpouseColumn), t2.C(user.FieldID))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.SpouseTable
+		step.Edge.Columns = append(step.Edge.Columns, user.SpouseColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.Both(user.SpouseLabel)
@@ -277,15 +275,17 @@ func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(user.ChildrenColumn), t2.C(user.FieldID))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = true
+		step.Edge.Table = user.ChildrenTable
+		step.Edge.Columns = append(step.Edge.Columns, user.ChildrenColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.ParentLabel).OutV()
@@ -298,15 +298,17 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	switch uq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(uq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := uq.sqlQuery()
-		t2.Select(t2.C(user.ParentColumn))
-		query.sql = builder.Select(t1.Columns(user.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(user.FieldID), t2.C(user.ParentColumn))
+		step := &sql.Step{}
+		step.From.V = uq.sqlQuery()
+		step.From.Table = user.Table
+		step.From.Column = user.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = false
+		step.Edge.Table = user.ParentTable
+		step.Edge.Columns = append(step.Edge.Columns, user.ParentColumn)
+		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := uq.gremlinQuery()
 		query.gremlin = gremlin.OutE(user.ParentLabel).InV()

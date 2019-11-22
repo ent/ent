@@ -58,70 +58,68 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(pet.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t2).
-		On(t1.C(user.PetsColumn), t2.C(user.FieldID))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = pet.Table
+	step.To.Column = pet.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.PetsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	t3 := builder.Table(user.FriendsTable)
-	t4 := builder.Select(t3.C(user.FriendsPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FriendsPrimaryKey[0]), t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FriendsPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.FriendsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(group.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	t3 := builder.Table(user.GroupsTable)
-	t4 := builder.Select(t3.C(user.GroupsPrimaryKey[0])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.GroupsPrimaryKey[1]), t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(group.FieldID), t4.C(user.GroupsPrimaryKey[0]))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = group.Table
+	step.To.Column = group.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.GroupsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryManage chains the current query on the manage edge.
 func (uq *UserQuery) QueryManage() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(group.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t2).
-		On(t1.C(user.ManageColumn), t2.C(user.FieldID))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = group.Table
+	step.To.Column = group.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.ManageTable
+	step.Edge.Columns = append(step.Edge.Columns, user.ManageColumn)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 

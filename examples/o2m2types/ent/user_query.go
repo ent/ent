@@ -57,15 +57,17 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(pet.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t2).
-		On(t1.C(user.PetsColumn), t2.C(user.FieldID))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = pet.Table
+	step.To.Column = pet.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.PetsTable
+	step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 

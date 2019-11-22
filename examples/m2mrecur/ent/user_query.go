@@ -56,40 +56,34 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	t3 := builder.Table(user.FollowersTable)
-	t4 := builder.Select(t3.C(user.FollowersPrimaryKey[0])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FollowersPrimaryKey[1]), t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FollowersPrimaryKey[0]))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = true
+	step.Edge.Table = user.FollowersTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FollowersPrimaryKey...)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-
-	builder := sql.Dialect(uq.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := uq.sqlQuery()
-	t2.Select(t2.C(user.FieldID))
-	t3 := builder.Table(user.FollowingTable)
-	t4 := builder.Select(t3.C(user.FollowingPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(user.FollowingPrimaryKey[0]), t2.C(user.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(user.FollowingPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = uq.sqlQuery()
+	step.From.Table = user.Table
+	step.From.Column = user.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = user.FollowingTable
+	step.Edge.Columns = append(step.Edge.Columns, user.FollowingPrimaryKey...)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
