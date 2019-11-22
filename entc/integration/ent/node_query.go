@@ -64,15 +64,17 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(nq.driver.Dialect())
-		t1 := builder.Table(node.Table)
-		t2 := nq.sqlQuery()
-		t2.Select(t2.C(node.PrevColumn))
-		query.sql = builder.Select(t1.Columns(node.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(node.FieldID), t2.C(node.PrevColumn))
+		step := &sql.Step{}
+		step.From.V = nq.sqlQuery()
+		step.From.Table = node.Table
+		step.From.Column = node.FieldID
+		step.To.Table = node.Table
+		step.To.Column = node.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = true
+		step.Edge.Table = node.PrevTable
+		step.Edge.Columns = append(step.Edge.Columns, node.PrevColumn)
+		query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := nq.gremlinQuery()
 		query.gremlin = gremlin.InE(node.NextLabel).OutV()
@@ -85,15 +87,17 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	switch nq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(nq.driver.Dialect())
-		t1 := builder.Table(node.Table)
-		t2 := nq.sqlQuery()
-		t2.Select(t2.C(node.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(node.NextColumn), t2.C(node.FieldID))
+		step := &sql.Step{}
+		step.From.V = nq.sqlQuery()
+		step.From.Table = node.Table
+		step.From.Column = node.FieldID
+		step.To.Table = node.Table
+		step.To.Column = node.FieldID
+		step.Edge.Rel = sql.O2O
+		step.Edge.Inverse = false
+		step.Edge.Table = node.NextTable
+		step.Edge.Columns = append(step.Edge.Columns, node.NextColumn)
+		query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := nq.gremlinQuery()
 		query.gremlin = gremlin.OutE(node.NextLabel).InV()

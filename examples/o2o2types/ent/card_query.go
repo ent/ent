@@ -57,15 +57,17 @@ func (cq *CardQuery) Order(o ...Order) *CardQuery {
 // QueryOwner chains the current query on the owner edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
-
-	builder := sql.Dialect(cq.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := cq.sqlQuery()
-	t2.Select(t2.C(card.OwnerColumn))
-	query.sql = builder.Select(t1.Columns(user.Columns...)...).
-		From(t1).
-		Join(t2).
-		On(t1.C(user.FieldID), t2.C(card.OwnerColumn))
+	step := &sql.Step{}
+	step.From.V = cq.sqlQuery()
+	step.From.Table = card.Table
+	step.From.Column = card.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.O2O
+	step.Edge.Inverse = true
+	step.Edge.Table = card.OwnerTable
+	step.Edge.Columns = append(step.Edge.Columns, card.OwnerColumn)
+	query.sql = sql.SetNeighbors(cq.driver.Dialect(), step)
 	return query
 }
 

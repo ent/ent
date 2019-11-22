@@ -115,7 +115,7 @@ func SetNeighbors(dialect string, s *Step) (q *Selector) {
 			pk1, pk2 = pk2, pk1
 		}
 		to := builder.Table(s.To.Table)
-		set.Select(s.From.Column)
+		set.Select(set.C(s.From.Column))
 		join := builder.Table(s.Edge.Table)
 		match := builder.Select(join.C(pk1)).
 			From(join).
@@ -127,14 +127,14 @@ func SetNeighbors(dialect string, s *Step) (q *Selector) {
 			On(to.C(s.To.Column), match.C(pk1))
 	case r == M2O || (r == O2O && s.Edge.Inverse):
 		t1 := builder.Table(s.To.Table)
-		set.Select(s.Edge.Columns[0])
+		set.Select(set.C(s.Edge.Columns[0]))
 		q = builder.Select().
 			From(t1).
 			Join(set).
 			On(t1.C(s.To.Column), set.C(s.Edge.Columns[0]))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		t1 := builder.Table(s.To.Table)
-		set.Select(s.From.Column)
+		set.Select(set.C(s.From.Column))
 		q = builder.Select().
 			From(t1).
 			Join(set).

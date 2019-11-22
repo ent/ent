@@ -67,15 +67,17 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(gq.driver.Dialect())
-		t1 := builder.Table(file.Table)
-		t2 := gq.sqlQuery()
-		t2.Select(t2.C(group.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(group.FilesColumn), t2.C(group.FieldID))
+		step := &sql.Step{}
+		step.From.V = gq.sqlQuery()
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = file.Table
+		step.To.Column = file.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = group.FilesTable
+		step.Edge.Columns = append(step.Edge.Columns, group.FilesColumn)
+		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.OutE(group.FilesLabel).InV()
@@ -88,15 +90,17 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(gq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := gq.sqlQuery()
-		t2.Select(t2.C(group.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t2).
-			On(t1.C(group.BlockedColumn), t2.C(group.FieldID))
+		step := &sql.Step{}
+		step.From.V = gq.sqlQuery()
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.O2M
+		step.Edge.Inverse = false
+		step.Edge.Table = group.BlockedTable
+		step.Edge.Columns = append(step.Edge.Columns, group.BlockedColumn)
+		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.OutE(group.BlockedLabel).InV()
@@ -109,20 +113,17 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(gq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := gq.sqlQuery()
-		t2.Select(t2.C(group.FieldID))
-		t3 := builder.Table(group.UsersTable)
-		t4 := builder.Select(t3.C(group.UsersPrimaryKey[0])).
-			From(t3).
-			Join(t2).
-			On(t3.C(group.UsersPrimaryKey[1]), t2.C(group.FieldID))
-		query.sql = builder.Select().
-			From(t1).
-			Join(t4).
-			On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[0]))
+		step := &sql.Step{}
+		step.From.V = gq.sqlQuery()
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2M
+		step.Edge.Inverse = true
+		step.Edge.Table = group.UsersTable
+		step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.GroupsLabel).OutV()
@@ -135,15 +136,17 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(gq.driver.Dialect())
-		t1 := builder.Table(groupinfo.Table)
-		t2 := gq.sqlQuery()
-		t2.Select(t2.C(group.InfoColumn))
-		query.sql = builder.Select(t1.Columns(groupinfo.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(groupinfo.FieldID), t2.C(group.InfoColumn))
+		step := &sql.Step{}
+		step.From.V = gq.sqlQuery()
+		step.From.Table = group.Table
+		step.From.Column = group.FieldID
+		step.To.Table = groupinfo.Table
+		step.To.Column = groupinfo.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = false
+		step.Edge.Table = group.InfoTable
+		step.Edge.Columns = append(step.Edge.Columns, group.InfoColumn)
+		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
 		query.gremlin = gremlin.OutE(group.InfoLabel).InV()
