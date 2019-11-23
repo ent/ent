@@ -27,7 +27,6 @@ import (
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/load/internal"
 
-	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -54,10 +53,10 @@ type Config struct {
 func (c *Config) Load() (*SchemaSpec, error) {
 	pkgPath, err := c.load()
 	if err != nil {
-		return nil, errors.WithMessage(err, "load schemas dir")
+		return nil, fmt.Errorf("load schemas dir: %v", err)
 	}
 	if len(c.Names) == 0 {
-		return nil, errors.Errorf("no schema found in: %s", c.Path)
+		return nil, fmt.Errorf("no schema found in: %s", c.Path)
 	}
 	b := bytes.NewBuffer(nil)
 	err = buildTmpl.ExecuteTemplate(b, "main", struct {
@@ -65,15 +64,15 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		Package string
 	}{c, pkgPath})
 	if err != nil {
-		return nil, errors.WithMessage(err, "execute template")
+		return nil, fmt.Errorf("execute template: %v", err)
 	}
 	buf, err := format.Source(b.Bytes())
 	if err != nil {
-		return nil, errors.WithMessage(err, "format template")
+		return nil, fmt.Errorf("format template: %v", err)
 	}
 	target := fmt.Sprintf("%s.go", filename(pkgPath))
 	if err := ioutil.WriteFile(target, buf, 0644); err != nil {
-		return nil, errors.WithMessagef(err, "write file %s", target)
+		return nil, fmt.Errorf("write file %s: %v", target, err)
 	}
 	defer os.Remove(target)
 	out, err := run(target)
@@ -84,14 +83,14 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	for _, line := range strings.Split(out, "\n") {
 		schema := &Schema{}
 		if err := json.Unmarshal([]byte(line), schema); err != nil {
-			return nil, errors.WithMessagef(err, "unmarshal schema %s", line)
+			return nil, fmt.Errorf("unmarshal schema %s: %v", line, err)
 		}
 		spec.Schemas = append(spec.Schemas, schema)
 	}
 	return spec, nil
 }
 
-// entInterface represents the the ent.Interface type.
+// entInterface holds the reflect.Type of ent.Interface.
 var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 
 // load loads the schemas info.
@@ -104,6 +103,9 @@ func (c *Config) load() (string, error) {
 		return "", fmt.Errorf("missing package information for: %s", c.Path)
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
+	if len(pkg.Errors) != 0 {
+		return "", pkg.Errors[0]
+	}
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
 	}
@@ -158,7 +160,7 @@ func schemaTemplates() ([]string, error) {
 	)
 	f, err := parser.ParseFile(fset, name, string(internal.MustAsset(name)), parser.AllErrors)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "parse file: %s", name)
+		return nil, fmt.Errorf("parse file: %s: %v", name, err)
 	}
 	for _, decl := range f.Decls {
 		if decl, ok := decl.(*ast.GenDecl); ok && decl.Tok == token.IMPORT {
@@ -168,7 +170,7 @@ func schemaTemplates() ([]string, error) {
 			continue
 		}
 		if err := format.Node(&code, fset, decl); err != nil {
-			return nil, errors.WithMessage(err, "format node")
+			return nil, fmt.Errorf("format node: %v", err)
 		}
 		code.WriteByte('\n')
 	}
