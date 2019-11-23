@@ -326,7 +326,6 @@ func TestHasNeighbors(t *testing.T) {
 				// node holds association pointer. The neighbors query
 				// here checks if a node "has-next".
 				step := &Step{}
-				step.From.V = 1
 				step.From.Table = "nodes"
 				step.From.Column = "id"
 				step.To.Table = "nodes"
@@ -345,7 +344,6 @@ func TestHasNeighbors(t *testing.T) {
 				// Same example as above, but the neighbors
 				// query checks if a node "has-previous".
 				step := &Step{}
-				step.From.V = 1
 				step.From.Table = "nodes"
 				step.From.Column = "id"
 				step.To.Table = "nodes"
@@ -366,6 +364,80 @@ func TestHasNeighbors(t *testing.T) {
 			query, args := tt.selector.Query()
 			require.Equal(t, tt.wantQuery, query)
 			require.Empty(t, args)
+		})
+	}
+}
+
+func TestHasNeighborsWith(t *testing.T) {
+	tests := []struct {
+		name      string
+		step      *Step
+		selector  *Selector
+		predicate func(*Selector)
+		wantQuery string
+		wantArgs  []interface{}
+	}{
+		{
+			name: "M2M",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "groups"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Table = "user_groups"
+				step.Edge.Columns = []string{"user_id", "group_id"}
+				return step
+			}(),
+			selector: Dialect("postgres").Select("*").From(Table("users")),
+			predicate: func(s *Selector) {
+				s.Where(EQ("name", "GitHub"))
+			},
+			wantQuery: `
+SELECT *
+FROM "users"
+WHERE "users"."id" IN
+  (SELECT "user_groups"."user_id"
+  FROM "user_groups"
+  JOIN "groups" AS "t0" ON "user_groups"."group_id" = "t0"."id" WHERE "name" = $1)`,
+			wantArgs: []interface{}{"GitHub"},
+		},
+		{
+			name: "M2M/inverse",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "groups"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Table = "user_groups"
+				step.Edge.Inverse = true
+				step.Edge.Columns = []string{"user_id", "group_id"}
+				return step
+			}(),
+			selector: Dialect("postgres").Select("*").From(Table("groups")),
+			predicate: func(s *Selector) {
+				s.Where(EQ("name", "a8m"))
+			},
+			wantQuery: `
+SELECT *
+FROM "groups"
+WHERE "groups"."id" IN
+  (SELECT "user_groups"."group_id"
+  FROM "user_groups"
+  JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE "name" = $1)`,
+			wantArgs: []interface{}{"a8m"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			HasNeighborsWith(tt.selector, tt.step, tt.predicate)
+			query, args := tt.selector.Query()
+			tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
+			require.Equal(t, tt.wantQuery, query)
+			require.Equal(t, tt.wantArgs, args)
 		})
 	}
 }
