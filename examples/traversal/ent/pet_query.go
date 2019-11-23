@@ -57,35 +57,34 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryFriends chains the current query on the friends edge.
 func (pq *PetQuery) QueryFriends() *PetQuery {
 	query := &PetQuery{config: pq.config}
-
-	builder := sql.Dialect(pq.driver.Dialect())
-	t1 := builder.Table(pet.Table)
-	t2 := pq.sqlQuery()
-	t2.Select(t2.C(pet.FieldID))
-	t3 := builder.Table(pet.FriendsTable)
-	t4 := builder.Select(t3.C(pet.FriendsPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(pet.FriendsPrimaryKey[0]), t2.C(pet.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(pet.FieldID), t4.C(pet.FriendsPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = pq.sqlQuery()
+	step.From.Table = pet.Table
+	step.From.Column = pet.FieldID
+	step.To.Table = pet.Table
+	step.To.Column = pet.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = pet.FriendsTable
+	step.Edge.Columns = append(step.Edge.Columns, pet.FriendsPrimaryKey...)
+	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-
-	builder := sql.Dialect(pq.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := pq.sqlQuery()
-	t2.Select(t2.C(pet.OwnerColumn))
-	query.sql = builder.Select(t1.Columns(user.Columns...)...).
-		From(t1).
-		Join(t2).
-		On(t1.C(user.FieldID), t2.C(pet.OwnerColumn))
+	step := &sql.Step{}
+	step.From.V = pq.sqlQuery()
+	step.From.Table = pet.Table
+	step.From.Column = pet.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2O
+	step.Edge.Inverse = true
+	step.Edge.Table = pet.OwnerTable
+	step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
