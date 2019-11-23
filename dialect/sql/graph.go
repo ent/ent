@@ -176,3 +176,39 @@ func HasNeighbors(q *Selector, s *Step) {
 		)
 	}
 }
+
+// HasNeighborsWith applies on the given Selector a neighbors check.
+// The given predicate applies its filtering on the selector.
+func HasNeighborsWith(q *Selector, s *Step, pred func(*Selector)) {
+	builder := Dialect(q.dialect)
+	switch r := s.Edge.Rel; {
+	case r == M2M:
+		pk1, pk2 := s.Edge.Columns[1], s.Edge.Columns[0]
+		if s.Edge.Inverse {
+			pk1, pk2 = pk2, pk1
+		}
+		from := q.Table()
+		to := builder.Table(s.To.Table)
+		join := builder.Table(s.Edge.Table)
+		matches := builder.Select(join.C(pk2)).
+			From(join).
+			Join(to).
+			On(join.C(pk1), to.C(s.To.Column))
+		pred(matches)
+		q.Where(In(from.C(s.From.Column), matches))
+	case r == M2O || (r == O2O && s.Edge.Inverse):
+		from := q.Table()
+		to := builder.Table(s.To.Table)
+		matches := builder.Select(to.C(s.To.Column)).
+			From(to)
+		pred(matches)
+		q.Where(In(from.C(s.From.Column), matches))
+	case r == O2M || (r == O2O && !s.Edge.Inverse):
+		from := q.Table()
+		to := builder.Table(s.Edge.Table)
+		matches := builder.Select(to.C(s.Edge.Columns[0])).
+			From(to)
+		pred(matches)
+		q.Where(In(from.C(s.From.Column), matches))
+	}
+}
