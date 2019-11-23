@@ -142,3 +142,37 @@ func SetNeighbors(dialect string, s *Step) (q *Selector) {
 	}
 	return q
 }
+
+// HasNeighbors applies on the given Selector a neighbors check.
+func HasNeighbors(q *Selector, s *Step) {
+	builder := Dialect(q.dialect)
+	switch r := s.Edge.Rel; {
+	case r == M2M:
+		pk1 := s.Edge.Columns[1]
+		if s.Edge.Inverse {
+			pk1 = s.Edge.Columns[0]
+		}
+		from := q.Table()
+		join := builder.Table(s.Edge.Table)
+		q.Where(
+			In(
+				from.C(s.From.Column),
+				builder.Select(join.C(pk1)).From(join),
+			),
+		)
+	case r == M2O || (r == O2O && s.Edge.Inverse):
+		from := q.Table()
+		q.Where(NotNull(from.C(s.Edge.Columns[0])))
+	case r == O2M || (r == O2O && !s.Edge.Inverse):
+		from := q.Table()
+		to := builder.Table(s.Edge.Table)
+		q.Where(
+			In(
+				from.C(s.From.Column),
+				builder.Select(to.C(s.Edge.Columns[0])).
+					From(to).
+					Where(NotNull(to.C(s.Edge.Columns[0]))),
+			),
+		)
+	}
+}
