@@ -66,15 +66,17 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(fq.driver.Dialect())
-		t1 := builder.Table(user.Table)
-		t2 := fq.sqlQuery()
-		t2.Select(t2.C(file.OwnerColumn))
-		query.sql = builder.Select(t1.Columns(user.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(user.FieldID), t2.C(file.OwnerColumn))
+		step := &sql.Step{}
+		step.From.V = fq.sqlQuery()
+		step.From.Table = file.Table
+		step.From.Column = file.FieldID
+		step.To.Table = user.Table
+		step.To.Column = user.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = true
+		step.Edge.Table = file.OwnerTable
+		step.Edge.Columns = append(step.Edge.Columns, file.OwnerColumn)
+		query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := fq.gremlinQuery()
 		query.gremlin = gremlin.InE(user.FilesLabel).OutV()
@@ -87,15 +89,17 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-
-		builder := sql.Dialect(fq.driver.Dialect())
-		t1 := builder.Table(filetype.Table)
-		t2 := fq.sqlQuery()
-		t2.Select(t2.C(file.TypeColumn))
-		query.sql = builder.Select(t1.Columns(filetype.Columns...)...).
-			From(t1).
-			Join(t2).
-			On(t1.C(filetype.FieldID), t2.C(file.TypeColumn))
+		step := &sql.Step{}
+		step.From.V = fq.sqlQuery()
+		step.From.Table = file.Table
+		step.From.Column = file.FieldID
+		step.To.Table = filetype.Table
+		step.To.Column = filetype.FieldID
+		step.Edge.Rel = sql.M2O
+		step.Edge.Inverse = true
+		step.Edge.Table = file.TypeTable
+		step.Edge.Columns = append(step.Edge.Columns, file.TypeColumn)
+		query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := fq.gremlinQuery()
 		query.gremlin = gremlin.InE(filetype.FilesLabel).OutV()

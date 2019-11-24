@@ -227,7 +227,7 @@ func TestSetNeighbors(t *testing.T) {
 				step.Edge.Columns = []string{"owner_id"}
 				return step
 			}(),
-			wantQuery: `SELECT * FROM "pets" JOIN (SELECT "id" FROM "users" WHERE "name" = $1) AS "t1" ON "pets"."owner_id" = "t1"."id"`,
+			wantQuery: `SELECT * FROM "pets" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "pets"."owner_id" = "t1"."id"`,
 			wantArgs:  []interface{}{"a8m"},
 		},
 		{
@@ -244,7 +244,7 @@ func TestSetNeighbors(t *testing.T) {
 				step.Edge.Columns = []string{"owner_id"}
 				return step
 			}(),
-			wantQuery: `SELECT * FROM "users" JOIN (SELECT "owner_id" FROM "pets" WHERE "name" = $1) AS "t1" ON "users"."id" = "t1"."owner_id"`,
+			wantQuery: `SELECT * FROM "users" JOIN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $1) AS "t1" ON "users"."id" = "t1"."owner_id"`,
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
@@ -268,7 +268,7 @@ JOIN
   (SELECT "user_groups"."group_id"
    FROM "user_groups"
    JOIN
-     (SELECT "id"
+     (SELECT "users"."id"
       FROM "users"
       WHERE "name" = $1) AS "t1" ON "user_groups"."user_id" = "t1"."id") AS "t1" ON "groups"."id" = "t1"."group_id"`,
 			wantArgs: []interface{}{"a8m"},
@@ -295,7 +295,7 @@ JOIN
   (SELECT "user_groups"."user_id"
    FROM "user_groups"
    JOIN
-     (SELECT "id"
+     (SELECT "groups"."id"
       FROM "groups"
       WHERE "name" = $1) AS "t1" ON "user_groups"."group_id" = "t1"."id") AS "t1" ON "users"."id" = "t1"."user_id"`,
 			wantArgs: []interface{}{"GitHub"},

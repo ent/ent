@@ -57,15 +57,17 @@ func (cq *CityQuery) Order(o ...Order) *CityQuery {
 // QueryStreets chains the current query on the streets edge.
 func (cq *CityQuery) QueryStreets() *StreetQuery {
 	query := &StreetQuery{config: cq.config}
-
-	builder := sql.Dialect(cq.driver.Dialect())
-	t1 := builder.Table(street.Table)
-	t2 := cq.sqlQuery()
-	t2.Select(t2.C(city.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t2).
-		On(t1.C(city.StreetsColumn), t2.C(city.FieldID))
+	step := &sql.Step{}
+	step.From.V = cq.sqlQuery()
+	step.From.Table = city.Table
+	step.From.Column = city.FieldID
+	step.To.Table = street.Table
+	step.To.Column = street.FieldID
+	step.Edge.Rel = sql.O2M
+	step.Edge.Inverse = false
+	step.Edge.Table = city.StreetsTable
+	step.Edge.Columns = append(step.Edge.Columns, city.StreetsColumn)
+	query.sql = sql.SetNeighbors(cq.driver.Dialect(), step)
 	return query
 }
 
