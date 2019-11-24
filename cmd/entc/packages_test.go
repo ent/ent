@@ -35,6 +35,11 @@ func testPkgPath(t *testing.T, x packagestest.Exporter) {
 
 	target = filepath.Join(e.Config.Dir, "z/ent")
 	pkgPath, err = PkgPath(e.Config, target)
+	require.NoError(t, err)
+	require.Equal(t, "golang.org/x/y/z/ent", pkgPath)
+
+	target = filepath.Join(e.Config.Dir, "z/e/n/t")
+	pkgPath, err = PkgPath(e.Config, target)
 	require.Error(t, err)
 	require.Empty(t, pkgPath)
 }
