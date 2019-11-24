@@ -95,6 +95,13 @@ func main() {
 						for _, tmpl := range template {
 							opts = append(opts, entc.TemplateDir(tmpl))
 						}
+						// If the target directory is not inferred from
+						// the schema path, resolve its package path.
+						if cfg.Target != "" {
+							pkgPath, err := PkgPath(DefaultConfig, cfg.Target)
+							failOnErr(err)
+							cfg.Package = pkgPath
+						}
 						cfg.IDType = &field.TypeInfo{Type: field.Type(idtype)}
 						err := entc.Generate(path[0], &cfg, opts...)
 						failOnErr(err)

@@ -20,27 +20,32 @@ func PkgPath(config *packages.Config, target string) (string, error) {
 	if config == nil {
 		config = DefaultConfig
 	}
-	abs, err := filepath.Abs(target)
+	pathCheck, err := filepath.Abs(target)
 	if err != nil {
 		return "", err
 	}
-	pathCheck := abs
+	var parts []string
 	if _, err := os.Stat(pathCheck); os.IsNotExist(err) {
-		pathCheck = filepath.Dir(abs)
+		parts = append(parts, filepath.Base(pathCheck))
+		pathCheck = filepath.Dir(pathCheck)
 	}
-	pkgs, err := packages.Load(config, pathCheck)
-	if err != nil {
-		return "", fmt.Errorf("load package info: %v", err)
+	// Try maximum 2 directories above the given target
+	// to find the root packages or module.
+	for i := 0; i < 2; i++ {
+		pkgs, err := packages.Load(config, pathCheck)
+		if err != nil {
+			return "", fmt.Errorf("load package info: %v", err)
+		}
+		if len(pkgs) == 0 || len(pkgs[0].Errors) != 0 {
+			parts = append(parts, filepath.Base(pathCheck))
+			pathCheck = filepath.Dir(pathCheck)
+			continue
+		}
+		pkgPath := pkgs[0].PkgPath
+		for j := len(parts) - 1; j >= 0; j-- {
+			pkgPath = path.Join(pkgPath, parts[j])
+		}
+		return pkgPath, nil
 	}
-	if len(pkgs) == 0 {
-		return "", fmt.Errorf("no package was found for: %s", pathCheck)
-	}
-	if errs := pkgs[0].Errors; len(errs) != 0 {
-		return "", errs[0]
-	}
-	pkgPath := pkgs[0].PkgPath
-	if abs != pathCheck {
-		pkgPath = path.Join(pkgPath, filepath.Base(abs))
-	}
-	return pkgPath, nil
+	return "", fmt.Errorf("root package or module was not found for: %s", target)
 }
