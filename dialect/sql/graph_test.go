@@ -311,3 +311,61 @@ JOIN
 		})
 	}
 }
+
+func TestHasNeighbors(t *testing.T) {
+	tests := []struct {
+		name      string
+		step      *Step
+		selector  *Selector
+		wantQuery string
+	}{
+		{
+			name: "O2O/1type",
+			step: func() *Step {
+				// A nodes table; linked-list (next->prev). The "prev"
+				// node holds association pointer. The neighbors query
+				// here checks if a node "has-next".
+				step := &Step{}
+				step.From.V = 1
+				step.From.Table = "nodes"
+				step.From.Column = "id"
+				step.To.Table = "nodes"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Table = "nodes"
+				step.Edge.Columns = []string{"prev_id"}
+				return step
+			}(),
+			selector:  Select("*").From(Table("nodes")),
+			wantQuery: "SELECT * FROM `nodes` WHERE `nodes`.`id` IN (SELECT `nodes`.`prev_id` FROM `nodes` WHERE `nodes`.`prev_id` IS NOT NULL)",
+		},
+		{
+			name: "O2O/1type/inverse",
+			step: func() *Step {
+				// Same example as above, but the neighbors
+				// query checks if a node "has-previous".
+				step := &Step{}
+				step.From.V = 1
+				step.From.Table = "nodes"
+				step.From.Column = "id"
+				step.To.Table = "nodes"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Inverse = true
+				step.Edge.Table = "nodes"
+				step.Edge.Columns = []string{"prev_id"}
+				return step
+			}(),
+			selector:  Select("*").From(Table("nodes")),
+			wantQuery: "SELECT * FROM `nodes` WHERE `nodes`.`prev_id` IS NOT NULL",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			HasNeighbors(tt.selector, tt.step)
+			query, args := tt.selector.Query()
+			require.Equal(t, tt.wantQuery, query)
+			require.Empty(t, args)
+		})
+	}
+}
