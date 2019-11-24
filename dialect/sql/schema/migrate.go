@@ -109,7 +109,7 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 
 func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
-		t.setup()
+		m.setupTable(t)
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
 		case err != nil:
 			return err
@@ -154,7 +154,6 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 		}
 		fks := make([]*ForeignKey, 0, len(t.ForeignKeys))
 		for _, fk := range t.ForeignKeys {
-			fk.Symbol = m.symbol(fk.Symbol)
 			exist, err := m.fkExist(ctx, tx, fk.Symbol)
 			if err != nil {
 				return err
@@ -310,7 +309,9 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 
 	// drop indexes.
 	for _, idx1 := range curr.Indexes {
-		if _, ok := new.index(idx1.Name); !ok {
+		_, ok1 := new.fk(idx1.Name)
+		_, ok2 := new.index(idx1.Name)
+		if !ok1 && !ok2 {
 			change.index.drop.append(idx1)
 		}
 	}
@@ -368,6 +369,30 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 	}
 	// set the id offset for table.
 	return m.setRange(ctx, tx, t.Name, id<<32)
+}
+
+// setup ensures the table is configured properly, like table columns
+// are linked to their indexes, and PKs columns are defined.
+func (m *Migrate) setupTable(t *Table) {
+	if t.columns == nil {
+		t.columns = make(map[string]*Column, len(t.Columns))
+	}
+	for _, c := range t.Columns {
+		t.columns[c.Name] = c
+	}
+	for _, idx := range t.Indexes {
+		for _, c := range idx.Columns {
+			c.indexes.append(idx)
+		}
+	}
+	for _, pk := range t.PrimaryKey {
+		c := t.columns[pk.Name]
+		c.Key = PrimaryKey
+		pk.Key = PrimaryKey
+	}
+	for _, fk := range t.ForeignKeys {
+		fk.Symbol = m.symbol(fk.Symbol)
+	}
 }
 
 // symbol makes sure the symbol length is not longer than the maxlength in the dialect.
