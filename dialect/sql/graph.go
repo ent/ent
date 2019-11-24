@@ -148,9 +148,9 @@ func HasNeighbors(q *Selector, s *Step) {
 	builder := Dialect(q.dialect)
 	switch r := s.Edge.Rel; {
 	case r == M2M:
-		pk1 := s.Edge.Columns[1]
+		pk1 := s.Edge.Columns[0]
 		if s.Edge.Inverse {
-			pk1 = s.Edge.Columns[0]
+			pk1 = s.Edge.Columns[1]
 		}
 		from := q.Table()
 		join := builder.Table(s.Edge.Table)

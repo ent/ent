@@ -357,6 +357,72 @@ func TestHasNeighbors(t *testing.T) {
 			selector:  Select("*").From(Table("nodes")),
 			wantQuery: "SELECT * FROM `nodes` WHERE `nodes`.`prev_id` IS NOT NULL",
 		},
+		{
+			name: "O2M/2type2",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "pets"
+				step.To.Column = "id"
+				step.Edge.Rel = O2M
+				step.Edge.Table = "pets"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			selector:  Select("*").From(Table("users")),
+			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `pets`.`owner_id` FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL)",
+		},
+		{
+			name: "M2O/2type2",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "pets"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = M2O
+				step.Edge.Inverse = true
+				step.Edge.Table = "pets"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			selector:  Select("*").From(Table("pets")),
+			wantQuery: "SELECT * FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL",
+		},
+		{
+			name: "M2M/2types",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "groups"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Table = "user_groups"
+				step.Edge.Columns = []string{"user_id", "group_id"}
+				return step
+			}(),
+			selector:  Select("*").From(Table("users")),
+			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `user_groups`.`user_id` FROM `user_groups`)",
+		},
+		{
+			name: "M2M/2types/inverse",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "groups"
+				step.To.Column = "id"
+				step.Edge.Rel = M2M
+				step.Edge.Inverse = true
+				step.Edge.Table = "group_users"
+				step.Edge.Columns = []string{"group_id", "user_id"}
+				return step
+			}(),
+			selector:  Select("*").From(Table("users")),
+			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `group_users`.`user_id` FROM `group_users`)",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
