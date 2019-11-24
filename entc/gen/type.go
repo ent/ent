@@ -423,6 +423,9 @@ func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.Type
 // IsString returns true if the field is a string field.
 func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.TypeString }
 
+// IsUUID returns true if the field is a UUID field.
+func (f Field) IsUUID() bool { return f.Type != nil && f.Type.Type == field.TypeUUID }
+
 // IsInt returns true if the field is an int field.
 func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeInt }
 
@@ -526,6 +529,8 @@ func (f Field) ExampleCode() string {
 		}
 		parts := strings.Split(f.Type.Ident, ".")
 		return fmt.Sprintf("%s.%s%s", parts[0], pascal(f.Name), pascal(enums[0]))
+	case t == field.TypeUUID:
+		return fmt.Sprintf("%s{}", f.Type)
 	default:
 		return "nil"
 	}

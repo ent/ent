@@ -153,6 +153,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -171,8 +172,13 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
+		updater = builder.Update(card.Table)
 	)
+	idface := make([]interface{}, len(ids))
+	for i := range ids {
+		idface[i] = ids[i]
+	}
+	updater = updater.Where(sql.In(card.FieldID, idface...))
 	if value := cu.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
 	}
@@ -412,6 +418,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -435,8 +442,13 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
+		updater = builder.Update(card.Table)
 	)
+	idface := make([]interface{}, len(ids))
+	for i := range ids {
+		idface[i] = ids[i]
+	}
+	updater = updater.Where(sql.In(card.FieldID, idface...))
 	if value := cuo.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
 		c.UpdateTime = *value

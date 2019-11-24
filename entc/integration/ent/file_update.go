@@ -235,6 +235,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -253,8 +254,13 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
+		updater = builder.Update(file.Table)
 	)
+	idface := make([]interface{}, len(ids))
+	for i := range ids {
+		idface[i] = ids[i]
+	}
+	updater = updater.Where(sql.In(file.FieldID, idface...))
 	if value := fu.size; value != nil {
 		updater.Set(file.FieldSize, *value)
 	}
@@ -608,6 +614,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -631,8 +638,13 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(file.Table).Where(sql.InInts(file.FieldID, ids...))
+		updater = builder.Update(file.Table)
 	)
+	idface := make([]interface{}, len(ids))
+	for i := range ids {
+		idface[i] = ids[i]
+	}
+	updater = updater.Where(sql.In(file.FieldID, idface...))
 	if value := fuo.size; value != nil {
 		updater.Set(file.FieldSize, *value)
 		f.Size = *value

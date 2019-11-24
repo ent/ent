@@ -1,3 +1,7 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package ent
@@ -71,6 +75,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		insert.Set(user.FieldID, *value)
 		u.ID = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

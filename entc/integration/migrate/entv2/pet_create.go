@@ -42,6 +42,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	insert := builder.Insert(pet.Table).Default()
+
 	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

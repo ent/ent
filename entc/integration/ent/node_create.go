@@ -130,6 +130,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		insert.Set(node.FieldValue, *value)
 		n.Value = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(node.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

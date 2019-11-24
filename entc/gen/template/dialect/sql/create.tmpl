@@ -37,11 +37,22 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			{{ $.Receiver }}.{{ $f.StructField }} = {{ if not $f.Nillable }}*{{ end }}value
 		}
 	{{- end }}
-	id, err := insertLastID(ctx, tx, insert.Returning({{ $.Package }}.{{ $.ID.Constant }}))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	{{ $.Receiver }}.ID = {{ if and $.ID.IsString (not $.ID.UserDefined) }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
+	{{/* if it's a non-numeric id defined by the user (does not have default value). */}}
+	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+		query, args := insert.Query()
+		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+			return nil, rollback(tx, err)
+		}
+		{{- if $.Edges }}
+			id := {{ $.Receiver }}.ID
+		{{- end }}
+	{{- else }}
+		id, err := insertLastID(ctx, tx, insert.Returning({{ $.Package }}.{{ $.ID.Constant }}))
+		if err != nil {
+			return nil, rollback(tx, err)
+		}
+		{{ $.Receiver }}.ID = {{ if and $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
+	{{- end }}
 	{{- range $_, $e := $.Edges }}
 		if len({{ $receiver }}.{{ $e.BuilderField }}) > 0 {
 			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}
@@ -155,7 +166,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 {{ end }}
 
 {{ define "dialect/sql/create/convertid" }}
-	{{- if $.Type.ID.IsString }}
+	{{- $id := $.Type.ID }}
+	{{- if and (not $id.UserDefined) $id.IsString }}
 		eid, err := strconv.Atoi(eid)
 		if err != nil {
 			return nil, rollback(tx, err)

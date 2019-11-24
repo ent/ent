@@ -59,7 +59,7 @@ var (
 		{{ if $f.Default }}
 			{{- $default := $f.DefaultName -}}
 			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.Default.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+			{{ $default }} = {{ $desc }}.Default.({{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }})
 		{{ end -}}
 		{{ if $f.UpdateDefault }}
 			{{- $default := $f.UpdateDefaultName -}}

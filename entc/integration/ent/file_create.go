@@ -189,6 +189,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		insert.Set(file.FieldGroup, *value)
 		f.Group = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(file.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

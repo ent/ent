@@ -160,6 +160,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -178,8 +179,13 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
+		updater = builder.Update(groupinfo.Table)
 	)
+	idface := make([]interface{}, len(ids))
+	for i := range ids {
+		idface[i] = ids[i]
+	}
+	updater = updater.Where(sql.In(groupinfo.FieldID, idface...))
 	if value := giu.desc; value != nil {
 		updater.Set(groupinfo.FieldDesc, *value)
 	}
@@ -438,6 +444,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -461,8 +468,13 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(groupinfo.Table).Where(sql.InInts(groupinfo.FieldID, ids...))
+		updater = builder.Update(groupinfo.Table)
 	)
+	idface := make([]interface{}, len(ids))
+	for i := range ids {
+		idface[i] = ids[i]
+	}
+	updater = updater.Where(sql.In(groupinfo.FieldID, idface...))
 	if value := giuo.desc; value != nil {
 		updater.Set(groupinfo.FieldDesc, *value)
 		gi.Desc = *value

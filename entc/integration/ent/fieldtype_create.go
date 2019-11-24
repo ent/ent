@@ -364,6 +364,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		insert.Set(fieldtype.FieldState, *value)
 		ft.State = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(fieldtype.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

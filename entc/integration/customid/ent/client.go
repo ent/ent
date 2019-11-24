@@ -1,3 +1,7 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package ent
@@ -8,7 +12,9 @@ import (
 	"log"
 
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/migrate"
+	"github.com/google/uuid"
 
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 
@@ -21,6 +27,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Blob is the client for interacting with the Blob builders.
+	Blob *BlobClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// User is the client for interacting with the User builders.
@@ -34,6 +42,7 @@ func NewClient(opts ...Option) *Client {
 	return &Client{
 		config: c,
 		Schema: migrate.NewSchema(c.driver),
+		Blob:   NewBlobClient(c),
 		Group:  NewGroupClient(c),
 		User:   NewUserClient(c),
 	}
@@ -68,6 +77,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := config{driver: tx, log: c.log, debug: c.debug}
 	return &Tx{
 		config: cfg,
+		Blob:   NewBlobClient(cfg),
 		Group:  NewGroupClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -76,7 +86,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Group.
+//		Blob.
 //		Query().
 //		Count(ctx)
 //
@@ -88,6 +98,7 @@ func (c *Client) Debug() *Client {
 	return &Client{
 		config: cfg,
 		Schema: migrate.NewSchema(cfg.driver),
+		Blob:   NewBlobClient(cfg),
 		Group:  NewGroupClient(cfg),
 		User:   NewUserClient(cfg),
 	}
@@ -96,6 +107,70 @@ func (c *Client) Debug() *Client {
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
+}
+
+// BlobClient is a client for the Blob schema.
+type BlobClient struct {
+	config
+}
+
+// NewBlobClient returns a client for the Blob from the given config.
+func NewBlobClient(c config) *BlobClient {
+	return &BlobClient{config: c}
+}
+
+// Create returns a create builder for Blob.
+func (c *BlobClient) Create() *BlobCreate {
+	return &BlobCreate{config: c.config}
+}
+
+// Update returns an update builder for Blob.
+func (c *BlobClient) Update() *BlobUpdate {
+	return &BlobUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BlobClient) UpdateOne(b *Blob) *BlobUpdateOne {
+	return c.UpdateOneID(b.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BlobClient) UpdateOneID(id uuid.UUID) *BlobUpdateOne {
+	return &BlobUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for Blob.
+func (c *BlobClient) Delete() *BlobDelete {
+	return &BlobDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *BlobClient) DeleteOne(b *Blob) *BlobDeleteOne {
+	return c.DeleteOneID(b.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
+	return &BlobDeleteOne{c.Delete().Where(blob.ID(id))}
+}
+
+// Create returns a query builder for Blob.
+func (c *BlobClient) Query() *BlobQuery {
+	return &BlobQuery{config: c.config}
+}
+
+// Get returns a Blob entity by its id.
+func (c *BlobClient) Get(ctx context.Context, id uuid.UUID) (*Blob, error) {
+	return c.Query().Where(blob.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BlobClient) GetX(ctx context.Context, id uuid.UUID) *Blob {
+	b, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
 
 // GroupClient is a client for the Group schema.

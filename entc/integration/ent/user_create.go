@@ -421,6 +421,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		insert.Set(user.FieldPassword, *value)
 		u.Password = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

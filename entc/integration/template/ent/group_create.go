@@ -57,6 +57,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		insert.Set(group.FieldMaxUsers, *value)
 		gr.MaxUsers = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

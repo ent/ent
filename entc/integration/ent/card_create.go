@@ -174,6 +174,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		insert.Set(card.FieldName, *value)
 		c.Name = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(card.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

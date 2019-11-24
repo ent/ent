@@ -30,15 +30,22 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		return {{ $zero }}, err
 	}
 	defer rows.Close()
-	var ids []int
+	{{ $typ := "int" }}{{ if $.ID.UserDefined }}{{ $typ = $.ID.Type }}{{ end }}
+	var ids []{{ $typ }}
 	for rows.Next() {
-		var id int
+		var id {{ $typ }}
 		{{- if $one }}
 			{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
 			if err := {{ $.Receiver }}.FromRows(rows); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: failed scanning row into {{ $.Name }}: %v", err)
 			}
-			id = {{ if $.ID.IsString }}{{ $.Receiver }}.id(){{ else if not $.ID.IsInt }}int({{ $.Receiver }}.ID){{ else }}{{ $.Receiver }}.ID{{ end }}
+			{{-  if and $.ID.IsString (not $.ID.UserDefined) }}
+				id = {{ $.Receiver }}.id()
+			{{- else if or $.ID.IsUUID $.ID.IsInt }}
+				id = {{ $.Receiver }}.ID
+			{{- else }}
+				id = int({{ $.Receiver }}.ID)
+			{{- end }}
 		{{- else }}
 			if err := rows.Scan(&id); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: failed reading id: %v", err)
@@ -66,8 +73,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- if $.Fields }}
 		var (
 			res sql.Result
-			updater = builder.Update({{ $.Package }}.Table).Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
+			updater = builder.Update({{ $.Package }}.Table)
 		)
+		{{- if $.ID.IsInt }}
+			updater = updater.Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
+		{{- else }}
+			idface := make([]interface{}, len(ids))
+			for i := range ids {
+				idface[i] = ids[i]
+			}
+			updater = updater.Where(sql.In({{ $.Package }}.{{ $.ID.Constant }}, idface...))
+		{{- end }}
 		{{- range $_, $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
@@ -308,13 +324,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 {{ end }}
 
 {{ define "dialect/sql/update/convertid" }}
-	{{- if $.Type.ID.IsString }}
-		eid, serr := strconv.Atoi(eid)
-		if serr != nil {
-			err = rollback(tx, serr)
-			return {{/* return is not knwon at this point. */}}
-		}
-	{{- else if not $.Type.ID.IsInt }}
-		eid := int(eid)
+	{{- $id := $.Type.ID }}
+	{{- if not $id.UserDefined }}
+		{{- if $id.IsString }}
+			eid, serr := strconv.Atoi(eid)
+			if serr != nil {
+				err = rollback(tx, serr)
+				return {{/* return is not knwon at this point. */}}
+			}
+		{{- else if not $id.IsInt}}
+			eid := int(eid)
+		{{- end }}
 	{{- end }}
 {{ end }}

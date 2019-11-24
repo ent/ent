@@ -1,3 +1,7 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package predicate
@@ -5,6 +9,9 @@ package predicate
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
 )
+
+// Blob is the predicate function for blob builders.
+type Blob func(*sql.Selector)
 
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
