@@ -82,27 +82,6 @@ func (t *Table) AddIndex(name string, unique bool, columns []string) *Table {
 	return t
 }
 
-// setup ensures the table is configured properly, like table columns
-// are linked to their indexes, and PKs columns are defined.
-func (t *Table) setup() {
-	if t.columns == nil {
-		t.columns = make(map[string]*Column, len(t.Columns))
-	}
-	for _, c := range t.Columns {
-		t.columns[c.Name] = c
-	}
-	for _, idx := range t.Indexes {
-		for _, c := range idx.Columns {
-			c.indexes.append(idx)
-		}
-	}
-	for _, pk := range t.PrimaryKey {
-		c := t.columns[pk.Name]
-		c.Key = PrimaryKey
-		pk.Key = PrimaryKey
-	}
-}
-
 // column returns a table column by its name.
 // faster than map lookup for most cases.
 func (t *Table) column(name string) (*Column, bool) {
@@ -131,6 +110,17 @@ func (t *Table) index(name string) (*Index, bool) {
 	// table creation) and it didn't load on table scanning.
 	if c, ok := t.column(name); ok && c.Unique {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
+	}
+	return nil, false
+}
+
+// fk returns a table foreign-key by its symbol.
+// faster than map lookup for most cases.
+func (t *Table) fk(symbol string) (*ForeignKey, bool) {
+	for _, fk := range t.ForeignKeys {
+		if fk.Symbol == symbol {
+			return fk, true
+		}
 	}
 	return nil, false
 }
