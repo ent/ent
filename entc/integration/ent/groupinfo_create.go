@@ -118,6 +118,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		insert.Set(groupinfo.FieldMaxUsers, *value)
 		gi.MaxUsers = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(groupinfo.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

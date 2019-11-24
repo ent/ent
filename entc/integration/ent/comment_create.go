@@ -104,6 +104,7 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		insert.Set(comment.FieldNillableInt, *value)
 		c.NillableInt = value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(comment.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

@@ -95,6 +95,7 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		insert.Set(filetype.FieldName, *value)
 		ft.Name = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(filetype.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

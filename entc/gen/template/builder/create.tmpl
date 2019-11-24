@@ -38,7 +38,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		{{- if or $f.Default (not $f.Optional) -}}
 			if {{ $receiver }}.{{ $f.BuilderField }} == nil {
 				{{ if $f.Default -}}
-					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if $f.IsTime }}(){{ end }}
+					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
 					{{ $receiver }}.{{ $f.BuilderField }} = &v
 				{{ else -}}
 					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")

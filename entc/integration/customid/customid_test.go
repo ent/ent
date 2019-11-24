@@ -10,6 +10,8 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/customid/ent"
 
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -31,4 +33,7 @@ func TestCustomID(t *testing.T) {
 	hub := client.Group.Create().SetID(3).AddUsers(a8m, nat).SaveX(ctx)
 	require.Equal(t, 3, hub.ID)
 	require.Equal(t, []int{1, 5}, hub.QueryUsers().IDsX(ctx))
+
+	b := client.Blob.Create().SetID(uuid.New()).SaveX(ctx)
+	require.NotEmpty(t, b.ID)
 }

@@ -1,3 +1,7 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package ent
@@ -53,20 +57,17 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-
-	builder := sql.Dialect(gq.driver.Dialect())
-	t1 := builder.Table(user.Table)
-	t2 := gq.sqlQuery()
-	t2.Select(t2.C(group.FieldID))
-	t3 := builder.Table(group.UsersTable)
-	t4 := builder.Select(t3.C(group.UsersPrimaryKey[1])).
-		From(t3).
-		Join(t2).
-		On(t3.C(group.UsersPrimaryKey[0]), t2.C(group.FieldID))
-	query.sql = builder.Select().
-		From(t1).
-		Join(t4).
-		On(t1.C(user.FieldID), t4.C(group.UsersPrimaryKey[1]))
+	step := &sql.Step{}
+	step.From.V = gq.sqlQuery()
+	step.From.Table = group.Table
+	step.From.Column = group.FieldID
+	step.To.Table = user.Table
+	step.To.Column = user.FieldID
+	step.Edge.Rel = sql.M2M
+	step.Edge.Inverse = false
+	step.Edge.Table = group.UsersTable
+	step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 

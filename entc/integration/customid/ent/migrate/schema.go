@@ -1,13 +1,31 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package migrate
 
 import (
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
+
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
 var (
+	// BlobsColumns holds the columns for the "blobs" table.
+	BlobsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "uuid", Type: field.TypeUUID, Default: blob.DefaultUUID},
+	}
+	// BlobsTable holds the schema information for the "blobs" table.
+	BlobsTable = &schema.Table{
+		Name:        "blobs",
+		Columns:     BlobsColumns,
+		PrimaryKey:  []*schema.Column{BlobsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -59,6 +77,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BlobsTable,
 		GroupsTable,
 		UsersTable,
 		GroupUsersTable,

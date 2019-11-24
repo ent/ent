@@ -87,6 +87,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -105,8 +106,9 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
+		updater = builder.Update(group.Table)
 	)
+	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := gu.max_users; value != nil {
 		updater.Set(group.FieldMaxUsers, *value)
 	}
@@ -189,6 +191,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -212,8 +215,9 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(group.Table).Where(sql.InInts(group.FieldID, ids...))
+		updater = builder.Update(group.Table)
 	)
+	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := guo.max_users; value != nil {
 		updater.Set(group.FieldMaxUsers, *value)
 		gr.MaxUsers = *value

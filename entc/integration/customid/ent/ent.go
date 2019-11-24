@@ -1,3 +1,7 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package ent
@@ -9,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Order applies an ordering on either graph traversal or sql selector.
@@ -226,8 +231,8 @@ func insertLastID(ctx context.Context, tx dialect.Tx, insert *sql.InsertBuilder)
 }
 
 // keys returns the keys/ids from the edge map.
-func keys(m map[int]struct{}) []int {
-	s := make([]int, 0, len(m))
+func keys(m map[uuid.UUID]struct{}) []uuid.UUID {
+	s := make([]uuid.UUID, 0, len(m))
 	for id := range m {
 		s = append(s, id)
 	}

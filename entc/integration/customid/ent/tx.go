@@ -1,3 +1,7 @@
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 // Code generated (@generated) by entc, DO NOT EDIT.
 
 package ent
@@ -12,6 +16,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Blob is the client for interacting with the Blob builders.
+	Blob *BlobClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// User is the client for interacting with the User builders.
@@ -33,6 +39,7 @@ func (tx *Tx) Client() *Client {
 	return &Client{
 		config: tx.config,
 		Schema: migrate.NewSchema(tx.driver),
+		Blob:   NewBlobClient(tx.config),
 		Group:  NewGroupClient(tx.config),
 		User:   NewUserClient(tx.config),
 	}
@@ -45,7 +52,7 @@ func (tx *Tx) Client() *Client {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Group.QueryXXX(), the query will be executed
+// applies a query, for example: Blob.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

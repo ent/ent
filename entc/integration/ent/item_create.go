@@ -55,6 +55,7 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 		return nil, err
 	}
 	insert := builder.Insert(item.Table).Default()
+
 	id, err := insertLastID(ctx, tx, insert.Returning(item.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
