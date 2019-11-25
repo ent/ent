@@ -539,7 +539,7 @@ func (i *InsertBuilder) Default() *InsertBuilder {
 
 // Returning adds the `RETURNING` clause to the insert statement. PostgreSQL only.
 func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
-	i.returning = append(i.returning, columns...)
+	i.returning = columns
 	return i
 }
 
