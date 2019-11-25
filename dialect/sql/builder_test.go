@@ -201,6 +201,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{1},
 		},
 		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1).Returning("id").Returning("name"),
+			wantQuery: `INSERT INTO "users" ("age") VALUES ($1) RETURNING "name"`,
+			wantArgs:  []interface{}{1},
+		},
+		{
 			input:     Insert("users").Columns("name", "age").Values("a8m", 10),
 			wantQuery: "INSERT INTO `users` (`name`, `age`) VALUES (?, ?)",
 			wantArgs:  []interface{}{"a8m", 10},
