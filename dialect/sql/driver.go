@@ -51,7 +51,12 @@ func (d Driver) Dialect() string {
 
 // Tx starts and returns a transaction.
 func (d *Driver) Tx(ctx context.Context) (dialect.Tx, error) {
-	tx, err := d.ExecQuerier.(*sql.DB).BeginTx(ctx, &sql.TxOptions{})
+	return d.BeginTx(ctx, &sql.TxOptions{})
+}
+
+// BeginTx starts a transaction with options.
+func (d *Driver) BeginTx(ctx context.Context, opts *sql.TxOptions) (dialect.Tx, error) {
+	tx, err := d.ExecQuerier.(*sql.DB).BeginTx(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
