@@ -55,7 +55,7 @@ func (d *Driver) Tx(ctx context.Context) (dialect.Tx, error) {
 }
 
 // BeginTx starts a transaction with options.
-func (d *Driver) BeginTx(ctx context.Context, opts *sql.TxOptions) (dialect.Tx, error) {
+func (d *Driver) BeginTx(ctx context.Context, opts *TxOptions) (dialect.Tx, error) {
 	tx, err := d.ExecQuerier.(*sql.DB).BeginTx(ctx, opts)
 	if err != nil {
 		return nil, err
@@ -139,4 +139,6 @@ type (
 	NullString = sql.NullString
 	// NullFloat64 is an alias to sql.NullFloat64.
 	NullFloat64 = sql.NullFloat64
+	// TxOptions holds the transaction options to be used in DB.BeginTx.
+	TxOptions = sql.TxOptions
 )
