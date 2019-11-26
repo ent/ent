@@ -84,6 +84,7 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		insert.Set(street.FieldName, *value)
 		s.Name = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(street.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

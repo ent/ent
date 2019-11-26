@@ -152,6 +152,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -170,8 +171,9 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
+		updater = builder.Update(pet.Table)
 	)
+	updater = updater.Where(sql.InInts(pet.FieldID, ids...))
 	if value := pu.name; value != nil {
 		updater.Set(pet.FieldName, *value)
 	}
@@ -371,6 +373,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -394,8 +397,9 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(pet.Table).Where(sql.InInts(pet.FieldID, ids...))
+		updater = builder.Update(pet.Table)
 	)
+	updater = updater.Where(sql.InInts(pet.FieldID, ids...))
 	if value := puo.name; value != nil {
 		updater.Set(pet.FieldName, *value)
 		pe.Name = *value

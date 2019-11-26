@@ -105,6 +105,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		insert.Set(group.FieldName, *value)
 		gr.Name = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

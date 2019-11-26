@@ -192,6 +192,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -210,8 +211,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table)
 	)
+	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uu.age; value != nil {
 		updater.Set(user.FieldAge, *value)
 	}
@@ -467,6 +469,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -490,8 +493,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(user.Table).Where(sql.InInts(user.FieldID, ids...))
+		updater = builder.Update(user.Table)
 	)
+	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uuo.age; value != nil {
 		updater.Set(user.FieldAge, *value)
 		u.Age = *value

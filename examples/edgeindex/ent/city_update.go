@@ -118,6 +118,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -136,8 +137,9 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(city.Table).Where(sql.InInts(city.FieldID, ids...))
+		updater = builder.Update(city.Table)
 	)
+	updater = updater.Where(sql.InInts(city.FieldID, ids...))
 	if value := cu.name; value != nil {
 		updater.Set(city.FieldName, *value)
 	}
@@ -283,6 +285,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -306,8 +309,9 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(city.Table).Where(sql.InInts(city.FieldID, ids...))
+		updater = builder.Update(city.Table)
 	)
+	updater = updater.Where(sql.InInts(city.FieldID, ids...))
 	if value := cuo.name; value != nil {
 		updater.Set(city.FieldName, *value)
 		c.Name = *value

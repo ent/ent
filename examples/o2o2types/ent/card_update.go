@@ -113,6 +113,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -131,8 +132,9 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
+		updater = builder.Update(card.Table)
 	)
+	updater = updater.Where(sql.InInts(card.FieldID, ids...))
 	if value := cu.expired; value != nil {
 		updater.Set(card.FieldExpired, *value)
 	}
@@ -266,6 +268,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -289,8 +292,9 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(card.Table).Where(sql.InInts(card.FieldID, ids...))
+		updater = builder.Update(card.Table)
 	)
+	updater = updater.Where(sql.InInts(card.FieldID, ids...))
 	if value := cuo.expired; value != nil {
 		updater.Set(card.FieldExpired, *value)
 		c.Expired = *value
