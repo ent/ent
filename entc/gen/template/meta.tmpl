@@ -127,4 +127,9 @@ var (
 	{{ end }}
 {{ end }}
 
+{{ template "meta/additional" $ }}
+
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional code for the type package. */}}
+{{ define "meta/additional" }}{{ end }}
