@@ -20,178 +20,103 @@ func TestNeighbors(t *testing.T) {
 	}{
 		{
 			name: "O2O/1type",
-			input: func() *Step {
-				step := &Step{}
-				// Since the relation is on the same table,
-				// V used as a reference value.
-				step.From.V = 1
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "users"
-				step.Edge.Columns = []string{"spouse_id"}
-				return step
-			}(),
+			// Since the relation is on the same table,
+			// V used as a reference value.
+			input: NewStep(
+				From("users", "id", 1),
+				To("users", "id"),
+				Edge(O2O, false, "users", "spouse_id"),
+			),
 			wantQuery: "SELECT * FROM `users` WHERE `spouse_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "O2O/1type/inverse",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 1
-				step.From.Table = "nodes"
-				step.From.Column = "id"
-				step.To.Table = "nodes"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "nodes"
-				step.Edge.Inverse = true
-				step.Edge.Columns = []string{"prev_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("nodes", "id", 1),
+				To("nodes", "id"),
+				Edge(O2O, true, "nodes", "prev_id"),
+			),
 			wantQuery: "SELECT * FROM `nodes` JOIN (SELECT `prev_id` FROM `nodes` WHERE `id` = ?) AS `t1` ON `nodes`.`id` = `t1`.`prev_id`",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "O2M/1type",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 1
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = O2M
-				step.Edge.Table = "users"
-				step.Edge.Columns = []string{"parent_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", 1),
+				To("users", "id"),
+				Edge(O2M, false, "users", "parent_id"),
+			),
 			wantQuery: "SELECT * FROM `users` WHERE `parent_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "O2O/2types",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 2
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "card"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "cards"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", 2),
+				To("card", "id"),
+				Edge(O2O, false, "cards", "owner_id"),
+			),
 			wantQuery: "SELECT * FROM `card` WHERE `owner_id` = ?",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "O2O/2types/inverse",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 2
-				step.From.Table = "card"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "cards"
-				step.Edge.Inverse = true
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("cards", "id", 2),
+				To("users", "id"),
+				Edge(O2O, true, "cards", "owner_id"),
+			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `owner_id` FROM `cards` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`owner_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "O2M/2types",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 1
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "pets"
-				step.To.Column = "id"
-				step.Edge.Rel = O2M
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", 1),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
 			wantQuery: "SELECT * FROM `pets` WHERE `owner_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "M2O/2types/inverse",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 2
-				step.From.Table = "pets"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2O
-				step.Edge.Inverse = true
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("pets", "id", 2),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `owner_id` FROM `pets` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`owner_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "M2O/1type/inverse",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 2
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2O
-				step.Edge.Inverse = true
-				step.Edge.Table = "users"
-				step.Edge.Columns = []string{"parent_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", 2),
+				To("users", "id"),
+				Edge(M2O, true, "users", "parent_id"),
+			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `parent_id` FROM `users` WHERE `id` = ?) AS `t1` ON `users`.`id` = `t1`.`parent_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "M2M/2type",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 2
-				step.From.Table = "groups"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Table = "user_groups"
-				step.Edge.Columns = []string{"group_id", "user_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("groups", "id", 2),
+				To("users", "id"),
+				Edge(M2M, false, "user_groups", "group_id", "user_id"),
+			),
 			wantQuery: "SELECT * FROM `users` JOIN (SELECT `user_groups`.`user_id` FROM `user_groups` WHERE `user_groups`.`group_id` = ?) AS `t1` ON `users`.`id` = `t1`.`user_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "M2M/2type/inverse",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = 2
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "groups"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Inverse = true
-				step.Edge.Table = "user_groups"
-				step.Edge.Columns = []string{"group_id", "user_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", 2),
+				To("groups", "id"),
+				Edge(M2M, true, "user_groups", "group_id", "user_id"),
+			),
 			wantQuery: "SELECT * FROM `groups` JOIN (SELECT `user_groups`.`group_id` FROM `user_groups` WHERE `user_groups`.`user_id` = ?) AS `t1` ON `groups`.`id` = `t1`.`group_id`",
 			wantArgs:  []interface{}{2},
 		},
@@ -215,52 +140,31 @@ func TestSetNeighbors(t *testing.T) {
 	}{
 		{
 			name: "O2M/2types",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = Select().From(Table("users")).Where(EQ("name", "a8m"))
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "pets"
-				step.To.Column = "id"
-				step.Edge.Rel = O2M
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", Select().From(Table("users")).Where(EQ("name", "a8m"))),
+				To("pets", "id"),
+				Edge(O2M, false, "users", "owner_id"),
+			),
 			wantQuery: `SELECT * FROM "pets" JOIN (SELECT "users"."id" FROM "users" WHERE "name" = $1) AS "t1" ON "pets"."owner_id" = "t1"."id"`,
 			wantArgs:  []interface{}{"a8m"},
 		},
 		{
 			name: "M2O/2types",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = Select().From(Table("pets")).Where(EQ("name", "pedro"))
-				step.From.Table = "pets"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2O
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("pets", "id", Select().From(Table("pets")).Where(EQ("name", "pedro"))),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
 			wantQuery: `SELECT * FROM "users" JOIN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $1) AS "t1" ON "users"."id" = "t1"."owner_id"`,
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
 			name: "M2M/2types",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = Select().From(Table("users")).Where(EQ("name", "a8m"))
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "groups"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Table = "user_groups"
-				step.Edge.Columns = []string{"user_id", "group_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("users", "id", Select().From(Table("users")).Where(EQ("name", "a8m"))),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
 			wantQuery: `
 SELECT *
 FROM "groups"
@@ -275,19 +179,11 @@ JOIN
 		},
 		{
 			name: "M2M/2types/inverse",
-			input: func() *Step {
-				step := &Step{}
-				step.From.V = Select().From(Table("groups")).Where(EQ("name", "GitHub"))
-				step.From.Table = "groups"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Inverse = true
-				step.Edge.Table = "user_groups"
-				step.Edge.Columns = []string{"user_id", "group_id"}
-				return step
-			}(),
+			input: NewStep(
+				From("groups", "id", Select().From(Table("groups")).Where(EQ("name", "GitHub"))),
+				To("users", "id"),
+				Edge(M2M, true, "user_groups", "user_id", "group_id"),
+			),
 			wantQuery: `
 SELECT *
 FROM "users"
@@ -321,105 +217,66 @@ func TestHasNeighbors(t *testing.T) {
 	}{
 		{
 			name: "O2O/1type",
-			step: func() *Step {
-				// A nodes table; linked-list (next->prev). The "prev"
-				// node holds association pointer. The neighbors query
-				// here checks if a node "has-next".
-				step := &Step{}
-				step.From.Table = "nodes"
-				step.From.Column = "id"
-				step.To.Table = "nodes"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "nodes"
-				step.Edge.Columns = []string{"prev_id"}
-				return step
-			}(),
+			// A nodes table; linked-list (next->prev). The "prev"
+			// node holds association pointer. The neighbors query
+			// here checks if a node "has-next".
+			step: NewStep(
+				From("nodes", "id"),
+				To("nodes", "id"),
+				Edge(O2O, false, "nodes", "prev_id"),
+			),
 			selector:  Select("*").From(Table("nodes")),
 			wantQuery: "SELECT * FROM `nodes` WHERE `nodes`.`id` IN (SELECT `nodes`.`prev_id` FROM `nodes` WHERE `nodes`.`prev_id` IS NOT NULL)",
 		},
 		{
 			name: "O2O/1type/inverse",
-			step: func() *Step {
-				// Same example as above, but the neighbors
-				// query checks if a node "has-previous".
-				step := &Step{}
-				step.From.Table = "nodes"
-				step.From.Column = "id"
-				step.To.Table = "nodes"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Inverse = true
-				step.Edge.Table = "nodes"
-				step.Edge.Columns = []string{"prev_id"}
-				return step
-			}(),
+			// Same example as above, but the neighbors
+			// query checks if a node "has-previous".
+			step: NewStep(
+				From("nodes", "id"),
+				To("nodes", "id"),
+				Edge(O2O, true, "nodes", "prev_id"),
+			),
 			selector:  Select("*").From(Table("nodes")),
 			wantQuery: "SELECT * FROM `nodes` WHERE `nodes`.`prev_id` IS NOT NULL",
 		},
 		{
 			name: "O2M/2type2",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "pets"
-				step.To.Column = "id"
-				step.Edge.Rel = O2M
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
 			selector:  Select("*").From(Table("users")),
 			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `pets`.`owner_id` FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL)",
 		},
 		{
 			name: "M2O/2type2",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "pets"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2O
-				step.Edge.Inverse = true
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
 			selector:  Select("*").From(Table("pets")),
 			wantQuery: "SELECT * FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL",
 		},
 		{
 			name: "M2M/2types",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "groups"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Table = "user_groups"
-				step.Edge.Columns = []string{"user_id", "group_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
 			selector:  Select("*").From(Table("users")),
 			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `user_groups`.`user_id` FROM `user_groups`)",
 		},
 		{
 			name: "M2M/2types/inverse",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "groups"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Inverse = true
-				step.Edge.Table = "group_users"
-				step.Edge.Columns = []string{"group_id", "user_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, true, "group_users", "group_id", "user_id"),
+			),
 			selector:  Select("*").From(Table("users")),
 			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `group_users`.`user_id` FROM `group_users`)",
 		},
@@ -445,17 +302,11 @@ func TestHasNeighborsWith(t *testing.T) {
 	}{
 		{
 			name: "O2O",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "cards"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "cards"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("users", "id"),
+				To("cards", "id"),
+				Edge(O2O, false, "cards", "owner_id"),
+			),
 			selector: Dialect("postgres").Select("*").From(Table("users")),
 			predicate: func(s *Selector) {
 				s.Where(EQ("expired", false))
@@ -465,18 +316,11 @@ func TestHasNeighborsWith(t *testing.T) {
 		},
 		{
 			name: "O2O/inverse",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "cards"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = O2O
-				step.Edge.Table = "cards"
-				step.Edge.Inverse = true
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("cards", "id"),
+				To("users", "id"),
+				Edge(O2O, true, "cards", "owner_id"),
+			),
 			selector: Dialect("postgres").Select("*").From(Table("cards")),
 			predicate: func(s *Selector) {
 				s.Where(EQ("name", "a8m"))
@@ -486,17 +330,11 @@ func TestHasNeighborsWith(t *testing.T) {
 		},
 		{
 			name: "O2M",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "pets"
-				step.To.Column = "id"
-				step.Edge.Rel = O2M
-				step.Edge.Table = "pets"
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
 			selector: Dialect("postgres").Select("*").
 				From(Table("users")).
 				Where(EQ("last_name", "mashraki")),
@@ -508,18 +346,11 @@ func TestHasNeighborsWith(t *testing.T) {
 		},
 		{
 			name: "M2O",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "pets"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2O
-				step.Edge.Table = "pets"
-				step.Edge.Inverse = true
-				step.Edge.Columns = []string{"owner_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
 			selector: Dialect("postgres").Select("*").
 				From(Table("pets")).
 				Where(EQ("name", "pedro")),
@@ -531,17 +362,11 @@ func TestHasNeighborsWith(t *testing.T) {
 		},
 		{
 			name: "M2M",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "users"
-				step.From.Column = "id"
-				step.To.Table = "groups"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Table = "user_groups"
-				step.Edge.Columns = []string{"user_id", "group_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
 			selector: Dialect("postgres").Select("*").From(Table("users")),
 			predicate: func(s *Selector) {
 				s.Where(EQ("name", "GitHub"))
@@ -557,18 +382,11 @@ WHERE "users"."id" IN
 		},
 		{
 			name: "M2M/inverse",
-			step: func() *Step {
-				step := &Step{}
-				step.From.Table = "groups"
-				step.From.Column = "id"
-				step.To.Table = "users"
-				step.To.Column = "id"
-				step.Edge.Rel = M2M
-				step.Edge.Table = "user_groups"
-				step.Edge.Inverse = true
-				step.Edge.Columns = []string{"user_id", "group_id"}
-				return step
-			}(),
+			step: NewStep(
+				From("groups", "id"),
+				To("users", "id"),
+				Edge(M2M, true, "user_groups", "user_id", "group_id"),
+			),
 			selector: Dialect("postgres").Select("*").From(Table("groups")),
 			predicate: func(s *Selector) {
 				s.Where(EQ("name", "a8m"))

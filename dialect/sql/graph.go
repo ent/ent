@@ -67,6 +67,54 @@ type Step struct {
 	}
 }
 
+// StepOption allows configuring Steps using functional options.
+type StepOption func(*Step)
+
+// From sets the source of the step.
+func From(table, column string, v ...interface{}) StepOption {
+	return func(s *Step) {
+		s.From.Table = table
+		s.From.Column = column
+		if len(v) > 0 {
+			s.From.V = v[0]
+		}
+	}
+}
+
+// To sets the destination of the step.
+func To(table, column string) StepOption {
+	return func(s *Step) {
+		s.To.Table = table
+		s.To.Column = column
+	}
+}
+
+// Edge sets the edge info for getting the neighbors.
+func Edge(rel Rel, inverse bool, table string, columns ...string) StepOption {
+	return func(s *Step) {
+		s.Edge.Rel = rel
+		s.Edge.Table = table
+		s.Edge.Columns = columns
+		s.Edge.Inverse = inverse
+	}
+}
+
+// NewStep gets list of options and returns a configured step.
+//
+//	NewStep(
+//		From("table", "pk", V),
+//		To("table", "pk"),
+//		Edge("name", O2M, "fk"),
+//	)
+//
+func NewStep(opts ...StepOption) *Step {
+	s := &Step{}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
+
 // Neighbors returns a Selector for evaluating the path-step
 // and getting the neighbors of one vertex.
 func Neighbors(dialect string, s *Step) (q *Selector) {
