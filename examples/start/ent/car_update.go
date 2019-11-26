@@ -118,6 +118,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -136,8 +137,9 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(car.Table).Where(sql.InInts(car.FieldID, ids...))
+		updater = builder.Update(car.Table)
 	)
+	updater = updater.Where(sql.InInts(car.FieldID, ids...))
 	if value := cu.model; value != nil {
 		updater.Set(car.FieldModel, *value)
 	}
@@ -268,6 +270,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -291,8 +294,9 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(car.Table).Where(sql.InInts(car.FieldID, ids...))
+		updater = builder.Update(car.Table)
 	)
+	updater = updater.Where(sql.InInts(car.FieldID, ids...))
 	if value := cuo.model; value != nil {
 		updater.Set(car.FieldModel, *value)
 		c.Model = *value

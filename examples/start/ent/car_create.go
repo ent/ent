@@ -99,6 +99,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		insert.Set(car.FieldRegisteredAt, *value)
 		c.RegisteredAt = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(car.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)
