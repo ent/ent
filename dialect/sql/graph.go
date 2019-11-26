@@ -202,7 +202,7 @@ func HasNeighborsWith(q *Selector, s *Step, pred func(*Selector)) {
 		matches := builder.Select(to.C(s.To.Column)).
 			From(to)
 		pred(matches)
-		q.Where(In(from.C(s.From.Column), matches))
+		q.Where(In(from.C(s.Edge.Columns[0]), matches))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		from := q.Table()
 		to := builder.Table(s.Edge.Table)
