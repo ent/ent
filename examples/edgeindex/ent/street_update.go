@@ -110,6 +110,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -128,8 +129,9 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
+		updater = builder.Update(street.Table)
 	)
+	updater = updater.Where(sql.InInts(street.FieldID, ids...))
 	if value := su.name; value != nil {
 		updater.Set(street.FieldName, *value)
 	}
@@ -250,6 +252,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -273,8 +276,9 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(street.Table).Where(sql.InInts(street.FieldID, ids...))
+		updater = builder.Update(street.Table)
 	)
+	updater = updater.Where(sql.InInts(street.FieldID, ids...))
 	if value := suo.name; value != nil {
 		updater.Set(street.FieldName, *value)
 		s.Name = *value

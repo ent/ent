@@ -17,6 +17,7 @@ in the LICENSE file in the root directory of this source tree.
 type {{ $builder }} struct {
 	config
 	predicates []predicate.{{ $.Name }}
+	{{ template "delete/fields/additional" $ }}
 }
 
 
@@ -85,3 +86,6 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 }
 
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional fields to the delete builder.*/}}
+{{ define "delete/fields/additional" }}{{end}}

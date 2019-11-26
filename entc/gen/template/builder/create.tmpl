@@ -26,6 +26,7 @@ type {{ $builder }} struct {
 	{{- range $_, $e := $.Edges }}
 		{{- $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 	{{ end -}}
+	{{ template "create/fields/additional" $ }}
 }
 
 {{ with extend $ "Builder" $builder }}
@@ -98,3 +99,6 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} 
 {{ end }}
 
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional fields to the create builder.*/}}
+{{ define "create/fields/additional" }}{{end}}

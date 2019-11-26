@@ -26,6 +26,7 @@ type {{ $builder }} struct {
 	{{- range $_, $storage := $.Storage }}
 		{{ $storage }} {{ $storage.Builder}}
 	{{- end }}
+	{{ template "query/fields/additional" $ }}
 }
 
 // Where adds a new predicate for the builder.
@@ -504,3 +505,6 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 
 
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional fields to the query builder.*/}}
+{{ define "query/fields/additional" }}{{end}}

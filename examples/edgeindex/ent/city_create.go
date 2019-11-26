@@ -81,6 +81,7 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		insert.Set(city.FieldName, *value)
 		c.Name = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(city.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

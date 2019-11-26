@@ -163,6 +163,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -181,8 +182,9 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
+		updater = builder.Update(node.Table)
 	)
+	updater = updater.Where(sql.InInts(node.FieldID, ids...))
 	if value := nu.value; value != nil {
 		updater.Set(node.FieldValue, *value)
 	}
@@ -396,6 +398,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var ids []int
 	for rows.Next() {
 		var id int
@@ -419,8 +422,9 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	var (
 		res     sql.Result
-		updater = builder.Update(node.Table).Where(sql.InInts(node.FieldID, ids...))
+		updater = builder.Update(node.Table)
 	)
+	updater = updater.Where(sql.InInts(node.FieldID, ids...))
 	if value := nuo.value; value != nil {
 		updater.Set(node.FieldValue, *value)
 		n.Value = *value

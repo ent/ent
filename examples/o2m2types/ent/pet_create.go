@@ -84,6 +84,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		insert.Set(pet.FieldName, *value)
 		pe.Name = *value
 	}
+
 	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
 	if err != nil {
 		return nil, rollback(tx, err)

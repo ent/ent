@@ -19,6 +19,7 @@ type {{ $builder }} struct {
 	config
 	{{- template "update/fields" $ -}}
 	predicates []predicate.{{ $.Name }}
+	{{ template "update/fields/additional" $ }}
 }
 
 // Where adds a new predicate for the builder.
@@ -91,6 +92,7 @@ type {{ $onebuilder }} struct {
 	config
 	id {{ $.ID.Type }}
 	{{- template "update/fields" $ }}
+	{{ template "update/fields/additional" $ }}
 }
 
 {{ with extend $ "Builder" $onebuilder }}
@@ -249,3 +251,6 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{ end -}}
 {{ end -}}
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional fields to the update builder.*/}}
+{{ define "update/fields/additional" }}{{end}}
