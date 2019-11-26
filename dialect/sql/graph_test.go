@@ -444,6 +444,92 @@ func TestHasNeighborsWith(t *testing.T) {
 		wantArgs  []interface{}
 	}{
 		{
+			name: "O2O",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "cards"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Table = "cards"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			selector: Dialect("postgres").Select("*").From(Table("users")),
+			predicate: func(s *Selector) {
+				s.Where(EQ("expired", false))
+			},
+			wantQuery: `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "cards"."owner_id" FROM "cards" WHERE "expired" = $1)`,
+			wantArgs:  []interface{}{false},
+		},
+		{
+			name: "O2O/inverse",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "cards"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = O2O
+				step.Edge.Table = "cards"
+				step.Edge.Inverse = true
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			selector: Dialect("postgres").Select("*").From(Table("cards")),
+			predicate: func(s *Selector) {
+				s.Where(EQ("name", "a8m"))
+			},
+			wantQuery: `SELECT * FROM "cards" WHERE "cards"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "name" = $1)`,
+			wantArgs:  []interface{}{"a8m"},
+		},
+		{
+			name: "O2M",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "users"
+				step.From.Column = "id"
+				step.To.Table = "pets"
+				step.To.Column = "id"
+				step.Edge.Rel = O2M
+				step.Edge.Table = "pets"
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			selector: Dialect("postgres").Select("*").
+				From(Table("users")).
+				Where(EQ("last_name", "mashraki")),
+			predicate: func(s *Selector) {
+				s.Where(EQ("name", "pedro"))
+			},
+			wantQuery: `SELECT * FROM "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
+			wantArgs:  []interface{}{"mashraki", "pedro"},
+		},
+		{
+			name: "M2O",
+			step: func() *Step {
+				step := &Step{}
+				step.From.Table = "pets"
+				step.From.Column = "id"
+				step.To.Table = "users"
+				step.To.Column = "id"
+				step.Edge.Rel = M2O
+				step.Edge.Table = "pets"
+				step.Edge.Inverse = true
+				step.Edge.Columns = []string{"owner_id"}
+				return step
+			}(),
+			selector: Dialect("postgres").Select("*").
+				From(Table("pets")).
+				Where(EQ("name", "pedro")),
+			predicate: func(s *Selector) {
+				s.Where(EQ("last_name", "mashraki"))
+			},
+			wantQuery: `SELECT * FROM "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
+			wantArgs:  []interface{}{"pedro", "mashraki"},
+		},
+		{
 			name: "M2M",
 			step: func() *Step {
 				step := &Step{}
