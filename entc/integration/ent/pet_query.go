@@ -65,16 +65,11 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = pq.sqlQuery()
-		step.From.Table = pet.Table
-		step.From.Column = pet.FieldID
-		step.To.Table = user.Table
-		step.To.Column = user.FieldID
-		step.Edge.Rel = sql.O2O
-		step.Edge.Inverse = true
-		step.Edge.Table = pet.TeamTable
-		step.Edge.Columns = append(step.Edge.Columns, pet.TeamColumn)
+		step := sql.NewStep(
+			sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+			sql.To(user.Table, user.FieldID),
+			sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
+		)
 		query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := pq.gremlinQuery()
@@ -88,16 +83,11 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	switch pq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = pq.sqlQuery()
-		step.From.Table = pet.Table
-		step.From.Column = pet.FieldID
-		step.To.Table = user.Table
-		step.To.Column = user.FieldID
-		step.Edge.Rel = sql.M2O
-		step.Edge.Inverse = true
-		step.Edge.Table = pet.OwnerTable
-		step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+		step := sql.NewStep(
+			sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+			sql.To(user.Table, user.FieldID),
+			sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+		)
 		query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := pq.gremlinQuery()
