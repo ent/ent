@@ -772,8 +772,12 @@ func NameNotNil() predicate.Card {
 func HasOwner() predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(OwnerColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(OwnerTable, FieldID),
+				sql.Edge(sql.O2O, true, OwnerTable, OwnerColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(OwnerInverseLabel).InV()

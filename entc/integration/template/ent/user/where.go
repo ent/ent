@@ -262,16 +262,12 @@ func NameContainsFold(v string) predicate.User {
 func HasPets() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(PetsColumn).
-						From(builder.Table(PetsTable)).
-						Where(sql.NotNull(PetsColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PetsTable, FieldID),
+				sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -295,15 +291,12 @@ func HasPetsWith(preds ...predicate.Pet) predicate.User {
 func HasFriends() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FriendsPrimaryKey[0]).
-						From(builder.Table(FriendsTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FriendsTable, FieldID),
+				sql.Edge(sql.M2M, false, FriendsTable, FriendsPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }

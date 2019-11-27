@@ -338,8 +338,12 @@ func LicensedAtNotNil() predicate.Pet {
 func HasOwner() predicate.Pet {
 	return predicate.Pet(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(OwnerColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(OwnerTable, FieldID),
+				sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }

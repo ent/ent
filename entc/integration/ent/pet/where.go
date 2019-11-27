@@ -327,8 +327,12 @@ func NameHasSuffix(v string) predicate.Pet {
 func HasTeam() predicate.Pet {
 	return predicate.PetPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(TeamColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(TeamTable, FieldID),
+				sql.Edge(sql.O2O, true, TeamTable, TeamColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(TeamInverseLabel).InV()
@@ -362,8 +366,12 @@ func HasTeamWith(preds ...predicate.User) predicate.Pet {
 func HasOwner() predicate.Pet {
 	return predicate.PetPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(OwnerColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(OwnerTable, FieldID),
+				sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(OwnerInverseLabel).InV()

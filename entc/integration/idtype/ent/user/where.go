@@ -262,16 +262,12 @@ func NameContainsFold(v string) predicate.User {
 func HasSpouse() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(SpouseColumn).
-						From(builder.Table(SpouseTable)).
-						Where(sql.NotNull(SpouseColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(SpouseTable, FieldID),
+				sql.Edge(sql.O2O, false, SpouseTable, SpouseColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -295,15 +291,12 @@ func HasSpouseWith(preds ...predicate.User) predicate.User {
 func HasFollowers() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FollowersPrimaryKey[1]).
-						From(builder.Table(FollowersTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FollowersTable, FieldID),
+				sql.Edge(sql.M2M, true, FollowersTable, FollowersPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -334,15 +327,12 @@ func HasFollowersWith(preds ...predicate.User) predicate.User {
 func HasFollowing() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FollowingPrimaryKey[0]).
-						From(builder.Table(FollowingTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FollowingTable, FieldID),
+				sql.Edge(sql.M2M, false, FollowingTable, FollowingPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
