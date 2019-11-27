@@ -315,8 +315,12 @@ func ValueNotNil() predicate.Node {
 func HasPrev() predicate.Node {
 	return predicate.NodePerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(PrevColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PrevTable, FieldID),
+				sql.Edge(sql.O2O, true, PrevTable, PrevColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(PrevInverseLabel).InV()
@@ -350,16 +354,12 @@ func HasPrevWith(preds ...predicate.Node) predicate.Node {
 func HasNext() predicate.Node {
 	return predicate.NodePerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(NextColumn).
-						From(builder.Table(NextTable)).
-						Where(sql.NotNull(NextColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(NextTable, FieldID),
+				sql.Edge(sql.O2O, false, NextTable, NextColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(NextLabel).OutV()

@@ -1183,16 +1183,12 @@ func PasswordNotNil() predicate.User {
 func HasCard() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(CardColumn).
-						From(builder.Table(CardTable)).
-						Where(sql.NotNull(CardColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(CardTable, FieldID),
+				sql.Edge(sql.O2O, false, CardTable, CardColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(CardLabel).OutV()
@@ -1226,16 +1222,12 @@ func HasCardWith(preds ...predicate.Card) predicate.User {
 func HasPets() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(PetsColumn).
-						From(builder.Table(PetsTable)).
-						Where(sql.NotNull(PetsColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PetsTable, FieldID),
+				sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(PetsLabel).OutV()
@@ -1269,16 +1261,12 @@ func HasPetsWith(preds ...predicate.Pet) predicate.User {
 func HasFiles() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FilesColumn).
-						From(builder.Table(FilesTable)).
-						Where(sql.NotNull(FilesColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FilesTable, FieldID),
+				sql.Edge(sql.O2M, false, FilesTable, FilesColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(FilesLabel).OutV()
@@ -1312,15 +1300,12 @@ func HasFilesWith(preds ...predicate.File) predicate.User {
 func HasGroups() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(GroupsPrimaryKey[0]).
-						From(builder.Table(GroupsTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(GroupsTable, FieldID),
+				sql.Edge(sql.M2M, false, GroupsTable, GroupsPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(GroupsLabel).OutV()
@@ -1361,15 +1346,12 @@ func HasGroupsWith(preds ...predicate.Group) predicate.User {
 func HasFriends() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FriendsPrimaryKey[0]).
-						From(builder.Table(FriendsTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FriendsTable, FieldID),
+				sql.Edge(sql.M2M, false, FriendsTable, FriendsPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.Both(FriendsLabel)
@@ -1416,15 +1398,12 @@ func HasFriendsWith(preds ...predicate.User) predicate.User {
 func HasFollowers() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FollowersPrimaryKey[1]).
-						From(builder.Table(FollowersTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FollowersTable, FieldID),
+				sql.Edge(sql.M2M, true, FollowersTable, FollowersPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(FollowersInverseLabel).InV()
@@ -1465,15 +1444,12 @@ func HasFollowersWith(preds ...predicate.User) predicate.User {
 func HasFollowing() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FollowingPrimaryKey[0]).
-						From(builder.Table(FollowingTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FollowingTable, FieldID),
+				sql.Edge(sql.M2M, false, FollowingTable, FollowingPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(FollowingLabel).OutV()
@@ -1514,16 +1490,12 @@ func HasFollowingWith(preds ...predicate.User) predicate.User {
 func HasTeam() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(TeamColumn).
-						From(builder.Table(TeamTable)).
-						Where(sql.NotNull(TeamColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(TeamTable, FieldID),
+				sql.Edge(sql.O2O, false, TeamTable, TeamColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(TeamLabel).OutV()
@@ -1557,16 +1529,12 @@ func HasTeamWith(preds ...predicate.Pet) predicate.User {
 func HasSpouse() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(SpouseColumn).
-						From(builder.Table(SpouseTable)).
-						Where(sql.NotNull(SpouseColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(SpouseTable, FieldID),
+				sql.Edge(sql.O2O, false, SpouseTable, SpouseColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.Both(SpouseLabel)
@@ -1606,16 +1574,12 @@ func HasSpouseWith(preds ...predicate.User) predicate.User {
 func HasChildren() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(ChildrenColumn).
-						From(builder.Table(ChildrenTable)).
-						Where(sql.NotNull(ChildrenColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(ChildrenTable, FieldID),
+				sql.Edge(sql.O2M, true, ChildrenTable, ChildrenColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(ChildrenInverseLabel).InV()
@@ -1649,8 +1613,12 @@ func HasChildrenWith(preds ...predicate.User) predicate.User {
 func HasParent() predicate.User {
 	return predicate.UserPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(ParentColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(ParentTable, FieldID),
+				sql.Edge(sql.M2O, false, ParentTable, ParentColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.OutE(ParentLabel).OutV()

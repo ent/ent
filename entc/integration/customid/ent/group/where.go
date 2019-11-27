@@ -116,15 +116,12 @@ func IDLTE(id int) predicate.Group {
 func HasUsers() predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(UsersPrimaryKey[0]).
-						From(builder.Table(UsersTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(UsersTable, FieldID),
+				sql.Edge(sql.M2M, false, UsersTable, UsersPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }

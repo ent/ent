@@ -455,16 +455,12 @@ func MaxUsersLTE(v int) predicate.GroupInfo {
 func HasGroups() predicate.GroupInfo {
 	return predicate.GroupInfoPerDialect(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(GroupsColumn).
-						From(builder.Table(GroupsTable)).
-						Where(sql.NotNull(GroupsColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(GroupsTable, FieldID),
+				sql.Edge(sql.O2M, true, GroupsTable, GroupsColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 		func(t *dsl.Traversal) {
 			t.InE(GroupsInverseLabel).InV()
