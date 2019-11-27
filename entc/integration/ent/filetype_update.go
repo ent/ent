@@ -154,11 +154,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(filetype.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(filetype.FieldID, idface...))
+	updater = updater.Where(sql.InInts(filetype.FieldID, ids...))
 	if value := ftu.name; value != nil {
 		updater.Set(filetype.FieldName, *value)
 	}
@@ -408,11 +404,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		res     sql.Result
 		updater = builder.Update(filetype.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(filetype.FieldID, idface...))
+	updater = updater.Where(sql.InInts(filetype.FieldID, ids...))
 	if value := ftuo.name; value != nil {
 		updater.Set(filetype.FieldName, *value)
 		ft.Name = *value

@@ -176,11 +176,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(comment.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(comment.FieldID, idface...))
+	updater = updater.Where(sql.InInts(comment.FieldID, ids...))
 	if value := cu.unique_int; value != nil {
 		updater.Set(comment.FieldUniqueInt, *value)
 	}
@@ -451,11 +447,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		res     sql.Result
 		updater = builder.Update(comment.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(comment.FieldID, idface...))
+	updater = updater.Where(sql.InInts(comment.FieldID, ids...))
 	if value := cuo.unique_int; value != nil {
 		updater.Set(comment.FieldUniqueInt, *value)
 		c.UniqueInt = *value

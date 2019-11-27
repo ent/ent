@@ -75,14 +75,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			res sql.Result
 			updater = builder.Update({{ $.Package }}.Table)
 		)
-		{{- if $.ID.IsInt }}
-			updater = updater.Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
-		{{- else }}
+		{{- if and (not $.ID.IsInt) $.ID.UserDefined }}
 			idface := make([]interface{}, len(ids))
 			for i := range ids {
 				idface[i] = ids[i]
 			}
 			updater = updater.Where(sql.In({{ $.Package }}.{{ $.ID.Constant }}, idface...))
+		{{- else }}
+			updater = updater.Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
 		{{- end }}
 		{{- range $_, $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}

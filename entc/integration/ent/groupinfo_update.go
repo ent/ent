@@ -181,11 +181,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(groupinfo.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(groupinfo.FieldID, idface...))
+	updater = updater.Where(sql.InInts(groupinfo.FieldID, ids...))
 	if value := giu.desc; value != nil {
 		updater.Set(groupinfo.FieldDesc, *value)
 	}
@@ -470,11 +466,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		res     sql.Result
 		updater = builder.Update(groupinfo.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(groupinfo.FieldID, idface...))
+	updater = updater.Where(sql.InInts(groupinfo.FieldID, ids...))
 	if value := giuo.desc; value != nil {
 		updater.Set(groupinfo.FieldDesc, *value)
 		gi.Desc = *value

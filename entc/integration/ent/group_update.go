@@ -364,11 +364,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(group.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(group.FieldID, idface...))
+	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := gu.active; value != nil {
 		updater.Set(group.FieldActive, *value)
 	}
@@ -1003,11 +999,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		res     sql.Result
 		updater = builder.Update(group.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(group.FieldID, idface...))
+	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := guo.active; value != nil {
 		updater.Set(group.FieldActive, *value)
 		gr.Active = *value

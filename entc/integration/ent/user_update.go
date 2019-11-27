@@ -643,11 +643,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(user.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(user.FieldID, idface...))
+	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uu.age; value != nil {
 		updater.Set(user.FieldAge, *value)
 	}
@@ -1933,11 +1929,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		res     sql.Result
 		updater = builder.Update(user.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(user.FieldID, idface...))
+	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uuo.age; value != nil {
 		updater.Set(user.FieldAge, *value)
 		u.Age = *value

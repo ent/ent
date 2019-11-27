@@ -174,11 +174,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(card.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(card.FieldID, idface...))
+	updater = updater.Where(sql.InInts(card.FieldID, ids...))
 	if value := cu.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
 	}
@@ -444,11 +440,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		res     sql.Result
 		updater = builder.Update(card.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(card.FieldID, idface...))
+	updater = updater.Where(sql.InInts(card.FieldID, ids...))
 	if value := cuo.update_time; value != nil {
 		updater.Set(card.FieldUpdateTime, *value)
 		c.UpdateTime = *value
