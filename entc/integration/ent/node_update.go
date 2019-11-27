@@ -205,11 +205,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(node.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(node.FieldID, idface...))
+	updater = updater.Where(sql.InInts(node.FieldID, ids...))
 	if value := nu.value; value != nil {
 		updater.Set(node.FieldValue, *value)
 	}
@@ -550,11 +546,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		res     sql.Result
 		updater = builder.Update(node.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(node.FieldID, idface...))
+	updater = updater.Where(sql.InInts(node.FieldID, ids...))
 	if value := nuo.value; value != nil {
 		updater.Set(node.FieldValue, *value)
 		n.Value = *value

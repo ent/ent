@@ -178,11 +178,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(pet.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(pet.FieldID, idface...))
+	updater = updater.Where(sql.InInts(pet.FieldID, ids...))
 	if value := pu.name; value != nil {
 		updater.Set(pet.FieldName, *value)
 	}
@@ -469,11 +465,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		res     sql.Result
 		updater = builder.Update(pet.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(pet.FieldID, idface...))
+	updater = updater.Where(sql.InInts(pet.FieldID, ids...))
 	if value := puo.name; value != nil {
 		updater.Set(pet.FieldName, *value)
 		pe.Name = *value

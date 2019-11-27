@@ -256,11 +256,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(file.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(file.FieldID, idface...))
+	updater = updater.Where(sql.InInts(file.FieldID, ids...))
 	if value := fu.size; value != nil {
 		updater.Set(file.FieldSize, *value)
 	}
@@ -640,11 +636,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		res     sql.Result
 		updater = builder.Update(file.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(file.FieldID, idface...))
+	updater = updater.Where(sql.InInts(file.FieldID, ids...))
 	if value := fuo.size; value != nil {
 		updater.Set(file.FieldSize, *value)
 		f.Size = *value

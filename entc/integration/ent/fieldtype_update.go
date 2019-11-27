@@ -615,11 +615,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		res     sql.Result
 		updater = builder.Update(fieldtype.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(fieldtype.FieldID, idface...))
+	updater = updater.Where(sql.InInts(fieldtype.FieldID, ids...))
 	if value := ftu.int; value != nil {
 		updater.Set(fieldtype.FieldInt, *value)
 	}
@@ -1522,11 +1518,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		res     sql.Result
 		updater = builder.Update(fieldtype.Table)
 	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(fieldtype.FieldID, idface...))
+	updater = updater.Where(sql.InInts(fieldtype.FieldID, ids...))
 	if value := ftuo.int; value != nil {
 		updater.Set(fieldtype.FieldInt, *value)
 		ft.Int = *value
