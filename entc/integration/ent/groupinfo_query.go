@@ -65,16 +65,11 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
 	switch giq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = giq.sqlQuery()
-		step.From.Table = groupinfo.Table
-		step.From.Column = groupinfo.FieldID
-		step.To.Table = group.Table
-		step.To.Column = group.FieldID
-		step.Edge.Rel = sql.O2M
-		step.Edge.Inverse = true
-		step.Edge.Table = groupinfo.GroupsTable
-		step.Edge.Columns = append(step.Edge.Columns, groupinfo.GroupsColumn)
+		step := sql.NewStep(
+			sql.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
+			sql.To(group.Table, group.FieldID),
+			sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+		)
 		query.sql = sql.SetNeighbors(giq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := giq.gremlinQuery()
