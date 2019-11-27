@@ -67,16 +67,11 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = gq.sqlQuery()
-		step.From.Table = group.Table
-		step.From.Column = group.FieldID
-		step.To.Table = file.Table
-		step.To.Column = file.FieldID
-		step.Edge.Rel = sql.O2M
-		step.Edge.Inverse = false
-		step.Edge.Table = group.FilesTable
-		step.Edge.Columns = append(step.Edge.Columns, group.FilesColumn)
+		step := sql.NewStep(
+			sql.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sql.To(file.Table, file.FieldID),
+			sql.Edge(sql.O2M, false, group.FilesTable, group.FilesColumn),
+		)
 		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
@@ -90,16 +85,11 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = gq.sqlQuery()
-		step.From.Table = group.Table
-		step.From.Column = group.FieldID
-		step.To.Table = user.Table
-		step.To.Column = user.FieldID
-		step.Edge.Rel = sql.O2M
-		step.Edge.Inverse = false
-		step.Edge.Table = group.BlockedTable
-		step.Edge.Columns = append(step.Edge.Columns, group.BlockedColumn)
+		step := sql.NewStep(
+			sql.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sql.To(user.Table, user.FieldID),
+			sql.Edge(sql.O2M, false, group.BlockedTable, group.BlockedColumn),
+		)
 		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
@@ -113,16 +103,11 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = gq.sqlQuery()
-		step.From.Table = group.Table
-		step.From.Column = group.FieldID
-		step.To.Table = user.Table
-		step.To.Column = user.FieldID
-		step.Edge.Rel = sql.M2M
-		step.Edge.Inverse = true
-		step.Edge.Table = group.UsersTable
-		step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+		step := sql.NewStep(
+			sql.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sql.To(user.Table, user.FieldID),
+			sql.Edge(sql.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+		)
 		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()
@@ -136,16 +121,11 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
 	switch gq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = gq.sqlQuery()
-		step.From.Table = group.Table
-		step.From.Column = group.FieldID
-		step.To.Table = groupinfo.Table
-		step.To.Column = groupinfo.FieldID
-		step.Edge.Rel = sql.M2O
-		step.Edge.Inverse = false
-		step.Edge.Table = group.InfoTable
-		step.Edge.Columns = append(step.Edge.Columns, group.InfoColumn)
+		step := sql.NewStep(
+			sql.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sql.To(groupinfo.Table, groupinfo.FieldID),
+			sql.Edge(sql.M2O, false, group.InfoTable, group.InfoColumn),
+		)
 		query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := gq.gremlinQuery()

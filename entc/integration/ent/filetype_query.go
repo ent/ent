@@ -65,16 +65,11 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: ftq.config}
 	switch ftq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = ftq.sqlQuery()
-		step.From.Table = filetype.Table
-		step.From.Column = filetype.FieldID
-		step.To.Table = file.Table
-		step.To.Column = file.FieldID
-		step.Edge.Rel = sql.O2M
-		step.Edge.Inverse = false
-		step.Edge.Table = filetype.FilesTable
-		step.Edge.Columns = append(step.Edge.Columns, filetype.FilesColumn)
+		step := sql.NewStep(
+			sql.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
+			sql.To(file.Table, file.FieldID),
+			sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+		)
 		query.sql = sql.SetNeighbors(ftq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := ftq.gremlinQuery()

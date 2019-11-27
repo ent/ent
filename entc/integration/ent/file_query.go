@@ -66,16 +66,11 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = fq.sqlQuery()
-		step.From.Table = file.Table
-		step.From.Column = file.FieldID
-		step.To.Table = user.Table
-		step.To.Column = user.FieldID
-		step.Edge.Rel = sql.M2O
-		step.Edge.Inverse = true
-		step.Edge.Table = file.OwnerTable
-		step.Edge.Columns = append(step.Edge.Columns, file.OwnerColumn)
+		step := sql.NewStep(
+			sql.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sql.To(user.Table, user.FieldID),
+			sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
+		)
 		query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := fq.gremlinQuery()
@@ -89,16 +84,11 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
 	switch fq.driver.Dialect() {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := &sql.Step{}
-		step.From.V = fq.sqlQuery()
-		step.From.Table = file.Table
-		step.From.Column = file.FieldID
-		step.To.Table = filetype.Table
-		step.To.Column = filetype.FieldID
-		step.Edge.Rel = sql.M2O
-		step.Edge.Inverse = true
-		step.Edge.Table = file.TypeTable
-		step.Edge.Columns = append(step.Edge.Columns, file.TypeColumn)
+		step := sql.NewStep(
+			sql.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sql.To(filetype.Table, filetype.FieldID),
+			sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
+		)
 		query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
 	case dialect.Gremlin:
 		gremlin := fq.gremlinQuery()
