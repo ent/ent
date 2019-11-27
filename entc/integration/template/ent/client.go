@@ -243,16 +243,11 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := pe.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = pet.Table
-	step.From.Column = pet.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2O
-	step.Edge.Inverse = true
-	step.Edge.Table = pet.OwnerTable
-	step.Edge.Columns = append(step.Edge.Columns, pet.OwnerColumn)
+	step := sql.NewStep(
+		sql.From(pet.Table, pet.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	)
 	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
 	return query
@@ -326,16 +321,11 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = pet.Table
-	step.To.Column = pet.FieldID
-	step.Edge.Rel = sql.O2M
-	step.Edge.Inverse = false
-	step.Edge.Table = user.PetsTable
-	step.Edge.Columns = append(step.Edge.Columns, user.PetsColumn)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(pet.Table, pet.FieldID),
+		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
@@ -345,16 +335,11 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = false
-	step.Edge.Table = user.FriendsTable
-	step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
