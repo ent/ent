@@ -164,16 +164,11 @@ func (c *UserClient) GetX(ctx context.Context, id uint64) *User {
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.O2O
-	step.Edge.Inverse = false
-	step.Edge.Table = user.SpouseTable
-	step.Edge.Columns = append(step.Edge.Columns, user.SpouseColumn)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
@@ -183,16 +178,11 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = true
-	step.Edge.Table = user.FollowersTable
-	step.Edge.Columns = append(step.Edge.Columns, user.FollowersPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
@@ -202,16 +192,11 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = false
-	step.Edge.Table = user.FollowingTable
-	step.Edge.Columns = append(step.Edge.Columns, user.FollowingPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query

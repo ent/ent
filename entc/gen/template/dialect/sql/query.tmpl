@@ -110,15 +110,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver -}}
 	id := {{ $receiver }}.{{- if $n.ID.IsString }}id(){{ else }}ID{{ end }}
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = {{ $n.Package }}.Table
-	step.From.Column = {{ $n.Package }}.{{ $n.ID.Constant }}
-	step.To.Table = {{ $e.Type.Package }}.Table
-	step.To.Column = {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}
-	step.Edge.Rel = sql.{{ $e.Rel.Type }}
-	step.Edge.Inverse = {{ $e.IsInverse }}
-	step.Edge.Table = {{ $n.Package }}.{{ $e.TableConstant }}
-	step.Edge.Columns = append(step.Edge.Columns, {{ if $e.M2M }}{{ $n.Package }}.{{ $e.PKConstant }}...{{ else }}{{ $n.Package }}.{{ $e.ColumnConstant }}{{ end }})
+	step := sql.NewStep(
+		sql.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
+		sql.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
+		sql.Edge(sql.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+			{{- if $e.M2M -}}
+				{{ $n.Package }}.{{ $e.PKConstant }}...
+			{{- else -}}
+				{{ $n.Package }}.{{ $e.ColumnConstant }}
+			{{- end -}}
+		),
+	)
 	query.sql = sql.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
