@@ -400,6 +400,26 @@ WHERE "groups"."id" IN
   JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE "name" = $1)`,
 			wantArgs: []interface{}{"a8m"},
 		},
+		{
+			name: "M2M/inverse",
+			step: NewStep(
+				From("groups", "id"),
+				To("users", "id"),
+				Edge(M2M, true, "user_groups", "user_id", "group_id"),
+			),
+			selector: Dialect("postgres").Select("*").From(Table("groups")),
+			predicate: func(s *Selector) {
+				s.Where(And(NotNull("name"), EQ("name", "a8m")))
+			},
+			wantQuery: `
+SELECT *
+FROM "groups"
+WHERE "groups"."id" IN
+  (SELECT "user_groups"."group_id"
+  FROM "user_groups"
+  JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE ("name" IS NOT NULL) AND ("name" = $1))`,
+			wantArgs: []interface{}{"a8m"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
