@@ -130,20 +130,16 @@ func HasUsers() predicate.Group {
 func HasUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Table(UsersInverseTable)
-			t3 := builder.Table(UsersTable)
-			t4 := builder.Select(t3.C(UsersPrimaryKey[0])).
-				From(t3).
-				Join(t2).
-				On(t3.C(UsersPrimaryKey[1]), t2.C(FieldID))
-			t5 := builder.Select().From(t2)
-			for _, p := range preds {
-				p(t5)
-			}
-			t4.FromSelect(t5)
-			s.Where(sql.In(t1.C(FieldID), t4))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(UsersInverseTable, FieldID),
+				sql.Edge(sql.M2M, false, UsersTable, UsersPrimaryKey...),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

@@ -849,13 +849,16 @@ func HasFiles() predicate.Group {
 func HasFilesWith(preds ...predicate.File) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FilesColumn).From(builder.Table(FilesTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FilesInverseTable, FieldID),
+				sql.Edge(sql.O2M, false, FilesTable, FilesColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.InV()
@@ -888,13 +891,16 @@ func HasBlocked() predicate.Group {
 func HasBlockedWith(preds ...predicate.User) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(BlockedColumn).From(builder.Table(BlockedTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(BlockedInverseTable, FieldID),
+				sql.Edge(sql.O2M, false, BlockedTable, BlockedColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.InV()
@@ -927,20 +933,16 @@ func HasUsers() predicate.Group {
 func HasUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Table(UsersInverseTable)
-			t3 := builder.Table(UsersTable)
-			t4 := builder.Select(t3.C(UsersPrimaryKey[1])).
-				From(t3).
-				Join(t2).
-				On(t3.C(UsersPrimaryKey[0]), t2.C(FieldID))
-			t5 := builder.Select().From(t2)
-			for _, p := range preds {
-				p(t5)
-			}
-			t4.FromSelect(t5)
-			s.Where(sql.In(t1.C(FieldID), t4))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(UsersInverseTable, FieldID),
+				sql.Edge(sql.M2M, true, UsersTable, UsersPrimaryKey...),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.OutV()
@@ -973,13 +975,16 @@ func HasInfo() predicate.Group {
 func HasInfoWith(preds ...predicate.GroupInfo) predicate.Group {
 	return predicate.GroupPerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(InfoInverseTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(InfoColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(InfoInverseTable, FieldID),
+				sql.Edge(sql.M2O, false, InfoTable, InfoColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.InV()

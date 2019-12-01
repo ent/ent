@@ -848,13 +848,16 @@ func HasOwner() predicate.File {
 func HasOwnerWith(preds ...predicate.User) predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(OwnerInverseTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(OwnerColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(OwnerInverseTable, FieldID),
+				sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.OutV()
@@ -887,13 +890,16 @@ func HasType() predicate.File {
 func HasTypeWith(preds ...predicate.FileType) predicate.File {
 	return predicate.FilePerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(TypeInverseTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(TypeColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(TypeInverseTable, FieldID),
+				sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.OutV()

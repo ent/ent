@@ -789,13 +789,16 @@ func HasOwner() predicate.Card {
 func HasOwnerWith(preds ...predicate.User) predicate.Card {
 	return predicate.CardPerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(OwnerInverseTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(OwnerColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(OwnerInverseTable, FieldID),
+				sql.Edge(sql.O2O, true, OwnerTable, OwnerColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.OutV()

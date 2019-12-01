@@ -344,13 +344,16 @@ func HasFiles() predicate.FileType {
 func HasFilesWith(preds ...predicate.File) predicate.FileType {
 	return predicate.FileTypePerDialect(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FilesColumn).From(builder.Table(FilesTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FilesInverseTable, FieldID),
+				sql.Edge(sql.O2M, false, FilesTable, FilesColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 		func(t *dsl.Traversal) {
 			tr := __.InV()
