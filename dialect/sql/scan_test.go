@@ -71,6 +71,20 @@ func TestScanSlice(t *testing.T) {
 	require.Equal(t, "bar", v4[1].Name)
 	require.Equal(t, 1, v4[0].Count)
 	require.Equal(t, 2, v4[1].Count)
+
+	rows = &mockRows{
+		columns: []string{"nick_name", "COUNT(*)"},
+		values:  [][]interface{}{{"foo", 1}, {"bar", 2}},
+	}
+	var v5 []*struct {
+		Count int
+		Name  string `json:"name" sql:"nick_name"`
+	}
+	require.NoError(t, ScanSlice(rows, &v5))
+	require.Equal(t, "foo", v5[0].Name)
+	require.Equal(t, "bar", v5[1].Name)
+	require.Equal(t, 1, v5[0].Count)
+	require.Equal(t, 2, v5[1].Count)
 }
 
 type mockRows struct {
