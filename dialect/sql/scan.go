@@ -101,7 +101,9 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		name := strings.ToLower(f.Name)
-		if tag, ok := f.Tag.Lookup("json"); ok {
+		if tag, ok := f.Tag.Lookup("sql"); ok {
+			name = tag
+		} else if tag, ok := f.Tag.Lookup("json"); ok {
 			name = strings.Split(tag, ",")[0]
 		}
 		names[name] = i
