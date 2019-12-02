@@ -5,6 +5,7 @@
 package sql
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -18,7 +19,38 @@ type ColumnScanner interface {
 	Columns() ([]string, error)
 }
 
-// ScanSlice scans the given ColumnScanner (basically, sql.Rows or sql.Rows) into the given slice.
+// ScanInt64 scans and returns an int64 from the rows columns.
+func ScanInt64(rows ColumnScanner) (int64, error) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return 0, fmt.Errorf("sql/scan: failed getting column names: %v", err)
+	}
+	if n := len(columns); n != 1 {
+		return 0, fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
+	}
+	if !rows.Next() {
+		return 0, sql.ErrNoRows
+	}
+	var n int64
+	if err := rows.Scan(&n); err != nil {
+		return 0, err
+	}
+	if rows.Next() {
+		return 0, fmt.Errorf("sql/scan: expect exactly one row in result set")
+	}
+	return n, nil
+}
+
+// ScanInt scans and returns an int from the rows columns.
+func ScanInt(rows ColumnScanner) (int, error) {
+	n, err := ScanInt64(rows)
+	if err != nil {
+		return 0, err
+	}
+	return int(n), nil
+}
+
+// ScanSlice scans the given ColumnScanner (basically, sql.Row or sql.Rows) into the given slice.
 func ScanSlice(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {

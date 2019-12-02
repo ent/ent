@@ -423,12 +423,9 @@ func exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}
 		return false, fmt.Errorf("reading schema information %v", err)
 	}
 	defer rows.Close()
-	if !rows.Next() {
-		return false, fmt.Errorf("no rows returned")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return false, fmt.Errorf("scanning count")
+	n, err := sql.ScanInt(rows)
+	if err != nil {
+		return false, err
 	}
 	return n > 0, nil
 }
