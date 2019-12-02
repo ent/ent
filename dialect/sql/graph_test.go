@@ -5,9 +5,14 @@
 package sql
 
 import (
+	"context"
+	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/facebookincubator/ent/schema/field"
+
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -430,4 +435,85 @@ WHERE "groups"."id" IN
 			require.Equal(t, tt.wantArgs, args)
 		})
 	}
+}
+
+func TestCreateNode(t *testing.T) {
+	tests := []struct {
+		name    string
+		spec    *CreateSpec
+		expect  func(sqlmock.Sqlmock)
+		wantErr bool
+	}{
+		{
+			name: "fields",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`) VALUES (?, ?)")).
+					WithArgs(30, "a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "fields/user-defined-id",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Value: 1},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`, `id`) VALUES (?, ?, ?)")).
+					WithArgs(30, "a8m", 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "fields/json",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "json", Type: field.TypeJSON, Value: struct{}{}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`json`) VALUES (?)")).
+					WithArgs([]byte("{}")).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+			tt.expect(mock)
+			err = CreateNode(context.Background(), OpenDB("", db), tt.spec)
+			require.Equal(t, tt.wantErr, err != nil, err)
+		})
+	}
+}
+
+func escape(query string) string {
+	rows := strings.Split(query, "\n")
+	for i := range rows {
+		rows[i] = strings.TrimPrefix(rows[i], " ")
+	}
+	query = strings.Join(rows, " ")
+	return regexp.QuoteMeta(query)
 }
