@@ -351,25 +351,14 @@ func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *InsertBui
 			return 0, err
 		}
 		defer rows.Close()
-		if !rows.Next() {
-			return 0, fmt.Errorf("no rows found for query: %v", query)
-		}
-		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return 0, err
-		}
-		return id, nil
+		return ScanInt64(rows)
 	}
 	// MySQL, SQLite, etc.
 	var res sql.Result
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+	return res.LastInsertId()
 }
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
