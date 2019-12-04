@@ -6,6 +6,7 @@ package sql
 
 import (
 	"context"
+	"database/sql/driver"
 	"regexp"
 	"strings"
 	"testing"
@@ -493,6 +494,236 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `users` (`json`) VALUES (?)")).
 					WithArgs([]byte("{}")).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/m2o",
+			spec: &CreateSpec{
+				Table: "pets",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "pedro"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2O, Columns: []string{"owner_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `pets` (`name`, `owner_id`) VALUES (?, ?)")).
+					WithArgs("pedro", 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/o2o/inverse",
+			spec: &CreateSpec{
+				Table: "cards",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "number", Type: field.TypeString, Value: "0001"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Columns: []string{"owner_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `cards` (`number`, `owner_id`) VALUES (?, ?)")).
+					WithArgs("0001", 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/o2m",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL)")).
+					WithArgs(1, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/o2m",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2, 3, 4}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` IN (?, ?, ?)) AND (`owner_id` IS NULL)")).
+					WithArgs(1, 2, 3, 4).
+					WillReturnResult(sqlmock.NewResult(1, 3))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/o2o",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("UPDATE `cards` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL)")).
+					WithArgs(1, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/o2o/bidi",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Bidi: true, Table: "users", Columns: []string{"spouse_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`, `spouse_id`) VALUES (?, ?)")).
+					WithArgs("a8m", 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("UPDATE `users` SET `spouse_id` = ? WHERE (`id` = ?) AND (`spouse_id` IS NULL)")).
+					WithArgs(1, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/m2m",
+			spec: &CreateSpec{
+				Table: "groups",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "GitHub"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `groups` (`name`) VALUES (?)")).
+					WithArgs("GitHub").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?)")).
+					WithArgs(1, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/m2m/inverse",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "mashraki"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("mashraki").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?)")).
+					WithArgs(2, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/m2m/bidi",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "mashraki"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Bidi: true, Table: "user_friends", Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("mashraki").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(1, 2, 2, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/m2m/bidi/batch",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "mashraki"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Bidi: true, Table: "user_friends", Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+					{Rel: M2M, Bidi: true, Table: "user_friends", Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{Nodes: []driver.Value{3}, IDSpec: &FieldSpec{Column: "id"}}},
+					{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{4}, IDSpec: &FieldSpec{Column: "id"}}},
+					{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{5}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("mashraki").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
+					WithArgs(1, 2, 2, 1, 1, 3, 3, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(4, 1, 5, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
 			},
