@@ -6,6 +6,7 @@ package sql
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"fmt"
 	"strconv"
 	"strings"
@@ -943,8 +944,22 @@ func InInts(col string, args ...int) *Predicate {
 	return (&Predicate{}).InInts(col, args...)
 }
 
+// InValues adds the `IN` predicate for slice of driver.Value.
+func InValues(col string, args ...driver.Value) *Predicate {
+	return (&Predicate{}).InValues(col, args...)
+}
+
 // InInts adds the `IN` predicate for ints.
 func (p *Predicate) InInts(col string, args ...int) *Predicate {
+	iface := make([]interface{}, len(args))
+	for i := range args {
+		iface[i] = args[i]
+	}
+	return p.In(col, iface...)
+}
+
+// InValues adds the `IN` predicate for slice of driver.Value.
+func (p *Predicate) InValues(col string, args ...driver.Value) *Predicate {
 	iface := make([]interface{}, len(args))
 	for i := range args {
 		iface[i] = args[i]
