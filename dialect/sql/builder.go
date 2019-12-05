@@ -254,7 +254,11 @@ func (t *TableAlter) DropColumn(c *ColumnBuilder) *TableAlter {
 
 // AddForeignKey adds a foreign key constraint to the `ALTER TABLE` statement.
 func (t *TableAlter) AddForeignKey(fk *ForeignKeyBuilder) *TableAlter {
-	t.Queries = append(t.Queries, &Wrapper{"ADD CONSTRAINT %s", fk})
+	if t.Dialect() == dialect.SQLite {
+		t.Queries = append(t.Queries, &Wrapper{"ADD COLUMN %s", fk})
+	} else {
+		t.Queries = append(t.Queries, &Wrapper{"ADD CONSTRAINT %s", fk})
+	}
 	return t
 }
 
@@ -339,17 +343,24 @@ func (fk *ForeignKeyBuilder) OnUpdate(action string) *ForeignKeyBuilder {
 
 // Query returns query representation of a foreign key constraint.
 func (fk *ForeignKeyBuilder) Query() (string, []interface{}) {
-	if fk.symbol != "" {
+	if fk.Dialect() != dialect.SQLite && fk.symbol != "" {
 		fk.Ident(fk.symbol).Pad()
 	}
-	fk.WriteString("FOREIGN KEY")
-	fk.Nested(func(b *Builder) {
-		b.IdentComma(fk.columns...)
-	})
+
+	if fk.Dialect() == dialect.SQLite {
+		fk.Pad().Ident(fk.columns[0])
+	} else {
+		fk.WriteString("FOREIGN KEY")
+		fk.Nested(func(b *Builder) {
+			b.IdentComma(fk.columns...)
+		})
+	}
+
 	fk.Pad().Join(fk.ref)
 	for _, action := range fk.actions {
 		fk.Pad().WriteString(action)
 	}
+
 	return fk.String(), fk.args
 }
 

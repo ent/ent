@@ -47,9 +47,9 @@ func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (boo
 	return exist(ctx, tx, query, args...)
 }
 
-func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
+func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, table *Table, fk *ForeignKey) (bool, error) {
 	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("CONSTRAINT_TYPE", "FOREIGN KEY").And().EQ("CONSTRAINT_NAME", name)).Query()
+		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("CONSTRAINT_TYPE", "FOREIGN KEY").And().EQ("CONSTRAINT_NAME", fk.Symbol)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
@@ -289,9 +289,8 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
-	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
-		return r == '(' || r == ')' || r == ' ' || r == ','
-	}); parts[0] {
+
+	switch parts := typeFields(c.typ); parts[0] {
 	case "int":
 		c.Type = field.TypeInt32
 		if len(parts) == 3 { // int(10) unsigned.

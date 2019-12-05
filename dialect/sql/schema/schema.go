@@ -436,3 +436,41 @@ func compare(v1, v2 int) int {
 	}
 	return 1
 }
+
+func typeFields(typ string) []string {
+	return strings.FieldsFunc(typ, func(r rune) bool {
+		return r == '(' || r == ')' || r == ' ' || r == ','
+	})
+}
+
+func processIndexes(idxs Indexes, t *Table) error {
+	// Populate the index information to the table and its columns.
+	// We do it manually, because PK and uniqueness information does
+	// not exist when querying the INFORMATION_SCHEMA.COLUMNS above.
+	for _, idx := range idxs {
+		switch {
+		case idx.primary:
+			for _, name := range idx.columns {
+				c, ok := t.column(name)
+				if !ok {
+					return fmt.Errorf("index %q column %q was not found in table %q", idx.Name, name, t.Name)
+				}
+				c.Key = PrimaryKey
+				t.PrimaryKey = append(t.PrimaryKey, c)
+			}
+		case idx.Unique && len(idx.columns) == 1:
+			name := idx.columns[0]
+			c, ok := t.column(name)
+			if !ok {
+				return fmt.Errorf("index %q column %q was not found in table %q", idx.Name, name, t.Name)
+			}
+			c.Key = UniqueKey
+			c.Unique = true
+			c.indexes.append(idx)
+			fallthrough
+		default:
+			t.AddIndex(idx.Name, idx.Unique, idx.columns)
+		}
+	}
+	return nil
+}

@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -154,7 +155,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 		}
 		fks := make([]*ForeignKey, 0, len(t.ForeignKeys))
 		for _, fk := range t.ForeignKeys {
-			exist, err := m.fkExist(ctx, tx, fk.Symbol)
+			exist, err := m.fkExist(ctx, tx, t, fk)
 			if err != nil {
 				return err
 			}
@@ -250,6 +251,14 @@ func (c *changes) dropColumn(name string) (*Column, bool) {
 // changeSet returns a changes object to be applied on existing table.
 // It fails if one of the changes is invalid.
 func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
+	if curr == nil {
+		return nil, errors.New("current state could not be determined during change set generation")
+	}
+
+	if new == nil {
+		return nil, errors.New("determined state could not be determined during change set generation")
+	}
+
 	change := &changes{}
 	// pks.
 	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
@@ -449,7 +458,7 @@ type sqlDialect interface {
 	init(context.Context, dialect.Tx) error
 	table(context.Context, dialect.Tx, string) (*Table, error)
 	tableExist(context.Context, dialect.Tx, string) (bool, error)
-	fkExist(context.Context, dialect.Tx, string) (bool, error)
+	fkExist(context.Context, dialect.Tx, *Table, *ForeignKey) (bool, error)
 	setRange(context.Context, dialect.Tx, string, int) error
 	dropIndex(context.Context, dialect.Tx, *Index, string) error
 	// table, column and index builder per dialect.

@@ -7,10 +7,14 @@ package schema
 import (
 	"context"
 	"fmt"
+	"math"
+	"strconv"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/pkg/errors"
 )
 
 // SQLite is an SQLite migration driver.
@@ -119,6 +123,52 @@ func (*SQLite) cType(c *Column) (t string) {
 	return t
 }
 
+func (d *SQLite) typeField(c *Column, str string) error {
+	switch parts := typeFields(str); parts[0] {
+	case "int", "integer":
+		c.Type = field.TypeInt32
+	case "smallint":
+		c.Type = field.TypeInt16
+	case "bigint":
+		c.Type = field.TypeInt64
+	case "tinyint":
+		c.Type = field.TypeInt8
+	case "double", "real":
+		c.Type = field.TypeFloat64
+	case "timestamp", "datetime":
+		c.Type = field.TypeTime
+	case "blob":
+		c.Size = math.MaxUint32
+		c.Type = field.TypeBytes
+	case "text":
+		c.Size = math.MaxInt32
+		c.Type = field.TypeString
+	case "varchar":
+		c.Type = field.TypeString
+		if len(parts) > 1 {
+			size, err := strconv.ParseInt(parts[1], 10, 64)
+			if err != nil {
+				return fmt.Errorf("converting varchar size to int: %v", err)
+			}
+			c.Size = size
+		}
+	case "json":
+		c.Type = field.TypeJSON
+	case "uuid":
+		c.Type = field.TypeUUID
+	case "enum":
+		c.Type = field.TypeEnum
+		c.Enums = make([]string, len(parts)-1)
+		for i, e := range parts[1:] {
+			c.Enums[i] = strings.Trim(e, "'")
+		}
+	default:
+		return fmt.Errorf("unknown column type %q", parts[0])
+	}
+
+	return nil
+}
+
 // addColumn returns the DSL query for adding the given column to a table.
 func (d *SQLite) addColumn(c *Column) *sql.ColumnBuilder {
 	b := sql.Column(c.Name).Type(d.cType(c)).Attr(c.Attr)
@@ -148,5 +198,143 @@ func (d *SQLite) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table
 }
 
 // fkExist returns always true to disable foreign-keys creation after the table was created.
-func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
-func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }
+func (d *SQLite) fkExist(ctx context.Context, tx dialect.Tx, table *Table, fk *ForeignKey) (bool, error) {
+	rows := &sql.Rows{}
+
+	if err := tx.Query(ctx, fmt.Sprintf("pragma foreign_key_list('%s')", table.Name), []interface{}{}, rows); err != nil {
+		return false, fmt.Errorf("sqlite3: reading table foreign keys description %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			id        int
+			seq       int
+			tableName string
+			from      string
+			to        string
+			onUpdate  string
+			onDelete  string
+			match     string
+		)
+		if err := rows.Scan(&id, &seq, &tableName, &from, &to, &onUpdate, &onDelete, &match); err != nil {
+			return false, errors.Wrap(err, "while querying foreign keys")
+		}
+
+		if tableName == fk.RefTable.Name && fk.Columns[0].Name == from && fk.RefColumns[0].Name == to {
+			return true, rows.Close()
+		}
+	}
+
+	return false, rows.Close()
+}
+
+func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, table string) (Indexes, error) {
+	idxs := Indexes{}
+	rows := &sql.Rows{}
+
+	if err := tx.Query(ctx, fmt.Sprintf("pragma index_list('%s')", table), []interface{}{}, rows); err != nil {
+		return nil, fmt.Errorf("sqlite3: reading table index description %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			seq     int
+			name    string
+			unique  int
+			origin  string
+			partial int
+		)
+		if err := rows.Scan(&seq, &name, &unique, &origin, &partial); err != nil {
+			return nil, errors.Wrap(err, "while querying indexes")
+		}
+
+		if origin == "pk" {
+			continue // we already know the primary key
+		}
+
+		idxs = append(idxs, &Index{
+			Name:   name,
+			Unique: unique == 1,
+		})
+	}
+	rows.Close()
+
+	// second loop to gather column info
+
+	for _, idx := range idxs {
+		if err := tx.Query(ctx, fmt.Sprintf("pragma index_info('%s')", idx.Name), []interface{}{}, rows); err != nil {
+			return nil, fmt.Errorf("sqlite3: reading index description %v", err)
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var (
+				seq        int
+				columnID   int
+				columnName string
+			)
+			if err := rows.Scan(&seq, &columnID, &columnName); err != nil {
+				return nil, errors.Wrap(err, "while querying indexes")
+			}
+
+			idx.columns = append(idx.columns, columnName)
+		}
+		rows.Close()
+	}
+
+	return idxs, nil
+}
+
+func (d *SQLite) scanColumn(c *Column, rows *sql.Rows) error {
+	var (
+		id         int
+		name       string
+		typ        string
+		notnullInt int
+		dflt       sql.NullString
+		pkInt      int
+	)
+
+	if err := rows.Scan(&id, &name, &typ, &notnullInt, &dflt, &pkInt); err != nil {
+		return err
+	}
+
+	c.Name = name
+	c.Nullable = notnullInt == 0
+	if pkInt > 0 {
+		c.Key = PrimaryKey
+	}
+
+	return d.typeField(c, typ)
+}
+
+func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
+	rows := &sql.Rows{}
+	if err := tx.Query(ctx, fmt.Sprintf("pragma table_info('%s')", name), []interface{}{}, rows); err != nil {
+		return nil, fmt.Errorf("sqlite3: reading table description %v", err)
+	}
+	// call `Close` in cases of failures (`Close` is idempotent).
+	defer rows.Close()
+	t := NewTable(name)
+	for rows.Next() {
+		c := &Column{}
+		if err := d.scanColumn(c, rows); err != nil {
+			return nil, err
+		}
+		t.AddColumn(c)
+		if c.Key == PrimaryKey {
+			t.PrimaryKey = append(t.PrimaryKey, c)
+		}
+	}
+	if err := rows.Close(); err != nil {
+		return nil, fmt.Errorf("closing rows %v", err)
+	}
+	idxs, err := d.indexes(ctx, tx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, processIndexes(idxs, t)
+}
