@@ -8,12 +8,43 @@ import (
 	"context"
 	"testing"
 
+	_ "github.com/mattn/go-sqlite3"
+
+	stdsql "database/sql"
+
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 )
+
+func TestSQLite_DoubleCreate(t *testing.T) {
+	tables := []*Table{
+		{
+			Name: "users",
+			PrimaryKey: []*Column{
+				{Name: "id", Type: field.TypeInt, Increment: true},
+			},
+			Columns: []*Column{
+				{Name: "id", Type: field.TypeInt, Increment: true},
+				{Name: "name", Type: field.TypeString, Nullable: true},
+				{Name: "age", Type: field.TypeInt},
+				{Name: "doc", Type: field.TypeJSON, Nullable: true},
+				{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+			},
+		},
+	}
+
+	for i := 0; i < 2; i++ {
+		db, err := stdsql.Open("sqlite3", "file:test?mode=memory&cache=shared&_fk=1")
+		require.NoError(t, err)
+		migrate, err := NewMigrate(sql.OpenDB("sqlite3", db))
+		require.NoError(t, err)
+		err = migrate.Create(context.Background(), tables...)
+		require.NoError(t, err)
+	}
+}
 
 func TestSQLite_Create(t *testing.T) {
 	tests := []struct {
