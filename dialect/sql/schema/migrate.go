@@ -237,6 +237,9 @@ type changes struct {
 // It fails if one of the changes is invalid.
 func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	change := &changes{}
+	if curr == nil {
+		return change, nil
+	}
 	// pks.
 	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
 		return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
