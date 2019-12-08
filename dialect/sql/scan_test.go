@@ -6,6 +6,7 @@ package sql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -137,6 +138,24 @@ func TestScanInt64(t *testing.T) {
 	n, err = ScanInt64(toRows(mock))
 	require.NoError(t, err)
 	require.EqualValues(t, 10, n)
+}
+
+func TestInterface(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"age"}).
+		AddRow("10").
+		AddRow("20")
+	var values []driver.Value
+	err := ScanSlice(toRows(mock), &values)
+	require.NoError(t, err)
+	require.Equal(t, []driver.Value{"10", "20"}, values)
+
+	mock = sqlmock.NewRows([]string{"age"}).
+		AddRow(10).
+		AddRow(20)
+	values = values[:0:0]
+	err = ScanSlice(toRows(mock), &values)
+	require.NoError(t, err)
+	require.Equal(t, []driver.Value{int64(10), int64(20)}, values)
 }
 
 func toRows(mrows *sqlmock.Rows) *sql.Rows {
