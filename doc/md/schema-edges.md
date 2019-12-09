@@ -348,7 +348,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2recur).
+The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2orecur).
 
 ## O2O Bidirectional
 
