@@ -217,8 +217,12 @@ func ValueLTE(v int) predicate.Node {
 func HasPrev() predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(PrevColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PrevTable, FieldID),
+				sql.Edge(sql.O2O, true, PrevTable, PrevColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -227,13 +231,16 @@ func HasPrev() predicate.Node {
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(PrevTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(PrevColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(Table, FieldID),
+				sql.Edge(sql.O2O, true, PrevTable, PrevColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }
@@ -242,16 +249,12 @@ func HasPrevWith(preds ...predicate.Node) predicate.Node {
 func HasNext() predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(NextColumn).
-						From(builder.Table(NextTable)).
-						Where(sql.NotNull(NextColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(NextTable, FieldID),
+				sql.Edge(sql.O2O, false, NextTable, NextColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -260,13 +263,16 @@ func HasNext() predicate.Node {
 func HasNextWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(NextColumn).From(builder.Table(NextTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(Table, FieldID),
+				sql.Edge(sql.O2O, false, NextTable, NextColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

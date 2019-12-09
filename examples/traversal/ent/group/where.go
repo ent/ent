@@ -262,15 +262,12 @@ func NameContainsFold(v string) predicate.Group {
 func HasUsers() predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(UsersPrimaryKey[0]).
-						From(builder.Table(UsersTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(UsersTable, FieldID),
+				sql.Edge(sql.M2M, false, UsersTable, UsersPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -279,20 +276,16 @@ func HasUsers() predicate.Group {
 func HasUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Table(UsersInverseTable)
-			t3 := builder.Table(UsersTable)
-			t4 := builder.Select(t3.C(UsersPrimaryKey[0])).
-				From(t3).
-				Join(t2).
-				On(t3.C(UsersPrimaryKey[1]), t2.C(FieldID))
-			t5 := builder.Select().From(t2)
-			for _, p := range preds {
-				p(t5)
-			}
-			t4.FromSelect(t5)
-			s.Where(sql.In(t1.C(FieldID), t4))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(UsersInverseTable, FieldID),
+				sql.Edge(sql.M2M, false, UsersTable, UsersPrimaryKey...),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }
@@ -301,8 +294,12 @@ func HasUsersWith(preds ...predicate.User) predicate.Group {
 func HasAdmin() predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(AdminColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(AdminTable, FieldID),
+				sql.Edge(sql.M2O, false, AdminTable, AdminColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -311,13 +308,16 @@ func HasAdmin() predicate.Group {
 func HasAdminWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(AdminInverseTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(AdminColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(AdminInverseTable, FieldID),
+				sql.Edge(sql.M2O, false, AdminTable, AdminColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

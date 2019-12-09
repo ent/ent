@@ -57,16 +57,11 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryCard chains the current query on the card edge.
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
-	step := &sql.Step{}
-	step.From.V = uq.sqlQuery()
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = card.Table
-	step.To.Column = card.FieldID
-	step.Edge.Rel = sql.O2O
-	step.Edge.Inverse = false
-	step.Edge.Table = user.CardTable
-	step.Edge.Columns = append(step.Edge.Columns, user.CardColumn)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(card.Table, card.FieldID),
+		sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
+	)
 	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }

@@ -56,16 +56,11 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QuerySpouse chains the current query on the spouse edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := &sql.Step{}
-	step.From.V = uq.sqlQuery()
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.O2O
-	step.Edge.Inverse = false
-	step.Edge.Table = user.SpouseTable
-	step.Edge.Columns = append(step.Edge.Columns, user.SpouseColumn)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
+	)
 	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }

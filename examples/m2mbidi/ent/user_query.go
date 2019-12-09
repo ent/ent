@@ -56,16 +56,11 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := &sql.Step{}
-	step.From.V = uq.sqlQuery()
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = false
-	step.Edge.Table = user.FriendsTable
-	step.Edge.Columns = append(step.Edge.Columns, user.FriendsPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	)
 	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }

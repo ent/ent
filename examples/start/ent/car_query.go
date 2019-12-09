@@ -57,16 +57,11 @@ func (cq *CarQuery) Order(o ...Order) *CarQuery {
 // QueryOwner chains the current query on the owner edge.
 func (cq *CarQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
-	step := &sql.Step{}
-	step.From.V = cq.sqlQuery()
-	step.From.Table = car.Table
-	step.From.Column = car.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2O
-	step.Edge.Inverse = true
-	step.Edge.Table = car.OwnerTable
-	step.Edge.Columns = append(step.Edge.Columns, car.OwnerColumn)
+	step := sql.NewStep(
+		sql.From(car.Table, car.FieldID, cq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, car.OwnerTable, car.OwnerColumn),
+	)
 	query.sql = sql.SetNeighbors(cq.driver.Dialect(), step)
 	return query
 }

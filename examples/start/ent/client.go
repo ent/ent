@@ -176,16 +176,11 @@ func (c *CarClient) GetX(ctx context.Context, id int) *Car {
 func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := ca.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = car.Table
-	step.From.Column = car.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2O
-	step.Edge.Inverse = true
-	step.Edge.Table = car.OwnerTable
-	step.Edge.Columns = append(step.Edge.Columns, car.OwnerColumn)
+	step := sql.NewStep(
+		sql.From(car.Table, car.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, car.OwnerTable, car.OwnerColumn),
+	)
 	query.sql = sql.Neighbors(ca.driver.Dialect(), step)
 
 	return query
@@ -259,16 +254,11 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = group.Table
-	step.From.Column = group.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = false
-	step.Edge.Table = group.UsersTable
-	step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+	)
 	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
 	return query
@@ -342,16 +332,11 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryCars(u *User) *CarQuery {
 	query := &CarQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = car.Table
-	step.To.Column = car.FieldID
-	step.Edge.Rel = sql.O2M
-	step.Edge.Inverse = false
-	step.Edge.Table = user.CarsTable
-	step.Edge.Columns = append(step.Edge.Columns, user.CarsColumn)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(car.Table, car.FieldID),
+		sql.Edge(sql.O2M, false, user.CarsTable, user.CarsColumn),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
@@ -361,16 +346,11 @@ func (c *UserClient) QueryCars(u *User) *CarQuery {
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := u.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = group.Table
-	step.To.Column = group.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = true
-	step.Edge.Table = user.GroupsTable
-	step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(group.Table, group.FieldID),
+		sql.Edge(sql.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
+	)
 	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
 	return query
