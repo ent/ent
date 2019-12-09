@@ -10,6 +10,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/schema/field"
@@ -304,15 +305,23 @@ type (
 	// EdgeSpecs used for perform common operations on list of edges.
 	EdgeSpecs []*EdgeSpec
 
-	// CreateSpec holds the information for creating a node
-	// in the graph.
-	CreateSpec struct {
-		Table  string
-		ID     *FieldSpec
-		Fields []*FieldSpec
-		Edges  []*EdgeSpec
+	// NodeSpec defines the information for querying and
+	// decoding nodes in the graph.
+	NodeSpec struct {
+		Table   string
+		Columns []string
+		ID      *FieldSpec
 	}
 )
+
+// CreateSpec holds the information for creating
+// a node in the graph.
+type CreateSpec struct {
+	Table  string
+	ID     *FieldSpec
+	Fields []*FieldSpec
+	Edges  []*EdgeSpec
+}
 
 // CreateNode applies the CreateSpec on the graph.
 func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error {
@@ -320,21 +329,146 @@ func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error
 	if err != nil {
 		return err
 	}
-	cr := &creator{CreateSpec: spec, builder: Dialect(drv.Dialect())}
+	gr := graph{tx: tx, builder: Dialect(drv.Dialect())}
+	cr := &creator{CreateSpec: spec, graph: gr}
 	if err := cr.node(ctx, tx); err != nil {
 		return rollback(tx, err)
 	}
 	return tx.Commit()
 }
 
+type (
+	// EdgeMut defines edge mutations.
+	EdgeMut struct {
+		Add   []*EdgeSpec
+		Clear []*EdgeSpec
+	}
+
+	// FieldMut defines field mutations.
+	FieldMut struct {
+		Set   []*FieldSpec // field = ?
+		Add   []*FieldSpec // field = field + ?
+		Clear []*FieldSpec // field = NULL
+	}
+
+	// UpdateSpec holds the information for updating one
+	// or more nodes in the graph in the graph.
+	UpdateSpec struct {
+		Node      *NodeSpec
+		Edges     EdgeMut
+		Fields    FieldMut
+		Predicate func(*Selector)
+
+		ScanTypes []interface{}
+		Assign    func(...interface{}) error
+	}
+)
+
+// UpdateNode applies the UpdateSpec on one node in the graph.
+func UpdateNode(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) error {
+	tx, err := drv.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	gr := graph{tx: tx, builder: Dialect(drv.Dialect())}
+	cr := &updater{UpdateSpec: spec, graph: gr}
+	if err := cr.node(ctx, tx); err != nil {
+		return rollback(tx, err)
+	}
+	return tx.Commit()
+}
+
+type updater struct {
+	graph
+	*UpdateSpec
+}
+
+func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
+	var (
+		// id holds the PK of the node used for linking
+		// it with the other nodes.
+		id         = u.Node.ID.Value
+		res        sql.Result
+		addEdges   = EdgeSpecs(u.Edges.Add).GroupRel()
+		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
+	)
+	update := u.builder.Update(u.Node.Table).Where(EQ(u.Node.ID.Column, id))
+	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
+		return err
+	}
+	if !update.Empty() {
+		query, args := update.Query()
+		if err := tx.Exec(ctx, query, args, &res); err != nil {
+			return err
+		}
+	}
+	if err := u.graph.clearM2MEdges(ctx, id, clearEdges[M2M]); err != nil {
+		return err
+	}
+	if err := u.graph.addM2MEdges(ctx, id, addEdges[M2M]); err != nil {
+		return err
+	}
+	if err := u.graph.clearFKEdges(ctx, id, append(clearEdges[O2M], clearEdges[O2O]...)); err != nil {
+		return err
+	}
+	if err := u.graph.addFKEdges(ctx, id, append(addEdges[O2M], addEdges[O2O]...)); err != nil {
+		return err
+	}
+	// Query and scan the node.
+	selector := u.builder.Select(u.Node.Columns...).
+		From(u.builder.Table(u.Node.Table)).
+		Where(EQ(u.Node.ID.Column, u.Node.ID.Value))
+	rows := &Rows{}
+	query, args := selector.Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	return u.scan(rows)
+}
+
+// setTableColumns sets the table columns and foreign_keys used in insert.
+func (u *updater) setTableColumns(update *UpdateBuilder, addEdges, clearEdges map[Rel][]*EdgeSpec) error {
+	for _, fi := range u.Fields.Clear {
+		update.SetNull(fi.Column)
+	}
+	for _, e := range clearEdges[M2O] {
+		update.SetNull(e.Columns[0])
+	}
+	for _, e := range clearEdges[O2O] {
+		if e.Inverse || e.Bidi {
+			update.SetNull(e.Columns[0])
+		}
+	}
+	err := setTableColumns(u.Fields.Set, addEdges, func(column string, value driver.Value) {
+		update.Set(column, value)
+	})
+	if err != nil {
+		return err
+	}
+	for _, fi := range u.Fields.Add {
+		update.Add(fi.Column, fi.Value)
+	}
+	return nil
+}
+
+func (u *updater) scan(rows *Rows) error {
+	defer rows.Close()
+	if !rows.Next() {
+		return fmt.Errorf("record with id %v not found in table %s", u.Node.ID.Value, u.Node.Table)
+	}
+	if err := rows.Scan(u.ScanTypes...); err != nil {
+		return fmt.Errorf("failed scanning rows: %v", err)
+	}
+	return u.Assign(u.ScanTypes...)
+}
+
 type creator struct {
+	graph
 	*CreateSpec
-	builder *dialectBuilder
 }
 
 func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	var (
-		res    sql.Result
 		edges  = EdgeSpecs(c.Edges).GroupRel()
 		insert = c.builder.Insert(c.Table).Default()
 	)
@@ -345,76 +479,21 @@ func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	if err := c.insert(ctx, tx, insert); err != nil {
 		return fmt.Errorf("insert node to table %s: %v", c.Table, err)
 	}
-	// Insert all M2M edges from the same type at once.
-	// The EdgeSpec is the same for all members in a group.
-	tables := EdgeSpecs(edges[M2M]).GroupTable()
-	for table, edges := range tables {
-		edge := edges[0]
-		insert = c.builder.Insert(table).Columns(edge.Columns...)
-		for _, edge := range edges {
-			pk1, pk2 := c.ID.Value, edge.Target.Nodes[0]
-			if edge.Inverse {
-				pk1, pk2 = pk2, pk1
-			}
-			insert.Values(pk1, pk2)
-			if edge.Bidi {
-				insert.Values(pk2, pk1)
-			}
-		}
-		query, args := insert.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("add m2m edge for table %s: %v", table, err)
-		}
+	if err := c.graph.addM2MEdges(ctx, c.ID.Value, edges[M2M]); err != nil {
+		return err
 	}
-	// O2M and non-inverse O2O edges also reside in external tables.
-	for _, edge := range append(edges[O2M], edges[O2O]...) {
-		if edge.Rel == O2O && edge.Inverse {
-			continue
-		}
-		p := EQ(edge.Target.IDSpec.Column, edge.Target.Nodes[0])
-		// Use "IN" predicate instead of list of "OR"
-		// in case of more than on nodes to connect.
-		if len(edge.Target.Nodes) > 1 {
-			p = InValues(edge.Target.IDSpec.Column, edge.Target.Nodes...)
-		}
-		query, args := c.builder.Update(edge.Table).
-			Set(edge.Columns[0], c.ID.Value).
-			Where(And(p, IsNull(edge.Columns[0]))).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("add m2m edge for table %s: %v", edge.Table, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if ids := edge.Target.Nodes; int(affected) < len(ids) {
-			return fmt.Errorf("one of %v is already connected to a different %s", ids, edge.Columns[0])
-		}
+	if err := c.graph.addFKEdges(ctx, c.ID.Value, append(edges[O2M], edges[O2O]...)); err != nil {
+		return err
 	}
 	return nil
 }
 
 // setTableColumns sets the table columns and foreign_keys used in insert.
-func (c *creator) setTableColumns(insert *InsertBuilder, edges map[Rel][]*EdgeSpec) (err error) {
-	for _, fi := range c.Fields {
-		value := fi.Value
-		if fi.Type == field.TypeJSON {
-			if value, err = json.Marshal(value); err != nil {
-				return fmt.Errorf("marshal value for column %s: %v", fi.Column, err)
-			}
-		}
-		insert.Set(fi.Column, value)
-	}
-	for _, e := range edges[M2O] {
-		insert.Set(e.Columns[0], e.Target.Nodes[0])
-	}
-	for _, e := range edges[O2O] {
-		if e.Inverse || e.Bidi {
-			insert.Set(e.Columns[0], e.Target.Nodes[0])
-		}
-	}
-	return nil
+func (c *creator) setTableColumns(insert *InsertBuilder, edges map[Rel][]*EdgeSpec) error {
+	err := setTableColumns(c.Fields, edges, func(column string, value driver.Value) {
+		insert.Set(column, value)
+	})
+	return err
 }
 
 // insert inserts the node to its table and sets its ID if it wasn't provided by the user.
@@ -452,6 +531,149 @@ func (es EdgeSpecs) GroupTable() map[string][]*EdgeSpec {
 	return edges
 }
 
+// The common operations shared between the different builders.
+//
+// M2M edges reside in join tables and require INSERT and DELETE
+// queries for adding or removing edges respectively.
+//
+// O2M and non-inverse O2O edges also reside in external tables,
+// but use UPDATE queries (fk = ?, fk = NULL).
+type graph struct {
+	tx      dialect.ExecQuerier
+	builder *dialectBuilder
+}
+
+func (g *graph) clearM2MEdges(ctx context.Context, id driver.Value, edges EdgeSpecs) error {
+	var (
+		res Result
+		// Delete all M2M edges from the same type at once.
+		// The EdgeSpec is the same for all members in a group.
+		tables = edges.GroupTable()
+	)
+	for _, table := range sortedKeys(tables) {
+		edges := tables[table]
+		preds := make([]*Predicate, 0, len(edges))
+		for _, edge := range edges {
+			pk1, pk2 := id, edge.Target.Nodes[0]
+			if edge.Inverse {
+				pk1, pk2 = pk2, pk1
+			}
+			preds = append(preds, EQ(edge.Columns[0], pk1).And().EQ(edge.Columns[1], pk2))
+			if edge.Bidi {
+				preds = append(preds, EQ(edge.Columns[0], pk2).And().EQ(edge.Columns[1], pk1))
+			}
+		}
+		query, args := g.builder.Delete(table).Where(Or(preds...)).Query()
+		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+			return fmt.Errorf("remove m2m edge for table %s: %v", table, err)
+		}
+	}
+	return nil
+}
+
+func (g *graph) addM2MEdges(ctx context.Context, id driver.Value, edges EdgeSpecs) error {
+	var (
+		res Result
+		// Insert all M2M edges from the same type at once.
+		// The EdgeSpec is the same for all members in a group.
+		tables = edges.GroupTable()
+	)
+	for _, table := range sortedKeys(tables) {
+		edges := tables[table]
+		insert := g.builder.Insert(table).Columns(edges[0].Columns...)
+		for _, edge := range edges {
+			pk1, pk2 := id, edge.Target.Nodes[0]
+			if edge.Inverse {
+				pk1, pk2 = pk2, pk1
+			}
+			insert.Values(pk1, pk2)
+			if edge.Bidi {
+				insert.Values(pk2, pk1)
+			}
+		}
+		query, args := insert.Query()
+		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+			return fmt.Errorf("add m2m edge for table %s: %v", table, err)
+		}
+	}
+	return nil
+}
+
+func (g *graph) clearFKEdges(ctx context.Context, id driver.Value, edges []*EdgeSpec) error {
+	for _, edge := range edges {
+		if edge.Rel == O2O && edge.Inverse {
+			continue
+		}
+		p := EQ(edge.Target.IDSpec.Column, edge.Target.Nodes[0])
+		// Use "IN" predicate instead of list of "OR"
+		// in case of more than on nodes to connect.
+		if len(edge.Target.Nodes) > 1 {
+			p = InValues(edge.Target.IDSpec.Column, edge.Target.Nodes...)
+		}
+		query, args := g.builder.Update(edge.Table).
+			SetNull(edge.Columns[0]).
+			Where(And(p, EQ(edge.Columns[0], id))).
+			Query()
+		var res Result
+		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+			return fmt.Errorf("add %s edge for table %s: %v", edge.Rel, edge.Table, err)
+		}
+	}
+	return nil
+}
+
+func (g *graph) addFKEdges(ctx context.Context, id driver.Value, edges []*EdgeSpec) error {
+	for _, edge := range edges {
+		if edge.Rel == O2O && edge.Inverse {
+			continue
+		}
+		p := EQ(edge.Target.IDSpec.Column, edge.Target.Nodes[0])
+		// Use "IN" predicate instead of list of "OR"
+		// in case of more than on nodes to connect.
+		if len(edge.Target.Nodes) > 1 {
+			p = InValues(edge.Target.IDSpec.Column, edge.Target.Nodes...)
+		}
+		query, args := g.builder.Update(edge.Table).
+			Set(edge.Columns[0], id).
+			Where(And(p, IsNull(edge.Columns[0]))).
+			Query()
+		var res Result
+		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+			return fmt.Errorf("add %s edge for table %s: %v", edge.Rel, edge.Table, err)
+		}
+		affected, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if ids := edge.Target.Nodes; int(affected) < len(ids) {
+			return fmt.Errorf("one of %v is already connected to a different %s", ids, edge.Columns[0])
+		}
+	}
+	return nil
+}
+
+// setTableColumns is shared between updater and creator.
+func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(string, driver.Value)) (err error) {
+	for _, fi := range fields {
+		value := fi.Value
+		if fi.Type == field.TypeJSON {
+			if value, err = json.Marshal(value); err != nil {
+				return fmt.Errorf("marshal value for column %s: %v", fi.Column, err)
+			}
+		}
+		set(fi.Column, value)
+	}
+	for _, e := range edges[M2O] {
+		set(e.Columns[0], e.Target.Nodes[0])
+	}
+	for _, e := range edges[O2O] {
+		if e.Inverse || e.Bidi {
+			set(e.Columns[0], e.Target.Nodes[0])
+		}
+	}
+	return nil
+}
+
 // insertLastID invokes the insert query on the transaction and returns the LastInsertID.
 func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *InsertBuilder) (int64, error) {
 	query, args := insert.Query()
@@ -479,4 +701,13 @@ func rollback(tx dialect.Tx, err error) error {
 		err = fmt.Errorf("%s: %v", err.Error(), rerr)
 	}
 	return err
+}
+
+func sortedKeys(m map[string][]*EdgeSpec) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }

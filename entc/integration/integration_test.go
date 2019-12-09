@@ -195,6 +195,7 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr = client.User.UpdateOne(usr).SetName("baz").AddGroups(grp).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
+
 	// grouping.
 	var v []struct {
 		Name  string `json:"name"`

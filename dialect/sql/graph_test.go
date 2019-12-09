@@ -719,11 +719,11 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("mashraki").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
-					WithArgs(1, 2, 2, 1, 1, 3, 3, 1).
-					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
 					WithArgs(4, 1, 5, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
+					WithArgs(1, 2, 2, 1, 1, 3, 3, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
 			},
@@ -736,6 +736,222 @@ func TestCreateNode(t *testing.T) {
 			tt.expect(mock)
 			err = CreateNode(context.Background(), OpenDB("", db), tt.spec)
 			require.Equal(t, tt.wantErr, err != nil, err)
+		})
+	}
+}
+
+type user struct {
+	id   int
+	age  int
+	name string
+}
+
+func (*user) values() []interface{} {
+	return []interface{}{&NullInt64{}, &NullInt64{}, &NullString{}}
+}
+
+func (u *user) assign(values ...interface{}) error {
+	u.id = int(values[0].(*NullInt64).Int64)
+	u.age = int(values[1].(*NullInt64).Int64)
+	u.name = values[2].(*NullString).String
+	return nil
+}
+
+func TestUpdateOne(t *testing.T) {
+	tests := []struct {
+		name     string
+		spec     *UpdateSpec
+		prepare  func(sqlmock.Sqlmock)
+		wantErr  bool
+		wantUser *user
+	}{
+		{
+			name: "fields/set",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Fields: FieldMut{
+					Set: []*FieldSpec{
+						{Column: "age", Type: field.TypeInt, Value: 30},
+						{Column: "name", Type: field.TypeString, Value: "Ariel"},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ? WHERE `id` = ?")).
+					WithArgs(30, "Ariel", 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 30, "Ariel"))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{name: "Ariel", age: 30, id: 1},
+		},
+		{
+			name: "fields/add_clear",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Fields: FieldMut{
+					Add: []*FieldSpec{
+						{Column: "age", Type: field.TypeInt, Value: 1},
+					},
+					Clear: []*FieldSpec{
+						{Column: "name", Type: field.TypeString},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`age`, ?) + ? WHERE `id` = ?")).
+					WithArgs(0, 1, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 31, nil))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{age: 31, id: 1},
+		},
+		{
+			name: "edges/o2o_non_inverse and m2o",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: O2O, Columns: []string{"car_id"}, Inverse: true},
+						{Rel: M2O, Columns: []string{"workplace_id"}, Inverse: true},
+					},
+					Add: []*EdgeSpec{
+						{Rel: O2O, Columns: []string{"card_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+						{Rel: M2O, Columns: []string{"parent_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `users` SET `workplace_id` = NULL, `car_id` = NULL, `parent_id` = ?, `card_id` = ? WHERE `id` = ?")).
+					WithArgs(2, 2, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 31, nil))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{age: 31, id: 1},
+		},
+		{
+			name: "edges/o2o_bidi",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: O2O, Table: "users", Bidi: true, Columns: []string{"spouse_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
+					},
+					Add: []*EdgeSpec{
+						{Rel: O2O, Table: "users", Bidi: true, Columns: []string{"spouse_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{3}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				// Clear "spouse 2" from 1's column, and set "spouse 3".
+				mock.ExpectExec(escape("UPDATE `users` SET `spouse_id` = NULL, `spouse_id` = ? WHERE `id` = ?")).
+					WithArgs(3, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				// Clear "spouse 1" from 3's column.
+				mock.ExpectExec(escape("UPDATE `users` SET `spouse_id` = NULL WHERE (`id` = ?) AND (`spouse_id` = ?)")).
+					WithArgs(2, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				// Set 3's column to point "spouse 1".
+				mock.ExpectExec(escape("UPDATE `users` SET `spouse_id` = ? WHERE (`id` = ?) AND (`spouse_id` IS NULL)")).
+					WithArgs(1, 3).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 31, nil))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{age: 31, id: 1},
+		},
+		{
+			name: "edges/clear_add_m2m",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
+						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{3}}},
+					},
+					Add: []*EdgeSpec{
+						{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{4}}},
+						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{5}}},
+						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{6}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				// Clear user groups.
+				mock.ExpectExec(escape("DELETE FROM `group_users` WHERE (`group_id` = ? AND `user_id` = ?)")).
+					WithArgs(3, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				// Clear user friends.
+				mock.ExpectExec(escape("DELETE FROM `user_friends` WHERE ((`user_id` = ? AND `friend_id` = ?) OR (`user_id` = ? AND `friend_id` = ?))")).
+					WithArgs(1, 2, 2, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				// Add new groups.
+				mock.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(5, 1, 6, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				// Add new friends.
+				mock.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(1, 4, 4, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 31, nil))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{age: 31, id: 1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+			tt.prepare(mock)
+			usr := &user{}
+			tt.spec.Assign = usr.assign
+			tt.spec.ScanTypes = usr.values()
+			err = UpdateNode(context.Background(), OpenDB("", db), tt.spec)
+			require.Equal(t, tt.wantErr, err != nil, err)
+			require.Equal(t, tt.wantUser, usr)
 		})
 	}
 }
