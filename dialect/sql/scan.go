@@ -98,6 +98,8 @@ func (r *rowScan) values() []interface{} {
 // scanType returns rowScan for the given reflect.Type.
 func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 	switch k := typ.Kind(); {
+	case k == reflect.Interface && typ.NumMethod() == 0:
+		fallthrough // interface{}
 	case k == reflect.String || k >= reflect.Bool && k <= reflect.Float64:
 		return &rowScan{
 			columns: []reflect.Type{typ},
