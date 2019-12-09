@@ -363,16 +363,12 @@ func NameContainsFold(v string) predicate.User {
 func HasPets() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(PetsColumn).
-						From(builder.Table(PetsTable)).
-						Where(sql.NotNull(PetsColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PetsTable, FieldID),
+				sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -381,13 +377,16 @@ func HasPets() predicate.User {
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(PetsColumn).From(builder.Table(PetsTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PetsInverseTable, FieldID),
+				sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

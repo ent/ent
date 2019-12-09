@@ -9,25 +9,23 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/traversal/ent/user"
-	"github.com/pkg/errors"
-
-	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
-
 	"github.com/facebookincubator/ent/examples/traversal/ent"
 	"github.com/facebookincubator/ent/examples/traversal/ent/group"
+	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
+	"github.com/facebookincubator/ent/examples/traversal/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/pkg/errors"
 )
 
-func main() {
+func Example_Traversal() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
-	// run the auto migration tool.
+	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
@@ -54,6 +52,13 @@ func main() {
 	}); err != nil {
 		log.Fatal(err)
 	}
+	// Output:
+	// Pets created: Pet(id=1, name=Pedro) Pet(id=2, name=Xabi) Pet(id=3, name=Coco)
+	// User(id=3, age=37, name=Alex)
+	// [Pet(id=1, name=Pedro) Pet(id=2, name=Xabi)]
+	// User(id=5, age=30, name=Ariel)
+	// Pets created: Pet(id=4, name=Pedro) Pet(id=5, name=Xabi) Pet(id=6, name=Coco)
+	// Pets created: Pet(id=7, name=Pedro) Pet(id=8, name=Xabi) Pet(id=9, name=Coco)
 }
 
 func Gen(ctx context.Context, client *ent.Client) error {

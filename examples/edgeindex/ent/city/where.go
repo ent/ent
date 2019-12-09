@@ -262,16 +262,12 @@ func NameContainsFold(v string) predicate.City {
 func HasStreets() predicate.City {
 	return predicate.City(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(StreetsColumn).
-						From(builder.Table(StreetsTable)).
-						Where(sql.NotNull(StreetsColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(StreetsTable, FieldID),
+				sql.Edge(sql.O2M, false, StreetsTable, StreetsColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -280,13 +276,16 @@ func HasStreets() predicate.City {
 func HasStreetsWith(preds ...predicate.Street) predicate.City {
 	return predicate.City(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(StreetsColumn).From(builder.Table(StreetsTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(StreetsInverseTable, FieldID),
+				sql.Edge(sql.O2M, false, StreetsTable, StreetsColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

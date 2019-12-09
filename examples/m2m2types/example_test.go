@@ -9,28 +9,31 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/m2m2types/ent/user"
-
 	"github.com/facebookincubator/ent/examples/m2m2types/ent"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/group"
+	"github.com/facebookincubator/ent/examples/m2m2types/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
+func Example_M2M2Types() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
-	// run the auto migration tool.
+	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	if err := Do(ctx, client); err != nil {
 		log.Fatal(err)
 	}
+	// Output:
+	// [Group(id=1, name=GitHub) Group(id=2, name=GitLab)]
+	// [Group(id=1, name=GitHub)]
+	// [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]
 }
 
 func Do(ctx context.Context, client *ent.Client) error {

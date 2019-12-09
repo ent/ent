@@ -10,3 +10,9 @@ a pet B using the pets edge, B can get its owner using the owner edge.
 ```console
 go generate ./...
 ```
+
+### Run Example
+
+```console
+go test
+```

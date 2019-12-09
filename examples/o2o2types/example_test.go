@@ -15,20 +15,25 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
+func Example_O2O2Types() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
-	// run the auto migration tool.
+	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	if err := Do(ctx, client); err != nil {
 		log.Fatal(err)
 	}
+	// Output:
+	// user: User(id=1, age=30, name=Mashraki)
+	// card: Card(id=1, expired=Sun Dec  8 15:04:05 2019, number=1020)
+	// card: Card(id=1, expired=Sun Dec  8 15:04:05 2019, number=1020)
+	// owner: User(id=1, age=30, name=Mashraki)
 }
 
 func Do(ctx context.Context, client *ent.Client) error {
@@ -40,30 +45,34 @@ func Do(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return fmt.Errorf("creating user: %v", err)
 	}
-	log.Println("user:", a8m)
+	fmt.Println("user:", a8m)
+	expired, err := time.Parse(time.RFC3339, "2019-12-08T15:04:05Z")
+	if err != nil {
+		return err
+	}
 	card1, err := client.Card.
 		Create().
 		SetOwner(a8m).
 		SetNumber("1020").
-		SetExpired(time.Now().Add(time.Minute)).
+		SetExpired(expired).
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("creating card: %v", err)
 	}
-	log.Println("card:", card1)
+	fmt.Println("card:", card1)
 	// Only returns the card of the user,
 	// and expects that there's only one.
 	card2, err := a8m.QueryCard().Only(ctx)
 	if err != nil {
 		return fmt.Errorf("querying card: %v", err)
 	}
-	log.Println("card:", card2)
+	fmt.Println("card:", card2)
 	// The Card entity is able to query its owner using
 	// its back-reference.
 	owner, err := card2.QueryOwner().Only(ctx)
 	if err != nil {
 		return fmt.Errorf("querying owner: %v", err)
 	}
-	log.Println("owner:", owner)
+	fmt.Println("owner:", owner)
 	return nil
 }

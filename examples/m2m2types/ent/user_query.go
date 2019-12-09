@@ -57,16 +57,11 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	step := &sql.Step{}
-	step.From.V = uq.sqlQuery()
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = group.Table
-	step.To.Column = group.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = true
-	step.Edge.Table = user.GroupsTable
-	step.Edge.Columns = append(step.Edge.Columns, user.GroupsPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(group.Table, group.FieldID),
+		sql.Edge(sql.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
+	)
 	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }

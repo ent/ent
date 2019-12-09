@@ -217,8 +217,12 @@ func ValueLTE(v int) predicate.Node {
 func HasParent() predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(ParentColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(ParentTable, FieldID),
+				sql.Edge(sql.M2O, true, ParentTable, ParentColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -227,13 +231,16 @@ func HasParent() predicate.Node {
 func HasParentWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(ParentTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(ParentColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(Table, FieldID),
+				sql.Edge(sql.M2O, true, ParentTable, ParentColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }
@@ -242,16 +249,12 @@ func HasParentWith(preds ...predicate.Node) predicate.Node {
 func HasChildren() predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(ChildrenColumn).
-						From(builder.Table(ChildrenTable)).
-						Where(sql.NotNull(ChildrenColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(ChildrenTable, FieldID),
+				sql.Edge(sql.O2M, false, ChildrenTable, ChildrenColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -260,13 +263,16 @@ func HasChildren() predicate.Node {
 func HasChildrenWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(ChildrenColumn).From(builder.Table(ChildrenTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(Table, FieldID),
+				sql.Edge(sql.O2M, false, ChildrenTable, ChildrenColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

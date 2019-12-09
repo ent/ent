@@ -56,16 +56,11 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := &sql.Step{}
-	step.From.V = uq.sqlQuery()
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = true
-	step.Edge.Table = user.FollowersTable
-	step.Edge.Columns = append(step.Edge.Columns, user.FollowersPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	)
 	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
@@ -73,16 +68,11 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := &sql.Step{}
-	step.From.V = uq.sqlQuery()
-	step.From.Table = user.Table
-	step.From.Column = user.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = false
-	step.Edge.Table = user.FollowingTable
-	step.Edge.Columns = append(step.Edge.Columns, user.FollowingPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	)
 	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }

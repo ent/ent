@@ -363,16 +363,12 @@ func NameContainsFold(v string) predicate.User {
 func HasPets() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(PetsColumn).
-						From(builder.Table(PetsTable)).
-						Where(sql.NotNull(PetsColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PetsTable, FieldID),
+				sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -381,13 +377,16 @@ func HasPets() predicate.User {
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(PetsColumn).From(builder.Table(PetsTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(PetsInverseTable, FieldID),
+				sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }
@@ -396,15 +395,12 @@ func HasPetsWith(preds ...predicate.Pet) predicate.User {
 func HasFriends() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(FriendsPrimaryKey[0]).
-						From(builder.Table(FriendsTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(FriendsTable, FieldID),
+				sql.Edge(sql.M2M, false, FriendsTable, FriendsPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -413,20 +409,16 @@ func HasFriends() predicate.User {
 func HasFriendsWith(preds ...predicate.User) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Table(Table)
-			t3 := builder.Table(FriendsTable)
-			t4 := builder.Select(t3.C(FriendsPrimaryKey[0])).
-				From(t3).
-				Join(t2).
-				On(t3.C(FriendsPrimaryKey[1]), t2.C(FieldID))
-			t5 := builder.Select().From(t2)
-			for _, p := range preds {
-				p(t5)
-			}
-			t4.FromSelect(t5)
-			s.Where(sql.In(t1.C(FieldID), t4))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(Table, FieldID),
+				sql.Edge(sql.M2M, false, FriendsTable, FriendsPrimaryKey...),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }
@@ -435,15 +427,12 @@ func HasFriendsWith(preds ...predicate.User) predicate.User {
 func HasGroups() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(GroupsPrimaryKey[1]).
-						From(builder.Table(GroupsTable)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(GroupsTable, FieldID),
+				sql.Edge(sql.M2M, true, GroupsTable, GroupsPrimaryKey...),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -452,20 +441,16 @@ func HasGroups() predicate.User {
 func HasGroupsWith(preds ...predicate.Group) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Table(GroupsInverseTable)
-			t3 := builder.Table(GroupsTable)
-			t4 := builder.Select(t3.C(GroupsPrimaryKey[1])).
-				From(t3).
-				Join(t2).
-				On(t3.C(GroupsPrimaryKey[0]), t2.C(FieldID))
-			t5 := builder.Select().From(t2)
-			for _, p := range preds {
-				p(t5)
-			}
-			t4.FromSelect(t5)
-			s.Where(sql.In(t1.C(FieldID), t4))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(GroupsInverseTable, FieldID),
+				sql.Edge(sql.M2M, true, GroupsTable, GroupsPrimaryKey...),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }
@@ -474,16 +459,12 @@ func HasGroupsWith(preds ...predicate.Group) predicate.User {
 func HasManage() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(ManageColumn).
-						From(builder.Table(ManageTable)).
-						Where(sql.NotNull(ManageColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(ManageTable, FieldID),
+				sql.Edge(sql.O2M, true, ManageTable, ManageColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -492,13 +473,16 @@ func HasManage() predicate.User {
 func HasManageWith(preds ...predicate.Group) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(ManageColumn).From(builder.Table(ManageTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(ManageInverseTable, FieldID),
+				sql.Edge(sql.O2M, true, ManageTable, ManageColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

@@ -363,16 +363,12 @@ func NameContainsFold(v string) predicate.User {
 func HasCard() predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			builder := sql.Dialect(s.Dialect())
-			s.Where(
-				sql.In(
-					t1.C(FieldID),
-					builder.Select(CardColumn).
-						From(builder.Table(CardTable)).
-						Where(sql.NotNull(CardColumn)),
-				),
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(CardTable, FieldID),
+				sql.Edge(sql.O2O, false, CardTable, CardColumn),
 			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -381,13 +377,16 @@ func HasCard() predicate.User {
 func HasCardWith(preds ...predicate.Card) predicate.User {
 	return predicate.User(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(CardColumn).From(builder.Table(CardTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(FieldID), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(CardInverseTable, FieldID),
+				sql.Edge(sql.O2O, false, CardTable, CardColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

@@ -262,8 +262,12 @@ func NameContainsFold(v string) predicate.Street {
 func HasCity() predicate.Street {
 	return predicate.Street(
 		func(s *sql.Selector) {
-			t1 := s.Table()
-			s.Where(sql.NotNull(t1.C(CityColumn)))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(CityTable, FieldID),
+				sql.Edge(sql.M2O, true, CityTable, CityColumn),
+			)
+			sql.HasNeighbors(s, step)
 		},
 	)
 }
@@ -272,13 +276,16 @@ func HasCity() predicate.Street {
 func HasCityWith(preds ...predicate.City) predicate.Street {
 	return predicate.Street(
 		func(s *sql.Selector) {
-			builder := sql.Dialect(s.Dialect())
-			t1 := s.Table()
-			t2 := builder.Select(FieldID).From(builder.Table(CityInverseTable))
-			for _, p := range preds {
-				p(t2)
-			}
-			s.Where(sql.In(t1.C(CityColumn), t2))
+			step := sql.NewStep(
+				sql.From(Table, FieldID),
+				sql.To(CityInverseTable, FieldID),
+				sql.Edge(sql.M2O, true, CityTable, CityColumn),
+			)
+			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		},
 	)
 }

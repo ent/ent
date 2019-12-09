@@ -8,3 +8,8 @@ In the example, a User can have only one card, and a card must have exactly one 
 ```console
 go generate ./...
 ```
+
+### Run Examples
+```console
+go test
+```

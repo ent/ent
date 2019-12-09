@@ -164,16 +164,11 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = node.Table
-	step.From.Column = node.FieldID
-	step.To.Table = node.Table
-	step.To.Column = node.FieldID
-	step.Edge.Rel = sql.M2O
-	step.Edge.Inverse = true
-	step.Edge.Table = node.ParentTable
-	step.Edge.Columns = append(step.Edge.Columns, node.ParentColumn)
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, id),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.M2O, true, node.ParentTable, node.ParentColumn),
+	)
 	query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
 	return query
@@ -183,16 +178,11 @@ func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	step := &sql.Step{}
-	step.From.V = id
-	step.From.Table = node.Table
-	step.From.Column = node.FieldID
-	step.To.Table = node.Table
-	step.To.Column = node.FieldID
-	step.Edge.Rel = sql.O2M
-	step.Edge.Inverse = false
-	step.Edge.Table = node.ChildrenTable
-	step.Edge.Columns = append(step.Edge.Columns, node.ChildrenColumn)
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, id),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.O2M, false, node.ChildrenTable, node.ChildrenColumn),
+	)
 	query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
 	return query

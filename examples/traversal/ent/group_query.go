@@ -57,16 +57,11 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := &sql.Step{}
-	step.From.V = gq.sqlQuery()
-	step.From.Table = group.Table
-	step.From.Column = group.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2M
-	step.Edge.Inverse = false
-	step.Edge.Table = group.UsersTable
-	step.Edge.Columns = append(step.Edge.Columns, group.UsersPrimaryKey...)
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+	)
 	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
@@ -74,16 +69,11 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 // QueryAdmin chains the current query on the admin edge.
 func (gq *GroupQuery) QueryAdmin() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := &sql.Step{}
-	step.From.V = gq.sqlQuery()
-	step.From.Table = group.Table
-	step.From.Column = group.FieldID
-	step.To.Table = user.Table
-	step.To.Column = user.FieldID
-	step.Edge.Rel = sql.M2O
-	step.Edge.Inverse = false
-	step.Edge.Table = group.AdminTable
-	step.Edge.Columns = append(step.Edge.Columns, group.AdminColumn)
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, false, group.AdminTable, group.AdminColumn),
+	)
 	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }

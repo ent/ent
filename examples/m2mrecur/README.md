@@ -8,3 +8,9 @@ can follow **many** users, and can have **many** followers.
 ```console
 go generate ./...
 ```
+
+### Run Example
+
+```console
+go test
+```

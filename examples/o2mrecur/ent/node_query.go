@@ -56,16 +56,11 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryParent chains the current query on the parent edge.
 func (nq *NodeQuery) QueryParent() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := &sql.Step{}
-	step.From.V = nq.sqlQuery()
-	step.From.Table = node.Table
-	step.From.Column = node.FieldID
-	step.To.Table = node.Table
-	step.To.Column = node.FieldID
-	step.Edge.Rel = sql.M2O
-	step.Edge.Inverse = true
-	step.Edge.Table = node.ParentTable
-	step.Edge.Columns = append(step.Edge.Columns, node.ParentColumn)
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.M2O, true, node.ParentTable, node.ParentColumn),
+	)
 	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
@@ -73,16 +68,11 @@ func (nq *NodeQuery) QueryParent() *NodeQuery {
 // QueryChildren chains the current query on the children edge.
 func (nq *NodeQuery) QueryChildren() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := &sql.Step{}
-	step.From.V = nq.sqlQuery()
-	step.From.Table = node.Table
-	step.From.Column = node.FieldID
-	step.To.Table = node.Table
-	step.To.Column = node.FieldID
-	step.Edge.Rel = sql.O2M
-	step.Edge.Inverse = false
-	step.Edge.Table = node.ChildrenTable
-	step.Edge.Columns = append(step.Edge.Columns, node.ChildrenColumn)
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.O2M, false, node.ChildrenTable, node.ChildrenColumn),
+	)
 	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
