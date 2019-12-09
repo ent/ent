@@ -9,3 +9,9 @@ B can get its pointer using `prev`.
 ```console
 go generate ./...
 ```
+
+### Run Example
+
+```console
+go test
+```

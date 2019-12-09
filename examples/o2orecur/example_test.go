@@ -15,20 +15,23 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
+func Example_O2ORecur() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
-	// run the auto migration tool.
+	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	if err := Do(ctx, client); err != nil {
 		log.Fatal(err)
 	}
+	// Output:
+	// 1 2 3 4 5
+	// true
 }
 
 func Do(ctx context.Context, client *ent.Client) error {
@@ -54,7 +57,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Loop over the list and print it. `FirstX` panics if an error occur.
 	for curr = head; curr != nil; curr = curr.QueryNext().FirstX(ctx) {
-		fmt.Printf("%d ", curr.Value)
+		fmt.Printf(" %d", curr.Value)
 	}
 	// Output: 1 2 3 4 5
 

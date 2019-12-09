@@ -7,3 +7,9 @@ See example in https://entgo.io/docs/traversals
 ```console
 go generate ./...
 ```
+
+### Run Examples
+
+```console
+go test
+```

@@ -9,3 +9,9 @@ B can get its spouse using the `spouse` edge.
 ```console
 go generate ./...
 ```
+
+### Run Examples
+
+```console
+go test
+```

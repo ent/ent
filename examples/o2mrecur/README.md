@@ -9,3 +9,9 @@ B can get its owner using the `owner` edge.
 ```console
 go generate ./...
 ```
+
+### Run Examples
+
+```console
+go test
+```

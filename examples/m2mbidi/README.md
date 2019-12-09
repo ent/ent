@@ -8,3 +8,9 @@ Each user can **have many** friends. If user A becomes a friend of B, B is also 
 ```console
 go generate ./...
 ```
+
+### Run Example
+
+```console
+go test
+```

@@ -9,14 +9,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/m2mrecur/ent/user"
-
-	"github.com/facebookincubator/ent/examples/m2mrecur/ent"
+	"github.com/facebookincubator/ent/examples/m2mbidi/ent"
+	"github.com/facebookincubator/ent/examples/m2mbidi/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
+func Example_M2MBidi() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -30,6 +29,10 @@ func main() {
 	if err := Do(ctx, client); err != nil {
 		log.Fatal(err)
 	}
+	// Output:
+	// [User(id=1, age=30, name=a8m)]
+	// [User(id=2, age=28, name=nati)]
+	// [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]
 }
 
 func Do(ctx context.Context, client *ent.Client) error {
@@ -43,43 +46,28 @@ func Do(ctx context.Context, client *ent.Client) error {
 		Create().
 		SetAge(28).
 		SetName("nati").
-		AddFollowers(a8m).
+		AddFriends(a8m).
 		SaveX(ctx)
 
-	// Query following/followers:
-
-	flw := a8m.QueryFollowing().AllX(ctx)
-	fmt.Println(flw)
-	// Output: [User(id=2, age=28, name=nati)]
-
-	flr := a8m.QueryFollowers().AllX(ctx)
-	fmt.Println(flr)
-	// Output: []
-
-	flw = nati.QueryFollowing().AllX(ctx)
-	fmt.Println(flw)
-	// Output: []
-
-	flr = nati.QueryFollowers().AllX(ctx)
-	fmt.Println(flr)
+	// Query friends. Unlike `All`, `AllX` panics if an error occurs.
+	friends := nati.
+		QueryFriends().
+		AllX(ctx)
+	fmt.Println(friends)
 	// Output: [User(id=1, age=30, name=a8m)]
 
-	// Traverse the graph:
+	friends = a8m.
+		QueryFriends().
+		AllX(ctx)
+	fmt.Println(friends)
+	// Output: [User(id=2, age=28, name=nati)]
 
-	ages := nati.
-		QueryFollowers().       // [a8m]
-		QueryFollowing().       // [nati]
-		GroupBy(user.FieldAge). // [28]
-		IntsX(ctx)
-	fmt.Println(ages)
-	// Output: [28]
-
-	names := client.User.
+	// Query the graph:
+	friends = client.User.
 		Query().
-		Where(user.Not(user.HasFollowers())).
-		GroupBy(user.FieldName).
-		StringsX(ctx)
-	fmt.Println(names)
-	// Output: [a8m]
+		Where(user.HasFriends()).
+		AllX(ctx)
+	fmt.Println(friends)
+	// Output: [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]
 	return nil
 }

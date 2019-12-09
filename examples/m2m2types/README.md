@@ -8,3 +8,9 @@ Each group **has many** users, and each user can be joined to **many** groups.
 ```console
 go generate ./...
 ```
+
+### Run Example
+
+```console
+go test
+```
