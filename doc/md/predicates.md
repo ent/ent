@@ -28,7 +28,7 @@ title: Predicates
   ```go
    client.Pet.
 		Query().
-		Where(user.HasOwner()).
+		Where(pet.HasOwner()).
 		All(ctx)
   ```
 
@@ -37,7 +37,7 @@ title: Predicates
   ```go
    client.Pet.
 		Query().
-		Where(user.HasOwnerWith(user.Name("a8m"))).
+		Where(pet.HasOwnerWith(user.Name("a8m"))).
 		All(ctx)
   ```
 
@@ -47,7 +47,7 @@ title: Predicates
 ```go
 client.Pet.
 	Query().
-	Where(user.Not(user.NameHasPrefix("Ari"))).
+	Where(pet.Not(pet.NameHasPrefix("Ari"))).
 	All(ctx)
 ```
 
@@ -57,9 +57,9 @@ client.Pet.
 client.Pet.
 	Query().
 	Where(
-		user.Or(
-			user.HasOwner(),
-			user.Not(user.HasFriends()),
+		pet.Or(
+			pet.HasOwner(),
+			pet.Not(pet.HasFriends()),
 		)
 	).
 	All(ctx)
@@ -71,9 +71,9 @@ client.Pet.
 client.Pet.
 	Query().
 	Where(
-		user.And(
-			user.HasOwner(),
-			user.Not(user.HasFriends()),
+		pet.And(
+			pet.HasOwner(),
+			pet.Not(pet.HasFriends()),
 		)
 	).
 	All(ctx)
