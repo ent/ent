@@ -352,7 +352,7 @@ type (
 	}
 
 	// UpdateSpec holds the information for updating one
-	// or more nodes in the graph in the graph.
+	// or more nodes in the graph.
 	UpdateSpec struct {
 		Node      *NodeSpec
 		Edges     EdgeMut
@@ -391,6 +391,39 @@ func UpdateNodes(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) (int
 		return 0, rollback(tx, err)
 	}
 	return affected, tx.Commit()
+}
+
+// DeleteSpec holds the information for delete one
+// or more nodes in the graph.
+type DeleteSpec struct {
+	Node      *NodeSpec
+	Predicate func(*Selector)
+}
+
+// DeleteNodes applies the DeleteSpec on the graph.
+func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int, error) {
+	tx, err := drv.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	var (
+		res     Result
+		builder = Dialect(drv.Dialect())
+	)
+	selector := builder.Select().
+		From(builder.Table(spec.Node.Table))
+	if pred := spec.Predicate; pred != nil {
+		pred(selector)
+	}
+	query, args := builder.Delete(spec.Node.Table).FromSelect(selector).Query()
+	if err := tx.Exec(ctx, query, args, &res); err != nil {
+		return 0, rollback(tx, err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, rollback(tx, err)
+	}
+	return int(affected), tx.Commit()
 }
 
 type updater struct {
