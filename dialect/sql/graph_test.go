@@ -999,7 +999,7 @@ func TestUpdateNodes(t *testing.T) {
 			wantAffected: 2,
 		},
 		{
-			name: "with",
+			name: "with predicate",
 			spec: &UpdateSpec{
 				Node: &NodeSpec{
 					Table: "users",
@@ -1026,6 +1026,87 @@ func TestUpdateNodes(t *testing.T) {
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = NULL, `name` = NULL WHERE `id` = ?")).
 					WithArgs(1).
 					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+			wantAffected: 1,
+		},
+		{
+			name: "own_fks/m2o_o2o_inverse",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: O2O, Columns: []string{"car_id"}, Inverse: true},
+						{Rel: M2O, Columns: []string{"workplace_id"}, Inverse: true},
+					},
+					Add: []*EdgeSpec{
+						{Rel: O2O, Columns: []string{"card_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{3}}},
+						{Rel: M2O, Columns: []string{"parent_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{4}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				// Get all node ids first.
+				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).
+						AddRow(1))
+				// Clear "car" and "workplace" foreign_keys and add "card" and a "parent".
+				mock.ExpectExec(escape("UPDATE `users` SET `workplace_id` = NULL, `car_id` = NULL, `parent_id` = ?, `card_id` = ? WHERE `id` = ?")).
+					WithArgs(4, 3, 1).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+			wantAffected: 1,
+		},
+		{
+			name: "m2m",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: M2M, Table: "group_users", Columns: []string{"group_id", "user_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2, 3}}},
+						{Rel: M2M, Table: "user_followers", Columns: []string{"user_id", "follower_id"}, Bidi: true, Target: &EdgeTarget{Nodes: []driver.Value{5, 6}}},
+						{Rel: M2M, Table: "user_friends", Columns: []string{"user_id", "friend_id"}, Bidi: true, Target: &EdgeTarget{Nodes: []driver.Value{4}}},
+					},
+					Add: []*EdgeSpec{
+						{Rel: M2M, Table: "group_users", Columns: []string{"group_id", "user_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{7, 8}}},
+						{Rel: M2M, Table: "user_followers", Columns: []string{"user_id", "follower_id"}, Bidi: true, Target: &EdgeTarget{Nodes: []driver.Value{9}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				// Get all node ids first.
+				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).
+						AddRow(1))
+				// Clear user's groups.
+				mock.ExpectExec(escape("DELETE FROM `group_users` WHERE (`group_id` IN (?, ?) AND `user_id` = ?)")).
+					WithArgs(2, 3, 1).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				// Clear user's followers.
+				mock.ExpectExec(escape("DELETE FROM `user_followers` WHERE ((`user_id` = ? AND `follower_id` IN (?, ?)) OR (`user_id` IN (?, ?) AND `follower_id` = ?))")).
+					WithArgs(1, 5, 6, 5, 6, 1).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				// Clear user's friends.
+				mock.ExpectExec(escape("DELETE FROM `user_friends` WHERE ((`user_id` = ? AND `friend_id` = ?) OR (`user_id` = ? AND `friend_id` = ?))")).
+					WithArgs(1, 4, 4, 1).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				// Attach new groups to user.
+				mock.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(7, 1, 8, 1).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				// Attach new friends to user.
+				mock.ExpectExec(escape("INSERT INTO `user_followers` (`user_id`, `follower_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(1, 9, 9, 1).
+					WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectCommit()
 			},
 			wantAffected: 1,
