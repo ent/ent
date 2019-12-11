@@ -1124,6 +1124,23 @@ func TestUpdateNodes(t *testing.T) {
 	}
 }
 
+func TestDeleteNodes(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectBegin()
+	mock.ExpectExec(escape("DELETE FROM `users`")).
+		WillReturnResult(sqlmock.NewResult(0, 2))
+	mock.ExpectCommit()
+	affected, err := DeleteNodes(context.Background(), OpenDB("", db), &DeleteSpec{
+		Node: &NodeSpec{
+			Table: "users",
+			ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, 2, affected)
+}
+
 func escape(query string) string {
 	rows := strings.Split(query, "\n")
 	for i := range rows {
