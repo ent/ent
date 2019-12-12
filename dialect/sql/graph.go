@@ -443,11 +443,18 @@ type QuerySpec struct {
 	Assign     func(...interface{}) error
 }
 
-// QueryNodes query the nodes in the graph and scan them to the given values.
+// QueryNodes query the nodes in the graph query and scans them to the given values.
 func QueryNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) error {
 	builder := Dialect(drv.Dialect())
 	qr := &query{graph: graph{builder: builder}, QuerySpec: spec}
 	return qr.nodes(ctx, drv)
+}
+
+// CountNodes counts the nodes in the given graph query.
+func CountNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) (int, error) {
+	builder := Dialect(drv.Dialect())
+	qr := &query{graph: graph{builder: builder}, QuerySpec: spec}
+	return qr.count(ctx, drv)
 }
 
 type query struct {
@@ -476,7 +483,12 @@ func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 
 func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	rows := &Rows{}
-	query, args := q.selector().Count(q.Node.ID.Column).Query()
+	selector := q.selector().Count(q.Node.ID.Column)
+	if q.Unique {
+		selector.distinct = false
+		selector.Count(Distinct(q.Node.ID.Column))
+	}
+	query, args := selector.Query()
 	if err := drv.Query(ctx, query, args, rows); err != nil {
 		return 0, err
 	}
