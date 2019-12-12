@@ -741,9 +741,13 @@ func TestCreateNode(t *testing.T) {
 }
 
 type user struct {
-	id   int
-	age  int
-	name string
+	id    int
+	age   int
+	name  string
+	edges struct {
+		fk1 int
+		fk2 int
+	}
 }
 
 func (*user) values() []interface{} {
@@ -754,6 +758,11 @@ func (u *user) assign(values ...interface{}) error {
 	u.id = int(values[0].(*NullInt64).Int64)
 	u.age = int(values[1].(*NullInt64).Int64)
 	u.name = values[2].(*NullString).String
+	// loaded with foreign-keys.
+	if len(values) > 3 {
+		u.edges.fk1 = int(values[3].(*NullInt64).Int64)
+		u.edges.fk2 = int(values[4].(*NullInt64).Int64)
+	}
 	return nil
 }
 
@@ -1139,6 +1148,46 @@ func TestDeleteNodes(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Equal(t, 2, affected)
+}
+
+func TestQueryNodes(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectQuery(escape("SELECT DISTINCT `id`, `age`, `name`, `fk1`, `fk2` FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT ? OFFSET ?")).
+		WithArgs(40, 3, 4).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name", "fk1", "fk2"}).
+			AddRow(1, 10, nil, nil, nil).
+			AddRow(2, 20, "", 0, 0).
+			AddRow(3, 30, "a8m", 1, 1))
+	var users []*user
+	err = QueryNodes(context.Background(), OpenDB("", db), &QuerySpec{
+		Node: &NodeSpec{
+			Table:   "users",
+			Columns: []string{"id", "age", "name", "fk1", "fk2"},
+			ID:      &FieldSpec{Column: "id", Type: field.TypeInt},
+		},
+		Limit:  3,
+		Offset: 4,
+		Unique: true,
+		Order: func(s *Selector) {
+			s.OrderBy("id")
+		},
+		Predicate: func(s *Selector) {
+			s.Where(LT("age", 40))
+		},
+		ScanValues: func() []interface{} {
+			u := &user{}
+			users = append(users, u)
+			return append(u.values(), &NullInt64{}, &NullInt64{}) // extra values for fks.
+		},
+		Assign: func(values ...interface{}) error {
+			return users[len(users)-1].assign(values...)
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, &user{id: 1, age: 10, name: ""}, users[0])
+	require.Equal(t, &user{id: 2, age: 20, name: ""}, users[1])
+	require.Equal(t, &user{id: 3, age: 30, name: "a8m", edges: struct{ fk1, fk2 int }{1, 1}}, users[2])
 }
 
 func escape(query string) string {

@@ -10,6 +10,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/facebookincubator/ent/dialect"
@@ -424,6 +425,64 @@ func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int
 		return 0, rollback(tx, err)
 	}
 	return int(affected), tx.Commit()
+}
+
+// QuerySpec holds the information for querying
+// nodes in the graph.
+type QuerySpec struct {
+	Node *NodeSpec // Nodes info.
+	From *Selector // Optional query source (from path).
+
+	Limit     int
+	Offset    int
+	Unique    bool
+	Order     func(*Selector)
+	Predicate func(*Selector)
+
+	ScanValues func() []interface{}
+	Assign     func(...interface{}) error
+}
+
+// QueryNodes query the nodes in the graph and scan them to the given values.
+func QueryNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) error {
+	builder := Dialect(drv.Dialect())
+	selector := builder.Select().From(builder.Table(spec.Node.Table))
+	if spec.From != nil {
+		selector = spec.From
+	}
+	selector.Select(spec.Node.Columns...)
+	if pred := spec.Predicate; pred != nil {
+		pred(selector)
+	}
+	if order := spec.Order; order != nil {
+		order(selector)
+	}
+	if spec.Offset != 0 {
+		// Limit is mandatory for the offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(spec.Offset).Limit(math.MaxInt32)
+	}
+	if spec.Limit != 0 {
+		selector.Limit(spec.Limit)
+	}
+	if spec.Unique {
+		selector.Distinct()
+	}
+	rows := &Rows{}
+	query, args := selector.Query()
+	if err := drv.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	for rows.Next() {
+		values := spec.ScanValues()
+		if err := rows.Scan(values...); err != nil {
+			return err
+		}
+		if err := spec.Assign(values...); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type updater struct {
