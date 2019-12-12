@@ -446,43 +446,68 @@ type QuerySpec struct {
 // QueryNodes query the nodes in the graph and scan them to the given values.
 func QueryNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) error {
 	builder := Dialect(drv.Dialect())
-	selector := builder.Select().From(builder.Table(spec.Node.Table))
-	if spec.From != nil {
-		selector = spec.From
-	}
-	selector.Select(spec.Node.Columns...)
-	if pred := spec.Predicate; pred != nil {
-		pred(selector)
-	}
-	if order := spec.Order; order != nil {
-		order(selector)
-	}
-	if spec.Offset != 0 {
-		// Limit is mandatory for the offset clause. We start
-		// with default value, and override it below if needed.
-		selector.Offset(spec.Offset).Limit(math.MaxInt32)
-	}
-	if spec.Limit != 0 {
-		selector.Limit(spec.Limit)
-	}
-	if spec.Unique {
-		selector.Distinct()
-	}
+	qr := &query{graph: graph{builder: builder}, QuerySpec: spec}
+	return qr.nodes(ctx, drv)
+}
+
+type query struct {
+	graph
+	*QuerySpec
+}
+
+func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 	rows := &Rows{}
-	query, args := selector.Query()
+	query, args := q.selector().Query()
 	if err := drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
+	defer rows.Close()
 	for rows.Next() {
-		values := spec.ScanValues()
+		values := q.ScanValues()
 		if err := rows.Scan(values...); err != nil {
 			return err
 		}
-		if err := spec.Assign(values...); err != nil {
+		if err := q.Assign(values...); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
+	rows := &Rows{}
+	query, args := q.selector().Count(q.Node.ID.Column).Query()
+	if err := drv.Query(ctx, query, args, rows); err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	return ScanInt(rows)
+}
+
+func (q *query) selector() *Selector {
+	selector := q.builder.Select().From(q.builder.Table(q.Node.Table))
+	if q.From != nil {
+		selector = q.From
+	}
+	selector.Select(q.Node.Columns...)
+	if pred := q.Predicate; pred != nil {
+		pred(selector)
+	}
+	if order := q.Order; order != nil {
+		order(selector)
+	}
+	if q.Offset != 0 {
+		// Limit is mandatory for the offset clause. We start
+		// with default value, and override it below if needed.
+		selector.Offset(q.Offset).Limit(math.MaxInt32)
+	}
+	if q.Limit != 0 {
+		selector.Limit(q.Limit)
+	}
+	if q.Unique {
+		selector.Distinct()
+	}
+	return selector
 }
 
 type updater struct {
