@@ -40,6 +40,12 @@ func TestInt(t *testing.T) {
 	assert.Equal(t, field.TypeInt16, field.Int16("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeInt32, field.Int32("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeInt64, field.Int64("age").Descriptor().Info.Type)
+	assert.Equal(t, field.TypeUint, field.Uint("age").Descriptor().Info.Type)
+	assert.Equal(t, field.TypeUint8, field.Uint8("age").Descriptor().Info.Type)
+	assert.Equal(t, field.TypeUint16, field.Uint16("age").Descriptor().Info.Type)
+	assert.Equal(t, field.TypeUint32, field.Uint32("age").Descriptor().Info.Type)
+	assert.Equal(t, field.TypeUint64, field.Uint64("age").Descriptor().Info.Type)
+
 }
 
 func TestFloat(t *testing.T) {
@@ -52,6 +58,8 @@ func TestFloat(t *testing.T) {
 	f = field.Float("age").Min(2.5).Max(5)
 	fd = f.Descriptor()
 	assert.Len(t, fd.Validators, 2)
+
+	assert.Equal(t, field.TypeFloat32, field.Float32("age").Descriptor().Info.Type)
 }
 
 func TestBool(t *testing.T) {
@@ -163,4 +171,36 @@ func TestField_UUID(t *testing.T) {
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)
 	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
+}
+
+func TestTypeString(t *testing.T) {
+	var typ = field.TypeBool
+	assert.Equal(t, "bool", typ.String())
+	typ = field.TypeInvalid
+	assert.Equal(t, "invalid", typ.String())
+	typ = 21
+	assert.Equal(t, "invalid", typ.String())
+}
+
+func TestTypeNumeric(t *testing.T) {
+	var typ = field.TypeBool
+	assert.Equal(t, false, typ.Numeric())
+	typ = field.TypeUint8
+	assert.Equal(t, true, typ.Numeric())
+}
+
+func TestTypeValid(t *testing.T) {
+	var typ = field.TypeBool
+	assert.Equal(t, true, typ.Valid())
+	typ = 0
+	assert.Equal(t, false, typ.Valid())
+}
+
+func TestTypeConstName(t *testing.T) {
+	var typ = field.TypeJSON
+	assert.Equal(t, "TypeJSON", typ.ConstName())
+	typ = field.TypeInt
+	assert.Equal(t, "TypeInt", typ.ConstName())
+	typ = 21
+	assert.Equal(t, "invalid", typ.ConstName())
 }
