@@ -53,19 +53,19 @@ import (
 	"github.com/facebookincubator/ent/schema/edge"
 )
 
-// User schema.
+// Pet holds the schema definition for the Pet entity.
 type Pet struct {
 	ent.Schema
 }
 
-// Fields of the user.
+// Fields of the Pet.
 func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		// ...
 	}
 }
 
-// Edges of the user.
+// Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
