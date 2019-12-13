@@ -14,11 +14,9 @@ in the LICENSE file in the root directory of this source tree.
 
 // ID filters vertices based on their identifier.
 func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-		{{ range $_, $storage := $.Storage -}}
-			{{ $tmpl := printf "dialect/%s/predicate/id" $storage }}
-			{{- xtemplate $tmpl $ }},
-		{{ end -}}
+	return predicate.{{ $.Name }}(
+		{{ $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+		{{- xtemplate $tmpl $ }},
 	)
 }
 
@@ -27,12 +25,10 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ $func := printf "ID%s" $op.Name }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
 	func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Arg" $arg "Op" $op "Storage" $storage -}}
-					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $storage }}
-					{{- xtemplate $tmpl . }},
-				{{ end -}}
+		return predicate.{{ $.Name }}(
+			{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
+				{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+				{{- xtemplate $tmpl . }},
 			{{ end -}}
 		)
 	}
@@ -44,12 +40,10 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		{{ $func := $f.StructField }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 		func {{ $func }}(v {{ $f.Type }}) predicate.{{ $.Name }} {
-			return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-				{{ range $_, $storage := $.Storage -}}
-					{{- with extend $ "Field" $f -}}
-						{{ $tmpl := printf "dialect/%s/predicate/field" $storage }}
-						{{- xtemplate $tmpl . }},
-					{{ end -}}
+			return predicate.{{ $.Name }}(
+				{{- with extend $ "Field" $f -}}
+					{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
+					{{- xtemplate $tmpl . }},
 				{{ end -}}
 			)
 		}
@@ -58,10 +52,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 
 {{ range $_, $f := $.Fields }}
 	{{ $ops := ops $f }}
-	{{/* storage specific predicates disabled for multi-storage codegen */}}
-	{{ if not $.MultiStorage }}
-		{{ $storage := index $.Storage 0 }}
-		{{ $ops = appends $ops (call $storage.Ops $f) }}
+	{{ with $.Storage.Ops }}
+		{{ $ops = appends $ops (call $.Storage.Ops $f) }}
 	{{ end }}
 	{{ range $_, $op := $ops }}
 	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
@@ -75,12 +67,10 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 				v[i] = {{ $arg }}[i]
 			}
 		{{- end }}
-		return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $storage -}}
-					{{ $tmpl := printf "dialect/%s/predicate/field/ops" $storage }}
-					{{- xtemplate $tmpl . }},
-				{{ end -}}
+		return predicate.{{ $.Name }}(
+			{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
+				{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
+				{{- xtemplate $tmpl . }},
 			{{ end -}}
 		)
 	}
@@ -91,24 +81,20 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ $func := print "Has" $e.StructField }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
 	func {{ $func }}() predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Edge" $e -}}
-					{{ $tmpl := printf "dialect/%s/predicate/edge/has" $storage }}
-					{{- xtemplate $tmpl . }},
-				{{ end -}}
+		return predicate.{{ $.Name }}(
+			{{- with extend $ "Edge" $e -}}
+				{{ $tmpl := printf "dialect/%s/predicate/edge/has" $.Storage }}
+				{{- xtemplate $tmpl . }},
 			{{ end -}}
 		)
 	}
 	{{ $func = printf "%sWith" $func }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge with a given conditions (other predicates).
 	func {{ $func }}(preds ...predicate.{{ $e.Type.Name }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-			{{ range $_, $storage := $.Storage -}}
-				{{- with extend $ "Edge" $e -}}
-					{{ $tmpl := printf "dialect/%s/predicate/edge/haswith" $storage }}
-					{{- xtemplate $tmpl . }},
-				{{ end -}}
+		return predicate.{{ $.Name }}(
+			{{- with extend $ "Edge" $e -}}
+				{{ $tmpl := printf "dialect/%s/predicate/edge/haswith" $.Storage }}
+				{{- xtemplate $tmpl . }},
 			{{ end -}}
 		)
 	}
@@ -116,31 +102,25 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-		{{ range $_, $storage := $.Storage -}}
-			{{ $tmpl := printf "dialect/%s/predicate/and" $storage }}
-			{{- xtemplate $tmpl . }},
-		{{ end -}}
+	return predicate.{{ $.Name }}(
+		{{ $tmpl := printf "dialect/%s/predicate/and" $.Storage }}
+		{{- xtemplate $tmpl . }},
 	)
 }
 
 // Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-		{{ range $_, $storage := $.Storage -}}
-			{{ $tmpl := printf "dialect/%s/predicate/or" $storage }}
-			{{- xtemplate $tmpl . }},
-		{{ end -}}
+	return predicate.{{ $.Name }}(
+		{{ $tmpl = printf "dialect/%s/predicate/or" $.Storage }}
+		{{- xtemplate $tmpl . }},
 	)
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}{{ if $.MultiStorage }}PerDialect{{ end }}(
-		{{ range $_, $storage := $.Storage -}}
-			{{ $tmpl := printf "dialect/%s/predicate/not" $storage }}
-			{{- xtemplate $tmpl . }},
-		{{ end -}}
+	return predicate.{{ $.Name }}(
+		{{ $tmpl = printf "dialect/%s/predicate/not" $.Storage }}
+		{{- xtemplate $tmpl . }},
 	)
 }
 

@@ -24,11 +24,6 @@ const (
 	NextTable = "nodes"
 	// NextColumn is the table column denoting the next relation/edge.
 	NextColumn = "prev_id"
-
-	// PrevInverseLabel holds the string label denoting the prev inverse edge type in the database.
-	PrevInverseLabel = "node_next"
-	// NextLabel holds the string label denoting the next edge type in the database.
-	NextLabel = "node_next"
 )
 
 // Columns holds all SQL columns are node fields.

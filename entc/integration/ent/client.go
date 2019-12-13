@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/url"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
 
@@ -27,8 +26,6 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
 	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -93,23 +90,6 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 			return nil, err
 		}
 		return NewClient(append(options, Driver(drv))...), nil
-
-	case dialect.Gremlin:
-		u, err := url.Parse(dataSourceName)
-		if err != nil {
-			return nil, err
-		}
-		c, err := gremlin.NewClient(gremlin.Config{
-			Endpoint: gremlin.Endpoint{
-				URL: u,
-			},
-		})
-		if err != nil {
-			return nil, err
-		}
-		drv := gremlin.NewDriver(c)
-		return NewClient(append(options, Driver(drv))...), nil
-
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
@@ -242,20 +222,14 @@ func (c *CardClient) GetX(ctx context.Context, id string) *Card {
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := ca.id()
-		step := sql.NewStep(
-			sql.From(card.Table, card.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2O, true, card.OwnerTable, card.OwnerColumn),
-		)
-		query.sql = sql.Neighbors(ca.driver.Dialect(), step)
+	id := ca.id()
+	step := sql.NewStep(
+		sql.From(card.Table, card.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, true, card.OwnerTable, card.OwnerColumn),
+	)
+	query.sql = sql.Neighbors(ca.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(ca.ID).InE(user.CardLabel).OutV()
-
-	}
 	return query
 }
 
@@ -454,40 +428,28 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 // QueryOwner queries the owner edge of a File.
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := f.id()
-		step := sql.NewStep(
-			sql.From(file.Table, file.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
-		)
-		query.sql = sql.Neighbors(f.driver.Dialect(), step)
+	id := f.id()
+	step := sql.NewStep(
+		sql.From(file.Table, file.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
+	)
+	query.sql = sql.Neighbors(f.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(f.ID).InE(user.FilesLabel).OutV()
-
-	}
 	return query
 }
 
 // QueryType queries the type edge of a File.
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	query := &FileTypeQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := f.id()
-		step := sql.NewStep(
-			sql.From(file.Table, file.FieldID, id),
-			sql.To(filetype.Table, filetype.FieldID),
-			sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
-		)
-		query.sql = sql.Neighbors(f.driver.Dialect(), step)
+	id := f.id()
+	step := sql.NewStep(
+		sql.From(file.Table, file.FieldID, id),
+		sql.To(filetype.Table, filetype.FieldID),
+		sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
+	)
+	query.sql = sql.Neighbors(f.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(f.ID).InE(filetype.FilesLabel).OutV()
-
-	}
 	return query
 }
 
@@ -558,20 +520,14 @@ func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := ft.id()
-		step := sql.NewStep(
-			sql.From(filetype.Table, filetype.FieldID, id),
-			sql.To(file.Table, file.FieldID),
-			sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
-		)
-		query.sql = sql.Neighbors(ft.driver.Dialect(), step)
+	id := ft.id()
+	step := sql.NewStep(
+		sql.From(filetype.Table, filetype.FieldID, id),
+		sql.To(file.Table, file.FieldID),
+		sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+	)
+	query.sql = sql.Neighbors(ft.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(ft.ID).OutE(filetype.FilesLabel).InV()
-
-	}
 	return query
 }
 
@@ -642,80 +598,56 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 // QueryFiles queries the files edge of a Group.
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	query := &FileQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := gr.id()
-		step := sql.NewStep(
-			sql.From(group.Table, group.FieldID, id),
-			sql.To(file.Table, file.FieldID),
-			sql.Edge(sql.O2M, false, group.FilesTable, group.FilesColumn),
-		)
-		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	id := gr.id()
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, id),
+		sql.To(file.Table, file.FieldID),
+		sql.Edge(sql.O2M, false, group.FilesTable, group.FilesColumn),
+	)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(gr.ID).OutE(group.FilesLabel).InV()
-
-	}
 	return query
 }
 
 // QueryBlocked queries the blocked edge of a Group.
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := gr.id()
-		step := sql.NewStep(
-			sql.From(group.Table, group.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2M, false, group.BlockedTable, group.BlockedColumn),
-		)
-		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	id := gr.id()
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2M, false, group.BlockedTable, group.BlockedColumn),
+	)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(gr.ID).OutE(group.BlockedLabel).InV()
-
-	}
 	return query
 }
 
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := gr.id()
-		step := sql.NewStep(
-			sql.From(group.Table, group.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
-		)
-		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	id := gr.id()
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+	)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(gr.ID).InE(user.GroupsLabel).OutV()
-
-	}
 	return query
 }
 
 // QueryInfo queries the info edge of a Group.
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	query := &GroupInfoQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := gr.id()
-		step := sql.NewStep(
-			sql.From(group.Table, group.FieldID, id),
-			sql.To(groupinfo.Table, groupinfo.FieldID),
-			sql.Edge(sql.M2O, false, group.InfoTable, group.InfoColumn),
-		)
-		query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	id := gr.id()
+	step := sql.NewStep(
+		sql.From(group.Table, group.FieldID, id),
+		sql.To(groupinfo.Table, groupinfo.FieldID),
+		sql.Edge(sql.M2O, false, group.InfoTable, group.InfoColumn),
+	)
+	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(gr.ID).OutE(group.InfoLabel).InV()
-
-	}
 	return query
 }
 
@@ -786,20 +718,14 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := gi.id()
-		step := sql.NewStep(
-			sql.From(groupinfo.Table, groupinfo.FieldID, id),
-			sql.To(group.Table, group.FieldID),
-			sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
-		)
-		query.sql = sql.Neighbors(gi.driver.Dialect(), step)
+	id := gi.id()
+	step := sql.NewStep(
+		sql.From(groupinfo.Table, groupinfo.FieldID, id),
+		sql.To(group.Table, group.FieldID),
+		sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+	)
+	query.sql = sql.Neighbors(gi.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(gi.ID).InE(group.InfoLabel).OutV()
-
-	}
 	return query
 }
 
@@ -934,40 +860,28 @@ func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := n.id()
-		step := sql.NewStep(
-			sql.From(node.Table, node.FieldID, id),
-			sql.To(node.Table, node.FieldID),
-			sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
-		)
-		query.sql = sql.Neighbors(n.driver.Dialect(), step)
+	id := n.id()
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, id),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
+	)
+	query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(n.ID).InE(node.NextLabel).OutV()
-
-	}
 	return query
 }
 
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := n.id()
-		step := sql.NewStep(
-			sql.From(node.Table, node.FieldID, id),
-			sql.To(node.Table, node.FieldID),
-			sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
-		)
-		query.sql = sql.Neighbors(n.driver.Dialect(), step)
+	id := n.id()
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, id),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
+	)
+	query.sql = sql.Neighbors(n.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(n.ID).OutE(node.NextLabel).InV()
-
-	}
 	return query
 }
 
@@ -1038,40 +952,28 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 // QueryTeam queries the team edge of a Pet.
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := pe.id()
-		step := sql.NewStep(
-			sql.From(pet.Table, pet.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
-		)
-		query.sql = sql.Neighbors(pe.driver.Dialect(), step)
+	id := pe.id()
+	step := sql.NewStep(
+		sql.From(pet.Table, pet.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
+	)
+	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(pe.ID).InE(user.TeamLabel).OutV()
-
-	}
 	return query
 }
 
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := pe.id()
-		step := sql.NewStep(
-			sql.From(pet.Table, pet.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
-		)
-		query.sql = sql.Neighbors(pe.driver.Dialect(), step)
+	id := pe.id()
+	step := sql.NewStep(
+		sql.From(pet.Table, pet.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	)
+	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(pe.ID).InE(user.PetsLabel).OutV()
-
-	}
 	return query
 }
 
@@ -1142,219 +1044,153 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 // QueryCard queries the card edge of a User.
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(card.Table, card.FieldID),
-			sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(card.Table, card.FieldID),
+		sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.CardLabel).InV()
-
-	}
 	return query
 }
 
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(pet.Table, pet.FieldID),
-			sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(pet.Table, pet.FieldID),
+		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.PetsLabel).InV()
-
-	}
 	return query
 }
 
 // QueryFiles queries the files edge of a User.
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	query := &FileQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(file.Table, file.FieldID),
-			sql.Edge(sql.O2M, false, user.FilesTable, user.FilesColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(file.Table, file.FieldID),
+		sql.Edge(sql.O2M, false, user.FilesTable, user.FilesColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.FilesLabel).InV()
-
-	}
 	return query
 }
 
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(group.Table, group.FieldID),
-			sql.Edge(sql.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(group.Table, group.FieldID),
+		sql.Edge(sql.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.GroupsLabel).InV()
-
-	}
 	return query
 }
 
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).Both(user.FriendsLabel)
-
-	}
 	return query
 }
 
 // QueryFollowers queries the followers edge of a User.
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).InE(user.FollowingLabel).OutV()
-
-	}
 	return query
 }
 
 // QueryFollowing queries the following edge of a User.
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.FollowingLabel).InV()
-
-	}
 	return query
 }
 
 // QueryTeam queries the team edge of a User.
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(pet.Table, pet.FieldID),
-			sql.Edge(sql.O2O, false, user.TeamTable, user.TeamColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(pet.Table, pet.FieldID),
+		sql.Edge(sql.O2O, false, user.TeamTable, user.TeamColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.TeamLabel).InV()
-
-	}
 	return query
 }
 
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).Both(user.SpouseLabel)
-
-	}
 	return query
 }
 
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2M, true, user.ChildrenTable, user.ChildrenColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2M, true, user.ChildrenTable, user.ChildrenColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).InE(user.ParentLabel).OutV()
-
-	}
 	return query
 }
 
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	switch c.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		id := u.id()
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, id),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2O, false, user.ParentTable, user.ParentColumn),
-		)
-		query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	id := u.id()
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, id),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, false, user.ParentTable, user.ParentColumn),
+	)
+	query.sql = sql.Neighbors(u.driver.Dialect(), step)
 
-	case dialect.Gremlin:
-		query.gremlin = g.V(u.ID).OutE(user.ParentLabel).InV()
-
-	}
 	return query
 }

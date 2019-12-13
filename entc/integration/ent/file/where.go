@@ -9,225 +9,155 @@ package file
 import (
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
 func ID(id string) predicate.File {
-	return predicate.FilePerDialect(
+	return predicate.File(
 		func(s *sql.Selector) {
 			id, _ := strconv.Atoi(id)
 			s.Where(sql.EQ(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(id)
 		},
 	)
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.EQ(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.EQ(id))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.EQ(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.NEQ(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.NEQ(id))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.NEQ(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(ids) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			v := make([]interface{}, len(ids))
-			for i := range v {
-				v[i], _ = strconv.Atoi(ids[i])
-			}
-			s.Where(sql.In(s.C(FieldID), v...))
-		},
-		func(t *dsl.Traversal) {
-			v := make([]interface{}, len(ids))
-			for i := range v {
-				v[i] = ids[i]
-			}
-			t.HasID(p.Within(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i], _ = strconv.Atoi(ids[i])
+		}
+		s.Where(sql.In(s.C(FieldID), v...))
+	},
 	)
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(ids) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			v := make([]interface{}, len(ids))
-			for i := range v {
-				v[i], _ = strconv.Atoi(ids[i])
-			}
-			s.Where(sql.NotIn(s.C(FieldID), v...))
-		},
-		func(t *dsl.Traversal) {
-			v := make([]interface{}, len(ids))
-			for i := range v {
-				v[i] = ids[i]
-			}
-			t.HasID(p.Without(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i], _ = strconv.Atoi(ids[i])
+		}
+		s.Where(sql.NotIn(s.C(FieldID), v...))
+	},
 	)
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GT(id))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.GT(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.GTE(id))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.GTE(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LT(id))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.LT(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
-		func(t *dsl.Traversal) {
-			t.HasID(p.LTE(id))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.LTE(s.C(FieldID), id))
+	},
 	)
 }
 
 // Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
 func Size(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSize), v))
+	},
 	)
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldName), v))
+	},
 	)
 }
 
 // User applies equality check predicate on the "user" field. It's identical to UserEQ.
 func User(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUser), v))
+	},
 	)
 }
 
 // Group applies equality check predicate on the "group" field. It's identical to GroupEQ.
 func Group(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // SizeEQ applies the EQ predicate on the "size" field.
 func SizeEQ(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSize), v))
+	},
 	)
 }
 
 // SizeNEQ applies the NEQ predicate on the "size" field.
 func SizeNEQ(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.NEQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSize), v))
+	},
 	)
 }
 
@@ -237,19 +167,15 @@ func SizeIn(vs ...int) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldSize), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.Within(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSize), v...))
+	},
 	)
 }
 
@@ -259,91 +185,63 @@ func SizeNotIn(vs ...int) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldSize), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.Without(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSize), v...))
+	},
 	)
 }
 
 // SizeGT applies the GT predicate on the "size" field.
 func SizeGT(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.GT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSize), v))
+	},
 	)
 }
 
 // SizeGTE applies the GTE predicate on the "size" field.
 func SizeGTE(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.GTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSize), v))
+	},
 	)
 }
 
 // SizeLT applies the LT predicate on the "size" field.
 func SizeLT(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.LT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSize), v))
+	},
 	)
 }
 
 // SizeLTE applies the LTE predicate on the "size" field.
 func SizeLTE(v int) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldSize), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldSize, p.LTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSize), v))
+	},
 	)
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.NEQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldName), v))
+	},
 	)
 }
 
@@ -353,19 +251,15 @@ func NameIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldName), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.Within(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldName), v...))
+	},
 	)
 }
 
@@ -375,127 +269,103 @@ func NameNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldName), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.Without(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldName), v...))
+	},
 	)
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.GT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.GTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.LT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.LTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.Contains(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.Containing(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.HasPrefix(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.StartingWith(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.HasSuffix(s.C(FieldName), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldName, p.EndingWith(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldName), v))
+	},
+	)
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldName), v))
+	},
+	)
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	},
 	)
 }
 
 // UserEQ applies the EQ predicate on the "user" field.
 func UserEQ(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserNEQ applies the NEQ predicate on the "user" field.
 func UserNEQ(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.NEQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUser), v))
+	},
 	)
 }
 
@@ -505,19 +375,15 @@ func UserIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldUser), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.Within(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUser), v...))
+	},
 	)
 }
 
@@ -527,151 +393,119 @@ func UserNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldUser), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.Without(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUser), v...))
+	},
 	)
 }
 
 // UserGT applies the GT predicate on the "user" field.
 func UserGT(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.GT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserGTE applies the GTE predicate on the "user" field.
 func UserGTE(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.GTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserLT applies the LT predicate on the "user" field.
 func UserLT(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.LT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserLTE applies the LTE predicate on the "user" field.
 func UserLTE(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.LTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserContains applies the Contains predicate on the "user" field.
 func UserContains(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.Contains(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.Containing(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserHasPrefix applies the HasPrefix predicate on the "user" field.
 func UserHasPrefix(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.HasPrefix(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.StartingWith(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserHasSuffix applies the HasSuffix predicate on the "user" field.
 func UserHasSuffix(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.HasSuffix(s.C(FieldUser), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldUser, p.EndingWith(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldUser), v))
+	},
 	)
 }
 
 // UserIsNil applies the IsNil predicate on the "user" field.
 func UserIsNil() predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldUser)))
-		},
-		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldUser)
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUser)))
+	},
 	)
 }
 
 // UserNotNil applies the NotNil predicate on the "user" field.
 func UserNotNil() predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldUser)))
-		},
-		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldUser)
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUser)))
+	},
+	)
+}
+
+// UserEqualFold applies the EqualFold predicate on the "user" field.
+func UserEqualFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldUser), v))
+	},
+	)
+}
+
+// UserContainsFold applies the ContainsFold predicate on the "user" field.
+func UserContainsFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldUser), v))
+	},
 	)
 }
 
 // GroupEQ applies the EQ predicate on the "group" field.
 func GroupEQ(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.EQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupNEQ applies the NEQ predicate on the "group" field.
 func GroupNEQ(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.NEQ(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldGroup), v))
+	},
 	)
 }
 
@@ -681,19 +515,15 @@ func GroupIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldGroup), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.Within(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldGroup), v...))
+	},
 	)
 }
 
@@ -703,217 +533,169 @@ func GroupNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldGroup), v...))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.Without(v...))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldGroup), v...))
+	},
 	)
 }
 
 // GroupGT applies the GT predicate on the "group" field.
 func GroupGT(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.GT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupGTE applies the GTE predicate on the "group" field.
 func GroupGTE(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.GTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupLT applies the LT predicate on the "group" field.
 func GroupLT(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.LT(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupLTE applies the LTE predicate on the "group" field.
 func GroupLTE(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.LTE(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupContains applies the Contains predicate on the "group" field.
 func GroupContains(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.Contains(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.Containing(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupHasPrefix applies the HasPrefix predicate on the "group" field.
 func GroupHasPrefix(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.HasPrefix(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.StartingWith(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupHasSuffix applies the HasSuffix predicate on the "group" field.
 func GroupHasSuffix(v string) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.HasSuffix(s.C(FieldGroup), v))
-		},
-		func(t *dsl.Traversal) {
-			t.Has(Label, FieldGroup, p.EndingWith(v))
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // GroupIsNil applies the IsNil predicate on the "group" field.
 func GroupIsNil() predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.IsNull(s.C(FieldGroup)))
-		},
-		func(t *dsl.Traversal) {
-			t.HasLabel(Label).HasNot(FieldGroup)
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldGroup)))
+	},
 	)
 }
 
 // GroupNotNil applies the NotNil predicate on the "group" field.
 func GroupNotNil() predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			s.Where(sql.NotNull(s.C(FieldGroup)))
-		},
-		func(t *dsl.Traversal) {
-			t.HasLabel(Label).Has(FieldGroup)
-		},
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldGroup)))
+	},
+	)
+}
+
+// GroupEqualFold applies the EqualFold predicate on the "group" field.
+func GroupEqualFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldGroup), v))
+	},
+	)
+}
+
+// GroupContainsFold applies the ContainsFold predicate on the "group" field.
+func GroupContainsFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldGroup), v))
+	},
 	)
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(OwnerTable, FieldID),
-				sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
-			)
-			sql.HasNeighbors(s, step)
-		},
-		func(t *dsl.Traversal) {
-			t.InE(OwnerInverseLabel).InV()
-		},
+	return predicate.File(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(OwnerTable, FieldID),
+			sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sql.HasNeighbors(s, step)
+	},
 	)
 }
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(OwnerInverseTable, FieldID),
-				sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
-			)
-			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		},
-		func(t *dsl.Traversal) {
-			tr := __.OutV()
+	return predicate.File(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(OwnerInverseTable, FieldID),
+			sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
-				p(tr)
+				p(s)
 			}
-			t.InE(OwnerInverseLabel).Where(tr).InV()
-		},
+		})
+	},
 	)
 }
 
 // HasType applies the HasEdge predicate on the "type" edge.
 func HasType() predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(TypeTable, FieldID),
-				sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
-			)
-			sql.HasNeighbors(s, step)
-		},
-		func(t *dsl.Traversal) {
-			t.InE(TypeInverseLabel).InV()
-		},
+	return predicate.File(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(TypeTable, FieldID),
+			sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
+		)
+		sql.HasNeighbors(s, step)
+	},
 	)
 }
 
 // HasTypeWith applies the HasEdge predicate on the "type" edge with a given conditions (other predicates).
 func HasTypeWith(preds ...predicate.FileType) predicate.File {
-	return predicate.FilePerDialect(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(TypeInverseTable, FieldID),
-				sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
-			)
-			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		},
-		func(t *dsl.Traversal) {
-			tr := __.OutV()
+	return predicate.File(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(TypeInverseTable, FieldID),
+			sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
+		)
+		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
-				p(tr)
+				p(s)
 			}
-			t.InE(TypeInverseLabel).Where(tr).InV()
-		},
+		})
+	},
 	)
 }
 
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
-	return predicate.FilePerDialect(
+	return predicate.File(
 		func(s *sql.Selector) {
 			s1 := s.Clone().SetP(nil)
 			for _, p := range predicates {
@@ -921,21 +703,12 @@ func And(predicates ...predicate.File) predicate.File {
 			}
 			s.Where(s1.P())
 		},
-		func(tr *dsl.Traversal) {
-			trs := make([]interface{}, 0, len(predicates))
-			for _, p := range predicates {
-				t := __.New()
-				p(t)
-				trs = append(trs, t)
-			}
-			tr.Where(__.And(trs...))
-		},
 	)
 }
 
 // Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.File) predicate.File {
-	return predicate.FilePerDialect(
+	return predicate.File(
 		func(s *sql.Selector) {
 			s1 := s.Clone().SetP(nil)
 			for i, p := range predicates {
@@ -946,28 +719,14 @@ func Or(predicates ...predicate.File) predicate.File {
 			}
 			s.Where(s1.P())
 		},
-		func(tr *dsl.Traversal) {
-			trs := make([]interface{}, 0, len(predicates))
-			for _, p := range predicates {
-				t := __.New()
-				p(t)
-				trs = append(trs, t)
-			}
-			tr.Where(__.Or(trs...))
-		},
 	)
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.File) predicate.File {
-	return predicate.FilePerDialect(
+	return predicate.File(
 		func(s *sql.Selector) {
 			p(s.Not())
-		},
-		func(tr *dsl.Traversal) {
-			t := __.New()
-			p(t)
-			tr.Where(__.Not(t))
 		},
 	)
 }

@@ -54,15 +54,6 @@ const (
 	InfoInverseTable = "group_infos"
 	// InfoColumn is the table column denoting the info relation/edge.
 	InfoColumn = "info_id"
-
-	// FilesLabel holds the string label denoting the files edge type in the database.
-	FilesLabel = "group_files"
-	// BlockedLabel holds the string label denoting the blocked edge type in the database.
-	BlockedLabel = "group_blocked"
-	// UsersInverseLabel holds the string label denoting the users inverse edge type in the database.
-	UsersInverseLabel = "user_groups"
-	// InfoLabel holds the string label denoting the info edge type in the database.
-	InfoLabel = "group_info"
 )
 
 // Columns holds all SQL columns are group fields.

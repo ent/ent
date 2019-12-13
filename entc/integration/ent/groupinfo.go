@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -44,26 +43,6 @@ func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
 	gi.ID = strconv.Itoa(scangi.ID)
 	gi.Desc = scangi.Desc.String
 	gi.MaxUsers = int(scangi.MaxUsers.Int64)
-	return nil
-}
-
-// FromResponse scans the gremlin response data into GroupInfo.
-func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scangi struct {
-		ID       string `json:"id,omitempty"`
-		Desc     string `json:"desc,omitempty"`
-		MaxUsers int    `json:"max_users,omitempty"`
-	}
-	if err := vmap.Decode(&scangi); err != nil {
-		return err
-	}
-	gi.ID = scangi.ID
-	gi.Desc = scangi.Desc
-	gi.MaxUsers = scangi.MaxUsers
 	return nil
 }
 
@@ -120,30 +99,6 @@ func (gi *GroupInfos) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*gi = append(*gi, scangi)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into GroupInfos.
-func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scangi []struct {
-		ID       string `json:"id,omitempty"`
-		Desc     string `json:"desc,omitempty"`
-		MaxUsers int    `json:"max_users,omitempty"`
-	}
-	if err := vmap.Decode(&scangi); err != nil {
-		return err
-	}
-	for _, v := range scangi {
-		*gi = append(*gi, &GroupInfo{
-			ID:       v.ID,
-			Desc:     v.Desc,
-			MaxUsers: v.MaxUsers,
-		})
 	}
 	return nil
 }

@@ -26,7 +26,7 @@ type BlobQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Blob
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -218,7 +218,7 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		order:      append([]Order{}, bq.order...),
 		unique:     append([]string{}, bq.unique...),
 		predicates: append([]predicate.Blob{}, bq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: bq.sql.Clone(),
 	}
 }
@@ -344,7 +344,7 @@ type BlobGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -465,7 +465,7 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
 	columns = append(columns, bgb.fields...)
 	for _, fn := range bgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(bgb.fields...)
 }

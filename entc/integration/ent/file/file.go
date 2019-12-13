@@ -40,11 +40,6 @@ const (
 	TypeInverseTable = "file_types"
 	// TypeColumn is the table column denoting the type relation/edge.
 	TypeColumn = "type_id"
-
-	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "user_files"
-	// TypeInverseLabel holds the string label denoting the type inverse edge type in the database.
-	TypeInverseLabel = "file_type_files"
 )
 
 // Columns holds all SQL columns are file fields.

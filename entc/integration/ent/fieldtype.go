@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 )
@@ -138,56 +137,6 @@ func (ft *FieldType) FromRows(rows *sql.Rows) error {
 	return nil
 }
 
-// FromResponse scans the gremlin response data into FieldType.
-func (ft *FieldType) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanft struct {
-		ID                    string          `json:"id,omitempty"`
-		Int                   int             `json:"int,omitempty"`
-		Int8                  int8            `json:"int8,omitempty"`
-		Int16                 int16           `json:"int16,omitempty"`
-		Int32                 int32           `json:"int32,omitempty"`
-		Int64                 int64           `json:"int64,omitempty"`
-		OptionalInt           int             `json:"optional_int,omitempty"`
-		OptionalInt8          int8            `json:"optional_int8,omitempty"`
-		OptionalInt16         int16           `json:"optional_int16,omitempty"`
-		OptionalInt32         int32           `json:"optional_int32,omitempty"`
-		OptionalInt64         int64           `json:"optional_int64,omitempty"`
-		NillableInt           *int            `json:"nillable_int,omitempty"`
-		NillableInt8          *int8           `json:"nillable_int8,omitempty"`
-		NillableInt16         *int16          `json:"nillable_int16,omitempty"`
-		NillableInt32         *int32          `json:"nillable_int32,omitempty"`
-		NillableInt64         *int64          `json:"nillable_int64,omitempty"`
-		ValidateOptionalInt32 int32           `json:"validate_optional_int32,omitempty"`
-		State                 fieldtype.State `json:"state,omitempty"`
-	}
-	if err := vmap.Decode(&scanft); err != nil {
-		return err
-	}
-	ft.ID = scanft.ID
-	ft.Int = scanft.Int
-	ft.Int8 = scanft.Int8
-	ft.Int16 = scanft.Int16
-	ft.Int32 = scanft.Int32
-	ft.Int64 = scanft.Int64
-	ft.OptionalInt = scanft.OptionalInt
-	ft.OptionalInt8 = scanft.OptionalInt8
-	ft.OptionalInt16 = scanft.OptionalInt16
-	ft.OptionalInt32 = scanft.OptionalInt32
-	ft.OptionalInt64 = scanft.OptionalInt64
-	ft.NillableInt = scanft.NillableInt
-	ft.NillableInt8 = scanft.NillableInt8
-	ft.NillableInt16 = scanft.NillableInt16
-	ft.NillableInt32 = scanft.NillableInt32
-	ft.NillableInt64 = scanft.NillableInt64
-	ft.ValidateOptionalInt32 = scanft.ValidateOptionalInt32
-	ft.State = scanft.State
-	return nil
-}
-
 // Update returns a builder for updating this FieldType.
 // Note that, you need to call FieldType.Unwrap() before calling this method, if this FieldType
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -276,60 +225,6 @@ func (ft *FieldTypes) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*ft = append(*ft, scanft)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into FieldTypes.
-func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanft []struct {
-		ID                    string          `json:"id,omitempty"`
-		Int                   int             `json:"int,omitempty"`
-		Int8                  int8            `json:"int8,omitempty"`
-		Int16                 int16           `json:"int16,omitempty"`
-		Int32                 int32           `json:"int32,omitempty"`
-		Int64                 int64           `json:"int64,omitempty"`
-		OptionalInt           int             `json:"optional_int,omitempty"`
-		OptionalInt8          int8            `json:"optional_int8,omitempty"`
-		OptionalInt16         int16           `json:"optional_int16,omitempty"`
-		OptionalInt32         int32           `json:"optional_int32,omitempty"`
-		OptionalInt64         int64           `json:"optional_int64,omitempty"`
-		NillableInt           *int            `json:"nillable_int,omitempty"`
-		NillableInt8          *int8           `json:"nillable_int8,omitempty"`
-		NillableInt16         *int16          `json:"nillable_int16,omitempty"`
-		NillableInt32         *int32          `json:"nillable_int32,omitempty"`
-		NillableInt64         *int64          `json:"nillable_int64,omitempty"`
-		ValidateOptionalInt32 int32           `json:"validate_optional_int32,omitempty"`
-		State                 fieldtype.State `json:"state,omitempty"`
-	}
-	if err := vmap.Decode(&scanft); err != nil {
-		return err
-	}
-	for _, v := range scanft {
-		*ft = append(*ft, &FieldType{
-			ID:                    v.ID,
-			Int:                   v.Int,
-			Int8:                  v.Int8,
-			Int16:                 v.Int16,
-			Int32:                 v.Int32,
-			Int64:                 v.Int64,
-			OptionalInt:           v.OptionalInt,
-			OptionalInt8:          v.OptionalInt8,
-			OptionalInt16:         v.OptionalInt16,
-			OptionalInt32:         v.OptionalInt32,
-			OptionalInt64:         v.OptionalInt64,
-			NillableInt:           v.NillableInt,
-			NillableInt8:          v.NillableInt8,
-			NillableInt16:         v.NillableInt16,
-			NillableInt32:         v.NillableInt32,
-			NillableInt64:         v.NillableInt64,
-			ValidateOptionalInt32: v.ValidateOptionalInt32,
-			State:                 v.State,
-		})
 	}
 	return nil
 }

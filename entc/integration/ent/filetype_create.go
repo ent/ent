@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
@@ -61,14 +55,7 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	if ftc.name == nil {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	switch ftc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return ftc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return ftc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -129,51 +116,4 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		return nil, err
 	}
 	return ft, nil
-}
-
-func (ftc *FileTypeCreate) gremlinSave(ctx context.Context) (*FileType, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftc.gremlin().Query()
-	if err := ftc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	ft := &FileType{config: ftc.config}
-	if err := ft.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return ft, nil
-}
-
-func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.AddV(filetype.Label)
-	if ftc.name != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *ftc.name).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *ftc.name)),
-		})
-		v.Property(dsl.Single, filetype.FieldName, *ftc.name)
-	}
-	for id := range ftc.files {
-		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(filetype.Label, filetype.FilesLabel, id)),
-		})
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

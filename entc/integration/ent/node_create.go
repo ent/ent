@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 )
@@ -96,14 +90,7 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	if len(nc.next) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
-	switch nc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return nc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return nc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return nc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -180,54 +167,4 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		return nil, err
 	}
 	return n, nil
-}
-
-func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
-	res := &gremlin.Response{}
-	query, bindings := nc.gremlin().Query()
-	if err := nc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	n := &Node{config: nc.config}
-	if err := n.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return n, nil
-}
-
-func (nc *NodeCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.AddV(node.Label)
-	if nc.value != nil {
-		v.Property(dsl.Single, node.FieldValue, *nc.value)
-	}
-	for id := range nc.prev {
-		v.AddE(node.NextLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
-		})
-	}
-	for id := range nc.next {
-		v.AddE(node.NextLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
-		})
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

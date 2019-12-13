@@ -15,19 +15,18 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* custom signature for group-by function */}}
 {{ define "dialect/sql/group/signature" -}}
-	// SQL the column wrapped with the aggregation function.
-	SQL     func(*sql.Selector) string
+	type Aggregate func(*sql.Selector) string
 {{- end }}
 
 {{ define "dialect/sql/group/as" -}}
 	func(s *sql.Selector) string {
-			return sql.As(fn.SQL(s), end)
+			return sql.As(fn(s), end)
 	}
 {{- end }}
 
 {{ define "dialect/sql/group/func" -}}
-	{{- $fn := $.Scope.Func }}
-	{{- $withField := $.Scope.WithField }}
+	{{- $fn := $.Scope.Func -}}
+	{{- $withField := $.Scope.WithField -}}
 	func(s *sql.Selector) string {
 		return sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})
 	}

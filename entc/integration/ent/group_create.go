@@ -13,12 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
@@ -200,14 +194,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	if gc.info == nil {
 		return nil, errors.New("ent: missing required edge \"info\"")
 	}
-	switch gc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return gc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return gc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return gc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -339,72 +326,4 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	return gr, nil
-}
-
-func (gc *GroupCreate) gremlinSave(ctx context.Context) (*Group, error) {
-	res := &gremlin.Response{}
-	query, bindings := gc.gremlin().Query()
-	if err := gc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	gr := &Group{config: gc.config}
-	if err := gr.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return gr, nil
-}
-
-func (gc *GroupCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.AddV(group.Label)
-	if gc.active != nil {
-		v.Property(dsl.Single, group.FieldActive, *gc.active)
-	}
-	if gc.expire != nil {
-		v.Property(dsl.Single, group.FieldExpire, *gc.expire)
-	}
-	if gc._type != nil {
-		v.Property(dsl.Single, group.FieldType, *gc._type)
-	}
-	if gc.max_users != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, *gc.max_users)
-	}
-	if gc.name != nil {
-		v.Property(dsl.Single, group.FieldName, *gc.name)
-	}
-	for id := range gc.files {
-		v.AddE(group.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(group.Label, group.FilesLabel, id)),
-		})
-	}
-	for id := range gc.blocked {
-		v.AddE(group.BlockedLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.BlockedLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(group.Label, group.BlockedLabel, id)),
-		})
-	}
-	for id := range gc.users {
-		v.AddE(user.GroupsLabel).From(g.V(id)).InV()
-	}
-	for id := range gc.info {
-		v.AddE(group.InfoLabel).To(g.V(id)).OutV()
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

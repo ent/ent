@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -138,14 +132,7 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 	if len(nu.next) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
-	switch nu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return nu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return nu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return nu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -289,84 +276,6 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (nu *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := nu.gremlin().Query()
-	if err := nu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (nu *NodeUpdate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V().HasLabel(node.Label)
-	for _, p := range nu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := nu.value; value != nil {
-		v.Property(dsl.Single, node.FieldValue, *value)
-	}
-	if value := nu.addvalue; value != nil {
-		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(*value)).Sum())
-	}
-	var properties []interface{}
-	if nu.clearvalue {
-		properties = append(properties, node.FieldValue)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	if nu.clearedPrev {
-		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range nu.prev {
-		v.AddE(node.NextLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
-		})
-	}
-	if nu.clearedNext {
-		tr := rv.Clone().OutE(node.NextLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range nu.next {
-		v.AddE(node.NextLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
-		})
-	}
-	v.Count()
-	if len(constraints) > 0 {
-		constraints = append(constraints, &constraint{
-			pred: rv.Count(),
-			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
-		})
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // NodeUpdateOne is the builder for updating a single Node entity.
 type NodeUpdateOne struct {
 	config
@@ -476,14 +385,7 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 	if len(nuo.next) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
-	switch nuo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return nuo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return nuo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return nuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -632,79 +534,4 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		return nil, err
 	}
 	return n, nil
-}
-
-func (nuo *NodeUpdateOne) gremlinSave(ctx context.Context) (*Node, error) {
-	res := &gremlin.Response{}
-	query, bindings := nuo.gremlin(nuo.id).Query()
-	if err := nuo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	n := &Node{config: nuo.config}
-	if err := n.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return n, nil
-}
-
-func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := nuo.value; value != nil {
-		v.Property(dsl.Single, node.FieldValue, *value)
-	}
-	if value := nuo.addvalue; value != nil {
-		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(*value)).Sum())
-	}
-	var properties []interface{}
-	if nuo.clearvalue {
-		properties = append(properties, node.FieldValue)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	if nuo.clearedPrev {
-		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range nuo.prev {
-		v.AddE(node.NextLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
-		})
-	}
-	if nuo.clearedNext {
-		tr := rv.Clone().OutE(node.NextLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range nuo.next {
-		v.AddE(node.NextLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
-		})
-	}
-	v.ValueMap(true)
-	if len(constraints) > 0 {
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

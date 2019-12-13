@@ -60,12 +60,12 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
 			return err
 		}
 	}
-	if len(cfg.Storage) == 0 {
+	if cfg.Storage == nil {
 		driver, err := gen.NewStorage("sql")
 		if err != nil {
 			return err
 		}
-		cfg.Storage = append(cfg.Storage, driver)
+		cfg.Storage = driver
 	}
 	graph, err := LoadGraph(schemaPath, cfg)
 	if err != nil {
@@ -77,16 +77,14 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
 // Option allows for managing codegen configuration using functional options.
 type Option func(*gen.Config) error
 
-// Storage sets the list of storage-driver types to support by the codegen.
-func Storage(types ...string) Option {
+// Storage sets the storage-driver type to support by the codegen.
+func Storage(typ string) Option {
 	return func(cfg *gen.Config) error {
-		for _, t := range types {
-			storage, err := gen.NewStorage(t)
-			if err != nil {
-				return err
-			}
-			cfg.Storage = append(cfg.Storage, storage)
+		storage, err := gen.NewStorage(typ)
+		if err != nil {
+			return err
 		}
+		cfg.Storage = storage
 		return nil
 	}
 }

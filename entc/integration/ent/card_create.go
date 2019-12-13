@@ -13,15 +13,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -128,14 +121,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if len(cc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	switch cc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return cc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return cc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -204,56 +190,4 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	return c, nil
-}
-
-func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
-	res := &gremlin.Response{}
-	query, bindings := cc.gremlin().Query()
-	if err := cc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	c := &Card{config: cc.config}
-	if err := c.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return c, nil
-}
-
-func (cc *CardCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.AddV(card.Label)
-	if cc.create_time != nil {
-		v.Property(dsl.Single, card.FieldCreateTime, *cc.create_time)
-	}
-	if cc.update_time != nil {
-		v.Property(dsl.Single, card.FieldUpdateTime, *cc.update_time)
-	}
-	if cc.number != nil {
-		v.Property(dsl.Single, card.FieldNumber, *cc.number)
-	}
-	if cc.name != nil {
-		v.Property(dsl.Single, card.FieldName, *cc.name)
-	}
-	for id := range cc.owner {
-		v.AddE(user.CardLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.CardLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
-		})
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

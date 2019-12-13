@@ -79,7 +79,7 @@ func main() {
 		func() *cobra.Command {
 			var (
 				cfg      gen.Config
-				storage  []string
+				storage  string
 				template []string
 				idtype   = idType(field.TypeInt)
 				cmd      = &cobra.Command{
@@ -91,7 +91,7 @@ func main() {
 					),
 					Args: cobra.ExactArgs(1),
 					Run: func(cmd *cobra.Command, path []string) {
-						opts := []entc.Option{entc.Storage(storage...)}
+						opts := []entc.Option{entc.Storage(storage)}
 						for _, tmpl := range template {
 							opts = append(opts, entc.TemplateDir(tmpl))
 						}
@@ -109,10 +109,10 @@ func main() {
 				}
 			)
 			cmd.Flags().Var(&idtype, "idtype", "type of the id field")
+			cmd.Flags().StringVar(&storage, "storage", "sql", "storage driver to support in codegen")
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 			cmd.Flags().StringSliceVarP(&template, "template", "", nil, "external templates to execute")
-			cmd.Flags().StringSliceVarP(&storage, "storage", "", []string{"sql"}, "list of storage drivers to support")
 			return cmd
 		}(),
 	)

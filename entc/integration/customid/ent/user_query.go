@@ -26,7 +26,7 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -230,7 +230,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:      append([]Order{}, uq.order...),
 		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: uq.sql.Clone(),
 	}
 }
@@ -332,7 +332,7 @@ type UserGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -453,7 +453,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }
