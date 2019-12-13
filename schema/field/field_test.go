@@ -45,7 +45,6 @@ func TestInt(t *testing.T) {
 	assert.Equal(t, field.TypeUint16, field.Uint16("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeUint32, field.Uint32("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeUint64, field.Uint64("age").Descriptor().Info.Type)
-
 }
 
 func TestFloat(t *testing.T) {
