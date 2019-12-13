@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -39,24 +38,6 @@ func (ft *FileType) FromRows(rows *sql.Rows) error {
 	}
 	ft.ID = strconv.Itoa(scanft.ID)
 	ft.Name = scanft.Name.String
-	return nil
-}
-
-// FromResponse scans the gremlin response data into FileType.
-func (ft *FileType) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanft struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&scanft); err != nil {
-		return err
-	}
-	ft.ID = scanft.ID
-	ft.Name = scanft.Name
 	return nil
 }
 
@@ -111,28 +92,6 @@ func (ft *FileTypes) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*ft = append(*ft, scanft)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into FileTypes.
-func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanft []struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&scanft); err != nil {
-		return err
-	}
-	for _, v := range scanft {
-		*ft = append(*ft, &FileType{
-			ID:   v.ID,
-			Name: v.Name,
-		})
 	}
 	return nil
 }

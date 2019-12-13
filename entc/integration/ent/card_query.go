@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -31,9 +26,8 @@ type CardQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Card
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -63,18 +57,12 @@ func (cq *CardQuery) Order(o ...Order) *CardQuery {
 // QueryOwner chains the current query on the owner edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(card.Table, card.FieldID, cq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2O, true, card.OwnerTable, card.OwnerColumn),
-		)
-		query.sql = sql.SetNeighbors(cq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := cq.gremlinQuery()
-		query.gremlin = gremlin.InE(user.CardLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(card.Table, card.FieldID, cq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, true, card.OwnerTable, card.OwnerColumn),
+	)
+	query.sql = sql.SetNeighbors(cq.driver.Dialect(), step)
 	return query
 }
 
@@ -174,14 +162,7 @@ func (cq *CardQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return cq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return cq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -213,14 +194,7 @@ func (cq *CardQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CardQuery) Count(ctx context.Context) (int, error) {
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return cq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return cq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -234,14 +208,7 @@ func (cq *CardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return cq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return cq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -263,9 +230,8 @@ func (cq *CardQuery) Clone() *CardQuery {
 		order:      append([]Order{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
-		// clone intermediate queries.
-		sql:     cq.sql.Clone(),
-		gremlin: cq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: cq.sql.Clone(),
 	}
 }
 
@@ -287,12 +253,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	group := &CardGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = cq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = cq.gremlinQuery()
-	}
+	group.sql = cq.sqlQuery()
 	return group
 }
 
@@ -311,12 +272,7 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 	selector := &CardSelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = cq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = cq.gremlinQuery()
-	}
+	selector.sql = cq.sqlQuery()
 	return selector
 }
 
@@ -395,74 +351,13 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
-	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().ValueMap(true).Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var cs Cards
-	if err := cs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	cs.config(cq.config)
-	return cs, nil
-}
-
-func (cq *CardQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().Count().Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (cq *CardQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().HasNext().Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(card.Label)
-	if cq.gremlin != nil {
-		v = cq.gremlin.Clone()
-	}
-	for _, p := range cq.predicates {
-		p(v)
-	}
-	if len(cq.order) > 0 {
-		v.Order()
-		for _, p := range cq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := cq.limit, cq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := cq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // CardGroupBy is the builder for group-by Card entities.
 type CardGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -473,14 +368,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...Aggregate) *CardGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch cgb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cgb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return cgb.gremlinScan(ctx, v)
-	default:
-		return errors.New("cgb: unsupported dialect")
-	}
+	return cgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -589,46 +477,9 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
-}
-
-func (cgb *CardGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := cgb.gremlinQuery().Query()
-	if err := cgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(cgb.fields)+len(cgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (cgb *CardGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range cgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range cgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return cgb.gremlin.Group().
-		By(__.Values(cgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // CardSelect is the builder for select fields of Card entities.
@@ -636,20 +487,12 @@ type CardSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
-	switch cs.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cs.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return cs.gremlinScan(ctx, v)
-	default:
-		return errors.New("CardSelect: unsupported dialect")
-	}
+	return cs.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -757,36 +600,4 @@ func (cs *CardSelect) sqlQuery() sql.Querier {
 	view := "card_view"
 	return sql.Dialect(cs.driver.Dialect()).
 		Select(cs.fields...).From(cs.sql.As(view))
-}
-
-func (cs *CardSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(cs.fields) == 1 {
-		if cs.fields[0] != card.FieldID {
-			traversal = cs.gremlin.Values(cs.fields...)
-		} else {
-			traversal = cs.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(cs.fields))
-		for i, f := range cs.fields {
-			fields[i] = f
-		}
-		traversal = cs.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := cs.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(cs.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

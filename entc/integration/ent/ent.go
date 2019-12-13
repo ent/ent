@@ -9,74 +9,35 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Order applies an ordering on either graph traversal or sql selector.
-type Order func(interface{})
-
-// OrderPerDialect construct the "order by" clause for graph traversals based on dialect type.
-func OrderPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Order {
-	return Order(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for order: %T", v))
-		}
-	})
-}
+type Order func(*sql.Selector)
 
 // Asc applies the given fields in ASC order.
 func Asc(fields ...string) Order {
-	return OrderPerDialect(
-		func(s *sql.Selector) {
-			for _, f := range fields {
-				s.OrderBy(sql.Asc(f))
-			}
-		},
-		func(tr *dsl.Traversal) {
-			for _, f := range fields {
-				tr.By(f, dsl.Incr)
-			}
-		},
-	)
+	return func(s *sql.Selector) {
+		for _, f := range fields {
+			s.OrderBy(sql.Asc(f))
+		}
+	}
 }
 
 // Desc applies the given fields in DESC order.
 func Desc(fields ...string) Order {
-	return OrderPerDialect(
-		func(s *sql.Selector) {
-			for _, f := range fields {
-				s.OrderBy(sql.Desc(f))
-			}
-		},
-		func(tr *dsl.Traversal) {
-			for _, f := range fields {
-				tr.By(f, dsl.Decr)
-			}
-		},
-	)
+	return func(s *sql.Selector) {
+		for _, f := range fields {
+			s.OrderBy(sql.Desc(f))
+		}
+	}
 }
 
 // Aggregate applies an aggregation step on the group-by traversal/selector.
-type Aggregate struct {
-	// SQL the column wrapped with the aggregation function.
-	SQL func(*sql.Selector) string
-	// Gremlin gets two labels as parameters. The first used in the `As` step for the predicate,
-	// and the second is an optional name for the next predicates (or for later usage).
-	Gremlin func(string, string) (string, *dsl.Traversal)
-}
+type Aggregate func(*sql.Selector) string
 
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
@@ -85,118 +46,43 @@ type Aggregate struct {
 //	Scan(ctx, &v)
 //
 func As(fn Aggregate, end string) Aggregate {
-	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.As(fn.SQL(s), end)
-		},
-		Gremlin: func(start, _ string) (string, *dsl.Traversal) {
-			return fn.Gremlin(start, end)
-		},
+	return func(s *sql.Selector) string {
+		return sql.As(fn(s), end)
 	}
 }
-
-// DefaultCountLabel is the default label name for the Count aggregation function.
-// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
-// In order to "count" 2 or more fields and avoid conflicting, use the `ent.As(ent.Count(field), "custom_name")`
-// function with custom name in order to override it.
-const DefaultCountLabel = "count"
 
 // Count applies the "count" aggregation function on each group.
 func Count() Aggregate {
-	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.Count("*")
-		},
-		Gremlin: func(start, end string) (string, *dsl.Traversal) {
-			if end == "" {
-				end = DefaultCountLabel
-			}
-			return end, __.As(start).Count(dsl.Local).As(end)
-		},
+	return func(s *sql.Selector) string {
+		return sql.Count("*")
 	}
 }
-
-// DefaultMaxLabel is the default label name for the Max aggregation function.
-// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
-// In order to "max" 2 or more fields and avoid conflicting, use the `ent.As(ent.Max(field), "custom_name")`
-// function with custom name in order to override it.
-const DefaultMaxLabel = "max"
 
 // Max applies the "max" aggregation function on the given field of each group.
 func Max(field string) Aggregate {
-	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.Max(s.C(field))
-		},
-		Gremlin: func(start, end string) (string, *dsl.Traversal) {
-			if end == "" {
-				end = DefaultMaxLabel
-			}
-			return end, __.As(start).Unfold().Values(field).Max().As(end)
-		},
+	return func(s *sql.Selector) string {
+		return sql.Max(s.C(field))
 	}
 }
-
-// DefaultMeanLabel is the default label name for the Mean aggregation function.
-// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
-// In order to "mean" 2 or more fields and avoid conflicting, use the `ent.As(ent.Mean(field), "custom_name")`
-// function with custom name in order to override it.
-const DefaultMeanLabel = "mean"
 
 // Mean applies the "mean" aggregation function on the given field of each group.
 func Mean(field string) Aggregate {
-	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.Avg(s.C(field))
-		},
-		Gremlin: func(start, end string) (string, *dsl.Traversal) {
-			if end == "" {
-				end = DefaultMeanLabel
-			}
-			return end, __.As(start).Unfold().Values(field).Mean().As(end)
-		},
+	return func(s *sql.Selector) string {
+		return sql.Avg(s.C(field))
 	}
 }
-
-// DefaultMinLabel is the default label name for the Min aggregation function.
-// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
-// In order to "min" 2 or more fields and avoid conflicting, use the `ent.As(ent.Min(field), "custom_name")`
-// function with custom name in order to override it.
-const DefaultMinLabel = "min"
 
 // Min applies the "min" aggregation function on the given field of each group.
 func Min(field string) Aggregate {
-	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.Min(s.C(field))
-		},
-		Gremlin: func(start, end string) (string, *dsl.Traversal) {
-			if end == "" {
-				end = DefaultMinLabel
-			}
-			return end, __.As(start).Unfold().Values(field).Min().As(end)
-		},
+	return func(s *sql.Selector) string {
+		return sql.Min(s.C(field))
 	}
 }
 
-// DefaultSumLabel is the default label name for the Sum aggregation function.
-// It should be used as the struct-tag for decoding, or a map key for interaction with the returned response.
-// In order to "sum" 2 or more fields and avoid conflicting, use the `ent.As(ent.Sum(field), "custom_name")`
-// function with custom name in order to override it.
-const DefaultSumLabel = "sum"
-
 // Sum applies the "sum" aggregation function on the given field of each group.
 func Sum(field string) Aggregate {
-	return Aggregate{
-		SQL: func(s *sql.Selector) string {
-			return sql.Sum(s.C(field))
-		},
-		Gremlin: func(start, end string) (string, *dsl.Traversal) {
-			if end == "" {
-				end = DefaultSumLabel
-			}
-			return end, __.As(start).Unfold().Values(field).Sum().As(end)
-		},
+	return func(s *sql.Selector) string {
+		return sql.Sum(s.C(field))
 	}
 }
 
@@ -322,48 +208,6 @@ func insertLastID(ctx context.Context, tx dialect.Tx, insert *sql.InsertBuilder)
 		return 0, err
 	}
 	return id, nil
-}
-
-// Code implements the dsl.Node interface.
-func (e ErrConstraintFailed) Code() (string, []interface{}) {
-	return strconv.Quote(e.prefix() + e.msg), nil
-}
-
-func (e *ErrConstraintFailed) UnmarshalGraphson(b []byte) error {
-	var v [1]*string
-	if err := graphson.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	if v[0] == nil {
-		return fmt.Errorf("ent: missing string value")
-	}
-	if !strings.HasPrefix(*v[0], e.prefix()) {
-		return fmt.Errorf("ent: invalid string for error: %s", *v[0])
-	}
-	e.msg = strings.TrimPrefix(*v[0], e.prefix())
-	return nil
-}
-
-// prefix returns the prefix used for gremlin constants.
-func (ErrConstraintFailed) prefix() string { return "Error: " }
-
-// NewErrUniqueField creates a constraint error for unique fields.
-func NewErrUniqueField(label, field string, v interface{}) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
-}
-
-// NewErrUniqueEdge creates a constraint error for unique edges.
-func NewErrUniqueEdge(label, edge, id string) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
-}
-
-// isConstantError indicates if the given response holds a gremlin constant containing an error.
-func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
-	e := &ErrConstraintFailed{}
-	if err := graphson.Unmarshal(r.Result.Data, e); err != nil {
-		return nil, false
-	}
-	return e, true
 }
 
 // keys returns the keys/ids from the edge map.

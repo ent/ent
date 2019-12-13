@@ -29,9 +29,6 @@ const (
 	GroupsInverseTable = "groups"
 	// GroupsColumn is the table column denoting the groups relation/edge.
 	GroupsColumn = "info_id"
-
-	// GroupsInverseLabel holds the string label denoting the groups inverse edge type in the database.
-	GroupsInverseLabel = "group_info"
 )
 
 // Columns holds all SQL columns are groupinfo fields.

@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -39,24 +38,6 @@ func (n *Node) FromRows(rows *sql.Rows) error {
 	}
 	n.ID = strconv.Itoa(scann.ID)
 	n.Value = int(scann.Value.Int64)
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Node.
-func (n *Node) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scann struct {
-		ID    string `json:"id,omitempty"`
-		Value int    `json:"value,omitempty"`
-	}
-	if err := vmap.Decode(&scann); err != nil {
-		return err
-	}
-	n.ID = scann.ID
-	n.Value = scann.Value
 	return nil
 }
 
@@ -116,28 +97,6 @@ func (n *Nodes) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*n = append(*n, scann)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Nodes.
-func (n *Nodes) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scann []struct {
-		ID    string `json:"id,omitempty"`
-		Value int    `json:"value,omitempty"`
-	}
-	if err := vmap.Decode(&scann); err != nil {
-		return err
-	}
-	for _, v := range scann {
-		*n = append(*n, &Node{
-			ID:    v.ID,
-			Value: v.Value,
-		})
 	}
 	return nil
 }

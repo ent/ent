@@ -25,7 +25,7 @@ type GroupQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Group
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -217,7 +217,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		order:      append([]Order{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: gq.sql.Clone(),
 	}
 }
@@ -343,7 +343,7 @@ type GroupGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -464,7 +464,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 	columns = append(columns, ggb.fields...)
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
 }

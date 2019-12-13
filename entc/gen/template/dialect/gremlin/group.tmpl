@@ -31,7 +31,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 		names []interface{}
 	)
 	for _, fn := range {{ $receiver }}.fns {
-		name, tr := fn.Gremlin("p", "")
+		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}

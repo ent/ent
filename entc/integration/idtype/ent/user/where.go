@@ -22,120 +22,109 @@ func ID(id uint64) predicate.User {
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldID), id))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldID), id))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(ids) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			v := make([]interface{}, len(ids))
-			for i := range v {
-				v[i] = ids[i]
-			}
-			s.Where(sql.In(s.C(FieldID), v...))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(FieldID), v...))
+	},
 	)
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(ids) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			v := make([]interface{}, len(ids))
-			for i := range v {
-				v[i] = ids[i]
-			}
-			s.Where(sql.NotIn(s.C(FieldID), v...))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(FieldID), v...))
+	},
 	)
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldID), id))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldID), id))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldID), id))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldID), id))
+	},
 	)
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uint64) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldID), id))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldID), id))
+	},
 	)
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.EQ(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.NEQ(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldName), v))
+	},
 	)
 }
 
@@ -145,16 +134,15 @@ func NameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.User(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.In(s.C(FieldName), v...))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldName), v...))
+	},
 	)
 }
 
@@ -164,193 +152,177 @@ func NameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.User(
-		func(s *sql.Selector) {
-			// if not arguments were provided, append the FALSE constants,
-			// since we can't apply "IN ()". This will make this predicate falsy.
-			if len(vs) == 0 {
-				s.Where(sql.False())
-				return
-			}
-			s.Where(sql.NotIn(s.C(FieldName), v...))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldName), v...))
+	},
 	)
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GT(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.GTE(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LT(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.LTE(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.Contains(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.HasPrefix(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.HasSuffix(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.EqualFold(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldName), v))
+	},
 	)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			s.Where(sql.ContainsFold(s.C(FieldName), v))
-		},
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	},
 	)
 }
 
 // HasSpouse applies the HasEdge predicate on the "spouse" edge.
 func HasSpouse() predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(SpouseTable, FieldID),
-				sql.Edge(sql.O2O, false, SpouseTable, SpouseColumn),
-			)
-			sql.HasNeighbors(s, step)
-		},
+	return predicate.User(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(SpouseTable, FieldID),
+			sql.Edge(sql.O2O, false, SpouseTable, SpouseColumn),
+		)
+		sql.HasNeighbors(s, step)
+	},
 	)
 }
 
 // HasSpouseWith applies the HasEdge predicate on the "spouse" edge with a given conditions (other predicates).
 func HasSpouseWith(preds ...predicate.User) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(Table, FieldID),
-				sql.Edge(sql.O2O, false, SpouseTable, SpouseColumn),
-			)
-			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		},
+	return predicate.User(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(Table, FieldID),
+			sql.Edge(sql.O2O, false, SpouseTable, SpouseColumn),
+		)
+		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
 	)
 }
 
 // HasFollowers applies the HasEdge predicate on the "followers" edge.
 func HasFollowers() predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(FollowersTable, FieldID),
-				sql.Edge(sql.M2M, true, FollowersTable, FollowersPrimaryKey...),
-			)
-			sql.HasNeighbors(s, step)
-		},
+	return predicate.User(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(FollowersTable, FieldID),
+			sql.Edge(sql.M2M, true, FollowersTable, FollowersPrimaryKey...),
+		)
+		sql.HasNeighbors(s, step)
+	},
 	)
 }
 
 // HasFollowersWith applies the HasEdge predicate on the "followers" edge with a given conditions (other predicates).
 func HasFollowersWith(preds ...predicate.User) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(Table, FieldID),
-				sql.Edge(sql.M2M, true, FollowersTable, FollowersPrimaryKey...),
-			)
-			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		},
+	return predicate.User(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(Table, FieldID),
+			sql.Edge(sql.M2M, true, FollowersTable, FollowersPrimaryKey...),
+		)
+		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
 	)
 }
 
 // HasFollowing applies the HasEdge predicate on the "following" edge.
 func HasFollowing() predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(FollowingTable, FieldID),
-				sql.Edge(sql.M2M, false, FollowingTable, FollowingPrimaryKey...),
-			)
-			sql.HasNeighbors(s, step)
-		},
+	return predicate.User(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(FollowingTable, FieldID),
+			sql.Edge(sql.M2M, false, FollowingTable, FollowingPrimaryKey...),
+		)
+		sql.HasNeighbors(s, step)
+	},
 	)
 }
 
 // HasFollowingWith applies the HasEdge predicate on the "following" edge with a given conditions (other predicates).
 func HasFollowingWith(preds ...predicate.User) predicate.User {
-	return predicate.User(
-		func(s *sql.Selector) {
-			step := sql.NewStep(
-				sql.From(Table, FieldID),
-				sql.To(Table, FieldID),
-				sql.Edge(sql.M2M, false, FollowingTable, FollowingPrimaryKey...),
-			)
-			sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		},
+	return predicate.User(func(s *sql.Selector) {
+		step := sql.NewStep(
+			sql.From(Table, FieldID),
+			sql.To(Table, FieldID),
+			sql.Edge(sql.M2M, false, FollowingTable, FollowingPrimaryKey...),
+		)
+		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
 	)
 }
 

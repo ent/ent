@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -64,34 +63,6 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.Nickname = scanu.Nickname.String
 	u.Phone = scanu.Phone.String
 	u.Password = scanu.Password.String
-	return nil
-}
-
-// FromResponse scans the gremlin response data into User.
-func (u *User) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanu struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-		Password string `json:"password,omitempty"`
-	}
-	if err := vmap.Decode(&scanu); err != nil {
-		return err
-	}
-	u.ID = scanu.ID
-	u.Age = scanu.Age
-	u.Name = scanu.Name
-	u.Last = scanu.Last
-	u.Nickname = scanu.Nickname
-	u.Phone = scanu.Phone
-	u.Password = scanu.Password
 	return nil
 }
 
@@ -205,38 +176,6 @@ func (u *Users) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*u = append(*u, scanu)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Users.
-func (u *Users) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanu []struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-		Password string `json:"password,omitempty"`
-	}
-	if err := vmap.Decode(&scanu); err != nil {
-		return err
-	}
-	for _, v := range scanu {
-		*u = append(*u, &User{
-			ID:       v.ID,
-			Age:      v.Age,
-			Name:     v.Name,
-			Last:     v.Last,
-			Nickname: v.Nickname,
-			Phone:    v.Phone,
-			Password: v.Password,
-		})
 	}
 	return nil
 }

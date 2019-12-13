@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -30,9 +25,8 @@ type FieldTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FieldType
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -155,14 +149,7 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return ftq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -194,14 +181,7 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return ftq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -215,14 +195,7 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return ftq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -244,9 +217,8 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		order:      append([]Order{}, ftq.order...),
 		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
-		// clone intermediate queries.
-		sql:     ftq.sql.Clone(),
-		gremlin: ftq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: ftq.sql.Clone(),
 	}
 }
 
@@ -268,12 +240,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
 	group := &FieldTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = ftq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = ftq.gremlinQuery()
-	}
+	group.sql = ftq.sqlQuery()
 	return group
 }
 
@@ -292,12 +259,7 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
 	selector := &FieldTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = ftq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = ftq.gremlinQuery()
-	}
+	selector.sql = ftq.sqlQuery()
 	return selector
 }
 
@@ -376,74 +338,13 @@ func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var fts FieldTypes
-	if err := fts.FromResponse(res); err != nil {
-		return nil, err
-	}
-	fts.config(ftq.config)
-	return fts, nil
-}
-
-func (ftq *FieldTypeQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().Count().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (ftq *FieldTypeQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().HasNext().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(fieldtype.Label)
-	if ftq.gremlin != nil {
-		v = ftq.gremlin.Clone()
-	}
-	for _, p := range ftq.predicates {
-		p(v)
-	}
-	if len(ftq.order) > 0 {
-		v.Order()
-		for _, p := range ftq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := ftq.limit, ftq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := ftq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // FieldTypeGroupBy is the builder for group-by FieldType entities.
 type FieldTypeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -454,14 +355,7 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...Aggregate) *FieldTypeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch ftgb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftgb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return ftgb.gremlinScan(ctx, v)
-	default:
-		return errors.New("ftgb: unsupported dialect")
-	}
+	return ftgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -570,46 +464,9 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 	columns = append(columns, ftgb.fields...)
 	for _, fn := range ftgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ftgb.fields...)
-}
-
-func (ftgb *FieldTypeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := ftgb.gremlinQuery().Query()
-	if err := ftgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ftgb.fields)+len(ftgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ftgb *FieldTypeGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range ftgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range ftgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return ftgb.gremlin.Group().
-		By(__.Values(ftgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // FieldTypeSelect is the builder for select fields of FieldType entities.
@@ -617,20 +474,12 @@ type FieldTypeSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
-	switch fts.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fts.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return fts.gremlinScan(ctx, v)
-	default:
-		return errors.New("FieldTypeSelect: unsupported dialect")
-	}
+	return fts.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -738,36 +587,4 @@ func (fts *FieldTypeSelect) sqlQuery() sql.Querier {
 	view := "fieldtype_view"
 	return sql.Dialect(fts.driver.Dialect()).
 		Select(fts.fields...).From(fts.sql.As(view))
-}
-
-func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(fts.fields) == 1 {
-		if fts.fields[0] != fieldtype.FieldID {
-			traversal = fts.gremlin.Values(fts.fields...)
-		} else {
-			traversal = fts.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(fts.fields))
-		for i, f := range fts.fields {
-			fields[i] = f
-		}
-		traversal = fts.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := fts.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(fts.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

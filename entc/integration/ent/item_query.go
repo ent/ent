@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -30,9 +25,8 @@ type ItemQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Item
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -155,14 +149,7 @@ func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
-	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return iq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return iq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return iq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -194,14 +181,7 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
-	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return iq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return iq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return iq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -215,14 +195,7 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
-	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return iq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return iq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return iq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -244,9 +217,8 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		order:      append([]Order{}, iq.order...),
 		unique:     append([]string{}, iq.unique...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
-		// clone intermediate queries.
-		sql:     iq.sql.Clone(),
-		gremlin: iq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: iq.sql.Clone(),
 	}
 }
 
@@ -255,12 +227,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
 	group.fields = append([]string{field}, fields...)
-	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = iq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = iq.gremlinQuery()
-	}
+	group.sql = iq.sqlQuery()
 	return group
 }
 
@@ -268,12 +235,7 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 	selector := &ItemSelect{config: iq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch iq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = iq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = iq.gremlinQuery()
-	}
+	selector.sql = iq.sqlQuery()
 	return selector
 }
 
@@ -352,74 +314,13 @@ func (iq *ItemQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (iq *ItemQuery) gremlinAll(ctx context.Context) ([]*Item, error) {
-	res := &gremlin.Response{}
-	query, bindings := iq.gremlinQuery().ValueMap(true).Query()
-	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var is Items
-	if err := is.FromResponse(res); err != nil {
-		return nil, err
-	}
-	is.config(iq.config)
-	return is, nil
-}
-
-func (iq *ItemQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := iq.gremlinQuery().Count().Query()
-	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (iq *ItemQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := iq.gremlinQuery().HasNext().Query()
-	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (iq *ItemQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(item.Label)
-	if iq.gremlin != nil {
-		v = iq.gremlin.Clone()
-	}
-	for _, p := range iq.predicates {
-		p(v)
-	}
-	if len(iq.order) > 0 {
-		v.Order()
-		for _, p := range iq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := iq.limit, iq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := iq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // ItemGroupBy is the builder for group-by Item entities.
 type ItemGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -430,14 +331,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...Aggregate) *ItemGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch igb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return igb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return igb.gremlinScan(ctx, v)
-	default:
-		return errors.New("igb: unsupported dialect")
-	}
+	return igb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -546,46 +440,9 @@ func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 	columns = append(columns, igb.fields...)
 	for _, fn := range igb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(igb.fields...)
-}
-
-func (igb *ItemGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := igb.gremlinQuery().Query()
-	if err := igb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(igb.fields)+len(igb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (igb *ItemGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range igb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range igb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return igb.gremlin.Group().
-		By(__.Values(igb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // ItemSelect is the builder for select fields of Item entities.
@@ -593,20 +450,12 @@ type ItemSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
-	switch is.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return is.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return is.gremlinScan(ctx, v)
-	default:
-		return errors.New("ItemSelect: unsupported dialect")
-	}
+	return is.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -714,36 +563,4 @@ func (is *ItemSelect) sqlQuery() sql.Querier {
 	view := "item_view"
 	return sql.Dialect(is.driver.Dialect()).
 		Select(is.fields...).From(is.sql.As(view))
-}
-
-func (is *ItemSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(is.fields) == 1 {
-		if is.fields[0] != item.FieldID {
-			traversal = is.gremlin.Values(is.fields...)
-		} else {
-			traversal = is.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(is.fields))
-		for i, f := range is.fields {
-			fields[i] = f
-		}
-		traversal = is.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := is.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(is.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -57,30 +56,6 @@ func (f *File) FromRows(rows *sql.Rows) error {
 		*f.User = scanf.User.String
 	}
 	f.Group = scanf.Group.String
-	return nil
-}
-
-// FromResponse scans the gremlin response data into File.
-func (f *File) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanf struct {
-		ID    string  `json:"id,omitempty"`
-		Size  int     `json:"fsize,omitempty"`
-		Name  string  `json:"name,omitempty"`
-		User  *string `json:"user,omitempty"`
-		Group string  `json:"group,omitempty"`
-	}
-	if err := vmap.Decode(&scanf); err != nil {
-		return err
-	}
-	f.ID = scanf.ID
-	f.Size = scanf.Size
-	f.Name = scanf.Name
-	f.User = scanf.User
-	f.Group = scanf.Group
 	return nil
 }
 
@@ -148,34 +123,6 @@ func (f *Files) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*f = append(*f, scanf)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Files.
-func (f *Files) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanf []struct {
-		ID    string  `json:"id,omitempty"`
-		Size  int     `json:"fsize,omitempty"`
-		Name  string  `json:"name,omitempty"`
-		User  *string `json:"user,omitempty"`
-		Group string  `json:"group,omitempty"`
-	}
-	if err := vmap.Decode(&scanf); err != nil {
-		return err
-	}
-	for _, v := range scanf {
-		*f = append(*f, &File{
-			ID:    v.ID,
-			Size:  v.Size,
-			Name:  v.Name,
-			User:  v.User,
-			Group: v.Group,
-		})
 	}
 	return nil
 }

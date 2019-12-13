@@ -28,18 +28,7 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	{{- if $.MultiStorage -}}
-		switch {{ $receiver }}.driver.Dialect() {
-		{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			return {{ $receiver }}.{{ $storage }}Exec(ctx)
-		{{- end }}
-		default:
-			return 0, errors.New("{{ $pkg }}: unsupported dialect")
-		}
-	{{- else -}}
-		return {{ $receiver }}.{{ index $.Storage 0 }}Exec(ctx)
-	{{- end }}
+	return {{ $receiver }}.{{ $.Storage }}Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -51,11 +40,9 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 	return n
 }
 
-{{- range $_, $storage := $.Storage }}
-	{{ with extend $ "Builder" $builder }}
-		{{ $tmpl := printf "dialect/%s/delete" $storage }}
-		{{ xtemplate $tmpl . }}
-	{{ end }}
+{{ with extend $ "Builder" $builder }}
+	{{ $tmpl := printf "dialect/%s/delete" $.Storage }}
+	{{ xtemplate $tmpl . }}
 {{ end }}
 
 {{ $onebuilder := print $builder "One" }}

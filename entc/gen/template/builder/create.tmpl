@@ -67,18 +67,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			}
 		{{ end -}}
 	{{ end -}}
-	{{- if $.MultiStorage -}}
-		switch {{ $receiver }}.driver.Dialect() {
-		{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			return {{ $receiver }}.{{ $storage }}Save(ctx)
-		{{- end }}
-		default:
-			return nil, errors.New("{{ $pkg }}: unsupported dialect")
-		}
-	{{- else -}}
-		return {{ $receiver }}.{{ index $.Storage 0 }}Save(ctx)
-	{{- end }}
+	return {{ $receiver }}.{{ $.Storage }}Save(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -90,11 +79,9 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} 
 	return v
 }
 
-{{- range $_, $storage := $.Storage }}
-	{{ with extend $ "Builder" $builder }}
-		{{ $tmpl := printf "dialect/%s/create" $storage }}
-		{{ xtemplate $tmpl . }}
-	{{ end }}
+{{ with extend $ "Builder" $builder }}
+	{{ $tmpl := printf "dialect/%s/create" $.Storage }}
+	{{ xtemplate $tmpl . }}
 {{ end }}
 
 {{ end }}

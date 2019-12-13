@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -30,9 +25,8 @@ type NodeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Node
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -62,36 +56,24 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryPrev chains the current query on the prev edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(node.Table, node.FieldID, nq.sqlQuery()),
-			sql.To(node.Table, node.FieldID),
-			sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
-		)
-		query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := nq.gremlinQuery()
-		query.gremlin = gremlin.InE(node.NextLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
+	)
+	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
 // QueryNext chains the current query on the next edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(node.Table, node.FieldID, nq.sqlQuery()),
-			sql.To(node.Table, node.FieldID),
-			sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
-		)
-		query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := nq.gremlinQuery()
-		query.gremlin = gremlin.OutE(node.NextLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sql.To(node.Table, node.FieldID),
+		sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
+	)
+	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
@@ -191,14 +173,7 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return nq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return nq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return nq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -230,14 +205,7 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return nq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return nq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return nq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -251,14 +219,7 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return nq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return nq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return nq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -280,9 +241,8 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		order:      append([]Order{}, nq.order...),
 		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
-		// clone intermediate queries.
-		sql:     nq.sql.Clone(),
-		gremlin: nq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: nq.sql.Clone(),
 	}
 }
 
@@ -304,12 +264,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	group := &NodeGroupBy{config: nq.config}
 	group.fields = append([]string{field}, fields...)
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = nq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = nq.gremlinQuery()
-	}
+	group.sql = nq.sqlQuery()
 	return group
 }
 
@@ -328,12 +283,7 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector := &NodeSelect{config: nq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch nq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = nq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = nq.gremlinQuery()
-	}
+	selector.sql = nq.sqlQuery()
 	return selector
 }
 
@@ -412,74 +362,13 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
-	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().ValueMap(true).Query()
-	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var ns Nodes
-	if err := ns.FromResponse(res); err != nil {
-		return nil, err
-	}
-	ns.config(nq.config)
-	return ns, nil
-}
-
-func (nq *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().Count().Query()
-	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (nq *NodeQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().HasNext().Query()
-	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(node.Label)
-	if nq.gremlin != nil {
-		v = nq.gremlin.Clone()
-	}
-	for _, p := range nq.predicates {
-		p(v)
-	}
-	if len(nq.order) > 0 {
-		v.Order()
-		for _, p := range nq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := nq.limit, nq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := nq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // NodeGroupBy is the builder for group-by Node entities.
 type NodeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -490,14 +379,7 @@ func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch ngb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ngb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return ngb.gremlinScan(ctx, v)
-	default:
-		return errors.New("ngb: unsupported dialect")
-	}
+	return ngb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -606,46 +488,9 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 	columns = append(columns, ngb.fields...)
 	for _, fn := range ngb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ngb.fields...)
-}
-
-func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := ngb.gremlinQuery().Query()
-	if err := ngb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ngb.fields)+len(ngb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range ngb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range ngb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return ngb.gremlin.Group().
-		By(__.Values(ngb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // NodeSelect is the builder for select fields of Node entities.
@@ -653,20 +498,12 @@ type NodeSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
-	switch ns.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ns.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return ns.gremlinScan(ctx, v)
-	default:
-		return errors.New("NodeSelect: unsupported dialect")
-	}
+	return ns.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -774,36 +611,4 @@ func (ns *NodeSelect) sqlQuery() sql.Querier {
 	view := "node_view"
 	return sql.Dialect(ns.driver.Dialect()).
 		Select(ns.fields...).From(ns.sql.As(view))
-}
-
-func (ns *NodeSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(ns.fields) == 1 {
-		if ns.fields[0] != node.FieldID {
-			traversal = ns.gremlin.Values(ns.fields...)
-		} else {
-			traversal = ns.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(ns.fields))
-		for i, f := range ns.fields {
-			fields[i] = f
-		}
-		traversal = ns.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := ns.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ns.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

@@ -30,10 +30,8 @@ type {{ $.Name }} struct {
 	{{ template "model/fields/additional" $ }}
 }
 
-{{ range $_, $storage := $.Storage }}
-	{{ $tmpl := printf "dialect/%s/decode/one" $storage }}
-	{{ xtemplate $tmpl $ }}
-{{ end }}
+{{ $tmpl := printf "dialect/%s/decode/one" $.Storage }}
+{{ xtemplate $tmpl $ }}
 
 {{ $receiver := $.Receiver }}
 
@@ -112,11 +110,9 @@ func ({{ $receiver }} *{{ $.Name }}) id() int {
 // {{ $slice }} is a parsable slice of {{ $.Name }}.
 type {{ $slice }} []*{{ $.Name }}
 
-{{ range $_, $storage := $.Storage }}
-	{{ with extend $ "Slice" $slice }}
-		{{ $tmpl := printf "dialect/%s/decode/many" $storage }}
-		{{ xtemplate $tmpl . }}
-	{{ end }}
+{{ with extend $ "Slice" $slice }}
+	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
+	{{ xtemplate $tmpl . }}
 {{ end }}
 
 func ({{ $receiver }} {{ $slice }}) config(cfg config) {

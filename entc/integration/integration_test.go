@@ -87,8 +87,11 @@ func TestPostgres(t *testing.T) {
 	}
 }
 
+/*
+Convert ent.Client to entgremlin.Client and run tests:
+
 func TestGremlin(t *testing.T) {
-	client, err := ent.Open("gremlin", "http://localhost:8182")
+	client, err := entgremlin.Open("gremlin", "http://localhost:8182")
 	require.NoError(t, err)
 	defer client.Close()
 	// run all tests except transaction and index tests.
@@ -100,6 +103,7 @@ func TestGremlin(t *testing.T) {
 		})
 	}
 }
+*/
 
 // tests for all drivers to run.
 var tests = []func(*testing.T, *ent.Client){

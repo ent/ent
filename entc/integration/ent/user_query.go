@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
@@ -34,9 +29,8 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -66,198 +60,132 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryCard chains the current query on the card edge.
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(card.Table, card.FieldID),
-			sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.CardLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(card.Table, card.FieldID),
+		sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(pet.Table, pet.FieldID),
-			sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.PetsLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(pet.Table, pet.FieldID),
+		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFiles chains the current query on the files edge.
 func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(file.Table, file.FieldID),
-			sql.Edge(sql.O2M, false, user.FilesTable, user.FilesColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.FilesLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(file.Table, file.FieldID),
+		sql.Edge(sql.O2M, false, user.FilesTable, user.FilesColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(group.Table, group.FieldID),
-			sql.Edge(sql.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.GroupsLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(group.Table, group.FieldID),
+		sql.Edge(sql.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.Both(user.FriendsLabel)
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.InE(user.FollowingLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.FollowingLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryTeam chains the current query on the team edge.
 func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(pet.Table, pet.FieldID),
-			sql.Edge(sql.O2O, false, user.TeamTable, user.TeamColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.TeamLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(pet.Table, pet.FieldID),
+		sql.Edge(sql.O2O, false, user.TeamTable, user.TeamColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QuerySpouse chains the current query on the spouse edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.Both(user.SpouseLabel)
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2M, true, user.ChildrenTable, user.ChildrenColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.InE(user.ParentLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2M, true, user.ChildrenTable, user.ChildrenColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryParent chains the current query on the parent edge.
 func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2O, false, user.ParentTable, user.ParentColumn),
-		)
-		query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := uq.gremlinQuery()
-		query.gremlin = gremlin.OutE(user.ParentLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, false, user.ParentTable, user.ParentColumn),
+	)
+	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
@@ -357,14 +285,7 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return uq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return uq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return uq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -396,14 +317,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return uq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return uq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return uq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -417,14 +331,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return uq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return uq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return uq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -446,9 +353,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:      append([]Order{}, uq.order...),
 		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
-		// clone intermediate queries.
-		sql:     uq.sql.Clone(),
-		gremlin: uq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: uq.sql.Clone(),
 	}
 }
 
@@ -470,12 +376,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	group := &UserGroupBy{config: uq.config}
 	group.fields = append([]string{field}, fields...)
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = uq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = uq.gremlinQuery()
-	}
+	group.sql = uq.sqlQuery()
 	return group
 }
 
@@ -494,12 +395,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 	selector := &UserSelect{config: uq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch uq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = uq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = uq.gremlinQuery()
-	}
+	selector.sql = uq.sqlQuery()
 	return selector
 }
 
@@ -578,74 +474,13 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().ValueMap(true).Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var us Users
-	if err := us.FromResponse(res); err != nil {
-		return nil, err
-	}
-	us.config(uq.config)
-	return us, nil
-}
-
-func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().Count().Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (uq *UserQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().HasNext().Query()
-	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(user.Label)
-	if uq.gremlin != nil {
-		v = uq.gremlin.Clone()
-	}
-	for _, p := range uq.predicates {
-		p(v)
-	}
-	if len(uq.order) > 0 {
-		v.Order()
-		for _, p := range uq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := uq.limit, uq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := uq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // UserGroupBy is the builder for group-by User entities.
 type UserGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -656,14 +491,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch ugb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ugb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return ugb.gremlinScan(ctx, v)
-	default:
-		return errors.New("ugb: unsupported dialect")
-	}
+	return ugb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -772,46 +600,9 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
-}
-
-func (ugb *UserGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := ugb.gremlinQuery().Query()
-	if err := ugb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ugb.fields)+len(ugb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ugb *UserGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range ugb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range ugb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return ugb.gremlin.Group().
-		By(__.Values(ugb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // UserSelect is the builder for select fields of User entities.
@@ -819,20 +610,12 @@ type UserSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
-	switch us.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return us.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return us.gremlinScan(ctx, v)
-	default:
-		return errors.New("UserSelect: unsupported dialect")
-	}
+	return us.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -940,36 +723,4 @@ func (us *UserSelect) sqlQuery() sql.Querier {
 	view := "user_view"
 	return sql.Dialect(us.driver.Dialect()).
 		Select(us.fields...).From(us.sql.As(view))
-}
-
-func (us *UserSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(us.fields) == 1 {
-		if us.fields[0] != user.FieldID {
-			traversal = us.gremlin.Values(us.fields...)
-		} else {
-			traversal = us.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(us.fields))
-		for i, f := range us.fields {
-			fields[i] = f
-		}
-		traversal = us.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := us.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(us.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

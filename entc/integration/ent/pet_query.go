@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -31,9 +26,8 @@ type PetQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Pet
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -63,36 +57,24 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryTeam chains the current query on the team edge.
 func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
-		)
-		query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := pq.gremlinQuery()
-		query.gremlin = gremlin.InE(user.TeamLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
+	)
+	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
-		)
-		query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := pq.gremlinQuery()
-		query.gremlin = gremlin.InE(user.PetsLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	)
+	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
@@ -192,14 +174,7 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return pq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return pq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -231,14 +206,7 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return pq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return pq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -252,14 +220,7 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return pq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return pq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -281,9 +242,8 @@ func (pq *PetQuery) Clone() *PetQuery {
 		order:      append([]Order{}, pq.order...),
 		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
-		// clone intermediate queries.
-		sql:     pq.sql.Clone(),
-		gremlin: pq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: pq.sql.Clone(),
 	}
 }
 
@@ -305,12 +265,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	group := &PetGroupBy{config: pq.config}
 	group.fields = append([]string{field}, fields...)
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = pq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = pq.gremlinQuery()
-	}
+	group.sql = pq.sqlQuery()
 	return group
 }
 
@@ -329,12 +284,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	selector := &PetSelect{config: pq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch pq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = pq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = pq.gremlinQuery()
-	}
+	selector.sql = pq.sqlQuery()
 	return selector
 }
 
@@ -413,74 +363,13 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().ValueMap(true).Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var pes Pets
-	if err := pes.FromResponse(res); err != nil {
-		return nil, err
-	}
-	pes.config(pq.config)
-	return pes, nil
-}
-
-func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().Count().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (pq *PetQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().HasNext().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(pet.Label)
-	if pq.gremlin != nil {
-		v = pq.gremlin.Clone()
-	}
-	for _, p := range pq.predicates {
-		p(v)
-	}
-	if len(pq.order) > 0 {
-		v.Order()
-		for _, p := range pq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := pq.limit, pq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := pq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // PetGroupBy is the builder for group-by Pet entities.
 type PetGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -491,14 +380,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch pgb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pgb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return pgb.gremlinScan(ctx, v)
-	default:
-		return errors.New("pgb: unsupported dialect")
-	}
+	return pgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -607,46 +489,9 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
 	columns = append(columns, pgb.fields...)
 	for _, fn := range pgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(pgb.fields...)
-}
-
-func (pgb *PetGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := pgb.gremlinQuery().Query()
-	if err := pgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(pgb.fields)+len(pgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range pgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range pgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return pgb.gremlin.Group().
-		By(__.Values(pgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // PetSelect is the builder for select fields of Pet entities.
@@ -654,20 +499,12 @@ type PetSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
-	switch ps.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ps.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return ps.gremlinScan(ctx, v)
-	default:
-		return errors.New("PetSelect: unsupported dialect")
-	}
+	return ps.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -775,36 +612,4 @@ func (ps *PetSelect) sqlQuery() sql.Querier {
 	view := "pet_view"
 	return sql.Dialect(ps.driver.Dialect()).
 		Select(ps.fields...).From(ps.sql.As(view))
-}
-
-func (ps *PetSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(ps.fields) == 1 {
-		if ps.fields[0] != pet.FieldID {
-			traversal = ps.gremlin.Values(ps.fields...)
-		} else {
-			traversal = ps.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(ps.fields))
-		for i, f := range ps.fields {
-			fields[i] = f
-		}
-		traversal = ps.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := ps.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ps.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

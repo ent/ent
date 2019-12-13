@@ -28,8 +28,8 @@ import (
 	{{- end }}
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect"
-	{{- range $_, $storage := $.Storage }}
-		{{- range $_, $import := $storage.Imports }}
+	{{- with $.Storage }}
+		{{- range $_, $import := .Imports }}
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}

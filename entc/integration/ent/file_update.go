@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
@@ -189,14 +184,7 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	if len(fu._type) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
-	switch fu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return fu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return fu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -338,73 +326,6 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	return len(ids), nil
-}
-
-func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := fu.gremlin().Query()
-	if err := fu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (fu *FileUpdate) gremlin() *dsl.Traversal {
-	v := g.V().HasLabel(file.Label)
-	for _, p := range fu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := fu.size; value != nil {
-		v.Property(dsl.Single, file.FieldSize, *value)
-	}
-	if value := fu.addsize; value != nil {
-		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(*value)).Sum())
-	}
-	if value := fu.name; value != nil {
-		v.Property(dsl.Single, file.FieldName, *value)
-	}
-	if value := fu.user; value != nil {
-		v.Property(dsl.Single, file.FieldUser, *value)
-	}
-	if value := fu.group; value != nil {
-		v.Property(dsl.Single, file.FieldGroup, *value)
-	}
-	var properties []interface{}
-	if fu.clearuser {
-		properties = append(properties, file.FieldUser)
-	}
-	if fu.cleargroup {
-		properties = append(properties, file.FieldGroup)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	if fu.clearedOwner {
-		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range fu.owner {
-		v.AddE(user.FilesLabel).From(g.V(id)).InV()
-	}
-	if fu.clearedType {
-		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range fu._type {
-		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
-	}
-	v.Count()
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }
 
 // FileUpdateOne is the builder for updating a single File entity.
@@ -566,14 +487,7 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	if len(fuo._type) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
-	switch fuo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fuo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return fuo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return fuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -726,72 +640,4 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		return nil, err
 	}
 	return f, nil
-}
-
-func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
-	res := &gremlin.Response{}
-	query, bindings := fuo.gremlin(fuo.id).Query()
-	if err := fuo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	f := &File{config: fuo.config}
-	if err := f.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return f, nil
-}
-
-func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := fuo.size; value != nil {
-		v.Property(dsl.Single, file.FieldSize, *value)
-	}
-	if value := fuo.addsize; value != nil {
-		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(*value)).Sum())
-	}
-	if value := fuo.name; value != nil {
-		v.Property(dsl.Single, file.FieldName, *value)
-	}
-	if value := fuo.user; value != nil {
-		v.Property(dsl.Single, file.FieldUser, *value)
-	}
-	if value := fuo.group; value != nil {
-		v.Property(dsl.Single, file.FieldGroup, *value)
-	}
-	var properties []interface{}
-	if fuo.clearuser {
-		properties = append(properties, file.FieldUser)
-	}
-	if fuo.cleargroup {
-		properties = append(properties, file.FieldGroup)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	if fuo.clearedOwner {
-		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range fuo.owner {
-		v.AddE(user.FilesLabel).From(g.V(id)).InV()
-	}
-	if fuo.clearedType {
-		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range fuo._type {
-		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
-	}
-	v.ValueMap(true)
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

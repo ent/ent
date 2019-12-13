@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
@@ -31,9 +26,8 @@ type GroupInfoQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.GroupInfo
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -63,18 +57,12 @@ func (giq *GroupInfoQuery) Order(o ...Order) *GroupInfoQuery {
 // QueryGroups chains the current query on the groups edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
-			sql.To(group.Table, group.FieldID),
-			sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
-		)
-		query.sql = sql.SetNeighbors(giq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := giq.gremlinQuery()
-		query.gremlin = gremlin.InE(group.InfoLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
+		sql.To(group.Table, group.FieldID),
+		sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+	)
+	query.sql = sql.SetNeighbors(giq.driver.Dialect(), step)
 	return query
 }
 
@@ -174,14 +162,7 @@ func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return giq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return giq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return giq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -213,14 +194,7 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return giq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return giq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return giq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -234,14 +208,7 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return giq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return giq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return giq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -263,9 +230,8 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		order:      append([]Order{}, giq.order...),
 		unique:     append([]string{}, giq.unique...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
-		// clone intermediate queries.
-		sql:     giq.sql.Clone(),
-		gremlin: giq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: giq.sql.Clone(),
 	}
 }
 
@@ -287,12 +253,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
 	group := &GroupInfoGroupBy{config: giq.config}
 	group.fields = append([]string{field}, fields...)
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = giq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = giq.gremlinQuery()
-	}
+	group.sql = giq.sqlQuery()
 	return group
 }
 
@@ -311,12 +272,7 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
 	selector := &GroupInfoSelect{config: giq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch giq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = giq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = giq.gremlinQuery()
-	}
+	selector.sql = giq.sqlQuery()
 	return selector
 }
 
@@ -395,74 +351,13 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error) {
-	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery().ValueMap(true).Query()
-	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var gis GroupInfos
-	if err := gis.FromResponse(res); err != nil {
-		return nil, err
-	}
-	gis.config(giq.config)
-	return gis, nil
-}
-
-func (giq *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery().Count().Query()
-	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (giq *GroupInfoQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery().HasNext().Query()
-	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(groupinfo.Label)
-	if giq.gremlin != nil {
-		v = giq.gremlin.Clone()
-	}
-	for _, p := range giq.predicates {
-		p(v)
-	}
-	if len(giq.order) > 0 {
-		v.Order()
-		for _, p := range giq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := giq.limit, giq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := giq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // GroupInfoGroupBy is the builder for group-by GroupInfo entities.
 type GroupInfoGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -473,14 +368,7 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...Aggregate) *GroupInfoGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch gigb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return gigb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return gigb.gremlinScan(ctx, v)
-	default:
-		return errors.New("gigb: unsupported dialect")
-	}
+	return gigb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -589,46 +477,9 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
 	columns = append(columns, gigb.fields...)
 	for _, fn := range gigb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(gigb.fields...)
-}
-
-func (gigb *GroupInfoGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := gigb.gremlinQuery().Query()
-	if err := gigb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(gigb.fields)+len(gigb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (gigb *GroupInfoGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range gigb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range gigb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return gigb.gremlin.Group().
-		By(__.Values(gigb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // GroupInfoSelect is the builder for select fields of GroupInfo entities.
@@ -636,20 +487,12 @@ type GroupInfoSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
-	switch gis.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return gis.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return gis.gremlinScan(ctx, v)
-	default:
-		return errors.New("GroupInfoSelect: unsupported dialect")
-	}
+	return gis.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -757,36 +600,4 @@ func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
 	view := "groupinfo_view"
 	return sql.Dialect(gis.driver.Dialect()).
 		Select(gis.fields...).From(gis.sql.As(view))
-}
-
-func (gis *GroupInfoSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(gis.fields) == 1 {
-		if gis.fields[0] != groupinfo.FieldID {
-			traversal = gis.gremlin.Values(gis.fields...)
-		} else {
-			traversal = gis.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(gis.fields))
-		for i, f := range gis.fields {
-			fields[i] = f
-		}
-		traversal = gis.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := gis.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(gis.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

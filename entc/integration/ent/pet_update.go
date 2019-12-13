@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -111,14 +105,7 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	if len(pu.owner) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	switch pu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return pu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return pu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -250,70 +237,6 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (pu *PetUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := pu.gremlin().Query()
-	if err := pu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (pu *PetUpdate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.V().HasLabel(pet.Label)
-	for _, p := range pu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := pu.name; value != nil {
-		v.Property(dsl.Single, pet.FieldName, *value)
-	}
-	if pu.clearedTeam {
-		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range pu.team {
-		v.AddE(user.TeamLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
-		})
-	}
-	if pu.clearedOwner {
-		tr := rv.Clone().InE(user.PetsLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range pu.owner {
-		v.AddE(user.PetsLabel).From(g.V(id)).InV()
-	}
-	v.Count()
-	if len(constraints) > 0 {
-		constraints = append(constraints, &constraint{
-			pred: rv.Count(),
-			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
-		})
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
@@ -395,14 +318,7 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	if len(puo.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	switch puo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return puo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return puo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return puo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -536,65 +452,4 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		return nil, err
 	}
 	return pe, nil
-}
-
-func (puo *PetUpdateOne) gremlinSave(ctx context.Context) (*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := puo.gremlin(puo.id).Query()
-	if err := puo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	pe := &Pet{config: puo.config}
-	if err := pe.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return pe, nil
-}
-
-func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := puo.name; value != nil {
-		v.Property(dsl.Single, pet.FieldName, *value)
-	}
-	if puo.clearedTeam {
-		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range puo.team {
-		v.AddE(user.TeamLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
-		})
-	}
-	if puo.clearedOwner {
-		tr := rv.Clone().InE(user.PetsLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range puo.owner {
-		v.AddE(user.PetsLabel).From(g.V(id)).InV()
-	}
-	v.ValueMap(true)
-	if len(constraints) > 0 {
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

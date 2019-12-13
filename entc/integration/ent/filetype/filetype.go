@@ -23,9 +23,6 @@ const (
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
 	FilesColumn = "type_id"
-
-	// FilesLabel holds the string label denoting the files edge type in the database.
-	FilesLabel = "file_type_files"
 )
 
 // Columns holds all SQL columns are filetype fields.

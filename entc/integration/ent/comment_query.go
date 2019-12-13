@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -30,9 +25,8 @@ type CommentQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Comment
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -155,14 +149,7 @@ func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return cq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return cq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -194,14 +181,7 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return cq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return cq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -215,14 +195,7 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return cq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return cq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -244,9 +217,8 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		order:      append([]Order{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Comment{}, cq.predicates...),
-		// clone intermediate queries.
-		sql:     cq.sql.Clone(),
-		gremlin: cq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: cq.sql.Clone(),
 	}
 }
 
@@ -268,12 +240,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
 	group := &CommentGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = cq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = cq.gremlinQuery()
-	}
+	group.sql = cq.sqlQuery()
 	return group
 }
 
@@ -292,12 +259,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 	selector := &CommentSelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch cq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = cq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = cq.gremlinQuery()
-	}
+	selector.sql = cq.sqlQuery()
 	return selector
 }
 
@@ -376,74 +338,13 @@ func (cq *CommentQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
-	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().ValueMap(true).Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var cs Comments
-	if err := cs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	cs.config(cq.config)
-	return cs, nil
-}
-
-func (cq *CommentQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().Count().Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (cq *CommentQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().HasNext().Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (cq *CommentQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(comment.Label)
-	if cq.gremlin != nil {
-		v = cq.gremlin.Clone()
-	}
-	for _, p := range cq.predicates {
-		p(v)
-	}
-	if len(cq.order) > 0 {
-		v.Order()
-		for _, p := range cq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := cq.limit, cq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := cq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // CommentGroupBy is the builder for group-by Comment entities.
 type CommentGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -454,14 +355,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...Aggregate) *CommentGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch cgb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cgb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return cgb.gremlinScan(ctx, v)
-	default:
-		return errors.New("cgb: unsupported dialect")
-	}
+	return cgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -570,46 +464,9 @@ func (cgb *CommentGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
-}
-
-func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := cgb.gremlinQuery().Query()
-	if err := cgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(cgb.fields)+len(cgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range cgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range cgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return cgb.gremlin.Group().
-		By(__.Values(cgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // CommentSelect is the builder for select fields of Comment entities.
@@ -617,20 +474,12 @@ type CommentSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
-	switch cs.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cs.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return cs.gremlinScan(ctx, v)
-	default:
-		return errors.New("CommentSelect: unsupported dialect")
-	}
+	return cs.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -738,36 +587,4 @@ func (cs *CommentSelect) sqlQuery() sql.Querier {
 	view := "comment_view"
 	return sql.Dialect(cs.driver.Dialect()).
 		Select(cs.fields...).From(cs.sql.As(view))
-}
-
-func (cs *CommentSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(cs.fields) == 1 {
-		if cs.fields[0] != comment.FieldID {
-			traversal = cs.gremlin.Values(cs.fields...)
-		} else {
-			traversal = cs.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(cs.fields))
-		for i, f := range cs.fields {
-			fields[i] = f
-		}
-		traversal = cs.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := cs.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(cs.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }
