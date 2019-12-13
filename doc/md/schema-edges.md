@@ -198,7 +198,7 @@ func (User) Edges() []ent.Edge {
 
 `ent/schema/card.go`
 ```go
-// Edges of the user.
+// Edges of the Card.
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
@@ -868,7 +868,7 @@ The full example exists in [GitHub](https://github.com/facebookincubator/ent/tre
 Edges can be defined as required in the entity creation using the `Required` method on the builder.
 
 ```go
-// Edges of the user.
+// Edges of the Card.
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
