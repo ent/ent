@@ -57,7 +57,6 @@ func TestFloat(t *testing.T) {
 	f = field.Float("age").Min(2.5).Max(5)
 	fd = f.Descriptor()
 	assert.Len(t, fd.Validators, 2)
-
 	assert.Equal(t, field.TypeFloat32, field.Float32("age").Descriptor().Info.Type)
 }
 
@@ -173,7 +172,7 @@ func TestField_UUID(t *testing.T) {
 }
 
 func TestTypeString(t *testing.T) {
-	var typ = field.TypeBool
+	typ := field.TypeBool
 	assert.Equal(t, "bool", typ.String())
 	typ = field.TypeInvalid
 	assert.Equal(t, "invalid", typ.String())
@@ -182,21 +181,23 @@ func TestTypeString(t *testing.T) {
 }
 
 func TestTypeNumeric(t *testing.T) {
-	var typ = field.TypeBool
-	assert.Equal(t, false, typ.Numeric())
+	typ := field.TypeBool
+	assert.False(t, typ.Numeric())
 	typ = field.TypeUint8
-	assert.Equal(t, true, typ.Numeric())
+	assert.True(t, typ.Numeric())
 }
 
 func TestTypeValid(t *testing.T) {
-	var typ = field.TypeBool
-	assert.Equal(t, true, typ.Valid())
+	typ := field.TypeBool
+	assert.True(t, typ.Valid())
 	typ = 0
-	assert.Equal(t, false, typ.Valid())
+	assert.False(t, typ.Valid())
+	typ = 21
+	assert.False(t, typ.Valid())
 }
 
 func TestTypeConstName(t *testing.T) {
-	var typ = field.TypeJSON
+	typ := field.TypeJSON
 	assert.Equal(t, "TypeJSON", typ.ConstName())
 	typ = field.TypeInt
 	assert.Equal(t, "TypeInt", typ.ConstName())
