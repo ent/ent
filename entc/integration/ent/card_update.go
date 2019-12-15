@@ -13,12 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -107,14 +101,7 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	if len(cu.owner) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	switch cu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return cu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return cu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -227,73 +214,6 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (cu *CardUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := cu.gremlin().Query()
-	if err := cu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (cu *CardUpdate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.V().HasLabel(card.Label)
-	for _, p := range cu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := cu.update_time; value != nil {
-		v.Property(dsl.Single, card.FieldUpdateTime, *value)
-	}
-	if value := cu.name; value != nil {
-		v.Property(dsl.Single, card.FieldName, *value)
-	}
-	var properties []interface{}
-	if cu.clearname {
-		properties = append(properties, card.FieldName)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	if cu.clearedOwner {
-		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range cu.owner {
-		v.AddE(user.CardLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.CardLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
-		})
-	}
-	v.Count()
-	if len(constraints) > 0 {
-		constraints = append(constraints, &constraint{
-			pred: rv.Count(),
-			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
-		})
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
@@ -370,14 +290,7 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	if len(cuo.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	switch cuo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cuo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return cuo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return cuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -495,68 +408,4 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		return nil, err
 	}
 	return c, nil
-}
-
-func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {
-	res := &gremlin.Response{}
-	query, bindings := cuo.gremlin(cuo.id).Query()
-	if err := cuo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	c := &Card{config: cuo.config}
-	if err := c.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return c, nil
-}
-
-func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := cuo.update_time; value != nil {
-		v.Property(dsl.Single, card.FieldUpdateTime, *value)
-	}
-	if value := cuo.name; value != nil {
-		v.Property(dsl.Single, card.FieldName, *value)
-	}
-	var properties []interface{}
-	if cuo.clearname {
-		properties = append(properties, card.FieldName)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	if cuo.clearedOwner {
-		tr := rv.Clone().InE(user.CardLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range cuo.owner {
-		v.AddE(user.CardLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.CardLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
-		})
-	}
-	v.ValueMap(true)
-	if len(constraints) > 0 {
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

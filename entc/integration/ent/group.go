@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -63,32 +62,6 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 	}
 	gr.MaxUsers = int(scangr.MaxUsers.Int64)
 	gr.Name = scangr.Name.String
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Group.
-func (gr *Group) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scangr struct {
-		ID       string  `json:"id,omitempty"`
-		Active   bool    `json:"active,omitempty"`
-		Expire   int64   `json:"expire,omitempty"`
-		Type     *string `json:"type,omitempty"`
-		MaxUsers int     `json:"max_users,omitempty"`
-		Name     string  `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&scangr); err != nil {
-		return err
-	}
-	gr.ID = scangr.ID
-	gr.Active = scangr.Active
-	gr.Expire = time.Unix(0, scangr.Expire)
-	gr.Type = scangr.Type
-	gr.MaxUsers = scangr.MaxUsers
-	gr.Name = scangr.Name
 	return nil
 }
 
@@ -168,36 +141,6 @@ func (gr *Groups) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*gr = append(*gr, scangr)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Groups.
-func (gr *Groups) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scangr []struct {
-		ID       string  `json:"id,omitempty"`
-		Active   bool    `json:"active,omitempty"`
-		Expire   int64   `json:"expire,omitempty"`
-		Type     *string `json:"type,omitempty"`
-		MaxUsers int     `json:"max_users,omitempty"`
-		Name     string  `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&scangr); err != nil {
-		return err
-	}
-	for _, v := range scangr {
-		*gr = append(*gr, &Group{
-			ID:       v.ID,
-			Active:   v.Active,
-			Expire:   time.Unix(0, v.Expire),
-			Type:     v.Type,
-			MaxUsers: v.MaxUsers,
-			Name:     v.Name,
-		})
 	}
 	return nil
 }

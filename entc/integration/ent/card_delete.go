@@ -8,13 +8,7 @@ package ent
 
 import (
 	"context"
-	"errors"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -34,14 +28,7 @@ func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CardDelete) Exec(ctx context.Context) (int, error) {
-	switch cd.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cd.sqlExec(ctx)
-	case dialect.Gremlin:
-		return cd.gremlinExec(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return cd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -71,23 +58,6 @@ func (cd *CardDelete) sqlExec(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return int(affected), nil
-}
-
-func (cd *CardDelete) gremlinExec(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := cd.gremlin().Query()
-	if err := cd.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (cd *CardDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(card.Label)
-	for _, p := range cd.predicates {
-		p(t)
-	}
-	return t.SideEffect(__.Drop()).Count()
 }
 
 // CardDeleteOne is the builder for deleting a single Card entity.

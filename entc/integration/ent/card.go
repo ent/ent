@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -58,30 +57,6 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 	c.UpdateTime = scanc.UpdateTime.Time
 	c.Number = scanc.Number.String
 	c.Name = scanc.Name.String
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Card.
-func (c *Card) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanc struct {
-		ID         string `json:"id,omitempty"`
-		CreateTime int64  `json:"create_time,omitempty"`
-		UpdateTime int64  `json:"update_time,omitempty"`
-		Number     string `json:"number,omitempty"`
-		Name       string `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&scanc); err != nil {
-		return err
-	}
-	c.ID = scanc.ID
-	c.CreateTime = time.Unix(0, scanc.CreateTime)
-	c.UpdateTime = time.Unix(0, scanc.UpdateTime)
-	c.Number = scanc.Number
-	c.Name = scanc.Name
 	return nil
 }
 
@@ -142,34 +117,6 @@ func (c *Cards) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*c = append(*c, scanc)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Cards.
-func (c *Cards) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanc []struct {
-		ID         string `json:"id,omitempty"`
-		CreateTime int64  `json:"create_time,omitempty"`
-		UpdateTime int64  `json:"update_time,omitempty"`
-		Number     string `json:"number,omitempty"`
-		Name       string `json:"name,omitempty"`
-	}
-	if err := vmap.Decode(&scanc); err != nil {
-		return err
-	}
-	for _, v := range scanc {
-		*c = append(*c, &Card{
-			ID:         v.ID,
-			CreateTime: time.Unix(0, v.CreateTime),
-			UpdateTime: time.Unix(0, v.UpdateTime),
-			Number:     v.Number,
-			Name:       v.Name,
-		})
 	}
 	return nil
 }

@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
@@ -80,14 +74,7 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		v := groupinfo.DefaultMaxUsers
 		gic.max_users = &v
 	}
-	switch gic.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return gic.sqlSave(ctx)
-	case dialect.Gremlin:
-		return gic.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return gic.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -152,50 +139,4 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		return nil, err
 	}
 	return gi, nil
-}
-
-func (gic *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
-	res := &gremlin.Response{}
-	query, bindings := gic.gremlin().Query()
-	if err := gic.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	gi := &GroupInfo{config: gic.config}
-	if err := gi.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return gi, nil
-}
-
-func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.AddV(groupinfo.Label)
-	if gic.desc != nil {
-		v.Property(dsl.Single, groupinfo.FieldDesc, *gic.desc)
-	}
-	if gic.max_users != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *gic.max_users)
-	}
-	for id := range gic.groups {
-		v.AddE(group.InfoLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(groupinfo.Label, group.InfoLabel, id)),
-		})
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

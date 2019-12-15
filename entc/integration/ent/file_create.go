@@ -12,14 +12,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -143,14 +137,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if len(fc._type) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
-	switch fc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return fc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return fc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -229,43 +216,4 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	return f, nil
-}
-
-func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
-	res := &gremlin.Response{}
-	query, bindings := fc.gremlin().Query()
-	if err := fc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	f := &File{config: fc.config}
-	if err := f.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return f, nil
-}
-
-func (fc *FileCreate) gremlin() *dsl.Traversal {
-	v := g.AddV(file.Label)
-	if fc.size != nil {
-		v.Property(dsl.Single, file.FieldSize, *fc.size)
-	}
-	if fc.name != nil {
-		v.Property(dsl.Single, file.FieldName, *fc.name)
-	}
-	if fc.user != nil {
-		v.Property(dsl.Single, file.FieldUser, *fc.user)
-	}
-	if fc.group != nil {
-		v.Property(dsl.Single, file.FieldGroup, *fc.group)
-	}
-	for id := range fc.owner {
-		v.AddE(user.FilesLabel).From(g.V(id)).InV()
-	}
-	for id := range fc._type {
-		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
-	}
-	return v.ValueMap(true)
 }

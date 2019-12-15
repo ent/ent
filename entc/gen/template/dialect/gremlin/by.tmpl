@@ -15,20 +15,20 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* custom signature for group-by function */}}
 {{ define "dialect/gremlin/group/signature" -}}
-	// Gremlin gets two labels as parameters. The first used in the `As` step for the predicate,
+	// It gets two labels as parameters. The first used in the `As` step for the predicate,
 	// and the second is an optional name for the next predicates (or for later usage).
-	Gremlin func(string, string) (string, *dsl.Traversal)
+	type Aggregate func(string, string) (string, *dsl.Traversal)
 {{- end }}
 
 {{ define "dialect/gremlin/group/as" -}}
 	func(start, _ string) (string, *dsl.Traversal) {
-		return fn.Gremlin(start, end)
+		return fn(start, end)
 	}
 {{- end }}
 
 {{ define "dialect/gremlin/group/func" -}}
-	{{- $fn := $.Scope.Func }}
-	{{- $withField := $.Scope.WithField }}
+	{{- $fn := $.Scope.Func -}}
+	{{- $withField := $.Scope.WithField -}}
 	func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = Default{{ $fn }}Label

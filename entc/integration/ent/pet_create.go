@@ -12,15 +12,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -92,14 +85,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	if len(pc.owner) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	switch pc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return pc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return pc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -171,50 +157,4 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	return pe, nil
-}
-
-func (pc *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
-	res := &gremlin.Response{}
-	query, bindings := pc.gremlin().Query()
-	if err := pc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	pe := &Pet{config: pc.config}
-	if err := pe.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return pe, nil
-}
-
-func (pc *PetCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 1)
-	v := g.AddV(pet.Label)
-	if pc.name != nil {
-		v.Property(dsl.Single, pet.FieldName, *pc.name)
-	}
-	for id := range pc.team {
-		v.AddE(user.TeamLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
-		})
-	}
-	for id := range pc.owner {
-		v.AddE(user.PetsLabel).From(g.V(id)).InV()
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

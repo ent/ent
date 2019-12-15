@@ -8,13 +8,7 @@ package ent
 
 import (
 	"context"
-	"errors"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -34,14 +28,7 @@ func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
-	switch gid.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return gid.sqlExec(ctx)
-	case dialect.Gremlin:
-		return gid.gremlinExec(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return gid.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -71,23 +58,6 @@ func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return int(affected), nil
-}
-
-func (gid *GroupInfoDelete) gremlinExec(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := gid.gremlin().Query()
-	if err := gid.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (gid *GroupInfoDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(groupinfo.Label)
-	for _, p := range gid.predicates {
-		p(t)
-	}
-	return t.SideEffect(__.Drop()).Count()
 }
 
 // GroupInfoDeleteOne is the builder for deleting a single GroupInfo entity.

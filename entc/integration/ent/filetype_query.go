@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
@@ -31,9 +26,8 @@ type FileTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FileType
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -63,18 +57,12 @@ func (ftq *FileTypeQuery) Order(o ...Order) *FileTypeQuery {
 // QueryFiles chains the current query on the files edge.
 func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: ftq.config}
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
-			sql.To(file.Table, file.FieldID),
-			sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
-		)
-		query.sql = sql.SetNeighbors(ftq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := ftq.gremlinQuery()
-		query.gremlin = gremlin.OutE(filetype.FilesLabel).InV()
-	}
+	step := sql.NewStep(
+		sql.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
+		sql.To(file.Table, file.FieldID),
+		sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+	)
+	query.sql = sql.SetNeighbors(ftq.driver.Dialect(), step)
 	return query
 }
 
@@ -174,14 +162,7 @@ func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of FileTypes.
 func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return ftq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -213,14 +194,7 @@ func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (ftq *FileTypeQuery) Count(ctx context.Context) (int, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return ftq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -234,14 +208,7 @@ func (ftq *FileTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return ftq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return ftq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -263,9 +230,8 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		order:      append([]Order{}, ftq.order...),
 		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FileType{}, ftq.predicates...),
-		// clone intermediate queries.
-		sql:     ftq.sql.Clone(),
-		gremlin: ftq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: ftq.sql.Clone(),
 	}
 }
 
@@ -287,12 +253,7 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroupBy {
 	group := &FileTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = ftq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = ftq.gremlinQuery()
-	}
+	group.sql = ftq.sqlQuery()
 	return group
 }
 
@@ -311,12 +272,7 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect {
 	selector := &FileTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch ftq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = ftq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = ftq.gremlinQuery()
-	}
+	selector.sql = ftq.sqlQuery()
 	return selector
 }
 
@@ -395,74 +351,13 @@ func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var fts FileTypes
-	if err := fts.FromResponse(res); err != nil {
-		return nil, err
-	}
-	fts.config(ftq.config)
-	return fts, nil
-}
-
-func (ftq *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().Count().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (ftq *FileTypeQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().HasNext().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (ftq *FileTypeQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(filetype.Label)
-	if ftq.gremlin != nil {
-		v = ftq.gremlin.Clone()
-	}
-	for _, p := range ftq.predicates {
-		p(v)
-	}
-	if len(ftq.order) > 0 {
-		v.Order()
-		for _, p := range ftq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := ftq.limit, ftq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := ftq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // FileTypeGroupBy is the builder for group-by FileType entities.
 type FileTypeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -473,14 +368,7 @@ func (ftgb *FileTypeGroupBy) Aggregate(fns ...Aggregate) *FileTypeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch ftgb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftgb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return ftgb.gremlinScan(ctx, v)
-	default:
-		return errors.New("ftgb: unsupported dialect")
-	}
+	return ftgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -589,46 +477,9 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 	columns = append(columns, ftgb.fields...)
 	for _, fn := range ftgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ftgb.fields...)
-}
-
-func (ftgb *FileTypeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := ftgb.gremlinQuery().Query()
-	if err := ftgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(ftgb.fields)+len(ftgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (ftgb *FileTypeGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range ftgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range ftgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return ftgb.gremlin.Group().
-		By(__.Values(ftgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // FileTypeSelect is the builder for select fields of FileType entities.
@@ -636,20 +487,12 @@ type FileTypeSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
-	switch fts.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fts.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return fts.gremlinScan(ctx, v)
-	default:
-		return errors.New("FileTypeSelect: unsupported dialect")
-	}
+	return fts.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -757,36 +600,4 @@ func (fts *FileTypeSelect) sqlQuery() sql.Querier {
 	view := "filetype_view"
 	return sql.Dialect(fts.driver.Dialect()).
 		Select(fts.fields...).From(fts.sql.As(view))
-}
-
-func (fts *FileTypeSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(fts.fields) == 1 {
-		if fts.fields[0] != filetype.FieldID {
-			traversal = fts.gremlin.Values(fts.fields...)
-		} else {
-			traversal = fts.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(fts.fields))
-		for i, f := range fts.fields {
-			fields[i] = f
-		}
-		traversal = fts.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := fts.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(fts.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

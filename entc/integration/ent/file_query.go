@@ -12,11 +12,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
@@ -32,9 +27,8 @@ type FileQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.File
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Where adds a new predicate for the builder.
@@ -64,36 +58,24 @@ func (fq *FileQuery) Order(o ...Order) *FileQuery {
 // QueryOwner chains the current query on the owner edge.
 func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(file.Table, file.FieldID, fq.sqlQuery()),
-			sql.To(user.Table, user.FieldID),
-			sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
-		)
-		query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := fq.gremlinQuery()
-		query.gremlin = gremlin.InE(user.FilesLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(file.Table, file.FieldID, fq.sqlQuery()),
+		sql.To(user.Table, user.FieldID),
+		sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
+	)
+	query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
 	return query
 }
 
 // QueryType chains the current query on the type edge.
 func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		step := sql.NewStep(
-			sql.From(file.Table, file.FieldID, fq.sqlQuery()),
-			sql.To(filetype.Table, filetype.FieldID),
-			sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
-		)
-		query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
-	case dialect.Gremlin:
-		gremlin := fq.gremlinQuery()
-		query.gremlin = gremlin.InE(filetype.FilesLabel).OutV()
-	}
+	step := sql.NewStep(
+		sql.From(file.Table, file.FieldID, fq.sqlQuery()),
+		sql.To(filetype.Table, filetype.FieldID),
+		sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
+	)
+	query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
 	return query
 }
 
@@ -193,14 +175,7 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fq.sqlAll(ctx)
-	case dialect.Gremlin:
-		return fq.gremlinAll(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return fq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -232,14 +207,7 @@ func (fq *FileQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (fq *FileQuery) Count(ctx context.Context) (int, error) {
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fq.sqlCount(ctx)
-	case dialect.Gremlin:
-		return fq.gremlinCount(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return fq.sqlCount(ctx)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -253,14 +221,7 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fq.sqlExist(ctx)
-	case dialect.Gremlin:
-		return fq.gremlinExist(ctx)
-	default:
-		return false, errors.New("ent: unsupported dialect")
-	}
+	return fq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -282,9 +243,8 @@ func (fq *FileQuery) Clone() *FileQuery {
 		order:      append([]Order{}, fq.order...),
 		unique:     append([]string{}, fq.unique...),
 		predicates: append([]predicate.File{}, fq.predicates...),
-		// clone intermediate queries.
-		sql:     fq.sql.Clone(),
-		gremlin: fq.gremlin.Clone(),
+		// clone intermediate query.
+		sql: fq.sql.Clone(),
 	}
 }
 
@@ -306,12 +266,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	group := &FileGroupBy{config: fq.config}
 	group.fields = append([]string{field}, fields...)
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		group.sql = fq.sqlQuery()
-	case dialect.Gremlin:
-		group.gremlin = fq.gremlinQuery()
-	}
+	group.sql = fq.sqlQuery()
 	return group
 }
 
@@ -330,12 +285,7 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 	selector := &FileSelect{config: fq.config}
 	selector.fields = append([]string{field}, fields...)
-	switch fq.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		selector.sql = fq.sqlQuery()
-	case dialect.Gremlin:
-		selector.gremlin = fq.gremlinQuery()
-	}
+	selector.sql = fq.sqlQuery()
 	return selector
 }
 
@@ -414,74 +364,13 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {
-	res := &gremlin.Response{}
-	query, bindings := fq.gremlinQuery().ValueMap(true).Query()
-	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	var fs Files
-	if err := fs.FromResponse(res); err != nil {
-		return nil, err
-	}
-	fs.config(fq.config)
-	return fs, nil
-}
-
-func (fq *FileQuery) gremlinCount(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := fq.gremlinQuery().Count().Query()
-	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (fq *FileQuery) gremlinExist(ctx context.Context) (bool, error) {
-	res := &gremlin.Response{}
-	query, bindings := fq.gremlinQuery().HasNext().Query()
-	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
-		return false, err
-	}
-	return res.ReadBool()
-}
-
-func (fq *FileQuery) gremlinQuery() *dsl.Traversal {
-	v := g.V().HasLabel(file.Label)
-	if fq.gremlin != nil {
-		v = fq.gremlin.Clone()
-	}
-	for _, p := range fq.predicates {
-		p(v)
-	}
-	if len(fq.order) > 0 {
-		v.Order()
-		for _, p := range fq.order {
-			p(v)
-		}
-	}
-	switch limit, offset := fq.limit, fq.offset; {
-	case limit != nil && offset != nil:
-		v.Range(*offset, *offset+*limit)
-	case offset != nil:
-		v.Range(*offset, math.MaxInt32)
-	case limit != nil:
-		v.Limit(*limit)
-	}
-	if unique := fq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
-	return v
-}
-
 // FileGroupBy is the builder for group-by File entities.
 type FileGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	// intermediate query.
+	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -492,14 +381,7 @@ func (fgb *FileGroupBy) Aggregate(fns ...Aggregate) *FileGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
-	switch fgb.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fgb.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return fgb.gremlinScan(ctx, v)
-	default:
-		return errors.New("fgb: unsupported dialect")
-	}
+	return fgb.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -608,46 +490,9 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
 	columns = append(columns, fgb.fields...)
 	for _, fn := range fgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(fgb.fields...)
-}
-
-func (fgb *FileGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
-	res := &gremlin.Response{}
-	query, bindings := fgb.gremlinQuery().Query()
-	if err := fgb.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(fgb.fields)+len(fgb.fns) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
-}
-
-func (fgb *FileGroupBy) gremlinQuery() *dsl.Traversal {
-	var (
-		trs   []interface{}
-		names []interface{}
-	)
-	for _, fn := range fgb.fns {
-		name, tr := fn.Gremlin("p", "")
-		trs = append(trs, tr)
-		names = append(names, name)
-	}
-	for _, f := range fgb.fields {
-		names = append(names, f)
-		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
-	}
-	return fgb.gremlin.Group().
-		By(__.Values(fgb.fields...).Fold()).
-		By(__.Fold().Match(trs...).Select(names...)).
-		Select(dsl.Values).
-		Next()
 }
 
 // FileSelect is the builder for select fields of File entities.
@@ -655,20 +500,12 @@ type FileSelect struct {
 	config
 	fields []string
 	// intermediate queries.
-	sql     *sql.Selector
-	gremlin *dsl.Traversal
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
-	switch fs.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return fs.sqlScan(ctx, v)
-	case dialect.Gremlin:
-		return fs.gremlinScan(ctx, v)
-	default:
-		return errors.New("FileSelect: unsupported dialect")
-	}
+	return fs.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
@@ -776,36 +613,4 @@ func (fs *FileSelect) sqlQuery() sql.Querier {
 	view := "file_view"
 	return sql.Dialect(fs.driver.Dialect()).
 		Select(fs.fields...).From(fs.sql.As(view))
-}
-
-func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {
-	var (
-		traversal *dsl.Traversal
-		res       = &gremlin.Response{}
-	)
-	if len(fs.fields) == 1 {
-		if fs.fields[0] != file.FieldID {
-			traversal = fs.gremlin.Values(fs.fields...)
-		} else {
-			traversal = fs.gremlin.ID()
-		}
-	} else {
-		fields := make([]interface{}, len(fs.fields))
-		for i, f := range fs.fields {
-			fields[i] = f
-		}
-		traversal = fs.gremlin.ValueMap(fields...)
-	}
-	query, bindings := traversal.Query()
-	if err := fs.driver.Exec(ctx, query, bindings, res); err != nil {
-		return err
-	}
-	if len(fs.fields) == 1 {
-		return res.ReadVal(v)
-	}
-	vm, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	return vm.Decode(v)
 }

@@ -12,10 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 )
@@ -267,14 +263,7 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
-	switch ftc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return ftc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return ftc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -374,76 +363,4 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		return nil, err
 	}
 	return ft, nil
-}
-
-func (ftc *FieldTypeCreate) gremlinSave(ctx context.Context) (*FieldType, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftc.gremlin().Query()
-	if err := ftc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	ft := &FieldType{config: ftc.config}
-	if err := ft.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return ft, nil
-}
-
-func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
-	v := g.AddV(fieldtype.Label)
-	if ftc.int != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt, *ftc.int)
-	}
-	if ftc.int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt8, *ftc.int8)
-	}
-	if ftc.int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt16, *ftc.int16)
-	}
-	if ftc.int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt32, *ftc.int32)
-	}
-	if ftc.int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt64, *ftc.int64)
-	}
-	if ftc.optional_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt, *ftc.optional_int)
-	}
-	if ftc.optional_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt8, *ftc.optional_int8)
-	}
-	if ftc.optional_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt16, *ftc.optional_int16)
-	}
-	if ftc.optional_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt32, *ftc.optional_int32)
-	}
-	if ftc.optional_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, *ftc.optional_int64)
-	}
-	if ftc.nillable_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt, *ftc.nillable_int)
-	}
-	if ftc.nillable_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt8, *ftc.nillable_int8)
-	}
-	if ftc.nillable_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt16, *ftc.nillable_int16)
-	}
-	if ftc.nillable_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt32, *ftc.nillable_int32)
-	}
-	if ftc.nillable_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftc.nillable_int64)
-	}
-	if ftc.validate_optional_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
-	}
-	if ftc.state != nil {
-		v.Property(dsl.Single, fieldtype.FieldState, *ftc.state)
-	}
-	return v.ValueMap(true)
 }

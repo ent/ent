@@ -33,7 +33,7 @@ type (
 		// Header is an optional header signature for generated files.
 		Header string
 		// Storage to support in codegen.
-		Storage []*Storage
+		Storage *Storage
 		// IDType specifies the type of the id field in the codegen.
 		// The supported types are string and int, which also the default.
 		IDType *field.TypeInfo
@@ -373,14 +373,9 @@ func (g *Graph) Tables() (all []*schema.Table) {
 	return
 }
 
-// migrateSupport reports if the codegen needs to support schema migratio.
-func (g *Graph) migrateSupport() bool {
-	for _, storage := range g.Storage {
-		if storage.SchemaMode.Support(Migrate) {
-			return true
-		}
-	}
-	return false
+// SupportMigrate reports if the codegen supports schema migration.
+func (g *Graph) SupportMigrate() bool {
+	return g.Storage.SchemaMode.Support(Migrate)
 }
 
 func (g *Graph) typ(name string) (*Type, bool) {
@@ -413,11 +408,6 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 		templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 	}
 	return templates, external
-}
-
-// MultiStorage reports whether c has more than 1 storage driver.
-func (c *Config) MultiStorage() bool {
-	return len(c.Storage) > 1
 }
 
 // formatFiles runs "goimports" on given paths.

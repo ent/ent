@@ -8,15 +8,8 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -109,14 +102,7 @@ func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
-	switch cu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return cu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return cu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -210,92 +196,6 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (cu *CommentUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := cu.gremlin().Query()
-	if err := cu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (cu *CommentUpdate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V().HasLabel(comment.Label)
-	for _, p := range cu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := cu.unique_int; value != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *value)),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, *value)
-	}
-	if value := cu.addunique_int; value != nil {
-		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum().Next()
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %v", *value))),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, __.Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum())
-	}
-	if value := cu.unique_float; value != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *value)),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, *value)
-	}
-	if value := cu.addunique_float; value != nil {
-		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum().Next()
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %v", *value))),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, __.Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum())
-	}
-	if value := cu.nillable_int; value != nil {
-		v.Property(dsl.Single, comment.FieldNillableInt, *value)
-	}
-	if value := cu.addnillable_int; value != nil {
-		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(*value)).Sum())
-	}
-	var properties []interface{}
-	if cu.clearnillable_int {
-		properties = append(properties, comment.FieldNillableInt)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	v.Count()
-	if len(constraints) > 0 {
-		constraints = append(constraints, &constraint{
-			pred: rv.Count(),
-			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
-		})
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
@@ -377,14 +277,7 @@ func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
-	switch cuo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cuo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return cuo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return cuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -490,87 +383,4 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		return nil, err
 	}
 	return c, nil
-}
-
-func (cuo *CommentUpdateOne) gremlinSave(ctx context.Context) (*Comment, error) {
-	res := &gremlin.Response{}
-	query, bindings := cuo.gremlin(cuo.id).Query()
-	if err := cuo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	c := &Comment{config: cuo.config}
-	if err := c.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return c, nil
-}
-
-func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := cuo.unique_int; value != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *value)),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, *value)
-	}
-	if value := cuo.addunique_int; value != nil {
-		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum().Next()
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, fmt.Sprintf("+= %v", *value))),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, __.Union(__.Values(comment.FieldUniqueInt), __.Constant(*value)).Sum())
-	}
-	if value := cuo.unique_float; value != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *value)),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, *value)
-	}
-	if value := cuo.addunique_float; value != nil {
-		addValue := rv.Clone().Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum().Next()
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, addValue).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, fmt.Sprintf("+= %v", *value))),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, __.Union(__.Values(comment.FieldUniqueFloat), __.Constant(*value)).Sum())
-	}
-	if value := cuo.nillable_int; value != nil {
-		v.Property(dsl.Single, comment.FieldNillableInt, *value)
-	}
-	if value := cuo.addnillable_int; value != nil {
-		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(*value)).Sum())
-	}
-	var properties []interface{}
-	if cuo.clearnillable_int {
-		properties = append(properties, comment.FieldNillableInt)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	v.ValueMap(true)
-	if len(constraints) > 0 {
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

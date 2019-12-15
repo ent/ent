@@ -7,195 +7,38 @@
 package predicate
 
 import (
-	"fmt"
-
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
 // Card is the predicate function for card builders.
-type Card func(interface{})
-
-// CardPerDialect construct a predicate for graph traversals based on dialect type.
-func CardPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Card {
-	return Card(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type Card func(*sql.Selector)
 
 // Comment is the predicate function for comment builders.
-type Comment func(interface{})
-
-// CommentPerDialect construct a predicate for graph traversals based on dialect type.
-func CommentPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Comment {
-	return Comment(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type Comment func(*sql.Selector)
 
 // FieldType is the predicate function for fieldtype builders.
-type FieldType func(interface{})
-
-// FieldTypePerDialect construct a predicate for graph traversals based on dialect type.
-func FieldTypePerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) FieldType {
-	return FieldType(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type FieldType func(*sql.Selector)
 
 // File is the predicate function for file builders.
-type File func(interface{})
-
-// FilePerDialect construct a predicate for graph traversals based on dialect type.
-func FilePerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) File {
-	return File(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type File func(*sql.Selector)
 
 // FileType is the predicate function for filetype builders.
-type FileType func(interface{})
-
-// FileTypePerDialect construct a predicate for graph traversals based on dialect type.
-func FileTypePerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) FileType {
-	return FileType(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type FileType func(*sql.Selector)
 
 // Group is the predicate function for group builders.
-type Group func(interface{})
-
-// GroupPerDialect construct a predicate for graph traversals based on dialect type.
-func GroupPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Group {
-	return Group(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type Group func(*sql.Selector)
 
 // GroupInfo is the predicate function for groupinfo builders.
-type GroupInfo func(interface{})
-
-// GroupInfoPerDialect construct a predicate for graph traversals based on dialect type.
-func GroupInfoPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) GroupInfo {
-	return GroupInfo(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type GroupInfo func(*sql.Selector)
 
 // Item is the predicate function for item builders.
-type Item func(interface{})
-
-// ItemPerDialect construct a predicate for graph traversals based on dialect type.
-func ItemPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Item {
-	return Item(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type Item func(*sql.Selector)
 
 // Node is the predicate function for node builders.
-type Node func(interface{})
-
-// NodePerDialect construct a predicate for graph traversals based on dialect type.
-func NodePerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Node {
-	return Node(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type Node func(*sql.Selector)
 
 // Pet is the predicate function for pet builders.
-type Pet func(interface{})
-
-// PetPerDialect construct a predicate for graph traversals based on dialect type.
-func PetPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) Pet {
-	return Pet(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type Pet func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User func(interface{})
-
-// UserPerDialect construct a predicate for graph traversals based on dialect type.
-func UserPerDialect(f0 func(*sql.Selector), f1 func(*dsl.Traversal)) User {
-	return User(func(v interface{}) {
-		switch v := v.(type) {
-		case *sql.Selector:
-			f0(v)
-		case *dsl.Traversal:
-			f1(v)
-		default:
-			panic(fmt.Sprintf("unknown type for predicate: %T", v))
-		}
-	})
-}
+type User func(*sql.Selector)

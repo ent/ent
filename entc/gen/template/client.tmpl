@@ -18,18 +18,18 @@ import (
 	{{- end }}
 
 	"github.com/facebookincubator/ent/dialect"
-	{{ range $_, $storage := $.Storage -}}
-		{{ range $_, $import := $storage.Imports -}}
-			"{{ $import }}"
-		{{ end -}}
+	{{ range $_, $import := $.Storage.Imports -}}
+		"{{ $import }}"
 	{{ end -}}
 )
 
 // Client is the client that holds all ent builders.
 type Client struct {
 	config
-	// Schema is the client for creating, migrating and dropping schema.
-	Schema *migrate.Schema
+	{{- if $.SupportMigrate }}
+		// Schema is the client for creating, migrating and dropping schema.
+		Schema *migrate.Schema
+	{{- end }}
 	{{ range $_, $n := $.Nodes -}}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
@@ -43,7 +43,9 @@ func NewClient(opts ...Option) *Client {
 	c.options(opts...)
 	return &Client{
 		config: c,
-		Schema: migrate.NewSchema(c.driver),
+		{{- if $.SupportMigrate }}
+			Schema: migrate.NewSchema(c.driver),
+		{{- end }}
 		{{ range $_, $n := $.Nodes -}}
 			{{ $n.Name }}: New{{ $n.Name }}Client(c),
 		{{ end -}}
@@ -55,11 +57,9 @@ func NewClient(opts ...Option) *Client {
 // Optional parameters can be added for configuring the client.
 func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
 	switch driverName {
-	{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			{{- $tmpl := printf "dialect/%s/client/open" $storage -}}
-			{{- xtemplate $tmpl . -}}
-	{{- end }}
+	case {{ join $.Storage.Dialects ", " }}:
+		{{- $tmpl := printf "dialect/%s/client/open" $.Storage -}}
+		{{- xtemplate $tmpl . -}}
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
@@ -97,7 +97,9 @@ func (c *Client) Debug() *Client {
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
 	return &Client{
 		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
+		{{- if $.SupportMigrate }}
+			Schema: migrate.NewSchema(cfg.driver),
+		{{- end }}
 		{{ range $_, $n := $.Nodes -}}
 			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
 		{{ end -}}
@@ -182,21 +184,9 @@ func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Na
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
 	query := &{{ $e.Type.Name }}Query{config: c.config}
-	{{ if $.MultiStorage -}}
-		switch c.driver.Dialect() {
-		{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			{{- with extend $n "Receiver" $rec "Edge" $e -}}
-				{{ $tmpl := printf "dialect/%s/query/from" $storage }}
-				{{- xtemplate $tmpl . -}}
-			{{ end -}}
-		{{- end }}
-		}
-	{{- else -}}
-		{{- with extend $n "Receiver" $rec "Edge" $e -}}
-			{{ $tmpl := printf "dialect/%s/query/from" (index $.Storage 0) }}
-			{{- xtemplate $tmpl . -}}
-		{{ end -}}
+	{{- with extend $n "Receiver" $rec "Edge" $e }}
+		{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
+		{{- xtemplate $tmpl . -}}
 	{{- end }}
 	return query
 }

@@ -30,11 +30,6 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "owner_id"
-
-	// TeamInverseLabel holds the string label denoting the team inverse edge type in the database.
-	TeamInverseLabel = "user_team"
-	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "user_pets"
 )
 
 // Columns holds all SQL columns are pet fields.

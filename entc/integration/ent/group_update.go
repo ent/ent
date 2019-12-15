@@ -13,12 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
@@ -297,14 +291,7 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	if gu.clearedInfo && gu.info == nil {
 		return 0, errors.New("ent: clearing a unique edge \"info\"")
 	}
-	switch gu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return gu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return gu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return gu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -556,113 +543,6 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	return len(ids), nil
-}
-
-func (gu *GroupUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := gu.gremlin().Query()
-	if err := gu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (gu *GroupUpdate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V().HasLabel(group.Label)
-	for _, p := range gu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := gu.active; value != nil {
-		v.Property(dsl.Single, group.FieldActive, *value)
-	}
-	if value := gu.expire; value != nil {
-		v.Property(dsl.Single, group.FieldExpire, *value)
-	}
-	if value := gu._type; value != nil {
-		v.Property(dsl.Single, group.FieldType, *value)
-	}
-	if value := gu.max_users; value != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, *value)
-	}
-	if value := gu.addmax_users; value != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, __.Union(__.Values(group.FieldMaxUsers), __.Constant(*value)).Sum())
-	}
-	if value := gu.name; value != nil {
-		v.Property(dsl.Single, group.FieldName, *value)
-	}
-	var properties []interface{}
-	if gu.clear_type {
-		properties = append(properties, group.FieldType)
-	}
-	if gu.clearmax_users {
-		properties = append(properties, group.FieldMaxUsers)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	for id := range gu.removedFiles {
-		tr := rv.Clone().OutE(group.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range gu.files {
-		v.AddE(group.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(group.Label, group.FilesLabel, id)),
-		})
-	}
-	for id := range gu.removedBlocked {
-		tr := rv.Clone().OutE(group.BlockedLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range gu.blocked {
-		v.AddE(group.BlockedLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.BlockedLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(group.Label, group.BlockedLabel, id)),
-		})
-	}
-	for id := range gu.removedUsers {
-		tr := rv.Clone().InE(user.GroupsLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range gu.users {
-		v.AddE(user.GroupsLabel).From(g.V(id)).InV()
-	}
-	if gu.clearedInfo {
-		tr := rv.Clone().OutE(group.InfoLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range gu.info {
-		v.AddE(group.InfoLabel).To(g.V(id)).OutV()
-	}
-	v.Count()
-	if len(constraints) > 0 {
-		constraints = append(constraints, &constraint{
-			pred: rv.Count(),
-			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
-		})
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -929,14 +809,7 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	if guo.clearedInfo && guo.info == nil {
 		return nil, errors.New("ent: clearing a unique edge \"info\"")
 	}
-	switch guo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return guo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return guo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return guo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1200,108 +1073,4 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		return nil, err
 	}
 	return gr, nil
-}
-
-func (guo *GroupUpdateOne) gremlinSave(ctx context.Context) (*Group, error) {
-	res := &gremlin.Response{}
-	query, bindings := guo.gremlin(guo.id).Query()
-	if err := guo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	gr := &Group{config: guo.config}
-	if err := gr.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return gr, nil
-}
-
-func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := guo.active; value != nil {
-		v.Property(dsl.Single, group.FieldActive, *value)
-	}
-	if value := guo.expire; value != nil {
-		v.Property(dsl.Single, group.FieldExpire, *value)
-	}
-	if value := guo._type; value != nil {
-		v.Property(dsl.Single, group.FieldType, *value)
-	}
-	if value := guo.max_users; value != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, *value)
-	}
-	if value := guo.addmax_users; value != nil {
-		v.Property(dsl.Single, group.FieldMaxUsers, __.Union(__.Values(group.FieldMaxUsers), __.Constant(*value)).Sum())
-	}
-	if value := guo.name; value != nil {
-		v.Property(dsl.Single, group.FieldName, *value)
-	}
-	var properties []interface{}
-	if guo.clear_type {
-		properties = append(properties, group.FieldType)
-	}
-	if guo.clearmax_users {
-		properties = append(properties, group.FieldMaxUsers)
-	}
-	if len(properties) > 0 {
-		v.SideEffect(__.Properties(properties...).Drop())
-	}
-	for id := range guo.removedFiles {
-		tr := rv.Clone().OutE(group.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range guo.files {
-		v.AddE(group.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(group.Label, group.FilesLabel, id)),
-		})
-	}
-	for id := range guo.removedBlocked {
-		tr := rv.Clone().OutE(group.BlockedLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range guo.blocked {
-		v.AddE(group.BlockedLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(group.BlockedLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(group.Label, group.BlockedLabel, id)),
-		})
-	}
-	for id := range guo.removedUsers {
-		tr := rv.Clone().InE(user.GroupsLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range guo.users {
-		v.AddE(user.GroupsLabel).From(g.V(id)).InV()
-	}
-	if guo.clearedInfo {
-		tr := rv.Clone().OutE(group.InfoLabel).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range guo.info {
-		v.AddE(group.InfoLabel).To(g.V(id)).OutV()
-	}
-	v.ValueMap(true)
-	if len(constraints) > 0 {
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }

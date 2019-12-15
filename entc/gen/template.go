@@ -93,12 +93,12 @@ var (
 		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
-			Skip:   func(g *Graph) bool { return !g.migrateSupport() },
+			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
 		},
 		{
 			Name:   "schema",
 			Format: "migrate/schema.go",
-			Skip:   func(g *Graph) bool { return !g.migrateSupport() },
+			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
 		},
 		{
 			Name:   "predicate",

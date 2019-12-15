@@ -24,7 +24,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len({{ $receiver }}.fields) + len({{ $receiver}}.fns))
 	columns = append(columns, {{ $receiver }}.fields...)
 	for _, fn := range {{ $receiver }}.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy({{ $receiver }}.fields...)
 }

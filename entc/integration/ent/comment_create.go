@@ -11,12 +11,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 )
@@ -63,14 +57,7 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 	if cc.unique_float == nil {
 		return nil, errors.New("ent: missing required field \"unique_float\"")
 	}
-	switch cc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return cc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return cc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return cc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -114,54 +101,4 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	return c, nil
-}
-
-func (cc *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
-	res := &gremlin.Response{}
-	query, bindings := cc.gremlin().Query()
-	if err := cc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	c := &Comment{config: cc.config}
-	if err := c.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return c, nil
-}
-
-func (cc *CommentCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.AddV(comment.Label)
-	if cc.unique_int != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *cc.unique_int).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *cc.unique_int)),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, *cc.unique_int)
-	}
-	if cc.unique_float != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *cc.unique_float).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *cc.unique_float)),
-		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, *cc.unique_float)
-	}
-	if cc.nillable_int != nil {
-		v.Property(dsl.Single, comment.FieldNillableInt, *cc.nillable_int)
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

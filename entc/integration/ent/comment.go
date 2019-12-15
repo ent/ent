@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
@@ -52,28 +51,6 @@ func (c *Comment) FromRows(rows *sql.Rows) error {
 		c.NillableInt = new(int)
 		*c.NillableInt = int(scanc.NillableInt.Int64)
 	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Comment.
-func (c *Comment) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanc struct {
-		ID          string  `json:"id,omitempty"`
-		UniqueInt   int     `json:"unique_int,omitempty"`
-		UniqueFloat float64 `json:"unique_float,omitempty"`
-		NillableInt *int    `json:"nillable_int,omitempty"`
-	}
-	if err := vmap.Decode(&scanc); err != nil {
-		return err
-	}
-	c.ID = scanc.ID
-	c.UniqueInt = scanc.UniqueInt
-	c.UniqueFloat = scanc.UniqueFloat
-	c.NillableInt = scanc.NillableInt
 	return nil
 }
 
@@ -129,32 +106,6 @@ func (c *Comments) FromRows(rows *sql.Rows) error {
 			return err
 		}
 		*c = append(*c, scanc)
-	}
-	return nil
-}
-
-// FromResponse scans the gremlin response data into Comments.
-func (c *Comments) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanc []struct {
-		ID          string  `json:"id,omitempty"`
-		UniqueInt   int     `json:"unique_int,omitempty"`
-		UniqueFloat float64 `json:"unique_float,omitempty"`
-		NillableInt *int    `json:"nillable_int,omitempty"`
-	}
-	if err := vmap.Decode(&scanc); err != nil {
-		return err
-	}
-	for _, v := range scanc {
-		*c = append(*c, &Comment{
-			ID:          v.ID,
-			UniqueInt:   v.UniqueInt,
-			UniqueFloat: v.UniqueFloat,
-			NillableInt: v.NillableInt,
-		})
 	}
 	return nil
 }

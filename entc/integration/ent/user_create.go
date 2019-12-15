@@ -12,12 +12,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
@@ -367,14 +361,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if len(uc.parent) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
-	switch uc.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return uc.sqlSave(ctx)
-	case dialect.Gremlin:
-		return uc.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return uc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -650,120 +637,4 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	return u, nil
-}
-
-func (uc *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
-	res := &gremlin.Response{}
-	query, bindings := uc.gremlin().Query()
-	if err := uc.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	u := &User{config: uc.config}
-	if err := u.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (uc *UserCreate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 8)
-	v := g.AddV(user.Label)
-	if uc.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uc.age)
-	}
-	if uc.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uc.name)
-	}
-	if uc.last != nil {
-		v.Property(dsl.Single, user.FieldLast, *uc.last)
-	}
-	if uc.nickname != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldNickname, *uc.nickname).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *uc.nickname)),
-		})
-		v.Property(dsl.Single, user.FieldNickname, *uc.nickname)
-	}
-	if uc.phone != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldPhone, *uc.phone).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *uc.phone)),
-		})
-		v.Property(dsl.Single, user.FieldPhone, *uc.phone)
-	}
-	if uc.password != nil {
-		v.Property(dsl.Single, user.FieldPassword, *uc.password)
-	}
-	for id := range uc.card {
-		v.AddE(user.CardLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.CardLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.CardLabel, id)),
-		})
-	}
-	for id := range uc.pets {
-		v.AddE(user.PetsLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.PetsLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.PetsLabel, id)),
-		})
-	}
-	for id := range uc.files {
-		v.AddE(user.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.FilesLabel, id)),
-		})
-	}
-	for id := range uc.groups {
-		v.AddE(user.GroupsLabel).To(g.V(id)).OutV()
-	}
-	for id := range uc.friends {
-		v.AddE(user.FriendsLabel).To(g.V(id)).OutV()
-	}
-	for id := range uc.followers {
-		v.AddE(user.FollowingLabel).From(g.V(id)).InV()
-	}
-	for id := range uc.following {
-		v.AddE(user.FollowingLabel).To(g.V(id)).OutV()
-	}
-	for id := range uc.team {
-		v.AddE(user.TeamLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.TeamLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.TeamLabel, id)),
-		})
-	}
-	for id := range uc.spouse {
-		v.AddE(user.SpouseLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.SpouseLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SpouseLabel, id)),
-		})
-	}
-	for id := range uc.children {
-		v.AddE(user.ParentLabel).From(g.V(id)).InV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(user.ParentLabel).OutV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.ParentLabel, id)),
-		})
-	}
-	for id := range uc.parent {
-		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
-	}
-	if len(constraints) == 0 {
-		return v.ValueMap(true)
-	}
-	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
-	for _, cr := range constraints[1:] {
-		tr = cr.pred.Coalesce(cr.test, tr)
-	}
-	return tr
 }

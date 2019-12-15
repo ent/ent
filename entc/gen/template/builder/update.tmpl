@@ -40,18 +40,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" 0 -}}
 		{{ template "update/save" . }}
 	{{- end -}}
-	{{- if $.MultiStorage -}}
-		switch {{ $receiver }}.driver.Dialect() {
-		{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			return {{ $receiver }}.{{ $storage }}Save(ctx)
-		{{- end }}
-		default:
-			return 0, errors.New("{{ $pkg }}: unsupported dialect")
-		}
-	{{- else -}}
-		return {{ $receiver }}.{{ index $.Storage 0 }}Save(ctx)
-	{{- end }}
+	return {{ $receiver }}.{{ $.Storage }}Save(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -76,11 +65,9 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{- range $_, $storage := $.Storage }}
-	{{ with extend $ "Builder" $builder "Package" $pkg }}
-		{{ $tmpl := printf "dialect/%s/update" $storage }}
-		{{ xtemplate $tmpl . }}
-	{{ end }}
+{{ with extend $ "Builder" $builder "Package" $pkg }}
+	{{ $tmpl := printf "dialect/%s/update" $.Storage }}
+	{{ xtemplate $tmpl . }}
 {{ end }}
 
 {{ $onebuilder := printf "%sOne" $builder }}
@@ -107,18 +94,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" "nil" -}}
 		{{ template "update/save" . }}
 	{{- end -}}
-	{{- if $.MultiStorage -}}
-	switch {{ $receiver }}.driver.Dialect() {
-		{{- range $_, $storage := $.Storage }}
-		case {{ join $storage.Dialects ", " }}:
-			return {{ $receiver }}.{{ $storage }}Save(ctx)
-		{{- end }}
-		default:
-			return nil, errors.New("{{ $pkg }}: unsupported dialect")
-		}
-	{{- else -}}
-		return {{ $receiver }}.{{ index $.Storage 0 }}Save(ctx)
-	{{- end }}
+	return {{ $receiver }}.{{ $.Storage }}Save(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -143,11 +119,9 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{- range $_, $storage := $.Storage }}
-	{{ with extend $ "Builder" $onebuilder "Package" $pkg }}
-		{{ $tmpl := printf "dialect/%s/update" $storage }}
-		{{ xtemplate $tmpl . }}
-	{{ end }}
+{{ with extend $ "Builder" $onebuilder "Package" $pkg }}
+	{{ $tmpl := printf "dialect/%s/update" $.Storage }}
+	{{ xtemplate $tmpl . }}
 {{ end }}
 
 {{ end }}

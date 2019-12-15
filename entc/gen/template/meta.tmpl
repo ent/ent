@@ -21,17 +21,13 @@ const (
 		// {{ $field }} holds the string denoting the {{ lower $f.Name }} vertex property in the database.
 		{{ $field }} = "{{ $f.StorageKey }}"
 	{{ end -}}
-	{{ range $_, $storage := $.Storage }}
-		{{ $tmpl := printf "dialect/%s/meta/constants" $storage }}
-		{{ xtemplate $tmpl $ }}
-	{{ end }}
+	{{ $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
+	{{ xtemplate $tmpl $ }}
 )
 
-{{ range $_, $storage := $.Storage }}
-	{{ $tmpl := printf "dialect/%s/meta/variables" $storage }}
-	{{ if hasTemplate $tmpl }}
-		{{ xtemplate $tmpl $ }}
-	{{ end }}
+{{ $tmpl = printf "dialect/%s/meta/variables" $.Storage }}
+{{ if hasTemplate $tmpl }}
+	{{ xtemplate $tmpl $ }}
 {{ end }}
 
 {{ if or $.HasDefault $.HasValidators }}

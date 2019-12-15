@@ -38,7 +38,9 @@ func (tx *Tx) Rollback() error {
 func (tx *Tx) Client() *Client {
 	return &Client{
 		config: tx.config,
-		Schema: migrate.NewSchema(tx.driver),
+		{{- if $.SupportMigrate }}
+			Schema: migrate.NewSchema(tx.driver),
+		{{- end }}
 		{{ range $_, $n := $.Nodes -}}
 			{{ $n.Name }}: New{{ $n.Name }}Client(tx.config),
 		{{ end -}}

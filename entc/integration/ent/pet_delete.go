@@ -8,13 +8,7 @@ package ent
 
 import (
 	"context"
-	"errors"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -34,14 +28,7 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
-	switch pd.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return pd.sqlExec(ctx)
-	case dialect.Gremlin:
-		return pd.gremlinExec(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return pd.sqlExec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -71,23 +58,6 @@ func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return int(affected), nil
-}
-
-func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := pd.gremlin().Query()
-	if err := pd.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (pd *PetDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(pet.Label)
-	for _, p := range pd.predicates {
-		p(t)
-	}
-	return t.SideEffect(__.Drop()).Count()
 }
 
 // PetDeleteOne is the builder for deleting a single Pet entity.

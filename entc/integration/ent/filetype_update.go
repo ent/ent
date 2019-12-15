@@ -8,16 +8,9 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
@@ -87,14 +80,7 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	switch ftu.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftu.sqlSave(ctx)
-	case dialect.Gremlin:
-		return ftu.gremlinSave(ctx)
-	default:
-		return 0, errors.New("ent: unsupported dialect")
-	}
+	return ftu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -216,67 +202,6 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return len(ids), nil
 }
 
-func (ftu *FileTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftu.gremlin().Query()
-	if err := ftu.driver.Exec(ctx, query, bindings, res); err != nil {
-		return 0, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return 0, err
-	}
-	return res.ReadInt()
-}
-
-func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V().HasLabel(filetype.Label)
-	for _, p := range ftu.predicates {
-		p(v)
-	}
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := ftu.name; value != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *value)),
-		})
-		v.Property(dsl.Single, filetype.FieldName, *value)
-	}
-	for id := range ftu.removedFiles {
-		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range ftu.files {
-		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(filetype.Label, filetype.FilesLabel, id)),
-		})
-	}
-	v.Count()
-	if len(constraints) > 0 {
-		constraints = append(constraints, &constraint{
-			pred: rv.Count(),
-			test: __.Is(p.GT(1)).Constant(&ErrConstraintFailed{msg: "update traversal contains more than one vertex"}),
-		})
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
-}
-
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
 type FileTypeUpdateOne struct {
 	config
@@ -334,14 +259,7 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	switch ftuo.driver.Dialect() {
-	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
-		return ftuo.sqlSave(ctx)
-	case dialect.Gremlin:
-		return ftuo.gremlinSave(ctx)
-	default:
-		return nil, errors.New("ent: unsupported dialect")
-	}
+	return ftuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -465,62 +383,4 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		return nil, err
 	}
 	return ft, nil
-}
-
-func (ftuo *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, error) {
-	res := &gremlin.Response{}
-	query, bindings := ftuo.gremlin(ftuo.id).Query()
-	if err := ftuo.driver.Exec(ctx, query, bindings, res); err != nil {
-		return nil, err
-	}
-	if err, ok := isConstantError(res); ok {
-		return nil, err
-	}
-	ft := &FileType{config: ftuo.config}
-	if err := ft.FromResponse(res); err != nil {
-		return nil, err
-	}
-	return ft, nil
-}
-
-func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
-	type constraint struct {
-		pred *dsl.Traversal // constraint predicate.
-		test *dsl.Traversal // test matches and its constant.
-	}
-	constraints := make([]*constraint, 0, 2)
-	v := g.V(id)
-	var (
-		rv = v.Clone()
-		_  = rv
-
-		trs []*dsl.Traversal
-	)
-	if value := ftuo.name; value != nil {
-		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *value)),
-		})
-		v.Property(dsl.Single, filetype.FieldName, *value)
-	}
-	for id := range ftuo.removedFiles {
-		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
-		trs = append(trs, tr)
-	}
-	for id := range ftuo.files {
-		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
-		constraints = append(constraints, &constraint{
-			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(filetype.Label, filetype.FilesLabel, id)),
-		})
-	}
-	v.ValueMap(true)
-	if len(constraints) > 0 {
-		v = constraints[0].pred.Coalesce(constraints[0].test, v)
-		for _, cr := range constraints[1:] {
-			v = cr.pred.Coalesce(cr.test, v)
-		}
-	}
-	trs = append(trs, v)
-	return dsl.Join(trs...)
 }
