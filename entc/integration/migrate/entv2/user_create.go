@@ -20,6 +20,7 @@ type UserCreate struct {
 	config
 	age      *int
 	name     *string
+	nickname *string
 	phone    *string
 	buffer   *[]byte
 	title    *string
@@ -37,6 +38,12 @@ func (uc *UserCreate) SetAge(i int) *UserCreate {
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.name = &s
+	return uc
+}
+
+// SetNickname sets the nickname field.
+func (uc *UserCreate) SetNickname(s string) *UserCreate {
+	uc.nickname = &s
 	return uc
 }
 
@@ -116,6 +123,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.name == nil {
 		return nil, errors.New("entv2: missing required field \"name\"")
 	}
+	if uc.nickname == nil {
+		return nil, errors.New("entv2: missing required field \"nickname\"")
+	}
 	if uc.phone == nil {
 		v := user.DefaultPhone
 		uc.phone = &v
@@ -158,6 +168,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if value := uc.name; value != nil {
 		insert.Set(user.FieldName, *value)
 		u.Name = *value
+	}
+	if value := uc.nickname; value != nil {
+		insert.Set(user.FieldNickname, *value)
+		u.Nickname = *value
 	}
 	if value := uc.phone; value != nil {
 		insert.Set(user.FieldPhone, *value)

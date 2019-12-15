@@ -18,12 +18,13 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age     *int32
-	name    *string
-	address *string
-	renamed *string
-	blob    *[]byte
-	state   *user.State
+	age      *int32
+	name     *string
+	nickname *string
+	address  *string
+	renamed  *string
+	blob     *[]byte
+	state    *user.State
 }
 
 // SetAge sets the age field.
@@ -35,6 +36,12 @@ func (uc *UserCreate) SetAge(i int32) *UserCreate {
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.name = &s
+	return uc
+}
+
+// SetNickname sets the nickname field.
+func (uc *UserCreate) SetNickname(s string) *UserCreate {
+	uc.nickname = &s
 	return uc
 }
 
@@ -97,6 +104,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if err := user.NameValidator(*uc.name); err != nil {
 		return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
 	}
+	if uc.nickname == nil {
+		return nil, errors.New("entv1: missing required field \"nickname\"")
+	}
 	if uc.state != nil {
 		if err := user.StateValidator(*uc.state); err != nil {
 			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
@@ -131,6 +141,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	if value := uc.name; value != nil {
 		insert.Set(user.FieldName, *value)
 		u.Name = *value
+	}
+	if value := uc.nickname; value != nil {
+		insert.Set(user.FieldNickname, *value)
+		u.Nickname = *value
 	}
 	if value := uc.address; value != nil {
 		insert.Set(user.FieldAddress, *value)

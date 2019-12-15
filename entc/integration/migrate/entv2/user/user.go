@@ -21,6 +21,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+	// FieldNickname holds the string denoting the nickname vertex property in the database.
+	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone vertex property in the database.
 	FieldPhone = "phone"
 	// FieldBuffer holds the string denoting the buffer vertex property in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldID,
 	FieldAge,
 	FieldName,
+	FieldNickname,
 	FieldPhone,
 	FieldBuffer,
 	FieldTitle,
@@ -55,12 +58,12 @@ var (
 	fields = schema.User{}.Fields()
 
 	// descPhone is the schema descriptor for phone field.
-	descPhone = fields[2].Descriptor()
+	descPhone = fields[3].Descriptor()
 	// DefaultPhone holds the default value on creation for the phone field.
 	DefaultPhone = descPhone.Default.(string)
 
 	// descTitle is the schema descriptor for title field.
-	descTitle = fields[4].Descriptor()
+	descTitle = fields[5].Descriptor()
 	// DefaultTitle holds the default value on creation for the title field.
 	DefaultTitle = descTitle.Default.(string)
 )

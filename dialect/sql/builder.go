@@ -258,6 +258,12 @@ func (t *TableAlter) AddForeignKey(fk *ForeignKeyBuilder) *TableAlter {
 	return t
 }
 
+// DropConstraint appends the `DROP CONSTRAINT` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) DropConstraint(ident string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("DROP CONSTRAINT %s", t.Quote(ident))))
+	return t
+}
+
 // Query returns query representation of the `ALTER TABLE` statement.
 //
 //	ALTER TABLE name

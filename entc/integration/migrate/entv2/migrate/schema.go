@@ -41,6 +41,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
+		{Name: "nickname", Type: field.TypeString},
 		{Name: "phone", Type: field.TypeString, Default: user.DefaultPhone},
 		{Name: "buffer", Type: field.TypeBytes, Nullable: true},
 		{Name: "title", Type: field.TypeString, Default: user.DefaultTitle},
@@ -58,7 +59,7 @@ var (
 			{
 				Name:    "user_phone_age",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3], UsersColumns[1]},
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[1]},
 			},
 		},
 	}

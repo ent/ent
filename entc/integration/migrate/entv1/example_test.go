@@ -39,6 +39,7 @@ func ExampleUser() {
 		Create().
 		SetAge(1).
 		SetName("string").
+		SetNickname("string").
 		SetAddress("string").
 		SetRenamed("string").
 		SetBlob(nil).

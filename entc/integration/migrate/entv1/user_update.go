@@ -21,6 +21,7 @@ type UserUpdate struct {
 	age          *int32
 	addage       *int32
 	name         *string
+	nickname     *string
 	address      *string
 	clearaddress bool
 	renamed      *string
@@ -58,6 +59,12 @@ func (uu *UserUpdate) AddAge(i int32) *UserUpdate {
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.name = &s
+	return uu
+}
+
+// SetNickname sets the nickname field.
+func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
+	uu.nickname = &s
 	return uu
 }
 
@@ -219,6 +226,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value := uu.name; value != nil {
 		updater.Set(user.FieldName, *value)
 	}
+	if value := uu.nickname; value != nil {
+		updater.Set(user.FieldNickname, *value)
+	}
 	if value := uu.address; value != nil {
 		updater.Set(user.FieldAddress, *value)
 	}
@@ -262,6 +272,7 @@ type UserUpdateOne struct {
 	age          *int32
 	addage       *int32
 	name         *string
+	nickname     *string
 	address      *string
 	clearaddress bool
 	renamed      *string
@@ -292,6 +303,12 @@ func (uuo *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.name = &s
+	return uuo
+}
+
+// SetNickname sets the nickname field.
+func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
+	uuo.nickname = &s
 	return uuo
 }
 
@@ -458,6 +475,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	if value := uuo.name; value != nil {
 		updater.Set(user.FieldName, *value)
 		u.Name = *value
+	}
+	if value := uuo.nickname; value != nil {
+		updater.Set(user.FieldNickname, *value)
+		u.Nickname = *value
 	}
 	if value := uuo.address; value != nil {
 		updater.Set(user.FieldAddress, *value)

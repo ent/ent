@@ -515,7 +515,10 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique"}).
 						AddRow("users_pkey", "id", "t", "t").
 						AddRow("users_age_key", "age", "f", "t"))
-				mock.ExpectExec(escape(`DROP INDEX "users_age_key"`)).
+				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
+					WithArgs("UNIQUE", "users_age_key").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectExec(escape(`ALTER TABLE "users" DROP CONSTRAINT "users_age_key"`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
