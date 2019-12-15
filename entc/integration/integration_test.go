@@ -23,6 +23,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
@@ -37,7 +38,7 @@ func TestSQLite(t *testing.T) {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer client.Close()
-	require.NoError(t, client.Schema.Create(context.Background()))
+	require.NoError(t, client.Schema.Create(context.Background()), migrate.WithDropColumn(true), migrate.WithDropIndex(true))
 	for _, tt := range tests {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
@@ -57,7 +58,7 @@ func TestMySQL(t *testing.T) {
 			}).FormatDSN())
 			require.NoError(t, err)
 			defer client.Close()
-			require.NoError(t, client.Schema.Create(context.Background()))
+			require.NoError(t, client.Schema.Create(context.Background()), migrate.WithDropColumn(true), migrate.WithDropIndex(true))
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
@@ -75,7 +76,7 @@ func TestPostgres(t *testing.T) {
 			client, err := ent.Open(dialect.Postgres, fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port))
 			require.NoError(t, err)
 			defer client.Close()
-			require.NoError(t, client.Schema.Create(context.Background()))
+			require.NoError(t, client.Schema.Create(context.Background()), migrate.WithDropColumn(true), migrate.WithDropIndex(true))
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
@@ -86,24 +87,6 @@ func TestPostgres(t *testing.T) {
 		})
 	}
 }
-
-/*
-Convert ent.Client to entgremlin.Client and run tests:
-
-func TestGremlin(t *testing.T) {
-	client, err := entgremlin.Open("gremlin", "http://localhost:8182")
-	require.NoError(t, err)
-	defer client.Close()
-	// run all tests except transaction and index tests.
-	for _, tt := range tests[2:] {
-		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
-			drop(t, client)
-			tt(t, client)
-		})
-	}
-}
-*/
 
 // tests for all drivers to run.
 var tests = []func(*testing.T, *ent.Client){
