@@ -111,8 +111,7 @@ func (t *Table) index(name string) (*Index, bool) {
 	c, ok := t.column(name)
 	if !ok {
 		// Postgres naming convention for unique constraint.
-		name = strings.TrimSuffix(name, "_key")
-		c, ok = t.column(name)
+		c, ok = t.column(strings.TrimSuffix(name, "_key"))
 	}
 	if ok && c.Unique {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
