@@ -221,9 +221,10 @@ func (d *MySQL) addIndex(i *Index, table string) *sql.IndexBuilder {
 	return i.Builder(table)
 }
 
-// dropIndex returns the querying for dropping an index in MySQL.
-func (d *MySQL) dropIndex(i *Index, table string) *sql.DropIndexBuilder {
-	return i.DropBuilder(table)
+// dropIndex drops a MySQL index.
+func (d *MySQL) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
+	query, args := idx.DropBuilder(table).Query()
+	return tx.Exec(ctx, query, args, new(sql.Result))
 }
 
 // scanColumn scans the column information from MySQL column description.

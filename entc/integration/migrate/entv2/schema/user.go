@@ -22,6 +22,8 @@ func (User) Fields() []ent.Field {
 		field.Int("age"),
 		// extending name field to longtext.
 		field.Text("name"),
+		// changing nickname from unique no non-unique.
+		field.String("nickname"),
 		// adding new columns (must be either optional, or with a default value).
 		field.String("phone").
 			Default("unknown"),

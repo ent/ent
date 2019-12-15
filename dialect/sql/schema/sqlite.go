@@ -141,9 +141,10 @@ func (d *SQLite) addIndex(i *Index, table string) *sql.IndexBuilder {
 	return i.Builder(table)
 }
 
-// dropIndex returns the querying for dropping an index in SQLite.
-func (d *SQLite) dropIndex(i *Index, _ string) *sql.DropIndexBuilder {
-	return i.DropBuilder("")
+// dropIndex drops a SQLite index.
+func (d *SQLite) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
+	query, args := idx.DropBuilder("").Query()
+	return tx.Exec(ctx, query, args, new(sql.Result))
 }
 
 // fkExist returns always true to disable foreign-keys creation after the table was created.

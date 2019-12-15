@@ -17,6 +17,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt32},
 		{Name: "name", Type: field.TypeString, Size: 10},
+		{Name: "nickname", Type: field.TypeString, Unique: true},
 		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 255},
@@ -32,7 +33,7 @@ var (
 			{
 				Name:    "user_name_address",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[2], UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[2], UsersColumns[4]},
 			},
 		},
 	}

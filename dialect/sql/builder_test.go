@@ -136,8 +136,9 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
 				AddColumn(Column("age").Type("int")).
-				AddColumn(Column("name").Type("varchar(255)")),
-			wantQuery: `ALTER TABLE "users" ADD COLUMN "age" int, ADD COLUMN "name" varchar(255)`,
+				AddColumn(Column("name").Type("varchar(255)")).
+				DropConstraint("users_nickname_key"),
+			wantQuery: `ALTER TABLE "users" ADD COLUMN "age" int, ADD COLUMN "name" varchar(255), DROP CONSTRAINT "users_nickname_key"`,
 		},
 		{
 			input: AlterTable("users").

@@ -85,6 +85,7 @@ func ExampleUser() {
 		Create().
 		SetAge(1).
 		SetName("string").
+		SetNickname("string").
 		SetPhone("string").
 		SetBuffer(nil).
 		SetTitle("string").

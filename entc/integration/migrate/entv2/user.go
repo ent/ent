@@ -23,6 +23,8 @@ type User struct {
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Nickname holds the value of the "nickname" field.
+	Nickname string `json:"nickname,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
 	// Buffer holds the value of the "buffer" field.
@@ -40,21 +42,23 @@ type User struct {
 // FromRows scans the sql response data into User.
 func (u *User) FromRows(rows *sql.Rows) error {
 	var scanu struct {
-		ID      int
-		Age     sql.NullInt64
-		Name    sql.NullString
-		Phone   sql.NullString
-		Buffer  []byte
-		Title   sql.NullString
-		NewName sql.NullString
-		Blob    []byte
-		State   sql.NullString
+		ID       int
+		Age      sql.NullInt64
+		Name     sql.NullString
+		Nickname sql.NullString
+		Phone    sql.NullString
+		Buffer   []byte
+		Title    sql.NullString
+		NewName  sql.NullString
+		Blob     []byte
+		State    sql.NullString
 	}
 	// the order here should be the same as in the `user.Columns`.
 	if err := rows.Scan(
 		&scanu.ID,
 		&scanu.Age,
 		&scanu.Name,
+		&scanu.Nickname,
 		&scanu.Phone,
 		&scanu.Buffer,
 		&scanu.Title,
@@ -67,6 +71,7 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	u.ID = scanu.ID
 	u.Age = int(scanu.Age.Int64)
 	u.Name = scanu.Name.String
+	u.Nickname = scanu.Nickname.String
 	u.Phone = scanu.Phone.String
 	u.Buffer = scanu.Buffer
 	u.Title = scanu.Title.String
@@ -103,6 +108,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
+	builder.WriteString(", nickname=")
+	builder.WriteString(u.Nickname)
 	builder.WriteString(", phone=")
 	builder.WriteString(u.Phone)
 	builder.WriteString(", buffer=")

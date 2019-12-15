@@ -168,7 +168,7 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 			return nil, fmt.Errorf("scanning index description: %v", err)
 		}
 		// If the index is prefixed with the table, it's probably was
-		// added by this driver (and not entc) and it should be trimmed.
+		// added by `addIndex` (and not entc) and it should be trimmed.
 		name = strings.TrimPrefix(name, table+"_")
 		idx, ok := names[name]
 		if !ok {
@@ -327,8 +327,24 @@ func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 	return idx
 }
 
-// dropIndex returns a DropIndexBuilder for the given table index.
-func (d *Postgres) dropIndex(i *Index, table string) *sql.DropIndexBuilder {
-	name := fmt.Sprintf("%s_%s", table, i.Name)
-	return sql.Dialect(dialect.Postgres).DropIndex(name)
+// dropIndex drops a Postgres index.
+func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
+	name := idx.Name
+	build := sql.Dialect(dialect.Postgres)
+	if prefix := table + "_"; !strings.HasPrefix(name, prefix) {
+		name = prefix + name
+	}
+	query, args := sql.Dialect(dialect.Postgres).
+		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
+		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("constraint_type", "UNIQUE").And().EQ("constraint_name", name)).
+		Query()
+	exists, err := exist(ctx, tx, query, args...)
+	if err != nil {
+		return err
+	}
+	query, args = build.DropIndex(name).Query()
+	if exists {
+		query, args = build.AlterTable(table).DropConstraint(name).Query()
+	}
+	return tx.Exec(ctx, query, args, new(sql.Result))
 }

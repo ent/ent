@@ -184,8 +184,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	// might fail if the intermediate state violates the constraints.
 	if m.dropIndexes {
 		for _, idx := range change.index.drop {
-			query, args := m.dropIndex(idx, table).Query()
-			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+			if err := m.dropIndex(ctx, tx, idx, table); err != nil {
 				return fmt.Errorf("drop index of table %q: %v", table, err)
 			}
 		}
@@ -437,11 +436,11 @@ type sqlDialect interface {
 	tableExist(context.Context, dialect.Tx, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)
 	setRange(context.Context, dialect.Tx, string, int) error
+	dropIndex(context.Context, dialect.Tx, *Index, string) error
 	// table, column and index builder per dialect.
 	cType(*Column) string
 	tBuilder(*Table) *sql.TableBuilder
 	addColumn(*Column) *sql.ColumnBuilder
 	alterColumn(*Column) []*sql.ColumnBuilder
 	addIndex(*Index, string) *sql.IndexBuilder
-	dropIndex(*Index, string) *sql.DropIndexBuilder
 }

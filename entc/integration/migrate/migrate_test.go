@@ -83,7 +83,7 @@ func TestSQLite(t *testing.T) {
 	SanityV2(t, client)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetPhone("y").SaveX(ctx).ID, 2<<32, 3<<32-1)
+	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 2<<32, 3<<32-1)
 
 	// override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -106,7 +106,7 @@ func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 
 	// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
-	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 
@@ -121,7 +121,7 @@ func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 
 func SanityV1(t *testing.T, client *entv1.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("foo").SetRenamed("renamed").SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetRenamed("renamed").SaveX(ctx)
 	require.EqualValues(t, 1, u.Age)
 	require.Equal(t, "foo", u.Name)
 
@@ -129,7 +129,7 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	require.Error(t, err, "name is limited to 10 chars")
 
 	// unique index on (name, address).
-	client.User.Create().SetAge(3).SetName("foo").SetAddress("tlv").SetState(userv1.StateLoggedIn).SaveX(ctx)
+	client.User.Create().SetAge(3).SetName("foo").SetNickname("nick_foo_2").SetAddress("tlv").SetState(userv1.StateLoggedIn).SaveX(ctx)
 	_, err = client.User.Create().SetAge(4).SetName("foo").SetAddress("tlv").Save(ctx)
 	require.Error(t, err)
 
@@ -140,13 +140,13 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	require.True(t, strings.Contains(t.Name(), "Postgres") || err != nil, "blob should be limited on SQLite and MySQL")
 
 	// invalid enum value.
-	_, err = client.User.Create().SetAge(1).SetName("bar").SetState("unknown").Save(ctx)
+	_, err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetState("unknown").Save(ctx)
 	require.Error(t, err)
 }
 
 func SanityV2(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetAge(1).SetName("bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
+	u := client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
 	require.Equal(t, []byte("{}"), u.Buffer)
@@ -159,11 +159,11 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	u = u.Update().SetState(user.StateOnline).SaveX(ctx)
 	require.Equal(t, user.StateOnline, u.State)
 
-	_, err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetPhone("200").Save(ctx)
-	require.NoError(t, err, "name is not limited to 10 chars")
+	_, err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetNickname("nick_bar").SetPhone("200").Save(ctx)
+	require.NoError(t, err, "name is not limited to 10 chars and nickname is not unique")
 
 	// new unique index was added to (age, phone).
-	_, err = client.User.Create().SetAge(1).SetName("foo").SetPhone("200").Save(ctx)
+	_, err = client.User.Create().SetAge(1).SetName("foo").SetPhone("200").SetNickname("nick_bar").Save(ctx)
 	require.Error(t, err)
 	require.True(t, entv2.IsConstraintFailure(err))
 
@@ -183,7 +183,7 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 func EqualFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing equal-fold on sql specific dialects")
-	client.User.Create().SetAge(37).SetName("Alex").SetPhone("123456789").SaveX(ctx)
+	client.User.Create().SetAge(37).SetName("Alex").SetNickname("alexsn").SetPhone("123456789").SaveX(ctx)
 	require.False(t, client.User.Query().Where(user.NameEQ("alex")).ExistX(ctx))
 	require.True(t, client.User.Query().Where(user.NameEqualFold("alex")).ExistX(ctx))
 }
@@ -191,7 +191,7 @@ func EqualFold(t *testing.T, client *entv2.Client) {
 func ContainsFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing contains-fold on sql specific dialects")
-	client.User.Create().SetAge(30).SetName("Mashraki").SetPhone("102030").SaveX(ctx)
+	client.User.Create().SetAge(30).SetName("Mashraki").SetNickname("a8m").SetPhone("102030").SaveX(ctx)
 	require.Zero(t, client.User.Query().Where(user.NameContains("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
