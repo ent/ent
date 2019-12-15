@@ -18,6 +18,7 @@ type Descriptor struct {
 	Unique   bool        // unique edge.
 	Inverse  bool        // inverse edge.
 	Required bool        // required on creation.
+	Comment  string      //  Comment on the schema.
 }
 
 // To defines an association edge between two vertices.
@@ -68,7 +69,8 @@ func (b *assocBuilder) From(name string) *inverseBuilder {
 }
 
 // Comment used to put annotations on the schema.
-func (b *assocBuilder) Comment(string) *assocBuilder {
+func (b *assocBuilder) Comment(s string) *assocBuilder {
+	b.desc.Comment = s
 	return b
 }
 
@@ -109,7 +111,8 @@ func (b *inverseBuilder) StructTag(s string) *inverseBuilder {
 }
 
 // Comment used to put annotations on the schema.
-func (b *inverseBuilder) Comment(string) *inverseBuilder {
+func (b *inverseBuilder) Comment(s string) *inverseBuilder {
+	b.desc.Comment = s
 	return b
 }
 

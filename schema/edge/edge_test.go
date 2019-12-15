@@ -16,13 +16,14 @@ import (
 func TestEdge(t *testing.T) {
 	assert := assert.New(t)
 	type User struct{ ent.Schema }
-	e := edge.To("friends", User.Type).
+	e := edge.To("friends", User.Type).Comment("comment").
 		Required().
 		Descriptor()
 	assert.False(e.Inverse)
 	assert.Equal("User", e.Type)
 	assert.Equal("friends", e.Name)
 	assert.True(e.Required)
+	assert.Equal("comment", e.Comment)
 
 	type Node struct{ ent.Schema }
 	e = edge.To("parent", Node.Type).
@@ -54,9 +55,10 @@ func TestEdge(t *testing.T) {
 	assert.False(from.Unique)
 	assert.True(from.Ref.Unique)
 	from = edge.To("following", User.Type).
-		From("followers").
+		From("followers").Comment("comment").
 		Unique().
 		Descriptor()
+	assert.Equal("comment", from.Comment)
 	assert.True(from.Unique)
 	assert.False(from.Ref.Unique)
 
