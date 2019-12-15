@@ -77,7 +77,7 @@ func (b *assocBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
-// assocBuilder is the builder for inverse edges.
+// inverseBuilder is the builder for inverse edges.
 type inverseBuilder struct {
 	desc *Descriptor
 }
