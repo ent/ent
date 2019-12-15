@@ -108,7 +108,13 @@ func (t *Table) index(name string) (*Index, bool) {
 	}
 	// If it is an "implicit index" (unique constraint on
 	// table creation) and it didn't load on table scanning.
-	if c, ok := t.column(name); ok && c.Unique {
+	c, ok := t.column(name)
+	if !ok {
+		// Postgres naming convention for unique constraint.
+		name = strings.TrimSuffix(name, "_key")
+		c, ok = t.column(name)
+	}
+	if ok && c.Unique {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
 	}
 	return nil, false
