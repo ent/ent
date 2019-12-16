@@ -17,10 +17,11 @@ import (
 )
 
 func TestInt(t *testing.T) {
-	f := field.Int("age").Positive()
+	f := field.Int("age").Positive().Comment("comment age")
 	fd := f.Descriptor()
 	assert.Equal(t, "age", fd.Name)
 	assert.Equal(t, field.TypeInt, fd.Info.Type)
+	assert.Equal(t, "comment age", fd.Comment)
 	assert.Len(t, fd.Validators, 1)
 
 	f = field.Int("age").Default(10).Min(10).Max(20)

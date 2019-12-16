@@ -29,6 +29,7 @@ type Descriptor struct {
 	StorageKey    string        // sql column or gremlin property.
 	Enums         []string      // enum values.
 	Sensitive     bool          // sensitive info string field.
+	Comment       string        // comment of the field
 }
 
 // String returns a new Field with type string.
@@ -242,6 +243,7 @@ func (b *stringBuilder) Immutable() *stringBuilder {
 
 // Comment sets the comment of the field.
 func (b *stringBuilder) Comment(c string) *stringBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -290,6 +292,7 @@ func (b *timeBuilder) Immutable() *timeBuilder {
 
 // Comment sets the comment of the field.
 func (b *timeBuilder) Comment(c string) *timeBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -367,6 +370,7 @@ func (b *boolBuilder) Immutable() *boolBuilder {
 
 // Comment sets the comment of the field.
 func (b *boolBuilder) Comment(c string) *boolBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -421,6 +425,7 @@ func (b *bytesBuilder) Immutable() *bytesBuilder {
 
 // Comment sets the comment of the field.
 func (b *bytesBuilder) Comment(c string) *bytesBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -477,6 +482,7 @@ func (b *jsonBuilder) Immutable() *jsonBuilder {
 
 // Comment sets the comment of the field.
 func (b *jsonBuilder) Comment(c string) *jsonBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -524,6 +530,7 @@ func (b *enumBuilder) Immutable() *enumBuilder {
 
 // Comment sets the comment of the field.
 func (b *enumBuilder) Comment(c string) *enumBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -572,6 +579,7 @@ func (b *uuidBuilder) Immutable() *uuidBuilder {
 
 // Comment sets the comment of the field.
 func (b *uuidBuilder) Comment(c string) *uuidBuilder {
+	b.desc.Comment = c
 	return b
 }
 
