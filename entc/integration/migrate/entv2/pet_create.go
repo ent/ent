@@ -9,8 +9,9 @@ package entv2
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -34,22 +35,22 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	var (
-		builder = sql.Dialect(pc.driver.Dialect())
-		pe      = &Pet{config: pc.config}
+		pe   = &Pet{config: pc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: pet.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: pet.FieldID,
+			},
+		}
 	)
-	tx, err := pc.driver.Tx(ctx)
-	if err != nil {
+	if err := sqlgraph.CreateNode(ctx, pc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
-	insert := builder.Insert(pet.Table).Default()
-
-	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
+	id := spec.ID.Value.(int64)
 	pe.ID = int(id)
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return pe, nil
 }

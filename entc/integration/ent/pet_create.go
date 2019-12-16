@@ -9,11 +9,12 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -99,62 +100,76 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(pc.driver.Dialect())
-		pe      = &Pet{config: pc.config}
+		pe   = &Pet{config: pc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: pet.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: pet.FieldID,
+			},
+		}
 	)
-	tx, err := pc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(pet.Table).Default()
 	if value := pc.name; value != nil {
-		insert.Set(pet.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: pet.FieldName,
+		})
 		pe.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	pe.ID = strconv.FormatInt(id, 10)
-	if len(pc.team) > 0 {
-		eid, err := strconv.Atoi(keys(pc.team)[0])
-		if err != nil {
-			return nil, err
+	if nodes := pc.team; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   pet.TeamTable,
+			Columns: []string{pet.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(pet.TeamTable).
-			Set(pet.TeamColumn, eid).
-			Where(sql.EQ(pet.FieldID, id).And().IsNull(pet.TeamColumn)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(pc.team) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(pc.team))})
-		}
-	}
-	if len(pc.owner) > 0 {
-		for eid := range pc.owner {
-			eid, err := strconv.Atoi(eid)
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			query, args := builder.Update(pet.OwnerTable).
-				Set(pet.OwnerColumn, eid).
-				Where(sql.EQ(pet.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if nodes := pc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if err := sqlgraph.CreateNode(ctx, pc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	pe.ID = strconv.FormatInt(id, 10)
 	return pe, nil
 }

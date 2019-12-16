@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -160,6 +161,9 @@ func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
 			"duplicate key value violates unique constraint", // PostgreSQL.
 		}
 	)
+	if _, ok := err.(*sqlgraph.ConstraintError); ok {
+		return &ErrConstraintFailed{msg, err}, true
+	}
 	for i := range errors {
 		if strings.Contains(msg, errors[i]) {
 			return &ErrConstraintFailed{msg, err}, true

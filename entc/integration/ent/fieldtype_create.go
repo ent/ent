@@ -12,8 +12,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -277,90 +278,158 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 
 func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	var (
-		builder = sql.Dialect(ftc.driver.Dialect())
-		ft      = &FieldType{config: ftc.config}
+		ft   = &FieldType{config: ftc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: fieldtype.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: fieldtype.FieldID,
+			},
+		}
 	)
-	tx, err := ftc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(fieldtype.Table).Default()
 	if value := ftc.int; value != nil {
-		insert.Set(fieldtype.FieldInt, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldInt,
+		})
 		ft.Int = *value
 	}
 	if value := ftc.int8; value != nil {
-		insert.Set(fieldtype.FieldInt8, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldInt8,
+		})
 		ft.Int8 = *value
 	}
 	if value := ftc.int16; value != nil {
-		insert.Set(fieldtype.FieldInt16, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldInt16,
+		})
 		ft.Int16 = *value
 	}
 	if value := ftc.int32; value != nil {
-		insert.Set(fieldtype.FieldInt32, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldInt32,
+		})
 		ft.Int32 = *value
 	}
 	if value := ftc.int64; value != nil {
-		insert.Set(fieldtype.FieldInt64, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldInt64,
+		})
 		ft.Int64 = *value
 	}
 	if value := ftc.optional_int; value != nil {
-		insert.Set(fieldtype.FieldOptionalInt, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt,
+		})
 		ft.OptionalInt = *value
 	}
 	if value := ftc.optional_int8; value != nil {
-		insert.Set(fieldtype.FieldOptionalInt8, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 		ft.OptionalInt8 = *value
 	}
 	if value := ftc.optional_int16; value != nil {
-		insert.Set(fieldtype.FieldOptionalInt16, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 		ft.OptionalInt16 = *value
 	}
 	if value := ftc.optional_int32; value != nil {
-		insert.Set(fieldtype.FieldOptionalInt32, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 		ft.OptionalInt32 = *value
 	}
 	if value := ftc.optional_int64; value != nil {
-		insert.Set(fieldtype.FieldOptionalInt64, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 		ft.OptionalInt64 = *value
 	}
 	if value := ftc.nillable_int; value != nil {
-		insert.Set(fieldtype.FieldNillableInt, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt,
+		})
 		ft.NillableInt = value
 	}
 	if value := ftc.nillable_int8; value != nil {
-		insert.Set(fieldtype.FieldNillableInt8, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt8,
+		})
 		ft.NillableInt8 = value
 	}
 	if value := ftc.nillable_int16; value != nil {
-		insert.Set(fieldtype.FieldNillableInt16, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt16,
+		})
 		ft.NillableInt16 = value
 	}
 	if value := ftc.nillable_int32; value != nil {
-		insert.Set(fieldtype.FieldNillableInt32, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt32,
+		})
 		ft.NillableInt32 = value
 	}
 	if value := ftc.nillable_int64; value != nil {
-		insert.Set(fieldtype.FieldNillableInt64, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt64,
+		})
 		ft.NillableInt64 = value
 	}
 	if value := ftc.validate_optional_int32; value != nil {
-		insert.Set(fieldtype.FieldValidateOptionalInt32, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 		ft.ValidateOptionalInt32 = *value
 	}
 	if value := ftc.state; value != nil {
-		insert.Set(fieldtype.FieldState, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: fieldtype.FieldState,
+		})
 		ft.State = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(fieldtype.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	ft.ID = strconv.FormatInt(id, 10)
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	ft.ID = strconv.FormatInt(id, 10)
 	return ft, nil
 }

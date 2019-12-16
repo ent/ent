@@ -11,8 +11,9 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -71,34 +72,46 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	var (
-		builder = sql.Dialect(cc.driver.Dialect())
-		c       = &Comment{config: cc.config}
+		c    = &Comment{config: cc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: comment.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: comment.FieldID,
+			},
+		}
 	)
-	tx, err := cc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(comment.Table).Default()
 	if value := cc.unique_int; value != nil {
-		insert.Set(comment.FieldUniqueInt, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: comment.FieldUniqueInt,
+		})
 		c.UniqueInt = *value
 	}
 	if value := cc.unique_float; value != nil {
-		insert.Set(comment.FieldUniqueFloat, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  *value,
+			Column: comment.FieldUniqueFloat,
+		})
 		c.UniqueFloat = *value
 	}
 	if value := cc.nillable_int; value != nil {
-		insert.Set(comment.FieldNillableInt, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: comment.FieldNillableInt,
+		})
 		c.NillableInt = value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(comment.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	c.ID = strconv.FormatInt(id, 10)
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	c.ID = strconv.FormatInt(id, 10)
 	return c, nil
 }

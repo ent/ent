@@ -9,8 +9,9 @@ package ent
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/config/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -34,22 +35,22 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		builder = sql.Dialect(uc.driver.Dialect())
-		u       = &User{config: uc.config}
+		u    = &User{config: uc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: user.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		}
 	)
-	tx, err := uc.driver.Tx(ctx)
-	if err != nil {
+	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
-	insert := builder.Insert(user.Table).Default()
-
-	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
+	id := spec.ID.Value.(int64)
 	u.ID = int(id)
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return u, nil
 }

@@ -10,8 +10,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/m2mrecur/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -97,55 +98,78 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(uc.driver.Dialect())
-		u       = &User{config: uc.config}
+		u    = &User{config: uc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: user.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		}
 	)
-	tx, err := uc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(user.Table).Default()
 	if value := uc.age; value != nil {
-		insert.Set(user.FieldAge, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 		u.Age = *value
 	}
 	if value := uc.name; value != nil {
-		insert.Set(user.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldName,
+		})
 		u.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	u.ID = int(id)
-	if len(uc.followers) > 0 {
-		for eid := range uc.followers {
-
-			query, args := builder.Insert(user.FollowersTable).
-				Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0]).
-				Values(id, eid).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := uc.followers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.FollowersTable,
+			Columns: user.FollowersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
-	}
-	if len(uc.following) > 0 {
-		for eid := range uc.following {
-
-			query, args := builder.Insert(user.FollowingTable).
-				Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1]).
-				Values(id, eid).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if nodes := uc.following; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FollowingTable,
+			Columns: user.FollowingPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	u.ID = int(id)
+
 	return u, nil
 }

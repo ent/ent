@@ -9,11 +9,11 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CityCreate is the builder for creating a City entity.
@@ -68,47 +68,51 @@ func (cc *CityCreate) SaveX(ctx context.Context) *City {
 
 func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(cc.driver.Dialect())
-		c       = &City{config: cc.config}
+		c    = &City{config: cc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: city.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: city.FieldID,
+			},
+		}
 	)
-	tx, err := cc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(city.Table).Default()
 	if value := cc.name; value != nil {
-		insert.Set(city.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: city.FieldName,
+		})
 		c.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(city.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
+	if nodes := cc.streets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   city.StreetsTable,
+			Columns: []string{city.StreetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: street.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	c.ID = int(id)
-	if len(cc.streets) > 0 {
-		p := sql.P()
-		for eid := range cc.streets {
-			p.Or().EQ(street.FieldID, eid)
+	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-		query, args := builder.Update(city.StreetsTable).
-			Set(city.StreetsColumn, id).
-			Where(sql.And(p, sql.IsNull(city.StreetsColumn))).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(cc.streets) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"streets\" %v already connected to a different \"City\"", keys(cc.streets))})
-		}
-	}
-	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	c.ID = int(id)
+
 	return c, nil
 }

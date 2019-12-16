@@ -11,8 +11,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/start/ent/car"
+	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CarCreate is the builder for creating a Car entity.
@@ -82,42 +84,59 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(cc.driver.Dialect())
-		c       = &Car{config: cc.config}
+		c    = &Car{config: cc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: car.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: car.FieldID,
+			},
+		}
 	)
-	tx, err := cc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(car.Table).Default()
 	if value := cc.model; value != nil {
-		insert.Set(car.FieldModel, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: car.FieldModel,
+		})
 		c.Model = *value
 	}
 	if value := cc.registered_at; value != nil {
-		insert.Set(car.FieldRegisteredAt, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: car.FieldRegisteredAt,
+		})
 		c.RegisteredAt = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(car.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	c.ID = int(id)
-	if len(cc.owner) > 0 {
-		for eid := range cc.owner {
-			query, args := builder.Update(car.OwnerTable).
-				Set(car.OwnerColumn, eid).
-				Where(sql.EQ(car.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := cc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   car.OwnerTable,
+			Columns: []string{car.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	c.ID = int(id)
+
 	return c, nil
 }

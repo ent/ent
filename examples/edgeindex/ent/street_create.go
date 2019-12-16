@@ -10,8 +10,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // StreetCreate is the builder for creating a Street entity.
@@ -71,38 +73,51 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(sc.driver.Dialect())
-		s       = &Street{config: sc.config}
+		s    = &Street{config: sc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: street.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: street.FieldID,
+			},
+		}
 	)
-	tx, err := sc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(street.Table).Default()
 	if value := sc.name; value != nil {
-		insert.Set(street.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: street.FieldName,
+		})
 		s.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(street.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	s.ID = int(id)
-	if len(sc.city) > 0 {
-		for eid := range sc.city {
-			query, args := builder.Update(street.CityTable).
-				Set(street.CityColumn, eid).
-				Where(sql.EQ(street.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := sc.city; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   street.CityTable,
+			Columns: []string{street.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: city.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, sc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	s.ID = int(id)
+
 	return s, nil
 }

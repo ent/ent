@@ -9,10 +9,10 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // NodeCreate is the builder for creating a Node entity.
@@ -93,58 +93,70 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(nc.driver.Dialect())
-		n       = &Node{config: nc.config}
+		n    = &Node{config: nc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: node.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: node.FieldID,
+			},
+		}
 	)
-	tx, err := nc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(node.Table).Default()
 	if value := nc.value; value != nil {
-		insert.Set(node.FieldValue, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: node.FieldValue,
+		})
 		n.Value = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(node.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
+	if nodes := nc.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   node.ParentTable,
+			Columns: []string{node.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: node.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	n.ID = int(id)
-	if len(nc.parent) > 0 {
-		for eid := range nc.parent {
-			query, args := builder.Update(node.ParentTable).
-				Set(node.ParentColumn, eid).
-				Where(sql.EQ(node.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := nc.children; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   node.ChildrenTable,
+			Columns: []string{node.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: node.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if len(nc.children) > 0 {
-		p := sql.P()
-		for eid := range nc.children {
-			p.Or().EQ(node.FieldID, eid)
+	if err := sqlgraph.CreateNode(ctx, nc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-		query, args := builder.Update(node.ChildrenTable).
-			Set(node.ChildrenColumn, id).
-			Where(sql.And(p, sql.IsNull(node.ChildrenColumn))).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(nc.children) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"Node\"", keys(nc.children))})
-		}
-	}
-	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	n.ID = int(id)
+
 	return n, nil
 }

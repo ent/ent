@@ -12,8 +12,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -79,70 +80,70 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		builder = sql.Dialect(uc.driver.Dialect())
-		u       = &User{config: uc.config}
-	)
-	tx, err := uc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(user.Table).Default()
-	if value := uc.url; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
+		u    = &User{config: uc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: user.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
 		}
-		insert.Set(user.FieldURL, buf)
+	)
+	if value := uc.url; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldURL,
+		})
 		u.URL = *value
 	}
 	if value := uc.raw; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		insert.Set(user.FieldRaw, buf)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldRaw,
+		})
 		u.Raw = *value
 	}
 	if value := uc.dirs; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		insert.Set(user.FieldDirs, buf)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldDirs,
+		})
 		u.Dirs = *value
 	}
 	if value := uc.ints; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		insert.Set(user.FieldInts, buf)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldInts,
+		})
 		u.Ints = *value
 	}
 	if value := uc.floats; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		insert.Set(user.FieldFloats, buf)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldFloats,
+		})
 		u.Floats = *value
 	}
 	if value := uc.strings; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		insert.Set(user.FieldStrings, buf)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldStrings,
+		})
 		u.Strings = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(user.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	u.ID = int(id)
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	u.ID = int(id)
 	return u, nil
 }

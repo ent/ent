@@ -26,6 +26,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetInt64(64).
 		SaveX(ctx)
 
+	require.NotEmpty(t, ft.ID)
 	require.Equal(1, ft.Int)
 	require.Equal(int8(8), ft.Int8)
 	require.Equal(int16(16), ft.Int16)

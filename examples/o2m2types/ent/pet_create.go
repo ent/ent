@@ -10,8 +10,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2m2types/ent/pet"
+	"github.com/facebookincubator/ent/examples/o2m2types/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -71,38 +73,51 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(pc.driver.Dialect())
-		pe      = &Pet{config: pc.config}
+		pe   = &Pet{config: pc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: pet.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: pet.FieldID,
+			},
+		}
 	)
-	tx, err := pc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(pet.Table).Default()
 	if value := pc.name; value != nil {
-		insert.Set(pet.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: pet.FieldName,
+		})
 		pe.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(pet.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	pe.ID = int(id)
-	if len(pc.owner) > 0 {
-		for eid := range pc.owner {
-			query, args := builder.Update(pet.OwnerTable).
-				Set(pet.OwnerColumn, eid).
-				Where(sql.EQ(pet.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := pc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, pc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	pe.ID = int(id)
+
 	return pe, nil
 }

@@ -9,11 +9,12 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
+	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -78,48 +79,59 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(cc.driver.Dialect())
-		c       = &Card{config: cc.config}
+		c    = &Card{config: cc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: card.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: card.FieldID,
+			},
+		}
 	)
-	tx, err := cc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(card.Table).Default()
 	if value := cc.expired; value != nil {
-		insert.Set(card.FieldExpired, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: card.FieldExpired,
+		})
 		c.Expired = *value
 	}
 	if value := cc.number; value != nil {
-		insert.Set(card.FieldNumber, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: card.FieldNumber,
+		})
 		c.Number = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(card.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
+	if nodes := cc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: []string{card.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	c.ID = int(id)
-	if len(cc.owner) > 0 {
-		eid := keys(cc.owner)[0]
-		query, args := builder.Update(card.OwnerTable).
-			Set(card.OwnerColumn, eid).
-			Where(sql.EQ(card.FieldID, id).And().IsNull(card.OwnerColumn)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(cc.owner) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"owner\" %v already connected to a different \"Card\"", keys(cc.owner))})
-		}
-	}
-	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+
+	id := spec.ID.Value.(int64)
+	c.ID = int(id)
+
 	return c, nil
 }

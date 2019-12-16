@@ -12,8 +12,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -151,69 +154,100 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(fc.driver.Dialect())
-		f       = &File{config: fc.config}
+		f    = &File{config: fc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: file.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: file.FieldID,
+			},
+		}
 	)
-	tx, err := fc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(file.Table).Default()
 	if value := fc.size; value != nil {
-		insert.Set(file.FieldSize, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: file.FieldSize,
+		})
 		f.Size = *value
 	}
 	if value := fc.name; value != nil {
-		insert.Set(file.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldName,
+		})
 		f.Name = *value
 	}
 	if value := fc.user; value != nil {
-		insert.Set(file.FieldUser, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldUser,
+		})
 		f.User = value
 	}
 	if value := fc.group; value != nil {
-		insert.Set(file.FieldGroup, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldGroup,
+		})
 		f.Group = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(file.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	f.ID = strconv.FormatInt(id, 10)
-	if len(fc.owner) > 0 {
-		for eid := range fc.owner {
-			eid, err := strconv.Atoi(eid)
-			if err != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args := builder.Update(file.OwnerTable).
-				Set(file.OwnerColumn, eid).
-				Where(sql.EQ(file.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := fc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.OwnerTable,
+			Columns: []string{file.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-	}
-	if len(fc._type) > 0 {
-		for eid := range fc._type {
-			eid, err := strconv.Atoi(eid)
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			query, args := builder.Update(file.TypeTable).
-				Set(file.TypeColumn, eid).
-				Where(sql.EQ(file.FieldID, id)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if nodes := fc._type; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.TypeTable,
+			Columns: []string{file.TypeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: filetype.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if err := sqlgraph.CreateNode(ctx, fc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	f.ID = strconv.FormatInt(id, 10)
 	return f, nil
 }
