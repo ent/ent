@@ -105,6 +105,14 @@ jobs:
       - *mktestdir
       - getmods
       - run:
+          name: Run codegen for examples
+          working_directory: examples
+          command: go generate ./...
+      - run:
+          name: Run example tests
+          working_directory: examples
+          command: gotestsum -f short-verbose --junitfile ~/test-results/examples.xml -- -race ./...
+      - run:
           name: Run codegen for entc/load
           working_directory: entc/load
           command: go generate
