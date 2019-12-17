@@ -165,7 +165,7 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	// new unique index was added to (age, phone).
 	_, err = client.User.Create().SetAge(1).SetName("foo").SetPhone("200").SetNickname("nick_bar").Save(ctx)
 	require.Error(t, err)
-	require.True(t, entv2.IsConstraintFailure(err))
+	require.True(t, entv2.IsConstraintError(err))
 
 	// ensure all rows in the database have the same default for the `title` column.
 	require.Equal(

@@ -225,7 +225,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(giu.groups) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(giu.groups))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(giu.groups))})
 			}
 		}
 	}
@@ -443,7 +443,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(giuo.groups) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(giuo.groups))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(giuo.groups))})
 			}
 		}
 	}

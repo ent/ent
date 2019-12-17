@@ -159,9 +159,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	n.ID = int(id)
-
 	return n, nil
 }

@@ -110,9 +110,7 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	c.ID = int(id)
-
 	return c, nil
 }

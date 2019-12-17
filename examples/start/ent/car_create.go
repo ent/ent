@@ -134,9 +134,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	c.ID = int(id)
-
 	return c, nil
 }

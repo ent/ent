@@ -129,9 +129,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	c.ID = int(id)
-
 	return c, nil
 }

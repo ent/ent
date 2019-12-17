@@ -226,7 +226,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						return {{ $zero }}, rollback(tx, err)
 					}
 					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("\"{{ $e.Name }}\" (%v) already connected to a different \"{{ $.Name }}\"", eid)})
+						return {{ $zero }}, rollback(tx, &ConstraintError{msg: fmt.Sprintf("\"{{ $e.Name }}\" (%v) already connected to a different \"{{ $.Name }}\"", eid)})
 					}
 				}
 			{{- else if $e.M2M  }}
@@ -277,7 +277,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						return {{ $zero }}, rollback(tx, err)
 					}
 					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
+						return {{ $zero }}, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
 					}
 				}
 			{{- else }}{{/* O2O */}}
@@ -309,7 +309,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						return {{ $zero }}, rollback(tx, err)
 					}
 					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return {{ $zero }}, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
+						return {{ $zero }}, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
 					}
 				}
 			{{- end }}

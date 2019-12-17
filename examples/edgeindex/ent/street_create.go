@@ -115,9 +115,7 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	s.ID = int(id)
-
 	return s, nil
 }

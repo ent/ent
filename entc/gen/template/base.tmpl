@@ -100,26 +100,27 @@ func IsNotSingular(err error) bool {
 }
 
 
-// ErrConstraintFailed returns when trying to create/update one or more entities and
-// one or more of their constraints failed. For example, violation of edge or field uniqueness.
-type ErrConstraintFailed struct {
+// ConstraintError returns when trying to create/update one or more entities and
+// one or more of their constraints failed. For example, violation of edge or
+// field uniqueness.
+type ConstraintError struct {
 	msg string
 	wrap error
 }
 
 // Error implements the error interface.
-func (e ErrConstraintFailed) Error() string {
-	return fmt.Sprintf("{{ $pkg }}: unique constraint failed: %s", e.msg)
+func (e ConstraintError) Error() string {
+	return fmt.Sprintf("{{ $pkg }}: constraint failed: %s", e.msg)
 }
 
 // Unwrap implements the errors.Wrapper interface.
-func (e *ErrConstraintFailed) Unwrap() error {
+func (e *ConstraintError) Unwrap() error {
 	return e.wrap
 }
 
-// IsConstraintFailure returns a boolean indicating whether the error is a constraint failure.
-func IsConstraintFailure(err error) bool {
-	_, ok := err.(*ErrConstraintFailed)
+// IsConstraintError returns a boolean indicating whether the error is a constraint failure.
+func IsConstraintError(err error) bool {
+	_, ok := err.(*ConstraintError)
 	return ok
 }
 

@@ -110,9 +110,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	gr.ID = int(id)
-
 	return gr, nil
 }

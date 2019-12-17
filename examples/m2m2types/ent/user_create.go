@@ -128,9 +128,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	u.ID = int(id)
-
 	return u, nil
 }

@@ -115,9 +115,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		}
 		return nil, err
 	}
-
 	id := spec.ID.Value.(int64)
 	pe.ID = int(id)
-
 	return pe, nil
 }

@@ -175,35 +175,36 @@ func IsNotSingular(err error) bool {
 	return ok
 }
 
-// ErrConstraintFailed returns when trying to create/update one or more entities and
-// one or more of their constraints failed. For example, violation of edge or field uniqueness.
-type ErrConstraintFailed struct {
+// ConstraintError returns when trying to create/update one or more entities and
+// one or more of their constraints failed. For example, violation of edge or
+// field uniqueness.
+type ConstraintError struct {
 	msg  string
 	wrap error
 }
 
 // Error implements the error interface.
-func (e ErrConstraintFailed) Error() string {
-	return fmt.Sprintf("ent: unique constraint failed: %s", e.msg)
+func (e ConstraintError) Error() string {
+	return fmt.Sprintf("ent: constraint failed: %s", e.msg)
 }
 
 // Unwrap implements the errors.Wrapper interface.
-func (e *ErrConstraintFailed) Unwrap() error {
+func (e *ConstraintError) Unwrap() error {
 	return e.wrap
 }
 
-// IsConstraintFailure returns a boolean indicating whether the error is a constraint failure.
-func IsConstraintFailure(err error) bool {
-	_, ok := err.(*ErrConstraintFailed)
+// IsConstraintError returns a boolean indicating whether the error is a constraint failure.
+func IsConstraintError(err error) bool {
+	_, ok := err.(*ConstraintError)
 	return ok
 }
 
 // Code implements the dsl.Node interface.
-func (e ErrConstraintFailed) Code() (string, []interface{}) {
+func (e ConstraintError) Code() (string, []interface{}) {
 	return strconv.Quote(e.prefix() + e.msg), nil
 }
 
-func (e *ErrConstraintFailed) UnmarshalGraphson(b []byte) error {
+func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 	var v [1]*string
 	if err := graphson.Unmarshal(b, &v); err != nil {
 		return err
@@ -219,21 +220,21 @@ func (e *ErrConstraintFailed) UnmarshalGraphson(b []byte) error {
 }
 
 // prefix returns the prefix used for gremlin constants.
-func (ErrConstraintFailed) prefix() string { return "Error: " }
+func (ConstraintError) prefix() string { return "Error: " }
 
 // NewErrUniqueField creates a constraint error for unique fields.
-func NewErrUniqueField(label, field string, v interface{}) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
+func NewErrUniqueField(label, field string, v interface{}) *ConstraintError {
+	return &ConstraintError{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
 }
 
 // NewErrUniqueEdge creates a constraint error for unique edges.
-func NewErrUniqueEdge(label, edge, id string) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
+func NewErrUniqueEdge(label, edge, id string) *ConstraintError {
+	return &ConstraintError{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
 }
 
 // isConstantError indicates if the given response holds a gremlin constant containing an error.
-func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
-	e := &ErrConstraintFailed{}
+func isConstantError(r *gremlin.Response) (*ConstraintError, bool) {
+	e := &ConstraintError{}
 	if err := graphson.Unmarshal(r.Result.Data, e); err != nil {
 		return nil, false
 	}

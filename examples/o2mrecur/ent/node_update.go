@@ -249,7 +249,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(nu.children) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"Node\"", keys(nu.children))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"Node\"", keys(nu.children))})
 			}
 		}
 	}
@@ -491,7 +491,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(nuo.children) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"Node\"", keys(nuo.children))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"Node\"", keys(nuo.children))})
 			}
 		}
 	}
