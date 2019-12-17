@@ -8,6 +8,7 @@ package group
 
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
 )
 
@@ -107,12 +108,12 @@ func IDLTE(id int) predicate.Group {
 // HasUsers applies the HasEdge predicate on the "users" edge.
 func HasUsers() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(UsersTable, FieldID),
-			sql.Edge(sql.M2M, false, UsersTable, UsersPrimaryKey...),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UsersTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -120,12 +121,12 @@ func HasUsers() predicate.Group {
 // HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
 func HasUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(UsersInverseTable, FieldID),
-			sql.Edge(sql.M2M, false, UsersTable, UsersPrimaryKey...),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UsersInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

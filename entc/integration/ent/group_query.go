@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
@@ -59,48 +60,48 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryFiles chains the current query on the files edge.
 func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(file.Table, file.FieldID),
-		sql.Edge(sql.O2M, false, group.FilesTable, group.FilesColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(file.Table, file.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 
 // QueryBlocked chains the current query on the blocked edge.
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2M, false, group.BlockedTable, group.BlockedColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 
 // QueryInfo chains the current query on the info edge.
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(groupinfo.Table, groupinfo.FieldID),
-		sql.Edge(sql.M2O, false, group.InfoTable, group.InfoColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 

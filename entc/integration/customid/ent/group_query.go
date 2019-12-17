@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
@@ -57,12 +58,12 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 

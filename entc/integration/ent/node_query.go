@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
@@ -56,24 +57,24 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryPrev chains the current query on the prev edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
 	)
-	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
 // QueryNext chains the current query on the next edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
 	)
-	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 

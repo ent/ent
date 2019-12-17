@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
@@ -60,132 +61,132 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryCard chains the current query on the card edge.
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(card.Table, card.FieldID),
-		sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(card.Table, card.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFiles chains the current query on the files edge.
 func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(file.Table, file.FieldID),
-		sql.Edge(sql.O2M, false, user.FilesTable, user.FilesColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(file.Table, file.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(group.Table, group.FieldID),
-		sql.Edge(sql.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(group.Table, group.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryTeam chains the current query on the team edge.
 func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.O2O, false, user.TeamTable, user.TeamColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.TeamTable, user.TeamColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QuerySpouse chains the current query on the spouse edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2M, true, user.ChildrenTable, user.ChildrenColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, user.ChildrenTable, user.ChildrenColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryParent chains the current query on the parent edge.
 func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, false, user.ParentTable, user.ParentColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 

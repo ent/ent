@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
@@ -248,12 +249,12 @@ func NameContainsFold(v string) predicate.FileType {
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.FileType {
 	return predicate.FileType(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(FilesTable, FieldID),
-			sql.Edge(sql.O2M, false, FilesTable, FilesColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FilesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FilesTable, FilesColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -261,12 +262,12 @@ func HasFiles() predicate.FileType {
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
 func HasFilesWith(preds ...predicate.File) predicate.FileType {
 	return predicate.FileType(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(FilesInverseTable, FieldID),
-			sql.Edge(sql.O2M, false, FilesTable, FilesColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FilesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FilesTable, FilesColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

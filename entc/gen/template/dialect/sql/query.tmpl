@@ -91,10 +91,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
-	step := sql.NewStep(
-		sql.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, {{ $receiver }}.sqlQuery()),
-		sql.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
-		sql.Edge(sql.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+	step := sqlgraph.NewStep(
+		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, {{ $receiver }}.sqlQuery()),
+		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
+		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}
 				{{ $n.Package }}.{{ $e.PKConstant }}...
 			{{- else -}}
@@ -102,7 +102,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
-	query.sql = sql.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{/* query/from defines the query generation for an edge query from a given node. */}}
@@ -111,10 +111,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver -}}
 	id := {{ $receiver }}.{{- if $n.ID.IsString }}id(){{ else }}ID{{ end }}
-	step := sql.NewStep(
-		sql.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
-		sql.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
-		sql.Edge(sql.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+	step := sqlgraph.NewStep(
+		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
+		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
+		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}
 				{{ $n.Package }}.{{ $e.PKConstant }}...
 			{{- else -}}
@@ -122,5 +122,5 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
-	query.sql = sql.Neighbors({{ $receiver }}.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}

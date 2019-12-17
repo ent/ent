@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/start/ent/car"
 	"github.com/facebookincubator/ent/examples/start/ent/predicate"
 	"github.com/facebookincubator/ent/examples/start/ent/user"
@@ -26,7 +27,7 @@ type CarQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Car
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -57,12 +58,12 @@ func (cq *CarQuery) Order(o ...Order) *CarQuery {
 // QueryOwner chains the current query on the owner edge.
 func (cq *CarQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
-	step := sql.NewStep(
-		sql.From(car.Table, car.FieldID, cq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, true, car.OwnerTable, car.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(car.Table, car.FieldID, cq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, car.OwnerTable, car.OwnerColumn),
 	)
-	query.sql = sql.SetNeighbors(cq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 	return query
 }
 
@@ -230,7 +231,7 @@ func (cq *CarQuery) Clone() *CarQuery {
 		order:      append([]Order{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Car{}, cq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: cq.sql.Clone(),
 	}
 }
@@ -356,7 +357,7 @@ type CarGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -477,7 +478,7 @@ func (cgb *CarGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }

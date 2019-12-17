@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
@@ -224,12 +225,12 @@ func ValueNotNil() predicate.Node {
 // HasPrev applies the HasEdge predicate on the "prev" edge.
 func HasPrev() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(PrevTable, FieldID),
-			sql.Edge(sql.O2O, true, PrevTable, PrevColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PrevTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, PrevTable, PrevColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -237,12 +238,12 @@ func HasPrev() predicate.Node {
 // HasPrevWith applies the HasEdge predicate on the "prev" edge with a given conditions (other predicates).
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(Table, FieldID),
-			sql.Edge(sql.O2O, true, PrevTable, PrevColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, PrevTable, PrevColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}
@@ -254,12 +255,12 @@ func HasPrevWith(preds ...predicate.Node) predicate.Node {
 // HasNext applies the HasEdge predicate on the "next" edge.
 func HasNext() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(NextTable, FieldID),
-			sql.Edge(sql.O2O, false, NextTable, NextColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(NextTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, NextTable, NextColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -267,12 +268,12 @@ func HasNext() predicate.Node {
 // HasNextWith applies the HasEdge predicate on the "next" edge with a given conditions (other predicates).
 func HasNextWith(preds ...predicate.Node) predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(Table, FieldID),
-			sql.Edge(sql.O2O, false, NextTable, NextColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, NextTable, NextColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

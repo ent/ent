@@ -17,6 +17,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -50,7 +51,6 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 			return nil, err
 		}
 		return NewClient(append(options, Driver(drv))...), nil
-
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
@@ -164,12 +164,12 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -178,12 +178,12 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.ID
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
@@ -26,7 +27,7 @@ type StreetQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Street
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -57,12 +58,12 @@ func (sq *StreetQuery) Order(o ...Order) *StreetQuery {
 // QueryCity chains the current query on the city edge.
 func (sq *StreetQuery) QueryCity() *CityQuery {
 	query := &CityQuery{config: sq.config}
-	step := sql.NewStep(
-		sql.From(street.Table, street.FieldID, sq.sqlQuery()),
-		sql.To(city.Table, city.FieldID),
-		sql.Edge(sql.M2O, true, street.CityTable, street.CityColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(street.Table, street.FieldID, sq.sqlQuery()),
+		sqlgraph.To(city.Table, city.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
 	)
-	query.sql = sql.SetNeighbors(sq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 	return query
 }
 
@@ -230,7 +231,7 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		order:      append([]Order{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: sq.sql.Clone(),
 	}
 }
@@ -356,7 +357,7 @@ type StreetGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -477,7 +478,7 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }

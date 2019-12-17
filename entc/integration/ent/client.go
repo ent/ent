@@ -27,6 +27,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -223,12 +224,12 @@ func (c *CardClient) GetX(ctx context.Context, id string) *Card {
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := ca.id()
-	step := sql.NewStep(
-		sql.From(card.Table, card.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2O, true, card.OwnerTable, card.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(card.Table, card.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
 	)
-	query.sql = sql.Neighbors(ca.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 
 	return query
 }
@@ -429,12 +430,12 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := f.id()
-	step := sql.NewStep(
-		sql.From(file.Table, file.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(file.Table, file.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
 	)
-	query.sql = sql.Neighbors(f.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(f.driver.Dialect(), step)
 
 	return query
 }
@@ -443,12 +444,12 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	query := &FileTypeQuery{config: c.config}
 	id := f.id()
-	step := sql.NewStep(
-		sql.From(file.Table, file.FieldID, id),
-		sql.To(filetype.Table, filetype.FieldID),
-		sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(file.Table, file.FieldID, id),
+		sqlgraph.To(filetype.Table, filetype.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
 	)
-	query.sql = sql.Neighbors(f.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(f.driver.Dialect(), step)
 
 	return query
 }
@@ -521,12 +522,12 @@ func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
 	id := ft.id()
-	step := sql.NewStep(
-		sql.From(filetype.Table, filetype.FieldID, id),
-		sql.To(file.Table, file.FieldID),
-		sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(filetype.Table, filetype.FieldID, id),
+		sqlgraph.To(file.Table, file.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
 	)
-	query.sql = sql.Neighbors(ft.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(ft.driver.Dialect(), step)
 
 	return query
 }
@@ -599,12 +600,12 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	query := &FileQuery{config: c.config}
 	id := gr.id()
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, id),
-		sql.To(file.Table, file.FieldID),
-		sql.Edge(sql.O2M, false, group.FilesTable, group.FilesColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, id),
+		sqlgraph.To(file.Table, file.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
 	)
-	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -613,12 +614,12 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.id()
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2M, false, group.BlockedTable, group.BlockedColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
 	)
-	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -627,12 +628,12 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := gr.id()
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -641,12 +642,12 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	query := &GroupInfoQuery{config: c.config}
 	id := gr.id()
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, id),
-		sql.To(groupinfo.Table, groupinfo.FieldID),
-		sql.Edge(sql.M2O, false, group.InfoTable, group.InfoColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, id),
+		sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
 	)
-	query.sql = sql.Neighbors(gr.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 
 	return query
 }
@@ -719,12 +720,12 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := gi.id()
-	step := sql.NewStep(
-		sql.From(groupinfo.Table, groupinfo.FieldID, id),
-		sql.To(group.Table, group.FieldID),
-		sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(groupinfo.Table, groupinfo.FieldID, id),
+		sqlgraph.To(group.Table, group.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
 	)
-	query.sql = sql.Neighbors(gi.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(gi.driver.Dialect(), step)
 
 	return query
 }
@@ -861,12 +862,12 @@ func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.id()
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, id),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, id),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
 	)
-	query.sql = sql.Neighbors(n.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
 
 	return query
 }
@@ -875,12 +876,12 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.id()
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, id),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, id),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
 	)
-	query.sql = sql.Neighbors(n.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
 
 	return query
 }
@@ -953,12 +954,12 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := pe.id()
-	step := sql.NewStep(
-		sql.From(pet.Table, pet.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, pet.TeamTable, pet.TeamColumn),
 	)
-	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 
 	return query
 }
@@ -967,12 +968,12 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := pe.id()
-	step := sql.NewStep(
-		sql.From(pet.Table, pet.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
 	)
-	query.sql = sql.Neighbors(pe.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 
 	return query
 }
@@ -1045,12 +1046,12 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(card.Table, card.FieldID),
-		sql.Edge(sql.O2O, false, user.CardTable, user.CardColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(card.Table, card.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1059,12 +1060,12 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1073,12 +1074,12 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	query := &FileQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(file.Table, file.FieldID),
-		sql.Edge(sql.O2M, false, user.FilesTable, user.FilesColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(file.Table, file.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1087,12 +1088,12 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(group.Table, group.FieldID),
-		sql.Edge(sql.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(group.Table, group.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1101,12 +1102,12 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1115,12 +1116,12 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1129,12 +1130,12 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1143,12 +1144,12 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.O2O, false, user.TeamTable, user.TeamColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.TeamTable, user.TeamColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1157,12 +1158,12 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2O, false, user.SpouseTable, user.SpouseColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1171,12 +1172,12 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2M, true, user.ChildrenTable, user.ChildrenColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, user.ChildrenTable, user.ChildrenColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }
@@ -1185,12 +1186,12 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
 	id := u.id()
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, id),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, false, user.ParentTable, user.ParentColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
 	)
-	query.sql = sql.Neighbors(u.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

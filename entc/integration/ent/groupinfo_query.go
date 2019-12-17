@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -57,12 +58,12 @@ func (giq *GroupInfoQuery) Order(o ...Order) *GroupInfoQuery {
 // QueryGroups chains the current query on the groups edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
-	step := sql.NewStep(
-		sql.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
-		sql.To(group.Table, group.FieldID),
-		sql.Edge(sql.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
+		sqlgraph.To(group.Table, group.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
 	)
-	query.sql = sql.SetNeighbors(giq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(giq.driver.Dialect(), step)
 	return query
 }
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
@@ -581,12 +582,12 @@ func NameContainsFold(v string) predicate.Card {
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(OwnerTable, FieldID),
-			sql.Edge(sql.O2O, true, OwnerTable, OwnerColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, OwnerTable, OwnerColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -594,12 +595,12 @@ func HasOwner() predicate.Card {
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(OwnerInverseTable, FieldID),
-			sql.Edge(sql.O2O, true, OwnerTable, OwnerColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, OwnerTable, OwnerColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

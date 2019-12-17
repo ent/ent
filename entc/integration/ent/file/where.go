@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
@@ -636,12 +637,12 @@ func GroupContainsFold(v string) predicate.File {
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(OwnerTable, FieldID),
-			sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -649,12 +650,12 @@ func HasOwner() predicate.File {
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(OwnerInverseTable, FieldID),
-			sql.Edge(sql.M2O, true, OwnerTable, OwnerColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}
@@ -666,12 +667,12 @@ func HasOwnerWith(preds ...predicate.User) predicate.File {
 // HasType applies the HasEdge predicate on the "type" edge.
 func HasType() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(TypeTable, FieldID),
-			sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TypeTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, TypeTable, TypeColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -679,12 +680,12 @@ func HasType() predicate.File {
 // HasTypeWith applies the HasEdge predicate on the "type" edge with a given conditions (other predicates).
 func HasTypeWith(preds ...predicate.FileType) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(TypeInverseTable, FieldID),
-			sql.Edge(sql.M2O, true, TypeTable, TypeColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TypeInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, TypeTable, TypeColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

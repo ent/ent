@@ -8,6 +8,7 @@ package user
 
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
 )
 
@@ -239,12 +240,12 @@ func NameContainsFold(v string) predicate.User {
 // HasPets applies the HasEdge predicate on the "pets" edge.
 func HasPets() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(PetsTable, FieldID),
-			sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PetsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PetsTable, PetsColumn),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -252,12 +253,12 @@ func HasPets() predicate.User {
 // HasPetsWith applies the HasEdge predicate on the "pets" edge with a given conditions (other predicates).
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(PetsInverseTable, FieldID),
-			sql.Edge(sql.O2M, false, PetsTable, PetsColumn),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(PetsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PetsTable, PetsColumn),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}
@@ -269,12 +270,12 @@ func HasPetsWith(preds ...predicate.Pet) predicate.User {
 // HasFriends applies the HasEdge predicate on the "friends" edge.
 func HasFriends() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(FriendsTable, FieldID),
-			sql.Edge(sql.M2M, false, FriendsTable, FriendsPrimaryKey...),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FriendsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	},
 	)
 }
@@ -282,12 +283,12 @@ func HasFriends() predicate.User {
 // HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
 func HasFriendsWith(preds ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, FieldID),
-			sql.To(Table, FieldID),
-			sql.Edge(sql.M2M, false, FriendsTable, FriendsPrimaryKey...),
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

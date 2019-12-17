@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
@@ -57,24 +58,24 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
