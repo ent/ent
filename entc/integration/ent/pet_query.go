@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
@@ -57,24 +58,24 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryTeam chains the current query on the team edge.
 func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	step := sql.NewStep(
-		sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.O2O, true, pet.TeamTable, pet.TeamColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, pet.TeamTable, pet.TeamColumn),
 	)
-	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	step := sql.NewStep(
-		sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
 	)
-	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 

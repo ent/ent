@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/traversal/ent/group"
 	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
@@ -27,7 +28,7 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -58,48 +59,48 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.O2M, false, user.PetsTable, user.PetsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(group.Table, group.FieldID),
-		sql.Edge(sql.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(group.Table, group.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
 // QueryManage chains the current query on the manage edge.
 func (uq *UserQuery) QueryManage() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	step := sql.NewStep(
-		sql.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sql.To(group.Table, group.FieldID),
-		sql.Edge(sql.O2M, true, user.ManageTable, user.ManageColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(group.Table, group.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, user.ManageTable, user.ManageColumn),
 	)
-	query.sql = sql.SetNeighbors(uq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
 }
 
@@ -267,7 +268,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:      append([]Order{}, uq.order...),
 		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: uq.sql.Clone(),
 	}
 }
@@ -393,7 +394,7 @@ type UserGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -514,7 +515,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }

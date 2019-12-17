@@ -17,6 +17,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -50,7 +51,6 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 			return nil, err
 		}
 		return NewClient(append(options, Driver(drv))...), nil
-
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
@@ -164,12 +164,12 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, id),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2O, true, node.PrevTable, node.PrevColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, id),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
 	)
-	query.sql = sql.Neighbors(n.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
 
 	return query
 }
@@ -178,12 +178,12 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
 	id := n.ID
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, id),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2O, false, node.NextTable, node.NextColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, id),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
 	)
-	query.sql = sql.Neighbors(n.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
 
 	return query
 }

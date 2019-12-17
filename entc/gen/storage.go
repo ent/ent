@@ -53,6 +53,7 @@ var drivers = []*Storage{
 		Dialects:  []string{"dialect.SQLite", "dialect.MySQL", "dialect.Postgres"},
 		Imports: []string{
 			"github.com/facebookincubator/ent/dialect/sql",
+			"github.com/facebookincubator/ent/dialect/sql/sqlgraph",
 		},
 		SchemaMode: Unique | Indexes | Cascade | Migrate,
 		Ops: func(f *Field) []Op {

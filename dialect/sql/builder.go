@@ -1314,6 +1314,12 @@ func (s *Selector) Distinct() *Selector {
 	return s
 }
 
+// SetDistinct sets explicitly if the returned rows are distinct or indistinct.
+func (s *Selector) SetDistinct(v bool) *Selector {
+	s.distinct = v
+	return s
+}
+
 // Limit adds the `LIMIT` clause to the `SELECT` statement.
 func (s *Selector) Limit(limit int) *Selector {
 	s.limit = &limit
@@ -1897,14 +1903,14 @@ type state interface {
 	SetTotal(int)
 }
 
-// dialectBuilder prefixes all root builders with the `Dialect` constructor.
-type dialectBuilder struct {
+// DialectBuilder prefixes all root builders with the `Dialect` constructor.
+type DialectBuilder struct {
 	dialect string
 }
 
-// Dialect creates a new dialectBuilder with the given dialect name.
-func Dialect(name string) *dialectBuilder {
-	return &dialectBuilder{name}
+// Dialect creates a new DialectBuilder with the given dialect name.
+func Dialect(name string) *DialectBuilder {
+	return &DialectBuilder{name}
 }
 
 // Describe creates a DescribeBuilder for the configured dialect.
@@ -1912,7 +1918,7 @@ func Dialect(name string) *dialectBuilder {
 //	Dialect(dialect.Postgres).
 //		Describe("users")
 //
-func (d *dialectBuilder) Describe(name string) *DescribeBuilder {
+func (d *DialectBuilder) Describe(name string) *DescribeBuilder {
 	b := Describe(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -1928,7 +1934,7 @@ func (d *dialectBuilder) Describe(name string) *DescribeBuilder {
 //			).
 //			PrimaryKey("id")
 //
-func (d *dialectBuilder) CreateTable(name string) *TableBuilder {
+func (d *DialectBuilder) CreateTable(name string) *TableBuilder {
 	b := CreateTable(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -1944,7 +1950,7 @@ func (d *dialectBuilder) CreateTable(name string) *TableBuilder {
 //			OnDelete("CASCADE"),
 //		)
 //
-func (d *dialectBuilder) AlterTable(name string) *TableAlter {
+func (d *DialectBuilder) AlterTable(name string) *TableAlter {
 	b := AlterTable(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -1955,7 +1961,7 @@ func (d *dialectBuilder) AlterTable(name string) *TableAlter {
 //	Dialect(dialect.Postgres)..
 //		Column("group_id").Type("int").Attr("UNIQUE")
 //
-func (d *dialectBuilder) Column(name string) *ColumnBuilder {
+func (d *DialectBuilder) Column(name string) *ColumnBuilder {
 	b := Column(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -1966,7 +1972,7 @@ func (d *dialectBuilder) Column(name string) *ColumnBuilder {
 //	Dialect(dialect.Postgres).
 //		Insert("users").Columns("age").Values(1)
 //
-func (d *dialectBuilder) Insert(table string) *InsertBuilder {
+func (d *DialectBuilder) Insert(table string) *InsertBuilder {
 	b := Insert(table)
 	b.SetDialect(d.dialect)
 	return b
@@ -1977,7 +1983,7 @@ func (d *dialectBuilder) Insert(table string) *InsertBuilder {
 //	Dialect(dialect.Postgres).
 //		Update("users").Set("name", "foo")
 //
-func (d *dialectBuilder) Update(table string) *UpdateBuilder {
+func (d *DialectBuilder) Update(table string) *UpdateBuilder {
 	b := Update(table)
 	b.SetDialect(d.dialect)
 	return b
@@ -1988,7 +1994,7 @@ func (d *dialectBuilder) Update(table string) *UpdateBuilder {
 //	Dialect(dialect.Postgres).
 //		Delete().From("users")
 //
-func (d *dialectBuilder) Delete(table string) *DeleteBuilder {
+func (d *DialectBuilder) Delete(table string) *DeleteBuilder {
 	b := Delete(table)
 	b.SetDialect(d.dialect)
 	return b
@@ -1999,7 +2005,7 @@ func (d *dialectBuilder) Delete(table string) *DeleteBuilder {
 //	Dialect(dialect.Postgres).
 //		Select().From(Table("users"))
 //
-func (d *dialectBuilder) Select(columns ...string) *Selector {
+func (d *DialectBuilder) Select(columns ...string) *Selector {
 	b := Select(columns...)
 	b.SetDialect(d.dialect)
 	return b
@@ -2010,7 +2016,7 @@ func (d *dialectBuilder) Select(columns ...string) *Selector {
 //	Dialect(dialect.Postgres).
 //		Table("users").As("u")
 //
-func (d *dialectBuilder) Table(name string) *SelectTable {
+func (d *DialectBuilder) Table(name string) *SelectTable {
 	b := Table(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -2022,7 +2028,7 @@ func (d *dialectBuilder) Table(name string) *SelectTable {
 //		With("users_view").
 //		As(Select().From(Table("users")))
 //
-func (d *dialectBuilder) With(name string) *WithBuilder {
+func (d *DialectBuilder) With(name string) *WithBuilder {
 	b := With(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -2036,7 +2042,7 @@ func (d *dialectBuilder) With(name string) *WithBuilder {
 //		Table("users").
 //		Columns("first", "last")
 //
-func (d *dialectBuilder) CreateIndex(name string) *IndexBuilder {
+func (d *DialectBuilder) CreateIndex(name string) *IndexBuilder {
 	b := CreateIndex(name)
 	b.SetDialect(d.dialect)
 	return b
@@ -2047,7 +2053,7 @@ func (d *dialectBuilder) CreateIndex(name string) *IndexBuilder {
 //	Dialect(dialect.Postgres).
 //		DropIndex("name")
 //
-func (d *dialectBuilder) DropIndex(name string) *DropIndexBuilder {
+func (d *DialectBuilder) DropIndex(name string) *DropIndexBuilder {
 	b := DropIndex(name)
 	b.SetDialect(d.dialect)
 	return b

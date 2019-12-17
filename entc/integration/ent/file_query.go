@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -58,24 +59,24 @@ func (fq *FileQuery) Order(o ...Order) *FileQuery {
 // QueryOwner chains the current query on the owner edge.
 func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
-	step := sql.NewStep(
-		sql.From(file.Table, file.FieldID, fq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, true, file.OwnerTable, file.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
 	)
-	query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 	return query
 }
 
 // QueryType chains the current query on the type edge.
 func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
-	step := sql.NewStep(
-		sql.From(file.Table, file.FieldID, fq.sqlQuery()),
-		sql.To(filetype.Table, filetype.FieldID),
-		sql.Edge(sql.M2O, true, file.TypeTable, file.TypeColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+		sqlgraph.To(filetype.Table, filetype.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
 	)
-	query.sql = sql.SetNeighbors(fq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 	return query
 }
 

@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -57,12 +58,12 @@ func (ftq *FileTypeQuery) Order(o ...Order) *FileTypeQuery {
 // QueryFiles chains the current query on the files edge.
 func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: ftq.config}
-	step := sql.NewStep(
-		sql.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
-		sql.To(file.Table, file.FieldID),
-		sql.Edge(sql.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
+		sqlgraph.To(file.Table, file.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
 	)
-	query.sql = sql.SetNeighbors(ftq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(ftq.driver.Dialect(), step)
 	return query
 }
 

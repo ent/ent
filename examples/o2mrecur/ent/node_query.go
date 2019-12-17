@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/predicate"
 )
@@ -25,7 +26,7 @@ type NodeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Node
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -56,24 +57,24 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryParent chains the current query on the parent edge.
 func (nq *NodeQuery) QueryParent() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.M2O, true, node.ParentTable, node.ParentColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, node.ParentTable, node.ParentColumn),
 	)
-	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (nq *NodeQuery) QueryChildren() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := sql.NewStep(
-		sql.From(node.Table, node.FieldID, nq.sqlQuery()),
-		sql.To(node.Table, node.FieldID),
-		sql.Edge(sql.O2M, false, node.ChildrenTable, node.ChildrenColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+		sqlgraph.To(node.Table, node.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, node.ChildrenTable, node.ChildrenColumn),
 	)
-	query.sql = sql.SetNeighbors(nq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
 	return query
 }
 
@@ -241,7 +242,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		order:      append([]Order{}, nq.order...),
 		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: nq.sql.Clone(),
 	}
 }
@@ -367,7 +368,7 @@ type NodeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -488,7 +489,7 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 	columns = append(columns, ngb.fields...)
 	for _, fn := range ngb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ngb.fields...)
 }

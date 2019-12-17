@@ -62,10 +62,10 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
 	func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, {{ $.ID.Constant }}),
-			sql.To({{ $e.TableConstant }}, {{ $.ID.Constant }}),
-			sql.Edge(sql.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, {{ $.ID.Constant }}),
+			sqlgraph.To({{ $e.TableConstant }}, {{ $.ID.Constant }}),
+			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
 					{{ $e.PKConstant }}...
 				{{- else -}}
@@ -73,17 +73,17 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
-		sql.HasNeighbors(s, step)
+		sqlgraph.HasNeighbors(s, step)
 	}
 {{- end }}
 
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
 	func(s *sql.Selector) {
-		step := sql.NewStep(
-			sql.From(Table, {{ $.ID.Constant }}),
-			sql.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $.ID.Constant }}),
-			sql.Edge(sql.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, {{ $.ID.Constant }}),
+			sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $.ID.Constant }}),
+			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
 					{{ $e.PKConstant }}...
 				{{- else -}}
@@ -91,7 +91,7 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
-		sql.HasNeighborsWith(s, step, func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}

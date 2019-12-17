@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/traversal/ent/group"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
 	"github.com/facebookincubator/ent/examples/traversal/ent/user"
@@ -26,7 +27,7 @@ type GroupQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Group
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -57,24 +58,24 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 
 // QueryAdmin chains the current query on the admin edge.
 func (gq *GroupQuery) QueryAdmin() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sql.NewStep(
-		sql.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, false, group.AdminTable, group.AdminColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, group.AdminTable, group.AdminColumn),
 	)
-	query.sql = sql.SetNeighbors(gq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 	return query
 }
 
@@ -242,7 +243,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		order:      append([]Order{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: gq.sql.Clone(),
 	}
 }
@@ -368,7 +369,7 @@ type GroupGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -489,7 +490,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 	columns = append(columns, ggb.fields...)
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
 }

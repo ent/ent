@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
 	"github.com/facebookincubator/ent/examples/traversal/ent/user"
@@ -26,7 +27,7 @@ type PetQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Pet
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -57,24 +58,24 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryFriends chains the current query on the friends edge.
 func (pq *PetQuery) QueryFriends() *PetQuery {
 	query := &PetQuery{config: pq.config}
-	step := sql.NewStep(
-		sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
-		sql.To(pet.Table, pet.FieldID),
-		sql.Edge(sql.M2M, false, pet.FriendsTable, pet.FriendsPrimaryKey...),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, pet.FriendsTable, pet.FriendsPrimaryKey...),
 	)
-	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	step := sql.NewStep(
-		sql.From(pet.Table, pet.FieldID, pq.sqlQuery()),
-		sql.To(user.Table, user.FieldID),
-		sql.Edge(sql.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
 	)
-	query.sql = sql.SetNeighbors(pq.driver.Dialect(), step)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
 }
 
@@ -242,7 +243,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		order:      append([]Order{}, pq.order...),
 		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
-		// clone intermediate queries.
+		// clone intermediate query.
 		sql: pq.sql.Clone(),
 	}
 }
@@ -368,7 +369,7 @@ type PetGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate queries.
+	// intermediate query.
 	sql *sql.Selector
 }
 
@@ -489,7 +490,7 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
 	columns = append(columns, pgb.fields...)
 	for _, fn := range pgb.fns {
-		columns = append(columns, fn.SQL(selector))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(pgb.fields...)
 }

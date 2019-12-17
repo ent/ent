@@ -18,6 +18,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -54,7 +55,6 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 			return nil, err
 		}
 		return NewClient(append(options, Driver(drv))...), nil
-
 	default:
 		return nil, fmt.Errorf("unsupported driver: %q", driverName)
 	}
@@ -170,12 +170,12 @@ func (c *CityClient) GetX(ctx context.Context, id int) *City {
 func (c *CityClient) QueryStreets(ci *City) *StreetQuery {
 	query := &StreetQuery{config: c.config}
 	id := ci.ID
-	step := sql.NewStep(
-		sql.From(city.Table, city.FieldID, id),
-		sql.To(street.Table, street.FieldID),
-		sql.Edge(sql.O2M, false, city.StreetsTable, city.StreetsColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(city.Table, city.FieldID, id),
+		sqlgraph.To(street.Table, street.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, city.StreetsTable, city.StreetsColumn),
 	)
-	query.sql = sql.Neighbors(ci.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(ci.driver.Dialect(), step)
 
 	return query
 }
@@ -248,12 +248,12 @@ func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
 func (c *StreetClient) QueryCity(s *Street) *CityQuery {
 	query := &CityQuery{config: c.config}
 	id := s.ID
-	step := sql.NewStep(
-		sql.From(street.Table, street.FieldID, id),
-		sql.To(city.Table, city.FieldID),
-		sql.Edge(sql.M2O, true, street.CityTable, street.CityColumn),
+	step := sqlgraph.NewStep(
+		sqlgraph.From(street.Table, street.FieldID, id),
+		sqlgraph.To(city.Table, city.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
 	)
-	query.sql = sql.Neighbors(s.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(s.driver.Dialect(), step)
 
 	return query
 }
