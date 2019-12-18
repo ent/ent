@@ -14,11 +14,13 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -317,232 +319,261 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(gu.driver.Dialect())
-		selector = builder.Select(group.FieldID).From(builder.Table(group.Table))
-	)
-	for _, p := range gu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   group.Table,
+			Columns: group.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: group.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = gu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := gu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := gu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(group.Table)
-	)
-	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := gu.active; value != nil {
-		updater.Set(group.FieldActive, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: group.FieldActive,
+		})
 	}
 	if value := gu.expire; value != nil {
-		updater.Set(group.FieldExpire, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: group.FieldExpire,
+		})
 	}
 	if value := gu._type; value != nil {
-		updater.Set(group.FieldType, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: group.FieldType,
+		})
 	}
 	if gu.clear_type {
-		updater.SetNull(group.FieldType)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: group.FieldType,
+		})
 	}
 	if value := gu.max_users; value != nil {
-		updater.Set(group.FieldMaxUsers, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: group.FieldMaxUsers,
+		})
 	}
 	if value := gu.addmax_users; value != nil {
-		updater.Add(group.FieldMaxUsers, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: group.FieldMaxUsers,
+		})
 	}
 	if gu.clearmax_users {
-		updater.SetNull(group.FieldMaxUsers)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: group.FieldMaxUsers,
+		})
 	}
 	if value := gu.name; value != nil {
-		updater.Set(group.FieldName, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: group.FieldName,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if nodes := gu.removedFiles; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
 		}
-	}
-	if len(gu.removedFiles) > 0 {
-		eids := make([]int, len(gu.removedFiles))
-		for eid := range gu.removedFiles {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
-		}
-		query, args := builder.Update(group.FilesTable).
-			SetNull(group.FilesColumn).
-			Where(sql.InInts(group.FilesColumn, ids...)).
-			Where(sql.InInts(file.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(gu.files) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range gu.files {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(file.FieldID, eid)
-			}
-			query, args := builder.Update(group.FilesTable).
-				Set(group.FilesColumn, id).
-				Where(sql.And(p, sql.IsNull(group.FilesColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(gu.files) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"Group\"", keys(gu.files))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(gu.removedBlocked) > 0 {
-		eids := make([]int, len(gu.removedBlocked))
-		for eid := range gu.removedBlocked {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := gu.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(group.BlockedTable).
-			SetNull(group.BlockedColumn).
-			Where(sql.InInts(group.BlockedColumn, ids...)).
-			Where(sql.InInts(user.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(gu.blocked) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range gu.blocked {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(user.FieldID, eid)
-			}
-			query, args := builder.Update(group.BlockedTable).
-				Set(group.BlockedColumn, id).
-				Where(sql.And(p, sql.IsNull(group.BlockedColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(gu.blocked) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"blocked\" %v already connected to a different \"Group\"", keys(gu.blocked))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(gu.removedUsers) > 0 {
-		eids := make([]int, len(gu.removedUsers))
-		for eid := range gu.removedUsers {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := gu.removedBlocked; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(group.UsersTable).
-			Where(sql.InInts(group.UsersPrimaryKey[1], ids...)).
-			Where(sql.InInts(group.UsersPrimaryKey[0], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(gu.users) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range gu.users {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := gu.blocked; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(group.UsersTable).
-			Columns(group.UsersPrimaryKey[1], group.UsersPrimaryKey[0])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if nodes := gu.removedUsers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := gu.users; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if gu.clearedInfo {
-		query, args := builder.Update(group.InfoTable).
-			SetNull(group.InfoColumn).
-			Where(sql.InInts(groupinfo.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   group.InfoTable,
+			Columns: []string{group.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: groupinfo.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(gu.info) > 0 {
-		for eid := range gu.info {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(group.InfoTable).
-				Set(group.InfoColumn, eid).
-				Where(sql.InInts(group.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
+	if nodes := gu.info; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   group.InfoTable,
+			Columns: []string{group.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: groupinfo.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -835,241 +866,299 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	var (
-		builder  = sql.Dialect(guo.driver.Dialect())
-		selector = builder.Select(group.Columns...).From(builder.Table(group.Table))
-	)
-	group.ID(guo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = guo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   group.Table,
+			Columns: group.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  guo.id,
+				Type:   field.TypeString,
+				Column: group.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		gr = &Group{config: guo.config}
-		if err := gr.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Group: %v", err)
-		}
-		id = gr.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Group with id: %v", guo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Group with the same id: %v", guo.id)
-	}
-
-	tx, err := guo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(group.Table)
-	)
-	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := guo.active; value != nil {
-		updater.Set(group.FieldActive, *value)
-		gr.Active = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  *value,
+			Column: group.FieldActive,
+		})
 	}
 	if value := guo.expire; value != nil {
-		updater.Set(group.FieldExpire, *value)
-		gr.Expire = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: group.FieldExpire,
+		})
 	}
 	if value := guo._type; value != nil {
-		updater.Set(group.FieldType, *value)
-		gr.Type = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: group.FieldType,
+		})
 	}
 	if guo.clear_type {
-		gr.Type = nil
-		updater.SetNull(group.FieldType)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: group.FieldType,
+		})
 	}
 	if value := guo.max_users; value != nil {
-		updater.Set(group.FieldMaxUsers, *value)
-		gr.MaxUsers = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: group.FieldMaxUsers,
+		})
 	}
 	if value := guo.addmax_users; value != nil {
-		updater.Add(group.FieldMaxUsers, *value)
-		gr.MaxUsers += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: group.FieldMaxUsers,
+		})
 	}
 	if guo.clearmax_users {
-		var value int
-		gr.MaxUsers = value
-		updater.SetNull(group.FieldMaxUsers)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: group.FieldMaxUsers,
+		})
 	}
 	if value := guo.name; value != nil {
-		updater.Set(group.FieldName, *value)
-		gr.Name = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: group.FieldName,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	if nodes := guo.removedFiles; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
 		}
-	}
-	if len(guo.removedFiles) > 0 {
-		eids := make([]int, len(guo.removedFiles))
-		for eid := range guo.removedFiles {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
-		}
-		query, args := builder.Update(group.FilesTable).
-			SetNull(group.FilesColumn).
-			Where(sql.InInts(group.FilesColumn, ids...)).
-			Where(sql.InInts(file.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(guo.files) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range guo.files {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(file.FieldID, eid)
-			}
-			query, args := builder.Update(group.FilesTable).
-				Set(group.FilesColumn, id).
-				Where(sql.And(p, sql.IsNull(group.FilesColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(guo.files) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"Group\"", keys(guo.files))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(guo.removedBlocked) > 0 {
-		eids := make([]int, len(guo.removedBlocked))
-		for eid := range guo.removedBlocked {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := guo.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(group.BlockedTable).
-			SetNull(group.BlockedColumn).
-			Where(sql.InInts(group.BlockedColumn, ids...)).
-			Where(sql.InInts(user.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(guo.blocked) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range guo.blocked {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(user.FieldID, eid)
-			}
-			query, args := builder.Update(group.BlockedTable).
-				Set(group.BlockedColumn, id).
-				Where(sql.And(p, sql.IsNull(group.BlockedColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(guo.blocked) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"blocked\" %v already connected to a different \"Group\"", keys(guo.blocked))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(guo.removedUsers) > 0 {
-		eids := make([]int, len(guo.removedUsers))
-		for eid := range guo.removedUsers {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := guo.removedBlocked; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(group.UsersTable).
-			Where(sql.InInts(group.UsersPrimaryKey[1], ids...)).
-			Where(sql.InInts(group.UsersPrimaryKey[0], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(guo.users) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range guo.users {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := guo.blocked; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(group.UsersTable).
-			Columns(group.UsersPrimaryKey[1], group.UsersPrimaryKey[0])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if nodes := guo.removedUsers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := guo.users; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if guo.clearedInfo {
-		query, args := builder.Update(group.InfoTable).
-			SetNull(group.InfoColumn).
-			Where(sql.InInts(groupinfo.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   group.InfoTable,
+			Columns: []string{group.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: groupinfo.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(guo.info) > 0 {
-		for eid := range guo.info {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(group.InfoTable).
-				Set(group.InfoColumn, eid).
-				Where(sql.InInts(group.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := guo.info; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   group.InfoTable,
+			Columns: []string{group.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: groupinfo.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	gr = &Group{config: guo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullBool{},
+		&sql.NullTime{},
+		&sql.NullString{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		gr.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullBool); !ok {
+			return fmt.Errorf("unexpected type %T for field active", values[0])
+		} else if value.Valid {
+			gr.Active = value.Bool
+		}
+		if value, ok := values[1].(*sql.NullTime); !ok {
+			return fmt.Errorf("unexpected type %T for field expire", values[1])
+		} else if value.Valid {
+			gr.Expire = value.Time
+		}
+		if value, ok := values[2].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field type", values[2])
+		} else if value.Valid {
+			gr.Type = new(string)
+			*gr.Type = value.String
+		}
+		if value, ok := values[3].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field max_users", values[3])
+		} else if value.Valid {
+			gr.MaxUsers = int(value.Int64)
+		}
+		if value, ok := values[4].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[4])
+		} else if value.Valid {
+			gr.Name = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, guo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return gr, nil

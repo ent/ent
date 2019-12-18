@@ -11,8 +11,10 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -63,58 +65,37 @@ func (bu *BlobUpdate) ExecX(ctx context.Context) {
 }
 
 func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(bu.driver.Dialect())
-		selector = builder.Select(blob.FieldID).From(builder.Table(blob.Table))
-	)
-	for _, p := range bu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   blob.Table,
+			Columns: blob.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: blob.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = bu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := bu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := bu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(blob.Table)
-	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(blob.FieldID, idface...))
 	if value := bu.uuid; value != nil {
-		updater.Set(blob.FieldUUID, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  *value,
+			Column: blob.FieldUUID,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-	}
-	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // BlobUpdateOne is the builder for updating a single Blob entity.
@@ -158,59 +139,50 @@ func (buo *BlobUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
-	var (
-		builder  = sql.Dialect(buo.driver.Dialect())
-		selector = builder.Select(blob.Columns...).From(builder.Table(blob.Table))
-	)
-	blob.ID(buo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = buo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   blob.Table,
+			Columns: blob.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  buo.id,
+				Type:   field.TypeUUID,
+				Column: blob.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		b = &Blob{config: buo.config}
-		if err := b.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Blob: %v", err)
-		}
-		id = b.ID
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Blob with id: %v", buo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Blob with the same id: %v", buo.id)
-	}
-
-	tx, err := buo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(blob.Table)
-	)
-	idface := make([]interface{}, len(ids))
-	for i := range ids {
-		idface[i] = ids[i]
-	}
-	updater = updater.Where(sql.In(blob.FieldID, idface...))
 	if value := buo.uuid; value != nil {
-		updater.Set(blob.FieldUUID, *value)
-		b.UUID = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  *value,
+			Column: blob.FieldUUID,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	b = &Blob{config: buo.config}
+	spec.ScanTypes = []interface{}{
+		&uuid.UUID{},
+		&uuid.UUID{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 		}
+		if value, ok := values[0].(*uuid.UUID); !ok {
+			return fmt.Errorf("unexpected type %T for field id", values[0])
+		} else if value != nil {
+			b.ID = *value
+		}
+		values = values[1:]
+		if value, ok := values[0].(*uuid.UUID); !ok {
+			return fmt.Errorf("unexpected type %T for field uuid", values[0])
+		} else if value != nil {
+			b.UUID = *value
+		}
+		return nil
 	}
-	if err = tx.Commit(); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, buo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return b, nil

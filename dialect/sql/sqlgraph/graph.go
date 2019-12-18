@@ -630,15 +630,28 @@ func (u *updater) setExternalEdges(ctx context.Context, ids []driver.Value, addE
 
 // setTableColumns sets the table columns and foreign_keys used in insert.
 func (u *updater) setTableColumns(update *sql.UpdateBuilder, addEdges, clearEdges map[Rel][]*EdgeSpec) error {
+	// Avoid multiple assignments to same column.
+	setEdges := make(map[string]bool)
+	for _, e := range addEdges[M2O] {
+		setEdges[e.Columns[0]] = true
+	}
+	for _, e := range addEdges[O2O] {
+		if e.Inverse || e.Bidi {
+			setEdges[e.Columns[0]] = true
+		}
+	}
 	for _, fi := range u.Fields.Clear {
 		update.SetNull(fi.Column)
 	}
 	for _, e := range clearEdges[M2O] {
-		update.SetNull(e.Columns[0])
+		if col := e.Columns[0]; !setEdges[col] {
+			update.SetNull(col)
+		}
 	}
 	for _, e := range clearEdges[O2O] {
-		if e.Inverse || e.Bidi {
-			update.SetNull(e.Columns[0])
+		col := e.Columns[0]
+		if (e.Inverse || e.Bidi) && !setEdges[col] {
+			update.SetNull(col)
 		}
 	}
 	err := setTableColumns(u.Fields.Set, addEdges, func(column string, value driver.Value) {

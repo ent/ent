@@ -14,8 +14,10 @@ import (
 	"net/url"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -148,111 +150,108 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(uu.driver.Dialect())
-		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
-	)
-	for _, p := range uu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := uu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := uu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(user.Table)
-	)
-	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uu.url; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return 0, err
-		}
-		updater.Set(user.FieldURL, buf)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldURL,
+		})
 	}
 	if uu.clearurl {
-		updater.SetNull(user.FieldURL)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldURL,
+		})
 	}
 	if value := uu.raw; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return 0, err
-		}
-		updater.Set(user.FieldRaw, buf)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldRaw,
+		})
 	}
 	if uu.clearraw {
-		updater.SetNull(user.FieldRaw)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldRaw,
+		})
 	}
 	if value := uu.dirs; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return 0, err
-		}
-		updater.Set(user.FieldDirs, buf)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldDirs,
+		})
 	}
 	if uu.cleardirs {
-		updater.SetNull(user.FieldDirs)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldDirs,
+		})
 	}
 	if value := uu.ints; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return 0, err
-		}
-		updater.Set(user.FieldInts, buf)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldInts,
+		})
 	}
 	if uu.clearints {
-		updater.SetNull(user.FieldInts)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldInts,
+		})
 	}
 	if value := uu.floats; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return 0, err
-		}
-		updater.Set(user.FieldFloats, buf)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldFloats,
+		})
 	}
 	if uu.clearfloats {
-		updater.SetNull(user.FieldFloats)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldFloats,
+		})
 	}
 	if value := uu.strings; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return 0, err
-		}
-		updater.Set(user.FieldStrings, buf)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldStrings,
+		})
 	}
 	if uu.clearstrings {
-		updater.SetNull(user.FieldStrings)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldStrings,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-	}
-	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -379,129 +378,169 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	var (
-		builder  = sql.Dialect(uuo.driver.Dialect())
-		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
-	)
-	user.ID(uuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  uuo.id,
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		u = &User{config: uuo.config}
-		if err := u.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into User: %v", err)
-		}
-		id = u.ID
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("User with id: %v", uuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one User with the same id: %v", uuo.id)
-	}
-
-	tx, err := uuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(user.Table)
-	)
-	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uuo.url; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		updater.Set(user.FieldURL, buf)
-		u.URL = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldURL,
+		})
 	}
 	if uuo.clearurl {
-		var value *url.URL
-		u.URL = value
-		updater.SetNull(user.FieldURL)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldURL,
+		})
 	}
 	if value := uuo.raw; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		updater.Set(user.FieldRaw, buf)
-		u.Raw = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldRaw,
+		})
 	}
 	if uuo.clearraw {
-		var value json.RawMessage
-		u.Raw = value
-		updater.SetNull(user.FieldRaw)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldRaw,
+		})
 	}
 	if value := uuo.dirs; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		updater.Set(user.FieldDirs, buf)
-		u.Dirs = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldDirs,
+		})
 	}
 	if uuo.cleardirs {
-		var value []http.Dir
-		u.Dirs = value
-		updater.SetNull(user.FieldDirs)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldDirs,
+		})
 	}
 	if value := uuo.ints; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		updater.Set(user.FieldInts, buf)
-		u.Ints = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldInts,
+		})
 	}
 	if uuo.clearints {
-		var value []int
-		u.Ints = value
-		updater.SetNull(user.FieldInts)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldInts,
+		})
 	}
 	if value := uuo.floats; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		updater.Set(user.FieldFloats, buf)
-		u.Floats = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldFloats,
+		})
 	}
 	if uuo.clearfloats {
-		var value []float64
-		u.Floats = value
-		updater.SetNull(user.FieldFloats)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldFloats,
+		})
 	}
 	if value := uuo.strings; value != nil {
-		buf, err := json.Marshal(*value)
-		if err != nil {
-			return nil, err
-		}
-		updater.Set(user.FieldStrings, buf)
-		u.Strings = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  *value,
+			Column: user.FieldStrings,
+		})
 	}
 	if uuo.clearstrings {
-		var value []string
-		u.Strings = value
-		updater.SetNull(user.FieldStrings)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldStrings,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	u = &User{config: uuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&[]byte{},
+		&[]byte{},
+		&[]byte{},
+		&[]byte{},
+		&[]byte{},
+		&[]byte{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		u.ID = int(value.Int64)
+		values = values[1:]
+
+		if value, ok := values[0].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field url", values[0])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &u.URL); err != nil {
+				return fmt.Errorf("unmarshal field url: %v", err)
+			}
+		}
+
+		if value, ok := values[1].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field raw", values[1])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &u.Raw); err != nil {
+				return fmt.Errorf("unmarshal field raw: %v", err)
+			}
+		}
+
+		if value, ok := values[2].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field dirs", values[2])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &u.Dirs); err != nil {
+				return fmt.Errorf("unmarshal field dirs: %v", err)
+			}
+		}
+
+		if value, ok := values[3].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field ints", values[3])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &u.Ints); err != nil {
+				return fmt.Errorf("unmarshal field ints: %v", err)
+			}
+		}
+
+		if value, ok := values[4].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field floats", values[4])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &u.Floats); err != nil {
+				return fmt.Errorf("unmarshal field floats: %v", err)
+			}
+		}
+
+		if value, ok := values[5].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field strings", values[5])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &u.Strings); err != nil {
+				return fmt.Errorf("unmarshal field strings: %v", err)
+			}
+		}
+		return nil
 	}
-	if err = tx.Commit(); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, uuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return u, nil

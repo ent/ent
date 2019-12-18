@@ -13,327 +13,183 @@ in the LICENSE file in the root directory of this source tree.
 {{- $ret := "n" }}{{ if $one }}{{ $ret = $.Receiver }}{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
-	var (
-		builder = sql.Dialect({{ $receiver }}.driver.Dialect())
-		selector = builder.Select({{ $.Package }}.{{ if $one }}Columns...{{ else }}{{ $.ID.Constant }}{{ end }}).From(builder.Table({{ $.Package }}.Table))
-	)
-	{{- if $one }}
-		{{ $.Package }}.ID({{ $receiver }}.id)(selector)
-	{{- else }}
-		for _, p := range {{ $receiver }}.predicates {
-			p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: {{ $.Package }}.Table,
+			Columns: {{ $.Package }}.Columns,
+			ID: &sqlgraph.FieldSpec{
+				{{- if $one }}
+					Value: {{ $receiver }}.id,
+				{{- end }}
+				Type: field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		},
+	}
+	{{- if not $one }}
+		if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+			spec.Predicate = func(selector *sql.Selector) {
+				for i := range ps {
+					ps[i](selector)
+				}
+			}
 		}
 	{{- end }}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
-		return {{ $zero }}, err
-	}
-	defer rows.Close()
-	{{ $typ := "int" }}{{ if $.ID.UserDefined }}{{ $typ = $.ID.Type }}{{ end }}
-	var ids []{{ $typ }}
-	for rows.Next() {
-		var id {{ $typ }}
-		{{- if $one }}
-			{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
-			if err := {{ $.Receiver }}.FromRows(rows); err != nil {
-				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: failed scanning row into {{ $.Name }}: %v", err)
-			}
-			{{-  if and $.ID.IsString (not $.ID.UserDefined) }}
-				id = {{ $.Receiver }}.id()
-			{{- else if or $.ID.IsUUID $.ID.IsInt }}
-				id = {{ $.Receiver }}.ID
-			{{- else }}
-				id = int({{ $.Receiver }}.ID)
-			{{- end }}
-		{{- else }}
-			if err := rows.Scan(&id); err != nil {
-				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: failed reading id: %v", err)
-			}
-		{{- end }}
-		ids = append(ids, id)
-	}
-	{{- if $one }}
-		switch n := len(ids); {
-		case n == 0:
-			return {{ $zero }}, &ErrNotFound{fmt.Sprintf("{{ $.Name }} with id: %v", {{ $receiver }}.id)}
-		case n > 1:
-			return {{ $zero }}, fmt.Errorf("{{ $pkg }}: more than one {{ $.Name }} with the same id: %v", {{ $receiver }}.id)
-		}
-	{{- else }}
-		if len(ids) == 0 {
-			return {{ $zero }}, nil
-		}
-	{{- end }}
-	{{/* if there's something to update, start a transaction. */}}
-	tx, err := {{ $receiver }}.driver.Tx(ctx)
-	if err != nil {
-		return {{ $zero }}, err
-	}
-	{{- if $.Fields }}
-		var (
-			res sql.Result
-			updater = builder.Update({{ $.Package }}.Table)
-		)
-		{{- if and (not $.ID.IsInt) $.ID.UserDefined }}
-			idface := make([]interface{}, len(ids))
-			for i := range ids {
-				idface[i] = ids[i]
-			}
-			updater = updater.Where(sql.In({{ $.Package }}.{{ $.ID.Constant }}, idface...))
-		{{- else }}
-			updater = updater.Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...))
-		{{- end }}
-		{{- range $_, $f := $.Fields }}
+	{{- range $_, $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
-					{{- if $f.IsJSON }}
-						buf, err := json.Marshal(*value)
-						if err != nil {
-							return {{ $zero }}, err
-						}
-						updater.Set({{ $.Package }}.{{ $f.Constant }}, buf)
-					{{- else }}
-						updater.Set({{ $.Package }}.{{ $f.Constant }}, *value)
-					{{- end }}
-					{{- if $one }}
-						{{ $.Receiver }}.{{ $f.StructField }} = {{ if not $f.Nillable }}*{{ end }}value
-					{{- end }}
+					spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+						Type: field.{{ $f.Type.ConstName }},
+						Value: *value,
+						Column: {{ $.Package }}.{{ $f.Constant }},
+					})
 				}
 				{{- if $f.Type.Numeric }}
 					if value := {{ $receiver }}.add{{ $f.BuilderField }}; value != nil {
-						updater.Add({{ $.Package }}.{{ $f.Constant }}, *value)
-						{{- if $one }}
-							{{- if $f.Nillable }}
-								if {{ $.Receiver }}.{{ $f.StructField }} != nil {
-									*{{ $.Receiver }}.{{ $f.StructField }} += *value
-								} else {
-									{{ $.Receiver }}.{{ $f.StructField }} = value
-								}
-							{{- else }}
-								{{ $.Receiver }}.{{ $f.StructField }} += *value
-							{{- end }}
-						{{- end }}
+						spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+							Type: field.{{ $f.Type.ConstName }},
+							Value: *value,
+							Column: {{ $.Package }}.{{ $f.Constant }},
+						})
 					}
 				{{- end }}
 			{{- end }}
 			{{- if $f.Optional }}
 				if {{ $receiver }}.clear{{ $f.BuilderField }} {
-					{{- if $one }}
-						{{- if $f.Nillable }}
-							{{ $.Receiver }}.{{ $f.StructField }} = nil
-						{{- else }}
-							var value {{ $f.Type }}
-							{{ $.Receiver }}.{{ $f.StructField }} = value
-						{{- end }}
-					{{- end }}
-					updater.SetNull({{ $.Package }}.{{ $f.Constant }})
+					spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+						Type: field.{{ $f.Type.ConstName }},
+						Column: {{ $.Package }}.{{ $f.Constant }},
+					})
 				}
 			{{- end }}
-		{{- end }}
-		if !updater.Empty() {
-			query, args := updater.Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return {{ $zero }}, rollback(tx, err)
-			}
-		}
-	{{- else if $.Edges }}{{/* ent without fields, but with edges */}}
-		var res sql.Result
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
-		{{- if $e.M2M }}
-			if len({{ $receiver }}.removed{{ $e.StructField }}) > 0 {
-				{{- $a := 0 }}{{ $b := 1 }}{{ if $e.IsInverse }}{{ $a = 1 }}{{ $b = 0 }}{{ end }}
-				eids := make([]int, len({{ $receiver }}.removed{{ $e.StructField }}))
-				for eid := range {{ $receiver }}.removed{{ $e.StructField }} {
-					{{- template "dialect/sql/update/convertid" $e -}}
-					eids = append(eids, eid)
-				}
-				query, args := builder.Delete({{ $.Package }}.{{ $e.TableConstant }}).
-					Where(sql.InInts({{ $.Package }}.{{ $e.PKConstant }}[{{ $a }}], ids...)).
-					Where(sql.InInts({{ $.Package }}.{{ $e.PKConstant }}[{{ $b }}], eids...)).
-					Query()
-				if err := tx.Exec(ctx, query, args, &res); err != nil {
-					return {{ $zero }}, rollback(tx, err)
-				}
-				{{- if $e.SelfRef }}{{/* M2M with self reference */}}{{/* TODO: use OR in the case above. */}}
-					query, args = builder.Delete({{ $.Package }}.{{ $e.TableConstant }}).
-						Where(sql.InInts({{ $.Package }}.{{ $e.PKConstant }}[{{ $b }}], ids...)).
-						Where(sql.InInts({{ $.Package }}.{{ $e.PKConstant }}[{{ $a }}], eids...)).
-						Query()
-						if err := tx.Exec(ctx, query, args, &res); err != nil {
-							return {{ $zero }}, rollback(tx, err)
-						}
-				{{- end }}
-			}
-		{{- else if $e.O2M }}
-			if len({{ $receiver }}.removed{{ $e.StructField }}) > 0 {
-				eids := make([]int, len({{ $receiver }}.removed{{ $e.StructField }}))
-				for eid := range {{ $receiver }}.removed{{ $e.StructField }} {
-					{{- template "dialect/sql/update/convertid" $e -}}
-					eids = append(eids, eid)
-				}
-				query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-					SetNull({{ $.Package }}.{{ $e.ColumnConstant }}).
-					Where(sql.InInts({{ $.Package }}.{{ $e.ColumnConstant }}, ids...)).
-					Where(sql.InInts({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eids...)).
-					Query()
-				if err := tx.Exec(ctx, query, args, &res); err != nil {
-					return {{ $zero }}, rollback(tx, err)
-				}
-			}
-		{{- else }}{{/* O2O or M2O */}}
+		{{- if $e.Unique }}
 			if {{ $receiver }}.cleared{{ $e.StructField }} {
-				query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-					SetNull({{ $.Package }}.{{ $e.ColumnConstant }}).
-					Where(sql.InInts({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, ids...)).
-					Query()
-				if err := tx.Exec(ctx, query, args, &res); err != nil {
-					return {{ $zero }}, rollback(tx, err)
-				}
-				{{- if $e.SelfRef }}{{/* O2O with self reference */}}
-					query, args = builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-						SetNull({{ $.Package }}.{{ $e.ColumnConstant }}).
-						Where(sql.InInts({{ $.Package }}.{{ $e.ColumnConstant }}, ids...)).
-						Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
+				{{- with extend $ "Edge" $e }}
+					{{ template "dialect/sql/defedge" . }}
 				{{- end }}
+				spec.Edges.Clear = append(spec.Edges.Clear, edge)
+			}
+		{{- else }}
+			if nodes := {{ $receiver }}.removed{{ $e.StructField }}; len(nodes) > 0 {
+				{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
+					{{ template "dialect/sql/defedge" . }}
+				{{- end }}
+				spec.Edges.Clear = append(spec.Edges.Clear, edge)
 			}
 		{{- end }}
-		if len({{ $receiver }}.{{ $e.BuilderField }}) > 0 {
-			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}
-				if n := len(ids); n > 1 {
-					return {{ $zero }}, rollback(tx, fmt.Errorf("{{ $pkg }}: can't link O2O edge \"{{ $e.Name }}\" to %d vertices (> 1)", n))
-				}
-				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-					{{- template "dialect/sql/update/convertid" $e -}}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-							Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
-							Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, ids[0])).Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					query, args = builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-							Set({{ $.Package }}.{{ $e.ColumnConstant }}, ids[0]).
-							Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					affected, err := res.RowsAffected()
-					if err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return {{ $zero }}, rollback(tx, &ConstraintError{msg: fmt.Sprintf("\"{{ $e.Name }}\" (%v) already connected to a different \"{{ $.Name }}\"", eid)})
-					}
-				}
-			{{- else if $e.M2M  }}
-				values := make([][]int, 0, len(ids))
-				for _, id := range ids {
-					for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-						{{- template "dialect/sql/update/convertid" $e -}}
-						values = append(values, []int{id, eid}, {{- if $e.SelfRef }}[]int{eid, id}{{ end }}){{/* self-ref creates the edges in both ways. */}}
-					}
-				}
-				{{- $a := 0 }}{{ $b := 1 }}{{ if $e.IsInverse }}{{ $a = 1 }}{{ $b = 0 }}{{ end }}
-				builder := builder.Insert({{ $.Package }}.{{ $e.TableConstant }}).
-					Columns({{ $.Package }}.{{ $e.PKConstant }}[{{ $a }}], {{ $.Package }}.{{ $e.PKConstant }}[{{ $b }}])
-				for _, v := range values {
-					builder.Values(v[0], v[1])
-				}
-				query, args := builder.Query()
-				if err := tx.Exec(ctx, query, args, &res); err != nil {
-					return {{ $zero }}, rollback(tx, err)
-				}
-			{{- else if $e.M2O }}
-				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-					{{- template "dialect/sql/update/convertid" $e -}}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
-						Where(sql.InInts({{ $.Package }}.{{ $.ID.Constant }}, ids...)).
-						Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-				}
-			{{- else if $e.O2M }}
-				for _, id := range ids {
-					p := sql.P()
-					for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-						{{- template "dialect/sql/update/convertid" $e -}}
-						p.Or().EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid)
-					}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-						Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
-						Where(sql.And(p, sql.IsNull({{ $.Package }}.{{ $e.ColumnConstant }}))).
-						Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					affected, err := res.RowsAffected()
-					if err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return {{ $zero }}, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
-					}
-				}
-			{{- else }}{{/* O2O */}}
-				for _, id := range ids {
-					{{- if $.Type.ID.IsString }}
-						eid, serr := strconv.Atoi(keys({{ $receiver }}.{{ $e.BuilderField }})[0])
-						if serr != nil {
-							return {{ $zero }}, rollback(tx, err)
-						}
-					{{- else }}
-						eid := keys({{ $receiver }}.{{ $e.BuilderField }})[0]
-					{{- end }}
-					{{- if $e.IsInverse }}
-						query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-							Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
-							Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
-							Query()
-					{{- else }}
-						query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-							Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
-							Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
-							Query()
-					{{- end }}
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					affected, err := res.RowsAffected()
-					if err != nil {
-						return {{ $zero }}, rollback(tx, err)
-					}
-					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return {{ $zero }}, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
-					}
-				}
+		if nodes := {{ $receiver }}.{{ $e.BuilderField }}; len(nodes) > 0 {
+			{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
+				{{ template "dialect/sql/defedge" . }}
 			{{- end }}
+			spec.Edges.Add = append(spec.Edges.Add, edge)
 		}
 	{{- end }}
-	if err = tx.Commit(); err != nil {
+	{{- if $one }}
+		{{ $ret }} = &{{ $.Name }}{config: {{ $receiver }}.config}
+		spec.ScanTypes = []interface{} {
+			&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{},
+			{{- range $_, $f := $.Fields }}
+				&{{ $f.NullType }}{},
+			{{- end }}
+		}
+		spec.Assign = func(values ...interface{}) error {
+			if m, n := len(values), len(spec.ScanTypes); m != n {
+				return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+			}
+			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+				{{- with extend $ "Idx" 0 "Field" $.ID "Ret" $ret }}
+					{{ template "dialect/sql/assignfield" . }}
+				{{- end }}
+			{{- else }}
+				value, ok := values[0].(*sql.NullInt64)
+				if !ok {
+					return fmt.Errorf("unexpected type %T for field id", value)
+				}
+				{{ $ret }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $.ID.Type }}(value.Int64){{ end }}
+			{{- end }}
+			values = values[1:]
+			{{- range $i, $f := $.Fields }}
+				{{- with extend $ "Idx" $i "Field" $f "Ret" $ret }}
+					{{ template "dialect/sql/assignfield" . }}
+				{{- end }}
+			{{- end }}
+			return nil
+		}
+	{{- end }}
+	{{- if $one }}
+		if err = sqlgraph.UpdateNode(ctx, {{ $receiver }}.driver, spec); err != nil {
+	{{- else }}
+		if {{ $ret }}, err = sqlgraph.UpdateNodes(ctx, {{ $receiver }}.driver, spec); err != nil {
+	{{- end }}
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return {{ $zero }}, err
 	}
-	return {{ if $one }}{{ $.Receiver }}{{ else }}len(ids){{ end }}, nil
+	return {{ $ret }}, nil
 }
-
 {{ end }}
 
-{{ define "dialect/sql/update/convertid" }}
-	{{- $id := $.Type.ID }}
-	{{- if not $id.UserDefined }}
-		{{- if $id.IsString }}
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return {{/* return is not knwon at this point. */}}
-			}
-		{{- else if not $id.IsInt}}
-			eid := int(eid)
-		{{- end }}
+{{ define "dialect/sql/defedge" }}
+	{{- $e := $.Scope.Edge -}}
+	edge := &sqlgraph.EdgeSpec{
+		Rel: sqlgraph.{{ $e.Rel.Type }},
+		Inverse: {{ $e.IsInverse }},
+		Table: {{ $.Package }}.{{ $e.TableConstant }},
+		Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
+		Bidi: {{ $e.SelfRef }},
+		Target: &sqlgraph.EdgeTarget{
+			IDSpec: &sqlgraph.FieldSpec{
+				Type: field.{{ $e.Type.ID.Type.ConstName }},
+				Column: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+			},
+		},
+	}
+	{{- with $.Scope.Nodes }}
+		for k, _ := range nodes {
+			{{- $id := $e.Type.ID -}}
+			{{- /* Convert string-ids that are stored as int in the database */ -}}
+			{{- if and (not $id.UserDefined) $id.IsString }}
+				k, err := strconv.Atoi(k)
+				if err != nil {
+					return {{ $.Scope.Zero }}, err
+				}
+			{{- end }}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 	{{- end }}
-{{ end }}
+{{- end }}
+
+{{ define "dialect/sql/assignfield" }}
+	{{- $i := $.Scope.Idx -}}
+	{{- $f := $.Scope.Field -}}
+	{{- $ret := $.Scope.Ret -}}
+	{{- if $f.IsJSON }}
+		if value, ok := values[{{ $i }}].(*{{ $f.NullType }}); !ok {
+			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $f.StructField }}); err != nil {
+				return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
+			}
+		}
+	{{- else }}
+		{{- $nulltype := $f.NullType -}}
+		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
+			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
+		{{- if hasPrefix $nulltype "sql" }}
+			} else if value.Valid {
+				{{- if $f.Nillable }}
+					{{ $ret }}.{{ $f.StructField }} = new({{ $f.Type }})
+					*{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
+				{{- else }}
+					{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
+				{{- end }}
+		{{- else }}
+			} else if value != nil {
+				{{ $ret }}.{{ $f.StructField }} = *value
+		{{- end }}
+		}
+	{{- end }}
+{{- end }}

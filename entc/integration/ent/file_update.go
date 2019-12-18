@@ -13,10 +13,12 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FileUpdate is the builder for updating File entities.
@@ -210,122 +212,155 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 }
 
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(fu.driver.Dialect())
-		selector = builder.Select(file.FieldID).From(builder.Table(file.Table))
-	)
-	for _, p := range fu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   file.Table,
+			Columns: file.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: file.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = fu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := fu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := fu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(file.Table)
-	)
-	updater = updater.Where(sql.InInts(file.FieldID, ids...))
 	if value := fu.size; value != nil {
-		updater.Set(file.FieldSize, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: file.FieldSize,
+		})
 	}
 	if value := fu.addsize; value != nil {
-		updater.Add(file.FieldSize, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: file.FieldSize,
+		})
 	}
 	if value := fu.name; value != nil {
-		updater.Set(file.FieldName, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldName,
+		})
 	}
 	if value := fu.user; value != nil {
-		updater.Set(file.FieldUser, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldUser,
+		})
 	}
 	if fu.clearuser {
-		updater.SetNull(file.FieldUser)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: file.FieldUser,
+		})
 	}
 	if value := fu.group; value != nil {
-		updater.Set(file.FieldGroup, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldGroup,
+		})
 	}
 	if fu.cleargroup {
-		updater.SetNull(file.FieldGroup)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: file.FieldGroup,
+		})
 	}
 	if fu.clearedOwner {
-		query, args := builder.Update(file.OwnerTable).
-			SetNull(file.OwnerColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.OwnerTable,
+			Columns: []string{file.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(fu.owner) > 0 {
-		for eid := range fu.owner {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(file.OwnerTable).
-				Set(file.OwnerColumn, eid).
-				Where(sql.InInts(file.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
+	if nodes := fu.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.OwnerTable,
+			Columns: []string{file.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if fu.clearedType {
-		query, args := builder.Update(file.TypeTable).
-			SetNull(file.TypeColumn).
-			Where(sql.InInts(filetype.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.TypeTable,
+			Columns: []string{file.TypeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: filetype.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(fu._type) > 0 {
-		for eid := range fu._type {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(file.TypeTable).
-				Set(file.TypeColumn, eid).
-				Where(sql.InInts(file.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
+	if nodes := fu._type; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.TypeTable,
+			Columns: []string{file.TypeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: filetype.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // FileUpdateOne is the builder for updating a single File entity.
@@ -513,130 +548,187 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
-	var (
-		builder  = sql.Dialect(fuo.driver.Dialect())
-		selector = builder.Select(file.Columns...).From(builder.Table(file.Table))
-	)
-	file.ID(fuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = fuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   file.Table,
+			Columns: file.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  fuo.id,
+				Type:   field.TypeString,
+				Column: file.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		f = &File{config: fuo.config}
-		if err := f.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into File: %v", err)
-		}
-		id = f.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("File with id: %v", fuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one File with the same id: %v", fuo.id)
-	}
-
-	tx, err := fuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(file.Table)
-	)
-	updater = updater.Where(sql.InInts(file.FieldID, ids...))
 	if value := fuo.size; value != nil {
-		updater.Set(file.FieldSize, *value)
-		f.Size = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: file.FieldSize,
+		})
 	}
 	if value := fuo.addsize; value != nil {
-		updater.Add(file.FieldSize, *value)
-		f.Size += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: file.FieldSize,
+		})
 	}
 	if value := fuo.name; value != nil {
-		updater.Set(file.FieldName, *value)
-		f.Name = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldName,
+		})
 	}
 	if value := fuo.user; value != nil {
-		updater.Set(file.FieldUser, *value)
-		f.User = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldUser,
+		})
 	}
 	if fuo.clearuser {
-		f.User = nil
-		updater.SetNull(file.FieldUser)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: file.FieldUser,
+		})
 	}
 	if value := fuo.group; value != nil {
-		updater.Set(file.FieldGroup, *value)
-		f.Group = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: file.FieldGroup,
+		})
 	}
 	if fuo.cleargroup {
-		var value string
-		f.Group = value
-		updater.SetNull(file.FieldGroup)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: file.FieldGroup,
+		})
 	}
 	if fuo.clearedOwner {
-		query, args := builder.Update(file.OwnerTable).
-			SetNull(file.OwnerColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.OwnerTable,
+			Columns: []string{file.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(fuo.owner) > 0 {
-		for eid := range fuo.owner {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(file.OwnerTable).
-				Set(file.OwnerColumn, eid).
-				Where(sql.InInts(file.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := fuo.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.OwnerTable,
+			Columns: []string{file.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if fuo.clearedType {
-		query, args := builder.Update(file.TypeTable).
-			SetNull(file.TypeColumn).
-			Where(sql.InInts(filetype.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.TypeTable,
+			Columns: []string{file.TypeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: filetype.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(fuo._type) > 0 {
-		for eid := range fuo._type {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(file.TypeTable).
-				Set(file.TypeColumn, eid).
-				Where(sql.InInts(file.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := fuo._type; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.TypeTable,
+			Columns: []string{file.TypeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: filetype.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	f = &File{config: fuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		f.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field size", values[0])
+		} else if value.Valid {
+			f.Size = int(value.Int64)
+		}
+		if value, ok := values[1].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[1])
+		} else if value.Valid {
+			f.Name = value.String
+		}
+		if value, ok := values[2].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field user", values[2])
+		} else if value.Valid {
+			f.User = new(string)
+			*f.User = value.String
+		}
+		if value, ok := values[3].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field group", values[3])
+		} else if value.Valid {
+			f.Group = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, fuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return f, nil

@@ -13,8 +13,10 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // NodeUpdate is the builder for updating Node entities.
@@ -158,122 +160,128 @@ func (nu *NodeUpdate) ExecX(ctx context.Context) {
 }
 
 func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(nu.driver.Dialect())
-		selector = builder.Select(node.FieldID).From(builder.Table(node.Table))
-	)
-	for _, p := range nu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   node.Table,
+			Columns: node.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: node.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = nu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := nu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := nu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(node.Table)
-	)
-	updater = updater.Where(sql.InInts(node.FieldID, ids...))
 	if value := nu.value; value != nil {
-		updater.Set(node.FieldValue, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: node.FieldValue,
+		})
 	}
 	if value := nu.addvalue; value != nil {
-		updater.Add(node.FieldValue, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: node.FieldValue,
+		})
 	}
 	if nu.clearvalue {
-		updater.SetNull(node.FieldValue)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: node.FieldValue,
+		})
 	}
 	if nu.clearedPrev {
-		query, args := builder.Update(node.PrevTable).
-			SetNull(node.PrevColumn).
-			Where(sql.InInts(node.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   node.PrevTable,
+			Columns: []string{node.PrevColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(nu.prev) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(nu.prev)[0])
-			if serr != nil {
-				return 0, rollback(tx, err)
-			}
-			query, args := builder.Update(node.PrevTable).
-				Set(node.PrevColumn, eid).
-				Where(sql.EQ(node.FieldID, id).And().IsNull(node.PrevColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return 0, rollback(tx, err)
-			}
-			if int(affected) < len(nu.prev) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"prev\" %v already connected to a different \"Node\"", keys(nu.prev))})
-			}
+	if nodes := nu.prev; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   node.PrevTable,
+			Columns: []string{node.PrevColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if nu.clearedNext {
-		query, args := builder.Update(node.NextTable).
-			SetNull(node.NextColumn).
-			Where(sql.InInts(node.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   node.NextTable,
+			Columns: []string{node.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(nu.next) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(nu.next)[0])
-			if serr != nil {
-				return 0, rollback(tx, err)
-			}
-			query, args := builder.Update(node.NextTable).
-				Set(node.NextColumn, id).
-				Where(sql.EQ(node.FieldID, eid).And().IsNull(node.NextColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+	if nodes := nu.next; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   node.NextTable,
+			Columns: []string{node.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(nu.next) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"next\" %v already connected to a different \"Node\"", keys(nu.next))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, nu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // NodeUpdateOne is the builder for updating a single Node entity.
@@ -411,126 +419,141 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
-	var (
-		builder  = sql.Dialect(nuo.driver.Dialect())
-		selector = builder.Select(node.Columns...).From(builder.Table(node.Table))
-	)
-	node.ID(nuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = nuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   node.Table,
+			Columns: node.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  nuo.id,
+				Type:   field.TypeString,
+				Column: node.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		n = &Node{config: nuo.config}
-		if err := n.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Node: %v", err)
-		}
-		id = n.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Node with id: %v", nuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Node with the same id: %v", nuo.id)
-	}
-
-	tx, err := nuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(node.Table)
-	)
-	updater = updater.Where(sql.InInts(node.FieldID, ids...))
 	if value := nuo.value; value != nil {
-		updater.Set(node.FieldValue, *value)
-		n.Value = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: node.FieldValue,
+		})
 	}
 	if value := nuo.addvalue; value != nil {
-		updater.Add(node.FieldValue, *value)
-		n.Value += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: node.FieldValue,
+		})
 	}
 	if nuo.clearvalue {
-		var value int
-		n.Value = value
-		updater.SetNull(node.FieldValue)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: node.FieldValue,
+		})
 	}
 	if nuo.clearedPrev {
-		query, args := builder.Update(node.PrevTable).
-			SetNull(node.PrevColumn).
-			Where(sql.InInts(node.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   node.PrevTable,
+			Columns: []string{node.PrevColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(nuo.prev) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(nuo.prev)[0])
-			if serr != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args := builder.Update(node.PrevTable).
-				Set(node.PrevColumn, eid).
-				Where(sql.EQ(node.FieldID, id).And().IsNull(node.PrevColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return nil, rollback(tx, err)
-			}
-			if int(affected) < len(nuo.prev) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"prev\" %v already connected to a different \"Node\"", keys(nuo.prev))})
-			}
+	if nodes := nuo.prev; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   node.PrevTable,
+			Columns: []string{node.PrevColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if nuo.clearedNext {
-		query, args := builder.Update(node.NextTable).
-			SetNull(node.NextColumn).
-			Where(sql.InInts(node.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   node.NextTable,
+			Columns: []string{node.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(nuo.next) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(nuo.next)[0])
-			if serr != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args := builder.Update(node.NextTable).
-				Set(node.NextColumn, id).
-				Where(sql.EQ(node.FieldID, eid).And().IsNull(node.NextColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+	if nodes := nuo.next; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   node.NextTable,
+			Columns: []string{node.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: node.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(nuo.next) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"next\" %v already connected to a different \"Node\"", keys(nuo.next))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	n = &Node{config: nuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		n.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field value", values[0])
+		} else if value.Valid {
+			n.Value = int(value.Int64)
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, nuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return n, nil

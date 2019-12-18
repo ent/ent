@@ -38,7 +38,7 @@ func TestSQLite(t *testing.T) {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer client.Close()
-	require.NoError(t, client.Schema.Create(context.Background()), migrate.WithDropColumn(true), migrate.WithDropIndex(true))
+	require.NoError(t, client.Schema.Create(context.Background(), migrate.WithDropColumn(true), migrate.WithDropIndex(true)))
 	for _, tt := range tests {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
@@ -49,6 +49,7 @@ func TestSQLite(t *testing.T) {
 }
 
 func TestMySQL(t *testing.T) {
+	t.Parallel()
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
 		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
 		t.Run(version, func(t *testing.T) {
@@ -58,7 +59,7 @@ func TestMySQL(t *testing.T) {
 			}).FormatDSN())
 			require.NoError(t, err)
 			defer client.Close()
-			require.NoError(t, client.Schema.Create(context.Background()), migrate.WithDropColumn(true), migrate.WithDropIndex(true))
+			require.NoError(t, client.Schema.Create(context.Background(), migrate.WithDropColumn(true), migrate.WithDropIndex(true)))
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
@@ -76,7 +77,7 @@ func TestPostgres(t *testing.T) {
 			client, err := ent.Open(dialect.Postgres, fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port))
 			require.NoError(t, err)
 			defer client.Close()
-			require.NoError(t, client.Schema.Create(context.Background()), migrate.WithDropColumn(true), migrate.WithDropIndex(true))
+			require.NoError(t, client.Schema.Create(context.Background(), migrate.WithDropColumn(true), migrate.WithDropIndex(true)))
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
 				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {

@@ -13,11 +13,14 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -596,520 +599,575 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(uu.driver.Dialect())
-		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
-	)
-	for _, p := range uu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: user.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := uu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := uu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(user.Table)
-	)
-	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uu.age; value != nil {
-		updater.Set(user.FieldAge, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uu.addage; value != nil {
-		updater.Add(user.FieldAge, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uu.name; value != nil {
-		updater.Set(user.FieldName, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldName,
+		})
 	}
 	if value := uu.last; value != nil {
-		updater.Set(user.FieldLast, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldLast,
+		})
 	}
 	if value := uu.nickname; value != nil {
-		updater.Set(user.FieldNickname, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldNickname,
+		})
 	}
 	if uu.clearnickname {
-		updater.SetNull(user.FieldNickname)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldNickname,
+		})
 	}
 	if value := uu.phone; value != nil {
-		updater.Set(user.FieldPhone, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldPhone,
+		})
 	}
 	if uu.clearphone {
-		updater.SetNull(user.FieldPhone)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldPhone,
+		})
 	}
 	if value := uu.password; value != nil {
-		updater.Set(user.FieldPassword, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldPassword,
+		})
 	}
 	if uu.clearpassword {
-		updater.SetNull(user.FieldPassword)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldPassword,
+		})
 	}
 	if uu.clearedCard {
-		query, args := builder.Update(user.CardTable).
-			SetNull(user.CardColumn).
-			Where(sql.InInts(card.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.CardTable,
+			Columns: []string{user.CardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.card) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(uu.card)[0])
-			if serr != nil {
-				return 0, rollback(tx, err)
-			}
-			query, args := builder.Update(user.CardTable).
-				Set(user.CardColumn, id).
-				Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+	if nodes := uu.card; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.CardTable,
+			Columns: []string{user.CardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(uu.card) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"card\" %v already connected to a different \"User\"", keys(uu.card))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uu.removedPets) > 0 {
-		eids := make([]int, len(uu.removedPets))
-		for eid := range uu.removedPets {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := uu.removedPets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(user.PetsTable).
-			SetNull(user.PetsColumn).
-			Where(sql.InInts(user.PetsColumn, ids...)).
-			Where(sql.InInts(pet.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(uu.pets) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range uu.pets {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(pet.FieldID, eid)
-			}
-			query, args := builder.Update(user.PetsTable).
-				Set(user.PetsColumn, id).
-				Where(sql.And(p, sql.IsNull(user.PetsColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(uu.pets) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"pets\" %v already connected to a different \"User\"", keys(uu.pets))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.removedFiles) > 0 {
-		eids := make([]int, len(uu.removedFiles))
-		for eid := range uu.removedFiles {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := uu.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(user.FilesTable).
-			SetNull(user.FilesColumn).
-			Where(sql.InInts(user.FilesColumn, ids...)).
-			Where(sql.InInts(file.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(uu.files) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range uu.files {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(file.FieldID, eid)
-			}
-			query, args := builder.Update(user.FilesTable).
-				Set(user.FilesColumn, id).
-				Where(sql.And(p, sql.IsNull(user.FilesColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(uu.files) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"User\"", keys(uu.files))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uu.removedGroups) > 0 {
-		eids := make([]int, len(uu.removedGroups))
-		for eid := range uu.removedGroups {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uu.removedFiles; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FilesTable,
+			Columns: []string{user.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.GroupsTable).
-			Where(sql.InInts(user.GroupsPrimaryKey[0], ids...)).
-			Where(sql.InInts(user.GroupsPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.groups) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uu.groups {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := uu.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FilesTable,
+			Columns: []string{user.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.GroupsTable).
-			Columns(user.GroupsPrimaryKey[0], user.GroupsPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uu.removedFriends) > 0 {
-		eids := make([]int, len(uu.removedFriends))
-		for eid := range uu.removedFriends {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uu.removedGroups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.FriendsTable).
-			Where(sql.InInts(user.FriendsPrimaryKey[0], ids...)).
-			Where(sql.InInts(user.FriendsPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-		query, args = builder.Delete(user.FriendsTable).
-			Where(sql.InInts(user.FriendsPrimaryKey[1], ids...)).
-			Where(sql.InInts(user.FriendsPrimaryKey[0], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.friends) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uu.friends {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid}, []int{eid, id})
+	if nodes := uu.groups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.FriendsTable).
-			Columns(user.FriendsPrimaryKey[0], user.FriendsPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uu.removedFollowers) > 0 {
-		eids := make([]int, len(uu.removedFollowers))
-		for eid := range uu.removedFollowers {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uu.removedFriends; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FriendsTable,
+			Columns: user.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.FollowersTable).
-			Where(sql.InInts(user.FollowersPrimaryKey[1], ids...)).
-			Where(sql.InInts(user.FollowersPrimaryKey[0], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.followers) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uu.followers {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := uu.friends; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FriendsTable,
+			Columns: user.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.FollowersTable).
-			Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uu.removedFollowing) > 0 {
-		eids := make([]int, len(uu.removedFollowing))
-		for eid := range uu.removedFollowing {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uu.removedFollowers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.FollowersTable,
+			Columns: user.FollowersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.FollowingTable).
-			Where(sql.InInts(user.FollowingPrimaryKey[0], ids...)).
-			Where(sql.InInts(user.FollowingPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.following) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uu.following {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := uu.followers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.FollowersTable,
+			Columns: user.FollowersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.FollowingTable).
-			Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if nodes := uu.removedFollowing; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FollowingTable,
+			Columns: user.FollowingPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uu.following; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FollowingTable,
+			Columns: user.FollowingPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if uu.clearedTeam {
-		query, args := builder.Update(user.TeamTable).
-			SetNull(user.TeamColumn).
-			Where(sql.InInts(pet.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TeamTable,
+			Columns: []string{user.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.team) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(uu.team)[0])
-			if serr != nil {
-				return 0, rollback(tx, err)
-			}
-			query, args := builder.Update(user.TeamTable).
-				Set(user.TeamColumn, id).
-				Where(sql.EQ(pet.FieldID, eid).And().IsNull(user.TeamColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return 0, rollback(tx, err)
-			}
-			if int(affected) < len(uu.team) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"User\"", keys(uu.team))})
-			}
+	if nodes := uu.team; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TeamTable,
+			Columns: []string{user.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if uu.clearedSpouse {
-		query, args := builder.Update(user.SpouseTable).
-			SetNull(user.SpouseColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SpouseTable,
+			Columns: []string{user.SpouseColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args = builder.Update(user.SpouseTable).
-			SetNull(user.SpouseColumn).
-			Where(sql.InInts(user.SpouseColumn, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.spouse) > 0 {
-		if n := len(ids); n > 1 {
-			return 0, rollback(tx, fmt.Errorf("ent: can't link O2O edge \"spouse\" to %d vertices (> 1)", n))
+	if nodes := uu.spouse; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SpouseTable,
+			Columns: []string{user.SpouseColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		for eid := range uu.spouse {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(user.SpouseTable).
-				Set(user.SpouseColumn, eid).
-				Where(sql.EQ(user.FieldID, ids[0])).Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			query, args = builder.Update(user.SpouseTable).
-				Set(user.SpouseColumn, ids[0]).
-				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(uu.spouse) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("\"spouse\" (%v) already connected to a different \"User\"", eid)})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uu.removedChildren) > 0 {
-		eids := make([]int, len(uu.removedChildren))
-		for eid := range uu.removedChildren {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := uu.removedChildren; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(user.ChildrenTable).
-			SetNull(user.ChildrenColumn).
-			Where(sql.InInts(user.ChildrenColumn, ids...)).
-			Where(sql.InInts(user.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(uu.children) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range uu.children {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(user.FieldID, eid)
-			}
-			query, args := builder.Update(user.ChildrenTable).
-				Set(user.ChildrenColumn, id).
-				Where(sql.And(p, sql.IsNull(user.ChildrenColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(uu.children) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"User\"", keys(uu.children))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uu.children; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if uu.clearedParent {
-		query, args := builder.Update(user.ParentTable).
-			SetNull(user.ParentColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uu.parent) > 0 {
-		for eid := range uu.parent {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(user.ParentTable).
-				Set(user.ParentColumn, eid).
-				Where(sql.InInts(user.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
+	if nodes := uu.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -1682,533 +1740,618 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	var (
-		builder  = sql.Dialect(uuo.driver.Dialect())
-		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
-	)
-	user.ID(uuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  uuo.id,
+				Type:   field.TypeString,
+				Column: user.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		u = &User{config: uuo.config}
-		if err := u.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into User: %v", err)
-		}
-		id = u.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("User with id: %v", uuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one User with the same id: %v", uuo.id)
-	}
-
-	tx, err := uuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(user.Table)
-	)
-	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uuo.age; value != nil {
-		updater.Set(user.FieldAge, *value)
-		u.Age = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uuo.addage; value != nil {
-		updater.Add(user.FieldAge, *value)
-		u.Age += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uuo.name; value != nil {
-		updater.Set(user.FieldName, *value)
-		u.Name = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldName,
+		})
 	}
 	if value := uuo.last; value != nil {
-		updater.Set(user.FieldLast, *value)
-		u.Last = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldLast,
+		})
 	}
 	if value := uuo.nickname; value != nil {
-		updater.Set(user.FieldNickname, *value)
-		u.Nickname = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldNickname,
+		})
 	}
 	if uuo.clearnickname {
-		var value string
-		u.Nickname = value
-		updater.SetNull(user.FieldNickname)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldNickname,
+		})
 	}
 	if value := uuo.phone; value != nil {
-		updater.Set(user.FieldPhone, *value)
-		u.Phone = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldPhone,
+		})
 	}
 	if uuo.clearphone {
-		var value string
-		u.Phone = value
-		updater.SetNull(user.FieldPhone)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldPhone,
+		})
 	}
 	if value := uuo.password; value != nil {
-		updater.Set(user.FieldPassword, *value)
-		u.Password = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldPassword,
+		})
 	}
 	if uuo.clearpassword {
-		var value string
-		u.Password = value
-		updater.SetNull(user.FieldPassword)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldPassword,
+		})
 	}
 	if uuo.clearedCard {
-		query, args := builder.Update(user.CardTable).
-			SetNull(user.CardColumn).
-			Where(sql.InInts(card.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.CardTable,
+			Columns: []string{user.CardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.card) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(uuo.card)[0])
-			if serr != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args := builder.Update(user.CardTable).
-				Set(user.CardColumn, id).
-				Where(sql.EQ(card.FieldID, eid).And().IsNull(user.CardColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+	if nodes := uuo.card; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.CardTable,
+			Columns: []string{user.CardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(uuo.card) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"card\" %v already connected to a different \"User\"", keys(uuo.card))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uuo.removedPets) > 0 {
-		eids := make([]int, len(uuo.removedPets))
-		for eid := range uuo.removedPets {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := uuo.removedPets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(user.PetsTable).
-			SetNull(user.PetsColumn).
-			Where(sql.InInts(user.PetsColumn, ids...)).
-			Where(sql.InInts(pet.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(uuo.pets) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range uuo.pets {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(pet.FieldID, eid)
-			}
-			query, args := builder.Update(user.PetsTable).
-				Set(user.PetsColumn, id).
-				Where(sql.And(p, sql.IsNull(user.PetsColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(uuo.pets) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"pets\" %v already connected to a different \"User\"", keys(uuo.pets))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.removedFiles) > 0 {
-		eids := make([]int, len(uuo.removedFiles))
-		for eid := range uuo.removedFiles {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := uuo.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(user.FilesTable).
-			SetNull(user.FilesColumn).
-			Where(sql.InInts(user.FilesColumn, ids...)).
-			Where(sql.InInts(file.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(uuo.files) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range uuo.files {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(file.FieldID, eid)
-			}
-			query, args := builder.Update(user.FilesTable).
-				Set(user.FilesColumn, id).
-				Where(sql.And(p, sql.IsNull(user.FilesColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(uuo.files) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"User\"", keys(uuo.files))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uuo.removedGroups) > 0 {
-		eids := make([]int, len(uuo.removedGroups))
-		for eid := range uuo.removedGroups {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uuo.removedFiles; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FilesTable,
+			Columns: []string{user.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.GroupsTable).
-			Where(sql.InInts(user.GroupsPrimaryKey[0], ids...)).
-			Where(sql.InInts(user.GroupsPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.groups) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uuo.groups {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := uuo.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FilesTable,
+			Columns: []string{user.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.GroupsTable).
-			Columns(user.GroupsPrimaryKey[0], user.GroupsPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uuo.removedFriends) > 0 {
-		eids := make([]int, len(uuo.removedFriends))
-		for eid := range uuo.removedFriends {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uuo.removedGroups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.FriendsTable).
-			Where(sql.InInts(user.FriendsPrimaryKey[0], ids...)).
-			Where(sql.InInts(user.FriendsPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		query, args = builder.Delete(user.FriendsTable).
-			Where(sql.InInts(user.FriendsPrimaryKey[1], ids...)).
-			Where(sql.InInts(user.FriendsPrimaryKey[0], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.friends) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uuo.friends {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid}, []int{eid, id})
+	if nodes := uuo.groups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.FriendsTable).
-			Columns(user.FriendsPrimaryKey[0], user.FriendsPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uuo.removedFollowers) > 0 {
-		eids := make([]int, len(uuo.removedFollowers))
-		for eid := range uuo.removedFollowers {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uuo.removedFriends; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FriendsTable,
+			Columns: user.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.FollowersTable).
-			Where(sql.InInts(user.FollowersPrimaryKey[1], ids...)).
-			Where(sql.InInts(user.FollowersPrimaryKey[0], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.followers) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uuo.followers {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := uuo.friends; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FriendsTable,
+			Columns: user.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.FollowersTable).
-			Columns(user.FollowersPrimaryKey[1], user.FollowersPrimaryKey[0])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uuo.removedFollowing) > 0 {
-		eids := make([]int, len(uuo.removedFollowing))
-		for eid := range uuo.removedFollowing {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
+	if nodes := uuo.removedFollowers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.FollowersTable,
+			Columns: user.FollowersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
-			eids = append(eids, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Delete(user.FollowingTable).
-			Where(sql.InInts(user.FollowingPrimaryKey[0], ids...)).
-			Where(sql.InInts(user.FollowingPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.following) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range uuo.following {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				values = append(values, []int{id, eid})
+	if nodes := uuo.followers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.FollowersTable,
+			Columns: user.FollowersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
 			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		builder := builder.Insert(user.FollowingTable).
-			Columns(user.FollowingPrimaryKey[0], user.FollowingPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if nodes := uuo.removedFollowing; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FollowingTable,
+			Columns: user.FollowingPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.following; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FollowingTable,
+			Columns: user.FollowingPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if uuo.clearedTeam {
-		query, args := builder.Update(user.TeamTable).
-			SetNull(user.TeamColumn).
-			Where(sql.InInts(pet.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TeamTable,
+			Columns: []string{user.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.team) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(uuo.team)[0])
-			if serr != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args := builder.Update(user.TeamTable).
-				Set(user.TeamColumn, id).
-				Where(sql.EQ(pet.FieldID, eid).And().IsNull(user.TeamColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return nil, rollback(tx, err)
-			}
-			if int(affected) < len(uuo.team) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"User\"", keys(uuo.team))})
-			}
+	if nodes := uuo.team; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.TeamTable,
+			Columns: []string{user.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if uuo.clearedSpouse {
-		query, args := builder.Update(user.SpouseTable).
-			SetNull(user.SpouseColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SpouseTable,
+			Columns: []string{user.SpouseColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args = builder.Update(user.SpouseTable).
-			SetNull(user.SpouseColumn).
-			Where(sql.InInts(user.SpouseColumn, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.spouse) > 0 {
-		if n := len(ids); n > 1 {
-			return nil, rollback(tx, fmt.Errorf("ent: can't link O2O edge \"spouse\" to %d vertices (> 1)", n))
+	if nodes := uuo.spouse; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SpouseTable,
+			Columns: []string{user.SpouseColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		for eid := range uuo.spouse {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(user.SpouseTable).
-				Set(user.SpouseColumn, eid).
-				Where(sql.EQ(user.FieldID, ids[0])).Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args = builder.Update(user.SpouseTable).
-				Set(user.SpouseColumn, ids[0]).
-				Where(sql.EQ(user.FieldID, eid).And().IsNull(user.SpouseColumn)).Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(uuo.spouse) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("\"spouse\" (%v) already connected to a different \"User\"", eid)})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(uuo.removedChildren) > 0 {
-		eids := make([]int, len(uuo.removedChildren))
-		for eid := range uuo.removedChildren {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
+	if nodes := uuo.removedChildren; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Update(user.ChildrenTable).
-			SetNull(user.ChildrenColumn).
-			Where(sql.InInts(user.ChildrenColumn, ids...)).
-			Where(sql.InInts(user.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(uuo.children) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range uuo.children {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(user.FieldID, eid)
-			}
-			query, args := builder.Update(user.ChildrenTable).
-				Set(user.ChildrenColumn, id).
-				Where(sql.And(p, sql.IsNull(user.ChildrenColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(uuo.children) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"User\"", keys(uuo.children))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.children; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if uuo.clearedParent {
-		query, args := builder.Update(user.ParentTable).
-			SetNull(user.ParentColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(uuo.parent) > 0 {
-		for eid := range uuo.parent {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(user.ParentTable).
-				Set(user.ParentColumn, eid).
-				Where(sql.InInts(user.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := uuo.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	u = &User{config: uuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		u.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field age", values[0])
+		} else if value.Valid {
+			u.Age = int(value.Int64)
+		}
+		if value, ok := values[1].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[1])
+		} else if value.Valid {
+			u.Name = value.String
+		}
+		if value, ok := values[2].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field last", values[2])
+		} else if value.Valid {
+			u.Last = value.String
+		}
+		if value, ok := values[3].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field nickname", values[3])
+		} else if value.Valid {
+			u.Nickname = value.String
+		}
+		if value, ok := values[4].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field phone", values[4])
+		} else if value.Valid {
+			u.Phone = value.String
+		}
+		if value, ok := values[5].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field password", values[5])
+		} else if value.Valid {
+			u.Password = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, uuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return u, nil

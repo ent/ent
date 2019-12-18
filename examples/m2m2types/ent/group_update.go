@@ -11,8 +11,11 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/group"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/predicate"
+	"github.com/facebookincubator/ent/examples/m2m2types/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -104,84 +107,75 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(gu.driver.Dialect())
-		selector = builder.Select(group.FieldID).From(builder.Table(group.Table))
-	)
-	for _, p := range gu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   group.Table,
+			Columns: group.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: group.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = gu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
-		}
-		ids = append(ids, id)
-	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := gu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(group.Table)
-	)
-	updater = updater.Where(sql.InInts(group.FieldID, ids...))
-	if value := gu.name; value != nil {
-		updater.Set(group.FieldName, *value)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(gu.removedUsers) > 0 {
-		eids := make([]int, len(gu.removedUsers))
-		for eid := range gu.removedUsers {
-			eids = append(eids, eid)
-		}
-		query, args := builder.Delete(group.UsersTable).
-			Where(sql.InInts(group.UsersPrimaryKey[0], ids...)).
-			Where(sql.InInts(group.UsersPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(gu.users) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range gu.users {
-				values = append(values, []int{id, eid})
+	if ps := gu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
 			}
 		}
-		builder := builder.Insert(group.UsersTable).
-			Columns(group.UsersPrimaryKey[0], group.UsersPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
 	}
-	if err = tx.Commit(); err != nil {
+	if value := gu.name; value != nil {
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: group.FieldName,
+		})
+	}
+	if nodes := gu.removedUsers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := gu.users; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -267,85 +261,88 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	var (
-		builder  = sql.Dialect(guo.driver.Dialect())
-		selector = builder.Select(group.Columns...).From(builder.Table(group.Table))
-	)
-	group.ID(guo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = guo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   group.Table,
+			Columns: group.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  guo.id,
+				Type:   field.TypeInt,
+				Column: group.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		gr = &Group{config: guo.config}
-		if err := gr.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Group: %v", err)
-		}
-		id = gr.ID
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Group with id: %v", guo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Group with the same id: %v", guo.id)
-	}
-
-	tx, err := guo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(group.Table)
-	)
-	updater = updater.Where(sql.InInts(group.FieldID, ids...))
 	if value := guo.name; value != nil {
-		updater.Set(group.FieldName, *value)
-		gr.Name = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: group.FieldName,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	if nodes := guo.removedUsers; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(guo.removedUsers) > 0 {
-		eids := make([]int, len(guo.removedUsers))
-		for eid := range guo.removedUsers {
-			eids = append(eids, eid)
+	if nodes := guo.users; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
-		query, args := builder.Delete(group.UsersTable).
-			Where(sql.InInts(group.UsersPrimaryKey[0], ids...)).
-			Where(sql.InInts(group.UsersPrimaryKey[1], eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if len(guo.users) > 0 {
-		values := make([][]int, 0, len(ids))
-		for _, id := range ids {
-			for eid := range guo.users {
-				values = append(values, []int{id, eid})
-			}
-		}
-		builder := builder.Insert(group.UsersTable).
-			Columns(group.UsersPrimaryKey[0], group.UsersPrimaryKey[1])
-		for _, v := range values {
-			builder.Values(v[0], v[1])
-		}
-		query, args := builder.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+	gr = &Group{config: guo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
 	}
-	if err = tx.Commit(); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		gr.ID = int(value.Int64)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[0])
+		} else if value.Valid {
+			gr.Name = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, guo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return gr, nil
