@@ -9,8 +9,9 @@ package ent
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
+	"github.com/facebookincubator/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -53,28 +54,31 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 	var (
-		builder = sql.Dialect(bc.driver.Dialect())
-		b       = &Blob{config: bc.config}
+		b    = &Blob{config: bc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: blob.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: blob.FieldID,
+			},
+		}
 	)
-	tx, err := bc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
+	if value := bc.id; value != nil {
+		b.ID = *value
+		spec.ID.Value = *value
 	}
-	insert := builder.Insert(blob.Table).Default()
 	if value := bc.uuid; value != nil {
-		insert.Set(blob.FieldUUID, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  *value,
+			Column: blob.FieldUUID,
+		})
 		b.UUID = *value
 	}
-	if value := bc.id; value != nil {
-		insert.Set(blob.FieldID, *value)
-		b.ID = *value
-	}
-
-	query, args := insert.Query()
-	if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-		return nil, rollback(tx, err)
-	}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, bc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return b, nil

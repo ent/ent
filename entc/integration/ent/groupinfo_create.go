@@ -9,12 +9,12 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
@@ -88,55 +88,61 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(gic.driver.Dialect())
-		gi      = &GroupInfo{config: gic.config}
+		gi   = &GroupInfo{config: gic.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: groupinfo.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: groupinfo.FieldID,
+			},
+		}
 	)
-	tx, err := gic.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(groupinfo.Table).Default()
 	if value := gic.desc; value != nil {
-		insert.Set(groupinfo.FieldDesc, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: groupinfo.FieldDesc,
+		})
 		gi.Desc = *value
 	}
 	if value := gic.max_users; value != nil {
-		insert.Set(groupinfo.FieldMaxUsers, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: groupinfo.FieldMaxUsers,
+		})
 		gi.MaxUsers = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(groupinfo.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	gi.ID = strconv.FormatInt(id, 10)
-	if len(gic.groups) > 0 {
-		p := sql.P()
-		for eid := range gic.groups {
-			eid, err := strconv.Atoi(eid)
+	if nodes := gic.groups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			p.Or().EQ(group.FieldID, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Update(groupinfo.GroupsTable).
-			Set(groupinfo.GroupsColumn, id).
-			Where(sql.And(p, sql.IsNull(groupinfo.GroupsColumn))).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(gic.groups) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(gic.groups))})
-		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, gic.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	gi.ID = strconv.FormatInt(id, 10)
 	return gi, nil
 }

@@ -9,12 +9,12 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
@@ -69,51 +69,53 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(ftc.driver.Dialect())
-		ft      = &FileType{config: ftc.config}
+		ft   = &FileType{config: ftc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: filetype.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: filetype.FieldID,
+			},
+		}
 	)
-	tx, err := ftc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(filetype.Table).Default()
 	if value := ftc.name; value != nil {
-		insert.Set(filetype.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: filetype.FieldName,
+		})
 		ft.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(filetype.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	ft.ID = strconv.FormatInt(id, 10)
-	if len(ftc.files) > 0 {
-		p := sql.P()
-		for eid := range ftc.files {
-			eid, err := strconv.Atoi(eid)
+	if nodes := ftc.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			p.Or().EQ(file.FieldID, eid)
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		query, args := builder.Update(filetype.FilesTable).
-			Set(filetype.FilesColumn, id).
-			Where(sql.And(p, sql.IsNull(filetype.FilesColumn))).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(ftc.files) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"FileType\"", keys(ftc.files))})
-		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	ft.ID = strconv.FormatInt(id, 10)
 	return ft, nil
 }

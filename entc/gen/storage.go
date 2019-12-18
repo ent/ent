@@ -54,6 +54,7 @@ var drivers = []*Storage{
 		Imports: []string{
 			"github.com/facebookincubator/ent/dialect/sql",
 			"github.com/facebookincubator/ent/dialect/sql/sqlgraph",
+			"github.com/facebookincubator/ent/schema/field",
 		},
 		SchemaMode: Unique | Indexes | Cascade | Migrate,
 		Ops: func(f *Field) []Op {

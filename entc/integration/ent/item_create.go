@@ -10,8 +10,9 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // ItemCreate is the builder for creating a Item entity.
@@ -35,22 +36,22 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 	var (
-		builder = sql.Dialect(ic.driver.Dialect())
-		i       = &Item{config: ic.config}
+		i    = &Item{config: ic.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: item.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: item.FieldID,
+			},
+		}
 	)
-	tx, err := ic.driver.Tx(ctx)
-	if err != nil {
+	if err := sqlgraph.CreateNode(ctx, ic.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
-	insert := builder.Insert(item.Table).Default()
-
-	id, err := insertLastID(ctx, tx, insert.Returning(item.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
+	id := spec.ID.Value.(int64)
 	i.ID = strconv.FormatInt(id, 10)
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return i, nil
 }

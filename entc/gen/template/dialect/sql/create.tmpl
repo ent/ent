@@ -7,170 +7,82 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/create" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
-{{ $fields := $.Fields }}
-{{ if $.ID.UserDefined }}
-	{{ $fields = append $fields $.ID }}
-{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	var (
-		{{ with $.Edges }}res sql.Result{{ end }}
-		builder = sql.Dialect({{ $receiver }}.driver.Dialect())
 		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: {{ $.Package }}.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type: field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		}
 	)
-	tx, err := {{ $receiver }}.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert({{ $.Package }}.Table).Default()
-	{{- range $_, $f := $fields }}
-		if value := {{ $receiver }}.{{- $f.BuilderField }}; value != nil {
-			{{- if $f.IsJSON }}
-				buf, err := json.Marshal(*value)
-				if err != nil {
-					return nil, err
-				}
-				insert.Set({{ $.Package }}.{{ $f.Constant }}, buf)
-			{{- else }}
-			insert.Set({{ $.Package }}.{{ $f.Constant }}, *value)
-			{{- end }}
+	{{- if $.ID.UserDefined }}
+		if value := {{ $receiver }}.{{ $.ID.BuilderField }}; value != nil {
+			{{ $.Receiver }}.ID = *value
+			spec.ID.Value = *value
+		}
+	{{- end }}
+	{{- range $_, $f := $.Fields }}
+		if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
+			spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+				Type: field.{{ $f.Type.ConstName }},
+				Value: *value,
+				Column: {{ $.Package }}.{{ $f.Constant }},
+			})
 			{{ $.Receiver }}.{{ $f.StructField }} = {{ if not $f.Nillable }}*{{ end }}value
 		}
 	{{- end }}
-	{{/* if it's a non-numeric id defined by the user (does not have default value). */}}
-	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
-		query, args := insert.Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
-			return nil, rollback(tx, err)
-		}
-		{{- if $.Edges }}
-			id := {{ $.Receiver }}.ID
-		{{- end }}
-	{{- else }}
-		id, err := insertLastID(ctx, tx, insert.Returning({{ $.Package }}.{{ $.ID.Constant }}))
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		{{ $.Receiver }}.ID = {{ if and $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
-	{{- end }}
 	{{- range $_, $e := $.Edges }}
-		if len({{ $receiver }}.{{ $e.BuilderField }}) > 0 {
-			{{- if and $e.Unique $e.SelfRef }}{{/* O2O with self reference */}}
-				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-					{{- template "dialect/sql/create/convertid" $e -}}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-							Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
-							Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id)).Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return nil, rollback(tx, err)
-					}
-					query, args = builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-							Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
-							Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return nil, rollback(tx, err)
-					}
-					affected, err := res.RowsAffected()
-					if err != nil {
-						return nil, rollback(tx, err)
-					}
-					if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-						return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("\"{{ $e.Name }}\" (%v) already connected to a different \"{{ $.Name }}\"", eid)})
-					}
-				}
-			{{- else if $e.M2M  }}
-				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-					{{- template "dialect/sql/create/convertid" $e -}}
-					{{ $a := 0 }}{{ $b := 1 }}{{- if $e.IsInverse }}{{ $a = 1 }}{{ $b = 0 }}{{ end }}
-					query, args := builder.Insert({{ $.Package }}.{{ $e.TableConstant }}).
-							Columns({{ $.Package }}.{{ $e.PKConstant }}[{{ $a }}], {{ $.Package }}.{{ $e.PKConstant }}[{{ $b }}]).
-							Values(id, eid).
-							{{- if $e.SelfRef }}{{/* self-ref creates the edges in both ways. */}}
-								Values(eid, id).
-							{{- end }}
-							Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return nil, rollback(tx, err)
-					}
-				}
-			{{- else if $e.M2O }}
-				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-					{{- template "dialect/sql/create/convertid" $e -}}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
-						Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id)).
-						Query()
-					if err := tx.Exec(ctx, query, args, &res); err != nil {
-						return nil, rollback(tx, err)
-					}
-				}
-			{{- else if $e.O2M }}
-				p := sql.P()
-				for eid := range {{ $receiver }}.{{ $e.BuilderField }} {
-					{{- template "dialect/sql/create/convertid" $e -}}
-					p.Or().EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid)
-				}
-				query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-					Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
-					Where(sql.And(p, sql.IsNull({{ $.Package }}.{{ $e.ColumnConstant }}))).
-					Query()
-				if err := tx.Exec(ctx, query, args, &res); err != nil {
-					return nil, rollback(tx, err)
-				}
-				affected, err := res.RowsAffected()
-				if err != nil {
-					return nil, rollback(tx, err)
-				}
-				if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-					return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
-				}
-			{{- else }}{{/* O2O */}}
-				{{- if $.Type.ID.IsString }}
-					eid, err := strconv.Atoi(keys({{ $receiver }}.{{ $e.BuilderField }})[0])
+		if nodes := {{ $receiver }}.{{ $e.BuilderField }}; len(nodes) > 0 {
+			edge := &sqlgraph.EdgeSpec{
+				Rel: sqlgraph.{{ $e.Rel.Type }},
+				Inverse: {{ $e.IsInverse }},
+				Table: {{ $.Package }}.{{ $e.TableConstant }},
+				Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
+				Bidi: {{ $e.SelfRef }},
+				Target: &sqlgraph.EdgeTarget{
+					IDSpec: &sqlgraph.FieldSpec{
+						Type: field.{{ $e.Type.ID.Type.ConstName }},
+						Column: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+					},
+				},
+			}
+			for k, _ := range nodes {
+				{{- $id := $e.Type.ID -}}
+				{{- /* Convert string-ids that are stored as int in the database */ -}}
+				{{- if and (not $id.UserDefined) $id.IsString }}
+					k, err := strconv.Atoi(k)
 					if err != nil {
 						return nil, err
 					}
-				{{- else }}
-					eid := keys({{ $receiver }}.{{ $e.BuilderField }})[0]
 				{{- end }}
-				{{- if $e.IsInverse }}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-						Set({{ $.Package }}.{{ $e.ColumnConstant }}, eid).
-						Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, id).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
-						Query()
-				{{- else }}
-					query, args := builder.Update({{ $.Package }}.{{ $e.TableConstant }}).
-						Set({{ $.Package }}.{{ $e.ColumnConstant }}, id).
-						Where(sql.EQ({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, eid).And().IsNull({{ $.Package }}.{{ $e.ColumnConstant }})).
-						Query()
-				{{- end }}
-				if err := tx.Exec(ctx, query, args, &res); err != nil {
-					return nil, rollback(tx, err)
-				}
-				affected, err := res.RowsAffected()
-				if err != nil {
-					return nil, rollback(tx, err)
-				}
-				if int(affected) < len({{ $receiver }}.{{ $e.BuilderField }}) {
-					return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"{{ $e.Name }}\" %v already connected to a different \"{{ $.Name }}\"", keys({{ $receiver }}.{{ $e.BuilderField }}))})
-				}
-			{{- end }}
+				edge.Target.Nodes = append(edge.Target.Nodes, k)
+			}
+			spec.Edges = append(spec.Edges, edge)
 		}
 	{{- end }}
-	if err := tx.Commit(); err != nil {
+	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
+	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+		{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
+	{{- else }}
+		{{- if and $.ID.UserDefined }}
+			if {{ $.Receiver }}.ID == 0 {
+		{{- end }}
+			id := spec.ID.Value.(int64)
+			{{ $.Receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
+		{{- if and $.ID.UserDefined }}
+			}
+		{{- end }}
+	{{- end }}
 	return {{ $.Receiver }}, nil
 }
 
-{{ end }}
-
-{{ define "dialect/sql/create/convertid" }}
-	{{- $id := $.Type.ID }}
-	{{- if and (not $id.UserDefined) $id.IsString }}
-		eid, err := strconv.Atoi(eid)
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-	{{- end }}
 {{ end }}

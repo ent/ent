@@ -48,6 +48,13 @@ func (r Rel) String() (s string) {
 	return s
 }
 
+// A ConstraintError represents an error from mutation that violates a specific constraint.
+type ConstraintError struct {
+	msg string
+}
+
+func (e ConstraintError) Error() string { return e.msg }
+
 // A Step provides a path-step information to the traversal functions.
 type Step struct {
 	// From is the source of the step.
@@ -672,7 +679,7 @@ func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
 		return err
 	}
 	if err := c.insert(ctx, tx, insert); err != nil {
-		return fmt.Errorf("insert node to table %s: %v", c.Table, err)
+		return fmt.Errorf("insert node to table %q: %v", c.Table, err)
 	}
 	if err := c.graph.addM2MEdges(ctx, []driver.Value{c.ID.Value}, edges[M2M]); err != nil {
 		return err
@@ -849,7 +856,7 @@ func (g *graph) addFKEdges(ctx context.Context, ids []driver.Value, edges []*Edg
 			return err
 		}
 		if ids := edge.Target.Nodes; int(affected) < len(ids) {
-			return fmt.Errorf("one of %v is already connected to a different %s", ids, edge.Columns[0])
+			return &ConstraintError{msg: fmt.Sprintf("one of %v is already connected to a different %s", ids, edge.Columns[0])}
 		}
 	}
 	return nil

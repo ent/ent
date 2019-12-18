@@ -202,7 +202,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(pu.team) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(pu.team))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(pu.team))})
 			}
 		}
 	}
@@ -419,7 +419,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(puo.team) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(puo.team))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(puo.team))})
 			}
 		}
 	}

@@ -13,8 +13,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -135,59 +137,77 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(cc.driver.Dialect())
-		c       = &Card{config: cc.config}
+		c    = &Card{config: cc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: card.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: card.FieldID,
+			},
+		}
 	)
-	tx, err := cc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(card.Table).Default()
 	if value := cc.create_time; value != nil {
-		insert.Set(card.FieldCreateTime, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: card.FieldCreateTime,
+		})
 		c.CreateTime = *value
 	}
 	if value := cc.update_time; value != nil {
-		insert.Set(card.FieldUpdateTime, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: card.FieldUpdateTime,
+		})
 		c.UpdateTime = *value
 	}
 	if value := cc.number; value != nil {
-		insert.Set(card.FieldNumber, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: card.FieldNumber,
+		})
 		c.Number = *value
 	}
 	if value := cc.name; value != nil {
-		insert.Set(card.FieldName, *value)
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: card.FieldName,
+		})
 		c.Name = *value
 	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(card.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
+	if nodes := cc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: []string{card.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
-	c.ID = strconv.FormatInt(id, 10)
-	if len(cc.owner) > 0 {
-		eid, err := strconv.Atoi(keys(cc.owner)[0])
-		if err != nil {
-			return nil, err
+	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-		query, args := builder.Update(card.OwnerTable).
-			Set(card.OwnerColumn, eid).
-			Where(sql.EQ(card.FieldID, id).And().IsNull(card.OwnerColumn)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-		affected, err := res.RowsAffected()
-		if err != nil {
-			return nil, rollback(tx, err)
-		}
-		if int(affected) < len(cc.owner) {
-			return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"owner\" %v already connected to a different \"Card\"", keys(cc.owner))})
-		}
-	}
-	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+	id := spec.ID.Value.(int64)
+	c.ID = strconv.FormatInt(id, 10)
 	return c, nil
 }

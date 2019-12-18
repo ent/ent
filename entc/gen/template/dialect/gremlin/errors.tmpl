@@ -9,11 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 
 // Code implements the dsl.Node interface.
-func (e ErrConstraintFailed) Code() (string, []interface{}) {
+func (e ConstraintError) Code() (string, []interface{}) {
 	return strconv.Quote(e.prefix() + e.msg), nil
 }
 
-func (e *ErrConstraintFailed) UnmarshalGraphson(b []byte) error {
+func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 	var v [1]*string
 	if err := graphson.Unmarshal(b, &v); err != nil {
 		return err
@@ -29,21 +29,21 @@ func (e *ErrConstraintFailed) UnmarshalGraphson(b []byte) error {
 }
 
 // prefix returns the prefix used for gremlin constants.
-func (ErrConstraintFailed) prefix() string { return "Error: " }
+func (ConstraintError) prefix() string { return "Error: " }
 
 // NewErrUniqueField creates a constraint error for unique fields.
-func NewErrUniqueField(label, field string, v interface{}) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
+func NewErrUniqueField(label, field string, v interface{}) *ConstraintError {
+	return &ConstraintError{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
 }
 
 // NewErrUniqueEdge creates a constraint error for unique edges.
-func NewErrUniqueEdge(label, edge, id string) *ErrConstraintFailed {
-	return &ErrConstraintFailed{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
+func NewErrUniqueEdge(label, edge, id string) *ConstraintError {
+	return &ConstraintError{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
 }
 
 // isConstantError indicates if the given response holds a gremlin constant containing an error.
-func isConstantError(r *gremlin.Response) (*ErrConstraintFailed, bool) {
-	e := &ErrConstraintFailed{}
+func isConstantError(r *gremlin.Response) (*ConstraintError, bool) {
+	e := &ConstraintError{}
 	if err := graphson.Unmarshal(r.Result.Data, e); err != nil {
 		return nil, false
 	}

@@ -9,8 +9,10 @@ package ent
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -62,39 +64,47 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		res     sql.Result
-		builder = sql.Dialect(gc.driver.Dialect())
-		gr      = &Group{config: gc.config}
-	)
-	tx, err := gc.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	insert := builder.Insert(group.Table).Default()
-	if value := gc.id; value != nil {
-		insert.Set(group.FieldID, *value)
-		gr.ID = *value
-	}
-
-	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-	gr.ID = int(id)
-	if len(gc.users) > 0 {
-		for eid := range gc.users {
-
-			query, args := builder.Insert(group.UsersTable).
-				Columns(group.UsersPrimaryKey[0], group.UsersPrimaryKey[1]).
-				Values(id, eid).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+		gr   = &Group{config: gc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: group.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: group.FieldID,
+			},
 		}
+	)
+	if value := gc.id; value != nil {
+		gr.ID = *value
+		spec.ID.Value = *value
 	}
-	if err := tx.Commit(); err != nil {
+	if nodes := gc.users; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if err := sqlgraph.CreateNode(ctx, gc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
+	}
+	if gr.ID == 0 {
+		id := spec.ID.Value.(int64)
+		gr.ID = int(id)
 	}
 	return gr, nil
 }

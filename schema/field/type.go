@@ -96,6 +96,11 @@ func (t TypeInfo) Numeric() bool {
 	return t.Type.Numeric()
 }
 
+// ConstName returns the const name of the info type.
+func (t TypeInfo) ConstName() string {
+	return t.Type.ConstName()
+}
+
 var (
 	typeNames = [...]string{
 		TypeInvalid: "invalid",

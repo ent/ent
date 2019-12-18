@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Order applies an ordering on either graph traversal or sql selector.
@@ -126,30 +127,31 @@ func IsNotSingular(err error) bool {
 	return ok
 }
 
-// ErrConstraintFailed returns when trying to create/update one or more entities and
-// one or more of their constraints failed. For example, violation of edge or field uniqueness.
-type ErrConstraintFailed struct {
+// ConstraintError returns when trying to create/update one or more entities and
+// one or more of their constraints failed. For example, violation of edge or
+// field uniqueness.
+type ConstraintError struct {
 	msg  string
 	wrap error
 }
 
 // Error implements the error interface.
-func (e ErrConstraintFailed) Error() string {
-	return fmt.Sprintf("entv2: unique constraint failed: %s", e.msg)
+func (e ConstraintError) Error() string {
+	return fmt.Sprintf("entv2: constraint failed: %s", e.msg)
 }
 
 // Unwrap implements the errors.Wrapper interface.
-func (e *ErrConstraintFailed) Unwrap() error {
+func (e *ConstraintError) Unwrap() error {
 	return e.wrap
 }
 
-// IsConstraintFailure returns a boolean indicating whether the error is a constraint failure.
-func IsConstraintFailure(err error) bool {
-	_, ok := err.(*ErrConstraintFailed)
+// IsConstraintError returns a boolean indicating whether the error is a constraint failure.
+func IsConstraintError(err error) bool {
+	_, ok := err.(*ConstraintError)
 	return ok
 }
 
-func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
+func isSQLConstraintError(err error) (*ConstraintError, bool) {
 	var (
 		msg = err.Error()
 		// error format per dialect.
@@ -159,9 +161,12 @@ func isSQLConstraintError(err error) (*ErrConstraintFailed, bool) {
 			"duplicate key value violates unique constraint", // PostgreSQL.
 		}
 	)
+	if _, ok := err.(*sqlgraph.ConstraintError); ok {
+		return &ConstraintError{msg, err}, true
+	}
 	for i := range errors {
 		if strings.Contains(msg, errors[i]) {
-			return &ErrConstraintFailed{msg, err}, true
+			return &ConstraintError{msg, err}, true
 		}
 	}
 	return nil, false

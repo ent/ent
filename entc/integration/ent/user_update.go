@@ -694,7 +694,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.card) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"card\" %v already connected to a different \"User\"", keys(uu.card))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"card\" %v already connected to a different \"User\"", keys(uu.card))})
 			}
 		}
 	}
@@ -740,7 +740,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.pets) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"pets\" %v already connected to a different \"User\"", keys(uu.pets))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"pets\" %v already connected to a different \"User\"", keys(uu.pets))})
 			}
 		}
 	}
@@ -786,7 +786,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.files) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"User\"", keys(uu.files))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"User\"", keys(uu.files))})
 			}
 		}
 	}
@@ -984,7 +984,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.team) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"User\"", keys(uu.team))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"User\"", keys(uu.team))})
 			}
 		}
 	}
@@ -1031,7 +1031,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.spouse) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("\"spouse\" (%v) already connected to a different \"User\"", eid)})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("\"spouse\" (%v) already connected to a different \"User\"", eid)})
 			}
 		}
 	}
@@ -1077,7 +1077,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.children) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"User\"", keys(uu.children))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"User\"", keys(uu.children))})
 			}
 		}
 	}
@@ -1796,7 +1796,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.card) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"card\" %v already connected to a different \"User\"", keys(uuo.card))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"card\" %v already connected to a different \"User\"", keys(uuo.card))})
 			}
 		}
 	}
@@ -1842,7 +1842,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.pets) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"pets\" %v already connected to a different \"User\"", keys(uuo.pets))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"pets\" %v already connected to a different \"User\"", keys(uuo.pets))})
 			}
 		}
 	}
@@ -1888,7 +1888,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.files) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"User\"", keys(uuo.files))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"User\"", keys(uuo.files))})
 			}
 		}
 	}
@@ -2086,7 +2086,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.team) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"User\"", keys(uuo.team))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"User\"", keys(uuo.team))})
 			}
 		}
 	}
@@ -2133,7 +2133,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.spouse) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("\"spouse\" (%v) already connected to a different \"User\"", eid)})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("\"spouse\" (%v) already connected to a different \"User\"", eid)})
 			}
 		}
 	}
@@ -2179,7 +2179,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.children) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"User\"", keys(uuo.children))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"children\" %v already connected to a different \"User\"", keys(uuo.children))})
 			}
 		}
 	}

@@ -9,8 +9,9 @@ package entv2
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -34,22 +35,22 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		builder = sql.Dialect(gc.driver.Dialect())
-		gr      = &Group{config: gc.config}
+		gr   = &Group{config: gc.config}
+		spec = &sqlgraph.CreateSpec{
+			Table: group.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: group.FieldID,
+			},
+		}
 	)
-	tx, err := gc.driver.Tx(ctx)
-	if err != nil {
+	if err := sqlgraph.CreateNode(ctx, gc.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
-	insert := builder.Insert(group.Table).Default()
-
-	id, err := insertLastID(ctx, tx, insert.Returning(group.FieldID))
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
+	id := spec.ID.Value.(int64)
 	gr.ID = int(id)
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return gr, nil
 }

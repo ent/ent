@@ -424,7 +424,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(gu.files) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"Group\"", keys(gu.files))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"Group\"", keys(gu.files))})
 			}
 		}
 	}
@@ -470,7 +470,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(gu.blocked) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"blocked\" %v already connected to a different \"Group\"", keys(gu.blocked))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"blocked\" %v already connected to a different \"Group\"", keys(gu.blocked))})
 			}
 		}
 	}
@@ -954,7 +954,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(guo.files) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"Group\"", keys(guo.files))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"Group\"", keys(guo.files))})
 			}
 		}
 	}
@@ -1000,7 +1000,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(guo.blocked) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"blocked\" %v already connected to a different \"Group\"", keys(guo.blocked))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"blocked\" %v already connected to a different \"Group\"", keys(guo.blocked))})
 			}
 		}
 	}

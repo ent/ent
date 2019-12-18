@@ -261,7 +261,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(uu.cars) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"cars\" %v already connected to a different \"User\"", keys(uu.cars))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"cars\" %v already connected to a different \"User\"", keys(uu.cars))})
 			}
 		}
 	}
@@ -546,7 +546,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(uuo.cars) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"cars\" %v already connected to a different \"User\"", keys(uuo.cars))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"cars\" %v already connected to a different \"User\"", keys(uuo.cars))})
 			}
 		}
 	}

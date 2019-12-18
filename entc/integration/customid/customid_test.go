@@ -26,7 +26,7 @@ func TestCustomID(t *testing.T) {
 	nat := client.User.Create().SaveX(ctx)
 	require.Equal(t, 1, nat.ID)
 	_, err = client.User.Create().SetID(1).Save(ctx)
-	require.True(t, ent.IsConstraintFailure(err), "duplicate id")
+	require.True(t, ent.IsConstraintError(err), "duplicate id")
 	a8m := client.User.Create().SetID(5).SaveX(ctx)
 	require.Equal(t, 5, a8m.ID)
 

@@ -181,7 +181,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				return 0, rollback(tx, err)
 			}
 			if int(affected) < len(cu.streets) {
-				return 0, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"streets\" %v already connected to a different \"City\"", keys(cu.streets))})
+				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"streets\" %v already connected to a different \"City\"", keys(cu.streets))})
 			}
 		}
 	}
@@ -354,7 +354,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 				return nil, rollback(tx, err)
 			}
 			if int(affected) < len(cuo.streets) {
-				return nil, rollback(tx, &ErrConstraintFailed{msg: fmt.Sprintf("one of \"streets\" %v already connected to a different \"City\"", keys(cuo.streets))})
+				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"streets\" %v already connected to a different \"City\"", keys(cuo.streets))})
 			}
 		}
 	}
