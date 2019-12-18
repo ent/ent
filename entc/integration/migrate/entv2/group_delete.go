@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
@@ -41,23 +43,23 @@ func (gd *GroupDelete) ExecX(ctx context.Context) int {
 }
 
 func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(gd.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(group.Table))
-	for _, p := range gd.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: group.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: group.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(group.Table).FromSelect(selector).Query()
-	if err := gd.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := gd.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, gd.driver, spec)
 }
 
 // GroupDeleteOne is the builder for deleting a single Group entity.

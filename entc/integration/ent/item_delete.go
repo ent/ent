@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // ItemDelete is the builder for deleting a Item entity.
@@ -41,23 +43,23 @@ func (id *ItemDelete) ExecX(ctx context.Context) int {
 }
 
 func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(id.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(item.Table))
-	for _, p := range id.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: item.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: item.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(item.Table).FromSelect(selector).Query()
-	if err := id.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := id.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, id.driver, spec)
 }
 
 // ItemDeleteOne is the builder for deleting a single Item entity.

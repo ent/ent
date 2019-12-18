@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserDelete is the builder for deleting a User entity.
@@ -41,23 +43,23 @@ func (ud *UserDelete) ExecX(ctx context.Context) int {
 }
 
 func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(ud.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(user.Table))
-	for _, p := range ud.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: user.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(user.Table).FromSelect(selector).Query()
-	if err := ud.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := ud.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, ud.driver, spec)
 }
 
 // UserDeleteOne is the builder for deleting a single User entity.

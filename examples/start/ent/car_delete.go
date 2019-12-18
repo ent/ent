@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/start/ent/car"
 	"github.com/facebookincubator/ent/examples/start/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CarDelete is the builder for deleting a Car entity.
@@ -41,23 +43,23 @@ func (cd *CarDelete) ExecX(ctx context.Context) int {
 }
 
 func (cd *CarDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(cd.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(car.Table))
-	for _, p := range cd.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: car.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: car.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(car.Table).FromSelect(selector).Query()
-	if err := cd.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := cd.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, cd.driver, spec)
 }
 
 // CarDeleteOne is the builder for deleting a single Car entity.

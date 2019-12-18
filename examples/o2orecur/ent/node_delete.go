@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/node"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // NodeDelete is the builder for deleting a Node entity.
@@ -41,23 +43,23 @@ func (nd *NodeDelete) ExecX(ctx context.Context) int {
 }
 
 func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(nd.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(node.Table))
-	for _, p := range nd.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: node.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: node.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(node.Table).FromSelect(selector).Query()
-	if err := nd.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := nd.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, nd.driver, spec)
 }
 
 // NodeDeleteOne is the builder for deleting a single Node entity.

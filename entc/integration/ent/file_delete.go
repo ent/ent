@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FileDelete is the builder for deleting a File entity.
@@ -41,23 +43,23 @@ func (fd *FileDelete) ExecX(ctx context.Context) int {
 }
 
 func (fd *FileDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(fd.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(file.Table))
-	for _, p := range fd.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: file.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: file.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(file.Table).FromSelect(selector).Query()
-	if err := fd.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := fd.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, fd.driver, spec)
 }
 
 // FileDeleteOne is the builder for deleting a single File entity.

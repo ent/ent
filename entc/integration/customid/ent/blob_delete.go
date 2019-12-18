@@ -10,8 +10,10 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // BlobDelete is the builder for deleting a Blob entity.
@@ -41,23 +43,23 @@ func (bd *BlobDelete) ExecX(ctx context.Context) int {
 }
 
 func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
-	var (
-		res     sql.Result
-		builder = sql.Dialect(bd.driver.Dialect())
-	)
-	selector := builder.Select().From(sql.Table(blob.Table))
-	for _, p := range bd.predicates {
-		p(selector)
+	spec := &sqlgraph.DeleteSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: blob.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: blob.FieldID,
+			},
+		},
 	}
-	query, args := builder.Delete(blob.Table).FromSelect(selector).Query()
-	if err := bd.driver.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+	if ps := bd.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	return int(affected), nil
+	return sqlgraph.DeleteNodes(ctx, bd.driver, spec)
 }
 
 // BlobDeleteOne is the builder for deleting a single Blob entity.
