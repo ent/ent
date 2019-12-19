@@ -163,7 +163,7 @@ func (c *Client) Noder(ctx context.Context, id int) (Noder, error) {
 		return nil, err
 	}
 	idx := id / (1<<32 - 1)
-	if idx < 0 && idx >= len(tables) {
+	if idx < 0 || idx >= len(tables) {
 		return nil, fmt.Errorf("cannot resolve table from id %v: %w", id, &ErrNotFound{"invalid/unknown"})
 	}
 	return c.noder(ctx, tables[idx], id)
