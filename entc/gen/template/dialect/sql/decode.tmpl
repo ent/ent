@@ -44,7 +44,75 @@ func ({{ $receiver }} *{{ $.Name }}) FromRows(rows *sql.Rows) error {
 	{{- end }}
 	return nil
 }
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*{{ $.Name }}) scanValues() []interface{} {
+	return []interface{} {
+		&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{},
+		{{- range $_, $f := $.Fields }}
+			&{{ $f.NullType }}{},
+		{{- end }}
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the {{ $.Name }} fields.
+func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
+		if m, n := len(values), len({{ $.Package }}.Columns); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+			{{- with extend $ "Idx" 0 "Field" $.ID "Rec" $receiver }}
+				{{ template "dialect/sql/decode/field" . }}
+			{{- end }}
+		{{- else }}
+			value, ok := values[0].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $.ID.Type }}(value.Int64){{ end }}
+		{{- end }}
+		values = values[1:]
+		{{- range $i, $f := $.Fields }}
+			{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver }}
+				{{ template "dialect/sql/decode/field" . }}
+			{{- end }}
+		{{- end }}
+		return nil
+}
 {{ end }}
+
+{{ define "dialect/sql/decode/field" }}
+	{{- $i := $.Scope.Idx -}}
+	{{- $f := $.Scope.Field -}}
+	{{- $ret := $.Scope.Rec -}}
+	{{- if $f.IsJSON }}
+		if value, ok := values[{{ $i }}].(*{{ $f.NullType }}); !ok {
+			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
+		} else if value != nil && len(*value) > 0 {
+			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $f.StructField }}); err != nil {
+				return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
+			}
+		}
+	{{- else }}
+		{{- $nulltype := $f.NullType -}}
+		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
+			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
+		{{- if hasPrefix $nulltype "sql" }}
+			} else if value.Valid {
+				{{- if $f.Nillable }}
+					{{ $ret }}.{{ $f.StructField }} = new({{ $f.Type }})
+					*{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
+				{{- else }}
+					{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
+				{{- end }}
+		{{- else }}
+			} else if value != nil {
+				{{ $ret }}.{{ $f.StructField }} = *value
+		{{- end }}
+		}
+	{{- end }}
+{{- end }}
 
 {{ define "dialect/sql/decode/many" }}
 {{ $receiver := $.Receiver }}

@@ -8,8 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -372,40 +370,8 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		})
 	}
 	c = &Comment{config: cuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullFloat64{},
-		&sql.NullInt64{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		c.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field unique_int", values[0])
-		} else if value.Valid {
-			c.UniqueInt = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullFloat64); !ok {
-			return fmt.Errorf("unexpected type %T for field unique_float", values[1])
-		} else if value.Valid {
-			c.UniqueFloat = value.Float64
-		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field nillable_int", values[2])
-		} else if value.Valid {
-			c.NillableInt = new(int)
-			*c.NillableInt = int(value.Int64)
-		}
-		return nil
-	}
+	spec.Assign = c.assignValues
+	spec.ScanValues = c.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

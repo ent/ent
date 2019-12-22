@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -417,33 +416,8 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	gi = &GroupInfo{config: giuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullInt64{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		gi.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field desc", values[0])
-		} else if value.Valid {
-			gi.Desc = value.String
-		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field max_users", values[1])
-		} else if value.Valid {
-			gi.MaxUsers = int(value.Int64)
-		}
-		return nil
-	}
+	spec.Assign = gi.assignValues
+	spec.ScanValues = gi.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, giuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

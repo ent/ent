@@ -13,8 +13,10 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FieldTypeQuery is the builder for querying FieldType entities.
@@ -264,45 +266,31 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 }
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
-	rows := &sql.Rows{}
-	selector := ftq.sqlQuery()
-	if unique := ftq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*FieldType
+		spec  = ftq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &FieldType{config: ftq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := ftq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, ftq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var fts FieldTypes
-	if err := fts.FromRows(rows); err != nil {
-		return nil, err
-	}
-	fts.config(ftq.config)
-	return fts, nil
+	return nodes, nil
 }
 
 func (ftq *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := ftq.sqlQuery()
-	unique := []string{fieldtype.FieldID}
-	if len(ftq.unique) > 0 {
-		unique = ftq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := ftq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := ftq.querySpec()
+	return sqlgraph.CountNodes(ctx, ftq.driver, spec)
 }
 
 func (ftq *FieldTypeQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -311,6 +299,42 @@ func (ftq *FieldTypeQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   fieldtype.Table,
+			Columns: fieldtype.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: fieldtype.FieldID,
+			},
+		},
+		From:   ftq.sql,
+		Unique: true,
+	}
+	if ps := ftq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := ftq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := ftq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := ftq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
@@ -584,7 +608,7 @@ func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (fts *FieldTypeSelect) sqlQuery() sql.Querier {
-	view := "fieldtype_view"
-	return sql.Dialect(fts.driver.Dialect()).
-		Select(fts.fields...).From(fts.sql.As(view))
+	selector := fts.sql
+	selector.Select(selector.Columns(fts.fields...)...)
+	return selector
 }

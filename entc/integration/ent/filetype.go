@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 )
 
 // FileType is the model entity for the FileType schema.
@@ -38,6 +39,34 @@ func (ft *FileType) FromRows(rows *sql.Rows) error {
 	}
 	ft.ID = strconv.Itoa(scanft.ID)
 	ft.Name = scanft.Name.String
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*FileType) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the FileType fields.
+func (ft *FileType) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(filetype.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	ft.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[0])
+	} else if value.Valid {
+		ft.Name = value.String
+	}
 	return nil
 }
 

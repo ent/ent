@@ -13,8 +13,10 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CommentQuery is the builder for querying Comment entities.
@@ -264,45 +266,31 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 }
 
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	if unique := cq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Comment
+		spec  = cq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Comment{config: cq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var cs Comments
-	if err := cs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	cs.config(cq.config)
-	return cs, nil
+	return nodes, nil
 }
 
 func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	unique := []string{comment.FieldID}
-	if len(cq.unique) > 0 {
-		unique = cq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := cq.querySpec()
+	return sqlgraph.CountNodes(ctx, cq.driver, spec)
 }
 
 func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -311,6 +299,42 @@ func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   comment.Table,
+			Columns: comment.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: comment.FieldID,
+			},
+		},
+		From:   cq.sql,
+		Unique: true,
+	}
+	if ps := cq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := cq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := cq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := cq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (cq *CommentQuery) sqlQuery() *sql.Selector {
@@ -584,7 +608,7 @@ func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (cs *CommentSelect) sqlQuery() sql.Querier {
-	view := "comment_view"
-	return sql.Dialect(cs.driver.Dialect()).
-		Select(cs.fields...).From(cs.sql.As(view))
+	selector := cs.sql
+	selector.Select(selector.Columns(cs.fields...)...)
+	return selector
 }

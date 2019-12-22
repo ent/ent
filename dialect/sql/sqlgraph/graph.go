@@ -369,8 +369,8 @@ type (
 		Fields    FieldMut
 		Predicate func(*sql.Selector)
 
-		ScanTypes []interface{}
-		Assign    func(...interface{}) error
+		ScanValues []interface{}
+		Assign     func(...interface{}) error
 	}
 )
 
@@ -492,10 +492,11 @@ func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 
 func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	rows := &sql.Rows{}
-	selector := q.selector().Count(q.Node.ID.Column)
+	selector := q.selector()
+	selector.Count(selector.C(q.Node.ID.Column))
 	if q.Unique {
 		selector.SetDistinct(false)
-		selector.Count(sql.Distinct(q.Node.ID.Column))
+		selector.Count(sql.Distinct(selector.C(q.Node.ID.Column)))
 	}
 	query, args := selector.Query()
 	if err := drv.Query(ctx, query, args, rows); err != nil {
@@ -510,7 +511,7 @@ func (q *query) selector() *sql.Selector {
 	if q.From != nil {
 		selector = q.From
 	}
-	selector.Select(q.Node.Columns...)
+	selector.Select(selector.Columns(q.Node.Columns...)...)
 	if pred := q.Predicate; pred != nil {
 		pred(selector)
 	}
@@ -671,10 +672,10 @@ func (u *updater) scan(rows *sql.Rows) error {
 	if !rows.Next() {
 		return fmt.Errorf("record with id %v not found in table %s", u.Node.ID.Value, u.Node.Table)
 	}
-	if err := rows.Scan(u.ScanTypes...); err != nil {
+	if err := rows.Scan(u.ScanValues...); err != nil {
 		return fmt.Errorf("failed scanning rows: %v", err)
 	}
-	return u.Assign(u.ScanTypes...)
+	return u.Assign(u.ScanValues...)
 }
 
 type creator struct {

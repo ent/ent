@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/item"
 )
 
 // Item is the model entity for the Item schema.
@@ -33,6 +34,28 @@ func (i *Item) FromRows(rows *sql.Rows) error {
 		return err
 	}
 	i.ID = strconv.Itoa(scani.ID)
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Item) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Item fields.
+func (i *Item) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(item.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	i.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
 	return nil
 }
 

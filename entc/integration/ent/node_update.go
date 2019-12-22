@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -529,27 +528,8 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	n = &Node{config: nuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		n.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field value", values[0])
-		} else if value.Valid {
-			n.Value = int(value.Int64)
-		}
-		return nil
-	}
+	spec.Assign = n.assignValues
+	spec.ScanValues = n.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

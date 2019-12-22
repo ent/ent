@@ -10,46 +10,31 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
-	rows := &sql.Rows{}
-	selector := {{ $receiver }}.sqlQuery()
-	if unique := {{ $receiver }}.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*{{ $.Name }}
+		spec = {{ $receiver }}.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &{{ $.Name }}{config: {{ $receiver }}.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	{{- $ret := plural $.Receiver }}
-	var {{ $ret }} {{ plural $.Name  }}
-	if err := {{ $ret }}.FromRows(rows); err != nil {
-		return nil, err
-	}
-	{{ $ret }}.config({{ $receiver }}.config)
-	return {{ $ret }}, nil
+	return nodes, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := {{ $receiver }}.sqlQuery()
-	unique := []string{ {{ $.Package }}.{{ $.ID.Constant }} }
-	if len({{ $receiver }}.unique) > 0 {
-		unique = {{ $receiver }}.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("{{ $pkg }}: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("{{ $pkg }}: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := {{ $receiver }}.querySpec()
+	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, spec)
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
@@ -58,6 +43,42 @@ func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, erro
 		return false, fmt.Errorf("{{ $pkg }}: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: {{ $.Package }}.Table,
+			Columns: {{ $.Package }}.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type: field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		},
+		From: {{ $receiver }}.sql,
+		Unique: true,
+	}
+	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := {{ $receiver }}.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := {{ $receiver }}.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := {{ $receiver }}.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {

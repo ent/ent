@@ -387,45 +387,8 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	c = &Card{config: cuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullTime{},
-		&sql.NullTime{},
-		&sql.NullString{},
-		&sql.NullString{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		c.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullTime); !ok {
-			return fmt.Errorf("unexpected type %T for field create_time", values[0])
-		} else if value.Valid {
-			c.CreateTime = value.Time
-		}
-		if value, ok := values[1].(*sql.NullTime); !ok {
-			return fmt.Errorf("unexpected type %T for field update_time", values[1])
-		} else if value.Valid {
-			c.UpdateTime = value.Time
-		}
-		if value, ok := values[2].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field number", values[2])
-		} else if value.Valid {
-			c.Number = value.String
-		}
-		if value, ok := values[3].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field name", values[3])
-		} else if value.Valid {
-			c.Name = value.String
-		}
-		return nil
-	}
+	spec.Assign = c.assignValues
+	spec.ScanValues = c.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

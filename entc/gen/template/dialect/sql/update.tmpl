@@ -88,35 +88,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- end }}
 	{{- if $one }}
 		{{ $ret }} = &{{ $.Name }}{config: {{ $receiver }}.config}
-		spec.ScanTypes = []interface{} {
-			&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{},
-			{{- range $_, $f := $.Fields }}
-				&{{ $f.NullType }}{},
-			{{- end }}
-		}
-		spec.Assign = func(values ...interface{}) error {
-			if m, n := len(values), len(spec.ScanTypes); m != n {
-				return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-			}
-			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
-				{{- with extend $ "Idx" 0 "Field" $.ID "Ret" $ret }}
-					{{ template "dialect/sql/assignfield" . }}
-				{{- end }}
-			{{- else }}
-				value, ok := values[0].(*sql.NullInt64)
-				if !ok {
-					return fmt.Errorf("unexpected type %T for field id", value)
-				}
-				{{ $ret }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $.ID.Type }}(value.Int64){{ end }}
-			{{- end }}
-			values = values[1:]
-			{{- range $i, $f := $.Fields }}
-				{{- with extend $ "Idx" $i "Field" $f "Ret" $ret }}
-					{{ template "dialect/sql/assignfield" . }}
-				{{- end }}
-			{{- end }}
-			return nil
-		}
+		spec.Assign = {{ $ret }}.assignValues
+		spec.ScanValues = {{ $ret }}.scanValues()
 	{{- end }}
 	{{- if $one }}
 		if err = sqlgraph.UpdateNode(ctx, {{ $receiver }}.driver, spec); err != nil {
@@ -158,38 +131,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				}
 			{{- end }}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-	{{- end }}
-{{- end }}
-
-{{ define "dialect/sql/assignfield" }}
-	{{- $i := $.Scope.Idx -}}
-	{{- $f := $.Scope.Field -}}
-	{{- $ret := $.Scope.Ret -}}
-	{{- if $f.IsJSON }}
-		if value, ok := values[{{ $i }}].(*{{ $f.NullType }}); !ok {
-			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
-		} else if value != nil && len(*value) > 0 {
-			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $f.StructField }}); err != nil {
-				return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
-			}
-		}
-	{{- else }}
-		{{- $nulltype := $f.NullType -}}
-		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
-			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
-		{{- if hasPrefix $nulltype "sql" }}
-			} else if value.Valid {
-				{{- if $f.Nillable }}
-					{{ $ret }}.{{ $f.StructField }} = new({{ $f.Type }})
-					*{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
-				{{- else }}
-					{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
-				{{- end }}
-		{{- else }}
-			} else if value != nil {
-				{{ $ret }}.{{ $f.StructField }} = *value
-		{{- end }}
 		}
 	{{- end }}
 {{- end }}

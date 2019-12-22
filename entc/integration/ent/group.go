@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/group"
 )
 
 // Group is the model entity for the Group schema.
@@ -62,6 +63,59 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 	}
 	gr.MaxUsers = int(scangr.MaxUsers.Int64)
 	gr.Name = scangr.Name.String
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Group) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullBool{},
+		&sql.NullTime{},
+		&sql.NullString{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Group fields.
+func (gr *Group) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(group.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	gr.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field active", values[0])
+	} else if value.Valid {
+		gr.Active = value.Bool
+	}
+	if value, ok := values[1].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field expire", values[1])
+	} else if value.Valid {
+		gr.Expire = value.Time
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field type", values[2])
+	} else if value.Valid {
+		gr.Type = new(string)
+		*gr.Type = value.String
+	}
+	if value, ok := values[3].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field max_users", values[3])
+	} else if value.Valid {
+		gr.MaxUsers = int(value.Int64)
+	}
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[4])
+	} else if value.Valid {
+		gr.Name = value.String
+	}
 	return nil
 }
 

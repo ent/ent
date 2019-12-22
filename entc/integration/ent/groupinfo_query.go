@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupInfoQuery is the builder for querying GroupInfo entities.
@@ -278,45 +279,31 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 }
 
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
-	rows := &sql.Rows{}
-	selector := giq.sqlQuery()
-	if unique := giq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*GroupInfo
+		spec  = giq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &GroupInfo{config: giq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := giq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, giq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var gis GroupInfos
-	if err := gis.FromRows(rows); err != nil {
-		return nil, err
-	}
-	gis.config(giq.config)
-	return gis, nil
+	return nodes, nil
 }
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := giq.sqlQuery()
-	unique := []string{groupinfo.FieldID}
-	if len(giq.unique) > 0 {
-		unique = giq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := giq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := giq.querySpec()
+	return sqlgraph.CountNodes(ctx, giq.driver, spec)
 }
 
 func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -325,6 +312,42 @@ func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   groupinfo.Table,
+			Columns: groupinfo.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: groupinfo.FieldID,
+			},
+		},
+		From:   giq.sql,
+		Unique: true,
+	}
+	if ps := giq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := giq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := giq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := giq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
@@ -598,7 +621,7 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
-	view := "groupinfo_view"
-	return sql.Dialect(gis.driver.Dialect()).
-		Select(gis.fields...).From(gis.sql.As(view))
+	selector := gis.sql
+	selector.Select(selector.Columns(gis.fields...)...)
+	return selector
 }

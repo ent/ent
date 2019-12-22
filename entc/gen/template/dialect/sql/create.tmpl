@@ -37,30 +37,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
 		if nodes := {{ $receiver }}.{{ $e.BuilderField }}; len(nodes) > 0 {
-			edge := &sqlgraph.EdgeSpec{
-				Rel: sqlgraph.{{ $e.Rel.Type }},
-				Inverse: {{ $e.IsInverse }},
-				Table: {{ $.Package }}.{{ $e.TableConstant }},
-				Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
-				Bidi: {{ $e.SelfRef }},
-				Target: &sqlgraph.EdgeTarget{
-					IDSpec: &sqlgraph.FieldSpec{
-						Type: field.{{ $e.Type.ID.Type.ConstName }},
-						Column: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
-					},
-				},
-			}
-			for k, _ := range nodes {
-				{{- $id := $e.Type.ID -}}
-				{{- /* Convert string-ids that are stored as int in the database */ -}}
-				{{- if and (not $id.UserDefined) $id.IsString }}
-					k, err := strconv.Atoi(k)
-					if err != nil {
-						return nil, err
-					}
-				{{- end }}
-				edge.Target.Nodes = append(edge.Target.Nodes, k)
-			}
+			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
+				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
+			{{- end }}
 			spec.Edges = append(spec.Edges, edge)
 		}
 	{{- end }}

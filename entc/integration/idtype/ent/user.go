@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/idtype/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -37,6 +38,34 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	}
 	u.ID = scanu.ID
 	u.Name = scanu.Name.String
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*User) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the User fields.
+func (u *User) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(user.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	u.ID = uint64(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[0])
+	} else if value.Valid {
+		u.Name = value.String
+	}
 	return nil
 }
 

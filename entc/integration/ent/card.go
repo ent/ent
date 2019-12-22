@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/card"
 )
 
 // Card is the model entity for the Card schema.
@@ -57,6 +58,52 @@ func (c *Card) FromRows(rows *sql.Rows) error {
 	c.UpdateTime = scanc.UpdateTime.Time
 	c.Number = scanc.Number.String
 	c.Name = scanc.Name.String
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Card) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullTime{},
+		&sql.NullTime{},
+		&sql.NullString{},
+		&sql.NullString{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Card fields.
+func (c *Card) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(card.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	c.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field create_time", values[0])
+	} else if value.Valid {
+		c.CreateTime = value.Time
+	}
+	if value, ok := values[1].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field update_time", values[1])
+	} else if value.Valid {
+		c.UpdateTime = value.Time
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field number", values[2])
+	} else if value.Valid {
+		c.Number = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[3])
+	} else if value.Valid {
+		c.Name = value.String
+	}
 	return nil
 }
 

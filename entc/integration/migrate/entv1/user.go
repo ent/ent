@@ -71,6 +71,70 @@ func (u *User) FromRows(rows *sql.Rows) error {
 	return nil
 }
 
+// scanValues returns the types for scanning values from sql.Rows.
+func (*User) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&[]byte{},
+		&sql.NullString{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the User fields.
+func (u *User) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(user.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	u.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[0])
+	} else if value.Valid {
+		u.Age = int32(value.Int64)
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[1])
+	} else if value.Valid {
+		u.Name = value.String
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field nickname", values[2])
+	} else if value.Valid {
+		u.Nickname = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field address", values[3])
+	} else if value.Valid {
+		u.Address = value.String
+	}
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field renamed", values[4])
+	} else if value.Valid {
+		u.Renamed = value.String
+	}
+	if value, ok := values[5].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field blob", values[5])
+	} else if value != nil {
+		u.Blob = *value
+	}
+	if value, ok := values[6].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field state", values[6])
+	} else if value.Valid {
+		u.State = user.State(value.String)
+	}
+	return nil
+}
+
 // Update returns a builder for updating this User.
 // Note that, you need to call User.Unwrap() before calling this method, if this User
 // was returned from a transaction, and the transaction was committed or rolled back.

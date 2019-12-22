@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -335,27 +334,8 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	ft = &FileType{config: ftuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		ft.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field name", values[0])
-		} else if value.Valid {
-			ft.Name = value.String
-		}
-		return nil
-	}
+	spec.Assign = ft.assignValues
+	spec.ScanValues = ft.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

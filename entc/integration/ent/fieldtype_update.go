@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -1762,128 +1761,8 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		})
 	}
 	ft = &FieldType{config: ftuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		ft.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field int", values[0])
-		} else if value.Valid {
-			ft.Int = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field int8", values[1])
-		} else if value.Valid {
-			ft.Int8 = int8(value.Int64)
-		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field int16", values[2])
-		} else if value.Valid {
-			ft.Int16 = int16(value.Int64)
-		}
-		if value, ok := values[3].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field int32", values[3])
-		} else if value.Valid {
-			ft.Int32 = int32(value.Int64)
-		}
-		if value, ok := values[4].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field int64", values[4])
-		} else if value.Valid {
-			ft.Int64 = value.Int64
-		}
-		if value, ok := values[5].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field optional_int", values[5])
-		} else if value.Valid {
-			ft.OptionalInt = int(value.Int64)
-		}
-		if value, ok := values[6].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field optional_int8", values[6])
-		} else if value.Valid {
-			ft.OptionalInt8 = int8(value.Int64)
-		}
-		if value, ok := values[7].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field optional_int16", values[7])
-		} else if value.Valid {
-			ft.OptionalInt16 = int16(value.Int64)
-		}
-		if value, ok := values[8].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field optional_int32", values[8])
-		} else if value.Valid {
-			ft.OptionalInt32 = int32(value.Int64)
-		}
-		if value, ok := values[9].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field optional_int64", values[9])
-		} else if value.Valid {
-			ft.OptionalInt64 = value.Int64
-		}
-		if value, ok := values[10].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field nillable_int", values[10])
-		} else if value.Valid {
-			ft.NillableInt = new(int)
-			*ft.NillableInt = int(value.Int64)
-		}
-		if value, ok := values[11].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field nillable_int8", values[11])
-		} else if value.Valid {
-			ft.NillableInt8 = new(int8)
-			*ft.NillableInt8 = int8(value.Int64)
-		}
-		if value, ok := values[12].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field nillable_int16", values[12])
-		} else if value.Valid {
-			ft.NillableInt16 = new(int16)
-			*ft.NillableInt16 = int16(value.Int64)
-		}
-		if value, ok := values[13].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field nillable_int32", values[13])
-		} else if value.Valid {
-			ft.NillableInt32 = new(int32)
-			*ft.NillableInt32 = int32(value.Int64)
-		}
-		if value, ok := values[14].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field nillable_int64", values[14])
-		} else if value.Valid {
-			ft.NillableInt64 = new(int64)
-			*ft.NillableInt64 = value.Int64
-		}
-		if value, ok := values[15].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field validate_optional_int32", values[15])
-		} else if value.Valid {
-			ft.ValidateOptionalInt32 = int32(value.Int64)
-		}
-		if value, ok := values[16].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field state", values[16])
-		} else if value.Valid {
-			ft.State = fieldtype.State(value.String)
-		}
-		return nil
-	}
+	spec.Assign = ft.assignValues
+	spec.ScanValues = ft.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

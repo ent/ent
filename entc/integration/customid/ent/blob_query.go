@@ -13,8 +13,10 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -265,45 +267,31 @@ func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
 }
 
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
-	rows := &sql.Rows{}
-	selector := bq.sqlQuery()
-	if unique := bq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Blob
+		spec  = bq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Blob{config: bq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := bq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, bq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var bs Blobs
-	if err := bs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	bs.config(bq.config)
-	return bs, nil
+	return nodes, nil
 }
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := bq.sqlQuery()
-	unique := []string{blob.FieldID}
-	if len(bq.unique) > 0 {
-		unique = bq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := bq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := bq.querySpec()
+	return sqlgraph.CountNodes(ctx, bq.driver, spec)
 }
 
 func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -312,6 +300,42 @@ func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   blob.Table,
+			Columns: blob.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: blob.FieldID,
+			},
+		},
+		From:   bq.sql,
+		Unique: true,
+	}
+	if ps := bq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := bq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := bq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := bq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (bq *BlobQuery) sqlQuery() *sql.Selector {
@@ -585,7 +609,7 @@ func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (bs *BlobSelect) sqlQuery() sql.Querier {
-	view := "blob_view"
-	return sql.Dialect(bs.driver.Dialect()).
-		Select(bs.fields...).From(bs.sql.As(view))
+	selector := bs.sql
+	selector.Select(selector.Columns(bs.fields...)...)
+	return selector
 }

@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 )
 
 // GroupInfo is the model entity for the GroupInfo schema.
@@ -43,6 +44,40 @@ func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
 	gi.ID = strconv.Itoa(scangi.ID)
 	gi.Desc = scangi.Desc.String
 	gi.MaxUsers = int(scangi.MaxUsers.Int64)
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*GroupInfo) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullInt64{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the GroupInfo fields.
+func (gi *GroupInfo) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(groupinfo.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	gi.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field desc", values[0])
+	} else if value.Valid {
+		gi.Desc = value.String
+	}
+	if value, ok := values[1].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field max_users", values[1])
+	} else if value.Valid {
+		gi.MaxUsers = int(value.Int64)
+	}
 	return nil
 }
 

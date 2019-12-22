@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/node"
 )
 
 // Node is the model entity for the Node schema.
@@ -38,6 +39,34 @@ func (n *Node) FromRows(rows *sql.Rows) error {
 	}
 	n.ID = strconv.Itoa(scann.ID)
 	n.Value = int(scann.Value.Int64)
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Node) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Node fields.
+func (n *Node) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(node.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	n.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field value", values[0])
+	} else if value.Valid {
+		n.Value = int(value.Int64)
+	}
 	return nil
 }
 
