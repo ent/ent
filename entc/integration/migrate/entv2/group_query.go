@@ -13,8 +13,10 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupQuery is the builder for querying Group entities.
@@ -259,26 +261,41 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 }
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := gq.sqlQuery()
-	unique := []string{group.FieldID}
-	if len(gq.unique) > 0 {
-		unique = gq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: group.Table,
+			Columns: []string{
+				group.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: group.FieldID,
+			},
+		},
+		From:   gq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := gq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := gq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("entv2: no rows found")
+	if limit := gq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("entv2: failed reading count: %v", err)
+	if offset := gq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := gq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, gq.driver, spec)
 }
 
 func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {

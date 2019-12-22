@@ -16,6 +16,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // NodeQuery is the builder for querying Node entities.
@@ -308,26 +309,41 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 }
 
 func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := nq.sqlQuery()
-	unique := []string{node.FieldID}
-	if len(nq.unique) > 0 {
-		unique = nq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: node.Table,
+			Columns: []string{
+				node.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: node.FieldID,
+			},
+		},
+		From:   nq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := nq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := nq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
+	if limit := nq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
+	if offset := nq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := nq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, nq.driver, spec)
 }
 
 func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {

@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupInfoQuery is the builder for querying GroupInfo entities.
@@ -297,26 +298,41 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 }
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := giq.sqlQuery()
-	unique := []string{groupinfo.FieldID}
-	if len(giq.unique) > 0 {
-		unique = giq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: groupinfo.Table,
+			Columns: []string{
+				groupinfo.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: groupinfo.FieldID,
+			},
+		},
+		From:   giq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := giq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := giq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
+	if limit := giq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
+	if offset := giq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := giq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, giq.driver, spec)
 }
 
 func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {

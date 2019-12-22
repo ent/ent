@@ -13,8 +13,10 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetQuery is the builder for querying Pet entities.
@@ -259,26 +261,41 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 }
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := pq.sqlQuery()
-	unique := []string{pet.FieldID}
-	if len(pq.unique) > 0 {
-		unique = pq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: pet.Table,
+			Columns: []string{
+				pet.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: pet.FieldID,
+			},
+		},
+		From:   pq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := pq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := pq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("entv2: no rows found")
+	if limit := pq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("entv2: failed reading count: %v", err)
+	if offset := pq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := pq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, pq.driver, spec)
 }
 
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {

@@ -30,26 +30,41 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := {{ $receiver }}.sqlQuery()
-	unique := []string{ {{ $.Package }}.{{ $.ID.Constant }} }
-	if len({{ $receiver }}.unique) > 0 {
-		unique = {{ $receiver }}.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: {{ $.Package }}.Table,
+			Columns: []string{
+				{{ $.Package }}.{{ $.ID.Constant }},
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type: field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		},
+		From: {{ $receiver }}.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("{{ $pkg }}: no rows found")
+	if limit := {{ $receiver }}.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("{{ $pkg }}: failed reading count: %v", err)
+	if offset := {{ $receiver }}.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := {{ $receiver }}.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, spec)
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {

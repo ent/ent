@@ -141,7 +141,7 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 
 	t.Log("head of the list")
-	head := client.Node.Create().SetValue(1).SaveX(ctx)
+	head := client.Debug().Node.Create().SetValue(1).SaveX(ctx)
 	require.Zero(head.QueryPrev().CountX(ctx))
 	require.Zero(head.QueryNext().CountX(ctx))
 

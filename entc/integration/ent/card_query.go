@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CardQuery is the builder for querying Card entities.
@@ -297,26 +298,41 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 }
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	unique := []string{card.FieldID}
-	if len(cq.unique) > 0 {
-		unique = cq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: card.Table,
+			Columns: []string{
+				card.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: card.FieldID,
+			},
+		},
+		From:   cq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := cq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
+	if limit := cq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
+	if offset := cq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := cq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, cq.driver, spec)
 }
 
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {

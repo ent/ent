@@ -492,10 +492,11 @@ func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 
 func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	rows := &sql.Rows{}
-	selector := q.selector().Count(q.Node.ID.Column)
+	selector := q.selector()
+	selector.Count(selector.C(q.Node.ID.Column))
 	if q.Unique {
 		selector.SetDistinct(false)
-		selector.Count(sql.Distinct(q.Node.ID.Column))
+		selector.Count(sql.Distinct(selector.C(q.Node.ID.Column)))
 	}
 	query, args := selector.Query()
 	if err := drv.Query(ctx, query, args, rows); err != nil {
@@ -510,7 +511,7 @@ func (q *query) selector() *sql.Selector {
 	if q.From != nil {
 		selector = q.From
 	}
-	selector.Select(q.Node.Columns...)
+	selector.Select(selector.Columns(q.Node.Columns...)...)
 	if pred := q.Predicate; pred != nil {
 		pred(selector)
 	}

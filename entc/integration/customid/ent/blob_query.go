@@ -13,8 +13,10 @@ import (
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -284,26 +286,41 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 }
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := bq.sqlQuery()
-	unique := []string{blob.FieldID}
-	if len(bq.unique) > 0 {
-		unique = bq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: blob.Table,
+			Columns: []string{
+				blob.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUUID,
+				Column: blob.FieldID,
+			},
+		},
+		From:   bq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := bq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := bq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
+	if limit := bq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
+	if offset := bq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := bq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, bq.driver, spec)
 }
 
 func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {

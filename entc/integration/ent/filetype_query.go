@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FileTypeQuery is the builder for querying FileType entities.
@@ -297,26 +298,41 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 }
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := ftq.sqlQuery()
-	unique := []string{filetype.FieldID}
-	if len(ftq.unique) > 0 {
-		unique = ftq.unique
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table: filetype.Table,
+			Columns: []string{
+				filetype.FieldID,
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: filetype.FieldID,
+			},
+		},
+		From:   ftq.sql,
+		Unique: true,
 	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := ftq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
+	if ps := ftq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
+	if limit := ftq.limit; limit != nil {
+		spec.Limit = *limit
 	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
+	if offset := ftq.offset; offset != nil {
+		spec.Offset = *offset
 	}
-	return n, nil
+	if ps := ftq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return sqlgraph.CountNodes(ctx, ftq.driver, spec)
 }
 
 func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
