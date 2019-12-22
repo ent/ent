@@ -266,31 +266,46 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 }
 
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	if unique := cq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Comment
+		spec  = cq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Comment{config: cq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var cs Comments
-	if err := cs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	cs.config(cq.config)
-	return cs, nil
+	return nodes, nil
 }
 
 func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := cq.querySpec()
+	return sqlgraph.CountNodes(ctx, cq.driver, spec)
+}
+
+func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := cq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: comment.Table,
-			Columns: []string{
-				comment.FieldID,
-			},
+			Table:   comment.Table,
+			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: comment.FieldID,
@@ -319,15 +334,7 @@ func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, cq.driver, spec)
-}
-
-func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (cq *CommentQuery) sqlQuery() *sql.Selector {

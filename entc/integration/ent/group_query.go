@@ -317,31 +317,46 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 }
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
-	rows := &sql.Rows{}
-	selector := gq.sqlQuery()
-	if unique := gq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Group
+		spec  = gq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Group{config: gq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := gq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, gq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var grs Groups
-	if err := grs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	grs.config(gq.config)
-	return grs, nil
+	return nodes, nil
 }
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := gq.querySpec()
+	return sqlgraph.CountNodes(ctx, gq.driver, spec)
+}
+
+func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := gq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: group.Table,
-			Columns: []string{
-				group.FieldID,
-			},
+			Table:   group.Table,
+			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: group.FieldID,
@@ -370,15 +385,7 @@ func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, gq.driver, spec)
-}
-
-func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := gq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (gq *GroupQuery) sqlQuery() *sql.Selector {

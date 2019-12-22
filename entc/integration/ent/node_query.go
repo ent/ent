@@ -290,31 +290,46 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 }
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
-	rows := &sql.Rows{}
-	selector := nq.sqlQuery()
-	if unique := nq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Node
+		spec  = nq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Node{config: nq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := nq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, nq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var ns Nodes
-	if err := ns.FromRows(rows); err != nil {
-		return nil, err
-	}
-	ns.config(nq.config)
-	return ns, nil
+	return nodes, nil
 }
 
 func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := nq.querySpec()
+	return sqlgraph.CountNodes(ctx, nq.driver, spec)
+}
+
+func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := nq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: node.Table,
-			Columns: []string{
-				node.FieldID,
-			},
+			Table:   node.Table,
+			Columns: node.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: node.FieldID,
@@ -343,15 +358,7 @@ func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, nq.driver, spec)
-}
-
-func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := nq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (nq *NodeQuery) sqlQuery() *sql.Selector {

@@ -279,31 +279,46 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 }
 
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
-	rows := &sql.Rows{}
-	selector := giq.sqlQuery()
-	if unique := giq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*GroupInfo
+		spec  = giq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &GroupInfo{config: giq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := giq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, giq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var gis GroupInfos
-	if err := gis.FromRows(rows); err != nil {
-		return nil, err
-	}
-	gis.config(giq.config)
-	return gis, nil
+	return nodes, nil
 }
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := giq.querySpec()
+	return sqlgraph.CountNodes(ctx, giq.driver, spec)
+}
+
+func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := giq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: groupinfo.Table,
-			Columns: []string{
-				groupinfo.FieldID,
-			},
+			Table:   groupinfo.Table,
+			Columns: groupinfo.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: groupinfo.FieldID,
@@ -332,15 +347,7 @@ func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, giq.driver, spec)
-}
-
-func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := giq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {

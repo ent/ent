@@ -255,31 +255,46 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 }
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
-	rows := &sql.Rows{}
-	selector := uq.sqlQuery()
-	if unique := uq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*User
+		spec  = uq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &User{config: uq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := uq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var us Users
-	if err := us.FromRows(rows); err != nil {
-		return nil, err
-	}
-	us.config(uq.config)
-	return us, nil
+	return nodes, nil
 }
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := uq.querySpec()
+	return sqlgraph.CountNodes(ctx, uq.driver, spec)
+}
+
+func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := uq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: user.Table,
-			Columns: []string{
-				user.FieldID,
-			},
+			Table:   user.Table,
+			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: user.FieldID,
@@ -308,15 +323,7 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, uq.driver, spec)
-}
-
-func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := uq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {

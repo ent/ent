@@ -292,31 +292,46 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 }
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
-	rows := &sql.Rows{}
-	selector := fq.sqlQuery()
-	if unique := fq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*File
+		spec  = fq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &File{config: fq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := fq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, fq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var fs Files
-	if err := fs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	fs.config(fq.config)
-	return fs, nil
+	return nodes, nil
 }
 
 func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := fq.querySpec()
+	return sqlgraph.CountNodes(ctx, fq.driver, spec)
+}
+
+func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := fq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: file.Table,
-			Columns: []string{
-				file.FieldID,
-			},
+			Table:   file.Table,
+			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: file.FieldID,
@@ -345,15 +360,7 @@ func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, fq.driver, spec)
-}
-
-func (fq *FileQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := fq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (fq *FileQuery) sqlQuery() *sql.Selector {

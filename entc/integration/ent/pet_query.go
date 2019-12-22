@@ -291,31 +291,46 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 }
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
-	rows := &sql.Rows{}
-	selector := pq.sqlQuery()
-	if unique := pq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Pet
+		spec  = pq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Pet{config: pq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := pq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, pq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var pes Pets
-	if err := pes.FromRows(rows); err != nil {
-		return nil, err
-	}
-	pes.config(pq.config)
-	return pes, nil
+	return nodes, nil
 }
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := pq.querySpec()
+	return sqlgraph.CountNodes(ctx, pq.driver, spec)
+}
+
+func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := pq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: pet.Table,
-			Columns: []string{
-				pet.FieldID,
-			},
+			Table:   pet.Table,
+			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: pet.FieldID,
@@ -344,15 +359,7 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, pq.driver, spec)
-}
-
-func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := pq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (pq *PetQuery) sqlQuery() *sql.Selector {

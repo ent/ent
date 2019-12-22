@@ -279,31 +279,46 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 }
 
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	if unique := cq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Card
+		spec  = cq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Card{config: cq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var cs Cards
-	if err := cs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	cs.config(cq.config)
-	return cs, nil
+	return nodes, nil
 }
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := cq.querySpec()
+	return sqlgraph.CountNodes(ctx, cq.driver, spec)
+}
+
+func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := cq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: card.Table,
-			Columns: []string{
-				card.FieldID,
-			},
+			Table:   card.Table,
+			Columns: card.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: card.FieldID,
@@ -332,15 +347,7 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, cq.driver, spec)
-}
-
-func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (cq *CardQuery) sqlQuery() *sql.Selector {

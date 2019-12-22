@@ -242,31 +242,46 @@ func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 }
 
 func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
-	rows := &sql.Rows{}
-	selector := iq.sqlQuery()
-	if unique := iq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Item
+		spec  = iq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Item{config: iq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := iq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, iq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var is Items
-	if err := is.FromRows(rows); err != nil {
-		return nil, err
-	}
-	is.config(iq.config)
-	return is, nil
+	return nodes, nil
 }
 
 func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := iq.querySpec()
+	return sqlgraph.CountNodes(ctx, iq.driver, spec)
+}
+
+func (iq *ItemQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := iq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: item.Table,
-			Columns: []string{
-				item.FieldID,
-			},
+			Table:   item.Table,
+			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: item.FieldID,
@@ -295,15 +310,7 @@ func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, iq.driver, spec)
-}
-
-func (iq *ItemQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := iq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (iq *ItemQuery) sqlQuery() *sql.Selector {

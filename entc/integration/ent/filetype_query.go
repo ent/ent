@@ -279,31 +279,46 @@ func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect
 }
 
 func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
-	rows := &sql.Rows{}
-	selector := ftq.sqlQuery()
-	if unique := ftq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*FileType
+		spec  = ftq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &FileType{config: ftq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := ftq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, ftq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var fts FileTypes
-	if err := fts.FromRows(rows); err != nil {
-		return nil, err
-	}
-	fts.config(ftq.config)
-	return fts, nil
+	return nodes, nil
 }
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := ftq.querySpec()
+	return sqlgraph.CountNodes(ctx, ftq.driver, spec)
+}
+
+func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := ftq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: filetype.Table,
-			Columns: []string{
-				filetype.FieldID,
-			},
+			Table:   filetype.Table,
+			Columns: filetype.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: filetype.FieldID,
@@ -332,15 +347,7 @@ func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, ftq.driver, spec)
-}
-
-func (ftq *FileTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ftq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {

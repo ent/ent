@@ -266,31 +266,46 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 }
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
-	rows := &sql.Rows{}
-	selector := ftq.sqlQuery()
-	if unique := ftq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*FieldType
+		spec  = ftq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &FieldType{config: ftq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := ftq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, ftq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var fts FieldTypes
-	if err := fts.FromRows(rows); err != nil {
-		return nil, err
-	}
-	fts.config(ftq.config)
-	return fts, nil
+	return nodes, nil
 }
 
 func (ftq *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
+	spec := ftq.querySpec()
+	return sqlgraph.CountNodes(ctx, ftq.driver, spec)
+}
+
+func (ftq *FieldTypeQuery) sqlExist(ctx context.Context) (bool, error) {
+	n, err := ftq.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("ent: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: fieldtype.Table,
-			Columns: []string{
-				fieldtype.FieldID,
-			},
+			Table:   fieldtype.Table,
+			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: fieldtype.FieldID,
@@ -319,15 +334,7 @@ func (ftq *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, ftq.driver, spec)
-}
-
-func (ftq *FieldTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := ftq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {

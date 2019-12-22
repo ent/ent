@@ -10,32 +10,46 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
-	rows := &sql.Rows{}
-	selector := {{ $receiver }}.sqlQuery()
-	if unique := {{ $receiver }}.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*{{ $.Name }}
+		spec = {{ $receiver }}.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &{{ $.Name }}{config: {{ $receiver }}.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	{{- $ret := plural $.Receiver }}
-	var {{ $ret }} {{ plural $.Name  }}
-	if err := {{ $ret }}.FromRows(rows); err != nil {
-		return nil, err
-	}
-	{{ $ret }}.config({{ $receiver }}.config)
-	return {{ $ret }}, nil
+	return nodes, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
+	spec := {{ $receiver }}.querySpec()
+	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, spec)
+}
+
+func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
+	n, err := {{ $receiver }}.sqlCount(ctx)
+	if err != nil {
+		return false, fmt.Errorf("{{ $pkg }}: check existence: %v", err)
+	}
+	return n > 0, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
-			Columns: []string{
-				{{ $.Package }}.{{ $.ID.Constant }},
-			},
+			Columns: {{ $.Package }}.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
 				Column: {{ $.Package }}.{{ $.ID.Constant }},
@@ -64,15 +78,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 			}
 		}
 	}
-	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, spec)
-}
-
-func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
-	n, err := {{ $receiver }}.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("{{ $pkg }}: check existence: %v", err)
-	}
-	return n > 0, nil
+	return spec
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
