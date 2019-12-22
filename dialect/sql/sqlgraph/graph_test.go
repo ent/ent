@@ -885,8 +885,9 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				// Clear the "partner" and "spouse 2" from 1's column, and set "spouse 3".
-				mock.ExpectExec(escape("UPDATE `users` SET `partner_id` = NULL, `spouse_id` = NULL, `spouse_id` = ? WHERE `id` = ?")).
+				// Clear the "partner" from 1's column, and set "spouse 3".
+				// "spouse 2" is implicitly removed when setting a different foreign-key.
+				mock.ExpectExec(escape("UPDATE `users` SET `partner_id` = NULL, `spouse_id` = ? WHERE `id` = ?")).
 					WithArgs(3, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				// Clear the "partner_id" column from previous 1's partner.

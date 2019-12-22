@@ -73,7 +73,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
 		{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
 	{{- else }}
-		{{- if and $.ID.UserDefined }}
+		{{- if $.ID.UserDefined }}
 			if {{ $.Receiver }}.ID == 0 {
 		{{- end }}
 			id := spec.ID.Value.(int64)

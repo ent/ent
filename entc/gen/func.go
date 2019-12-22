@@ -46,6 +46,7 @@ var (
 		"upper":       strings.ToUpper,
 		"hasField":    hasField,
 		"indirect":    indirect,
+		"hasPrefix":   strings.HasPrefix,
 		"hasSuffix":   strings.HasSuffix,
 		"trimPackage": trimPackage,
 		"xtemplate":   xtemplate,
@@ -193,6 +194,11 @@ func extend(v interface{}, kv ...interface{}) (interface{}, error) {
 		return &typeScope{Type: v, Scope: scope}, nil
 	case *Graph:
 		return &graphScope{Graph: v, Scope: scope}, nil
+	case *typeScope:
+		for k := range v.Scope {
+			scope[k] = v.Scope[k]
+		}
+		return &typeScope{Type: v.Type, Scope: scope}, nil
 	default:
 		return nil, fmt.Errorf("invalid type for extend: %T", v)
 	}

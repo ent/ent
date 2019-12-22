@@ -11,8 +11,10 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/entcpkg/ent/predicate"
 	"github.com/facebookincubator/ent/examples/entcpkg/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -55,40 +57,30 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(uu.driver.Dialect())
-		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
-	)
-	for _, p := range uu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := uu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := uu.driver.Tx(ctx)
-	if err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	if err = tx.Commit(); err != nil {
-		return 0, err
-	}
-	return len(ids), nil
+	return n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -125,40 +117,37 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	var (
-		builder  = sql.Dialect(uuo.driver.Dialect())
-		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
-	)
-	user.ID(uuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  uuo.id,
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		u = &User{config: uuo.config}
-		if err := u.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into User: %v", err)
+	u = &User{config: uuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 		}
-		id = u.ID
-		ids = append(ids, id)
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		u.ID = int(value.Int64)
+		values = values[1:]
+		return nil
 	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("User with id: %v", uuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one User with the same id: %v", uuo.id)
-	}
-
-	tx, err := uuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if err = tx.Commit(); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, uuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return u, nil

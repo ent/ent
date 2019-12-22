@@ -12,9 +12,11 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // StreetUpdate is the builder for updating Street entities.
@@ -97,74 +99,72 @@ func (su *StreetUpdate) ExecX(ctx context.Context) {
 }
 
 func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(su.driver.Dialect())
-		selector = builder.Select(street.FieldID).From(builder.Table(street.Table))
-	)
-	for _, p := range su.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   street.Table,
+			Columns: street.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: street.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = su.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
-		}
-		ids = append(ids, id)
-	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := su.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(street.Table)
-	)
-	updater = updater.Where(sql.InInts(street.FieldID, ids...))
-	if value := su.name; value != nil {
-		updater.Set(street.FieldName, *value)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if su.clearedCity {
-		query, args := builder.Update(street.CityTable).
-			SetNull(street.CityColumn).
-			Where(sql.InInts(city.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(su.city) > 0 {
-		for eid := range su.city {
-			query, args := builder.Update(street.CityTable).
-				Set(street.CityColumn, eid).
-				Where(sql.InInts(street.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
+	if ps := su.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
 			}
 		}
 	}
-	if err = tx.Commit(); err != nil {
+	if value := su.name; value != nil {
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: street.FieldName,
+		})
+	}
+	if su.clearedCity {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   street.CityTable,
+			Columns: []string{street.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: city.FieldID,
+				},
+			},
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := su.city; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   street.CityTable,
+			Columns: []string{street.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: city.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // StreetUpdateOne is the builder for updating a single Street entity.
@@ -241,75 +241,85 @@ func (suo *StreetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) {
-	var (
-		builder  = sql.Dialect(suo.driver.Dialect())
-		selector = builder.Select(street.Columns...).From(builder.Table(street.Table))
-	)
-	street.ID(suo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = suo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   street.Table,
+			Columns: street.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  suo.id,
+				Type:   field.TypeInt,
+				Column: street.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		s = &Street{config: suo.config}
-		if err := s.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Street: %v", err)
-		}
-		id = s.ID
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Street with id: %v", suo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Street with the same id: %v", suo.id)
-	}
-
-	tx, err := suo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(street.Table)
-	)
-	updater = updater.Where(sql.InInts(street.FieldID, ids...))
 	if value := suo.name; value != nil {
-		updater.Set(street.FieldName, *value)
-		s.Name = *value
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: street.FieldName,
+		})
 	}
 	if suo.clearedCity {
-		query, args := builder.Update(street.CityTable).
-			SetNull(street.CityColumn).
-			Where(sql.InInts(city.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   street.CityTable,
+			Columns: []string{street.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: city.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(suo.city) > 0 {
-		for eid := range suo.city {
-			query, args := builder.Update(street.CityTable).
-				Set(street.CityColumn, eid).
-				Where(sql.InInts(street.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := suo.city; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   street.CityTable,
+			Columns: []string{street.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: city.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	s = &Street{config: suo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		s.ID = int(value.Int64)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[0])
+		} else if value.Valid {
+			s.Name = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, suo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return s, nil

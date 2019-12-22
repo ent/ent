@@ -11,8 +11,10 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -199,93 +201,124 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(uu.driver.Dialect())
-		selector = builder.Select(user.FieldID).From(builder.Table(user.Table))
-	)
-	for _, p := range uu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("entv2: failed reading id: %v", err)
+	if ps := uu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := uu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(user.Table)
-	)
-	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uu.age; value != nil {
-		updater.Set(user.FieldAge, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uu.addage; value != nil {
-		updater.Add(user.FieldAge, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uu.name; value != nil {
-		updater.Set(user.FieldName, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldName,
+		})
 	}
 	if value := uu.nickname; value != nil {
-		updater.Set(user.FieldNickname, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldNickname,
+		})
 	}
 	if value := uu.phone; value != nil {
-		updater.Set(user.FieldPhone, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldPhone,
+		})
 	}
 	if value := uu.buffer; value != nil {
-		updater.Set(user.FieldBuffer, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  *value,
+			Column: user.FieldBuffer,
+		})
 	}
 	if uu.clearbuffer {
-		updater.SetNull(user.FieldBuffer)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: user.FieldBuffer,
+		})
 	}
 	if value := uu.title; value != nil {
-		updater.Set(user.FieldTitle, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldTitle,
+		})
 	}
 	if value := uu.new_name; value != nil {
-		updater.Set(user.FieldNewName, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldNewName,
+		})
 	}
 	if uu.clearnew_name {
-		updater.SetNull(user.FieldNewName)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldNewName,
+		})
 	}
 	if value := uu.blob; value != nil {
-		updater.Set(user.FieldBlob, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  *value,
+			Column: user.FieldBlob,
+		})
 	}
 	if uu.clearblob {
-		updater.SetNull(user.FieldBlob)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: user.FieldBlob,
+		})
 	}
 	if value := uu.state; value != nil {
-		updater.Set(user.FieldState, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: user.FieldState,
+		})
 	}
 	if uu.clearstate {
-		updater.SetNull(user.FieldState)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: user.FieldState,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-	}
-	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -466,111 +499,185 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	var (
-		builder  = sql.Dialect(uuo.driver.Dialect())
-		selector = builder.Select(user.Columns...).From(builder.Table(user.Table))
-	)
-	user.ID(uuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = uuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  uuo.id,
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		u = &User{config: uuo.config}
-		if err := u.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("entv2: failed scanning row into User: %v", err)
-		}
-		id = u.ID
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("User with id: %v", uuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("entv2: more than one User with the same id: %v", uuo.id)
-	}
-
-	tx, err := uuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(user.Table)
-	)
-	updater = updater.Where(sql.InInts(user.FieldID, ids...))
 	if value := uuo.age; value != nil {
-		updater.Set(user.FieldAge, *value)
-		u.Age = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uuo.addage; value != nil {
-		updater.Add(user.FieldAge, *value)
-		u.Age += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldAge,
+		})
 	}
 	if value := uuo.name; value != nil {
-		updater.Set(user.FieldName, *value)
-		u.Name = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldName,
+		})
 	}
 	if value := uuo.nickname; value != nil {
-		updater.Set(user.FieldNickname, *value)
-		u.Nickname = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldNickname,
+		})
 	}
 	if value := uuo.phone; value != nil {
-		updater.Set(user.FieldPhone, *value)
-		u.Phone = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldPhone,
+		})
 	}
 	if value := uuo.buffer; value != nil {
-		updater.Set(user.FieldBuffer, *value)
-		u.Buffer = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  *value,
+			Column: user.FieldBuffer,
+		})
 	}
 	if uuo.clearbuffer {
-		var value []byte
-		u.Buffer = value
-		updater.SetNull(user.FieldBuffer)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: user.FieldBuffer,
+		})
 	}
 	if value := uuo.title; value != nil {
-		updater.Set(user.FieldTitle, *value)
-		u.Title = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldTitle,
+		})
 	}
 	if value := uuo.new_name; value != nil {
-		updater.Set(user.FieldNewName, *value)
-		u.NewName = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: user.FieldNewName,
+		})
 	}
 	if uuo.clearnew_name {
-		var value string
-		u.NewName = value
-		updater.SetNull(user.FieldNewName)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldNewName,
+		})
 	}
 	if value := uuo.blob; value != nil {
-		updater.Set(user.FieldBlob, *value)
-		u.Blob = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  *value,
+			Column: user.FieldBlob,
+		})
 	}
 	if uuo.clearblob {
-		var value []byte
-		u.Blob = value
-		updater.SetNull(user.FieldBlob)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: user.FieldBlob,
+		})
 	}
 	if value := uuo.state; value != nil {
-		updater.Set(user.FieldState, *value)
-		u.State = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: user.FieldState,
+		})
 	}
 	if uuo.clearstate {
-		var value user.State
-		u.State = value
-		updater.SetNull(user.FieldState)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: user.FieldState,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	u = &User{config: uuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&[]byte{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&[]byte{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		u.ID = int(value.Int64)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field age", values[0])
+		} else if value.Valid {
+			u.Age = int(value.Int64)
+		}
+		if value, ok := values[1].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[1])
+		} else if value.Valid {
+			u.Name = value.String
+		}
+		if value, ok := values[2].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field nickname", values[2])
+		} else if value.Valid {
+			u.Nickname = value.String
+		}
+		if value, ok := values[3].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field phone", values[3])
+		} else if value.Valid {
+			u.Phone = value.String
+		}
+		if value, ok := values[4].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field buffer", values[4])
+		} else if value != nil {
+			u.Buffer = *value
+		}
+		if value, ok := values[5].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field title", values[5])
+		} else if value.Valid {
+			u.Title = value.String
+		}
+		if value, ok := values[6].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field new_name", values[6])
+		} else if value.Valid {
+			u.NewName = value.String
+		}
+		if value, ok := values[7].(*[]byte); !ok {
+			return fmt.Errorf("unexpected type %T for field blob", values[7])
+		} else if value != nil {
+			u.Blob = *value
+		}
+		if value, ok := values[8].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field state", values[8])
+		} else if value.Valid {
+			u.State = user.State(value.String)
+		}
+		return nil
 	}
-	if err = tx.Commit(); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, uuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return u, nil

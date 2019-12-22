@@ -13,9 +13,11 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.
@@ -131,110 +133,115 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 }
 
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(pu.driver.Dialect())
-		selector = builder.Select(pet.FieldID).From(builder.Table(pet.Table))
-	)
-	for _, p := range pu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   pet.Table,
+			Columns: pet.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: pet.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = pu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := pu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := pu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(pet.Table)
-	)
-	updater = updater.Where(sql.InInts(pet.FieldID, ids...))
 	if value := pu.name; value != nil {
-		updater.Set(pet.FieldName, *value)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: pet.FieldName,
+		})
 	}
 	if pu.clearedTeam {
-		query, args := builder.Update(pet.TeamTable).
-			SetNull(pet.TeamColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   pet.TeamTable,
+			Columns: []string{pet.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(pu.team) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(pu.team)[0])
-			if serr != nil {
-				return 0, rollback(tx, err)
-			}
-			query, args := builder.Update(pet.TeamTable).
-				Set(pet.TeamColumn, eid).
-				Where(sql.EQ(pet.FieldID, id).And().IsNull(pet.TeamColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return 0, rollback(tx, err)
-			}
-			if int(affected) < len(pu.team) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(pu.team))})
-			}
+	if nodes := pu.team; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   pet.TeamTable,
+			Columns: []string{pet.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if pu.clearedOwner {
-		query, args := builder.Update(pet.OwnerTable).
-			SetNull(pet.OwnerColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(pu.owner) > 0 {
-		for eid := range pu.owner {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(pet.OwnerTable).
-				Set(pet.OwnerColumn, eid).
-				Where(sql.InInts(pet.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
+	if nodes := pu.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // PetUpdateOne is the builder for updating a single Pet entity.
@@ -344,111 +351,128 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
-	var (
-		builder  = sql.Dialect(puo.driver.Dialect())
-		selector = builder.Select(pet.Columns...).From(builder.Table(pet.Table))
-	)
-	pet.ID(puo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = puo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   pet.Table,
+			Columns: pet.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  puo.id,
+				Type:   field.TypeString,
+				Column: pet.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		pe = &Pet{config: puo.config}
-		if err := pe.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Pet: %v", err)
-		}
-		id = pe.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Pet with id: %v", puo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Pet with the same id: %v", puo.id)
-	}
-
-	tx, err := puo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(pet.Table)
-	)
-	updater = updater.Where(sql.InInts(pet.FieldID, ids...))
 	if value := puo.name; value != nil {
-		updater.Set(pet.FieldName, *value)
-		pe.Name = *value
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: pet.FieldName,
+		})
 	}
 	if puo.clearedTeam {
-		query, args := builder.Update(pet.TeamTable).
-			SetNull(pet.TeamColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   pet.TeamTable,
+			Columns: []string{pet.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(puo.team) > 0 {
-		for _, id := range ids {
-			eid, serr := strconv.Atoi(keys(puo.team)[0])
-			if serr != nil {
-				return nil, rollback(tx, err)
-			}
-			query, args := builder.Update(pet.TeamTable).
-				Set(pet.TeamColumn, eid).
-				Where(sql.EQ(pet.FieldID, id).And().IsNull(pet.TeamColumn)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return nil, rollback(tx, err)
-			}
-			if int(affected) < len(puo.team) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"team\" %v already connected to a different \"Pet\"", keys(puo.team))})
-			}
+	if nodes := puo.team; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   pet.TeamTable,
+			Columns: []string{pet.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	if puo.clearedOwner {
-		query, args := builder.Update(pet.OwnerTable).
-			SetNull(pet.OwnerColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(puo.owner) > 0 {
-		for eid := range puo.owner {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			query, args := builder.Update(pet.OwnerTable).
-				Set(pet.OwnerColumn, eid).
-				Where(sql.InInts(pet.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := puo.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	pe = &Pet{config: puo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		pe.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[0])
+		} else if value.Valid {
+			pe.Name = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, puo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return pe, nil

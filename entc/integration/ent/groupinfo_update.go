@@ -12,9 +12,11 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
@@ -133,106 +135,97 @@ func (giu *GroupInfoUpdate) ExecX(ctx context.Context) {
 }
 
 func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(giu.driver.Dialect())
-		selector = builder.Select(groupinfo.FieldID).From(builder.Table(groupinfo.Table))
-	)
-	for _, p := range giu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   groupinfo.Table,
+			Columns: groupinfo.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: groupinfo.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = giu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := giu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := giu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(groupinfo.Table)
-	)
-	updater = updater.Where(sql.InInts(groupinfo.FieldID, ids...))
 	if value := giu.desc; value != nil {
-		updater.Set(groupinfo.FieldDesc, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: groupinfo.FieldDesc,
+		})
 	}
 	if value := giu.max_users; value != nil {
-		updater.Set(groupinfo.FieldMaxUsers, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: groupinfo.FieldMaxUsers,
+		})
 	}
 	if value := giu.addmax_users; value != nil {
-		updater.Add(groupinfo.FieldMaxUsers, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: groupinfo.FieldMaxUsers,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if nodes := giu.removedGroups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
 		}
-	}
-	if len(giu.removedGroups) > 0 {
-		eids := make([]int, len(giu.removedGroups))
-		for eid := range giu.removedGroups {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
-		}
-		query, args := builder.Update(groupinfo.GroupsTable).
-			SetNull(groupinfo.GroupsColumn).
-			Where(sql.InInts(groupinfo.GroupsColumn, ids...)).
-			Where(sql.InInts(group.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(giu.groups) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range giu.groups {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(group.FieldID, eid)
-			}
-			query, args := builder.Update(groupinfo.GroupsTable).
-				Set(groupinfo.GroupsColumn, id).
-				Where(sql.And(p, sql.IsNull(groupinfo.GroupsColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(giu.groups) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(giu.groups))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if nodes := giu.groups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if n, err = sqlgraph.UpdateNodes(ctx, giu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // GroupInfoUpdateOne is the builder for updating a single GroupInfo entity.
@@ -345,109 +338,116 @@ func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err error) {
-	var (
-		builder  = sql.Dialect(giuo.driver.Dialect())
-		selector = builder.Select(groupinfo.Columns...).From(builder.Table(groupinfo.Table))
-	)
-	groupinfo.ID(giuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = giuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   groupinfo.Table,
+			Columns: groupinfo.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  giuo.id,
+				Type:   field.TypeString,
+				Column: groupinfo.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		gi = &GroupInfo{config: giuo.config}
-		if err := gi.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into GroupInfo: %v", err)
-		}
-		id = gi.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("GroupInfo with id: %v", giuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one GroupInfo with the same id: %v", giuo.id)
-	}
-
-	tx, err := giuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(groupinfo.Table)
-	)
-	updater = updater.Where(sql.InInts(groupinfo.FieldID, ids...))
 	if value := giuo.desc; value != nil {
-		updater.Set(groupinfo.FieldDesc, *value)
-		gi.Desc = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: groupinfo.FieldDesc,
+		})
 	}
 	if value := giuo.max_users; value != nil {
-		updater.Set(groupinfo.FieldMaxUsers, *value)
-		gi.MaxUsers = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: groupinfo.FieldMaxUsers,
+		})
 	}
 	if value := giuo.addmax_users; value != nil {
-		updater.Add(groupinfo.FieldMaxUsers, *value)
-		gi.MaxUsers += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: groupinfo.FieldMaxUsers,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	if nodes := giuo.removedGroups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
 		}
-	}
-	if len(giuo.removedGroups) > 0 {
-		eids := make([]int, len(giuo.removedGroups))
-		for eid := range giuo.removedGroups {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
-		}
-		query, args := builder.Update(groupinfo.GroupsTable).
-			SetNull(groupinfo.GroupsColumn).
-			Where(sql.InInts(groupinfo.GroupsColumn, ids...)).
-			Where(sql.InInts(group.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(giuo.groups) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range giuo.groups {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(group.FieldID, eid)
-			}
-			query, args := builder.Update(groupinfo.GroupsTable).
-				Set(groupinfo.GroupsColumn, id).
-				Where(sql.And(p, sql.IsNull(groupinfo.GroupsColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(giuo.groups) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"groups\" %v already connected to a different \"GroupInfo\"", keys(giuo.groups))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if nodes := giuo.groups; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	gi = &GroupInfo{config: giuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullInt64{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		gi.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field desc", values[0])
+		} else if value.Valid {
+			gi.Desc = value.String
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field max_users", values[1])
+		} else if value.Valid {
+			gi.MaxUsers = int(value.Int64)
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, giuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return gi, nil

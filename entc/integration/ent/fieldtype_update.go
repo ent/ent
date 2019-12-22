@@ -9,10 +9,13 @@ package ent
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
@@ -568,186 +571,333 @@ func (ftu *FieldTypeUpdate) ExecX(ctx context.Context) {
 }
 
 func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(ftu.driver.Dialect())
-		selector = builder.Select(fieldtype.FieldID).From(builder.Table(fieldtype.Table))
-	)
-	for _, p := range ftu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   fieldtype.Table,
+			Columns: fieldtype.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: fieldtype.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = ftu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := ftu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := ftu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(fieldtype.Table)
-	)
-	updater = updater.Where(sql.InInts(fieldtype.FieldID, ids...))
 	if value := ftu.int; value != nil {
-		updater.Set(fieldtype.FieldInt, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldInt,
+		})
 	}
 	if value := ftu.addint; value != nil {
-		updater.Add(fieldtype.FieldInt, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldInt,
+		})
 	}
 	if value := ftu.int8; value != nil {
-		updater.Set(fieldtype.FieldInt8, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldInt8,
+		})
 	}
 	if value := ftu.addint8; value != nil {
-		updater.Add(fieldtype.FieldInt8, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldInt8,
+		})
 	}
 	if value := ftu.int16; value != nil {
-		updater.Set(fieldtype.FieldInt16, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldInt16,
+		})
 	}
 	if value := ftu.addint16; value != nil {
-		updater.Add(fieldtype.FieldInt16, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldInt16,
+		})
 	}
 	if value := ftu.int32; value != nil {
-		updater.Set(fieldtype.FieldInt32, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldInt32,
+		})
 	}
 	if value := ftu.addint32; value != nil {
-		updater.Add(fieldtype.FieldInt32, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldInt32,
+		})
 	}
 	if value := ftu.int64; value != nil {
-		updater.Set(fieldtype.FieldInt64, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldInt64,
+		})
 	}
 	if value := ftu.addint64; value != nil {
-		updater.Add(fieldtype.FieldInt64, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldInt64,
+		})
 	}
 	if value := ftu.optional_int; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt,
+		})
 	}
 	if value := ftu.addoptional_int; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt,
+		})
 	}
 	if ftu.clearoptional_int {
-		updater.SetNull(fieldtype.FieldOptionalInt)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldOptionalInt,
+		})
 	}
 	if value := ftu.optional_int8; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt8, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 	}
 	if value := ftu.addoptional_int8; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt8, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 	}
 	if ftu.clearoptional_int8 {
-		updater.SetNull(fieldtype.FieldOptionalInt8)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 	}
 	if value := ftu.optional_int16; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt16, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 	}
 	if value := ftu.addoptional_int16; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt16, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 	}
 	if ftu.clearoptional_int16 {
-		updater.SetNull(fieldtype.FieldOptionalInt16)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 	}
 	if value := ftu.optional_int32; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt32, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 	}
 	if value := ftu.addoptional_int32; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt32, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 	}
 	if ftu.clearoptional_int32 {
-		updater.SetNull(fieldtype.FieldOptionalInt32)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 	}
 	if value := ftu.optional_int64; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt64, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 	}
 	if value := ftu.addoptional_int64; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt64, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 	}
 	if ftu.clearoptional_int64 {
-		updater.SetNull(fieldtype.FieldOptionalInt64)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 	}
 	if value := ftu.nillable_int; value != nil {
-		updater.Set(fieldtype.FieldNillableInt, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt,
+		})
 	}
 	if value := ftu.addnillable_int; value != nil {
-		updater.Add(fieldtype.FieldNillableInt, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt,
+		})
 	}
 	if ftu.clearnillable_int {
-		updater.SetNull(fieldtype.FieldNillableInt)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldNillableInt,
+		})
 	}
 	if value := ftu.nillable_int8; value != nil {
-		updater.Set(fieldtype.FieldNillableInt8, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt8,
+		})
 	}
 	if value := ftu.addnillable_int8; value != nil {
-		updater.Add(fieldtype.FieldNillableInt8, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt8,
+		})
 	}
 	if ftu.clearnillable_int8 {
-		updater.SetNull(fieldtype.FieldNillableInt8)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Column: fieldtype.FieldNillableInt8,
+		})
 	}
 	if value := ftu.nillable_int16; value != nil {
-		updater.Set(fieldtype.FieldNillableInt16, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt16,
+		})
 	}
 	if value := ftu.addnillable_int16; value != nil {
-		updater.Add(fieldtype.FieldNillableInt16, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt16,
+		})
 	}
 	if ftu.clearnillable_int16 {
-		updater.SetNull(fieldtype.FieldNillableInt16)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Column: fieldtype.FieldNillableInt16,
+		})
 	}
 	if value := ftu.nillable_int32; value != nil {
-		updater.Set(fieldtype.FieldNillableInt32, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt32,
+		})
 	}
 	if value := ftu.addnillable_int32; value != nil {
-		updater.Add(fieldtype.FieldNillableInt32, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt32,
+		})
 	}
 	if ftu.clearnillable_int32 {
-		updater.SetNull(fieldtype.FieldNillableInt32)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: fieldtype.FieldNillableInt32,
+		})
 	}
 	if value := ftu.nillable_int64; value != nil {
-		updater.Set(fieldtype.FieldNillableInt64, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt64,
+		})
 	}
 	if value := ftu.addnillable_int64; value != nil {
-		updater.Add(fieldtype.FieldNillableInt64, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt64,
+		})
 	}
 	if ftu.clearnillable_int64 {
-		updater.SetNull(fieldtype.FieldNillableInt64)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: fieldtype.FieldNillableInt64,
+		})
 	}
 	if value := ftu.validate_optional_int32; value != nil {
-		updater.Set(fieldtype.FieldValidateOptionalInt32, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 	}
 	if value := ftu.addvalidate_optional_int32; value != nil {
-		updater.Add(fieldtype.FieldValidateOptionalInt32, *value)
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 	}
 	if ftu.clearvalidate_optional_int32 {
-		updater.SetNull(fieldtype.FieldValidateOptionalInt32)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 	}
 	if value := ftu.state; value != nil {
-		updater.Set(fieldtype.FieldState, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: fieldtype.FieldState,
+		})
 	}
 	if ftu.clearstate {
-		updater.SetNull(fieldtype.FieldState)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: fieldtype.FieldState,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
 		}
-	}
-	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
@@ -1297,258 +1447,447 @@ func (ftuo *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err error) {
-	var (
-		builder  = sql.Dialect(ftuo.driver.Dialect())
-		selector = builder.Select(fieldtype.Columns...).From(builder.Table(fieldtype.Table))
-	)
-	fieldtype.ID(ftuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = ftuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   fieldtype.Table,
+			Columns: fieldtype.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  ftuo.id,
+				Type:   field.TypeString,
+				Column: fieldtype.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		ft = &FieldType{config: ftuo.config}
-		if err := ft.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into FieldType: %v", err)
-		}
-		id = ft.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("FieldType with id: %v", ftuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one FieldType with the same id: %v", ftuo.id)
-	}
-
-	tx, err := ftuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(fieldtype.Table)
-	)
-	updater = updater.Where(sql.InInts(fieldtype.FieldID, ids...))
 	if value := ftuo.int; value != nil {
-		updater.Set(fieldtype.FieldInt, *value)
-		ft.Int = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldInt,
+		})
 	}
 	if value := ftuo.addint; value != nil {
-		updater.Add(fieldtype.FieldInt, *value)
-		ft.Int += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldInt,
+		})
 	}
 	if value := ftuo.int8; value != nil {
-		updater.Set(fieldtype.FieldInt8, *value)
-		ft.Int8 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldInt8,
+		})
 	}
 	if value := ftuo.addint8; value != nil {
-		updater.Add(fieldtype.FieldInt8, *value)
-		ft.Int8 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldInt8,
+		})
 	}
 	if value := ftuo.int16; value != nil {
-		updater.Set(fieldtype.FieldInt16, *value)
-		ft.Int16 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldInt16,
+		})
 	}
 	if value := ftuo.addint16; value != nil {
-		updater.Add(fieldtype.FieldInt16, *value)
-		ft.Int16 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldInt16,
+		})
 	}
 	if value := ftuo.int32; value != nil {
-		updater.Set(fieldtype.FieldInt32, *value)
-		ft.Int32 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldInt32,
+		})
 	}
 	if value := ftuo.addint32; value != nil {
-		updater.Add(fieldtype.FieldInt32, *value)
-		ft.Int32 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldInt32,
+		})
 	}
 	if value := ftuo.int64; value != nil {
-		updater.Set(fieldtype.FieldInt64, *value)
-		ft.Int64 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldInt64,
+		})
 	}
 	if value := ftuo.addint64; value != nil {
-		updater.Add(fieldtype.FieldInt64, *value)
-		ft.Int64 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldInt64,
+		})
 	}
 	if value := ftuo.optional_int; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt, *value)
-		ft.OptionalInt = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt,
+		})
 	}
 	if value := ftuo.addoptional_int; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt, *value)
-		ft.OptionalInt += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt,
+		})
 	}
 	if ftuo.clearoptional_int {
-		var value int
-		ft.OptionalInt = value
-		updater.SetNull(fieldtype.FieldOptionalInt)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldOptionalInt,
+		})
 	}
 	if value := ftuo.optional_int8; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt8, *value)
-		ft.OptionalInt8 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 	}
 	if value := ftuo.addoptional_int8; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt8, *value)
-		ft.OptionalInt8 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 	}
 	if ftuo.clearoptional_int8 {
-		var value int8
-		ft.OptionalInt8 = value
-		updater.SetNull(fieldtype.FieldOptionalInt8)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Column: fieldtype.FieldOptionalInt8,
+		})
 	}
 	if value := ftuo.optional_int16; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt16, *value)
-		ft.OptionalInt16 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 	}
 	if value := ftuo.addoptional_int16; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt16, *value)
-		ft.OptionalInt16 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 	}
 	if ftuo.clearoptional_int16 {
-		var value int16
-		ft.OptionalInt16 = value
-		updater.SetNull(fieldtype.FieldOptionalInt16)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Column: fieldtype.FieldOptionalInt16,
+		})
 	}
 	if value := ftuo.optional_int32; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt32, *value)
-		ft.OptionalInt32 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 	}
 	if value := ftuo.addoptional_int32; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt32, *value)
-		ft.OptionalInt32 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 	}
 	if ftuo.clearoptional_int32 {
-		var value int32
-		ft.OptionalInt32 = value
-		updater.SetNull(fieldtype.FieldOptionalInt32)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: fieldtype.FieldOptionalInt32,
+		})
 	}
 	if value := ftuo.optional_int64; value != nil {
-		updater.Set(fieldtype.FieldOptionalInt64, *value)
-		ft.OptionalInt64 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 	}
 	if value := ftuo.addoptional_int64; value != nil {
-		updater.Add(fieldtype.FieldOptionalInt64, *value)
-		ft.OptionalInt64 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 	}
 	if ftuo.clearoptional_int64 {
-		var value int64
-		ft.OptionalInt64 = value
-		updater.SetNull(fieldtype.FieldOptionalInt64)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: fieldtype.FieldOptionalInt64,
+		})
 	}
 	if value := ftuo.nillable_int; value != nil {
-		updater.Set(fieldtype.FieldNillableInt, *value)
-		ft.NillableInt = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt,
+		})
 	}
 	if value := ftuo.addnillable_int; value != nil {
-		updater.Add(fieldtype.FieldNillableInt, *value)
-		if ft.NillableInt != nil {
-			*ft.NillableInt += *value
-		} else {
-			ft.NillableInt = value
-		}
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt,
+		})
 	}
 	if ftuo.clearnillable_int {
-		ft.NillableInt = nil
-		updater.SetNull(fieldtype.FieldNillableInt)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldNillableInt,
+		})
 	}
 	if value := ftuo.nillable_int8; value != nil {
-		updater.Set(fieldtype.FieldNillableInt8, *value)
-		ft.NillableInt8 = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt8,
+		})
 	}
 	if value := ftuo.addnillable_int8; value != nil {
-		updater.Add(fieldtype.FieldNillableInt8, *value)
-		if ft.NillableInt8 != nil {
-			*ft.NillableInt8 += *value
-		} else {
-			ft.NillableInt8 = value
-		}
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt8,
+		})
 	}
 	if ftuo.clearnillable_int8 {
-		ft.NillableInt8 = nil
-		updater.SetNull(fieldtype.FieldNillableInt8)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Column: fieldtype.FieldNillableInt8,
+		})
 	}
 	if value := ftuo.nillable_int16; value != nil {
-		updater.Set(fieldtype.FieldNillableInt16, *value)
-		ft.NillableInt16 = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt16,
+		})
 	}
 	if value := ftuo.addnillable_int16; value != nil {
-		updater.Add(fieldtype.FieldNillableInt16, *value)
-		if ft.NillableInt16 != nil {
-			*ft.NillableInt16 += *value
-		} else {
-			ft.NillableInt16 = value
-		}
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt16,
+		})
 	}
 	if ftuo.clearnillable_int16 {
-		ft.NillableInt16 = nil
-		updater.SetNull(fieldtype.FieldNillableInt16)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt16,
+			Column: fieldtype.FieldNillableInt16,
+		})
 	}
 	if value := ftuo.nillable_int32; value != nil {
-		updater.Set(fieldtype.FieldNillableInt32, *value)
-		ft.NillableInt32 = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt32,
+		})
 	}
 	if value := ftuo.addnillable_int32; value != nil {
-		updater.Add(fieldtype.FieldNillableInt32, *value)
-		if ft.NillableInt32 != nil {
-			*ft.NillableInt32 += *value
-		} else {
-			ft.NillableInt32 = value
-		}
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt32,
+		})
 	}
 	if ftuo.clearnillable_int32 {
-		ft.NillableInt32 = nil
-		updater.SetNull(fieldtype.FieldNillableInt32)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: fieldtype.FieldNillableInt32,
+		})
 	}
 	if value := ftuo.nillable_int64; value != nil {
-		updater.Set(fieldtype.FieldNillableInt64, *value)
-		ft.NillableInt64 = value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt64,
+		})
 	}
 	if value := ftuo.addnillable_int64; value != nil {
-		updater.Add(fieldtype.FieldNillableInt64, *value)
-		if ft.NillableInt64 != nil {
-			*ft.NillableInt64 += *value
-		} else {
-			ft.NillableInt64 = value
-		}
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  *value,
+			Column: fieldtype.FieldNillableInt64,
+		})
 	}
 	if ftuo.clearnillable_int64 {
-		ft.NillableInt64 = nil
-		updater.SetNull(fieldtype.FieldNillableInt64)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: fieldtype.FieldNillableInt64,
+		})
 	}
 	if value := ftuo.validate_optional_int32; value != nil {
-		updater.Set(fieldtype.FieldValidateOptionalInt32, *value)
-		ft.ValidateOptionalInt32 = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 	}
 	if value := ftuo.addvalidate_optional_int32; value != nil {
-		updater.Add(fieldtype.FieldValidateOptionalInt32, *value)
-		ft.ValidateOptionalInt32 += *value
+		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  *value,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 	}
 	if ftuo.clearvalidate_optional_int32 {
-		var value int32
-		ft.ValidateOptionalInt32 = value
-		updater.SetNull(fieldtype.FieldValidateOptionalInt32)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: fieldtype.FieldValidateOptionalInt32,
+		})
 	}
 	if value := ftuo.state; value != nil {
-		updater.Set(fieldtype.FieldState, *value)
-		ft.State = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: fieldtype.FieldState,
+		})
 	}
 	if ftuo.clearstate {
-		var value fieldtype.State
-		ft.State = value
-		updater.SetNull(fieldtype.FieldState)
+		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: fieldtype.FieldState,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	ft = &FieldType{config: ftuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		ft.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field int", values[0])
+		} else if value.Valid {
+			ft.Int = int(value.Int64)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field int8", values[1])
+		} else if value.Valid {
+			ft.Int8 = int8(value.Int64)
+		}
+		if value, ok := values[2].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field int16", values[2])
+		} else if value.Valid {
+			ft.Int16 = int16(value.Int64)
+		}
+		if value, ok := values[3].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field int32", values[3])
+		} else if value.Valid {
+			ft.Int32 = int32(value.Int64)
+		}
+		if value, ok := values[4].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field int64", values[4])
+		} else if value.Valid {
+			ft.Int64 = value.Int64
+		}
+		if value, ok := values[5].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field optional_int", values[5])
+		} else if value.Valid {
+			ft.OptionalInt = int(value.Int64)
+		}
+		if value, ok := values[6].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field optional_int8", values[6])
+		} else if value.Valid {
+			ft.OptionalInt8 = int8(value.Int64)
+		}
+		if value, ok := values[7].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field optional_int16", values[7])
+		} else if value.Valid {
+			ft.OptionalInt16 = int16(value.Int64)
+		}
+		if value, ok := values[8].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field optional_int32", values[8])
+		} else if value.Valid {
+			ft.OptionalInt32 = int32(value.Int64)
+		}
+		if value, ok := values[9].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field optional_int64", values[9])
+		} else if value.Valid {
+			ft.OptionalInt64 = value.Int64
+		}
+		if value, ok := values[10].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field nillable_int", values[10])
+		} else if value.Valid {
+			ft.NillableInt = new(int)
+			*ft.NillableInt = int(value.Int64)
+		}
+		if value, ok := values[11].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field nillable_int8", values[11])
+		} else if value.Valid {
+			ft.NillableInt8 = new(int8)
+			*ft.NillableInt8 = int8(value.Int64)
+		}
+		if value, ok := values[12].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field nillable_int16", values[12])
+		} else if value.Valid {
+			ft.NillableInt16 = new(int16)
+			*ft.NillableInt16 = int16(value.Int64)
+		}
+		if value, ok := values[13].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field nillable_int32", values[13])
+		} else if value.Valid {
+			ft.NillableInt32 = new(int32)
+			*ft.NillableInt32 = int32(value.Int64)
+		}
+		if value, ok := values[14].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field nillable_int64", values[14])
+		} else if value.Valid {
+			ft.NillableInt64 = new(int64)
+			*ft.NillableInt64 = value.Int64
+		}
+		if value, ok := values[15].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for field validate_optional_int32", values[15])
+		} else if value.Valid {
+			ft.ValidateOptionalInt32 = int32(value.Int64)
+		}
+		if value, ok := values[16].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field state", values[16])
+		} else if value.Valid {
+			ft.State = fieldtype.State(value.String)
+		}
+		return nil
 	}
-	if err = tx.Commit(); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return ft, nil

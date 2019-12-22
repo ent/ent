@@ -13,9 +13,11 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/start/ent/car"
 	"github.com/facebookincubator/ent/examples/start/ent/predicate"
 	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
@@ -105,77 +107,79 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(cu.driver.Dialect())
-		selector = builder.Select(car.FieldID).From(builder.Table(car.Table))
-	)
-	for _, p := range cu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   car.Table,
+			Columns: car.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: car.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = cu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
-		}
-		ids = append(ids, id)
-	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := cu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(car.Table)
-	)
-	updater = updater.Where(sql.InInts(car.FieldID, ids...))
-	if value := cu.model; value != nil {
-		updater.Set(car.FieldModel, *value)
-	}
-	if value := cu.registered_at; value != nil {
-		updater.Set(car.FieldRegisteredAt, *value)
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if cu.clearedOwner {
-		query, args := builder.Update(car.OwnerTable).
-			SetNull(car.OwnerColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(cu.owner) > 0 {
-		for eid := range cu.owner {
-			query, args := builder.Update(car.OwnerTable).
-				Set(car.OwnerColumn, eid).
-				Where(sql.InInts(car.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
+	if ps := cu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
 			}
 		}
 	}
-	if err = tx.Commit(); err != nil {
+	if value := cu.model; value != nil {
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: car.FieldModel,
+		})
+	}
+	if value := cu.registered_at; value != nil {
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: car.FieldRegisteredAt,
+		})
+	}
+	if cu.clearedOwner {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   car.OwnerTable,
+			Columns: []string{car.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := cu.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   car.OwnerTable,
+			Columns: []string{car.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // CarUpdateOne is the builder for updating a single Car entity.
@@ -259,79 +263,98 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
-	var (
-		builder  = sql.Dialect(cuo.driver.Dialect())
-		selector = builder.Select(car.Columns...).From(builder.Table(car.Table))
-	)
-	car.ID(cuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = cuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   car.Table,
+			Columns: car.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  cuo.id,
+				Type:   field.TypeInt,
+				Column: car.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		c = &Car{config: cuo.config}
-		if err := c.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Car: %v", err)
-		}
-		id = c.ID
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Car with id: %v", cuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Car with the same id: %v", cuo.id)
-	}
-
-	tx, err := cuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(car.Table)
-	)
-	updater = updater.Where(sql.InInts(car.FieldID, ids...))
 	if value := cuo.model; value != nil {
-		updater.Set(car.FieldModel, *value)
-		c.Model = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: car.FieldModel,
+		})
 	}
 	if value := cuo.registered_at; value != nil {
-		updater.Set(car.FieldRegisteredAt, *value)
-		c.RegisteredAt = *value
-	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: car.FieldRegisteredAt,
+		})
 	}
 	if cuo.clearedOwner {
-		query, args := builder.Update(car.OwnerTable).
-			SetNull(car.OwnerColumn).
-			Where(sql.InInts(user.FieldID, ids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   car.OwnerTable,
+			Columns: []string{car.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if len(cuo.owner) > 0 {
-		for eid := range cuo.owner {
-			query, args := builder.Update(car.OwnerTable).
-				Set(car.OwnerColumn, eid).
-				Where(sql.InInts(car.FieldID, ids...)).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
+	if nodes := cuo.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   car.OwnerTable,
+			Columns: []string{car.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
 		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	c = &Car{config: cuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullTime{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		c.ID = int(value.Int64)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field model", values[0])
+		} else if value.Valid {
+			c.Model = value.String
+		}
+		if value, ok := values[1].(*sql.NullTime); !ok {
+			return fmt.Errorf("unexpected type %T for field registered_at", values[1])
+		} else if value.Valid {
+			c.RegisteredAt = value.Time
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return c, nil

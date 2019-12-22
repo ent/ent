@@ -12,9 +12,11 @@ import (
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.
@@ -106,100 +108,83 @@ func (ftu *FileTypeUpdate) ExecX(ctx context.Context) {
 }
 
 func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(ftu.driver.Dialect())
-		selector = builder.Select(filetype.FieldID).From(builder.Table(filetype.Table))
-	)
-	for _, p := range ftu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   filetype.Table,
+			Columns: filetype.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: filetype.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = ftu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := ftu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := ftu.driver.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(filetype.Table)
-	)
-	updater = updater.Where(sql.InInts(filetype.FieldID, ids...))
 	if value := ftu.name; value != nil {
-		updater.Set(filetype.FieldName, *value)
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: filetype.FieldName,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
+	if nodes := ftu.removedFiles; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
 		}
-	}
-	if len(ftu.removedFiles) > 0 {
-		eids := make([]int, len(ftu.removedFiles))
-		for eid := range ftu.removedFiles {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
-		}
-		query, args := builder.Update(filetype.FilesTable).
-			SetNull(filetype.FilesColumn).
-			Where(sql.InInts(filetype.FilesColumn, ids...)).
-			Where(sql.InInts(file.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return 0, rollback(tx, err)
-		}
-	}
-	if len(ftu.files) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range ftu.files {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(file.FieldID, eid)
-			}
-			query, args := builder.Update(filetype.FilesTable).
-				Set(filetype.FilesColumn, id).
-				Where(sql.And(p, sql.IsNull(filetype.FilesColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return 0, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return 0, rollback(tx, err)
+				return 0, err
 			}
-			if int(affected) < len(ftu.files) {
-				return 0, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"FileType\"", keys(ftu.files))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if nodes := ftu.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	return len(ids), nil
+	return n, nil
 }
 
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
@@ -285,101 +270,96 @@ func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err error) {
-	var (
-		builder  = sql.Dialect(ftuo.driver.Dialect())
-		selector = builder.Select(filetype.Columns...).From(builder.Table(filetype.Table))
-	)
-	filetype.ID(ftuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = ftuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   filetype.Table,
+			Columns: filetype.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  ftuo.id,
+				Type:   field.TypeString,
+				Column: filetype.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		ft = &FileType{config: ftuo.config}
-		if err := ft.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into FileType: %v", err)
-		}
-		id = ft.id()
-		ids = append(ids, id)
-	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("FileType with id: %v", ftuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one FileType with the same id: %v", ftuo.id)
-	}
-
-	tx, err := ftuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		res     sql.Result
-		updater = builder.Update(filetype.Table)
-	)
-	updater = updater.Where(sql.InInts(filetype.FieldID, ids...))
 	if value := ftuo.name; value != nil {
-		updater.Set(filetype.FieldName, *value)
-		ft.Name = *value
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  *value,
+			Column: filetype.FieldName,
+		})
 	}
-	if !updater.Empty() {
-		query, args := updater.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
+	if nodes := ftuo.removedFiles; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
 		}
-	}
-	if len(ftuo.removedFiles) > 0 {
-		eids := make([]int, len(ftuo.removedFiles))
-		for eid := range ftuo.removedFiles {
-			eid, serr := strconv.Atoi(eid)
-			if serr != nil {
-				err = rollback(tx, serr)
-				return
-			}
-			eids = append(eids, eid)
-		}
-		query, args := builder.Update(filetype.FilesTable).
-			SetNull(filetype.FilesColumn).
-			Where(sql.InInts(filetype.FilesColumn, ids...)).
-			Where(sql.InInts(file.FieldID, eids...)).
-			Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
-			return nil, rollback(tx, err)
-		}
-	}
-	if len(ftuo.files) > 0 {
-		for _, id := range ids {
-			p := sql.P()
-			for eid := range ftuo.files {
-				eid, serr := strconv.Atoi(eid)
-				if serr != nil {
-					err = rollback(tx, serr)
-					return
-				}
-				p.Or().EQ(file.FieldID, eid)
-			}
-			query, args := builder.Update(filetype.FilesTable).
-				Set(filetype.FilesColumn, id).
-				Where(sql.And(p, sql.IsNull(filetype.FilesColumn))).
-				Query()
-			if err := tx.Exec(ctx, query, args, &res); err != nil {
-				return nil, rollback(tx, err)
-			}
-			affected, err := res.RowsAffected()
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
 			if err != nil {
-				return nil, rollback(tx, err)
+				return nil, err
 			}
-			if int(affected) < len(ftuo.files) {
-				return nil, rollback(tx, &ConstraintError{msg: fmt.Sprintf("one of \"files\" %v already connected to a different \"FileType\"", keys(ftuo.files))})
-			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
 	}
-	if err = tx.Commit(); err != nil {
+	if nodes := ftuo.files; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	ft = &FileType{config: ftuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+		}
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		ft.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field name", values[0])
+		} else if value.Valid {
+			ft.Name = value.String
+		}
+		return nil
+	}
+	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return ft, nil

@@ -9,10 +9,13 @@ package ent
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // ItemUpdate is the builder for updating Item entities.
@@ -55,40 +58,30 @@ func (iu *ItemUpdate) ExecX(ctx context.Context) {
 }
 
 func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	var (
-		builder  = sql.Dialect(iu.driver.Dialect())
-		selector = builder.Select(item.FieldID).From(builder.Table(item.Table))
-	)
-	for _, p := range iu.predicates {
-		p(selector)
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   item.Table,
+			Columns: item.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeString,
+				Column: item.FieldID,
+			},
+		},
 	}
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = iu.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
-			return 0, fmt.Errorf("ent: failed reading id: %v", err)
+	if ps := iu.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
 		}
-		ids = append(ids, id)
 	}
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	tx, err := iu.driver.Tx(ctx)
-	if err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return 0, err
 	}
-	if err = tx.Commit(); err != nil {
-		return 0, err
-	}
-	return len(ids), nil
+	return n, nil
 }
 
 // ItemUpdateOne is the builder for updating a single Item entity.
@@ -125,40 +118,37 @@ func (iuo *ItemUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (i *Item, err error) {
-	var (
-		builder  = sql.Dialect(iuo.driver.Dialect())
-		selector = builder.Select(item.Columns...).From(builder.Table(item.Table))
-	)
-	item.ID(iuo.id)(selector)
-	rows := &sql.Rows{}
-	query, args := selector.Query()
-	if err = iuo.driver.Query(ctx, query, args, rows); err != nil {
-		return nil, err
+	spec := &sqlgraph.UpdateSpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   item.Table,
+			Columns: item.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Value:  iuo.id,
+				Type:   field.TypeString,
+				Column: item.FieldID,
+			},
+		},
 	}
-	defer rows.Close()
-
-	var ids []int
-	for rows.Next() {
-		var id int
-		i = &Item{config: iuo.config}
-		if err := i.FromRows(rows); err != nil {
-			return nil, fmt.Errorf("ent: failed scanning row into Item: %v", err)
+	i = &Item{config: iuo.config}
+	spec.ScanTypes = []interface{}{
+		&sql.NullInt64{},
+	}
+	spec.Assign = func(values ...interface{}) error {
+		if m, n := len(values), len(spec.ScanTypes); m != n {
+			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 		}
-		id = i.id()
-		ids = append(ids, id)
+		value, ok := values[0].(*sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field id", value)
+		}
+		i.ID = strconv.FormatInt(value.Int64, 10)
+		values = values[1:]
+		return nil
 	}
-	switch n := len(ids); {
-	case n == 0:
-		return nil, &ErrNotFound{fmt.Sprintf("Item with id: %v", iuo.id)}
-	case n > 1:
-		return nil, fmt.Errorf("ent: more than one Item with the same id: %v", iuo.id)
-	}
-
-	tx, err := iuo.driver.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if err = tx.Commit(); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, iuo.driver, spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
 		return nil, err
 	}
 	return i, nil

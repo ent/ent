@@ -10,7 +10,6 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/customid/ent"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
