@@ -584,7 +584,7 @@ func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (is *ItemSelect) sqlQuery() sql.Querier {
-	view := "item_view"
-	return sql.Dialect(is.driver.Dialect()).
-		Select(is.fields...).From(is.sql.As(view))
+	selector := is.sql
+	selector.Select(selector.Columns(is.fields...)...)
+	return selector
 }

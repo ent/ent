@@ -597,7 +597,7 @@ func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (gs *GroupSelect) sqlQuery() sql.Querier {
-	view := "group_view"
-	return sql.Dialect(gs.driver.Dialect()).
-		Select(gs.fields...).From(gs.sql.As(view))
+	selector := gs.sql
+	selector.Select(selector.Columns(gs.fields...)...)
+	return selector
 }

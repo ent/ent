@@ -634,7 +634,7 @@ func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (fs *FileSelect) sqlQuery() sql.Querier {
-	view := "file_view"
-	return sql.Dialect(fs.driver.Dialect()).
-		Select(fs.fields...).From(fs.sql.As(view))
+	selector := fs.sql
+	selector.Select(selector.Columns(fs.fields...)...)
+	return selector
 }

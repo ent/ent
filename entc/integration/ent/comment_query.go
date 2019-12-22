@@ -608,7 +608,7 @@ func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (cs *CommentSelect) sqlQuery() sql.Querier {
-	view := "comment_view"
-	return sql.Dialect(cs.driver.Dialect()).
-		Select(cs.fields...).From(cs.sql.As(view))
+	selector := cs.sql
+	selector.Select(selector.Columns(cs.fields...)...)
+	return selector
 }

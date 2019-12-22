@@ -608,7 +608,7 @@ func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (fts *FieldTypeSelect) sqlQuery() sql.Querier {
-	view := "fieldtype_view"
-	return sql.Dialect(fts.driver.Dialect()).
-		Select(fts.fields...).From(fts.sql.As(view))
+	selector := fts.sql
+	selector.Select(selector.Columns(fts.fields...)...)
+	return selector
 }

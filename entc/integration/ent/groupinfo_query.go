@@ -621,7 +621,7 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
-	view := "groupinfo_view"
-	return sql.Dialect(gis.driver.Dialect()).
-		Select(gis.fields...).From(gis.sql.As(view))
+	selector := gis.sql
+	selector.Select(selector.Columns(gis.fields...)...)
+	return selector
 }

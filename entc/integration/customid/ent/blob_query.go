@@ -609,7 +609,7 @@ func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (bs *BlobSelect) sqlQuery() sql.Querier {
-	view := "blob_view"
-	return sql.Dialect(bs.driver.Dialect()).
-		Select(bs.fields...).From(bs.sql.As(view))
+	selector := bs.sql
+	selector.Select(selector.Columns(bs.fields...)...)
+	return selector
 }

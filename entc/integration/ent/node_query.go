@@ -632,7 +632,7 @@ func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (ns *NodeSelect) sqlQuery() sql.Querier {
-	view := "node_view"
-	return sql.Dialect(ns.driver.Dialect()).
-		Select(ns.fields...).From(ns.sql.As(view))
+	selector := ns.sql
+	selector.Select(selector.Columns(ns.fields...)...)
+	return selector
 }

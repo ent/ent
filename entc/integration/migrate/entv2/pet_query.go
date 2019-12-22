@@ -584,7 +584,7 @@ func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (ps *PetSelect) sqlQuery() sql.Querier {
-	view := "pet_view"
-	return sql.Dialect(ps.driver.Dialect()).
-		Select(ps.fields...).From(ps.sql.As(view))
+	selector := ps.sql
+	selector.Select(selector.Columns(ps.fields...)...)
+	return selector
 }

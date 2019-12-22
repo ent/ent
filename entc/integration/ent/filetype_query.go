@@ -621,7 +621,7 @@ func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (fts *FileTypeSelect) sqlQuery() sql.Querier {
-	view := "filetype_view"
-	return sql.Dialect(fts.driver.Dialect()).
-		Select(fts.fields...).From(fts.sql.As(view))
+	selector := fts.sql
+	selector.Select(selector.Columns(fts.fields...)...)
+	return selector
 }

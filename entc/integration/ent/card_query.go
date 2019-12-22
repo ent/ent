@@ -621,7 +621,7 @@ func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (cs *CardSelect) sqlQuery() sql.Querier {
-	view := "card_view"
-	return sql.Dialect(cs.driver.Dialect()).
-		Select(cs.fields...).From(cs.sql.As(view))
+	selector := cs.sql
+	selector.Select(selector.Columns(cs.fields...)...)
+	return selector
 }

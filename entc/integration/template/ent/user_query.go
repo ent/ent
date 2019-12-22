@@ -633,7 +633,7 @@ func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (us *UserSelect) sqlQuery() sql.Querier {
-	view := "user_view"
-	return sql.Dialect(us.driver.Dialect()).
-		Select(us.fields...).From(us.sql.As(view))
+	selector := us.sql
+	selector.Select(selector.Columns(us.fields...)...)
+	return selector
 }
