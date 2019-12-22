@@ -417,7 +417,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 	}
 	gi = &GroupInfo{config: giuo.config}
 	spec.Assign = gi.assignValues
-	spec.ScanTypes = gi.scanValues()
+	spec.ScanValues = gi.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, giuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

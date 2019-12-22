@@ -448,7 +448,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	}
 	pe = &Pet{config: puo.config}
 	spec.Assign = pe.assignValues
-	spec.ScanTypes = pe.scanValues()
+	spec.ScanValues = pe.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, puo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

@@ -129,7 +129,7 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (i *Item, err error) {
 	}
 	i = &Item{config: iuo.config}
 	spec.Assign = i.assignValues
-	spec.ScanTypes = i.scanValues()
+	spec.ScanValues = i.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, iuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

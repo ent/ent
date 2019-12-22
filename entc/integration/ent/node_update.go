@@ -529,7 +529,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	n = &Node{config: nuo.config}
 	spec.Assign = n.assignValues
-	spec.ScanTypes = n.scanValues()
+	spec.ScanValues = n.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

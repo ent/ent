@@ -369,8 +369,8 @@ type (
 		Fields    FieldMut
 		Predicate func(*sql.Selector)
 
-		ScanTypes []interface{}
-		Assign    func(...interface{}) error
+		ScanValues []interface{}
+		Assign     func(...interface{}) error
 	}
 )
 
@@ -672,10 +672,10 @@ func (u *updater) scan(rows *sql.Rows) error {
 	if !rows.Next() {
 		return fmt.Errorf("record with id %v not found in table %s", u.Node.ID.Value, u.Node.Table)
 	}
-	if err := rows.Scan(u.ScanTypes...); err != nil {
+	if err := rows.Scan(u.ScanValues...); err != nil {
 		return fmt.Errorf("failed scanning rows: %v", err)
 	}
-	return u.Assign(u.ScanTypes...)
+	return u.Assign(u.ScanValues...)
 }
 
 type creator struct {

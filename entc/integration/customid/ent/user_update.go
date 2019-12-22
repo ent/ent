@@ -290,7 +290,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	u = &User{config: uuo.config}
 	spec.Assign = u.assignValues
-	spec.ScanTypes = u.scanValues()
+	spec.ScanValues = u.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

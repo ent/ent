@@ -686,7 +686,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 	}
 	f = &File{config: fuo.config}
 	spec.Assign = f.assignValues
-	spec.ScanTypes = f.scanValues()
+	spec.ScanValues = f.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, fuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

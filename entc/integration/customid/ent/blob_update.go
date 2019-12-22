@@ -158,7 +158,7 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 	}
 	b = &Blob{config: buo.config}
 	spec.Assign = b.assignValues
-	spec.ScanTypes = b.scanValues()
+	spec.ScanValues = b.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, buo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

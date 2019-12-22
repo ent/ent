@@ -388,7 +388,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	}
 	c = &Card{config: cuo.config}
 	spec.Assign = c.assignValues
-	spec.ScanTypes = c.scanValues()
+	spec.ScanValues = c.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

@@ -335,7 +335,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 	}
 	ft = &FileType{config: ftuo.config}
 	spec.Assign = ft.assignValues
-	spec.ScanTypes = ft.scanValues()
+	spec.ScanValues = ft.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

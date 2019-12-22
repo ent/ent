@@ -89,7 +89,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- if $one }}
 		{{ $ret }} = &{{ $.Name }}{config: {{ $receiver }}.config}
 		spec.Assign = {{ $ret }}.assignValues
-		spec.ScanTypes = {{ $ret }}.scanValues()
+		spec.ScanValues = {{ $ret }}.scanValues()
 	{{- end }}
 	{{- if $one }}
 		if err = sqlgraph.UpdateNode(ctx, {{ $receiver }}.driver, spec); err != nil {

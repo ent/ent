@@ -371,7 +371,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 	}
 	c = &Comment{config: cuo.config}
 	spec.Assign = c.assignValues
-	spec.ScanTypes = c.scanValues()
+	spec.ScanValues = c.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

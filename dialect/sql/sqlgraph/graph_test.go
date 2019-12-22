@@ -964,7 +964,7 @@ func TestUpdateNode(t *testing.T) {
 			tt.prepare(mock)
 			usr := &user{}
 			tt.spec.Assign = usr.assign
-			tt.spec.ScanTypes = usr.values()
+			tt.spec.ScanValues = usr.values()
 			err = UpdateNode(context.Background(), sql.OpenDB("", db), tt.spec)
 			require.Equal(t, tt.wantErr, err != nil, err)
 			require.Equal(t, tt.wantUser, usr)

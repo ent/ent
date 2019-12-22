@@ -1110,7 +1110,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	gr = &Group{config: guo.config}
 	spec.Assign = gr.assignValues
-	spec.ScanTypes = gr.scanValues()
+	spec.ScanValues = gr.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
