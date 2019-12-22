@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/google/uuid"
 )
 
@@ -38,6 +39,34 @@ func (b *Blob) FromRows(rows *sql.Rows) error {
 	}
 	b.ID = scanb.ID
 	b.UUID = scanb.UUID
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Blob) scanValues() []interface{} {
+	return []interface{}{
+		&uuid.UUID{},
+		&uuid.UUID{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Blob fields.
+func (b *Blob) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(blob.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	if value, ok := values[0].(*uuid.UUID); !ok {
+		return fmt.Errorf("unexpected type %T for field id", values[0])
+	} else if value != nil {
+		b.ID = *value
+	}
+	values = values[1:]
+	if value, ok := values[0].(*uuid.UUID); !ok {
+		return fmt.Errorf("unexpected type %T for field uuid", values[0])
+	} else if value != nil {
+		b.UUID = *value
+	}
 	return nil
 }
 

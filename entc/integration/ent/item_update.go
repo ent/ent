@@ -8,8 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -130,21 +128,8 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (i *Item, err error) {
 		},
 	}
 	i = &Item{config: iuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		i.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		return nil
-	}
+	spec.Assign = i.assignValues
+	spec.ScanTypes = i.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, iuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

@@ -685,46 +685,8 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	f = &File{config: fuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		f.ID = strconv.FormatInt(value.Int64, 10)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for field size", values[0])
-		} else if value.Valid {
-			f.Size = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field name", values[1])
-		} else if value.Valid {
-			f.Name = value.String
-		}
-		if value, ok := values[2].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field user", values[2])
-		} else if value.Valid {
-			f.User = new(string)
-			*f.User = value.String
-		}
-		if value, ok := values[3].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field group", values[3])
-		} else if value.Valid {
-			f.Group = value.String
-		}
-		return nil
-	}
+	spec.Assign = f.assignValues
+	spec.ScanTypes = f.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, fuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -45,6 +46,41 @@ func (pe *Pet) FromRows(rows *sql.Rows) error {
 	if scanpe.LicensedAt.Valid {
 		pe.LicensedAt = new(time.Time)
 		*pe.LicensedAt = scanpe.LicensedAt.Time
+	}
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Pet) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullTime{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Pet fields.
+func (pe *Pet) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(pet.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	pe.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[0])
+	} else if value.Valid {
+		pe.Age = int(value.Int64)
+	}
+	if value, ok := values[1].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field licensed_at", values[1])
+	} else if value.Valid {
+		pe.LicensedAt = new(time.Time)
+		*pe.LicensedAt = value.Time
 	}
 	return nil
 }

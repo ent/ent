@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
 )
 
 // Group is the model entity for the Group schema.
@@ -37,6 +38,34 @@ func (gr *Group) FromRows(rows *sql.Rows) error {
 	}
 	gr.ID = scangr.ID
 	gr.MaxUsers = int(scangr.MaxUsers.Int64)
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Group) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Group fields.
+func (gr *Group) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(group.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	gr.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field max_users", values[0])
+	} else if value.Valid {
+		gr.MaxUsers = int(value.Int64)
+	}
 	return nil
 }
 

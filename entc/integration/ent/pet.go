@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -38,6 +39,34 @@ func (pe *Pet) FromRows(rows *sql.Rows) error {
 	}
 	pe.ID = strconv.Itoa(scanpe.ID)
 	pe.Name = scanpe.Name.String
+	return nil
+}
+
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Pet) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Pet fields.
+func (pe *Pet) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(pet.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	pe.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[0])
+	} else if value.Valid {
+		pe.Name = value.String
+	}
 	return nil
 }
 

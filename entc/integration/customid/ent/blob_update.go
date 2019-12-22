@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -158,27 +157,8 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 		})
 	}
 	b = &Blob{config: buo.config}
-	spec.ScanTypes = []interface{}{
-		&uuid.UUID{},
-		&uuid.UUID{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		if value, ok := values[0].(*uuid.UUID); !ok {
-			return fmt.Errorf("unexpected type %T for field id", values[0])
-		} else if value != nil {
-			b.ID = *value
-		}
-		values = values[1:]
-		if value, ok := values[0].(*uuid.UUID); !ok {
-			return fmt.Errorf("unexpected type %T for field uuid", values[0])
-		} else if value != nil {
-			b.UUID = *value
-		}
-		return nil
-	}
+	spec.Assign = b.assignValues
+	spec.ScanTypes = b.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, buo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
