@@ -112,7 +112,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		Inverse: {{ $e.IsInverse }},
 		Table: {{ $.Package }}.{{ $e.TableConstant }},
 		Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
-		Bidi: {{ $e.SelfRef }},
+		Bidi: {{ $e.Bidi }},
 		Target: &sqlgraph.EdgeTarget{
 			IDSpec: &sqlgraph.FieldSpec{
 				Type: field.{{ $e.Type.ID.Type.ConstName }},

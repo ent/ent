@@ -89,14 +89,14 @@ type (
 		StructTag string
 		// Relation holds the relation info of an edge.
 		Rel Relation
-		// SelfRef indicates if this edge is a self-reference to the same
-		// type with the same name (symmetric relation). For example, a User
-		// type have one of following edges:
+		// Bidi indicates if this edge is a bidirectional edge. A self-reference
+		// to the same type with the same name (symmetric relation). For example,
+		// a User type have one of following edges:
 		//
 		//	edge.To("friends", User.Type)           // many 2 many.
 		//	edge.To("spouse", User.Type).Unique()   // one 2 one.
 		//
-		SelfRef bool
+		Bidi bool
 	}
 
 	// Relation holds the relational database information for edges.
@@ -384,6 +384,21 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	return nil
 }
 
+// EdgeFields returns the edges that resides in the type's
+// table in SQL as foreign-keys (columns).
+func (t Type) EdgeFields() []*Edge {
+	var fks []*Edge
+	for _, e := range t.Edges {
+		switch {
+		case e.M2O():
+			fks = append(fks, e)
+		case e.O2O() && (e.IsInverse() || e.Bidi):
+			fks = append(fks, e)
+		}
+	}
+	return fks
+}
+
 // Constant returns the constant name of the field.
 func (f Field) Constant() string { return "Field" + pascal(f.Name) }
 
@@ -596,6 +611,7 @@ func (e Edge) PKConstant() string { return pascal(e.Name) + "PrimaryKey" }
 
 // HasConstraint indicates if this edge has a unique constraint check.
 // We check uniqueness when both-directions are unique or one of them.
+// Used by the Gremlin storage-layer.
 func (e Edge) HasConstraint() bool {
 	return e.Rel.Type == O2O || e.Rel.Type == O2M
 }
