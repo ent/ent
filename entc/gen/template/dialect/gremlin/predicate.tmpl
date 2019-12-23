@@ -56,7 +56,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- end -}}
 	func(t *dsl.Traversal) {
 		{{- /* if it's an edge with self-reference, take the two vertices */}}
-		{{- if $e.SelfRef }}
+		{{- if $e.Bidi }}
 			t.Both({{ $label }})
 		{{- else }}
 			t.{{ $direction }}E({{ $label }}).{{ $direction }}V()
@@ -76,7 +76,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{- $label = $e.InverseConstant -}}
 	{{- end -}}
 	func(t *dsl.Traversal) {
-		{{- if $e.SelfRef }}{{/* selfref means it should be true in one of the directions */}}
+		{{- if $e.Bidi }}{{/* selfref means it should be true in one of the directions */}}
 			in, out := __.InV(), __.OutV()
 			for _, p := range preds {
 				p(in)

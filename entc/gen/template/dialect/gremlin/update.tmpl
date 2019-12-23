@@ -108,7 +108,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{- else }}
 		for id := range {{ $receiver }}.removed{{ $e.StructField }} {
 		{{- end }}
-		{{- if $e.SelfRef }}
+		{{- if $e.Bidi }}
 			tr := rv.Clone().BothE({{ $name }}){{ if not $e.Unique }}.Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))){{ end }}.Drop().Iterate()
 		{{- else if $e.IsInverse }}
 			tr := rv.Clone().InE({{ $name }}){{ if not $e.Unique }}.Where(__.OtherV().HasID(id)){{ end }}.Drop().Iterate()
@@ -125,7 +125,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			v.AddE({{ $name }}).To(g.V(id)).OutV()
 		{{- end }}
 		{{- if $e.HasConstraint }}
-			{{- if $e.SelfRef }}
+			{{- if $e.Bidi }}
 				constraints = append(constraints, &constraint{
 					pred: rv.Clone().Both({{ $name }}).Count(),
 					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),

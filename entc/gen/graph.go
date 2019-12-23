@@ -262,13 +262,13 @@ func (g *Graph) resolve(t *Type) error {
 			switch {
 			case !e.Unique && e.Type == t:
 				e.Rel.Type = M2M
-				e.SelfRef = true
+				e.Bidi = true
 				e.Rel.Table = t.Label() + "_" + e.Name
 				c1, c2 := e.Owner.Label()+"_id", rules.Singularize(e.Name)+"_id"
 				e.Rel.Columns = append(e.Rel.Columns, c1, c2)
 			case e.Unique && e.Type == t:
 				e.Rel.Type = O2O
-				e.SelfRef = true
+				e.Bidi = true
 				e.Rel.Table = t.Table()
 			case e.Unique:
 				e.Rel.Type = M2O

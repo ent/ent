@@ -74,7 +74,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
 	gremlin := {{ $receiver }}.gremlinQuery()
-	{{- if $e.SelfRef }}
+	{{- if $e.Bidi }}
 		query.gremlin = gremlin.Both({{ $.Package }}.{{ $e.Constant }})
 	{{- else if $e.IsInverse }}
 		query.gremlin = gremlin.InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
@@ -90,7 +90,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
 
-	{{- if $e.SelfRef }}
+	{{- if $e.Bidi }}
 		query.gremlin = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.Constant }})
 	{{- else if $e.IsInverse }}
 		query.gremlin = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
