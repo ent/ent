@@ -24,24 +24,6 @@ type FileType struct {
 	Name string `json:"name,omitempty"`
 }
 
-// FromRows scans the sql response data into FileType.
-func (ft *FileType) FromRows(rows *sql.Rows) error {
-	var scanft struct {
-		ID   int
-		Name sql.NullString
-	}
-	// the order here should be the same as in the `filetype.Columns`.
-	if err := rows.Scan(
-		&scanft.ID,
-		&scanft.Name,
-	); err != nil {
-		return err
-	}
-	ft.ID = strconv.Itoa(scanft.ID)
-	ft.Name = scanft.Name.String
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*FileType) scanValues() []interface{} {
 	return []interface{}{
@@ -112,18 +94,6 @@ func (ft *FileType) id() int {
 
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType
-
-// FromRows scans the sql response data into FileTypes.
-func (ft *FileTypes) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanft := &FileType{}
-		if err := scanft.FromRows(rows); err != nil {
-			return err
-		}
-		*ft = append(*ft, scanft)
-	}
-	return nil
-}
 
 func (ft FileTypes) config(cfg config) {
 	for _i := range ft {

@@ -34,33 +34,6 @@ type Card struct {
 	StaticField string `json:"boring,omitempty"`
 }
 
-// FromRows scans the sql response data into Card.
-func (c *Card) FromRows(rows *sql.Rows) error {
-	var scanc struct {
-		ID         int
-		CreateTime sql.NullTime
-		UpdateTime sql.NullTime
-		Number     sql.NullString
-		Name       sql.NullString
-	}
-	// the order here should be the same as in the `card.Columns`.
-	if err := rows.Scan(
-		&scanc.ID,
-		&scanc.CreateTime,
-		&scanc.UpdateTime,
-		&scanc.Number,
-		&scanc.Name,
-	); err != nil {
-		return err
-	}
-	c.ID = strconv.Itoa(scanc.ID)
-	c.CreateTime = scanc.CreateTime.Time
-	c.UpdateTime = scanc.UpdateTime.Time
-	c.Number = scanc.Number.String
-	c.Name = scanc.Name.String
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Card) scanValues() []interface{} {
 	return []interface{}{
@@ -155,18 +128,6 @@ func (c *Card) id() int {
 
 // Cards is a parsable slice of Card.
 type Cards []*Card
-
-// FromRows scans the sql response data into Cards.
-func (c *Cards) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanc := &Card{}
-		if err := scanc.FromRows(rows); err != nil {
-			return err
-		}
-		*c = append(*c, scanc)
-	}
-	return nil
-}
 
 func (c Cards) config(cfg config) {
 	for _i := range c {

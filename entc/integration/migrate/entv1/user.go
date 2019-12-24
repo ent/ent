@@ -35,42 +35,6 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 }
 
-// FromRows scans the sql response data into User.
-func (u *User) FromRows(rows *sql.Rows) error {
-	var scanu struct {
-		ID       int
-		Age      sql.NullInt64
-		Name     sql.NullString
-		Nickname sql.NullString
-		Address  sql.NullString
-		Renamed  sql.NullString
-		Blob     []byte
-		State    sql.NullString
-	}
-	// the order here should be the same as in the `user.Columns`.
-	if err := rows.Scan(
-		&scanu.ID,
-		&scanu.Age,
-		&scanu.Name,
-		&scanu.Nickname,
-		&scanu.Address,
-		&scanu.Renamed,
-		&scanu.Blob,
-		&scanu.State,
-	); err != nil {
-		return err
-	}
-	u.ID = scanu.ID
-	u.Age = int32(scanu.Age.Int64)
-	u.Name = scanu.Name.String
-	u.Nickname = scanu.Nickname.String
-	u.Address = scanu.Address.String
-	u.Renamed = scanu.Renamed.String
-	u.Blob = scanu.Blob
-	u.State = user.State(scanu.State.String)
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -178,18 +142,6 @@ func (u *User) String() string {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-// FromRows scans the sql response data into Users.
-func (u *Users) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanu := &User{}
-		if err := scanu.FromRows(rows); err != nil {
-			return err
-		}
-		*u = append(*u, scanu)
-	}
-	return nil
-}
 
 func (u Users) config(cfg config) {
 	for _i := range u {

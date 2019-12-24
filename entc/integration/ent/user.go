@@ -34,39 +34,6 @@ type User struct {
 	Password string `graphql:"-" json:"-"`
 }
 
-// FromRows scans the sql response data into User.
-func (u *User) FromRows(rows *sql.Rows) error {
-	var scanu struct {
-		ID       int
-		Age      sql.NullInt64
-		Name     sql.NullString
-		Last     sql.NullString
-		Nickname sql.NullString
-		Phone    sql.NullString
-		Password sql.NullString
-	}
-	// the order here should be the same as in the `user.Columns`.
-	if err := rows.Scan(
-		&scanu.ID,
-		&scanu.Age,
-		&scanu.Name,
-		&scanu.Last,
-		&scanu.Nickname,
-		&scanu.Phone,
-		&scanu.Password,
-	); err != nil {
-		return err
-	}
-	u.ID = strconv.Itoa(scanu.ID)
-	u.Age = int(scanu.Age.Int64)
-	u.Name = scanu.Name.String
-	u.Last = scanu.Last.String
-	u.Nickname = scanu.Nickname.String
-	u.Phone = scanu.Phone.String
-	u.Password = scanu.Password.String
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -226,18 +193,6 @@ func (u *User) id() int {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-// FromRows scans the sql response data into Users.
-func (u *Users) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanu := &User{}
-		if err := scanu.FromRows(rows); err != nil {
-			return err
-		}
-		*u = append(*u, scanu)
-	}
-	return nil
-}
 
 func (u Users) config(cfg config) {
 	for _i := range u {

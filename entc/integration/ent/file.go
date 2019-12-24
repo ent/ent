@@ -30,36 +30,6 @@ type File struct {
 	Group string `json:"group,omitempty"`
 }
 
-// FromRows scans the sql response data into File.
-func (f *File) FromRows(rows *sql.Rows) error {
-	var scanf struct {
-		ID    int
-		Size  sql.NullInt64
-		Name  sql.NullString
-		User  sql.NullString
-		Group sql.NullString
-	}
-	// the order here should be the same as in the `file.Columns`.
-	if err := rows.Scan(
-		&scanf.ID,
-		&scanf.Size,
-		&scanf.Name,
-		&scanf.User,
-		&scanf.Group,
-	); err != nil {
-		return err
-	}
-	f.ID = strconv.Itoa(scanf.ID)
-	f.Size = int(scanf.Size.Int64)
-	f.Name = scanf.Name.String
-	if scanf.User.Valid {
-		f.User = new(string)
-		*f.User = scanf.User.String
-	}
-	f.Group = scanf.Group.String
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*File) scanValues() []interface{} {
 	return []interface{}{
@@ -162,18 +132,6 @@ func (f *File) id() int {
 
 // Files is a parsable slice of File.
 type Files []*File
-
-// FromRows scans the sql response data into Files.
-func (f *Files) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanf := &File{}
-		if err := scanf.FromRows(rows); err != nil {
-			return err
-		}
-		*f = append(*f, scanf)
-	}
-	return nil
-}
 
 func (f Files) config(cfg config) {
 	for _i := range f {

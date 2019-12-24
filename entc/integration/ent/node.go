@@ -24,24 +24,6 @@ type Node struct {
 	Value int `json:"value,omitempty"`
 }
 
-// FromRows scans the sql response data into Node.
-func (n *Node) FromRows(rows *sql.Rows) error {
-	var scann struct {
-		ID    int
-		Value sql.NullInt64
-	}
-	// the order here should be the same as in the `node.Columns`.
-	if err := rows.Scan(
-		&scann.ID,
-		&scann.Value,
-	); err != nil {
-		return err
-	}
-	n.ID = strconv.Itoa(scann.ID)
-	n.Value = int(scann.Value.Int64)
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Node) scanValues() []interface{} {
 	return []interface{}{
@@ -117,18 +99,6 @@ func (n *Node) id() int {
 
 // Nodes is a parsable slice of Node.
 type Nodes []*Node
-
-// FromRows scans the sql response data into Nodes.
-func (n *Nodes) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scann := &Node{}
-		if err := scann.FromRows(rows); err != nil {
-			return err
-		}
-		*n = append(*n, scann)
-	}
-	return nil
-}
 
 func (n Nodes) config(cfg config) {
 	for _i := range n {

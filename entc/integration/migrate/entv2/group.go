@@ -21,21 +21,6 @@ type Group struct {
 	ID int `json:"id,omitempty"`
 }
 
-// FromRows scans the sql response data into Group.
-func (gr *Group) FromRows(rows *sql.Rows) error {
-	var scangr struct {
-		ID int
-	}
-	// the order here should be the same as in the `group.Columns`.
-	if err := rows.Scan(
-		&scangr.ID,
-	); err != nil {
-		return err
-	}
-	gr.ID = scangr.ID
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Group) scanValues() []interface{} {
 	return []interface{}{
@@ -87,18 +72,6 @@ func (gr *Group) String() string {
 
 // Groups is a parsable slice of Group.
 type Groups []*Group
-
-// FromRows scans the sql response data into Groups.
-func (gr *Groups) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scangr := &Group{}
-		if err := scangr.FromRows(rows); err != nil {
-			return err
-		}
-		*gr = append(*gr, scangr)
-	}
-	return nil
-}
 
 func (gr Groups) config(cfg config) {
 	for _i := range gr {

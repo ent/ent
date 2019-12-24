@@ -28,33 +28,6 @@ type Comment struct {
 	NillableInt *int `json:"nillable_int,omitempty"`
 }
 
-// FromRows scans the sql response data into Comment.
-func (c *Comment) FromRows(rows *sql.Rows) error {
-	var scanc struct {
-		ID          int
-		UniqueInt   sql.NullInt64
-		UniqueFloat sql.NullFloat64
-		NillableInt sql.NullInt64
-	}
-	// the order here should be the same as in the `comment.Columns`.
-	if err := rows.Scan(
-		&scanc.ID,
-		&scanc.UniqueInt,
-		&scanc.UniqueFloat,
-		&scanc.NillableInt,
-	); err != nil {
-		return err
-	}
-	c.ID = strconv.Itoa(scanc.ID)
-	c.UniqueInt = int(scanc.UniqueInt.Int64)
-	c.UniqueFloat = scanc.UniqueFloat.Float64
-	if scanc.NillableInt.Valid {
-		c.NillableInt = new(int)
-		*c.NillableInt = int(scanc.NillableInt.Int64)
-	}
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Comment) scanValues() []interface{} {
 	return []interface{}{
@@ -139,18 +112,6 @@ func (c *Comment) id() int {
 
 // Comments is a parsable slice of Comment.
 type Comments []*Comment
-
-// FromRows scans the sql response data into Comments.
-func (c *Comments) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanc := &Comment{}
-		if err := scanc.FromRows(rows); err != nil {
-			return err
-		}
-		*c = append(*c, scanc)
-	}
-	return nil
-}
 
 func (c Comments) config(cfg config) {
 	for _i := range c {
