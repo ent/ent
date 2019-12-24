@@ -33,39 +33,6 @@ type Group struct {
 	Name string `json:"name,omitempty"`
 }
 
-// FromRows scans the sql response data into Group.
-func (gr *Group) FromRows(rows *sql.Rows) error {
-	var scangr struct {
-		ID       int
-		Active   sql.NullBool
-		Expire   sql.NullTime
-		Type     sql.NullString
-		MaxUsers sql.NullInt64
-		Name     sql.NullString
-	}
-	// the order here should be the same as in the `group.Columns`.
-	if err := rows.Scan(
-		&scangr.ID,
-		&scangr.Active,
-		&scangr.Expire,
-		&scangr.Type,
-		&scangr.MaxUsers,
-		&scangr.Name,
-	); err != nil {
-		return err
-	}
-	gr.ID = strconv.Itoa(scangr.ID)
-	gr.Active = scangr.Active.Bool
-	gr.Expire = scangr.Expire.Time
-	if scangr.Type.Valid {
-		gr.Type = new(string)
-		*gr.Type = scangr.Type.String
-	}
-	gr.MaxUsers = int(scangr.MaxUsers.Int64)
-	gr.Name = scangr.Name.String
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Group) scanValues() []interface{} {
 	return []interface{}{
@@ -186,18 +153,6 @@ func (gr *Group) id() int {
 
 // Groups is a parsable slice of Group.
 type Groups []*Group
-
-// FromRows scans the sql response data into Groups.
-func (gr *Groups) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scangr := &Group{}
-		if err := scangr.FromRows(rows); err != nil {
-			return err
-		}
-		*gr = append(*gr, scangr)
-	}
-	return nil
-}
 
 func (gr Groups) config(cfg config) {
 	for _i := range gr {

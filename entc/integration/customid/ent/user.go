@@ -21,21 +21,6 @@ type User struct {
 	ID int `json:"id,omitempty"`
 }
 
-// FromRows scans the sql response data into User.
-func (u *User) FromRows(rows *sql.Rows) error {
-	var scanu struct {
-		ID int
-	}
-	// the order here should be the same as in the `user.Columns`.
-	if err := rows.Scan(
-		&scanu.ID,
-	); err != nil {
-		return err
-	}
-	u.ID = scanu.ID
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -92,18 +77,6 @@ func (u *User) String() string {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-// FromRows scans the sql response data into Users.
-func (u *Users) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanu := &User{}
-		if err := scanu.FromRows(rows); err != nil {
-			return err
-		}
-		*u = append(*u, scanu)
-	}
-	return nil
-}
 
 func (u Users) config(cfg config) {
 	for _i := range u {

@@ -56,87 +56,6 @@ type FieldType struct {
 	State fieldtype.State `json:"state,omitempty"`
 }
 
-// FromRows scans the sql response data into FieldType.
-func (ft *FieldType) FromRows(rows *sql.Rows) error {
-	var scanft struct {
-		ID                    int
-		Int                   sql.NullInt64
-		Int8                  sql.NullInt64
-		Int16                 sql.NullInt64
-		Int32                 sql.NullInt64
-		Int64                 sql.NullInt64
-		OptionalInt           sql.NullInt64
-		OptionalInt8          sql.NullInt64
-		OptionalInt16         sql.NullInt64
-		OptionalInt32         sql.NullInt64
-		OptionalInt64         sql.NullInt64
-		NillableInt           sql.NullInt64
-		NillableInt8          sql.NullInt64
-		NillableInt16         sql.NullInt64
-		NillableInt32         sql.NullInt64
-		NillableInt64         sql.NullInt64
-		ValidateOptionalInt32 sql.NullInt64
-		State                 sql.NullString
-	}
-	// the order here should be the same as in the `fieldtype.Columns`.
-	if err := rows.Scan(
-		&scanft.ID,
-		&scanft.Int,
-		&scanft.Int8,
-		&scanft.Int16,
-		&scanft.Int32,
-		&scanft.Int64,
-		&scanft.OptionalInt,
-		&scanft.OptionalInt8,
-		&scanft.OptionalInt16,
-		&scanft.OptionalInt32,
-		&scanft.OptionalInt64,
-		&scanft.NillableInt,
-		&scanft.NillableInt8,
-		&scanft.NillableInt16,
-		&scanft.NillableInt32,
-		&scanft.NillableInt64,
-		&scanft.ValidateOptionalInt32,
-		&scanft.State,
-	); err != nil {
-		return err
-	}
-	ft.ID = strconv.Itoa(scanft.ID)
-	ft.Int = int(scanft.Int.Int64)
-	ft.Int8 = int8(scanft.Int8.Int64)
-	ft.Int16 = int16(scanft.Int16.Int64)
-	ft.Int32 = int32(scanft.Int32.Int64)
-	ft.Int64 = scanft.Int64.Int64
-	ft.OptionalInt = int(scanft.OptionalInt.Int64)
-	ft.OptionalInt8 = int8(scanft.OptionalInt8.Int64)
-	ft.OptionalInt16 = int16(scanft.OptionalInt16.Int64)
-	ft.OptionalInt32 = int32(scanft.OptionalInt32.Int64)
-	ft.OptionalInt64 = scanft.OptionalInt64.Int64
-	if scanft.NillableInt.Valid {
-		ft.NillableInt = new(int)
-		*ft.NillableInt = int(scanft.NillableInt.Int64)
-	}
-	if scanft.NillableInt8.Valid {
-		ft.NillableInt8 = new(int8)
-		*ft.NillableInt8 = int8(scanft.NillableInt8.Int64)
-	}
-	if scanft.NillableInt16.Valid {
-		ft.NillableInt16 = new(int16)
-		*ft.NillableInt16 = int16(scanft.NillableInt16.Int64)
-	}
-	if scanft.NillableInt32.Valid {
-		ft.NillableInt32 = new(int32)
-		*ft.NillableInt32 = int32(scanft.NillableInt32.Int64)
-	}
-	if scanft.NillableInt64.Valid {
-		ft.NillableInt64 = new(int64)
-		*ft.NillableInt64 = scanft.NillableInt64.Int64
-	}
-	ft.ValidateOptionalInt32 = int32(scanft.ValidateOptionalInt32.Int64)
-	ft.State = fieldtype.State(scanft.State.String)
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*FieldType) scanValues() []interface{} {
 	return []interface{}{
@@ -345,18 +264,6 @@ func (ft *FieldType) id() int {
 
 // FieldTypes is a parsable slice of FieldType.
 type FieldTypes []*FieldType
-
-// FromRows scans the sql response data into FieldTypes.
-func (ft *FieldTypes) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanft := &FieldType{}
-		if err := scanft.FromRows(rows); err != nil {
-			return err
-		}
-		*ft = append(*ft, scanft)
-	}
-	return nil
-}
 
 func (ft FieldTypes) config(cfg config) {
 	for _i := range ft {

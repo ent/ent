@@ -36,63 +36,6 @@ type User struct {
 	Strings []string `json:"strings,omitempty"`
 }
 
-// FromRows scans the sql response data into User.
-func (u *User) FromRows(rows *sql.Rows) error {
-	var scanu struct {
-		ID      int
-		URL     []byte
-		Raw     []byte
-		Dirs    []byte
-		Ints    []byte
-		Floats  []byte
-		Strings []byte
-	}
-	// the order here should be the same as in the `user.Columns`.
-	if err := rows.Scan(
-		&scanu.ID,
-		&scanu.URL,
-		&scanu.Raw,
-		&scanu.Dirs,
-		&scanu.Ints,
-		&scanu.Floats,
-		&scanu.Strings,
-	); err != nil {
-		return err
-	}
-	u.ID = scanu.ID
-	if value := scanu.URL; len(value) > 0 {
-		if err := json.Unmarshal(value, &u.URL); err != nil {
-			return fmt.Errorf("unmarshal field url: %v", err)
-		}
-	}
-	if value := scanu.Raw; len(value) > 0 {
-		if err := json.Unmarshal(value, &u.Raw); err != nil {
-			return fmt.Errorf("unmarshal field raw: %v", err)
-		}
-	}
-	if value := scanu.Dirs; len(value) > 0 {
-		if err := json.Unmarshal(value, &u.Dirs); err != nil {
-			return fmt.Errorf("unmarshal field dirs: %v", err)
-		}
-	}
-	if value := scanu.Ints; len(value) > 0 {
-		if err := json.Unmarshal(value, &u.Ints); err != nil {
-			return fmt.Errorf("unmarshal field ints: %v", err)
-		}
-	}
-	if value := scanu.Floats; len(value) > 0 {
-		if err := json.Unmarshal(value, &u.Floats); err != nil {
-			return fmt.Errorf("unmarshal field floats: %v", err)
-		}
-	}
-	if value := scanu.Strings; len(value) > 0 {
-		if err := json.Unmarshal(value, &u.Strings); err != nil {
-			return fmt.Errorf("unmarshal field strings: %v", err)
-		}
-	}
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -210,18 +153,6 @@ func (u *User) String() string {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-// FromRows scans the sql response data into Users.
-func (u *Users) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanu := &User{}
-		if err := scanu.FromRows(rows); err != nil {
-			return err
-		}
-		*u = append(*u, scanu)
-	}
-	return nil
-}
 
 func (u Users) config(cfg config) {
 	for _i := range u {

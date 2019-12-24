@@ -22,21 +22,6 @@ type Item struct {
 	ID string `json:"id,omitempty"`
 }
 
-// FromRows scans the sql response data into Item.
-func (i *Item) FromRows(rows *sql.Rows) error {
-	var scani struct {
-		ID int
-	}
-	// the order here should be the same as in the `item.Columns`.
-	if err := rows.Scan(
-		&scani.ID,
-	); err != nil {
-		return err
-	}
-	i.ID = strconv.Itoa(scani.ID)
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Item) scanValues() []interface{} {
 	return []interface{}{
@@ -94,18 +79,6 @@ func (i *Item) id() int {
 
 // Items is a parsable slice of Item.
 type Items []*Item
-
-// FromRows scans the sql response data into Items.
-func (i *Items) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scani := &Item{}
-		if err := scani.FromRows(rows); err != nil {
-			return err
-		}
-		*i = append(*i, scani)
-	}
-	return nil
-}
 
 func (i Items) config(cfg config) {
 	for _i := range i {

@@ -26,27 +26,6 @@ type GroupInfo struct {
 	MaxUsers int `json:"max_users,omitempty"`
 }
 
-// FromRows scans the sql response data into GroupInfo.
-func (gi *GroupInfo) FromRows(rows *sql.Rows) error {
-	var scangi struct {
-		ID       int
-		Desc     sql.NullString
-		MaxUsers sql.NullInt64
-	}
-	// the order here should be the same as in the `groupinfo.Columns`.
-	if err := rows.Scan(
-		&scangi.ID,
-		&scangi.Desc,
-		&scangi.MaxUsers,
-	); err != nil {
-		return err
-	}
-	gi.ID = strconv.Itoa(scangi.ID)
-	gi.Desc = scangi.Desc.String
-	gi.MaxUsers = int(scangi.MaxUsers.Int64)
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*GroupInfo) scanValues() []interface{} {
 	return []interface{}{
@@ -125,18 +104,6 @@ func (gi *GroupInfo) id() int {
 
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo
-
-// FromRows scans the sql response data into GroupInfos.
-func (gi *GroupInfos) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scangi := &GroupInfo{}
-		if err := scangi.FromRows(rows); err != nil {
-			return err
-		}
-		*gi = append(*gi, scangi)
-	}
-	return nil
-}
 
 func (gi GroupInfos) config(cfg config) {
 	for _i := range gi {

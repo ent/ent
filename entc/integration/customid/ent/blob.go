@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/google/uuid"
 )
@@ -22,24 +21,6 @@ type Blob struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
-}
-
-// FromRows scans the sql response data into Blob.
-func (b *Blob) FromRows(rows *sql.Rows) error {
-	var scanb struct {
-		ID   uuid.UUID
-		UUID uuid.UUID
-	}
-	// the order here should be the same as in the `blob.Columns`.
-	if err := rows.Scan(
-		&scanb.ID,
-		&scanb.UUID,
-	); err != nil {
-		return err
-	}
-	b.ID = scanb.ID
-	b.UUID = scanb.UUID
-	return nil
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -101,18 +82,6 @@ func (b *Blob) String() string {
 
 // Blobs is a parsable slice of Blob.
 type Blobs []*Blob
-
-// FromRows scans the sql response data into Blobs.
-func (b *Blobs) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanb := &Blob{}
-		if err := scanb.FromRows(rows); err != nil {
-			return err
-		}
-		*b = append(*b, scanb)
-	}
-	return nil
-}
 
 func (b Blobs) config(cfg config) {
 	for _i := range b {

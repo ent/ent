@@ -21,21 +21,6 @@ type Pet struct {
 	ID int `json:"id,omitempty"`
 }
 
-// FromRows scans the sql response data into Pet.
-func (pe *Pet) FromRows(rows *sql.Rows) error {
-	var scanpe struct {
-		ID int
-	}
-	// the order here should be the same as in the `pet.Columns`.
-	if err := rows.Scan(
-		&scanpe.ID,
-	); err != nil {
-		return err
-	}
-	pe.ID = scanpe.ID
-	return nil
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Pet) scanValues() []interface{} {
 	return []interface{}{
@@ -87,18 +72,6 @@ func (pe *Pet) String() string {
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
-
-// FromRows scans the sql response data into Pets.
-func (pe *Pets) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanpe := &Pet{}
-		if err := scanpe.FromRows(rows); err != nil {
-			return err
-		}
-		*pe = append(*pe, scanpe)
-	}
-	return nil
-}
 
 func (pe Pets) config(cfg config) {
 	for _i := range pe {
