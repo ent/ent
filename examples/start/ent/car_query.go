@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/examples/start/ent/car"
 	"github.com/facebookincubator/ent/examples/start/ent/predicate"
 	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // CarQuery is the builder for querying Car entities.
@@ -278,45 +279,31 @@ func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
 }
 
 func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	if unique := cq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Car
+		spec  = cq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Car{config: cq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var cs Cars
-	if err := cs.FromRows(rows); err != nil {
-		return nil, err
-	}
-	cs.config(cq.config)
-	return cs, nil
+	return nodes, nil
 }
 
 func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := cq.sqlQuery()
-	unique := []string{car.FieldID}
-	if len(cq.unique) > 0 {
-		unique = cq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := cq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := cq.querySpec()
+	return sqlgraph.CountNodes(ctx, cq.driver, spec)
 }
 
 func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -325,6 +312,42 @@ func (cq *CarQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   car.Table,
+			Columns: car.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: car.FieldID,
+			},
+		},
+		From:   cq.sql,
+		Unique: true,
+	}
+	if ps := cq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := cq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := cq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := cq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (cq *CarQuery) sqlQuery() *sql.Selector {
@@ -598,7 +621,7 @@ func (cs *CarSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (cs *CarSelect) sqlQuery() sql.Querier {
-	view := "car_view"
-	return sql.Dialect(cs.driver.Dialect()).
-		Select(cs.fields...).From(cs.sql.As(view))
+	selector := cs.sql
+	selector.Select(selector.Columns(cs.fields...)...)
+	return selector
 }

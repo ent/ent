@@ -16,6 +16,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/predicate"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // NodeQuery is the builder for querying Node entities.
@@ -289,45 +290,31 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 }
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
-	rows := &sql.Rows{}
-	selector := nq.sqlQuery()
-	if unique := nq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*Node
+		spec  = nq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &Node{config: nq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := nq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, nq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var ns Nodes
-	if err := ns.FromRows(rows); err != nil {
-		return nil, err
-	}
-	ns.config(nq.config)
-	return ns, nil
+	return nodes, nil
 }
 
 func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := nq.sqlQuery()
-	unique := []string{node.FieldID}
-	if len(nq.unique) > 0 {
-		unique = nq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := nq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := nq.querySpec()
+	return sqlgraph.CountNodes(ctx, nq.driver, spec)
 }
 
 func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -336,6 +323,42 @@ func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   node.Table,
+			Columns: node.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: node.FieldID,
+			},
+		},
+		From:   nq.sql,
+		Unique: true,
+	}
+	if ps := nq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := nq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := nq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := nq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (nq *NodeQuery) sqlQuery() *sql.Selector {
@@ -609,7 +632,7 @@ func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (ns *NodeSelect) sqlQuery() sql.Querier {
-	view := "node_view"
-	return sql.Dialect(ns.driver.Dialect()).
-		Select(ns.fields...).From(ns.sql.As(view))
+	selector := ns.sql
+	selector.Select(selector.Columns(ns.fields...)...)
+	return selector
 }

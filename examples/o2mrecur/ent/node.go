@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
 )
 
 // Node is the model entity for the Node schema.
@@ -22,21 +23,31 @@ type Node struct {
 	Value int `json:"value,omitempty"`
 }
 
-// FromRows scans the sql response data into Node.
-func (n *Node) FromRows(rows *sql.Rows) error {
-	var scann struct {
-		ID    int
-		Value sql.NullInt64
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Node) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
 	}
-	// the order here should be the same as in the `node.Columns`.
-	if err := rows.Scan(
-		&scann.ID,
-		&scann.Value,
-	); err != nil {
-		return err
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Node fields.
+func (n *Node) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(node.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	n.ID = scann.ID
-	n.Value = int(scann.Value.Int64)
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	n.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field value", values[0])
+	} else if value.Valid {
+		n.Value = int(value.Int64)
+	}
 	return nil
 }
 
@@ -81,18 +92,6 @@ func (n *Node) String() string {
 
 // Nodes is a parsable slice of Node.
 type Nodes []*Node
-
-// FromRows scans the sql response data into Nodes.
-func (n *Nodes) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scann := &Node{}
-		if err := scann.FromRows(rows); err != nil {
-			return err
-		}
-		*n = append(*n, scann)
-	}
-	return nil
-}
 
 func (n Nodes) config(cfg config) {
 	for _i := range n {

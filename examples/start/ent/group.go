@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/start/ent/group"
 )
 
 // Group is the model entity for the Group schema.
@@ -22,21 +23,31 @@ type Group struct {
 	Name string `json:"name,omitempty"`
 }
 
-// FromRows scans the sql response data into Group.
-func (gr *Group) FromRows(rows *sql.Rows) error {
-	var scangr struct {
-		ID   int
-		Name sql.NullString
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Group) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
 	}
-	// the order here should be the same as in the `group.Columns`.
-	if err := rows.Scan(
-		&scangr.ID,
-		&scangr.Name,
-	); err != nil {
-		return err
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Group fields.
+func (gr *Group) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(group.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	gr.ID = scangr.ID
-	gr.Name = scangr.Name.String
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	gr.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[0])
+	} else if value.Valid {
+		gr.Name = value.String
+	}
 	return nil
 }
 
@@ -76,18 +87,6 @@ func (gr *Group) String() string {
 
 // Groups is a parsable slice of Group.
 type Groups []*Group
-
-// FromRows scans the sql response data into Groups.
-func (gr *Groups) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scangr := &Group{}
-		if err := scangr.FromRows(rows); err != nil {
-			return err
-		}
-		*gr = append(*gr, scangr)
-	}
-	return nil
-}
 
 func (gr Groups) config(cfg config) {
 	for _i := range gr {

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
 )
 
 // Street is the model entity for the Street schema.
@@ -22,21 +23,31 @@ type Street struct {
 	Name string `json:"name,omitempty"`
 }
 
-// FromRows scans the sql response data into Street.
-func (s *Street) FromRows(rows *sql.Rows) error {
-	var scans struct {
-		ID   int
-		Name sql.NullString
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Street) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
 	}
-	// the order here should be the same as in the `street.Columns`.
-	if err := rows.Scan(
-		&scans.ID,
-		&scans.Name,
-	); err != nil {
-		return err
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Street fields.
+func (s *Street) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(street.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	s.ID = scans.ID
-	s.Name = scans.Name.String
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	s.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[0])
+	} else if value.Valid {
+		s.Name = value.String
+	}
 	return nil
 }
 
@@ -76,18 +87,6 @@ func (s *Street) String() string {
 
 // Streets is a parsable slice of Street.
 type Streets []*Street
-
-// FromRows scans the sql response data into Streets.
-func (s *Streets) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scans := &Street{}
-		if err := scans.FromRows(rows); err != nil {
-			return err
-		}
-		*s = append(*s, scans)
-	}
-	return nil
-}
 
 func (s Streets) config(cfg config) {
 	for _i := range s {

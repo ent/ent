@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/start/ent/car"
 )
 
 // Car is the model entity for the Car schema.
@@ -25,24 +26,37 @@ type Car struct {
 	RegisteredAt time.Time `json:"registered_at,omitempty"`
 }
 
-// FromRows scans the sql response data into Car.
-func (c *Car) FromRows(rows *sql.Rows) error {
-	var scanc struct {
-		ID           int
-		Model        sql.NullString
-		RegisteredAt sql.NullTime
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Car) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullTime{},
 	}
-	// the order here should be the same as in the `car.Columns`.
-	if err := rows.Scan(
-		&scanc.ID,
-		&scanc.Model,
-		&scanc.RegisteredAt,
-	); err != nil {
-		return err
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Car fields.
+func (c *Car) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(car.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	c.ID = scanc.ID
-	c.Model = scanc.Model.String
-	c.RegisteredAt = scanc.RegisteredAt.Time
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	c.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field model", values[0])
+	} else if value.Valid {
+		c.Model = value.String
+	}
+	if value, ok := values[1].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field registered_at", values[1])
+	} else if value.Valid {
+		c.RegisteredAt = value.Time
+	}
 	return nil
 }
 
@@ -84,18 +98,6 @@ func (c *Car) String() string {
 
 // Cars is a parsable slice of Car.
 type Cars []*Car
-
-// FromRows scans the sql response data into Cars.
-func (c *Cars) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanc := &Car{}
-		if err := scanc.FromRows(rows); err != nil {
-			return err
-		}
-		*c = append(*c, scanc)
-	}
-	return nil
-}
 
 func (c Cars) config(cfg config) {
 	for _i := range c {

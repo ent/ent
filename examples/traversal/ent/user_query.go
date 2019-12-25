@@ -18,6 +18,7 @@ import (
 	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
 	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
 	"github.com/facebookincubator/ent/examples/traversal/ent/user"
+	"github.com/facebookincubator/ent/schema/field"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -315,45 +316,31 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 }
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
-	rows := &sql.Rows{}
-	selector := uq.sqlQuery()
-	if unique := uq.unique; len(unique) == 0 {
-		selector.Distinct()
+	var (
+		nodes []*User
+		spec  = uq.querySpec()
+	)
+	spec.ScanValues = func() []interface{} {
+		node := &User{config: uq.config}
+		nodes = append(nodes, node)
+		return node.scanValues()
 	}
-	query, args := selector.Query()
-	if err := uq.driver.Query(ctx, query, args, rows); err != nil {
+	spec.Assign = func(values ...interface{}) error {
+		if len(nodes) == 0 {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		node := nodes[len(nodes)-1]
+		return node.assignValues(values...)
+	}
+	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var us Users
-	if err := us.FromRows(rows); err != nil {
-		return nil, err
-	}
-	us.config(uq.config)
-	return us, nil
+	return nodes, nil
 }
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
-	rows := &sql.Rows{}
-	selector := uq.sqlQuery()
-	unique := []string{user.FieldID}
-	if len(uq.unique) > 0 {
-		unique = uq.unique
-	}
-	selector.Count(sql.Distinct(selector.Columns(unique...)...))
-	query, args := selector.Query()
-	if err := uq.driver.Query(ctx, query, args, rows); err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return 0, errors.New("ent: no rows found")
-	}
-	var n int
-	if err := rows.Scan(&n); err != nil {
-		return 0, fmt.Errorf("ent: failed reading count: %v", err)
-	}
-	return n, nil
+	spec := uq.querySpec()
+	return sqlgraph.CountNodes(ctx, uq.driver, spec)
 }
 
 func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -362,6 +349,42 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("ent: check existence: %v", err)
 	}
 	return n > 0, nil
+}
+
+func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
+	spec := &sqlgraph.QuerySpec{
+		Node: &sqlgraph.NodeSpec{
+			Table:   user.Table,
+			Columns: user.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: user.FieldID,
+			},
+		},
+		From:   uq.sql,
+		Unique: true,
+	}
+	if ps := uq.predicates; len(ps) > 0 {
+		spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if limit := uq.limit; limit != nil {
+		spec.Limit = *limit
+	}
+	if offset := uq.offset; offset != nil {
+		spec.Offset = *offset
+	}
+	if ps := uq.order; len(ps) > 0 {
+		spec.Order = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	return spec
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {
@@ -635,7 +658,7 @@ func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (us *UserSelect) sqlQuery() sql.Querier {
-	view := "user_view"
-	return sql.Dialect(us.driver.Dialect()).
-		Select(us.fields...).From(us.sql.As(view))
+	selector := us.sql
+	selector.Select(selector.Columns(us.fields...)...)
+	return selector
 }
