@@ -386,21 +386,6 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	return nil
 }
 
-// EdgeFields returns the edges that resides in the type's
-// table in SQL as foreign-keys (columns).
-func (t Type) EdgeFields() []*Edge {
-	var fks []*Edge
-	for _, e := range t.Edges {
-		switch {
-		case e.M2O():
-			fks = append(fks, e)
-		case e.O2O() && (e.IsInverse() || e.Bidi):
-			fks = append(fks, e)
-		}
-	}
-	return fks
-}
-
 // Constant returns the constant name of the field.
 func (f Field) Constant() string { return "Field" + pascal(f.Name) }
 
@@ -634,6 +619,18 @@ func (e Edge) BuilderField() string {
 // StructField returns the struct member of the edge in the model.
 func (e Edge) StructField() string {
 	return pascal(e.Name)
+}
+
+// OwnFK indicates if the foreign-key of this edge is owned by the edge
+// column (reside in the type's table). Used by the SQL storage-driver.
+func (e Edge) OwnFK() bool {
+	switch {
+	case e.M2O():
+		return true
+	case e.O2O() && (e.IsInverse() || e.Bidi):
+		return true
+	}
+	return false
 }
 
 // Column returns the first element from the columns slice.
