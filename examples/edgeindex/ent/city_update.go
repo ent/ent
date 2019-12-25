@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -318,27 +317,8 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	c = &City{config: cuo.config}
-	spec.ScanTypes = []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
-	}
-	spec.Assign = func(values ...interface{}) error {
-		if m, n := len(values), len(spec.ScanTypes); m != n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		value, ok := values[0].(*sql.NullInt64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field id", value)
-		}
-		c.ID = int(value.Int64)
-		values = values[1:]
-		if value, ok := values[0].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field name", values[0])
-		} else if value.Valid {
-			c.Name = value.String
-		}
-		return nil
-	}
+	spec.Assign = c.assignValues
+	spec.ScanValues = c.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

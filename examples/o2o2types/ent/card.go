@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 )
 
 // Card is the model entity for the Card schema.
@@ -25,24 +26,37 @@ type Card struct {
 	Number string `json:"number,omitempty"`
 }
 
-// FromRows scans the sql response data into Card.
-func (c *Card) FromRows(rows *sql.Rows) error {
-	var scanc struct {
-		ID      int
-		Expired sql.NullTime
-		Number  sql.NullString
+// scanValues returns the types for scanning values from sql.Rows.
+func (*Card) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullTime{},
+		&sql.NullString{},
 	}
-	// the order here should be the same as in the `card.Columns`.
-	if err := rows.Scan(
-		&scanc.ID,
-		&scanc.Expired,
-		&scanc.Number,
-	); err != nil {
-		return err
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the Card fields.
+func (c *Card) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(card.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	c.ID = scanc.ID
-	c.Expired = scanc.Expired.Time
-	c.Number = scanc.Number.String
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	c.ID = int(value.Int64)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field expired", values[0])
+	} else if value.Valid {
+		c.Expired = value.Time
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field number", values[1])
+	} else if value.Valid {
+		c.Number = value.String
+	}
 	return nil
 }
 
@@ -84,18 +98,6 @@ func (c *Card) String() string {
 
 // Cards is a parsable slice of Card.
 type Cards []*Card
-
-// FromRows scans the sql response data into Cards.
-func (c *Cards) FromRows(rows *sql.Rows) error {
-	for rows.Next() {
-		scanc := &Card{}
-		if err := scanc.FromRows(rows); err != nil {
-			return err
-		}
-		*c = append(*c, scanc)
-	}
-	return nil
-}
 
 func (c Cards) config(cfg config) {
 	for _i := range c {
