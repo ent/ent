@@ -31,7 +31,7 @@ const (
 	GroupsColumn = "info_id"
 )
 
-// Columns holds all SQL columns are groupinfo fields.
+// Columns holds all SQL columns for groupinfo fields.
 var Columns = []string{
 	FieldID,
 	FieldDesc,

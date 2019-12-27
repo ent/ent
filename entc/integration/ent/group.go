@@ -31,6 +31,20 @@ type Group struct {
 	MaxUsers int `json:"max_users,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The edge values are being populated by the GroupQuery
+	// when eager-loading is set.
+	Edges struct {
+		// Files holds the value of the files edge.
+		Files []*File
+		// Blocked holds the value of the blocked edge.
+		Blocked []*User
+		// Users holds the value of the users edge.
+		Users []*User
+		// Info holds the value of the info edge.
+		Info    *GroupInfo
+		info_id int
+	}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

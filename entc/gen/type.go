@@ -621,6 +621,15 @@ func (e Edge) StructField() string {
 	return pascal(e.Name)
 }
 
+// StructFKField returns the struct member for holding the edge
+// foreign-key in the model.
+func (e Edge) StructFKField() string {
+	if e.OwnFK() {
+		return builderField(e.Name) + "_id"
+	}
+	return ""
+}
+
 // OwnFK indicates if the foreign-key of this edge is owned by the edge
 // column (reside in the type's table). Used by the SQL storage-driver.
 func (e Edge) OwnFK() bool {

@@ -24,6 +24,13 @@ type GroupInfo struct {
 	Desc string `json:"desc,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.
 	MaxUsers int `json:"max_users,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The edge values are being populated by the GroupInfoQuery
+	// when eager-loading is set.
+	Edges struct {
+		// Groups holds the value of the groups edge.
+		Groups []*Group
+	}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

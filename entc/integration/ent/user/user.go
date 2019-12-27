@@ -90,7 +90,7 @@ const (
 	ParentColumn = "parent_id"
 )
 
-// Columns holds all SQL columns are user fields.
+// Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
 	FieldOptionalInt,
@@ -101,6 +101,12 @@ var Columns = []string{
 	FieldPhone,
 	FieldPassword,
 	FieldRole,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+var ForeignKeys = []string{
+	SpouseColumn,
+	ParentColumn,
 }
 
 var (

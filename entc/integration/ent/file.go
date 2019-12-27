@@ -28,6 +28,17 @@ type File struct {
 	User *string `json:"user,omitempty"`
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The edge values are being populated by the FileQuery
+	// when eager-loading is set.
+	Edges struct {
+		// Owner holds the value of the owner edge.
+		Owner    *User
+		owner_id int
+		// Type holds the value of the type edge.
+		Type     *FileType
+		_type_id int
+	}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

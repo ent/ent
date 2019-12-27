@@ -26,13 +26,25 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* variables needed for sql dialects. */}}
 {{ define "dialect/sql/meta/variables" }}
-	// Columns holds all SQL columns are {{ lower $.Name }} fields.
+	// Columns holds all SQL columns for {{ lower $.Name }} fields.
 	var Columns = []string{
 		{{ $.ID.Constant }},
-		{{- range $_, $f := $.Fields }}
+		{{- range $f := $.Fields }}
 			{{ $f.Constant }},
 		{{- end }}
 	}
+	{{/* check if there's any edge that owns a foreign-key */}}
+	{{ $hasfk := false }}{{ range $e := $.Edges }}{{ if $e.OwnFK }}{{ $hasfk = true }}{{ end }}{{ end }}
+	{{ if $hasfk }}
+		// ForeignKeys holds the SQL foreign-keys that are owned by the {{ $.Name }} type.
+		var ForeignKeys = []string{
+			{{- range $e := $.Edges }}
+				{{- if $e.OwnFK }}
+					{{ $e.ColumnConstant }},
+				{{- end }}
+			{{- end }}
+		}
+	{{ end }}
 
 	{{ with $.NumM2M }}
 		var (
