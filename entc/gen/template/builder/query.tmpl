@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
-{{ $builder := print (pascal $.Name) "Query" }}
+{{ $builder := $.QueryName }}
 {{ $receiver := receiver $builder }}
 
 // {{ $builder }} is the builder for querying {{ pascal $.Name }} entities.
@@ -22,6 +22,12 @@ type {{ $builder }} struct {
 	order		[]Order
 	unique		[]string
 	predicates 	[]predicate.{{ $.Name }}
+	{{- with $.Edges }}
+		// eager-loading edges.
+		{{- range $e := . }}
+			with{{ pascal $e.Name }} *{{ $e.Type.QueryName }}
+		{{- end }}
+	{{- end }}
 	// intermediate query.
 	{{ $.Storage }} {{ $.Storage.Builder}}
 }
@@ -58,7 +64,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
 		{{- with extend $ "Receiver" $receiver "Edge" $e -}}
 			{{ $tmpl := printf "dialect/%s/query/path" $.Storage  }}
-				{{- xtemplate $tmpl . }}
+			{{- xtemplate $tmpl . }}
 		{{- end -}}
 		return query
 	}
@@ -232,6 +238,20 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 	}
 }
+
+{{- range $e := $.Edges }}
+	{{ $ebuilder := $e.Type.QueryName }}
+	//  With{{ pascal $e.Name }} tells the query-builder to eager-loads the nodes that are connected to
+	// the "{{ $e.Name }}" edge. The optional arguments used to configure the query builder of the edge.
+	func ({{ $receiver }} *{{ $builder }}) With{{ pascal $e.Name }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
+		query := &{{ $ebuilder }}{config: {{ $receiver }}.config}
+		for _, opt := range opts {
+			opt(query)
+		}
+		{{ $receiver }}.with{{ pascal $e.Name }} = query
+		return {{ $receiver }}
+	}
+{{- end }}
 
 {{ $groupBuilder := pascal $.Name | printf "%sGroupBy" }}
 

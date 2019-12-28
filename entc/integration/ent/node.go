@@ -23,8 +23,7 @@ type Node struct {
 	// Value holds the value of the "value" field.
 	Value int `json:"value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The edge values are being populated by the NodeQuery
-	// when eager-loading is set.
+	// The values are being populated by the NodeQuery when eager-loading is set.
 	Edges struct {
 		// Prev holds the value of the prev edge.
 		Prev    *Node

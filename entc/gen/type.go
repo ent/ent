@@ -386,6 +386,11 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	return nil
 }
 
+// QueryName returns the struct name of the query builder for this type.
+func (t Type) QueryName() string {
+	return pascal(t.Name) + "Query"
+}
+
 // Constant returns the constant name of the field.
 func (f Field) Constant() string { return "Field" + pascal(f.Name) }
 

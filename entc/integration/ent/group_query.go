@@ -30,6 +30,11 @@ type GroupQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Group
+	// eager-loading edges.
+	withFiles   *FileQuery
+	withBlocked *UserQuery
+	withUsers   *UserQuery
+	withInfo    *GroupInfoQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -273,6 +278,50 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		// clone intermediate query.
 		sql: gq.sql.Clone(),
 	}
+}
+
+//  WithFiles tells the query-builder to eager-loads the nodes that are connected to
+// the "files" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
+	query := &FileQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withFiles = query
+	return gq
+}
+
+//  WithBlocked tells the query-builder to eager-loads the nodes that are connected to
+// the "blocked" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withBlocked = query
+	return gq
+}
+
+//  WithUsers tells the query-builder to eager-loads the nodes that are connected to
+// the "users" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withUsers = query
+	return gq
+}
+
+//  WithInfo tells the query-builder to eager-loads the nodes that are connected to
+// the "info" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
+	query := &GroupInfoQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withInfo = query
+	return gq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

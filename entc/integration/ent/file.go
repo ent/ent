@@ -29,8 +29,7 @@ type File struct {
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The edge values are being populated by the FileQuery
-	// when eager-loading is set.
+	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner    *User

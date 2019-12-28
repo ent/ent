@@ -34,8 +34,39 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `graphql:"-" json:"-"`
+<<<<<<< HEAD:entc/integration/gremlin/ent/user.go
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+=======
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges struct {
+		// Card holds the value of the card edge.
+		Card *Card
+		// Pets holds the value of the pets edge.
+		Pets []*Pet
+		// Files holds the value of the files edge.
+		Files []*File
+		// Groups holds the value of the groups edge.
+		Groups []*Group
+		// Friends holds the value of the friends edge.
+		Friends []*User
+		// Followers holds the value of the followers edge.
+		Followers []*User
+		// Following holds the value of the following edge.
+		Following []*User
+		// Team holds the value of the team edge.
+		Team *Pet
+		// Spouse holds the value of the spouse edge.
+		Spouse    *User
+		spouse_id int
+		// Children holds the value of the children edge.
+		Children []*User
+		// Parent holds the value of the parent edge.
+		Parent    *User
+		parent_id int
+	}
+>>>>>>> entc/gen: add With<T> method to query-builder template:entc/integration/ent/user.go
 }
 
 // FromResponse scans the gremlin response data into User.

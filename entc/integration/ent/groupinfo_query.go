@@ -28,6 +28,8 @@ type GroupInfoQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.GroupInfo
+	// eager-loading edges.
+	withGroups *GroupQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -235,6 +237,17 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		// clone intermediate query.
 		sql: giq.sql.Clone(),
 	}
+}
+
+//  WithGroups tells the query-builder to eager-loads the nodes that are connected to
+// the "groups" edge. The optional arguments used to configure the query builder of the edge.
+func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
+	query := &GroupQuery{config: giq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	giq.withGroups = query
+	return giq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

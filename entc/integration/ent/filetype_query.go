@@ -28,6 +28,8 @@ type FileTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FileType
+	// eager-loading edges.
+	withFiles *FileQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -235,6 +237,17 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		// clone intermediate query.
 		sql: ftq.sql.Clone(),
 	}
+}
+
+//  WithFiles tells the query-builder to eager-loads the nodes that are connected to
+// the "files" edge. The optional arguments used to configure the query builder of the edge.
+func (ftq *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
+	query := &FileQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ftq.withFiles = query
+	return ftq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

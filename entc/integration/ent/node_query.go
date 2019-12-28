@@ -27,6 +27,9 @@ type NodeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Node
+	// eager-loading edges.
+	withPrev *NodeQuery
+	withNext *NodeQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -246,6 +249,28 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		// clone intermediate query.
 		sql: nq.sql.Clone(),
 	}
+}
+
+//  WithPrev tells the query-builder to eager-loads the nodes that are connected to
+// the "prev" edge. The optional arguments used to configure the query builder of the edge.
+func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
+	query := &NodeQuery{config: nq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	nq.withPrev = query
+	return nq
+}
+
+//  WithNext tells the query-builder to eager-loads the nodes that are connected to
+// the "next" edge. The optional arguments used to configure the query builder of the edge.
+func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
+	query := &NodeQuery{config: nq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	nq.withNext = query
+	return nq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

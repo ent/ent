@@ -28,6 +28,9 @@ type PetQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Pet
+	// eager-loading edges.
+	withTeam  *UserQuery
+	withOwner *UserQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -247,6 +250,28 @@ func (pq *PetQuery) Clone() *PetQuery {
 		// clone intermediate query.
 		sql: pq.sql.Clone(),
 	}
+}
+
+//  WithTeam tells the query-builder to eager-loads the nodes that are connected to
+// the "team" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithTeam(opts ...func(*UserQuery)) *PetQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withTeam = query
+	return pq
+}
+
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withOwner = query
+	return pq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

@@ -28,6 +28,8 @@ type CardQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Card
+	// eager-loading edges.
+	withOwner *UserQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -235,6 +237,17 @@ func (cq *CardQuery) Clone() *CardQuery {
 		// clone intermediate query.
 		sql: cq.sql.Clone(),
 	}
+}
+
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
+	query := &UserQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withOwner = query
+	return cq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

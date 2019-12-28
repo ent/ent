@@ -180,10 +180,10 @@ func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Na
 }
 
 {{ range $_, $e := $n.Edges }}
-{{ $builder := print (pascal $e.Type.Name) "Query" }}
+{{ $builder := $e.Type.QueryName }}
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
-	query := &{{ $e.Type.Name }}Query{config: c.config}
+	query := &{{ $builder }}{config: c.config}
 	{{- with extend $n "Receiver" $rec "Edge" $e }}
 		{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
 		{{- xtemplate $tmpl . -}}

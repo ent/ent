@@ -31,6 +31,18 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
+	// eager-loading edges.
+	withCard      *CardQuery
+	withPets      *PetQuery
+	withFiles     *FileQuery
+	withGroups    *GroupQuery
+	withFriends   *UserQuery
+	withFollowers *UserQuery
+	withFollowing *UserQuery
+	withTeam      *PetQuery
+	withSpouse    *UserQuery
+	withChildren  *UserQuery
+	withParent    *UserQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -358,6 +370,127 @@ func (uq *UserQuery) Clone() *UserQuery {
 		// clone intermediate query.
 		sql: uq.sql.Clone(),
 	}
+}
+
+//  WithCard tells the query-builder to eager-loads the nodes that are connected to
+// the "card" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
+	query := &CardQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCard = query
+	return uq
+}
+
+//  WithPets tells the query-builder to eager-loads the nodes that are connected to
+// the "pets" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPets = query
+	return uq
+}
+
+//  WithFiles tells the query-builder to eager-loads the nodes that are connected to
+// the "files" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
+	query := &FileQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFiles = query
+	return uq
+}
+
+//  WithGroups tells the query-builder to eager-loads the nodes that are connected to
+// the "groups" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withGroups = query
+	return uq
+}
+
+//  WithFriends tells the query-builder to eager-loads the nodes that are connected to
+// the "friends" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFriends = query
+	return uq
+}
+
+//  WithFollowers tells the query-builder to eager-loads the nodes that are connected to
+// the "followers" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFollowers = query
+	return uq
+}
+
+//  WithFollowing tells the query-builder to eager-loads the nodes that are connected to
+// the "following" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFollowing = query
+	return uq
+}
+
+//  WithTeam tells the query-builder to eager-loads the nodes that are connected to
+// the "team" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withTeam = query
+	return uq
+}
+
+//  WithSpouse tells the query-builder to eager-loads the nodes that are connected to
+// the "spouse" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSpouse = query
+	return uq
+}
+
+//  WithChildren tells the query-builder to eager-loads the nodes that are connected to
+// the "children" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withChildren = query
+	return uq
+}
+
+//  WithParent tells the query-builder to eager-loads the nodes that are connected to
+// the "parent" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withParent = query
+	return uq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.
