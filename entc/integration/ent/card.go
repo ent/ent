@@ -34,7 +34,7 @@ type Card struct {
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner    *User
-		owner_id int
+		owner_id *int
 	}
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`
@@ -48,6 +48,13 @@ func (*Card) scanValues() []interface{} {
 		&sql.NullTime{},
 		&sql.NullString{},
 		&sql.NullString{},
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Card) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
 	}
 }
 
@@ -82,6 +89,15 @@ func (c *Card) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[3])
 	} else if value.Valid {
 		c.Name = value.String
+	}
+	values = values[4:]
+	if len(values) == len(card.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			c.Edges.owner_id = new(int)
+			*c.Edges.owner_id = int(value.Int64)
+		}
 	}
 	return nil
 }

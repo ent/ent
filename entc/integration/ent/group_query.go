@@ -367,13 +367,21 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
-		nodes []*Group
-		spec  = gq.querySpec()
+		withFKs bool
+		nodes   []*Group
+		spec    = gq.querySpec()
 	)
+	if withFKs = gq.withInfo != nil; withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, group.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Group{config: gq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

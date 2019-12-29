@@ -257,6 +257,26 @@ func (t Type) HasOptional() bool {
 	return false
 }
 
+// HasFK reports this type's table holds an edge foreign-key.
+func (t Type) HasFK() bool {
+	for _, e := range t.Edges {
+		if e.OwnFK() {
+			return true
+		}
+	}
+	return false
+}
+
+// FKEdges returns all edges that reside on the type table as foreign-keys.
+func (t Type) FKEdges() (edges []*Edge) {
+	for _, e := range t.Edges {
+		if e.OwnFK() {
+			edges = append(edges, e)
+		}
+	}
+	return
+}
+
 // MixedInWithDefaultOrValidator returns all mixed-in fields with default values for creation or update.
 func (t Type) MixedInWithDefaultOrValidator() (fields []*Field) {
 	for _, f := range t.Fields {
@@ -630,7 +650,7 @@ func (e Edge) StructField() string {
 // foreign-key in the model.
 func (e Edge) StructFKField() string {
 	if e.OwnFK() {
-		return builderField(e.Name) + "_id"
+		return e.Name + "_id"
 	}
 	return ""
 }

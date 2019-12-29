@@ -29,7 +29,7 @@ type {{ $.Name }} struct {
 				{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
 				{{- if $e.OwnFK }}
 					{{- $id := $e.Type.ID }}
-					{{ $e.StructFKField }} {{ if $id.UserDefined }}{{ $id.Type }}{{ else }}int{{ end }}
+					{{ $e.StructFKField }} *{{ if $id.UserDefined }}{{ $id.Type }}{{ else }}int{{ end }}
 				{{- end }}
 			{{- end }}
 		}

@@ -17,6 +17,17 @@ func (*{{ $.Name }}) scanValues() []interface{} {
 	}
 }
 
+{{- if $.HasFK }}
+	// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+	func (*{{ $.Name }}) fkValues() []interface{} {
+		return []interface{} {
+			{{- range $e := $.FKEdges }}
+				&{{ if not $e.Type.ID.UserDefined }}sql.NullInt64{{ else }}{{ $e.Type.ID.NullType }}{{ end }}{},
+			{{- end }}
+		}
+	}
+{{- end }}
+
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the {{ $.Name }} fields.
 func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
@@ -39,6 +50,26 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver }}
 				{{ template "dialect/sql/decode/field" . }}
 			{{- end }}
+		{{- end }}
+		{{- if $.HasFK }}
+			values = values[{{ len $.Fields }}:]
+			if len(values) == len({{ $.Package }}.ForeignKeys) {
+				{{- range $i, $e := $.FKEdges }}
+					{{- $id := $e.Type.ID }}
+					{{- if and $id.UserDefined (or $id.IsString $id.IsUUID) }}
+						{{- with extend $e.Type "Idx" 0 "Field" $id "Rec" $receiver }}
+							{{ template "dialect/sql/decode/field" . }}
+						{{- end }}
+					{{- else }}
+						if value, ok := values[0].(*sql.NullInt64); !ok {
+							return fmt.Errorf("unexpected type %T for edge-field {{ $e.StructFKField }}", value)
+						} else if value.Valid {
+							{{ $receiver }}.Edges.{{ $e.StructFKField }} = new(int)
+							*{{ $receiver }}.Edges.{{ $e.StructFKField }} = int(value.Int64)
+						}
+					{{- end }}
+				{{- end }}
+			}
 		{{- end }}
 		return nil
 }

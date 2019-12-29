@@ -317,13 +317,21 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
-		nodes []*Pet
-		spec  = pq.querySpec()
+		withFKs bool
+		nodes   []*Pet
+		spec    = pq.querySpec()
 	)
+	if withFKs = pq.withTeam != nil || pq.withOwner != nil; withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, pet.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

@@ -27,10 +27,10 @@ type Pet struct {
 	Edges struct {
 		// Team holds the value of the team edge.
 		Team    *User
-		team_id int
+		team_id *int
 		// Owner holds the value of the owner edge.
 		Owner    *User
-		owner_id int
+		owner_id *int
 	}
 }
 
@@ -39,6 +39,14 @@ func (*Pet) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},
 		&sql.NullString{},
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Pet) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
 	}
 }
 
@@ -58,6 +66,21 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
 	} else if value.Valid {
 		pe.Name = value.String
+	}
+	values = values[1:]
+	if len(values) == len(pet.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field team_id", value)
+		} else if value.Valid {
+			pe.Edges.team_id = new(int)
+			*pe.Edges.team_id = int(value.Int64)
+		}
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			pe.Edges.owner_id = new(int)
+			*pe.Edges.owner_id = int(value.Int64)
+		}
 	}
 	return nil
 }

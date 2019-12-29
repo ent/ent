@@ -293,13 +293,21 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
-		nodes []*Card
-		spec  = cq.querySpec()
+		withFKs bool
+		nodes   []*Card
+		spec    = cq.querySpec()
 	)
+	if withFKs = cq.withOwner != nil; withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, card.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

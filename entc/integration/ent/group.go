@@ -42,7 +42,7 @@ type Group struct {
 		Users []*User
 		// Info holds the value of the info edge.
 		Info    *GroupInfo
-		info_id int
+		info_id *int
 	}
 }
 
@@ -55,6 +55,13 @@ func (*Group) scanValues() []interface{} {
 		&sql.NullString{},
 		&sql.NullInt64{},
 		&sql.NullString{},
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Group) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
 	}
 }
 
@@ -95,6 +102,15 @@ func (gr *Group) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[4])
 	} else if value.Valid {
 		gr.Name = value.String
+	}
+	values = values[5:]
+	if len(values) == len(group.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field info_id", value)
+		} else if value.Valid {
+			gr.Edges.info_id = new(int)
+			*gr.Edges.info_id = int(value.Int64)
+		}
 	}
 	return nil
 }

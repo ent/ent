@@ -318,13 +318,21 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
-		nodes []*File
-		spec  = fq.querySpec()
+		withFKs bool
+		nodes   []*File
+		spec    = fq.querySpec()
 	)
+	if withFKs = fq.withOwner != nil || fq.withType != nil; withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, file.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &File{config: fq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

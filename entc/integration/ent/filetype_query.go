@@ -299,7 +299,8 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &FileType{config: ftq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

@@ -33,10 +33,10 @@ type File struct {
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner    *User
-		owner_id int
+		owner_id *int
 		// Type holds the value of the type edge.
-		Type     *FileType
-		_type_id int
+		Type    *FileType
+		type_id *int
 	}
 }
 
@@ -48,6 +48,14 @@ func (*File) scanValues() []interface{} {
 		&sql.NullString{},
 		&sql.NullString{},
 		&sql.NullString{},
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*File) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
 	}
 }
 
@@ -83,6 +91,21 @@ func (f *File) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field group", values[3])
 	} else if value.Valid {
 		f.Group = value.String
+	}
+	values = values[4:]
+	if len(values) == len(file.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			f.Edges.owner_id = new(int)
+			*f.Edges.owner_id = int(value.Int64)
+		}
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field type_id", value)
+		} else if value.Valid {
+			f.Edges.type_id = new(int)
+			*f.Edges.type_id = int(value.Int64)
+		}
 	}
 	return nil
 }

@@ -316,13 +316,21 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
-		nodes []*Node
-		spec  = nq.querySpec()
+		withFKs bool
+		nodes   []*Node
+		spec    = nq.querySpec()
 	)
+	if withFKs = nq.withPrev != nil; withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, node.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Node{config: nq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

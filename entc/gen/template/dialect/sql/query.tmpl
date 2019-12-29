@@ -11,13 +11,27 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	var (
+		{{- if $.HasFK }}
+			withFKs bool
+		{{- end }}
 		nodes []*{{ $.Name }}
 		spec = {{ $receiver }}.querySpec()
 	)
+	{{- if $.HasFK }}
+			if withFKs = {{ range $i, $e := $.FKEdges }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }}; withFKs {
+				spec.Node.Columns = append(spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
+			}
+	{{- end }}
 	spec.ScanValues = func() []interface{} {
 		node := &{{ $.Name }}{config: {{ $receiver }}.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		{{- if $.HasFK }}
+			if withFKs {
+				values = append(values, node.fkValues()...)
+			}
+		{{- end }}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

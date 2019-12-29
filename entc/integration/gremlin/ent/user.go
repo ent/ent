@@ -59,12 +59,12 @@ type User struct {
 		Team *Pet
 		// Spouse holds the value of the spouse edge.
 		Spouse    *User
-		spouse_id int
+		spouse_id *int
 		// Children holds the value of the children edge.
 		Children []*User
 		// Parent holds the value of the parent edge.
 		Parent    *User
-		parent_id int
+		parent_id *int
 	}
 >>>>>>> entc/gen: add With<T> method to query-builder template:entc/integration/ent/user.go
 }
@@ -75,6 +75,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD:entc/integration/gremlin/ent/user.go
 	var scanu struct {
 		ID          string    `json:"id,omitempty"`
 		OptionalInt int       `json:"optional_int,omitempty"`
@@ -85,10 +86,54 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
+=======
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+	}
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the User fields.
+func (u *User) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(user.Columns); m != n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	u.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[0])
+	} else if value.Valid {
+		u.Age = int(value.Int64)
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[1])
+	} else if value.Valid {
+		u.Name = value.String
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field last", values[2])
+	} else if value.Valid {
+		u.Last = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field nickname", values[3])
+	} else if value.Valid {
+		u.Nickname = value.String
+>>>>>>> entc/gen: scan and assign foreign-keys on eager-loading:entc/integration/ent/user.go
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
 	}
+<<<<<<< HEAD:entc/integration/gremlin/ent/user.go
 	u.ID = scanu.ID
 	u.OptionalInt = scanu.OptionalInt
 	u.Age = scanu.Age
@@ -98,6 +143,23 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
 	u.Role = scanu.Role
+=======
+	values = values[6:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field spouse_id", value)
+		} else if value.Valid {
+			u.Edges.spouse_id = new(int)
+			*u.Edges.spouse_id = int(value.Int64)
+		}
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
+		} else if value.Valid {
+			u.Edges.parent_id = new(int)
+			*u.Edges.parent_id = int(value.Int64)
+		}
+	}
+>>>>>>> entc/gen: scan and assign foreign-keys on eager-loading:entc/integration/ent/user.go
 	return nil
 }
 

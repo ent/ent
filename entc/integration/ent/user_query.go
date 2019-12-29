@@ -536,13 +536,21 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes []*User
-		spec  = uq.querySpec()
+		withFKs bool
+		nodes   []*User
+		spec    = uq.querySpec()
 	)
+	if withFKs = uq.withSpouse != nil || uq.withParent != nil; withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, user.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
