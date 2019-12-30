@@ -1061,6 +1061,46 @@ func (p *Predicate) ContainsFold(col, sub string) *Predicate {
 	})
 }
 
+func Columns(columns ...string) []string {
+	return columns
+}
+
+func CompositeGT(columns []string, args ...interface{}) *Predicate {
+	return (&Predicate{}).CompositeGT(columns, args...)
+}
+
+func CompositeLT(columns []string, args ...interface{}) *Predicate {
+	return (&Predicate{}).CompositeLT(columns, args...)
+}
+
+// GT returns a composite ">" predicate.
+func (p *Predicate) CompositeGT(columns []string, args ...interface{}) *Predicate {
+	const operator = " > "
+	return p.append(func(b *Builder) {
+		b.Nested(func(nb *Builder) {
+			nb.IdentComma(columns...)
+		})
+		b.WriteString(operator)
+		b.WriteString("(")
+		b.Args(args...)
+		b.WriteString(")")
+	})
+}
+
+// LT appends a composite "<" predicate.
+func (p *Predicate) CompositeLT(columns []string, args ...interface{}) *Predicate {
+	const operator = " < "
+	return p.append(func(b *Builder) {
+		b.Nested(func(nb *Builder) {
+			nb.IdentComma(columns...)
+		})
+		b.WriteString(operator)
+		b.WriteString("(")
+		b.Args(args...)
+		b.WriteString(")")
+	})
+}
+
 // Query returns query representation of a predicate.
 func (p *Predicate) Query() (string, []interface{}) {
 	for _, f := range p.fns {
