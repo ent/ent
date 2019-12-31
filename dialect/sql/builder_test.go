@@ -134,6 +134,11 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` ADD COLUMN `age` int, ADD COLUMN `name` varchar(255)",
 		},
 		{
+			input: AlterTable("users").
+				DropForeignKey("users_parent_id"),
+			wantQuery: "ALTER TABLE `users` DROP FOREIGN KEY `users_parent_id`",
+		},
+		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
 				AddColumn(Column("age").Type("int")).
 				AddColumn(Column("name").Type("varchar(255)")).
