@@ -8,6 +8,7 @@ package user
 
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 )
 
@@ -1152,6 +1153,36 @@ func StateIsNil() predicate.User {
 func StateNotNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldState)))
+	},
+	)
+}
+
+// HasCar applies the HasEdge predicate on the "car" edge.
+func HasCar() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CarTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CarTable, CarColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	},
+	)
+}
+
+// HasCarWith applies the HasEdge predicate on the "car" edge with a given conditions (other predicates).
+func HasCarWith(preds ...predicate.Car) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CarInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CarTable, CarColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	},
 	)
 }

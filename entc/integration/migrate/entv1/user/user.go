@@ -34,6 +34,25 @@ const (
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// ParentTable is the table the holds the parent relation/edge.
+	ParentTable = "users"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "parent_id"
+	// ChildrenTable is the table the holds the children relation/edge.
+	ChildrenTable = "users"
+	// ChildrenColumn is the table column denoting the children relation/edge.
+	ChildrenColumn = "parent_id"
+	// SpouseTable is the table the holds the spouse relation/edge.
+	SpouseTable = "users"
+	// SpouseColumn is the table column denoting the spouse relation/edge.
+	SpouseColumn = "user_spouse_id"
+	// CarTable is the table the holds the car relation/edge.
+	CarTable = "cars"
+	// CarInverseTable is the table name for the Car entity.
+	// It exists in this package in order to avoid circular dependency with the "car" package.
+	CarInverseTable = "cars"
+	// CarColumn is the table column denoting the car relation/edge.
+	CarColumn = "owner_id"
 )
 
 // Columns holds all SQL columns are user fields.

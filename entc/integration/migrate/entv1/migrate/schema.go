@@ -12,6 +12,26 @@ import (
 )
 
 var (
+	// CarsColumns holds the columns for the "cars" table.
+	CarsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// CarsTable holds the schema information for the "cars" table.
+	CarsTable = &schema.Table{
+		Name:       "cars",
+		Columns:    CarsColumns,
+		PrimaryKey: []*schema.Column{CarsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "cars_users_car",
+				Columns: []*schema.Column{CarsColumns[1]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -22,13 +42,30 @@ var (
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 255},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
+		{Name: "user_spouse_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "users_users_children",
+				Columns: []*schema.Column{UsersColumns[8]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "users_users_spouse",
+				Columns: []*schema.Column{UsersColumns[9]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_name_address",
@@ -39,9 +76,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CarsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	CarsTable.ForeignKeys[0].RefTable = UsersTable
+	UsersTable.ForeignKeys[0].RefTable = UsersTable
+	UsersTable.ForeignKeys[1].RefTable = UsersTable
 }

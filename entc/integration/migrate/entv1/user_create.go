@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -26,6 +27,10 @@ type UserCreate struct {
 	renamed  *string
 	blob     *[]byte
 	state    *user.State
+	parent   map[int]struct{}
+	children map[int]struct{}
+	spouse   map[int]struct{}
+	car      map[int]struct{}
 }
 
 // SetAge sets the age field.
@@ -94,6 +99,92 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 	return uc
 }
 
+// SetParentID sets the parent edge to User by id.
+func (uc *UserCreate) SetParentID(id int) *UserCreate {
+	if uc.parent == nil {
+		uc.parent = make(map[int]struct{})
+	}
+	uc.parent[id] = struct{}{}
+	return uc
+}
+
+// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetParentID(*id)
+	}
+	return uc
+}
+
+// SetParent sets the parent edge to User.
+func (uc *UserCreate) SetParent(u *User) *UserCreate {
+	return uc.SetParentID(u.ID)
+}
+
+// AddChildIDs adds the children edge to User by ids.
+func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
+	if uc.children == nil {
+		uc.children = make(map[int]struct{})
+	}
+	for i := range ids {
+		uc.children[ids[i]] = struct{}{}
+	}
+	return uc
+}
+
+// AddChildren adds the children edges to User.
+func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uc.AddChildIDs(ids...)
+}
+
+// SetSpouseID sets the spouse edge to User by id.
+func (uc *UserCreate) SetSpouseID(id int) *UserCreate {
+	if uc.spouse == nil {
+		uc.spouse = make(map[int]struct{})
+	}
+	uc.spouse[id] = struct{}{}
+	return uc
+}
+
+// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+func (uc *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetSpouseID(*id)
+	}
+	return uc
+}
+
+// SetSpouse sets the spouse edge to User.
+func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
+	return uc.SetSpouseID(u.ID)
+}
+
+// SetCarID sets the car edge to Car by id.
+func (uc *UserCreate) SetCarID(id int) *UserCreate {
+	if uc.car == nil {
+		uc.car = make(map[int]struct{})
+	}
+	uc.car[id] = struct{}{}
+	return uc
+}
+
+// SetNillableCarID sets the car edge to Car by id if the given value is not nil.
+func (uc *UserCreate) SetNillableCarID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetCarID(*id)
+	}
+	return uc
+}
+
+// SetCar sets the car edge to Car.
+func (uc *UserCreate) SetCar(c *Car) *UserCreate {
+	return uc.SetCarID(c.ID)
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.age == nil {
@@ -112,6 +203,15 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		if err := user.StateValidator(*uc.state); err != nil {
 			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
 		}
+	}
+	if len(uc.parent) > 1 {
+		return nil, errors.New("entv1: multiple assignments on a unique edge \"parent\"")
+	}
+	if len(uc.spouse) > 1 {
+		return nil, errors.New("entv1: multiple assignments on a unique edge \"spouse\"")
+	}
+	if len(uc.car) > 1 {
+		return nil, errors.New("entv1: multiple assignments on a unique edge \"car\"")
 	}
 	return uc.sqlSave(ctx)
 }
@@ -191,6 +291,82 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldState,
 		})
 		u.State = *value
+	}
+	if nodes := uc.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if nodes := uc.children; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if nodes := uc.spouse; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SpouseTable,
+			Columns: []string{user.SpouseColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
+	}
+	if nodes := uc.car; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.CarTable,
+			Columns: []string{user.CarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
 	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

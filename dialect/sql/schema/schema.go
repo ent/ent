@@ -69,13 +69,13 @@ func (t *Table) AddIndex(name string, unique bool, columns []string) *Table {
 		Name:    name,
 		Unique:  unique,
 		columns: columns,
-		Columns: make([]*Column, len(columns)),
+		Columns: make([]*Column, 0, len(columns)),
 	}
-	for i, name := range columns {
+	for _, name := range columns {
 		c, ok := t.columns[name]
 		if ok {
-			idx.Columns[i] = c
 			c.indexes = append(c.indexes, idx)
+			idx.Columns = append(idx.Columns, c)
 		}
 	}
 	t.Indexes = append(t.Indexes, idx)

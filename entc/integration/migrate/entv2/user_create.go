@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -28,6 +29,7 @@ type UserCreate struct {
 	new_name *string
 	blob     *[]byte
 	state    *user.State
+	car      map[int]struct{}
 }
 
 // SetAge sets the age field.
@@ -114,6 +116,26 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 		uc.SetState(*u)
 	}
 	return uc
+}
+
+// AddCarIDs adds the car edge to Car by ids.
+func (uc *UserCreate) AddCarIDs(ids ...int) *UserCreate {
+	if uc.car == nil {
+		uc.car = make(map[int]struct{})
+	}
+	for i := range ids {
+		uc.car[ids[i]] = struct{}{}
+	}
+	return uc
+}
+
+// AddCar adds the car edges to Car.
+func (uc *UserCreate) AddCar(c ...*Car) *UserCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddCarIDs(ids...)
 }
 
 // Save creates the User in the database.
@@ -234,6 +256,25 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldState,
 		})
 		u.State = *value
+	}
+	if nodes := uc.car; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarTable,
+			Columns: []string{user.CarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges = append(spec.Edges, edge)
 	}
 	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

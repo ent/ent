@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -53,6 +54,18 @@ func (uq *UserQuery) Offset(offset int) *UserQuery {
 func (uq *UserQuery) Order(o ...Order) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
+}
+
+// QueryCar chains the current query on the car edge.
+func (uq *UserQuery) QueryCar() *CarQuery {
+	query := &CarQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(car.Table, car.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.CarTable, user.CarColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
 }
 
 // First returns the first User entity in the query. Returns *ErrNotFound when no user was found.

@@ -702,6 +702,10 @@ func TestMySQL_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1").
 						AddRow("age", "age", "0", "1"))
+				// check if a foreign-key needs to be dropped.
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
+					WithArgs("users", "age").
+					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}))
 				// drop the unique index.
 				mock.ExpectExec(escape("DROP INDEX `age` ON `users`")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
@@ -755,6 +759,97 @@ func TestMySQL_Create(t *testing.T) {
 				// foreign key already exist.
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "drop foreign key with column and index",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			options: []MigrateOption{WithDropIndex(true), WithDropColumn(true)},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("parent_id", "bigint(20)", "YES", "NULL", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1").
+						AddRow("parent_id", "parent_id", "0", "1"))
+				// check if a foreign-key needs to be dropped.
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
+					WithArgs("users", "parent_id").
+					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}).AddRow("users_parent_id"))
+				mock.ExpectExec(escape("ALTER TABLE `users` DROP FOREIGN KEY `users_parent_id`")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// drop the unique index.
+				mock.ExpectExec(escape("DROP INDEX `parent_id` ON `users`")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// drop the unique index.
+				mock.ExpectExec(escape("ALTER TABLE `users` DROP COLUMN `parent_id`")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "create a new simple-index for the foreign-key",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "parent_id", Type: field.TypeInt, Nullable: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			options: []MigrateOption{WithDropIndex(true), WithDropColumn(true)},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("parent_id", "bigint(20)", "YES", "NULL", "NULL", "", "", ""))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1").
+						AddRow("parent_id", "parent_id", "0", "1"))
+				// check if there's a foreign-key that is associated with this index.
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
+					WithArgs("users", "parent_id").
+					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}).AddRow("users_parent_id"))
+				// create a new index, to replace the old one (that needs to be dropped).
+				mock.ExpectExec(escape("CREATE INDEX `users_parent_id` ON `users`(`parent_id`)")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// drop the unique index.
+				mock.ExpectExec(escape("DROP INDEX `parent_id` ON `users`")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
 		},
