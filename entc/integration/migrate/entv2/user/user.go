@@ -38,6 +38,13 @@ const (
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// CarTable is the table the holds the car relation/edge.
+	CarTable = "cars"
+	// CarInverseTable is the table name for the Car entity.
+	// It exists in this package in order to avoid circular dependency with the "car" package.
+	CarInverseTable = "cars"
+	// CarColumn is the table column denoting the car relation/edge.
+	CarColumn = "owner_id"
 )
 
 // Columns holds all SQL columns are user fields.

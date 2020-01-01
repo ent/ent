@@ -81,9 +81,10 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)))
 
 	SanityV2(t, client)
-	idRange(t, client.Group.Create().SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, client.Pet.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 2<<32, 3<<32-1)
+	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, client.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, client.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 3<<32-1, 4<<32)
 
 	// override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -106,9 +107,10 @@ func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 
 	// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
-	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, clientv2.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
 
 	// sql specific predicates.
 	EqualFold(t, clientv2)

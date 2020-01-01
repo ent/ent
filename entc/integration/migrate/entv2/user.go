@@ -115,6 +115,11 @@ func (u *User) assignValues(values ...interface{}) error {
 	return nil
 }
 
+// QueryCar queries the car edge of the User.
+func (u *User) QueryCar() *CarQuery {
+	return (&UserClient{u.config}).QueryCar(u)
+}
+
 // Update returns a builder for updating this User.
 // Note that, you need to call User.Unwrap() before calling this method, if this User
 // was returned from a transaction, and the transaction was committed or rolled back.

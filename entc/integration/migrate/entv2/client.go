@@ -13,12 +13,14 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
 
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -26,6 +28,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Car is the client for interacting with the Car builders.
+	Car *CarClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// Pet is the client for interacting with the Pet builders.
@@ -41,6 +45,7 @@ func NewClient(opts ...Option) *Client {
 	return &Client{
 		config: c,
 		Schema: migrate.NewSchema(c.driver),
+		Car:    NewCarClient(c),
 		Group:  NewGroupClient(c),
 		Pet:    NewPetClient(c),
 		User:   NewUserClient(c),
@@ -75,6 +80,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := config{driver: tx, log: c.log, debug: c.debug}
 	return &Tx{
 		config: cfg,
+		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),
 		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
@@ -84,7 +90,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Group.
+//		Car.
 //		Query().
 //		Count(ctx)
 //
@@ -96,6 +102,7 @@ func (c *Client) Debug() *Client {
 	return &Client{
 		config: cfg,
 		Schema: migrate.NewSchema(cfg.driver),
+		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),
 		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
@@ -105,6 +112,84 @@ func (c *Client) Debug() *Client {
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
+}
+
+// CarClient is a client for the Car schema.
+type CarClient struct {
+	config
+}
+
+// NewCarClient returns a client for the Car from the given config.
+func NewCarClient(c config) *CarClient {
+	return &CarClient{config: c}
+}
+
+// Create returns a create builder for Car.
+func (c *CarClient) Create() *CarCreate {
+	return &CarCreate{config: c.config}
+}
+
+// Update returns an update builder for Car.
+func (c *CarClient) Update() *CarUpdate {
+	return &CarUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CarClient) UpdateOne(ca *Car) *CarUpdateOne {
+	return c.UpdateOneID(ca.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CarClient) UpdateOneID(id int) *CarUpdateOne {
+	return &CarUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for Car.
+func (c *CarClient) Delete() *CarDelete {
+	return &CarDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CarClient) DeleteOne(ca *Car) *CarDeleteOne {
+	return c.DeleteOneID(ca.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
+	return &CarDeleteOne{c.Delete().Where(car.ID(id))}
+}
+
+// Create returns a query builder for Car.
+func (c *CarClient) Query() *CarQuery {
+	return &CarQuery{config: c.config}
+}
+
+// Get returns a Car entity by its id.
+func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
+	return c.Query().Where(car.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CarClient) GetX(ctx context.Context, id int) *Car {
+	ca, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ca
+}
+
+// QueryOwner queries the owner edge of a Car.
+func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := ca.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(car.Table, car.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, car.OwnerTable, car.OwnerColumn),
+	)
+	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+
+	return query
 }
 
 // GroupClient is a client for the Group schema.
@@ -297,4 +382,18 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 		panic(err)
 	}
 	return u
+}
+
+// QueryCar queries the car edge of a User.
+func (c *UserClient) QueryCar(u *User) *CarQuery {
+	query := &CarQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(car.Table, car.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.CarTable, user.CarColumn),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
 }

@@ -21,6 +21,29 @@ import (
 //
 var dsn string
 
+func ExampleCar() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the car's edges.
+
+	// create car vertex with its edges.
+	c := client.Car.
+		Create().
+		SaveX(ctx)
+	log.Println("car created:", c)
+
+	// query edges.
+
+	// Output:
+}
 func ExampleUser() {
 	if dsn == "" {
 		return
@@ -33,6 +56,32 @@ func ExampleUser() {
 	defer drv.Close()
 	client := NewClient(Driver(drv))
 	// creating vertices for the user's edges.
+	u1 := client.User.
+		Create().
+		SetAge(1).
+		SetName("string").
+		SetNickname("string").
+		SetAddress("string").
+		SetRenamed("string").
+		SetBlob(nil).
+		SetState(user.StateLoggedIn).
+		SaveX(ctx)
+	log.Println("user created:", u1)
+	u2 := client.User.
+		Create().
+		SetAge(1).
+		SetName("string").
+		SetNickname("string").
+		SetAddress("string").
+		SetRenamed("string").
+		SetBlob(nil).
+		SetState(user.StateLoggedIn).
+		SaveX(ctx)
+	log.Println("user created:", u2)
+	c3 := client.Car.
+		Create().
+		SaveX(ctx)
+	log.Println("car created:", c3)
 
 	// create user vertex with its edges.
 	u := client.User.
@@ -44,10 +93,31 @@ func ExampleUser() {
 		SetRenamed("string").
 		SetBlob(nil).
 		SetState(user.StateLoggedIn).
+		AddChildren(u1).
+		SetSpouse(u2).
+		SetCar(c3).
 		SaveX(ctx)
 	log.Println("user created:", u)
 
 	// query edges.
+
+	u1, err = u.QueryChildren().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying children: %v", err)
+	}
+	log.Println("children found:", u1)
+
+	u2, err = u.QuerySpouse().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying spouse: %v", err)
+	}
+	log.Println("spouse found:", u2)
+
+	c3, err = u.QueryCar().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying car: %v", err)
+	}
+	log.Println("car found:", c3)
 
 	// Output:
 }

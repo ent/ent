@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -53,6 +54,54 @@ func (uq *UserQuery) Offset(offset int) *UserQuery {
 func (uq *UserQuery) Order(o ...Order) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
+}
+
+// QueryParent chains the current query on the parent edge.
+func (uq *UserQuery) QueryParent() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
+}
+
+// QueryChildren chains the current query on the children edge.
+func (uq *UserQuery) QueryChildren() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
+}
+
+// QuerySpouse chains the current query on the spouse edge.
+func (uq *UserQuery) QuerySpouse() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
+}
+
+// QueryCar chains the current query on the car edge.
+func (uq *UserQuery) QueryCar() *CarQuery {
+	query := &CarQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(car.Table, car.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.CarTable, user.CarColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
 }
 
 // First returns the first User entity in the query. Returns *ErrNotFound when no user was found.

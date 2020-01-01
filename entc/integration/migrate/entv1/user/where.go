@@ -8,6 +8,7 @@ package user
 
 import (
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
 )
 
@@ -928,6 +929,126 @@ func StateIsNil() predicate.User {
 func StateNotNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldState)))
+	},
+	)
+}
+
+// HasParent applies the HasEdge predicate on the "parent" edge.
+func HasParent() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ParentTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	},
+	)
+}
+
+// HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
+func HasParentWith(preds ...predicate.User) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
+	)
+}
+
+// HasChildren applies the HasEdge predicate on the "children" edge.
+func HasChildren() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ChildrenTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	},
+	)
+}
+
+// HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
+func HasChildrenWith(preds ...predicate.User) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
+	)
+}
+
+// HasSpouse applies the HasEdge predicate on the "spouse" edge.
+func HasSpouse() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SpouseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, SpouseTable, SpouseColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	},
+	)
+}
+
+// HasSpouseWith applies the HasEdge predicate on the "spouse" edge with a given conditions (other predicates).
+func HasSpouseWith(preds ...predicate.User) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, SpouseTable, SpouseColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
+	)
+}
+
+// HasCar applies the HasEdge predicate on the "car" edge.
+func HasCar() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CarTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, CarTable, CarColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	},
+	)
+}
+
+// HasCarWith applies the HasEdge predicate on the "car" edge with a given conditions (other predicates).
+func HasCarWith(preds ...predicate.Car) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CarInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, CarTable, CarColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	},
 	)
 }

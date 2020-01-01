@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -34,6 +35,8 @@ type UserUpdate struct {
 	clearblob     bool
 	state         *user.State
 	clearstate    bool
+	car           map[int]struct{}
+	removedCar    map[int]struct{}
 	predicates    []predicate.User
 }
 
@@ -166,6 +169,46 @@ func (uu *UserUpdate) ClearState() *UserUpdate {
 	uu.state = nil
 	uu.clearstate = true
 	return uu
+}
+
+// AddCarIDs adds the car edge to Car by ids.
+func (uu *UserUpdate) AddCarIDs(ids ...int) *UserUpdate {
+	if uu.car == nil {
+		uu.car = make(map[int]struct{})
+	}
+	for i := range ids {
+		uu.car[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// AddCar adds the car edges to Car.
+func (uu *UserUpdate) AddCar(c ...*Car) *UserUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.AddCarIDs(ids...)
+}
+
+// RemoveCarIDs removes the car edge to Car by ids.
+func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
+	if uu.removedCar == nil {
+		uu.removedCar = make(map[int]struct{})
+	}
+	for i := range ids {
+		uu.removedCar[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// RemoveCar removes car edges to Car.
+func (uu *UserUpdate) RemoveCar(c ...*Car) *UserUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.RemoveCarIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -312,6 +355,44 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldState,
 		})
 	}
+	if nodes := uu.removedCar; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarTable,
+			Columns: []string{user.CarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uu.car; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarTable,
+			Columns: []string{user.CarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -339,6 +420,8 @@ type UserUpdateOne struct {
 	clearblob     bool
 	state         *user.State
 	clearstate    bool
+	car           map[int]struct{}
+	removedCar    map[int]struct{}
 }
 
 // SetAge sets the age field.
@@ -464,6 +547,46 @@ func (uuo *UserUpdateOne) ClearState() *UserUpdateOne {
 	uuo.state = nil
 	uuo.clearstate = true
 	return uuo
+}
+
+// AddCarIDs adds the car edge to Car by ids.
+func (uuo *UserUpdateOne) AddCarIDs(ids ...int) *UserUpdateOne {
+	if uuo.car == nil {
+		uuo.car = make(map[int]struct{})
+	}
+	for i := range ids {
+		uuo.car[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// AddCar adds the car edges to Car.
+func (uuo *UserUpdateOne) AddCar(c ...*Car) *UserUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.AddCarIDs(ids...)
+}
+
+// RemoveCarIDs removes the car edge to Car by ids.
+func (uuo *UserUpdateOne) RemoveCarIDs(ids ...int) *UserUpdateOne {
+	if uuo.removedCar == nil {
+		uuo.removedCar = make(map[int]struct{})
+	}
+	for i := range ids {
+		uuo.removedCar[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// RemoveCar removes car edges to Car.
+func (uuo *UserUpdateOne) RemoveCar(c ...*Car) *UserUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.RemoveCarIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -603,6 +726,44 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Type:   field.TypeEnum,
 			Column: user.FieldState,
 		})
+	}
+	if nodes := uuo.removedCar; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarTable,
+			Columns: []string{user.CarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.car; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarTable,
+			Columns: []string{user.CarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
 	u = &User{config: uuo.config}
 	spec.Assign = u.assignValues
