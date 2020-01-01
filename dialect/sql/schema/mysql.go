@@ -227,6 +227,55 @@ func (d *MySQL) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table 
 	return tx.Exec(ctx, query, args, new(sql.Result))
 }
 
+// prepare runs preparation work that needs to be done to apply the change-set.
+func (d *MySQL) prepare(ctx context.Context, tx dialect.Tx, change *changes, table string) error {
+	for _, idx := range change.index.drop {
+		switch n := len(idx.columns); {
+		case n == 0:
+			return fmt.Errorf("index %q has no columns", idx.Name)
+		case n > 1:
+			continue // not a foreign-key index.
+		}
+		var qr sql.Querier
+	Switch:
+		switch col, ok := change.dropColumn(idx.columns[0]); {
+		// If both the index and the column need to be dropped, the foreign-key
+		// constraint that is associated with them need to be dropped as well.
+		case ok:
+			names, err := fkNames(ctx, tx, table, col.Name)
+			if err != nil {
+				return err
+			}
+			if len(names) == 1 {
+				qr = sql.AlterTable(table).DropForeignKey(names[0])
+			}
+		// If the uniqueness was dropped from a foreign-key column,
+		// create a "simple index" if no other index exist for it.
+		case !ok && idx.Unique && len(idx.Columns) > 0:
+			col := idx.Columns[0]
+			for _, idx2 := range col.indexes {
+				if idx2 != idx && len(idx2.columns) == 1 {
+					break Switch
+				}
+			}
+			names, err := fkNames(ctx, tx, table, col.Name)
+			if err != nil {
+				return err
+			}
+			if len(names) == 1 {
+				qr = sql.CreateIndex(names[0]).Table(table).Columns(col.Name)
+			}
+		}
+		if qr != nil {
+			query, args := qr.Query()
+			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // scanColumn scans the column information from MySQL column description.
 func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
@@ -359,4 +408,29 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 		idx.columns = append(idx.columns, column)
 	}
 	return i, nil
+}
+
+// fkNames returns the foreign-key names of a column.
+func fkNames(ctx context.Context, tx dialect.Tx, table, column string) ([]string, error) {
+	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote()).
+		Where(sql.
+			EQ("TABLE_NAME", table).
+			And().EQ("COLUMN_NAME", column).
+			// NULL for unique and primary-key constraints.
+			And().NotNull("POSITION_IN_UNIQUE_CONSTRAINT").
+			And().EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+		).
+		Query()
+	var (
+		names []string
+		rows  = &sql.Rows{}
+	)
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return nil, fmt.Errorf("mysql: reading constraint names %v", err)
+	}
+	defer rows.Close()
+	if err := sql.ScanSlice(rows, &names); err != nil {
+		return nil, err
+	}
+	return names, nil
 }

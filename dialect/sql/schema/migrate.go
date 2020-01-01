@@ -179,10 +179,15 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 
 // apply applies changes on the given table.
 func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change *changes) error {
-	// constraints should be dropped before dropping columns, because if a column
+	// Constraints should be dropped before dropping columns, because if a column
 	// is a part of multi-column constraints (like, unique index), ALTER TABLE
 	// might fail if the intermediate state violates the constraints.
 	if m.dropIndexes {
+		if pr, ok := m.sqlDialect.(preparer); ok {
+			if err := pr.prepare(ctx, tx, change, table); err != nil {
+				return err
+			}
+		}
 		for _, idx := range change.index.drop {
 			if err := m.dropIndex(ctx, tx, idx, table); err != nil {
 				return fmt.Errorf("drop index of table %q: %v", table, err)
@@ -230,6 +235,16 @@ type changes struct {
 		add  Indexes
 		drop Indexes
 	}
+}
+
+// dropColumn returns the dropped column by name (if any).
+func (c *changes) dropColumn(name string) (*Column, bool) {
+	for _, col := range c.column.drop {
+		if col.Name == name {
+			return col, true
+		}
+	}
+	return nil, false
 }
 
 // changeSet returns a changes object to be applied on existing table.
@@ -443,4 +458,8 @@ type sqlDialect interface {
 	addColumn(*Column) *sql.ColumnBuilder
 	alterColumn(*Column) []*sql.ColumnBuilder
 	addIndex(*Index, string) *sql.IndexBuilder
+}
+
+type preparer interface {
+	prepare(context.Context, dialect.Tx, *changes, string) error
 }
