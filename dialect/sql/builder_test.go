@@ -1064,35 +1064,47 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"baz", 1},
 		},
 		{
-			input: Dialect(dialect.Postgres).
-				Select().
-				From(Table("users")).
-				Where(CompositeGT(Columns("id", "name"), 1, "Ariel")),
-			wantQuery: `SELECT * FROM "users" WHERE ("id", "name") > ($1, $2)`,
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(CompositeGT(t1.Columns("id", "name"), 1, "Ariel"))
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE ("users"."id", "users"."name") > ($1, $2)`,
 			wantArgs:  []interface{}{1, "Ariel"},
 		},
 		{
-			input: Dialect(dialect.Postgres).
-				Select().
-				From(Table("users")).
-				Where(And(EQ("name", "Ariel"), CompositeGT(Columns("id", "name"), 1, "Ariel"))),
-			wantQuery: `SELECT * FROM "users" WHERE ("name" = $1) AND (("id", "name") > ($2, $3))`,
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(And(EQ("name", "Ariel"), CompositeGT(t1.Columns("id", "name"), 1, "Ariel")))
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE ("name" = $1) AND (("users"."id", "users"."name") > ($2, $3))`,
 			wantArgs:  []interface{}{"Ariel", 1, "Ariel"},
 		},
 		{
-			input: Dialect(dialect.Postgres).
-				Select().
-				From(Table("users")).
-				Where(And(EQ("name", "Ariel"), Or(EQ("surname", "Doe"), CompositeGT(Columns("id", "name"), 1, "Ariel")))),
-			wantQuery: `SELECT * FROM "users" WHERE ("name" = $1) AND ((("surname" = $2) OR (("id", "name") > ($3, $4))))`,
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(And(EQ("name", "Ariel"), Or(EQ("surname", "Doe"), CompositeGT(t1.Columns("id", "name"), 1, "Ariel"))))
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE ("name" = $1) AND ((("surname" = $2) OR (("users"."id", "users"."name") > ($3, $4))))`,
 			wantArgs:  []interface{}{"Ariel", "Doe", 1, "Ariel"},
 		},
 		{
-			input: Dialect(dialect.Postgres).
-				Select().
-				From(Table("users")).
-				Where(And(EQ("name", "Ariel"), CompositeLT(Columns("id", "name"), 1, "Ariel"))),
-			wantQuery: `SELECT * FROM "users" WHERE ("name" = $1) AND (("id", "name") < ($2, $3))`,
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(Table("users")).
+					Where(And(EQ("name", "Ariel"), CompositeLT(t1.Columns("id", "name"), 1, "Ariel")))
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE ("name" = $1) AND (("users"."id", "users"."name") < ($2, $3))`,
 			wantArgs:  []interface{}{"Ariel", 1, "Ariel"},
 		},
 		{

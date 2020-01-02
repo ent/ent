@@ -1061,10 +1061,6 @@ func (p *Predicate) ContainsFold(col, sub string) *Predicate {
 	})
 }
 
-func Columns(columns ...string) []string {
-	return columns
-}
-
 func CompositeGT(columns []string, args ...interface{}) *Predicate {
 	return (&Predicate{}).CompositeGT(columns, args...)
 }
