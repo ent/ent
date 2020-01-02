@@ -1069,9 +1069,7 @@ func CompositeLT(columns []string, args ...interface{}) *Predicate {
 	return (&Predicate{}).CompositeLT(columns, args...)
 }
 
-// GT returns a composite ">" predicate.
-func (p *Predicate) CompositeGT(columns []string, args ...interface{}) *Predicate {
-	const operator = " > "
+func (p *Predicate) compositeP(operator string, columns []string, args ...interface{}) *Predicate {
 	return p.append(func(b *Builder) {
 		b.Nested(func(nb *Builder) {
 			nb.IdentComma(columns...)
@@ -1083,18 +1081,16 @@ func (p *Predicate) CompositeGT(columns []string, args ...interface{}) *Predicat
 	})
 }
 
+// GT returns a composite ">" predicate.
+func (p *Predicate) CompositeGT(columns []string, args ...interface{}) *Predicate {
+	const operator = " > "
+	return p.compositeP(operator, columns, args...)
+}
+
 // LT appends a composite "<" predicate.
 func (p *Predicate) CompositeLT(columns []string, args ...interface{}) *Predicate {
 	const operator = " < "
-	return p.append(func(b *Builder) {
-		b.Nested(func(nb *Builder) {
-			nb.IdentComma(columns...)
-		})
-		b.WriteString(operator)
-		b.WriteString("(")
-		b.Args(args...)
-		b.WriteString(")")
-	})
+	return p.compositeP(operator, columns, args...)
 }
 
 // Query returns query representation of a predicate.
