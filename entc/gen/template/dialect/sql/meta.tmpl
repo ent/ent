@@ -12,7 +12,7 @@ in the LICENSE file in the root directory of this source tree.
 		// {{ $e.TableConstant }} is the table the holds the {{ $e.Name }} relation/edge.
 		{{- if $e.M2M }} The primary key declared below.{{ end }}
 		{{ $e.TableConstant }} = "{{ $e.Rel.Table }}"
-		{{- if eq $.Table $e.Type.Table | not }}
+		{{- if ne $.Table $e.Type.Table }}
 			// {{ $e.InverseTableConstant }} is the table name for the {{ $e.Type.Name }} entity.
 			// It exists in this package in order to avoid circular dependency with the "{{ $e.Type.Package }}" package.
 			{{ $e.InverseTableConstant }} = "{{ $e.Type.Table }}"
@@ -34,13 +34,11 @@ in the LICENSE file in the root directory of this source tree.
 		{{- end }}
 	}
 	{{/* if any of the edges owns a foreign-key */}}
-	{{ if $.HasFK }}
+	{{ with $.FKEdges }}
 		// ForeignKeys holds the SQL foreign-keys that are owned by the {{ $.Name }} type.
 		var ForeignKeys = []string{
-			{{- range $e := $.Edges }}
-				{{- if $e.OwnFK }}
-					{{ $e.ColumnConstant }},
-				{{- end }}
+			{{- range $e := . }}
+				{{ $e.ColumnConstant }},
 			{{- end }}
 		}
 	{{ end }}

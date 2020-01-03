@@ -28,8 +28,13 @@ type {{ $builder }} struct {
 			with{{ pascal $e.Name }} *{{ $e.Type.QueryName }}
 		{{- end }}
 	{{- end }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $tmpl := printf "dialect/%s/query/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 	// intermediate query.
-	{{ $.Storage }} {{ $.Storage.Builder}}
+	{{ $.Storage }} {{ $.Storage.Builder }}
 }
 
 // Where adds a new predicate for the builder.
@@ -63,7 +68,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
 		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
 		{{- with extend $ "Receiver" $receiver "Edge" $e -}}
-			{{ $tmpl := printf "dialect/%s/query/path" $.Storage  }}
+			{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
 			{{- xtemplate $tmpl . }}
 		{{- end -}}
 		return query

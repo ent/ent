@@ -4,6 +4,13 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* Additional fields for the builder. */}}
+{{ define "dialect/sql/query/fields" }}
+	{{- with $.ForeignKeys }}
+		withFKs bool
+	{{- end }}
+{{- end }}
+
 {{ define "dialect/sql/query" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
@@ -11,14 +18,15 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	var (
-		{{- if $.HasFK }}
-			withFKs bool
-		{{- end }}
 		nodes []*{{ $.Name }}
+		{{- with $.ForeignKeys }}
+			withFKs = {{ $receiver }}.withFKs
+		{{- end }}
 		spec = {{ $receiver }}.querySpec()
 	)
-	{{- if $.HasFK }}
-			if withFKs = {{ range $i, $e := $.FKEdges }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }}; withFKs {
+	{{- with $.ForeignKeys }}
+			if withFKs || {{ range $i, $e := $.FKEdges }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
+				withFKs = true
 				spec.Node.Columns = append(spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
 			}
 	{{- end }}
@@ -26,7 +34,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		node := &{{ $.Name }}{config: {{ $receiver }}.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
-		{{- if $.HasFK }}
+		{{- with $.ForeignKeys }}
 			if withFKs {
 				values = append(values, node.fkValues()...)
 			}
@@ -43,6 +51,73 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, spec); err != nil {
 		return nil, err
 	}
+	{{- range $i, $e := $.Edges }}
+		if query := {{ $receiver }}.with{{ pascal $e.Name }}; query != nil {
+		{{- if $e.M2M }}
+			{{/* TODO: load from join-table */}}
+		{{- else if $e.OwnFK }}
+			ids := make([]{{ $e.Type.ID.Type }}, 0, len(nodes))
+			idmap := make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
+			for i := range nodes {
+				if fk := nodes[i].{{ $e.StructFKField }}; fk != nil {
+					ids = append(ids, *fk)
+					idmap[*fk] = append(idmap[*fk], nodes[i])
+				}
+			}
+			query.Where({{ $e.Type.Package }}.IDIn(ids...))
+			vs, err := query.All(ctx)
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range vs {
+				vnodes, ok := idmap[v.ID]
+				if !ok {
+					return nil, fmt.Errorf("unexpected id returned")
+				}
+				for i := range vnodes {
+					vnodes[i].Edges.{{ $e.StructField }} = v
+					{{/* TODO: set the inverse */}}
+				}
+			}
+		{{- else }}
+			fks := make([]driver.Value, 0, len(nodes))
+			idmap := make(map[{{ $.ID.Type }}]*{{ $.Name }})
+			for i := range nodes {
+				{{- /* Convert string-ids that are stored as int in the database */ -}}
+				{{- if and (not $.ID.UserDefined) $.ID.IsString }}
+					id, err := strconv.Atoi(nodes[i].ID)
+					if err != nil {
+						return nil, err
+					}
+					fks = append(fks, id)
+				{{- else }}
+					fks = append(fks, nodes[i].ID)
+				{{- end }}
+				idmap[nodes[i].ID] = nodes[i]
+			}
+			query.withFKs = true
+			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
+				s.Where(sql.InValues({{ $.Package }}.{{ $e.ColumnConstant }}, fks...))
+			}))
+			vs, err := query.All(ctx)
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range vs {
+				fk := v.{{ $e.StructFKField }}
+				if fk == nil {
+					return nil, fmt.Errorf("foreign-key is null")
+				}
+				vnode, ok := idmap[*fk]
+				if !ok {
+					return nil, fmt.Errorf("unexpected foreign-key returned")
+				}
+				vnode.Edges.{{ $e.StructField }} = {{ if $e.Unique }}v{{ else }}append(vnode.Edges.{{ $e.StructField }}, v){{ end }}
+				{{/* TODO: set the inverse */}}
+			}
+		{{- end }}
+		}
+	{{- end }}
 	return nodes, nil
 }
 
