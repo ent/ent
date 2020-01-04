@@ -20,6 +20,8 @@ type User struct {
 	config `graphql:"-" json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// OptionalInt holds the value of the "optional_int" field.
+	OptionalInt int `json:"optional_int,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
@@ -37,6 +39,7 @@ type User struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
+		&sql.NullInt64{},
 		&sql.NullInt64{},
 		&sql.NullInt64{},
 		&sql.NullString{},
@@ -60,32 +63,37 @@ func (u *User) assignValues(values ...interface{}) error {
 	u.ID = strconv.FormatInt(value.Int64, 10)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field age", values[0])
+		return fmt.Errorf("unexpected type %T for field optional_int", values[0])
+	} else if value.Valid {
+		u.OptionalInt = int(value.Int64)
+	}
+	if value, ok := values[1].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[1])
 	} else if value.Valid {
 		u.Age = int(value.Int64)
 	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[1])
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[2])
 	} else if value.Valid {
 		u.Name = value.String
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field last", values[2])
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field last", values[3])
 	} else if value.Valid {
 		u.Last = value.String
 	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field nickname", values[3])
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field nickname", values[4])
 	} else if value.Valid {
 		u.Nickname = value.String
 	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field phone", values[4])
+	if value, ok := values[5].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field phone", values[5])
 	} else if value.Valid {
 		u.Phone = value.String
 	}
-	if value, ok := values[5].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field password", values[5])
+	if value, ok := values[6].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field password", values[6])
 	} else if value.Valid {
 		u.Password = value.String
 	}
@@ -170,6 +178,8 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", optional_int=")
+	builder.WriteString(fmt.Sprintf("%v", u.OptionalInt))
 	builder.WriteString(", age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteString(", name=")

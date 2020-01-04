@@ -94,6 +94,14 @@ func IDLTE(id string) predicate.User {
 	)
 }
 
+// OptionalInt applies equality check predicate on the "optional_int" field. It's identical to OptionalIntEQ.
+func OptionalInt(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.EQ(v))
+	},
+	)
+}
+
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -138,6 +146,94 @@ func Phone(v string) predicate.User {
 func Password(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPassword, p.EQ(v))
+	},
+	)
+}
+
+// OptionalIntEQ applies the EQ predicate on the "optional_int" field.
+func OptionalIntEQ(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.EQ(v))
+	},
+	)
+}
+
+// OptionalIntNEQ applies the NEQ predicate on the "optional_int" field.
+func OptionalIntNEQ(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.NEQ(v))
+	},
+	)
+}
+
+// OptionalIntIn applies the In predicate on the "optional_int" field.
+func OptionalIntIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.Within(v...))
+	},
+	)
+}
+
+// OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
+func OptionalIntNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.Without(v...))
+	},
+	)
+}
+
+// OptionalIntGT applies the GT predicate on the "optional_int" field.
+func OptionalIntGT(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.GT(v))
+	},
+	)
+}
+
+// OptionalIntGTE applies the GTE predicate on the "optional_int" field.
+func OptionalIntGTE(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.GTE(v))
+	},
+	)
+}
+
+// OptionalIntLT applies the LT predicate on the "optional_int" field.
+func OptionalIntLT(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.LT(v))
+	},
+	)
+}
+
+// OptionalIntLTE applies the LTE predicate on the "optional_int" field.
+func OptionalIntLTE(v int) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalInt, p.LTE(v))
+	},
+	)
+}
+
+// OptionalIntIsNil applies the IsNil predicate on the "optional_int" field.
+func OptionalIntIsNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalInt)
+	},
+	)
+}
+
+// OptionalIntNotNil applies the NotNil predicate on the "optional_int" field.
+func OptionalIntNotNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalInt)
 	},
 	)
 }

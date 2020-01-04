@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -23,23 +24,38 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age       *int
-	name      *string
-	last      *string
-	nickname  *string
-	phone     *string
-	password  *string
-	card      map[string]struct{}
-	pets      map[string]struct{}
-	files     map[string]struct{}
-	groups    map[string]struct{}
-	friends   map[string]struct{}
-	followers map[string]struct{}
-	following map[string]struct{}
-	team      map[string]struct{}
-	spouse    map[string]struct{}
-	children  map[string]struct{}
-	parent    map[string]struct{}
+	optional_int *int
+	age          *int
+	name         *string
+	last         *string
+	nickname     *string
+	phone        *string
+	password     *string
+	card         map[string]struct{}
+	pets         map[string]struct{}
+	files        map[string]struct{}
+	groups       map[string]struct{}
+	friends      map[string]struct{}
+	followers    map[string]struct{}
+	following    map[string]struct{}
+	team         map[string]struct{}
+	spouse       map[string]struct{}
+	children     map[string]struct{}
+	parent       map[string]struct{}
+}
+
+// SetOptionalInt sets the optional_int field.
+func (uc *UserCreate) SetOptionalInt(i int) *UserCreate {
+	uc.optional_int = &i
+	return uc
+}
+
+// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+func (uc *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
+	if i != nil {
+		uc.SetOptionalInt(*i)
+	}
+	return uc
 }
 
 // SetAge sets the age field.
@@ -340,6 +356,11 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
+	if uc.optional_int != nil {
+		if err := user.OptionalIntValidator(*uc.optional_int); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+		}
+	}
 	if uc.age == nil {
 		return nil, errors.New("ent: missing required field \"age\"")
 	}
@@ -385,6 +406,14 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
+	if value := uc.optional_int; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  *value,
+			Column: user.FieldOptionalInt,
+		})
+		u.OptionalInt = *value
+	}
 	if value := uc.age; value != nil {
 		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

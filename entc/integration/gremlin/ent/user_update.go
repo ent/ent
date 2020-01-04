@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -22,44 +23,79 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	age              *int
-	addage           *int
-	name             *string
-	last             *string
-	nickname         *string
-	clearnickname    bool
-	phone            *string
-	clearphone       bool
-	password         *string
-	clearpassword    bool
-	card             map[string]struct{}
-	pets             map[string]struct{}
-	files            map[string]struct{}
-	groups           map[string]struct{}
-	friends          map[string]struct{}
-	followers        map[string]struct{}
-	following        map[string]struct{}
-	team             map[string]struct{}
-	spouse           map[string]struct{}
-	children         map[string]struct{}
-	parent           map[string]struct{}
-	clearedCard      bool
-	removedPets      map[string]struct{}
-	removedFiles     map[string]struct{}
-	removedGroups    map[string]struct{}
-	removedFriends   map[string]struct{}
-	removedFollowers map[string]struct{}
-	removedFollowing map[string]struct{}
-	clearedTeam      bool
-	clearedSpouse    bool
-	removedChildren  map[string]struct{}
-	clearedParent    bool
-	predicates       []predicate.User
+	optional_int      *int
+	addoptional_int   *int
+	clearoptional_int bool
+	age               *int
+	addage            *int
+	name              *string
+	last              *string
+	nickname          *string
+	clearnickname     bool
+	phone             *string
+	clearphone        bool
+	password          *string
+	clearpassword     bool
+	card              map[string]struct{}
+	pets              map[string]struct{}
+	files             map[string]struct{}
+	groups            map[string]struct{}
+	friends           map[string]struct{}
+	followers         map[string]struct{}
+	following         map[string]struct{}
+	team              map[string]struct{}
+	spouse            map[string]struct{}
+	children          map[string]struct{}
+	parent            map[string]struct{}
+	clearedCard       bool
+	removedPets       map[string]struct{}
+	removedFiles      map[string]struct{}
+	removedGroups     map[string]struct{}
+	removedFriends    map[string]struct{}
+	removedFollowers  map[string]struct{}
+	removedFollowing  map[string]struct{}
+	clearedTeam       bool
+	clearedSpouse     bool
+	removedChildren   map[string]struct{}
+	clearedParent     bool
+	predicates        []predicate.User
 }
 
 // Where adds a new predicate for the builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.predicates = append(uu.predicates, ps...)
+	return uu
+}
+
+// SetOptionalInt sets the optional_int field.
+func (uu *UserUpdate) SetOptionalInt(i int) *UserUpdate {
+	uu.optional_int = &i
+	uu.addoptional_int = nil
+	return uu
+}
+
+// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+func (uu *UserUpdate) SetNillableOptionalInt(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetOptionalInt(*i)
+	}
+	return uu
+}
+
+// AddOptionalInt adds i to optional_int.
+func (uu *UserUpdate) AddOptionalInt(i int) *UserUpdate {
+	if uu.addoptional_int == nil {
+		uu.addoptional_int = &i
+	} else {
+		*uu.addoptional_int += i
+	}
+	return uu
+}
+
+// ClearOptionalInt clears the value of optional_int.
+func (uu *UserUpdate) ClearOptionalInt() *UserUpdate {
+	uu.optional_int = nil
+	uu.clearoptional_int = true
 	return uu
 }
 
@@ -557,6 +593,11 @@ func (uu *UserUpdate) ClearParent() *UserUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	if uu.optional_int != nil {
+		if err := user.OptionalIntValidator(*uu.optional_int); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+		}
+	}
 	if len(uu.card) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -622,6 +663,12 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
+	if value := uu.optional_int; value != nil {
+		v.Property(dsl.Single, user.FieldOptionalInt, *value)
+	}
+	if value := uu.addoptional_int; value != nil {
+		v.Property(dsl.Single, user.FieldOptionalInt, __.Union(__.Values(user.FieldOptionalInt), __.Constant(*value)).Sum())
+	}
 	if value := uu.age; value != nil {
 		v.Property(dsl.Single, user.FieldAge, *value)
 	}
@@ -652,6 +699,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 		v.Property(dsl.Single, user.FieldPassword, *value)
 	}
 	var properties []interface{}
+	if uu.clearoptional_int {
+		properties = append(properties, user.FieldOptionalInt)
+	}
 	if uu.clearnickname {
 		properties = append(properties, user.FieldNickname)
 	}
@@ -787,39 +837,74 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id               string
-	age              *int
-	addage           *int
-	name             *string
-	last             *string
-	nickname         *string
-	clearnickname    bool
-	phone            *string
-	clearphone       bool
-	password         *string
-	clearpassword    bool
-	card             map[string]struct{}
-	pets             map[string]struct{}
-	files            map[string]struct{}
-	groups           map[string]struct{}
-	friends          map[string]struct{}
-	followers        map[string]struct{}
-	following        map[string]struct{}
-	team             map[string]struct{}
-	spouse           map[string]struct{}
-	children         map[string]struct{}
-	parent           map[string]struct{}
-	clearedCard      bool
-	removedPets      map[string]struct{}
-	removedFiles     map[string]struct{}
-	removedGroups    map[string]struct{}
-	removedFriends   map[string]struct{}
-	removedFollowers map[string]struct{}
-	removedFollowing map[string]struct{}
-	clearedTeam      bool
-	clearedSpouse    bool
-	removedChildren  map[string]struct{}
-	clearedParent    bool
+	id                string
+	optional_int      *int
+	addoptional_int   *int
+	clearoptional_int bool
+	age               *int
+	addage            *int
+	name              *string
+	last              *string
+	nickname          *string
+	clearnickname     bool
+	phone             *string
+	clearphone        bool
+	password          *string
+	clearpassword     bool
+	card              map[string]struct{}
+	pets              map[string]struct{}
+	files             map[string]struct{}
+	groups            map[string]struct{}
+	friends           map[string]struct{}
+	followers         map[string]struct{}
+	following         map[string]struct{}
+	team              map[string]struct{}
+	spouse            map[string]struct{}
+	children          map[string]struct{}
+	parent            map[string]struct{}
+	clearedCard       bool
+	removedPets       map[string]struct{}
+	removedFiles      map[string]struct{}
+	removedGroups     map[string]struct{}
+	removedFriends    map[string]struct{}
+	removedFollowers  map[string]struct{}
+	removedFollowing  map[string]struct{}
+	clearedTeam       bool
+	clearedSpouse     bool
+	removedChildren   map[string]struct{}
+	clearedParent     bool
+}
+
+// SetOptionalInt sets the optional_int field.
+func (uuo *UserUpdateOne) SetOptionalInt(i int) *UserUpdateOne {
+	uuo.optional_int = &i
+	uuo.addoptional_int = nil
+	return uuo
+}
+
+// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableOptionalInt(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetOptionalInt(*i)
+	}
+	return uuo
+}
+
+// AddOptionalInt adds i to optional_int.
+func (uuo *UserUpdateOne) AddOptionalInt(i int) *UserUpdateOne {
+	if uuo.addoptional_int == nil {
+		uuo.addoptional_int = &i
+	} else {
+		*uuo.addoptional_int += i
+	}
+	return uuo
+}
+
+// ClearOptionalInt clears the value of optional_int.
+func (uuo *UserUpdateOne) ClearOptionalInt() *UserUpdateOne {
+	uuo.optional_int = nil
+	uuo.clearoptional_int = true
+	return uuo
 }
 
 // SetAge sets the age field.
@@ -1316,6 +1401,11 @@ func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if uuo.optional_int != nil {
+		if err := user.OptionalIntValidator(*uuo.optional_int); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+		}
+	}
 	if len(uuo.card) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -1382,6 +1472,12 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
+	if value := uuo.optional_int; value != nil {
+		v.Property(dsl.Single, user.FieldOptionalInt, *value)
+	}
+	if value := uuo.addoptional_int; value != nil {
+		v.Property(dsl.Single, user.FieldOptionalInt, __.Union(__.Values(user.FieldOptionalInt), __.Constant(*value)).Sum())
+	}
 	if value := uuo.age; value != nil {
 		v.Property(dsl.Single, user.FieldAge, *value)
 	}
@@ -1412,6 +1508,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.Property(dsl.Single, user.FieldPassword, *value)
 	}
 	var properties []interface{}
+	if uuo.clearoptional_int {
+		properties = append(properties, user.FieldOptionalInt)
+	}
 	if uuo.clearnickname {
 		properties = append(properties, user.FieldNickname)
 	}

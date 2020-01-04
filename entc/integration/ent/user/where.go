@@ -114,6 +114,14 @@ func IDLTE(id string) predicate.User {
 	)
 }
 
+// OptionalInt applies equality check predicate on the "optional_int" field. It's identical to OptionalIntEQ.
+func OptionalInt(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -158,6 +166,106 @@ func Phone(v string) predicate.User {
 func Password(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPassword), v))
+	},
+	)
+}
+
+// OptionalIntEQ applies the EQ predicate on the "optional_int" field.
+func OptionalIntEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
+// OptionalIntNEQ applies the NEQ predicate on the "optional_int" field.
+func OptionalIntNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
+// OptionalIntIn applies the In predicate on the "optional_int" field.
+func OptionalIntIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalInt), v...))
+	},
+	)
+}
+
+// OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
+func OptionalIntNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalInt), v...))
+	},
+	)
+}
+
+// OptionalIntGT applies the GT predicate on the "optional_int" field.
+func OptionalIntGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
+// OptionalIntGTE applies the GTE predicate on the "optional_int" field.
+func OptionalIntGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
+// OptionalIntLT applies the LT predicate on the "optional_int" field.
+func OptionalIntLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
+// OptionalIntLTE applies the LTE predicate on the "optional_int" field.
+func OptionalIntLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalInt), v))
+	},
+	)
+}
+
+// OptionalIntIsNil applies the IsNil predicate on the "optional_int" field.
+func OptionalIntIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalInt)))
+	},
+	)
+}
+
+// OptionalIntNotNil applies the NotNil predicate on the "optional_int" field.
+func OptionalIntNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalInt)))
 	},
 	)
 }
