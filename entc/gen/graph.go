@@ -68,6 +68,8 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	}
 	for _, t := range g.Nodes {
 		check(resolve(t), "resolve %q relations", t.Name)
+	}
+	for _, t := range g.Nodes {
 		t.resolveFKs()
 	}
 	for _, schema := range schemas {

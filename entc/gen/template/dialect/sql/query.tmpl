@@ -76,7 +76,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 				}
 				for i := range vnodes {
 					vnodes[i].Edges.{{ $e.StructField }} = v
-					{{/* TODO: set the inverse */}}
 				}
 			}
 		{{- else }}
@@ -113,7 +112,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 					return nil, fmt.Errorf("unexpected foreign-key returned")
 				}
 				vnode.Edges.{{ $e.StructField }} = {{ if $e.Unique }}v{{ else }}append(vnode.Edges.{{ $e.StructField }}, v){{ end }}
-				{{/* TODO: set the inverse */}}
 			}
 		{{- end }}
 		}

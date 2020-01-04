@@ -19,6 +19,17 @@ type User struct {
 	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges struct {
+		// Groups holds the value of the groups edge.
+		Groups []*Group
+		// Parent holds the value of the parent edge.
+		Parent *User
+		// Children holds the value of the children edge.
+		Children []*User
+	}
+	parent_id *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,10 +39,17 @@ func (*User) scanValues() []interface{} {
 	}
 }
 
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+	}
+}
+
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m != n {
+	if m, n := len(values), len(user.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -40,12 +58,31 @@ func (u *User) assignValues(values ...interface{}) error {
 	}
 	u.ID = int(value.Int64)
 	values = values[1:]
+	values = values[0:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
+		} else if value.Valid {
+			u.parent_id = new(int)
+			*u.parent_id = int(value.Int64)
+		}
+	}
 	return nil
 }
 
 // QueryGroups queries the groups edge of the User.
 func (u *User) QueryGroups() *GroupQuery {
 	return (&UserClient{u.config}).QueryGroups(u)
+}
+
+// QueryParent queries the parent edge of the User.
+func (u *User) QueryParent() *UserQuery {
+	return (&UserClient{u.config}).QueryParent(u)
+}
+
+// QueryChildren queries the children edge of the User.
+func (u *User) QueryChildren() *UserQuery {
+	return (&UserClient{u.config}).QueryChildren(u)
 }
 
 // Update returns a builder for updating this User.

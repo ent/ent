@@ -115,6 +115,7 @@ var tests = []func(*testing.T, *ent.Client){
 	DefaultValue,
 	ImmutableValue,
 	Sensitive,
+	EagerLoading,
 }
 
 func Sanity(t *testing.T, client *ent.Client) {
@@ -869,6 +870,51 @@ func Sensitive(t *testing.T, client *ent.Client) {
 	b, err := json.Marshal(usr)
 	require.NoError(err)
 	require.NotContains(string(b), "secret-password")
+}
+
+func EagerLoading(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	require := require.New(t)
+	t.Run("O2M", func(t *testing.T) {
+		a8m := client.User.Create().SetName("a8m").SetAge(20).SaveX(ctx)
+		client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(a8m).SaveX(ctx)
+
+		pedro := client.Pet.Query().OnlyX(ctx)
+		require.Nil(pedro.Edges.Team)
+		require.Nil(pedro.Edges.Owner)
+
+		pedro = client.Pet.Query().WithOwner().OnlyX(ctx)
+		require.Nil(pedro.Edges.Team)
+		require.NotNil(pedro.Edges.Owner)
+		require.Equal(a8m.Name, pedro.Edges.Owner.Name)
+
+		pedro = client.Pet.Query().WithOwner().WithTeam().OnlyX(ctx)
+		require.NotNil(pedro.Edges.Team)
+		require.NotNil(pedro.Edges.Owner)
+		require.Equal(a8m.Name, pedro.Edges.Team.Name)
+		require.Equal(a8m.Name, pedro.Edges.Owner.Name)
+	})
+
+	t.Run("M2O", func(t *testing.T) {
+		a8m := client.User.Create().SetName("a8m").SetAge(20).SaveX(ctx)
+		client.Pet.Create().SetName("xabi").SetOwner(a8m).SaveX(ctx)
+		client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(a8m).SaveX(ctx)
+
+		a8m = client.User.Query().Where(user.ID(a8m.ID)).OnlyX(ctx)
+		require.Empty(a8m.Edges.Pets)
+
+		a8m = client.User.
+			Query().
+			Where(user.ID(a8m.ID)).
+			WithPets(func(q *ent.PetQuery) {
+				q.WithTeam().Order(ent.Asc(pet.FieldName))
+			}).
+			OnlyX(ctx)
+		require.Len(a8m.Edges.Pets, 2)
+		require.Equal("pedro", a8m.Edges.Pets[0].Name)
+		require.Equal("xabi", a8m.Edges.Pets[1].Name)
+		require.Equal(a8m.Name, a8m.Edges.Pets[0].Edges.Team.Name)
+	})
 }
 
 func drop(t *testing.T, client *ent.Client) {

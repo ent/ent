@@ -32,7 +32,7 @@ func (*Item) scanValues() []interface{} {
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Item fields.
 func (i *Item) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(item.Columns); m != n {
+	if m, n := len(values), len(item.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

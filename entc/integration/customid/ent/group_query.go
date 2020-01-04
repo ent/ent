@@ -28,6 +28,8 @@ type GroupQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Group
+	// eager-loading edges.
+	withUsers *UserQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +239,17 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 	}
 }
 
+//  WithUsers tells the query-builder to eager-loads the nodes that are connected to
+// the "users" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withUsers = query
+	return gq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
@@ -262,7 +275,8 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &Group{config: gq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -273,6 +287,9 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := gq.withUsers; query != nil {
+
 	}
 	return nodes, nil
 }

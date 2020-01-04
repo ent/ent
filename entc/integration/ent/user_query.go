@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -43,6 +45,7 @@ type UserQuery struct {
 	withSpouse    *UserQuery
 	withChildren  *UserQuery
 	withParent    *UserQuery
+	withFKs       bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -536,11 +539,12 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		withFKs bool
 		nodes   []*User
+		withFKs = uq.withFKs
 		spec    = uq.querySpec()
 	)
-	if withFKs = uq.withSpouse != nil || uq.withParent != nil; withFKs {
+	if withFKs || uq.withSpouse != nil || uq.withParent != nil {
+		withFKs = true
 		spec.Node.Columns = append(spec.Node.Columns, user.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {
@@ -561,6 +565,221 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := uq.withCard; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*User)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Card(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CardColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.owner_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Card = v
+		}
+	}
+	if query := uq.withPets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*User)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Pet(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.PetsColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.owner_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Pets = append(vnode.Edges.Pets, v)
+		}
+	}
+	if query := uq.withFiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*User)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.FilesColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.type_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Files = append(vnode.Edges.Files, v)
+		}
+	}
+	if query := uq.withGroups; query != nil {
+
+	}
+	if query := uq.withFriends; query != nil {
+
+	}
+	if query := uq.withFollowers; query != nil {
+
+	}
+	if query := uq.withFollowing; query != nil {
+
+	}
+	if query := uq.withTeam; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*User)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Pet(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.TeamColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.team_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Team = v
+		}
+	}
+	if query := uq.withSpouse; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*User)
+		for i := range nodes {
+			if fk := nodes[i].user_spouse_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Spouse = v
+			}
+		}
+	}
+	if query := uq.withChildren; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*User)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.ChildrenColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.parent_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Children = append(vnode.Edges.Children, v)
+		}
+	}
+	if query := uq.withParent; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*User)
+		for i := range nodes {
+			if fk := nodes[i].parent_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Parent = v
+			}
+		}
 	}
 	return nodes, nil
 }

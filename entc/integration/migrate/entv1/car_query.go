@@ -28,6 +28,9 @@ type CarQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Car
+	// eager-loading edges.
+	withOwner *UserQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +240,17 @@ func (cq *CarQuery) Clone() *CarQuery {
 	}
 }
 
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
+	query := &UserQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withOwner = query
+	return cq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
@@ -256,13 +270,22 @@ func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
 
 func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 	var (
-		nodes []*Car
-		spec  = cq.querySpec()
+		nodes   []*Car
+		withFKs = cq.withFKs
+		spec    = cq.querySpec()
 	)
+	if withFKs || cq.withOwner != nil {
+		withFKs = true
+		spec.Node.Columns = append(spec.Node.Columns, car.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Car{config: cq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -273,6 +296,30 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := cq.withOwner; query != nil {
+		ids := make([]int, 0, len(nodes))
+		idmap := make(map[int][]*Car)
+		for i := range nodes {
+			if fk := nodes[i].owner_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Owner = v
+			}
+		}
 	}
 	return nodes, nil
 }

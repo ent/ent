@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,12 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
+	// eager-loading edges.
+	withParent   *UserQuery
+	withChildren *UserQuery
+	withSpouse   *UserQuery
+	withCar      *CarQuery
+	withFKs      bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -273,6 +280,50 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
+//  WithParent tells the query-builder to eager-loads the nodes that are connected to
+// the "parent" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withParent = query
+	return uq
+}
+
+//  WithChildren tells the query-builder to eager-loads the nodes that are connected to
+// the "children" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withChildren = query
+	return uq
+}
+
+//  WithSpouse tells the query-builder to eager-loads the nodes that are connected to
+// the "spouse" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSpouse = query
+	return uq
+}
+
+//  WithCar tells the query-builder to eager-loads the nodes that are connected to
+// the "car" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithCar(opts ...func(*CarQuery)) *UserQuery {
+	query := &CarQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCar = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -316,13 +367,22 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes []*User
-		spec  = uq.querySpec()
+		nodes   []*User
+		withFKs = uq.withFKs
+		spec    = uq.querySpec()
 	)
+	if withFKs || uq.withParent != nil || uq.withSpouse != nil {
+		withFKs = true
+		spec.Node.Columns = append(spec.Node.Columns, user.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -333,6 +393,108 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := uq.withParent; query != nil {
+		ids := make([]int, 0, len(nodes))
+		idmap := make(map[int][]*User)
+		for i := range nodes {
+			if fk := nodes[i].parent_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Parent = v
+			}
+		}
+	}
+	if query := uq.withChildren; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.ChildrenColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.parent_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Children = append(vnode.Edges.Children, v)
+		}
+	}
+	if query := uq.withSpouse; query != nil {
+		ids := make([]int, 0, len(nodes))
+		idmap := make(map[int][]*User)
+		for i := range nodes {
+			if fk := nodes[i].user_spouse_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Spouse = v
+			}
+		}
+	}
+	if query := uq.withCar; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Car(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CarColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.owner_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Car = v
+		}
 	}
 	return nodes, nil
 }

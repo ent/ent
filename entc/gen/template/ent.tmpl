@@ -30,14 +30,16 @@ type {{ $.Name }} struct {
 			{{- end }}
 		}
 	{{- end -}}
-	{{- range $fk := $.ForeignKeys }}
-		{{- $f := $fk.Field }}
-		{{ $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}
+	{{- /* Additional fields to add by the storage driver. */}}
+	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
 	{{- end }}
+	{{- /* Additional fields to add by the user. */}}
 	{{ template "model/fields/additional" $ }}
 }
 
-{{ $tmpl := printf "dialect/%s/decode/one" $.Storage }}
+{{ $tmpl = printf "dialect/%s/decode/one" $.Storage }}
 {{ xtemplate $tmpl $ }}
 
 {{ $receiver := $.Receiver }}

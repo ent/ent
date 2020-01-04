@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -35,6 +37,7 @@ type GroupQuery struct {
 	withBlocked *UserQuery
 	withUsers   *UserQuery
 	withInfo    *GroupInfoQuery
+	withFKs     bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -367,11 +370,12 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
-		withFKs bool
 		nodes   []*Group
+		withFKs = gq.withFKs
 		spec    = gq.querySpec()
 	)
-	if withFKs = gq.withInfo != nil; withFKs {
+	if withFKs || gq.withInfo != nil {
+		withFKs = true
 		spec.Node.Columns = append(spec.Node.Columns, group.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {
@@ -392,6 +396,95 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := gq.withFiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*Group)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(group.FilesColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.type_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Files = append(vnode.Edges.Files, v)
+		}
+	}
+	if query := gq.withBlocked; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*Group)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(group.BlockedColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.group_blocked_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Blocked = append(vnode.Edges.Blocked, v)
+		}
+	}
+	if query := gq.withUsers; query != nil {
+
+	}
+	if query := gq.withInfo; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*Group)
+		for i := range nodes {
+			if fk := nodes[i].info_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(groupinfo.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Info = v
+			}
+		}
 	}
 	return nodes, nil
 }

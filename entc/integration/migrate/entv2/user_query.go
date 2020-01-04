@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,8 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
+	// eager-loading edges.
+	withCar *CarQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +240,17 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
+//  WithCar tells the query-builder to eager-loads the nodes that are connected to
+// the "car" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithCar(opts ...func(*CarQuery)) *UserQuery {
+	query := &CarQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCar = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -286,7 +300,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -297,6 +312,33 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := uq.withCar; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Car(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CarColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.owner_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Car = append(vnode.Edges.Car, v)
+		}
 	}
 	return nodes, nil
 }

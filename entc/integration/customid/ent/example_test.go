@@ -89,14 +89,25 @@ func ExampleUser() {
 	defer drv.Close()
 	client := NewClient(Driver(drv))
 	// creating vertices for the user's edges.
+	u2 := client.User.
+		Create().
+		SaveX(ctx)
+	log.Println("user created:", u2)
 
 	// create user vertex with its edges.
 	u := client.User.
 		Create().
+		AddChildren(u2).
 		SaveX(ctx)
 	log.Println("user created:", u)
 
 	// query edges.
+
+	u2, err = u.QueryChildren().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying children: %v", err)
+	}
+	log.Println("children found:", u2)
 
 	// Output:
 }

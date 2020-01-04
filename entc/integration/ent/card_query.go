@@ -30,6 +30,7 @@ type CardQuery struct {
 	predicates []predicate.Card
 	// eager-loading edges.
 	withOwner *UserQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -293,11 +294,12 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
-		withFKs bool
 		nodes   []*Card
+		withFKs = cq.withFKs
 		spec    = cq.querySpec()
 	)
-	if withFKs = cq.withOwner != nil; withFKs {
+	if withFKs || cq.withOwner != nil {
+		withFKs = true
 		spec.Node.Columns = append(spec.Node.Columns, card.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {
@@ -318,6 +320,30 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := cq.withOwner; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*Card)
+		for i := range nodes {
+			if fk := nodes[i].owner_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Owner = v
+			}
+		}
 	}
 	return nodes, nil
 }

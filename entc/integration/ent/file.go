@@ -32,12 +32,11 @@ type File struct {
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges struct {
 		// Owner holds the value of the owner edge.
-		Owner    *User
-		owner_id *int
+		Owner *User
 		// Type holds the value of the type edge.
-		Type    *FileType
-		type_id *int
+		Type *FileType
 	}
+	type_id *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -62,7 +61,7 @@ func (*File) fkValues() []interface{} {
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the File fields.
 func (f *File) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(file.Columns); m != n {
+	if m, n := len(values), len(file.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -95,16 +94,16 @@ func (f *File) assignValues(values ...interface{}) error {
 	values = values[4:]
 	if len(values) == len(file.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
-		} else if value.Valid {
-			f.Edges.owner_id = new(int)
-			*f.Edges.owner_id = int(value.Int64)
-		}
-		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field type_id", value)
 		} else if value.Valid {
-			f.Edges.type_id = new(int)
-			*f.Edges.type_id = int(value.Int64)
+			f.type_id = new(string)
+			*f.type_id = strconv.FormatInt(value.Int64, 10)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field type_id", value)
+		} else if value.Valid {
+			f.type_id = new(string)
+			*f.type_id = strconv.FormatInt(value.Int64, 10)
 		}
 	}
 	return nil

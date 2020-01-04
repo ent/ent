@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -30,6 +32,7 @@ type NodeQuery struct {
 	// eager-loading edges.
 	withPrev *NodeQuery
 	withNext *NodeQuery
+	withFKs  bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -316,11 +319,12 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
-		withFKs bool
 		nodes   []*Node
+		withFKs = nq.withFKs
 		spec    = nq.querySpec()
 	)
-	if withFKs = nq.withPrev != nil; withFKs {
+	if withFKs || nq.withPrev != nil {
+		withFKs = true
 		spec.Node.Columns = append(spec.Node.Columns, node.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {
@@ -341,6 +345,61 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, nq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := nq.withPrev; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*Node)
+		for i := range nodes {
+			if fk := nodes[i].prev_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(node.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Prev = v
+			}
+		}
+	}
+	if query := nq.withNext; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[string]*Node)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Node(func(s *sql.Selector) {
+			s.Where(sql.InValues(node.NextColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.prev_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Next = v
+		}
 	}
 	return nodes, nil
 }

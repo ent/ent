@@ -31,7 +31,7 @@ const (
 	// BlockedLabel holds the string label denoting the blocked edge type in the database.
 	BlockedLabel = "group_blocked"
 	// UsersInverseLabel holds the string label denoting the users inverse edge type in the database.
-	UsersInverseLabel = "user_groups"
+	UsersInverseLabel = "group_groups"
 	// InfoLabel holds the string label denoting the info edge type in the database.
 	InfoLabel = "group_info"
 )

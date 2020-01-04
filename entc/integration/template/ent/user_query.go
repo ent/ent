@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,9 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
+	// eager-loading edges.
+	withPets    *PetQuery
+	withFriends *UserQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -249,6 +253,28 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
+//  WithPets tells the query-builder to eager-loads the nodes that are connected to
+// the "pets" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPets = query
+	return uq
+}
+
+//  WithFriends tells the query-builder to eager-loads the nodes that are connected to
+// the "friends" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFriends = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -298,7 +324,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -309,6 +336,36 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := uq.withPets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		idmap := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			idmap[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Pet(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.PetsColumn, fks...))
+		}))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			fk := v.owner_id
+			if fk == nil {
+				return nil, fmt.Errorf("foreign-key is null")
+			}
+			vnode, ok := idmap[*fk]
+			if !ok {
+				return nil, fmt.Errorf("unexpected foreign-key returned")
+			}
+			vnode.Edges.Pets = append(vnode.Edges.Pets, v)
+		}
+	}
+	if query := uq.withFriends; query != nil {
+
 	}
 	return nodes, nil
 }

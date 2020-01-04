@@ -130,7 +130,7 @@ type (
 
 	// ForeignKey holds the information for foreign-key columns of types.
 	// It's exported only because it's used by the codegen templates and
-	// should not be used beside of that.
+	// should not be used beside that.
 	ForeignKey struct {
 		// Field information for the foreign-key column.
 		Field *Field

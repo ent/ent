@@ -41,9 +41,9 @@ type Group struct {
 		// Users holds the value of the users edge.
 		Users []*User
 		// Info holds the value of the info edge.
-		Info    *GroupInfo
-		info_id *int
+		Info *GroupInfo
 	}
+	info_id *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -68,7 +68,7 @@ func (*Group) fkValues() []interface{} {
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
 func (gr *Group) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(group.Columns); m != n {
+	if m, n := len(values), len(group.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -108,8 +108,8 @@ func (gr *Group) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field info_id", value)
 		} else if value.Valid {
-			gr.Edges.info_id = new(int)
-			*gr.Edges.info_id = int(value.Int64)
+			gr.info_id = new(string)
+			*gr.info_id = strconv.FormatInt(value.Int64, 10)
 		}
 	}
 	return nil

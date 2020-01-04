@@ -31,6 +31,7 @@ type PetQuery struct {
 	// eager-loading edges.
 	withTeam  *UserQuery
 	withOwner *UserQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -317,11 +318,12 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
-		withFKs bool
 		nodes   []*Pet
+		withFKs = pq.withFKs
 		spec    = pq.querySpec()
 	)
-	if withFKs = pq.withTeam != nil || pq.withOwner != nil; withFKs {
+	if withFKs || pq.withTeam != nil || pq.withOwner != nil {
+		withFKs = true
 		spec.Node.Columns = append(spec.Node.Columns, pet.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {
@@ -342,6 +344,54 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := pq.withTeam; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*Pet)
+		for i := range nodes {
+			if fk := nodes[i].team_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Team = v
+			}
+		}
+	}
+	if query := pq.withOwner; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*Pet)
+		for i := range nodes {
+			if fk := nodes[i].owner_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Owner = v
+			}
+		}
 	}
 	return nodes, nil
 }

@@ -56,9 +56,8 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			if len(values) == len({{ $.Package }}.ForeignKeys) {
 				{{- range $i, $e := . }}
 					{{- $id := $e.Type.ID }}
-					{{/* TODO: The usage of template here is wrong. */}}
 					{{- if and $id.UserDefined (or $id.IsString $id.IsUUID) }}
-						{{- with extend $ "Idx" 0 "Field" $id "Rec" $receiver }}
+						{{- with extend $ "Idx" 0 "Field" $id "Rec" $receiver "StructField" $e.StructFKField }}
 							{{ template "dialect/sql/decode/field" . }}
 						{{- end }}
 					{{- else }}
@@ -80,11 +79,12 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 	{{- $i := $.Scope.Idx -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $ret := $.Scope.Rec -}}
+	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end }}
 	{{- if $f.IsJSON }}
 		if value, ok := values[{{ $i }}].(*{{ $f.NullType }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {
-			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $f.StructField }}); err != nil {
+			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $field }}); err != nil {
 				return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
 			}
 		}
@@ -95,18 +95,26 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 		{{- if hasPrefix $nulltype "sql" }}
 			} else if value.Valid {
 				{{- if $f.Nillable }}
-					{{ $ret }}.{{ $f.StructField }} = new({{ $f.Type }})
-					*{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
+					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
+					*{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
 				{{- else }}
-					{{ $ret }}.{{ $f.StructField }} = {{ $f.NullTypeField "value" }}
+					{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
 				{{- end }}
 		{{- else }}
 			} else if value != nil {
-				{{ $ret }}.{{ $f.StructField }} = *value
+				{{ $ret }}.{{ $field }} = *value
 		{{- end }}
 		}
 	{{- end }}
 {{- end }}
 
 {{ define "dialect/sql/decode/many" }}
+{{ end }}
+
+{{/* Additional fields for the generated model for holding the foreign-keys */}}
+{{ define "dialect/sql/model/fields" }}
+	{{- range $fk := $.ForeignKeys }}
+		{{- $f := $fk.Field }}
+		{{ $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}
+	{{- end }}
 {{ end }}

@@ -18,7 +18,7 @@ const (
 	Table = "groups"
 )
 
-// Columns holds all SQL columns are group fields.
+// Columns holds all SQL columns for group fields.
 var Columns = []string{
 	FieldID,
 	FieldMaxUsers,

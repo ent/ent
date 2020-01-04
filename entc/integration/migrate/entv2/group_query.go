@@ -249,7 +249,8 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &Group{config: gq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

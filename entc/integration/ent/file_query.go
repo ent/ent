@@ -32,6 +32,7 @@ type FileQuery struct {
 	// eager-loading edges.
 	withOwner *UserQuery
 	withType  *FileTypeQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -318,11 +319,12 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
-		withFKs bool
 		nodes   []*File
+		withFKs = fq.withFKs
 		spec    = fq.querySpec()
 	)
-	if withFKs = fq.withOwner != nil || fq.withType != nil; withFKs {
+	if withFKs || fq.withOwner != nil || fq.withType != nil {
+		withFKs = true
 		spec.Node.Columns = append(spec.Node.Columns, file.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {
@@ -343,6 +345,54 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	}
 	if err := sqlgraph.QueryNodes(ctx, fq.driver, spec); err != nil {
 		return nil, err
+	}
+	if query := fq.withOwner; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*File)
+		for i := range nodes {
+			if fk := nodes[i].type_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Owner = v
+			}
+		}
+	}
+	if query := fq.withType; query != nil {
+		ids := make([]string, 0, len(nodes))
+		idmap := make(map[string][]*File)
+		for i := range nodes {
+			if fk := nodes[i].type_id; fk != nil {
+				ids = append(ids, *fk)
+				idmap[*fk] = append(idmap[*fk], nodes[i])
+			}
+		}
+		query.Where(filetype.IDIn(ids...))
+		vs, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range vs {
+			vnodes, ok := idmap[v.ID]
+			if !ok {
+				return nil, fmt.Errorf("unexpected id returned")
+			}
+			for i := range vnodes {
+				vnodes[i].Edges.Type = v
+			}
+		}
 	}
 	return nodes, nil
 }

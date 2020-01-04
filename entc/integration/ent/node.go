@@ -26,11 +26,11 @@ type Node struct {
 	// The values are being populated by the NodeQuery when eager-loading is set.
 	Edges struct {
 		// Prev holds the value of the prev edge.
-		Prev    *Node
-		prev_id *int
+		Prev *Node
 		// Next holds the value of the next edge.
 		Next *Node
 	}
+	prev_id *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -51,7 +51,7 @@ func (*Node) fkValues() []interface{} {
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Node fields.
 func (n *Node) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(node.Columns); m != n {
+	if m, n := len(values), len(node.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -70,8 +70,8 @@ func (n *Node) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field prev_id", value)
 		} else if value.Valid {
-			n.Edges.prev_id = new(int)
-			*n.Edges.prev_id = int(value.Int64)
+			n.prev_id = new(string)
+			*n.prev_id = strconv.FormatInt(value.Int64, 10)
 		}
 	}
 	return nil

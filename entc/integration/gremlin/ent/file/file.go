@@ -25,9 +25,9 @@ const (
 	FieldGroup = "group"
 
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "user_files"
+	OwnerInverseLabel = "file_files"
 	// TypeInverseLabel holds the string label denoting the type inverse edge type in the database.
-	TypeInverseLabel = "file_type_files"
+	TypeInverseLabel = "file_files"
 )
 
 var (

@@ -34,7 +34,7 @@ func (*Blob) scanValues() []interface{} {
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Blob fields.
 func (b *Blob) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(blob.Columns); m != n {
+	if m, n := len(values), len(blob.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	if value, ok := values[0].(*uuid.UUID); !ok {

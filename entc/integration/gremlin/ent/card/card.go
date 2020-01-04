@@ -28,7 +28,7 @@ const (
 	FieldName = "name"
 
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "user_card"
+	OwnerInverseLabel = "card_card"
 )
 
 var (

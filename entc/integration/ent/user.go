@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -62,37 +62,101 @@ type User struct {
 		// Parent holds the value of the parent edge.
 		Parent *User
 	}
+	group_blocked_id *string
+	user_spouse_id   *string
+	parent_id        *string
 }
 
-// FromResponse scans the gremlin response data into User.
-func (u *User) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
+// scanValues returns the types for scanning values from sql.Rows.
+func (*User) scanValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullInt64{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
+		&sql.NullString{},
 	}
-	var scanu struct {
-		ID          string    `json:"id,omitempty"`
-		OptionalInt int       `json:"optional_int,omitempty"`
-		Age         int       `json:"age,omitempty"`
-		Name        string    `json:"name,omitempty"`
-		Last        string    `json:"last,omitempty"`
-		Nickname    string    `json:"nickname,omitempty"`
-		Phone       string    `json:"phone,omitempty"`
-		Password    string    `json:"password,omitempty"`
-		Role        user.Role `json:"role,omitempty"`
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{},
+		&sql.NullInt64{},
 	}
-	if err := vmap.Decode(&scanu); err != nil {
-		return err
+}
+
+// assignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the User fields.
+func (u *User) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(user.Columns); m < n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	u.ID = scanu.ID
-	u.OptionalInt = scanu.OptionalInt
-	u.Age = scanu.Age
-	u.Name = scanu.Name
-	u.Last = scanu.Last
-	u.Nickname = scanu.Nickname
-	u.Phone = scanu.Phone
-	u.Password = scanu.Password
-	u.Role = scanu.Role
+	value, ok := values[0].(*sql.NullInt64)
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field id", value)
+	}
+	u.ID = strconv.FormatInt(value.Int64, 10)
+	values = values[1:]
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field optional_int", values[0])
+	} else if value.Valid {
+		u.OptionalInt = int(value.Int64)
+	}
+	if value, ok := values[1].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[1])
+	} else if value.Valid {
+		u.Age = int(value.Int64)
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[2])
+	} else if value.Valid {
+		u.Name = value.String
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field last", values[3])
+	} else if value.Valid {
+		u.Last = value.String
+	}
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field nickname", values[4])
+	} else if value.Valid {
+		u.Nickname = value.String
+	}
+	if value, ok := values[5].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field phone", values[5])
+	} else if value.Valid {
+		u.Phone = value.String
+	}
+	if value, ok := values[6].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field password", values[6])
+	} else if value.Valid {
+		u.Password = value.String
+	}
+	if value, ok := values[7].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field role", values[7])
+	} else if value.Valid {
+		u.Role = user.Role(value.String)
+	}
+	values = values[8:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field user_spouse_id", value)
+		} else if value.Valid {
+			u.user_spouse_id = new(string)
+			*u.user_spouse_id = strconv.FormatInt(value.Int64, 10)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
+		} else if value.Valid {
+			u.parent_id = new(string)
+			*u.parent_id = strconv.FormatInt(value.Int64, 10)
+		}
+	}
 	return nil
 }
 
@@ -201,42 +265,6 @@ func (u *User) id() int {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-// FromResponse scans the gremlin response data into Users.
-func (u *Users) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scanu []struct {
-		ID          string    `json:"id,omitempty"`
-		OptionalInt int       `json:"optional_int,omitempty"`
-		Age         int       `json:"age,omitempty"`
-		Name        string    `json:"name,omitempty"`
-		Last        string    `json:"last,omitempty"`
-		Nickname    string    `json:"nickname,omitempty"`
-		Phone       string    `json:"phone,omitempty"`
-		Password    string    `json:"password,omitempty"`
-		Role        user.Role `json:"role,omitempty"`
-	}
-	if err := vmap.Decode(&scanu); err != nil {
-		return err
-	}
-	for _, v := range scanu {
-		*u = append(*u, &User{
-			ID:          v.ID,
-			OptionalInt: v.OptionalInt,
-			Age:         v.Age,
-			Name:        v.Name,
-			Last:        v.Last,
-			Nickname:    v.Nickname,
-			Phone:       v.Phone,
-			Password:    v.Password,
-			Role:        v.Role,
-		})
-	}
-	return nil
-}
 
 func (u Users) config(cfg config) {
 	for _i := range u {
