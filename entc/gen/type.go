@@ -255,10 +255,10 @@ func (t Type) HasOptional() bool {
 	return false
 }
 
-// MixedInWithDefault returns all mixed-in fields with default values for creation or update.
-func (t Type) MixedInWithDefault() (fields []*Field) {
+// MixedInWithDefaultOrValidator returns all mixed-in fields with default values for creation or update.
+func (t Type) MixedInWithDefaultOrValidator() (fields []*Field) {
 	for _, f := range t.Fields {
-		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault) {
+		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0) {
 			fields = append(fields, f)
 		}
 	}

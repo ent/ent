@@ -36,7 +36,7 @@ const (
 
 {{ if or $.HasDefault $.HasValidators }}
 var (
-	{{- with $.MixedInWithDefault }}
+	{{- with $.MixedInWithDefaultOrValidator }}
 		mixin = {{ base $.Schema }}.{{ $.Name }}{}.Mixin()
 		mixinFields = [...][]ent.Field{
 			{{- range $i, $_ := xrange $.NumMixin }}
