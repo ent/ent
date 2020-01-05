@@ -157,9 +157,9 @@ func TestField_Enums(t *testing.T) {
 		).
 		Default("user").
 		Descriptor()
-<<<<<<< HEAD
 	assert.Equal(t, "role", fd.Name)
 	assert.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+	assert.Equal(t, "user", fd.Default)
 }
 
 func TestField_UUID(t *testing.T) {
@@ -205,9 +205,4 @@ func TestTypeConstName(t *testing.T) {
 	assert.Equal(t, "TypeInt", typ.ConstName())
 	typ = 21
 	assert.Equal(t, "invalid", typ.ConstName())
-=======
-	require.Equal(t, "role", fd.Name)
-	require.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
-	require.Equal(t, "user", fd.Default)
->>>>>>> schema: enum default value UT
 }

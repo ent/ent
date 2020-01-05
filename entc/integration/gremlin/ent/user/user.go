@@ -11,7 +11,6 @@ import (
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
 )
 
 const (
@@ -76,16 +75,15 @@ var (
 	descLast = fields[2].Descriptor()
 	// DefaultLast holds the default value on creation for the last field.
 	DefaultLast = descLast.Default.(string)
-
-	// descRole is the schema descriptor for role field.
-	descRole = fields[6].Descriptor()
-	// DefaultRole holds the default value on creation for the role field.
-	DefaultRole = descRole.Default.(user.Role)
 )
 
 // Role defines the type for the role enum field.
 type Role string
 
+// RoleUser is the default Role.
+const DefaultRole = RoleUser
+
+// Role values.
 const (
 	RoleUser  Role = "user"
 	RoleAdmin Role = "admin"

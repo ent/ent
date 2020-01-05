@@ -78,6 +78,7 @@ var (
 // State defines the type for the state enum field.
 type State string
 
+// State values.
 const (
 	StateLoggedIn  State = "logged_in"
 	StateLoggedOut State = "logged_out"
