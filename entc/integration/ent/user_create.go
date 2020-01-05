@@ -31,6 +31,7 @@ type UserCreate struct {
 	nickname     *string
 	phone        *string
 	password     *string
+	role         *user.Role
 	card         map[string]struct{}
 	pets         map[string]struct{}
 	files        map[string]struct{}
@@ -122,6 +123,20 @@ func (uc *UserCreate) SetPassword(s string) *UserCreate {
 func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	if s != nil {
 		uc.SetPassword(*s)
+	}
+	return uc
+}
+
+// SetRole sets the role field.
+func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
+	uc.role = &u
+	return uc
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
+	if u != nil {
+		uc.SetRole(*u)
 	}
 	return uc
 }
@@ -371,6 +386,13 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		v := user.DefaultLast
 		uc.last = &v
 	}
+	if uc.role == nil {
+		v := user.DefaultRole
+		uc.role = &v
+	}
+	if err := user.RoleValidator(*uc.role); err != nil {
+		return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+	}
 	if len(uc.card) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -461,6 +483,14 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldPassword,
 		})
 		u.Password = *value
+	}
+	if value := uc.role; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: user.FieldRole,
+		})
+		u.Role = *value
 	}
 	if nodes := uc.card; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
