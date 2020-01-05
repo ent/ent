@@ -90,6 +90,7 @@ var (
 // State defines the type for the state enum field.
 type State string
 
+// State values.
 const (
 	StateOn  State = "on"
 	StateOff State = "off"

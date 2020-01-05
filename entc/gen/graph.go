@@ -116,7 +116,7 @@ func (g *Graph) Gen() (err error) {
 // addNode creates a new Type/Node/Ent to the graph.
 func (g *Graph) addNode(schema *load.Schema) {
 	t, err := NewType(g.Config, schema)
-	check(err, "create type")
+	check(err, "create type %s", schema.Name)
 	g.Nodes = append(g.Nodes, t)
 }
 

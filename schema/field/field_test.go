@@ -155,9 +155,11 @@ func TestField_Enums(t *testing.T) {
 			"admin",
 			"master",
 		).
+		Default("user").
 		Descriptor()
 	assert.Equal(t, "role", fd.Name)
 	assert.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+	assert.Equal(t, "user", fd.Default)
 }
 
 func TestField_UUID(t *testing.T) {

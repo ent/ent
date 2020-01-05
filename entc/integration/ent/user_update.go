@@ -39,6 +39,7 @@ type UserUpdate struct {
 	clearphone        bool
 	password          *string
 	clearpassword     bool
+	role              *user.Role
 	card              map[string]struct{}
 	pets              map[string]struct{}
 	files             map[string]struct{}
@@ -199,6 +200,20 @@ func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
 func (uu *UserUpdate) ClearPassword() *UserUpdate {
 	uu.password = nil
 	uu.clearpassword = true
+	return uu
+}
+
+// SetRole sets the role field.
+func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
+	uu.role = &u
+	return uu
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
+	if u != nil {
+		uu.SetRole(*u)
+	}
 	return uu
 }
 
@@ -601,6 +616,11 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
+	if uu.role != nil {
+		if err := user.RoleValidator(*uu.role); err != nil {
+			return 0, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+		}
+	}
 	if len(uu.card) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -741,6 +761,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldPassword,
+		})
+	}
+	if value := uu.role; value != nil {
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: user.FieldRole,
 		})
 	}
 	if uu.clearedCard {
@@ -1247,6 +1274,7 @@ type UserUpdateOne struct {
 	clearphone        bool
 	password          *string
 	clearpassword     bool
+	role              *user.Role
 	card              map[string]struct{}
 	pets              map[string]struct{}
 	files             map[string]struct{}
@@ -1400,6 +1428,20 @@ func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
 	uuo.password = nil
 	uuo.clearpassword = true
+	return uuo
+}
+
+// SetRole sets the role field.
+func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
+	uuo.role = &u
+	return uuo
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
+	if u != nil {
+		uuo.SetRole(*u)
+	}
 	return uuo
 }
 
@@ -1802,6 +1844,11 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
+	if uuo.role != nil {
+		if err := user.RoleValidator(*uuo.role); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+		}
+	}
 	if len(uuo.card) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
@@ -1936,6 +1983,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldPassword,
+		})
+	}
+	if value := uuo.role; value != nil {
+		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  *value,
+			Column: user.FieldRole,
 		})
 	}
 	if uuo.clearedCard {

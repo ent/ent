@@ -502,6 +502,12 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 	return b
 }
 
+// Default sets the default value of the field.
+func (b *enumBuilder) Default(value string) *enumBuilder {
+	b.desc.Default = value
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *enumBuilder) StorageKey(key string) *enumBuilder {

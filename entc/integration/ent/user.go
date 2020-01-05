@@ -34,6 +34,8 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `graphql:"-" json:"-"`
+	// Role holds the value of the "role" field.
+	Role user.Role `json:"role,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -42,6 +44,7 @@ func (*User) scanValues() []interface{} {
 		&sql.NullInt64{},
 		&sql.NullInt64{},
 		&sql.NullInt64{},
+		&sql.NullString{},
 		&sql.NullString{},
 		&sql.NullString{},
 		&sql.NullString{},
@@ -96,6 +99,11 @@ func (u *User) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field password", values[6])
 	} else if value.Valid {
 		u.Password = value.String
+	}
+	if value, ok := values[7].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field role", values[7])
+	} else if value.Valid {
+		u.Role = user.Role(value.String)
 	}
 	return nil
 }
@@ -191,6 +199,8 @@ func (u *User) String() string {
 	builder.WriteString(", phone=")
 	builder.WriteString(u.Phone)
 	builder.WriteString(", password=<sensitive>")
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", u.Role))
 	builder.WriteByte(')')
 	return builder.String()
 }
