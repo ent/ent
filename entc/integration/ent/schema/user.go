@@ -15,6 +15,12 @@ type User struct {
 	ent.Schema
 }
 
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		UserMixin{},
+	}
+}
+
 // Fields of the user.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -48,5 +54,17 @@ func (User) Edges() []ent.Edge {
 		edge.To("team", Pet.Type).Unique(),
 		edge.To("spouse", User.Type).Unique(),
 		edge.To("parent", User.Type).Unique().From("children"),
+	}
+}
+
+// UserMixin composes create/update time mixin.
+type UserMixin struct{}
+
+// Fields of the time mixin.
+func (UserMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("optional_int").
+			Optional().
+			Positive(),
 	}
 }

@@ -202,6 +202,7 @@ func ExampleGroup() {
 	log.Println("file created:", f0)
 	u1 := client.User.
 		Create().
+		SetOptionalInt(1).
 		SetAge(1).
 		SetName("string").
 		SetLast("string").
@@ -404,6 +405,7 @@ func ExampleUser() {
 	log.Println("group created:", gr3)
 	u4 := client.User.
 		Create().
+		SetOptionalInt(1).
 		SetAge(1).
 		SetName("string").
 		SetLast("string").
@@ -414,6 +416,7 @@ func ExampleUser() {
 	log.Println("user created:", u4)
 	u6 := client.User.
 		Create().
+		SetOptionalInt(1).
 		SetAge(1).
 		SetName("string").
 		SetLast("string").
@@ -429,6 +432,7 @@ func ExampleUser() {
 	log.Println("pet created:", pe7)
 	u8 := client.User.
 		Create().
+		SetOptionalInt(1).
 		SetAge(1).
 		SetName("string").
 		SetLast("string").
@@ -439,6 +443,7 @@ func ExampleUser() {
 	log.Println("user created:", u8)
 	u10 := client.User.
 		Create().
+		SetOptionalInt(1).
 		SetAge(1).
 		SetName("string").
 		SetLast("string").
@@ -451,6 +456,7 @@ func ExampleUser() {
 	// create user vertex with its edges.
 	u := client.User.
 		Create().
+		SetOptionalInt(1).
 		SetAge(1).
 		SetName("string").
 		SetLast("string").

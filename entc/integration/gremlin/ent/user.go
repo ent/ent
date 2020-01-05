@@ -19,6 +19,8 @@ type User struct {
 	config `graphql:"-" json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// OptionalInt holds the value of the "optional_int" field.
+	OptionalInt int `json:"optional_int,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
@@ -40,18 +42,20 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-		Password string `json:"password,omitempty"`
+		ID          string `json:"id,omitempty"`
+		OptionalInt int    `json:"optional_int,omitempty"`
+		Age         int    `json:"age,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Last        string `json:"last,omitempty"`
+		Nickname    string `json:"nickname,omitempty"`
+		Phone       string `json:"phone,omitempty"`
+		Password    string `json:"password,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
 	}
 	u.ID = scanu.ID
+	u.OptionalInt = scanu.OptionalInt
 	u.Age = scanu.Age
 	u.Name = scanu.Name
 	u.Last = scanu.Last
@@ -139,6 +143,8 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", optional_int=")
+	builder.WriteString(fmt.Sprintf("%v", u.OptionalInt))
 	builder.WriteString(", age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteString(", name=")
@@ -170,26 +176,28 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu []struct {
-		ID       string `json:"id,omitempty"`
-		Age      int    `json:"age,omitempty"`
-		Name     string `json:"name,omitempty"`
-		Last     string `json:"last,omitempty"`
-		Nickname string `json:"nickname,omitempty"`
-		Phone    string `json:"phone,omitempty"`
-		Password string `json:"password,omitempty"`
+		ID          string `json:"id,omitempty"`
+		OptionalInt int    `json:"optional_int,omitempty"`
+		Age         int    `json:"age,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Last        string `json:"last,omitempty"`
+		Nickname    string `json:"nickname,omitempty"`
+		Phone       string `json:"phone,omitempty"`
+		Password    string `json:"password,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
 	}
 	for _, v := range scanu {
 		*u = append(*u, &User{
-			ID:       v.ID,
-			Age:      v.Age,
-			Name:     v.Name,
-			Last:     v.Last,
-			Nickname: v.Nickname,
-			Phone:    v.Phone,
-			Password: v.Password,
+			ID:          v.ID,
+			OptionalInt: v.OptionalInt,
+			Age:         v.Age,
+			Name:        v.Name,
+			Last:        v.Last,
+			Nickname:    v.Nickname,
+			Phone:       v.Phone,
+			Password:    v.Password,
 		})
 	}
 	return nil

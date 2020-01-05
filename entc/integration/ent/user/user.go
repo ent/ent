@@ -7,6 +7,7 @@
 package user
 
 import (
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
@@ -15,6 +16,8 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOptionalInt holds the string denoting the optional_int vertex property in the database.
+	FieldOptionalInt = "optional_int"
 	// FieldAge holds the string denoting the age vertex property in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name vertex property in the database.
@@ -86,6 +89,7 @@ const (
 // Columns holds all SQL columns are user fields.
 var Columns = []string{
 	FieldID,
+	FieldOptionalInt,
 	FieldAge,
 	FieldName,
 	FieldLast,
@@ -110,7 +114,16 @@ var (
 )
 
 var (
+	mixin       = schema.User{}.Mixin()
+	mixinFields = [...][]ent.Field{
+		mixin[0].Fields(),
+	}
 	fields = schema.User{}.Fields()
+
+	// descOptionalInt is the schema descriptor for optional_int field.
+	descOptionalInt = mixinFields[0][0].Descriptor()
+	// OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.
+	OptionalIntValidator = descOptionalInt.Validators[0].(func(int) error)
 
 	// descLast is the schema descriptor for last field.
 	descLast = fields[2].Descriptor()
