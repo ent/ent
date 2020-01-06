@@ -345,54 +345,57 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, spec); err != nil {
 		return nil, err
 	}
+
 	if query := pq.withTeam; query != nil {
 		ids := make([]string, 0, len(nodes))
-		idmap := make(map[string][]*Pet)
+		nodeids := make(map[string][]*Pet)
 		for i := range nodes {
 			if fk := nodes[i].team_id; fk != nil {
 				ids = append(ids, *fk)
-				idmap[*fk] = append(idmap[*fk], nodes[i])
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
 		}
 		query.Where(user.IDIn(ids...))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			vnodes, ok := idmap[v.ID]
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf("unexpected id returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "team_id" returned %v`, n.ID)
 			}
-			for i := range vnodes {
-				vnodes[i].Edges.Team = v
+			for i := range nodes {
+				nodes[i].Edges.Team = n
 			}
 		}
 	}
+
 	if query := pq.withOwner; query != nil {
 		ids := make([]string, 0, len(nodes))
-		idmap := make(map[string][]*Pet)
+		nodeids := make(map[string][]*Pet)
 		for i := range nodes {
 			if fk := nodes[i].owner_id; fk != nil {
 				ids = append(ids, *fk)
-				idmap[*fk] = append(idmap[*fk], nodes[i])
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
 		}
 		query.Where(user.IDIn(ids...))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			vnodes, ok := idmap[v.ID]
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf("unexpected id returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
 			}
-			for i := range vnodes {
-				vnodes[i].Edges.Owner = v
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
 			}
 		}
 	}
+
 	return nodes, nil
 }
 

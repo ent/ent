@@ -876,6 +876,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	require := require.New(t)
 	t.Run("O2M", func(t *testing.T) {
+		defer drop(t, client)
 		a8m := client.User.Create().SetName("a8m").SetAge(20).SaveX(ctx)
 		client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(a8m).SaveX(ctx)
 
@@ -896,6 +897,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	})
 
 	t.Run("M2O", func(t *testing.T) {
+		defer drop(t, client)
 		a8m := client.User.Create().SetName("a8m").SetAge(20).SaveX(ctx)
 		client.Pet.Create().SetName("xabi").SetOwner(a8m).SaveX(ctx)
 		client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(a8m).SaveX(ctx)
@@ -914,6 +916,19 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Equal("pedro", a8m.Edges.Pets[0].Name)
 		require.Equal("xabi", a8m.Edges.Pets[1].Name)
 		require.Equal(a8m.Name, a8m.Edges.Pets[0].Edges.Team.Name)
+	})
+
+	t.Run("M2M", func(t *testing.T) {
+		defer drop(t, client)
+		a8m := client.User.Create().SetName("a8m").SetAge(20).SaveX(ctx)
+		inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+		hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).AddUsers(a8m).SetInfo(inf).SaveX(ctx)
+		lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).AddUsers(a8m).SetInfo(inf).SaveX(ctx)
+
+		a8m = client.User.Query().WithGroups().OnlyX(ctx)
+		require.Len(a8m.Edges.Groups, 2)
+		require.Equal(hub.Name, a8m.Edges.Groups[0].Name)
+		require.Equal(lab.Name, a8m.Edges.Groups[1].Name)
 	})
 }
 

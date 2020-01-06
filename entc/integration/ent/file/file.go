@@ -53,8 +53,9 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the File type.
 var ForeignKeys = []string{
-	OwnerColumn,
-	TypeColumn,
+	"type_id",
+	"group_file_id",
+	"owner_id",
 }
 
 var (

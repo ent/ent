@@ -36,25 +36,28 @@ type File struct {
 		// Type holds the value of the type edge.
 		Type *FileType
 	}
-	type_id *string
+	type_id       *string
+	group_file_id *string
+	owner_id      *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*File) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // size
+		&sql.NullString{}, // name
+		&sql.NullString{}, // user
+		&sql.NullString{}, // group
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*File) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // type_id
+		&sql.NullInt64{}, // group_file_id
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
@@ -100,10 +103,16 @@ func (f *File) assignValues(values ...interface{}) error {
 			*f.type_id = strconv.FormatInt(value.Int64, 10)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field type_id", value)
+			return fmt.Errorf("unexpected type %T for edge-field group_file_id", value)
 		} else if value.Valid {
-			f.type_id = new(string)
-			*f.type_id = strconv.FormatInt(value.Int64, 10)
+			f.group_file_id = new(string)
+			*f.group_file_id = strconv.FormatInt(value.Int64, 10)
+		}
+		if value, ok := values[2].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			f.owner_id = new(string)
+			*f.owner_id = strconv.FormatInt(value.Int64, 10)
 		}
 	}
 	return nil

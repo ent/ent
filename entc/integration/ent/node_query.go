@@ -346,61 +346,64 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	if err := sqlgraph.QueryNodes(ctx, nq.driver, spec); err != nil {
 		return nil, err
 	}
+
 	if query := nq.withPrev; query != nil {
 		ids := make([]string, 0, len(nodes))
-		idmap := make(map[string][]*Node)
+		nodeids := make(map[string][]*Node)
 		for i := range nodes {
 			if fk := nodes[i].prev_id; fk != nil {
 				ids = append(ids, *fk)
-				idmap[*fk] = append(idmap[*fk], nodes[i])
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
 		}
 		query.Where(node.IDIn(ids...))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			vnodes, ok := idmap[v.ID]
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf("unexpected id returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "prev_id" returned %v`, n.ID)
 			}
-			for i := range vnodes {
-				vnodes[i].Edges.Prev = v
+			for i := range nodes {
+				nodes[i].Edges.Prev = n
 			}
 		}
 	}
+
 	if query := nq.withNext; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		idmap := make(map[string]*Node)
+		nodeids := make(map[string]*Node)
 		for i := range nodes {
 			id, err := strconv.Atoi(nodes[i].ID)
 			if err != nil {
 				return nil, err
 			}
 			fks = append(fks, id)
-			idmap[nodes[i].ID] = nodes[i]
+			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
 		query.Where(predicate.Node(func(s *sql.Selector) {
 			s.Where(sql.InValues(node.NextColumn, fks...))
 		}))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			fk := v.prev_id
+		for _, n := range neighbors {
+			fk := n.prev_id
 			if fk == nil {
-				return nil, fmt.Errorf("foreign-key is null")
+				return nil, fmt.Errorf(`foreign-key "prev_id" is nil for node %v`, n.ID)
 			}
-			vnode, ok := idmap[*fk]
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf("unexpected foreign-key returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "prev_id" returned %v for node %v`, *fk, n.ID)
 			}
-			vnode.Edges.Next = v
+			node.Edges.Next = n
 		}
 	}
+
 	return nodes, nil
 }
 

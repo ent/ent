@@ -154,7 +154,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			t.Edges = append(t.Edges, &Edge{
 				Type:      typ,
 				Name:      e.Name,
-				Owner:     t,
+				Owner:     typ,
 				Inverse:   e.RefName,
 				Unique:    e.Unique,
 				Optional:  !e.Required,

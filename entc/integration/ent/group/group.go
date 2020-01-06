@@ -68,7 +68,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
 var ForeignKeys = []string{
-	InfoColumn,
+	"info_id",
 }
 
 var (

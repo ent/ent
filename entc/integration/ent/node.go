@@ -36,15 +36,15 @@ type Node struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Node) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // id
+		&sql.NullInt64{}, // value
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Node) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // prev_id
 	}
 }
 

@@ -397,95 +397,159 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, spec); err != nil {
 		return nil, err
 	}
+
 	if query := gq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		idmap := make(map[string]*Group)
+		nodeids := make(map[string]*Group)
 		for i := range nodes {
 			id, err := strconv.Atoi(nodes[i].ID)
 			if err != nil {
 				return nil, err
 			}
 			fks = append(fks, id)
-			idmap[nodes[i].ID] = nodes[i]
+			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
 		query.Where(predicate.File(func(s *sql.Selector) {
 			s.Where(sql.InValues(group.FilesColumn, fks...))
 		}))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			fk := v.type_id
+		for _, n := range neighbors {
+			fk := n.group_file_id
 			if fk == nil {
-				return nil, fmt.Errorf("foreign-key is null")
+				return nil, fmt.Errorf(`foreign-key "group_file_id" is nil for node %v`, n.ID)
 			}
-			vnode, ok := idmap[*fk]
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf("unexpected foreign-key returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "group_file_id" returned %v for node %v`, *fk, n.ID)
 			}
-			vnode.Edges.Files = append(vnode.Edges.Files, v)
+			node.Edges.Files = append(node.Edges.Files, n)
 		}
 	}
+
 	if query := gq.withBlocked; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		idmap := make(map[string]*Group)
+		nodeids := make(map[string]*Group)
 		for i := range nodes {
 			id, err := strconv.Atoi(nodes[i].ID)
 			if err != nil {
 				return nil, err
 			}
 			fks = append(fks, id)
-			idmap[nodes[i].ID] = nodes[i]
+			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
 		query.Where(predicate.User(func(s *sql.Selector) {
 			s.Where(sql.InValues(group.BlockedColumn, fks...))
 		}))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			fk := v.group_blocked_id
+		for _, n := range neighbors {
+			fk := n.group_blocked_id
 			if fk == nil {
-				return nil, fmt.Errorf("foreign-key is null")
+				return nil, fmt.Errorf(`foreign-key "group_blocked_id" is nil for node %v`, n.ID)
 			}
-			vnode, ok := idmap[*fk]
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf("unexpected foreign-key returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "group_blocked_id" returned %v for node %v`, *fk, n.ID)
 			}
-			vnode.Edges.Blocked = append(vnode.Edges.Blocked, v)
+			node.Edges.Blocked = append(node.Edges.Blocked, n)
 		}
 	}
-	if query := gq.withUsers; query != nil {
 
+	if query := gq.withUsers; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[string]*Group, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+		}
+		var (
+			edgeids []string
+			edges   = make(map[string][]*Group)
+		)
+		spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   group.UsersTable,
+				Columns: group.UsersPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(group.UsersPrimaryKey[1], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := strconv.FormatInt(eout.Int64, 10)
+				inValue := strconv.FormatInt(ein.Int64, 10)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, gq.driver, spec); err != nil {
+			return nil, fmt.Errorf(`query edges "users": %v`, err)
+		}
+		query.Where(user.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Users = append(nodes[i].Edges.Users, n)
+			}
+		}
 	}
+
 	if query := gq.withInfo; query != nil {
 		ids := make([]string, 0, len(nodes))
-		idmap := make(map[string][]*Group)
+		nodeids := make(map[string][]*Group)
 		for i := range nodes {
 			if fk := nodes[i].info_id; fk != nil {
 				ids = append(ids, *fk)
-				idmap[*fk] = append(idmap[*fk], nodes[i])
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
 		}
 		query.Where(groupinfo.IDIn(ids...))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			vnodes, ok := idmap[v.ID]
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf("unexpected id returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
 			}
-			for i := range vnodes {
-				vnodes[i].Edges.Info = v
+			for i := range nodes {
+				nodes[i].Edges.Info = n
 			}
 		}
 	}
+
 	return nodes, nil
 }
 

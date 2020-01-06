@@ -10,19 +10,20 @@ in the LICENSE file in the root directory of this source tree.
 // scanValues returns the types for scanning values from sql.Rows.
 func (*{{ $.Name }}) scanValues() []interface{} {
 	return []interface{} {
-		&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{},
+		&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{}, // {{ $.ID.Name }}
 		{{- range $_, $f := $.Fields }}
-			&{{ $f.NullType }}{},
+			&{{ $f.NullType }}{}, // {{ $f.Name }}
 		{{- end }}
 	}
 }
 
-{{- with $.FKEdges }}
+{{- with $.ForeignKeys }}
 	// fkValues returns the types for scanning foreign-keys values from sql.Rows.
 	func (*{{ $.Name }}) fkValues() []interface{} {
 		return []interface{} {
-			{{- range $e := $.FKEdges }}
-				&{{ if not $e.Type.ID.UserDefined }}sql.NullInt64{{ else }}{{ $e.Type.ID.NullType }}{{ end }}{},
+			{{- range $fk := . }}
+				{{- $f := $fk.Field }}
+				&{{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }}{}, // {{ $f.Name }}
 			{{- end }}
 		}
 	}
@@ -51,21 +52,21 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 				{{ template "dialect/sql/decode/field" . }}
 			{{- end }}
 		{{- end }}
-		{{- with $.FKEdges }}
+		{{- with $.ForeignKeys }}
 			values = values[{{ len $.Fields }}:]
 			if len(values) == len({{ $.Package }}.ForeignKeys) {
-				{{- range $i, $e := . }}
-					{{- $id := $e.Type.ID }}
-					{{- if and $id.UserDefined (or $id.IsString $id.IsUUID) }}
-						{{- with extend $ "Idx" 0 "Field" $id "Rec" $receiver "StructField" $e.StructFKField }}
+				{{- range $i, $fk := . }}
+					{{- $f := $fk.Field }}
+					{{- if and $f.UserDefined (or $f.IsString $f.IsUUID) }}
+						{{- with extend $ "Idx" 0 "Field" $f "Rec" $receiver "StructField" $f.Name }}
 							{{ template "dialect/sql/decode/field" . }}
 						{{- end }}
 					{{- else }}
 						if value, ok := values[{{ $i }}].(*sql.NullInt64); !ok {
-							return fmt.Errorf("unexpected type %T for edge-field {{ $e.StructFKField }}", value)
+							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 						} else if value.Valid {
-							{{ $receiver }}.{{ $e.StructFKField }} = new({{ $id.Type }})
-							*{{ $receiver }}.{{ $e.StructFKField }} = {{ if $id.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $id.Type }}(value.Int64){{ end }}
+							{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
+							*{{ $receiver }}.{{ $f.Name }} = {{ if $f.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $f.Type }}(value.Int64){{ end }}
 						}
 					{{- end }}
 				{{- end }}

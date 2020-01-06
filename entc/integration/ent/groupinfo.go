@@ -35,9 +35,9 @@ type GroupInfo struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*GroupInfo) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullInt64{},
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // desc
+		&sql.NullInt64{},  // max_users
 	}
 }
 

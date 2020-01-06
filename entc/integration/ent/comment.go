@@ -31,10 +31,10 @@ type Comment struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Comment) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullFloat64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{},   // id
+		&sql.NullInt64{},   // unique_int
+		&sql.NullFloat64{}, // unique_float
+		&sql.NullInt64{},   // nillable_int
 	}
 }
 

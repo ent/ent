@@ -33,8 +33,8 @@ type FileType struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*FileType) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // name
 	}
 }
 

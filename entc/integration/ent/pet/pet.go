@@ -40,6 +40,6 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
 var ForeignKeys = []string{
-	TeamColumn,
-	OwnerColumn,
+	"owner_id",
+	"team_id",
 }

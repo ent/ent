@@ -34,5 +34,5 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Node type.
 var ForeignKeys = []string{
-	PrevColumn,
+	"prev_id",
 }

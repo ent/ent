@@ -337,36 +337,98 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
 	}
+
 	if query := uq.withPets; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		idmap := make(map[int]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
-			idmap[nodes[i].ID] = nodes[i]
+			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
 		query.Where(predicate.Pet(func(s *sql.Selector) {
 			s.Where(sql.InValues(user.PetsColumn, fks...))
 		}))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			fk := v.owner_id
+		for _, n := range neighbors {
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf("foreign-key is null")
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
-			vnode, ok := idmap[*fk]
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf("unexpected foreign-key returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
-			vnode.Edges.Pets = append(vnode.Edges.Pets, v)
+			node.Edges.Pets = append(node.Edges.Pets, n)
 		}
 	}
-	if query := uq.withFriends; query != nil {
 
+	if query := uq.withFriends; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+		}
+		var (
+			edgeids []int
+			edges   = make(map[int][]*User)
+		)
+		spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   user.FriendsTable,
+				Columns: user.FriendsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.FriendsPrimaryKey[0], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(eout.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, spec); err != nil {
+			return nil, fmt.Errorf(`query edges "friends": %v`, err)
+		}
+		query.Where(user.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Friends = append(nodes[i].Edges.Friends, n)
+			}
+		}
 	}
+
 	return nodes, nil
 }
 

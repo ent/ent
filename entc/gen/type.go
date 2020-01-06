@@ -438,10 +438,10 @@ func (t *Type) resolveFKs() {
 
 // AddForeignKey adds a foreign-key for the type if it doesn't exist.
 func (t *Type) addFK(fk *ForeignKey) {
-	if _, ok := t.foreignkeys[fk.Edge.Name]; ok {
+	if _, ok := t.foreignkeys[fk.Field.Name]; ok {
 		return
 	}
-	t.foreignkeys[fk.Edge.Name] = fk
+	t.foreignkeys[fk.Field.Name] = fk
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
@@ -688,15 +688,7 @@ func (e Edge) StructField() string {
 // StructFKField returns the struct member for holding the edge
 // foreign-key in the model.
 func (e Edge) StructFKField() string {
-	name := e.Name
-	if e.IsInverse() {
-		name = e.Inverse
-	}
-	typ := e.Type
-	if e.OwnFK() {
-		typ = e.Owner
-	}
-	return typ.foreignkeys[name].Field.Name
+	return e.Rel.Column()
 }
 
 // OwnFK indicates if the foreign-key of this edge is owned by the edge

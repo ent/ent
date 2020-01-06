@@ -21,7 +21,7 @@ const (
 	FieldMaxUsers = "max_users"
 
 	// GroupsInverseLabel holds the string label denoting the groups inverse edge type in the database.
-	GroupsInverseLabel = "group_info_info"
+	GroupsInverseLabel = "group_info"
 )
 
 var (

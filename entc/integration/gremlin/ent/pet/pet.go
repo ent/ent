@@ -15,7 +15,7 @@ const (
 	FieldName = "name"
 
 	// TeamInverseLabel holds the string label denoting the team inverse edge type in the database.
-	TeamInverseLabel = "pet_team"
+	TeamInverseLabel = "user_team"
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
-	OwnerInverseLabel = "pet_pets"
+	OwnerInverseLabel = "user_pets"
 )

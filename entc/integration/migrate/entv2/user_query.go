@@ -313,33 +313,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
 	}
+
 	if query := uq.withCar; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		idmap := make(map[int]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
-			idmap[nodes[i].ID] = nodes[i]
+			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
 		query.Where(predicate.Car(func(s *sql.Selector) {
 			s.Where(sql.InValues(user.CarColumn, fks...))
 		}))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			fk := v.owner_id
+		for _, n := range neighbors {
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf("foreign-key is null")
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
-			vnode, ok := idmap[*fk]
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf("unexpected foreign-key returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
-			vnode.Edges.Car = append(vnode.Edges.Car, v)
+			node.Edges.Car = append(node.Edges.Car, n)
 		}
 	}
+
 	return nodes, nil
 }
 

@@ -70,23 +70,24 @@ type User struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // optional_int
+		&sql.NullInt64{},  // age
+		&sql.NullString{}, // name
+		&sql.NullString{}, // last
+		&sql.NullString{}, // nickname
+		&sql.NullString{}, // phone
+		&sql.NullString{}, // password
+		&sql.NullString{}, // role
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*User) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // group_blocked_id
+		&sql.NullInt64{}, // user_spouse_id
+		&sql.NullInt64{}, // parent_id
 	}
 }
 
@@ -145,12 +146,18 @@ func (u *User) assignValues(values ...interface{}) error {
 	values = values[8:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field group_blocked_id", value)
+		} else if value.Valid {
+			u.group_blocked_id = new(string)
+			*u.group_blocked_id = strconv.FormatInt(value.Int64, 10)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_spouse_id", value)
 		} else if value.Valid {
 			u.user_spouse_id = new(string)
 			*u.user_spouse_id = strconv.FormatInt(value.Int64, 10)
 		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
+		if value, ok := values[2].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
 		} else if value.Valid {
 			u.parent_id = new(string)

@@ -314,37 +314,39 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 	if err := sqlgraph.QueryNodes(ctx, giq.driver, spec); err != nil {
 		return nil, err
 	}
+
 	if query := giq.withGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		idmap := make(map[string]*GroupInfo)
+		nodeids := make(map[string]*GroupInfo)
 		for i := range nodes {
 			id, err := strconv.Atoi(nodes[i].ID)
 			if err != nil {
 				return nil, err
 			}
 			fks = append(fks, id)
-			idmap[nodes[i].ID] = nodes[i]
+			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
 		query.Where(predicate.Group(func(s *sql.Selector) {
 			s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
 		}))
-		vs, err := query.All(ctx)
+		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range vs {
-			fk := v.info_id
+		for _, n := range neighbors {
+			fk := n.info_id
 			if fk == nil {
-				return nil, fmt.Errorf("foreign-key is null")
+				return nil, fmt.Errorf(`foreign-key "info_id" is nil for node %v`, n.ID)
 			}
-			vnode, ok := idmap[*fk]
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf("unexpected foreign-key returned")
+				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v for node %v`, *fk, n.ID)
 			}
-			vnode.Edges.Groups = append(vnode.Edges.Groups, v)
+			node.Edges.Groups = append(node.Edges.Groups, n)
 		}
 	}
+
 	return nodes, nil
 }
 

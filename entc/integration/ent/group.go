@@ -49,19 +49,19 @@ type Group struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Group) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullBool{},
-		&sql.NullTime{},
-		&sql.NullString{},
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullBool{},   // active
+		&sql.NullTime{},   // expire
+		&sql.NullString{}, // type
+		&sql.NullInt64{},  // max_users
+		&sql.NullString{}, // name
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Group) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // info_id
 	}
 }
 

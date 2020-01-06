@@ -44,18 +44,18 @@ type Card struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Card) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullTime{},
-		&sql.NullTime{},
-		&sql.NullString{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullTime{},   // create_time
+		&sql.NullTime{},   // update_time
+		&sql.NullString{}, // number
+		&sql.NullString{}, // name
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Card) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
