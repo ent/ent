@@ -61,6 +61,14 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "empty value for enums")
+
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+		Name: "T",
+		Fields: []*load.Field{
+			{Name: "", Info: &field.TypeInfo{Type: field.TypeInt}},
+		},
+	})
+	require.Error(err, "empty field name")
 }
 
 func TestType_Label(t *testing.T) {
