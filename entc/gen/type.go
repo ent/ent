@@ -141,6 +141,8 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	}
 	for _, f := range schema.Fields {
 		switch {
+		case f.Name == "":
+			return nil, fmt.Errorf("field name cannot be empty")
 		case f.Info == nil || !f.Info.Valid():
 			return nil, fmt.Errorf("invalid type for field %s", f.Name)
 		case f.Nillable && !f.Optional:
