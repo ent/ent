@@ -452,7 +452,7 @@ type QuerySpec struct {
 	Assign     func(...interface{}) error
 }
 
-// QueryNodes query the nodes in the graph query and scans them to the given values.
+// QueryNodes queries the nodes in the graph query and scans them to the given values.
 func QueryNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) error {
 	builder := sql.Dialect(drv.Dialect())
 	qr := &query{graph: graph{builder: builder}, QuerySpec: spec}
@@ -464,6 +464,48 @@ func CountNodes(ctx context.Context, drv dialect.Driver, spec *QuerySpec) (int, 
 	builder := sql.Dialect(drv.Dialect())
 	qr := &query{graph: graph{builder: builder}, QuerySpec: spec}
 	return qr.count(ctx, drv)
+}
+
+// EdgeQuerySpec holds the information for querying
+// edges in the graph.
+type EdgeQuerySpec struct {
+	Edge       *EdgeSpec
+	Predicate  func(*sql.Selector)
+	ScanValues func() [2]interface{}
+	Assign     func(out, in interface{}) error
+}
+
+// QueryEdges queries the edges in the graph and scans the result with the given dest function.
+func QueryEdges(ctx context.Context, drv dialect.Driver, spec *EdgeQuerySpec) error {
+	if len(spec.Edge.Columns) != 2 {
+		return fmt.Errorf("sqlgraph: edge query requires 2 columns (out, in)")
+	}
+	out, in := spec.Edge.Columns[0], spec.Edge.Columns[1]
+	if spec.Edge.Inverse {
+		out, in = in, out
+	}
+	selector := sql.Dialect(drv.Dialect()).
+		Select(out, in).
+		From(sql.Table(spec.Edge.Table))
+	if p := spec.Predicate; p != nil {
+		p(selector)
+	}
+	rows := &sql.Rows{}
+	query, args := selector.Query()
+	if err := drv.Query(ctx, query, args, rows); err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		values := spec.ScanValues()
+		if err := rows.Scan(values[0], values[1]); err != nil {
+			return err
+		}
+		if err := spec.Assign(values[0], values[1]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type query struct {
