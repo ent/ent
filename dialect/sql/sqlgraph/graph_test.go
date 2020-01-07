@@ -1207,6 +1207,43 @@ func TestQueryNodes(t *testing.T) {
 	require.Equal(t, 3, n)
 }
 
+func TestQueryEdges(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectQuery(escape("SELECT `group_id`, `user_id` FROM `user_groups` WHERE `user_id` IN (?, ?, ?)")).
+		WithArgs(1, 2, 3).
+		WillReturnRows(sqlmock.NewRows([]string{"group_id", "user_id"}).
+			AddRow(4, 5).
+			AddRow(4, 6))
+
+	var (
+		edges [][]int64
+		spec  = &EdgeQuerySpec{
+			Edge: &EdgeSpec{
+				Inverse: true,
+				Table:   "user_groups",
+				Columns: []string{"user_id", "group_id"},
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues("user_id", 1, 2, 3))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				o, i := out.(*sql.NullInt64), in.(*sql.NullInt64)
+				edges = append(edges, []int64{o.Int64, i.Int64})
+				return nil
+			},
+		}
+	)
+
+	// Query and scan.
+	err = QueryEdges(context.Background(), sql.OpenDB("", db), spec)
+	require.NoError(t, err)
+	require.Equal(t, [][]int64{{4, 5}, {4, 6}}, edges)
+}
+
 func escape(query string) string {
 	rows := strings.Split(query, "\n")
 	for i := range rows {
