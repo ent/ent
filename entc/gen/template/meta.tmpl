@@ -100,7 +100,6 @@ var (
 		{{ $enum := trimPackage $f.Type.String $.Package }}
 		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
 		type {{ $enum }} string
-
 		{{- if $f.Default }}
 			{{- /*  find the enum that holds the default value. */ -}}
 			{{- range $_, $e := $f.Enums }}
@@ -124,13 +123,14 @@ var (
 		}
 
 		{{ $name := $f.Validator -}}
-		// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
-		func {{ $name }}({{ $f.Name }} {{ $enum }}) error {
-			switch {{ $f.Name }} {
+		{{ $arg := sanitize $f.Name }}
+		// {{ $name }} is a validator for the "{{ $arg }}" field enum values. It is called by the builders before save.
+		func {{ $name }}({{ $arg }} {{ $enum }}) error {
+			switch {{ $arg }} {
 				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
 					return nil
 				default:
-					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $f.Name }})
+					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $arg }})
 			}
 		}
 	{{ end }}
