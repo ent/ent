@@ -7,6 +7,7 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"go/token"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -24,23 +25,23 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":         ops,
-		"add":         add,
-		"append":      reflect.Append,
-		"appends":     reflect.AppendSlice,
-		"order":       order,
-		"snake":       snake,
-		"pascal":      pascal,
-		"extend":      extend,
-		"xrange":      xrange,
-		"receiver":    receiver,
-		"plural":      plural,
-		"aggregate":   aggregate,
-		"primitives":  primitives,
-		"singular":    rules.Singularize,
-		"quote":       strconv.Quote,
-		"base":        filepath.Base,
-		"keys":        keys,
+		"ops":          ops,
+		"add":          add,
+		"append":       reflect.Append,
+		"appends":      reflect.AppendSlice,
+		"order":        order,
+		"snake":        snake,
+		"pascal":       pascal,
+		"extend":       extend,
+		"xrange":       xrange,
+		"receiver":     receiver,
+		"plural":       plural,
+		"aggregate":    aggregate,
+		"primitives":   primitives,
+		"singular":     rules.Singularize,
+		"quote":        strconv.Quote,
+		"base":         filepath.Base,
+		"keys":         keys,
 		"join":        join,
 		"lower":       strings.ToLower,
 		"upper":       strings.ToUpper,
@@ -51,6 +52,7 @@ var (
 		"trimPackage": trimPackage,
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
+		"sanitize":    sanitize,
 	}
 	rules   = ruleset()
 	acronym = make(map[string]bool)
@@ -305,4 +307,14 @@ func indirect(v reflect.Value) reflect.Value {
 	for ; v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface; v = v.Elem() {
 	}
 	return v
+}
+
+// sanitize checks that name is safe to paste into template without breaking a of codegen compilation.
+// It checks if s is reserved golang keyword and returns it with suffix _
+func sanitize(s string) string {
+	if token.IsKeyword(s) {
+		return s + "_"
+	}
+
+	return s
 }
