@@ -100,6 +100,7 @@ var (
 		{{ $enum := trimPackage $f.Type.String $.Package }}
 		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
 		type {{ $enum }} string
+
 		{{- if $f.Default }}
 			{{- /*  find the enum that holds the default value. */ -}}
 			{{- range $_, $e := $f.Enums }}
