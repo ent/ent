@@ -7,7 +7,6 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"go/token"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -52,7 +51,6 @@ var (
 		"trimPackage": trimPackage,
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
-		"sanitize":    sanitize,
 	}
 	rules   = ruleset()
 	acronym = make(map[string]bool)
@@ -307,14 +305,4 @@ func indirect(v reflect.Value) reflect.Value {
 	for ; v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface; v = v.Elem() {
 	}
 	return v
-}
-
-// sanitize checks that name is safe to paste into template without breaking a of codegen compilation.
-// It checks if s is reserved golang keyword and returns it with suffix _
-func sanitize(s string) string {
-	if token.IsKeyword(s) {
-		return s + "_"
-	}
-
-	return s
 }
