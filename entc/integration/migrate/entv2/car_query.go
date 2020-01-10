@@ -274,8 +274,10 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 		withFKs = cq.withFKs
 		spec    = cq.querySpec()
 	)
-	if withFKs || cq.withOwner != nil {
+	if cq.withOwner != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, car.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

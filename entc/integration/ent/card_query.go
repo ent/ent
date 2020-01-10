@@ -298,8 +298,10 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		withFKs = cq.withFKs
 		spec    = cq.querySpec()
 	)
-	if withFKs || cq.withOwner != nil {
+	if cq.withOwner != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, card.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

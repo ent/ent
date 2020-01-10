@@ -323,8 +323,10 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		withFKs = nq.withFKs
 		spec    = nq.querySpec()
 	)
-	if withFKs || nq.withPrev != nil {
+	if nq.withPrev != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, node.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

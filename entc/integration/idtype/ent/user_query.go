@@ -346,8 +346,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		withFKs = uq.withFKs
 		spec    = uq.querySpec()
 	)
-	if withFKs || uq.withSpouse != nil {
+	if uq.withSpouse != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, user.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

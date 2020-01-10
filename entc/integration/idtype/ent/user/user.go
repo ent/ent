@@ -34,7 +34,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	SpouseColumn,
+	"user_spouse_id",
 }
 
 var (

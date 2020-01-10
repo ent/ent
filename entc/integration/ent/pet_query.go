@@ -322,8 +322,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		withFKs = pq.withFKs
 		spec    = pq.querySpec()
 	)
-	if withFKs || pq.withTeam != nil || pq.withOwner != nil {
+	if pq.withTeam != nil || pq.withOwner != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, pet.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

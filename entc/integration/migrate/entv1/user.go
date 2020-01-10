@@ -52,22 +52,22 @@ type User struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&[]byte{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // age
+		&sql.NullString{}, // name
+		&sql.NullString{}, // nickname
+		&sql.NullString{}, // address
+		&sql.NullString{}, // renamed
+		&[]byte{},         // blob
+		&sql.NullString{}, // state
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*User) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // parent_id
+		&sql.NullInt64{}, // user_spouse_id
 	}
 }
 

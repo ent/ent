@@ -31,14 +31,14 @@ type Car struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Car) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // id
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Car) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // owner_id
 	}
 }
 

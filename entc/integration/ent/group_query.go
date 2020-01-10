@@ -374,8 +374,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		withFKs = gq.withFKs
 		spec    = gq.querySpec()
 	)
-	if withFKs || gq.withInfo != nil {
+	if gq.withInfo != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, group.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

@@ -30,5 +30,5 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Car type.
 var ForeignKeys = []string{
-	OwnerColumn,
+	"owner_id",
 }

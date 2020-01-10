@@ -36,16 +36,16 @@ type Pet struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Pet) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullTime{},
+		&sql.NullInt64{}, // id
+		&sql.NullInt64{}, // age
+		&sql.NullTime{},  // licensed_at
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Pet) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // owner_id
 	}
 }
 

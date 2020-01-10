@@ -323,8 +323,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		withFKs = fq.withFKs
 		spec    = fq.querySpec()
 	)
-	if withFKs || fq.withOwner != nil || fq.withType != nil {
+	if fq.withOwner != nil || fq.withType != nil {
 		withFKs = true
+	}
+	if withFKs {
 		spec.Node.Columns = append(spec.Node.Columns, file.ForeignKeys...)
 	}
 	spec.ScanValues = func() []interface{} {

@@ -25,8 +25,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		spec = {{ $receiver }}.querySpec()
 	)
 	{{- with $.ForeignKeys }}
-			if withFKs || {{ range $i, $e := $.FKEdges }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
-				withFKs = true
+			{{- with $.FKEdges }}
+				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
+					withFKs = true
+				}
+			{{- end }}
+			if withFKs {
 				spec.Node.Columns = append(spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
 			}
 	{{- end }}

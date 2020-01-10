@@ -27,9 +27,14 @@ const (
 	OwnerColumn = "owner_id"
 )
 
-// Columns holds all SQL columns are car fields.
+// Columns holds all SQL columns for car fields.
 var Columns = []string{
 	FieldID,
 	FieldModel,
 	FieldRegisteredAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Car type.
+var ForeignKeys = []string{
+	"owner_id",
 }

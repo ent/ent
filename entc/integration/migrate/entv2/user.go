@@ -48,16 +48,16 @@ type User struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&[]byte{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&[]byte{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // age
+		&sql.NullString{}, // name
+		&sql.NullString{}, // nickname
+		&sql.NullString{}, // phone
+		&[]byte{},         // buffer
+		&sql.NullString{}, // title
+		&sql.NullString{}, // new_name
+		&[]byte{},         // blob
+		&sql.NullString{}, // state
 	}
 }
 

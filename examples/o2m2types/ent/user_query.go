@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,8 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
+	// eager-loading edges.
+	withPets *PetQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +240,17 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
+//  WithPets tells the query-builder to eager-loads the nodes that are connected to
+// the "pets" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPets = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -286,7 +300,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -298,6 +313,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := uq.withPets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Pet(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.PetsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.owner_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Pets = append(node.Edges.Pets, n)
+		}
+	}
+
 	return nodes, nil
 }
 

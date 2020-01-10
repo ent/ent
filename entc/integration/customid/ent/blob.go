@@ -26,8 +26,8 @@ type Blob struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Blob) scanValues() []interface{} {
 	return []interface{}{
-		&uuid.UUID{},
-		&uuid.UUID{},
+		&uuid.UUID{}, // id
+		&uuid.UUID{}, // uuid
 	}
 }
 
