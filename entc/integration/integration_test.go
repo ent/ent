@@ -881,6 +881,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	alex := client.User.Create().SetName("alexsn").SetAge(35).AddFriends(a8m).SaveX(ctx)
 	client.Pet.Create().SetName("xabi").SaveX(ctx)
 	client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(nati).SaveX(ctx)
+	client.Card.Create().SetNumber("102030").SetOwner(a8m).SaveX(ctx)
 
 	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
 	files := ent.Files{
@@ -888,8 +889,26 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		client.File.Create().SetName("b").SetSize(10).SaveX(ctx),
 		client.File.Create().SetName("c").SetSize(10).SaveX(ctx),
 	}
+	typ := client.FileType.Create().SetName("type").AddFiles(files...).SaveX(ctx)
 	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).AddUsers(alex, a8m).SetInfo(inf).SaveX(ctx)
 	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).AddUsers(nati, a8m).SetInfo(inf).AddFiles(files...).SaveX(ctx)
+
+	t.Run("O2O", func(t *testing.T) {
+		users := client.User.
+			Query().
+			Where(user.HasSpouse()).
+			WithSpouse().
+			WithCard().
+			Order(ent.Asc(user.FieldName)).
+			AllX(ctx)
+		require.Len(users, 2)
+		require.NotNil(users[0].Edges.Spouse)
+		require.NotNil(users[1].Edges.Spouse)
+		require.NotNil(nati.Name, users[0].Edges.Spouse.Name)
+		require.NotNil(a8m.Name, users[1].Edges.Spouse.Name)
+		require.NotNil(users[0].Edges.Card)
+		require.Nil(users[1].Edges.Card)
+	})
 
 	t.Run("O2M", func(t *testing.T) {
 		pets := client.Pet.Query().AllX(ctx)
@@ -952,6 +971,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 			WithGroups(func(q *ent.GroupQuery) {
 				q.WithInfo()
 				q.WithFiles(func(q *ent.FileQuery) {
+					q.WithType()
 					q.Order(ent.Asc(file.FieldName))
 				})
 				q.Order(ent.Desc(group.FieldName))
@@ -969,6 +989,10 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Equal(hub.Name, g2.Name)
 		require.Equal(inf.Desc, g1.Edges.Info.Desc)
 		require.Equal([]string{"a", "c"}, []string{g1.Edges.Files[0].Name, g1.Edges.Files[2].Name})
+		for _, f := range g1.Edges.Files {
+			require.NotNil(f.Edges.Type)
+			require.Equal(typ.Name, f.Edges.Type.Name)
+		}
 	})
 }
 
