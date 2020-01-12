@@ -80,6 +80,19 @@ func TestScanSlice(t *testing.T) {
 	require.Equal(t, "bar", v5[1].Name)
 	require.Equal(t, 1, v5[0].Count)
 	require.Equal(t, 2, v5[1].Count)
+
+	mock = sqlmock.NewRows([]string{"age", "name"}).
+		AddRow(1, nil).
+		AddRow(nil, "a8m")
+	var v6 []struct {
+		Age  NullInt64
+		Name NullString
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v6))
+	require.EqualValues(t, 1, v6[0].Age.Int64)
+	require.False(t, v6[0].Name.Valid)
+	require.False(t, v6[1].Age.Valid)
+	require.Equal(t, "a8m", v6[1].Name.String)
 }
 
 func TestScanSlicePtr(t *testing.T) {
