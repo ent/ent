@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -30,6 +32,12 @@ type GroupQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Group
+	// eager-loading edges.
+	withFiles   *FileQuery
+	withBlocked *UserQuery
+	withUsers   *UserQuery
+	withInfo    *GroupInfoQuery
+	withFKs     bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -275,6 +283,50 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 	}
 }
 
+//  WithFiles tells the query-builder to eager-loads the nodes that are connected to
+// the "files" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
+	query := &FileQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withFiles = query
+	return gq
+}
+
+//  WithBlocked tells the query-builder to eager-loads the nodes that are connected to
+// the "blocked" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withBlocked = query
+	return gq
+}
+
+//  WithUsers tells the query-builder to eager-loads the nodes that are connected to
+// the "users" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withUsers = query
+	return gq
+}
+
+//  WithInfo tells the query-builder to eager-loads the nodes that are connected to
+// the "info" edge. The optional arguments used to configure the query builder of the edge.
+func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
+	query := &GroupInfoQuery{config: gq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gq.withInfo = query
+	return gq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -318,13 +370,24 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
-		nodes []*Group
-		spec  = gq.querySpec()
+		nodes   []*Group
+		withFKs = gq.withFKs
+		spec    = gq.querySpec()
 	)
+	if gq.withInfo != nil {
+		withFKs = true
+	}
+	if withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, group.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Group{config: gq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -336,6 +399,159 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := gq.withFiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[string]*Group)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(group.FilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.group_file_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "group_file_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "group_file_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Files = append(node.Edges.Files, n)
+		}
+	}
+
+	if query := gq.withBlocked; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[string]*Group)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(group.BlockedColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.group_blocked_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "group_blocked_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "group_blocked_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Blocked = append(node.Edges.Blocked, n)
+		}
+	}
+
+	if query := gq.withUsers; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[string]*Group, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+		}
+		var (
+			edgeids []string
+			edges   = make(map[string][]*Group)
+		)
+		spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   group.UsersTable,
+				Columns: group.UsersPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(group.UsersPrimaryKey[1], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := strconv.FormatInt(eout.Int64, 10)
+				inValue := strconv.FormatInt(ein.Int64, 10)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, gq.driver, spec); err != nil {
+			return nil, fmt.Errorf(`query edges "users": %v`, err)
+		}
+		query.Where(user.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Users = append(nodes[i].Edges.Users, n)
+			}
+		}
+	}
+
+	if query := gq.withInfo; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*Group)
+		for i := range nodes {
+			if fk := nodes[i].info_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(groupinfo.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Info = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

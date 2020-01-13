@@ -24,14 +24,14 @@ type Pet struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Pet) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Pet fields.
 func (pe *Pet) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(pet.Columns); m != n {
+	if m, n := len(values), len(pet.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

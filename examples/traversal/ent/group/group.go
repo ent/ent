@@ -30,10 +30,15 @@ const (
 	AdminColumn = "admin_id"
 )
 
-// Columns holds all SQL columns are group fields.
+// Columns holds all SQL columns for group fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
+var ForeignKeys = []string{
+	"admin_id",
 }
 
 var (

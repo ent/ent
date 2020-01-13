@@ -27,5 +27,8 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("groups", Group.Type).
 			Ref("users"),
+		edge.To("children", User.Type).
+			From("parent").
+			Unique(),
 	}
 }

@@ -36,6 +36,10 @@ type (
 		Edges []*Edge
 		// Indexes are the configured indexes for this type.
 		Indexes []*Index
+		// ForeignKeys are the foreign-keys that resides in the type table.
+		ForeignKeys []*ForeignKey
+		// foreignkeys used for first lookup from edge name to foreign-key.
+		foreignkeys map[string]*ForeignKey
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -80,7 +84,7 @@ type (
 		Optional bool
 		// Unique indicates if this edge is a unique edge.
 		Unique bool
-		// Inverse holds the name of the inverse edge.
+		// Inverse holds the name of the reference edge declared in the schema.
 		Inverse string
 		// Owner holds the type of the edge-owner. For assoc-edges it's the
 		// type that holds the edge, for inverse-edges, it's the assoc type.
@@ -123,6 +127,16 @@ type (
 		// Columns are the table columns.
 		Columns []string
 	}
+
+	// ForeignKey holds the information for foreign-key columns of types.
+	// It's exported only because it's used by the codegen templates and
+	// should not be used beside that.
+	ForeignKey struct {
+		// Field information for the foreign-key column.
+		Field *Field
+		// Edge that is associated with this foreign-key.
+		Edge *Edge
+	}
 )
 
 // NewType creates a new type and its fields from the given schema.
@@ -134,10 +148,11 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Type:      c.IDType,
 			StructTag: `json:"id,omitempty"`,
 		},
-		schema: schema,
-		Name:   schema.Name,
-		Fields: make([]*Field, 0, len(schema.Fields)),
-		fields: make(map[string]*Field, len(schema.Fields)),
+		schema:      schema,
+		Name:        schema.Name,
+		Fields:      make([]*Field, 0, len(schema.Fields)),
+		fields:      make(map[string]*Field, len(schema.Fields)),
+		foreignkeys: make(map[string]*ForeignKey),
 	}
 	for _, f := range schema.Fields {
 		switch {
@@ -255,6 +270,16 @@ func (t Type) HasOptional() bool {
 		}
 	}
 	return false
+}
+
+// FKEdges returns all edges that reside on the type table as foreign-keys.
+func (t Type) FKEdges() (edges []*Edge) {
+	for _, e := range t.Edges {
+		if e.OwnFK() {
+			edges = append(edges, e)
+		}
+	}
+	return
 }
 
 // MixedInWithDefaultOrValidator returns all mixed-in fields with default values for creation or update.
@@ -386,19 +411,43 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	return nil
 }
 
-// EdgeFields returns the edges that resides in the type's
-// table in SQL as foreign-keys (columns).
-func (t Type) EdgeFields() []*Edge {
-	var fks []*Edge
+// resolveFKs makes sure all edge-fks are created for the types.
+func (t *Type) resolveFKs() {
 	for _, e := range t.Edges {
-		switch {
-		case e.M2O():
-			fks = append(fks, e)
-		case e.O2O() && (e.IsInverse() || e.Bidi):
-			fks = append(fks, e)
+		if e.IsInverse() || e.M2M() {
+			continue
+		}
+		fk := &ForeignKey{
+			Edge: e,
+			Field: &Field{
+				Name:        e.Rel.Column(),
+				Type:        e.Type.ID.Type,
+				Nillable:    true,
+				Optional:    true,
+				Unique:      e.Unique,
+				UserDefined: e.Type.ID.UserDefined,
+			},
+		}
+		if e.OwnFK() {
+			t.addFK(fk)
+		} else {
+			e.Type.addFK(fk)
 		}
 	}
-	return fks
+}
+
+// AddForeignKey adds a foreign-key for the type if it doesn't exist.
+func (t *Type) addFK(fk *ForeignKey) {
+	if _, ok := t.foreignkeys[fk.Field.Name]; ok {
+		return
+	}
+	t.foreignkeys[fk.Field.Name] = fk
+	t.ForeignKeys = append(t.ForeignKeys, fk)
+}
+
+// QueryName returns the struct name of the query builder for this type.
+func (t Type) QueryName() string {
+	return pascal(t.Name) + "Query"
 }
 
 // Constant returns the constant name of the field.
@@ -634,6 +683,24 @@ func (e Edge) BuilderField() string {
 // StructField returns the struct member of the edge in the model.
 func (e Edge) StructField() string {
 	return pascal(e.Name)
+}
+
+// StructFKField returns the struct member for holding the edge
+// foreign-key in the model.
+func (e Edge) StructFKField() string {
+	return e.Rel.Column()
+}
+
+// OwnFK indicates if the foreign-key of this edge is owned by the edge
+// column (reside in the type's table). Used by the SQL storage-driver.
+func (e Edge) OwnFK() bool {
+	switch {
+	case e.M2O():
+		return true
+	case e.O2O() && (e.IsInverse() || e.Bidi):
+		return true
+	}
+	return false
 }
 
 // Column returns the first element from the columns slice.

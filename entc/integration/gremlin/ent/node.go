@@ -21,6 +21,14 @@ type Node struct {
 	ID string `json:"id,omitempty"`
 	// Value holds the value of the "value" field.
 	Value int `json:"value,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the NodeQuery when eager-loading is set.
+	Edges struct {
+		// Prev holds the value of the prev edge.
+		Prev *Node
+		// Next holds the value of the next edge.
+		Next *Node
+	}
 }
 
 // FromResponse scans the gremlin response data into Node.

@@ -31,17 +31,17 @@ type Comment struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Comment) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullFloat64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{},   // id
+		&sql.NullInt64{},   // unique_int
+		&sql.NullFloat64{}, // unique_float
+		&sql.NullInt64{},   // nillable_int
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Comment fields.
 func (c *Comment) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(comment.Columns); m != n {
+	if m, n := len(values), len(comment.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

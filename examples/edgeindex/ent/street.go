@@ -21,20 +21,34 @@ type Street struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the StreetQuery when eager-loading is set.
+	Edges struct {
+		// City holds the value of the city edge.
+		City *City
+	}
+	city_id *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Street) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // name
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Street) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // city_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Street fields.
 func (s *Street) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(street.Columns); m != n {
+	if m, n := len(values), len(street.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -47,6 +61,15 @@ func (s *Street) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
 	} else if value.Valid {
 		s.Name = value.String
+	}
+	values = values[1:]
+	if len(values) == len(street.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field city_id", value)
+		} else if value.Valid {
+			s.city_id = new(int)
+			*s.city_id = int(value.Int64)
+		}
 	}
 	return nil
 }

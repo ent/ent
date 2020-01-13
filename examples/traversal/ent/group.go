@@ -21,20 +21,36 @@ type Group struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the GroupQuery when eager-loading is set.
+	Edges struct {
+		// Users holds the value of the users edge.
+		Users []*User
+		// Admin holds the value of the admin edge.
+		Admin *User
+	}
+	admin_id *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Group) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // name
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Group) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // admin_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
 func (gr *Group) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(group.Columns); m != n {
+	if m, n := len(values), len(group.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -47,6 +63,15 @@ func (gr *Group) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
 	} else if value.Valid {
 		gr.Name = value.String
+	}
+	values = values[1:]
+	if len(values) == len(group.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field admin_id", value)
+		} else if value.Valid {
+			gr.admin_id = new(int)
+			*gr.admin_id = int(value.Int64)
+		}
 	}
 	return nil
 }

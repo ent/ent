@@ -16,21 +16,30 @@ type {{ $.Name }} struct {
 	config {{ template "model/omittags" $ }}
 	// ID of the ent.
 	ID {{ $.ID.Type }} `json:"id,omitempty"`
-	{{ range $_, $f := $.Fields -}}
+	{{- range $_, $f := $.Fields }}
 		// {{ $f.StructField }} holds the value of the "{{ $f.Name }}" field.
     	{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $f.StructTag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
-	{{ end -}}
-	{{ range $_, $e := $.Edges -}}
-		{{/* ignore generating edge fields */}}
-		{{- with $e.StructTag -}}
-			// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge. The value set to nil, and should be updated manually.
-			{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} `{{ $e.StructTag }}`
-		{{ end -}}
-	{{ end -}}
+	{{- end }}
+	{{- with $.Edges }}
+		// Edges holds the relations/edges for other nodes in the graph.
+		// The values are being populated by the {{ $.Name }}Query when eager-loading is set.
+		Edges struct {
+			{{- range $e := $.Edges }}
+				// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge.
+				{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
+			{{- end }}
+		}
+	{{- end -}}
+	{{- /* Additional fields to add by the storage driver. */}}
+	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
+	{{- /* Additional fields to add by the user. */}}
 	{{ template "model/fields/additional" $ }}
 }
 
-{{ $tmpl := printf "dialect/%s/decode/one" $.Storage }}
+{{ $tmpl = printf "dialect/%s/decode/one" $.Storage }}
 {{ xtemplate $tmpl $ }}
 
 {{ $receiver := $.Receiver }}

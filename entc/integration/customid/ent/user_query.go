@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,11 @@ type UserQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.User
+	// eager-loading edges.
+	withGroups   *GroupQuery
+	withParent   *UserQuery
+	withChildren *UserQuery
+	withFKs      bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -63,6 +69,30 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
 		sqlgraph.To(group.Table, group.FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
+}
+
+// QueryParent chains the current query on the parent edge.
+func (uq *UserQuery) QueryParent() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
+}
+
+// QueryChildren chains the current query on the children edge.
+func (uq *UserQuery) QueryChildren() *UserQuery {
+	query := &UserQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
@@ -237,6 +267,39 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
+//  WithGroups tells the query-builder to eager-loads the nodes that are connected to
+// the "groups" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withGroups = query
+	return uq
+}
+
+//  WithParent tells the query-builder to eager-loads the nodes that are connected to
+// the "parent" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withParent = query
+	return uq
+}
+
+//  WithChildren tells the query-builder to eager-loads the nodes that are connected to
+// the "children" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
+	query := &UserQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withChildren = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -256,13 +319,24 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes []*User
-		spec  = uq.querySpec()
+		nodes   []*User
+		withFKs = uq.withFKs
+		spec    = uq.querySpec()
 	)
+	if uq.withParent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, user.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -274,6 +348,123 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := uq.withGroups; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+		}
+		var (
+			edgeids []int
+			edges   = make(map[int][]*User)
+		)
+		spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   user.GroupsTable,
+				Columns: user.GroupsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.GroupsPrimaryKey[1], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(eout.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, spec); err != nil {
+			return nil, fmt.Errorf(`query edges "groups": %v`, err)
+		}
+		query.Where(group.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "groups" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Groups = append(nodes[i].Edges.Groups, n)
+			}
+		}
+	}
+
+	if query := uq.withParent; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
+		for i := range nodes {
+			if fk := nodes[i].parent_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Parent = n
+			}
+		}
+	}
+
+	if query := uq.withChildren; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.ChildrenColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.parent_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "parent_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Children = append(node.Edges.Children, n)
+		}
+	}
+
 	return nodes, nil
 }
 

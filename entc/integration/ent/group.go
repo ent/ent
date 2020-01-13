@@ -31,24 +31,44 @@ type Group struct {
 	MaxUsers int `json:"max_users,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the GroupQuery when eager-loading is set.
+	Edges struct {
+		// Files holds the value of the files edge.
+		Files []*File
+		// Blocked holds the value of the blocked edge.
+		Blocked []*User
+		// Users holds the value of the users edge.
+		Users []*User
+		// Info holds the value of the info edge.
+		Info *GroupInfo
+	}
+	info_id *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Group) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullBool{},
-		&sql.NullTime{},
-		&sql.NullString{},
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullBool{},   // active
+		&sql.NullTime{},   // expire
+		&sql.NullString{}, // type
+		&sql.NullInt64{},  // max_users
+		&sql.NullString{}, // name
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Group) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // info_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
 func (gr *Group) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(group.Columns); m != n {
+	if m, n := len(values), len(group.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -82,6 +102,15 @@ func (gr *Group) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[4])
 	} else if value.Valid {
 		gr.Name = value.String
+	}
+	values = values[5:]
+	if len(values) == len(group.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field info_id", value)
+		} else if value.Valid {
+			gr.info_id = new(string)
+			*gr.info_id = strconv.FormatInt(value.Int64, 10)
+		}
 	}
 	return nil
 }

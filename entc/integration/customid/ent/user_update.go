@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -20,9 +21,13 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	groups        map[int]struct{}
-	removedGroups map[int]struct{}
-	predicates    []predicate.User
+	groups          map[int]struct{}
+	parent          map[int]struct{}
+	children        map[int]struct{}
+	removedGroups   map[int]struct{}
+	clearedParent   bool
+	removedChildren map[int]struct{}
+	predicates      []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -51,6 +56,48 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	return uu.AddGroupIDs(ids...)
 }
 
+// SetParentID sets the parent edge to User by id.
+func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
+	if uu.parent == nil {
+		uu.parent = make(map[int]struct{})
+	}
+	uu.parent[id] = struct{}{}
+	return uu
+}
+
+// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
+	if id != nil {
+		uu = uu.SetParentID(*id)
+	}
+	return uu
+}
+
+// SetParent sets the parent edge to User.
+func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
+	return uu.SetParentID(u.ID)
+}
+
+// AddChildIDs adds the children edge to User by ids.
+func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
+	if uu.children == nil {
+		uu.children = make(map[int]struct{})
+	}
+	for i := range ids {
+		uu.children[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// AddChildren adds the children edges to User.
+func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.AddChildIDs(ids...)
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	if uu.removedGroups == nil {
@@ -71,8 +118,37 @@ func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	return uu.RemoveGroupIDs(ids...)
 }
 
+// ClearParent clears the parent edge to User.
+func (uu *UserUpdate) ClearParent() *UserUpdate {
+	uu.clearedParent = true
+	return uu
+}
+
+// RemoveChildIDs removes the children edge to User by ids.
+func (uu *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
+	if uu.removedChildren == nil {
+		uu.removedChildren = make(map[int]struct{})
+	}
+	for i := range ids {
+		uu.removedChildren[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// RemoveChildren removes children edges to User.
+func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.RemoveChildIDs(ids...)
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	if len(uu.parent) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
+	}
 	return uu.sqlSave(ctx)
 }
 
@@ -154,6 +230,79 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		spec.Edges.Add = append(spec.Edges.Add, edge)
 	}
+	if uu.clearedParent {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uu.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if nodes := uu.removedChildren; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uu.children; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -166,9 +315,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id            int
-	groups        map[int]struct{}
-	removedGroups map[int]struct{}
+	id              int
+	groups          map[int]struct{}
+	parent          map[int]struct{}
+	children        map[int]struct{}
+	removedGroups   map[int]struct{}
+	clearedParent   bool
+	removedChildren map[int]struct{}
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
@@ -191,6 +344,48 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	return uuo.AddGroupIDs(ids...)
 }
 
+// SetParentID sets the parent edge to User by id.
+func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
+	if uuo.parent == nil {
+		uuo.parent = make(map[int]struct{})
+	}
+	uuo.parent[id] = struct{}{}
+	return uuo
+}
+
+// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetParentID(*id)
+	}
+	return uuo
+}
+
+// SetParent sets the parent edge to User.
+func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
+	return uuo.SetParentID(u.ID)
+}
+
+// AddChildIDs adds the children edge to User by ids.
+func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
+	if uuo.children == nil {
+		uuo.children = make(map[int]struct{})
+	}
+	for i := range ids {
+		uuo.children[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// AddChildren adds the children edges to User.
+func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.AddChildIDs(ids...)
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	if uuo.removedGroups == nil {
@@ -211,8 +406,37 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	return uuo.RemoveGroupIDs(ids...)
 }
 
+// ClearParent clears the parent edge to User.
+func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
+	uuo.clearedParent = true
+	return uuo
+}
+
+// RemoveChildIDs removes the children edge to User by ids.
+func (uuo *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
+	if uuo.removedChildren == nil {
+		uuo.removedChildren = make(map[int]struct{})
+	}
+	for i := range ids {
+		uuo.removedChildren[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// RemoveChildren removes children edges to User.
+func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.RemoveChildIDs(ids...)
+}
+
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if len(uuo.parent) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
+	}
 	return uuo.sqlSave(ctx)
 }
 
@@ -280,6 +504,79 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: group.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if uuo.clearedParent {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ParentTable,
+			Columns: []string{user.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Add = append(spec.Edges.Add, edge)
+	}
+	if nodes := uuo.removedChildren; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.children; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
 				},
 			},
 		}

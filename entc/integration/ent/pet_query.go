@@ -28,6 +28,10 @@ type PetQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Pet
+	// eager-loading edges.
+	withTeam  *UserQuery
+	withOwner *UserQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -249,6 +253,28 @@ func (pq *PetQuery) Clone() *PetQuery {
 	}
 }
 
+//  WithTeam tells the query-builder to eager-loads the nodes that are connected to
+// the "team" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithTeam(opts ...func(*UserQuery)) *PetQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withTeam = query
+	return pq
+}
+
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withOwner = query
+	return pq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -292,13 +318,24 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
-		nodes []*Pet
-		spec  = pq.querySpec()
+		nodes   []*Pet
+		withFKs = pq.withFKs
+		spec    = pq.querySpec()
 	)
+	if pq.withTeam != nil || pq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, pet.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -310,6 +347,57 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := pq.withTeam; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*Pet)
+		for i := range nodes {
+			if fk := nodes[i].team_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "team_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Team = n
+			}
+		}
+	}
+
+	if query := pq.withOwner; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*Pet)
+		for i := range nodes {
+			if fk := nodes[i].owner_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

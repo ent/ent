@@ -36,27 +36,65 @@ type User struct {
 	Password string `graphql:"-" json:"-"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges struct {
+		// Card holds the value of the card edge.
+		Card *Card
+		// Pets holds the value of the pets edge.
+		Pets []*Pet
+		// Files holds the value of the files edge.
+		Files []*File
+		// Groups holds the value of the groups edge.
+		Groups []*Group
+		// Friends holds the value of the friends edge.
+		Friends []*User
+		// Followers holds the value of the followers edge.
+		Followers []*User
+		// Following holds the value of the following edge.
+		Following []*User
+		// Team holds the value of the team edge.
+		Team *Pet
+		// Spouse holds the value of the spouse edge.
+		Spouse *User
+		// Children holds the value of the children edge.
+		Children []*User
+		// Parent holds the value of the parent edge.
+		Parent *User
+	}
+	group_blocked_id *string
+	user_spouse_id   *string
+	parent_id        *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // optional_int
+		&sql.NullInt64{},  // age
+		&sql.NullString{}, // name
+		&sql.NullString{}, // last
+		&sql.NullString{}, // nickname
+		&sql.NullString{}, // phone
+		&sql.NullString{}, // password
+		&sql.NullString{}, // role
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // group_blocked_id
+		&sql.NullInt64{}, // user_spouse_id
+		&sql.NullInt64{}, // parent_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m != n {
+	if m, n := len(values), len(user.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -104,6 +142,27 @@ func (u *User) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field role", values[7])
 	} else if value.Valid {
 		u.Role = user.Role(value.String)
+	}
+	values = values[8:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field group_blocked_id", value)
+		} else if value.Valid {
+			u.group_blocked_id = new(string)
+			*u.group_blocked_id = strconv.FormatInt(value.Int64, 10)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field user_spouse_id", value)
+		} else if value.Valid {
+			u.user_spouse_id = new(string)
+			*u.user_spouse_id = strconv.FormatInt(value.Int64, 10)
+		}
+		if value, ok := values[2].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
+		} else if value.Valid {
+			u.parent_id = new(string)
+			*u.parent_id = strconv.FormatInt(value.Int64, 10)
+		}
 	}
 	return nil
 }

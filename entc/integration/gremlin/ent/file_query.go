@@ -29,6 +29,9 @@ type FileQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.File
+	// eager-loading edges.
+	withOwner *UserQuery
+	withType  *FileTypeQuery
 	// intermediate query.
 	gremlin *dsl.Traversal
 }
@@ -240,6 +243,28 @@ func (fq *FileQuery) Clone() *FileQuery {
 		// clone intermediate query.
 		gremlin: fq.gremlin.Clone(),
 	}
+}
+
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
+	query := &UserQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withOwner = query
+	return fq
+}
+
+//  WithType tells the query-builder to eager-loads the nodes that are connected to
+// the "type" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
+	query := &FileTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withType = query
+	return fq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

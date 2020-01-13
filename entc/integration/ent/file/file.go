@@ -42,13 +42,20 @@ const (
 	TypeColumn = "type_id"
 )
 
-// Columns holds all SQL columns are file fields.
+// Columns holds all SQL columns for file fields.
 var Columns = []string{
 	FieldID,
 	FieldSize,
 	FieldName,
 	FieldUser,
 	FieldGroup,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the File type.
+var ForeignKeys = []string{
+	"type_id",
+	"group_file_id",
+	"owner_id",
 }
 
 var (

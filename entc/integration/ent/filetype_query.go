@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -28,6 +30,8 @@ type FileTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FileType
+	// eager-loading edges.
+	withFiles *FileQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +241,17 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 	}
 }
 
+//  WithFiles tells the query-builder to eager-loads the nodes that are connected to
+// the "files" edge. The optional arguments used to configure the query builder of the edge.
+func (ftq *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
+	query := &FileQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ftq.withFiles = query
+	return ftq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -286,7 +301,8 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &FileType{config: ftq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -298,6 +314,39 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	if err := sqlgraph.QueryNodes(ctx, ftq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := ftq.withFiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[string]*FileType)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(filetype.FilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.type_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "type_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "type_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Files = append(node.Edges.Files, n)
+		}
+	}
+
 	return nodes, nil
 }
 

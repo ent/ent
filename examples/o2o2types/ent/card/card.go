@@ -27,9 +27,14 @@ const (
 	OwnerColumn = "owner_id"
 )
 
-// Columns holds all SQL columns are card fields.
+// Columns holds all SQL columns for card fields.
 var Columns = []string{
 	FieldID,
 	FieldExpired,
 	FieldNumber,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
+var ForeignKeys = []string{
+	"owner_id",
 }

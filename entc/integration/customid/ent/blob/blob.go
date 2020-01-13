@@ -23,7 +23,7 @@ const (
 	Table = "blobs"
 )
 
-// Columns holds all SQL columns are blob fields.
+// Columns holds all SQL columns for blob fields.
 var Columns = []string{
 	FieldID,
 	FieldUUID,

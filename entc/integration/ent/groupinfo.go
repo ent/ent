@@ -24,21 +24,27 @@ type GroupInfo struct {
 	Desc string `json:"desc,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.
 	MaxUsers int `json:"max_users,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the GroupInfoQuery when eager-loading is set.
+	Edges struct {
+		// Groups holds the value of the groups edge.
+		Groups []*Group
+	}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*GroupInfo) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
-		&sql.NullInt64{},
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // desc
+		&sql.NullInt64{},  // max_users
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GroupInfo fields.
 func (gi *GroupInfo) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(groupinfo.Columns); m != n {
+	if m, n := len(values), len(groupinfo.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

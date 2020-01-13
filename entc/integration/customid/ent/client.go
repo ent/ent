@@ -328,3 +328,31 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 
 	return query
 }
+
+// QueryParent queries the parent edge of a User.
+func (c *UserClient) QueryParent(u *User) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryChildren queries the children edge of a User.
+func (c *UserClient) QueryChildren(u *User) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
+}

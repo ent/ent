@@ -27,10 +27,15 @@ const (
 	OwnerColumn = "owner_id"
 )
 
-// Columns holds all SQL columns are pet fields.
+// Columns holds all SQL columns for pet fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
+var ForeignKeys = []string{
+	"owner_id",
 }
 
 var (

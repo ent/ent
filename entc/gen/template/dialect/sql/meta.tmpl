@@ -12,7 +12,7 @@ in the LICENSE file in the root directory of this source tree.
 		// {{ $e.TableConstant }} is the table the holds the {{ $e.Name }} relation/edge.
 		{{- if $e.M2M }} The primary key declared below.{{ end }}
 		{{ $e.TableConstant }} = "{{ $e.Rel.Table }}"
-		{{- if eq $.Table $e.Type.Table | not }}
+		{{- if ne $.Table $e.Type.Table }}
 			// {{ $e.InverseTableConstant }} is the table name for the {{ $e.Type.Name }} entity.
 			// It exists in this package in order to avoid circular dependency with the "{{ $e.Type.Package }}" package.
 			{{ $e.InverseTableConstant }} = "{{ $e.Type.Table }}"
@@ -26,13 +26,22 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* variables needed for sql dialects. */}}
 {{ define "dialect/sql/meta/variables" }}
-	// Columns holds all SQL columns are {{ lower $.Name }} fields.
+	// Columns holds all SQL columns for {{ lower $.Name }} fields.
 	var Columns = []string{
 		{{ $.ID.Constant }},
-		{{- range $_, $f := $.Fields }}
+		{{- range $f := $.Fields }}
 			{{ $f.Constant }},
 		{{- end }}
 	}
+	{{/* if any of the edges owns a foreign-key */}}
+	{{ with $.ForeignKeys }}
+		// ForeignKeys holds the SQL foreign-keys that are owned by the {{ $.Name }} type.
+		var ForeignKeys = []string{
+			{{- range $fk := . }}
+				"{{ $fk.Field.Name }}",
+			{{- end }}
+		}
+	{{ end }}
 
 	{{ with $.NumM2M }}
 		var (

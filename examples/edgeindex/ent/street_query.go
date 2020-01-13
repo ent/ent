@@ -28,6 +28,9 @@ type StreetQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Street
+	// eager-loading edges.
+	withCity *CityQuery
+	withFKs  bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +240,17 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 	}
 }
 
+//  WithCity tells the query-builder to eager-loads the nodes that are connected to
+// the "city" edge. The optional arguments used to configure the query builder of the edge.
+func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
+	query := &CityQuery{config: sq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withCity = query
+	return sq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -280,13 +294,24 @@ func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
 
 func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	var (
-		nodes []*Street
-		spec  = sq.querySpec()
+		nodes   []*Street
+		withFKs = sq.withFKs
+		spec    = sq.querySpec()
 	)
+	if sq.withCity != nil {
+		withFKs = true
+	}
+	if withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, street.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Street{config: sq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -298,6 +323,32 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := sq.withCity; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Street)
+		for i := range nodes {
+			if fk := nodes[i].city_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(city.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "city_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.City = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

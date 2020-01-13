@@ -39,20 +39,20 @@ type User struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&[]byte{},
-		&[]byte{},
-		&[]byte{},
-		&[]byte{},
-		&[]byte{},
-		&[]byte{},
+		&sql.NullInt64{}, // id
+		&[]byte{},        // url
+		&[]byte{},        // raw
+		&[]byte{},        // dirs
+		&[]byte{},        // ints
+		&[]byte{},        // floats
+		&[]byte{},        // strings
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m != n {
+	if m, n := len(values), len(user.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

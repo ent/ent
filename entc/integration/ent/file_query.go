@@ -29,6 +29,10 @@ type FileQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.File
+	// eager-loading edges.
+	withOwner *UserQuery
+	withType  *FileTypeQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -250,6 +254,28 @@ func (fq *FileQuery) Clone() *FileQuery {
 	}
 }
 
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
+	query := &UserQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withOwner = query
+	return fq
+}
+
+//  WithType tells the query-builder to eager-loads the nodes that are connected to
+// the "type" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
+	query := &FileTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withType = query
+	return fq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -293,13 +319,24 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
-		nodes []*File
-		spec  = fq.querySpec()
+		nodes   []*File
+		withFKs = fq.withFKs
+		spec    = fq.querySpec()
 	)
+	if fq.withOwner != nil || fq.withType != nil {
+		withFKs = true
+	}
+	if withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, file.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &File{config: fq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -311,6 +348,57 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	if err := sqlgraph.QueryNodes(ctx, fq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := fq.withOwner; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*File)
+		for i := range nodes {
+			if fk := nodes[i].owner_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
+			}
+		}
+	}
+
+	if query := fq.withType; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*File)
+		for i := range nodes {
+			if fk := nodes[i].type_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(filetype.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "type_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Type = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -27,6 +29,10 @@ type NodeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Node
+	// eager-loading edges.
+	withPrev *NodeQuery
+	withNext *NodeQuery
+	withFKs  bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -248,6 +254,28 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 	}
 }
 
+//  WithPrev tells the query-builder to eager-loads the nodes that are connected to
+// the "prev" edge. The optional arguments used to configure the query builder of the edge.
+func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
+	query := &NodeQuery{config: nq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	nq.withPrev = query
+	return nq
+}
+
+//  WithNext tells the query-builder to eager-loads the nodes that are connected to
+// the "next" edge. The optional arguments used to configure the query builder of the edge.
+func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
+	query := &NodeQuery{config: nq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	nq.withNext = query
+	return nq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -291,13 +319,24 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
-		nodes []*Node
-		spec  = nq.querySpec()
+		nodes   []*Node
+		withFKs = nq.withFKs
+		spec    = nq.querySpec()
 	)
+	if nq.withPrev != nil {
+		withFKs = true
+	}
+	if withFKs {
+		spec.Node.Columns = append(spec.Node.Columns, node.ForeignKeys...)
+	}
 	spec.ScanValues = func() []interface{} {
 		node := &Node{config: nq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -309,6 +348,64 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	if err := sqlgraph.QueryNodes(ctx, nq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := nq.withPrev; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*Node)
+		for i := range nodes {
+			if fk := nodes[i].prev_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(node.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "prev_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Prev = n
+			}
+		}
+	}
+
+	if query := nq.withNext; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[string]*Node)
+		for i := range nodes {
+			id, err := strconv.Atoi(nodes[i].ID)
+			if err != nil {
+				return nil, err
+			}
+			fks = append(fks, id)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Node(func(s *sql.Selector) {
+			s.Where(sql.InValues(node.NextColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.prev_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "prev_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "prev_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Next = n
+		}
+	}
+
 	return nodes, nil
 }
 

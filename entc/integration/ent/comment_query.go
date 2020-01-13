@@ -273,7 +273,8 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &Comment{config: cq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

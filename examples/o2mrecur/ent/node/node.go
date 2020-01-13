@@ -26,8 +26,13 @@ const (
 	ChildrenColumn = "parent_id"
 )
 
-// Columns holds all SQL columns are node fields.
+// Columns holds all SQL columns for node fields.
 var Columns = []string{
 	FieldID,
 	FieldValue,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Node type.
+var ForeignKeys = []string{
+	"parent_id",
 }

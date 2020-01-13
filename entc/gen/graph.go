@@ -67,7 +67,10 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		g.addEdges(schema)
 	}
 	for _, t := range g.Nodes {
-		check(g.resolve(t), "resolve %q relations", t.Name)
+		check(resolve(t), "resolve %q relations", t.Name)
+	}
+	for _, t := range g.Nodes {
+		t.resolveFKs()
 	}
 	for _, schema := range schemas {
 		g.addIndexes(schema)
@@ -206,7 +209,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 // 	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
 // 	 - A have an edge (E) to A (not unique).
 //
-func (g *Graph) resolve(t *Type) error {
+func resolve(t *Type) error {
 	for _, e := range t.Edges {
 		switch {
 		case e.IsInverse():

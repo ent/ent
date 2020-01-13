@@ -22,20 +22,36 @@ type Node struct {
 	ID string `json:"id,omitempty"`
 	// Value holds the value of the "value" field.
 	Value int `json:"value,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the NodeQuery when eager-loading is set.
+	Edges struct {
+		// Prev holds the value of the prev edge.
+		Prev *Node
+		// Next holds the value of the next edge.
+		Next *Node
+	}
+	prev_id *string
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Node) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // id
+		&sql.NullInt64{}, // value
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Node) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // prev_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Node fields.
 func (n *Node) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(node.Columns); m != n {
+	if m, n := len(values), len(node.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -48,6 +64,15 @@ func (n *Node) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field value", values[0])
 	} else if value.Valid {
 		n.Value = int(value.Int64)
+	}
+	values = values[1:]
+	if len(values) == len(node.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field prev_id", value)
+		} else if value.Valid {
+			n.prev_id = new(string)
+			*n.prev_id = strconv.FormatInt(value.Int64, 10)
+		}
 	}
 	return nil
 }

@@ -29,6 +29,13 @@ type Card struct {
 	Number string `json:"number,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CardQuery when eager-loading is set.
+	Edges struct {
+		// Owner holds the value of the owner edge.
+		Owner *User
+	}
+	owner_id *string
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`
@@ -37,18 +44,25 @@ type Card struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Card) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullTime{},
-		&sql.NullTime{},
-		&sql.NullString{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullTime{},   // create_time
+		&sql.NullTime{},   // update_time
+		&sql.NullString{}, // number
+		&sql.NullString{}, // name
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Card) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
 func (c *Card) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(card.Columns); m != n {
+	if m, n := len(values), len(card.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -76,6 +90,15 @@ func (c *Card) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[3])
 	} else if value.Valid {
 		c.Name = value.String
+	}
+	values = values[4:]
+	if len(values) == len(card.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			c.owner_id = new(string)
+			*c.owner_id = strconv.FormatInt(value.Int64, 10)
+		}
 	}
 	return nil
 }

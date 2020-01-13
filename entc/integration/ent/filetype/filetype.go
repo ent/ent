@@ -25,7 +25,7 @@ const (
 	FilesColumn = "type_id"
 )
 
-// Columns holds all SQL columns are filetype fields.
+// Columns holds all SQL columns for filetype fields.
 var Columns = []string{
 	FieldID,
 	FieldName,

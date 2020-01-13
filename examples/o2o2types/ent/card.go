@@ -24,21 +24,35 @@ type Card struct {
 	Expired time.Time `json:"expired,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CardQuery when eager-loading is set.
+	Edges struct {
+		// Owner holds the value of the owner edge.
+		Owner *User
+	}
+	owner_id *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Card) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullTime{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullTime{},   // expired
+		&sql.NullString{}, // number
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Card) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
 func (c *Card) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(card.Columns); m != n {
+	if m, n := len(values), len(card.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -56,6 +70,15 @@ func (c *Card) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field number", values[1])
 	} else if value.Valid {
 		c.Number = value.String
+	}
+	values = values[2:]
+	if len(values) == len(card.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			c.owner_id = new(int)
+			*c.owner_id = int(value.Int64)
+		}
 	}
 	return nil
 }

@@ -115,6 +115,7 @@ var tests = []func(*testing.T, *ent.Client){
 	DefaultValue,
 	ImmutableValue,
 	Sensitive,
+	EagerLoading,
 }
 
 func Sanity(t *testing.T, client *ent.Client) {
@@ -869,6 +870,130 @@ func Sensitive(t *testing.T, client *ent.Client) {
 	b, err := json.Marshal(usr)
 	require.NoError(err)
 	require.NotContains(string(b), "secret-password")
+}
+
+func EagerLoading(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	require := require.New(t)
+
+	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
+	nati := client.User.Create().SetName("nati").SetAge(28).SetSpouse(a8m).SaveX(ctx)
+	alex := client.User.Create().SetName("alexsn").SetAge(35).AddFriends(a8m).SaveX(ctx)
+	client.Pet.Create().SetName("xabi").SaveX(ctx)
+	client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(nati).SaveX(ctx)
+	client.Card.Create().SetNumber("102030").SetOwner(a8m).SaveX(ctx)
+
+	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+	files := ent.Files{
+		client.File.Create().SetName("a").SetSize(10).SaveX(ctx),
+		client.File.Create().SetName("b").SetSize(10).SaveX(ctx),
+		client.File.Create().SetName("c").SetSize(10).SaveX(ctx),
+	}
+	typ := client.FileType.Create().SetName("type").AddFiles(files...).SaveX(ctx)
+	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).AddUsers(alex, a8m).SetInfo(inf).SaveX(ctx)
+	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).AddUsers(nati, a8m).SetInfo(inf).AddFiles(files...).SaveX(ctx)
+
+	t.Run("O2O", func(t *testing.T) {
+		users := client.User.
+			Query().
+			Where(user.HasSpouse()).
+			WithSpouse().
+			WithCard().
+			Order(ent.Asc(user.FieldName)).
+			AllX(ctx)
+		require.Len(users, 2)
+		require.NotNil(users[0].Edges.Spouse)
+		require.NotNil(users[1].Edges.Spouse)
+		require.NotNil(nati.Name, users[0].Edges.Spouse.Name)
+		require.NotNil(a8m.Name, users[1].Edges.Spouse.Name)
+		require.NotNil(users[0].Edges.Card)
+		require.Nil(users[1].Edges.Card)
+	})
+
+	t.Run("O2M", func(t *testing.T) {
+		pets := client.Pet.Query().AllX(ctx)
+		require.Nil(pets[0].Edges.Team)
+		require.Nil(pets[0].Edges.Owner)
+		require.Nil(pets[1].Edges.Team)
+		require.Nil(pets[1].Edges.Owner)
+
+		pedro := client.Pet.Query().Where(pet.HasOwner()).WithOwner().OnlyX(ctx)
+		require.Nil(pedro.Edges.Team)
+		require.NotNil(pedro.Edges.Owner)
+		require.Equal(a8m.Name, pedro.Edges.Owner.Name)
+
+		pedro = client.Pet.Query().Where(pet.HasOwner()).WithOwner().WithTeam().OnlyX(ctx)
+		require.NotNil(pedro.Edges.Team)
+		require.NotNil(pedro.Edges.Owner)
+		require.Equal(a8m.Name, pedro.Edges.Owner.Name)
+		require.Equal(nati.Name, pedro.Edges.Team.Name)
+	})
+
+	t.Run("M2O", func(t *testing.T) {
+		a8m = client.User.Query().Where(user.ID(a8m.ID)).OnlyX(ctx)
+		require.Empty(a8m.Edges.Pets)
+
+		a8m = client.User.
+			Query().
+			Where(user.ID(a8m.ID)).
+			WithPets(func(q *ent.PetQuery) {
+				q.WithTeam().Order(ent.Asc(pet.FieldName))
+			}).
+			OnlyX(ctx)
+		require.Len(a8m.Edges.Pets, 1)
+		require.Equal("pedro", a8m.Edges.Pets[0].Name)
+		require.Equal(nati.Name, a8m.Edges.Pets[0].Edges.Team.Name)
+	})
+
+	t.Run("M2M", func(t *testing.T) {
+		users := client.User.
+			Query().
+			WithFriends().
+			WithGroups(func(q *ent.GroupQuery) {
+				q.Order(ent.Desc(group.FieldName))
+			}).
+			Order(ent.Asc(user.FieldName)).
+			AllX(ctx)
+		require.Equal(a8m.Name, users[0].Name)
+		require.Len(users[0].Edges.Groups, 2)
+		require.Len(users[0].Edges.Friends, 1)
+		require.Equal(alex.Name, users[0].Edges.Friends[0].Name)
+		g1, g2 := users[0].Edges.Groups[0], users[0].Edges.Groups[1]
+		require.Equal(lab.Name, g1.Name)
+		require.Equal(hub.Name, g2.Name)
+	})
+
+	t.Run("Graph", func(t *testing.T) {
+		users := client.User.
+			Query().
+			WithSpouse().
+			WithFriends().
+			WithGroups(func(q *ent.GroupQuery) {
+				q.WithInfo()
+				q.WithFiles(func(q *ent.FileQuery) {
+					q.WithType()
+					q.Order(ent.Asc(file.FieldName))
+				})
+				q.Order(ent.Desc(group.FieldName))
+			}).
+			Order(ent.Asc(user.FieldName)).
+			AllX(ctx)
+		require.Equal(a8m.Name, users[0].Name)
+		require.NotNil(users[0].Edges.Spouse)
+		require.Equal(nati.Name, users[0].Edges.Spouse.Name)
+		require.Len(users[0].Edges.Groups, 2)
+		require.Len(users[0].Edges.Friends, 1)
+		require.Equal(alex.Name, users[0].Edges.Friends[0].Name)
+		g1, g2 := users[0].Edges.Groups[0], users[0].Edges.Groups[1]
+		require.Equal(lab.Name, g1.Name)
+		require.Equal(hub.Name, g2.Name)
+		require.Equal(inf.Desc, g1.Edges.Info.Desc)
+		require.Equal([]string{"a", "c"}, []string{g1.Edges.Files[0].Name, g1.Edges.Files[2].Name})
+		for _, f := range g1.Edges.Files {
+			require.NotNil(f.Edges.Type)
+			require.Equal(typ.Name, f.Edges.Type.Name)
+		}
+	})
 }
 
 func drop(t *testing.T, client *ent.Client) {

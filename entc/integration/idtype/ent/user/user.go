@@ -26,10 +26,15 @@ const (
 	FollowingTable = "user_following"
 )
 
-// Columns holds all SQL columns are user fields.
+// Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+var ForeignKeys = []string{
+	"user_spouse_id",
 }
 
 var (

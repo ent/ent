@@ -59,31 +59,31 @@ type FieldType struct {
 // scanValues returns the types for scanning values from sql.Rows.
 func (*FieldType) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // int
+		&sql.NullInt64{},  // int8
+		&sql.NullInt64{},  // int16
+		&sql.NullInt64{},  // int32
+		&sql.NullInt64{},  // int64
+		&sql.NullInt64{},  // optional_int
+		&sql.NullInt64{},  // optional_int8
+		&sql.NullInt64{},  // optional_int16
+		&sql.NullInt64{},  // optional_int32
+		&sql.NullInt64{},  // optional_int64
+		&sql.NullInt64{},  // nillable_int
+		&sql.NullInt64{},  // nillable_int8
+		&sql.NullInt64{},  // nillable_int16
+		&sql.NullInt64{},  // nillable_int32
+		&sql.NullInt64{},  // nillable_int64
+		&sql.NullInt64{},  // validate_optional_int32
+		&sql.NullString{}, // state
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the FieldType fields.
 func (ft *FieldType) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(fieldtype.Columns); m != n {
+	if m, n := len(values), len(fieldtype.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

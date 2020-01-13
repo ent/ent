@@ -23,21 +23,35 @@ type User struct {
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges struct {
+		// Spouse holds the value of the spouse edge.
+		Spouse *User
+	}
+	user_spouse_id *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // age
+		&sql.NullString{}, // name
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // user_spouse_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m != n {
+	if m, n := len(values), len(user.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -55,6 +69,15 @@ func (u *User) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field name", values[1])
 	} else if value.Valid {
 		u.Name = value.String
+	}
+	values = values[2:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field user_spouse_id", value)
+		} else if value.Valid {
+			u.user_spouse_id = new(int)
+			*u.user_spouse_id = int(value.Int64)
+		}
 	}
 	return nil
 }

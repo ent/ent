@@ -56,7 +56,7 @@ const (
 	Table = "field_types"
 )
 
-// Columns holds all SQL columns are fieldtype fields.
+// Columns holds all SQL columns for fieldtype fields.
 var Columns = []string{
 	FieldID,
 	FieldInt,

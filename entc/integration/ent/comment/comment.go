@@ -22,7 +22,7 @@ const (
 	Table = "comments"
 )
 
-// Columns holds all SQL columns are comment fields.
+// Columns holds all SQL columns for comment fields.
 var Columns = []string{
 	FieldID,
 	FieldUniqueInt,

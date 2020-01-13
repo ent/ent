@@ -21,6 +21,14 @@ type Pet struct {
 	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the PetQuery when eager-loading is set.
+	Edges struct {
+		// Team holds the value of the team edge.
+		Team *User
+		// Owner holds the value of the owner edge.
+		Owner *User
+	}
 }
 
 // FromResponse scans the gremlin response data into Pet.

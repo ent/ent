@@ -19,19 +19,33 @@ type Car struct {
 	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CarQuery when eager-loading is set.
+	Edges struct {
+		// Owner holds the value of the owner edge.
+		Owner *User
+	}
+	owner_id *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Car) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
+		&sql.NullInt64{}, // id
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Car) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
 func (c *Car) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(car.Columns); m != n {
+	if m, n := len(values), len(car.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
@@ -40,6 +54,15 @@ func (c *Car) assignValues(values ...interface{}) error {
 	}
 	c.ID = int(value.Int64)
 	values = values[1:]
+	values = values[0:]
+	if len(values) == len(car.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			c.owner_id = new(int)
+			*c.owner_id = int(value.Int64)
+		}
+	}
 	return nil
 }
 

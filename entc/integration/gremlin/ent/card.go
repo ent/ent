@@ -28,6 +28,12 @@ type Card struct {
 	Number string `json:"number,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CardQuery when eager-loading is set.
+	Edges struct {
+		// Owner holds the value of the owner edge.
+		Owner *User
+	}
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`

@@ -16,7 +16,7 @@ const (
 	Table = "items"
 )
 
-// Columns holds all SQL columns are item fields.
+// Columns holds all SQL columns for item fields.
 var Columns = []string{
 	FieldID,
 }

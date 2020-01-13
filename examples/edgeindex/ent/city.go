@@ -21,20 +21,26 @@ type City struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CityQuery when eager-loading is set.
+	Edges struct {
+		// Streets holds the value of the streets edge.
+		Streets []*Street
+	}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*City) scanValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{},
-		&sql.NullString{},
+		&sql.NullInt64{},  // id
+		&sql.NullString{}, // name
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the City fields.
 func (c *City) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(city.Columns); m != n {
+	if m, n := len(values), len(city.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)

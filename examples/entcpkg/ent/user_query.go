@@ -249,7 +249,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {

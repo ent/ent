@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,8 @@ type CityQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.City
+	// eager-loading edges.
+	withStreets *StreetQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -237,6 +240,17 @@ func (cq *CityQuery) Clone() *CityQuery {
 	}
 }
 
+//  WithStreets tells the query-builder to eager-loads the nodes that are connected to
+// the "streets" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
+	query := &StreetQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withStreets = query
+	return cq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -286,7 +300,8 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	spec.ScanValues = func() []interface{} {
 		node := &City{config: cq.config}
 		nodes = append(nodes, node)
-		return node.scanValues()
+		values := node.scanValues()
+		return values
 	}
 	spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
@@ -298,6 +313,35 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
 		return nil, err
 	}
+
+	if query := cq.withStreets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*City)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Street(func(s *sql.Selector) {
+			s.Where(sql.InValues(city.StreetsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.city_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "city_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "city_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Streets = append(node.Edges.Streets, n)
+		}
+	}
+
 	return nodes, nil
 }
 
