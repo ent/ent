@@ -116,3 +116,5 @@ Note that, only SQL dialects support this feature.
 Since a query-builder can load more than one association, it's not possible to load them using one `JOIN` operation.
 Therefore, `ent` executes additional queries for loading associations. One query for `M2O/O2M` and `O2O` edges, and
 2 queries for loading `M2M` edges.
+
+Note that, we expect to improve this in the next versions of `ent`.
