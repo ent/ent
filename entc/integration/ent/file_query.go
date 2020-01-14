@@ -361,7 +361,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*File)
 		for i := range nodes {
-			if fk := nodes[i].owner_id; fk != nil {
+			if fk := nodes[i].user_files; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -374,7 +374,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Owner = n
@@ -386,7 +386,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*File)
 		for i := range nodes {
-			if fk := nodes[i].type_id; fk != nil {
+			if fk := nodes[i].file_type_files; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -399,7 +399,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "type_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Type = n

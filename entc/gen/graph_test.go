@@ -203,6 +203,41 @@ func TestRelation(t *testing.T) {
 	require.Equal(M2M, t1.Edges[8].Rel.Type)
 }
 
+func TestFKColumns(t *testing.T) {
+	user := &load.Schema{
+		Name: "User",
+		Edges: []*load.Edge{
+			{Name: "pets", Type: "Pet"},
+			{Name: "pet", Type: "Pet", Unique: true},
+			{Name: "parent", Type: "User", Unique: true},
+		},
+	}
+	require := require.New(t)
+	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, &load.Schema{Name: "Pet"})
+	require.NoError(err)
+	t1 := graph.Nodes[0]
+	require.Equal(Relation{Type: O2M, Table: "pets", Columns: []string{"user_pets"}}, t1.Edges[0].Rel)
+	require.Equal(Relation{Type: M2O, Table: "users", Columns: []string{"user_pet"}}, t1.Edges[1].Rel)
+	require.Equal(Relation{Type: O2O, Table: "users", Columns: []string{"user_parent"}}, t1.Edges[2].Rel)
+
+	// Adding inverse edges.
+	graph, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user,
+		&load.Schema{
+			Name: "Pet",
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+				{Name: "team", Type: "User", RefName: "pet", Inverse: true},
+			},
+		},
+	)
+	require.NoError(err)
+	t1, t2 := graph.Nodes[0], graph.Nodes[1]
+	require.Equal(Relation{Type: O2M, Table: "pets", Columns: []string{"user_pets"}}, t1.Edges[0].Rel)
+	require.Equal(Relation{Type: M2O, Table: "users", Columns: []string{"user_pet"}}, t1.Edges[1].Rel)
+	require.Equal(Relation{Type: M2O, Table: "pets", Columns: []string{"user_pets"}}, t2.Edges[0].Rel)
+	require.Equal(Relation{Type: O2M, Table: "users", Columns: []string{"user_pet"}}, t2.Edges[1].Rel)
+}
+
 func TestGraph_Gen(t *testing.T) {
 	require := require.New(t)
 	target := filepath.Join(os.TempDir(), "ent")

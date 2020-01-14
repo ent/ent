@@ -40,10 +40,10 @@ type User struct {
 	Role user.Role `json:"role,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges            UserEdges `json:"edges"`
-	group_blocked_id *string
-	user_spouse_id   *string
-	parent_id        *string
+	Edges         UserEdges `json:"edges"`
+	group_blocked *string
+	user_spouse   *string
+	user_parent   *string
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -212,9 +212,9 @@ func (*User) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*User) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // group_blocked_id
-		&sql.NullInt64{}, // user_spouse_id
-		&sql.NullInt64{}, // parent_id
+		&sql.NullInt64{}, // group_blocked
+		&sql.NullInt64{}, // user_spouse
+		&sql.NullInt64{}, // user_parent
 	}
 }
 
@@ -273,22 +273,22 @@ func (u *User) assignValues(values ...interface{}) error {
 	values = values[8:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_blocked_id", value)
+			return fmt.Errorf("unexpected type %T for edge-field group_blocked", value)
 		} else if value.Valid {
-			u.group_blocked_id = new(string)
-			*u.group_blocked_id = strconv.FormatInt(value.Int64, 10)
+			u.group_blocked = new(string)
+			*u.group_blocked = strconv.FormatInt(value.Int64, 10)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_spouse_id", value)
+			return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
 		} else if value.Valid {
-			u.user_spouse_id = new(string)
-			*u.user_spouse_id = strconv.FormatInt(value.Int64, 10)
+			u.user_spouse = new(string)
+			*u.user_spouse = strconv.FormatInt(value.Int64, 10)
 		}
 		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
+			return fmt.Errorf("unexpected type %T for edge-field user_parent", value)
 		} else if value.Valid {
-			u.parent_id = new(string)
-			*u.parent_id = strconv.FormatInt(value.Int64, 10)
+			u.user_parent = new(string)
+			*u.user_parent = strconv.FormatInt(value.Int64, 10)
 		}
 	}
 	return nil

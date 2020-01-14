@@ -606,13 +606,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.owner_id
+			fk := n.user_card
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_card" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_card" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Card = n
 		}
@@ -638,13 +638,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.owner_id
+			fk := n.user_pets
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_pets" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Pets = append(node.Edges.Pets, n)
 		}
@@ -670,13 +670,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.owner_id
+			fk := n.user_files
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_files" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Files = append(node.Edges.Files, n)
 		}
@@ -954,13 +954,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.team_id
+			fk := n.user_team
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "team_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_team" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "team_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_team" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Team = n
 		}
@@ -970,7 +970,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*User)
 		for i := range nodes {
-			if fk := nodes[i].user_spouse_id; fk != nil {
+			if fk := nodes[i].user_spouse; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -983,7 +983,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_spouse_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_spouse" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Spouse = n
@@ -1011,13 +1011,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.parent_id
+			fk := n.user_parent
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "parent_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_parent" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_parent" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Children = append(node.Edges.Children, n)
 		}
@@ -1027,7 +1027,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*User)
 		for i := range nodes {
-			if fk := nodes[i].parent_id; fk != nil {
+			if fk := nodes[i].user_parent; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -1040,7 +1040,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_parent" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Parent = n

@@ -406,6 +406,9 @@ func (m *Migrate) setupTable(t *Table) {
 	}
 	for _, fk := range t.ForeignKeys {
 		fk.Symbol = m.symbol(fk.Symbol)
+		for _, c := range fk.Columns {
+			c.foreign = fk
+		}
 	}
 }
 

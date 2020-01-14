@@ -24,7 +24,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "number", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
-		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "user_card", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
@@ -95,9 +95,9 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
-		{Name: "type_id", Type: field.TypeInt, Nullable: true},
-		{Name: "group_file_id", Type: field.TypeInt, Nullable: true},
-		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+		{Name: "file_type_files", Type: field.TypeInt, Nullable: true},
+		{Name: "group_files", Type: field.TypeInt, Nullable: true},
+		{Name: "user_files", Type: field.TypeInt, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -139,17 +139,17 @@ var (
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
 			},
 			{
-				Name:    "file_owner_id_type_id",
+				Name:    "file_user_files_file_type_files",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[7], FilesColumns[5]},
 			},
 			{
-				Name:    "file_name_owner_id_type_id",
+				Name:    "file_name_user_files_file_type_files",
 				Unique:  true,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7], FilesColumns[5]},
 			},
 			{
-				Name:    "file_name_owner_id",
+				Name:    "file_name_user_files",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[7]},
 			},
@@ -175,7 +175,7 @@ var (
 		{Name: "type", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: group.DefaultMaxUsers},
 		{Name: "name", Type: field.TypeString},
-		{Name: "info_id", Type: field.TypeInt, Nullable: true},
+		{Name: "group_info", Type: field.TypeInt, Nullable: true},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
@@ -220,7 +220,7 @@ var (
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "value", Type: field.TypeInt, Nullable: true},
-		{Name: "prev_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "node_next", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// NodesTable holds the schema information for the "nodes" table.
 	NodesTable = &schema.Table{
@@ -241,8 +241,8 @@ var (
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
-		{Name: "team_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
+		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -267,7 +267,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "pet_name_owner_id",
+				Name:    "pet_name_user_pets",
 				Unique:  false,
 				Columns: []*schema.Column{PetsColumns[1], PetsColumns[2]},
 			},
@@ -295,9 +295,9 @@ var (
 		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin"}, Default: user.DefaultRole},
-		{Name: "group_blocked_id", Type: field.TypeInt, Nullable: true},
-		{Name: "user_spouse_id", Type: field.TypeInt, Unique: true, Nullable: true},
-		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
+		{Name: "group_blocked", Type: field.TypeInt, Nullable: true},
+		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "user_parent", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

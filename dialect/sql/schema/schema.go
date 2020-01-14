@@ -142,8 +142,9 @@ type Column struct {
 	Increment bool        // auto increment attribute.
 	Nullable  bool        // null or not null attribute.
 	Default   interface{} // default value.
-	indexes   Indexes     // linked indexes.
 	Enums     []string    // enum values.
+	indexes   Indexes     // linked indexes.
+	foreign   *ForeignKey // linked foreign-key.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
