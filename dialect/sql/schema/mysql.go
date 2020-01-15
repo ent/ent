@@ -294,6 +294,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	}); parts[0] {
 	case "int":
 		c.Type = field.TypeInt32
+		if len(parts) == 3 { // int(10) unsigned.
+			c.Type = field.TypeUint32
+		}
 	case "smallint":
 		c.Type = field.TypeInt16
 		if len(parts) == 3 { // smallint(5) unsigned.

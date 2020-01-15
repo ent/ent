@@ -52,6 +52,16 @@ type FieldType struct {
 	NillableInt64 *int64 `json:"nillable_int64,omitempty"`
 	// ValidateOptionalInt32 holds the value of the "validate_optional_int32" field.
 	ValidateOptionalInt32 int32 `json:"validate_optional_int32,omitempty"`
+	// OptionalUint holds the value of the "optional_uint" field.
+	OptionalUint uint `json:"optional_uint,omitempty"`
+	// OptionalUint8 holds the value of the "optional_uint8" field.
+	OptionalUint8 uint8 `json:"optional_uint8,omitempty"`
+	// OptionalUint16 holds the value of the "optional_uint16" field.
+	OptionalUint16 uint16 `json:"optional_uint16,omitempty"`
+	// OptionalUint32 holds the value of the "optional_uint32" field.
+	OptionalUint32 uint32 `json:"optional_uint32,omitempty"`
+	// OptionalUint64 holds the value of the "optional_uint64" field.
+	OptionalUint64 uint64 `json:"optional_uint64,omitempty"`
 	// State holds the value of the "state" field.
 	State fieldtype.State `json:"state,omitempty"`
 }
@@ -76,6 +86,11 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullInt64{},  // nillable_int32
 		&sql.NullInt64{},  // nillable_int64
 		&sql.NullInt64{},  // validate_optional_int32
+		&sql.NullInt64{},  // optional_uint
+		&sql.NullInt64{},  // optional_uint8
+		&sql.NullInt64{},  // optional_uint16
+		&sql.NullInt64{},  // optional_uint32
+		&sql.NullInt64{},  // optional_uint64
 		&sql.NullString{}, // state
 	}
 }
@@ -177,8 +192,33 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ft.ValidateOptionalInt32 = int32(value.Int64)
 	}
-	if value, ok := values[16].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field state", values[16])
+	if value, ok := values[16].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field optional_uint", values[16])
+	} else if value.Valid {
+		ft.OptionalUint = uint(value.Int64)
+	}
+	if value, ok := values[17].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field optional_uint8", values[17])
+	} else if value.Valid {
+		ft.OptionalUint8 = uint8(value.Int64)
+	}
+	if value, ok := values[18].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field optional_uint16", values[18])
+	} else if value.Valid {
+		ft.OptionalUint16 = uint16(value.Int64)
+	}
+	if value, ok := values[19].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field optional_uint32", values[19])
+	} else if value.Valid {
+		ft.OptionalUint32 = uint32(value.Int64)
+	}
+	if value, ok := values[20].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field optional_uint64", values[20])
+	} else if value.Valid {
+		ft.OptionalUint64 = uint64(value.Int64)
+	}
+	if value, ok := values[21].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field state", values[21])
 	} else if value.Valid {
 		ft.State = fieldtype.State(value.String)
 	}
@@ -250,6 +290,16 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", validate_optional_int32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.ValidateOptionalInt32))
+	builder.WriteString(", optional_uint=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint))
+	builder.WriteString(", optional_uint8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint8))
+	builder.WriteString(", optional_uint16=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint16))
+	builder.WriteString(", optional_uint32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint32))
+	builder.WriteString(", optional_uint64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')

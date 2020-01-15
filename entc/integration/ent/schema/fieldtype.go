@@ -36,6 +36,11 @@ func (FieldType) Fields() []ent.Field {
 		field.Int32("validate_optional_int32").
 			Optional().
 			Max(100),
+		field.Uint("optional_uint").Optional(),
+		field.Uint8("optional_uint8").Optional(),
+		field.Uint16("optional_uint16").Optional(),
+		field.Uint32("optional_uint32").Optional(),
+		field.Uint64("optional_uint64").Optional(),
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),

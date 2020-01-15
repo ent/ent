@@ -74,6 +74,11 @@ var (
 		{Name: "nillable_int32", Type: field.TypeInt32, Nullable: true},
 		{Name: "nillable_int64", Type: field.TypeInt64, Nullable: true},
 		{Name: "validate_optional_int32", Type: field.TypeInt32, Nullable: true},
+		{Name: "optional_uint", Type: field.TypeUint, Nullable: true},
+		{Name: "optional_uint8", Type: field.TypeUint8, Nullable: true},
+		{Name: "optional_uint16", Type: field.TypeUint16, Nullable: true},
+		{Name: "optional_uint32", Type: field.TypeUint32, Nullable: true},
+		{Name: "optional_uint64", Type: field.TypeUint64, Nullable: true},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
