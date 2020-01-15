@@ -49,6 +49,16 @@ const (
 	FieldNillableInt64 = "nillable_int64"
 	// FieldValidateOptionalInt32 holds the string denoting the validate_optional_int32 vertex property in the database.
 	FieldValidateOptionalInt32 = "validate_optional_int32"
+	// FieldOptionalUint holds the string denoting the optional_uint vertex property in the database.
+	FieldOptionalUint = "optional_uint"
+	// FieldOptionalUint8 holds the string denoting the optional_uint8 vertex property in the database.
+	FieldOptionalUint8 = "optional_uint8"
+	// FieldOptionalUint16 holds the string denoting the optional_uint16 vertex property in the database.
+	FieldOptionalUint16 = "optional_uint16"
+	// FieldOptionalUint32 holds the string denoting the optional_uint32 vertex property in the database.
+	FieldOptionalUint32 = "optional_uint32"
+	// FieldOptionalUint64 holds the string denoting the optional_uint64 vertex property in the database.
+	FieldOptionalUint64 = "optional_uint64"
 	// FieldState holds the string denoting the state vertex property in the database.
 	FieldState = "state"
 
@@ -75,6 +85,11 @@ var Columns = []string{
 	FieldNillableInt32,
 	FieldNillableInt64,
 	FieldValidateOptionalInt32,
+	FieldOptionalUint,
+	FieldOptionalUint8,
+	FieldOptionalUint16,
+	FieldOptionalUint32,
+	FieldOptionalUint64,
 	FieldState,
 }
 

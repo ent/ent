@@ -241,6 +241,46 @@ func ValidateOptionalInt32(v int32) predicate.FieldType {
 	)
 }
 
+// OptionalUint applies equality check predicate on the "optional_uint" field. It's identical to OptionalUintEQ.
+func OptionalUint(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUint8 applies equality check predicate on the "optional_uint8" field. It's identical to OptionalUint8EQ.
+func OptionalUint8(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint16 applies equality check predicate on the "optional_uint16" field. It's identical to OptionalUint16EQ.
+func OptionalUint16(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint32 applies equality check predicate on the "optional_uint32" field. It's identical to OptionalUint32EQ.
+func OptionalUint32(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint64 applies equality check predicate on the "optional_uint64" field. It's identical to OptionalUint64EQ.
+func OptionalUint64(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -1757,6 +1797,506 @@ func ValidateOptionalInt32IsNil() predicate.FieldType {
 func ValidateOptionalInt32NotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldValidateOptionalInt32)))
+	},
+	)
+}
+
+// OptionalUintEQ applies the EQ predicate on the "optional_uint" field.
+func OptionalUintEQ(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUintNEQ applies the NEQ predicate on the "optional_uint" field.
+func OptionalUintNEQ(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUintIn applies the In predicate on the "optional_uint" field.
+func OptionalUintIn(vs ...uint) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalUint), v...))
+	},
+	)
+}
+
+// OptionalUintNotIn applies the NotIn predicate on the "optional_uint" field.
+func OptionalUintNotIn(vs ...uint) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalUint), v...))
+	},
+	)
+}
+
+// OptionalUintGT applies the GT predicate on the "optional_uint" field.
+func OptionalUintGT(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUintGTE applies the GTE predicate on the "optional_uint" field.
+func OptionalUintGTE(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUintLT applies the LT predicate on the "optional_uint" field.
+func OptionalUintLT(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUintLTE applies the LTE predicate on the "optional_uint" field.
+func OptionalUintLTE(v uint) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalUint), v))
+	},
+	)
+}
+
+// OptionalUintIsNil applies the IsNil predicate on the "optional_uint" field.
+func OptionalUintIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalUint)))
+	},
+	)
+}
+
+// OptionalUintNotNil applies the NotNil predicate on the "optional_uint" field.
+func OptionalUintNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalUint)))
+	},
+	)
+}
+
+// OptionalUint8EQ applies the EQ predicate on the "optional_uint8" field.
+func OptionalUint8EQ(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint8NEQ applies the NEQ predicate on the "optional_uint8" field.
+func OptionalUint8NEQ(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint8In applies the In predicate on the "optional_uint8" field.
+func OptionalUint8In(vs ...uint8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalUint8), v...))
+	},
+	)
+}
+
+// OptionalUint8NotIn applies the NotIn predicate on the "optional_uint8" field.
+func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalUint8), v...))
+	},
+	)
+}
+
+// OptionalUint8GT applies the GT predicate on the "optional_uint8" field.
+func OptionalUint8GT(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint8GTE applies the GTE predicate on the "optional_uint8" field.
+func OptionalUint8GTE(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint8LT applies the LT predicate on the "optional_uint8" field.
+func OptionalUint8LT(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint8LTE applies the LTE predicate on the "optional_uint8" field.
+func OptionalUint8LTE(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalUint8), v))
+	},
+	)
+}
+
+// OptionalUint8IsNil applies the IsNil predicate on the "optional_uint8" field.
+func OptionalUint8IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalUint8)))
+	},
+	)
+}
+
+// OptionalUint8NotNil applies the NotNil predicate on the "optional_uint8" field.
+func OptionalUint8NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalUint8)))
+	},
+	)
+}
+
+// OptionalUint16EQ applies the EQ predicate on the "optional_uint16" field.
+func OptionalUint16EQ(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint16NEQ applies the NEQ predicate on the "optional_uint16" field.
+func OptionalUint16NEQ(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint16In applies the In predicate on the "optional_uint16" field.
+func OptionalUint16In(vs ...uint16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalUint16), v...))
+	},
+	)
+}
+
+// OptionalUint16NotIn applies the NotIn predicate on the "optional_uint16" field.
+func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalUint16), v...))
+	},
+	)
+}
+
+// OptionalUint16GT applies the GT predicate on the "optional_uint16" field.
+func OptionalUint16GT(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint16GTE applies the GTE predicate on the "optional_uint16" field.
+func OptionalUint16GTE(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint16LT applies the LT predicate on the "optional_uint16" field.
+func OptionalUint16LT(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint16LTE applies the LTE predicate on the "optional_uint16" field.
+func OptionalUint16LTE(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalUint16), v))
+	},
+	)
+}
+
+// OptionalUint16IsNil applies the IsNil predicate on the "optional_uint16" field.
+func OptionalUint16IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalUint16)))
+	},
+	)
+}
+
+// OptionalUint16NotNil applies the NotNil predicate on the "optional_uint16" field.
+func OptionalUint16NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalUint16)))
+	},
+	)
+}
+
+// OptionalUint32EQ applies the EQ predicate on the "optional_uint32" field.
+func OptionalUint32EQ(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint32NEQ applies the NEQ predicate on the "optional_uint32" field.
+func OptionalUint32NEQ(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint32In applies the In predicate on the "optional_uint32" field.
+func OptionalUint32In(vs ...uint32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalUint32), v...))
+	},
+	)
+}
+
+// OptionalUint32NotIn applies the NotIn predicate on the "optional_uint32" field.
+func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalUint32), v...))
+	},
+	)
+}
+
+// OptionalUint32GT applies the GT predicate on the "optional_uint32" field.
+func OptionalUint32GT(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint32GTE applies the GTE predicate on the "optional_uint32" field.
+func OptionalUint32GTE(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint32LT applies the LT predicate on the "optional_uint32" field.
+func OptionalUint32LT(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint32LTE applies the LTE predicate on the "optional_uint32" field.
+func OptionalUint32LTE(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalUint32), v))
+	},
+	)
+}
+
+// OptionalUint32IsNil applies the IsNil predicate on the "optional_uint32" field.
+func OptionalUint32IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalUint32)))
+	},
+	)
+}
+
+// OptionalUint32NotNil applies the NotNil predicate on the "optional_uint32" field.
+func OptionalUint32NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalUint32)))
+	},
+	)
+}
+
+// OptionalUint64EQ applies the EQ predicate on the "optional_uint64" field.
+func OptionalUint64EQ(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
+// OptionalUint64NEQ applies the NEQ predicate on the "optional_uint64" field.
+func OptionalUint64NEQ(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
+// OptionalUint64In applies the In predicate on the "optional_uint64" field.
+func OptionalUint64In(vs ...uint64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalUint64), v...))
+	},
+	)
+}
+
+// OptionalUint64NotIn applies the NotIn predicate on the "optional_uint64" field.
+func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalUint64), v...))
+	},
+	)
+}
+
+// OptionalUint64GT applies the GT predicate on the "optional_uint64" field.
+func OptionalUint64GT(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
+// OptionalUint64GTE applies the GTE predicate on the "optional_uint64" field.
+func OptionalUint64GTE(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
+// OptionalUint64LT applies the LT predicate on the "optional_uint64" field.
+func OptionalUint64LT(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
+// OptionalUint64LTE applies the LTE predicate on the "optional_uint64" field.
+func OptionalUint64LTE(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalUint64), v))
+	},
+	)
+}
+
+// OptionalUint64IsNil applies the IsNil predicate on the "optional_uint64" field.
+func OptionalUint64IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalUint64)))
+	},
+	)
+}
+
+// OptionalUint64NotNil applies the NotNil predicate on the "optional_uint64" field.
+func OptionalUint64NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalUint64)))
 	},
 	)
 }

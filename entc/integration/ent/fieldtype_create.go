@@ -36,6 +36,11 @@ type FieldTypeCreate struct {
 	nillable_int32          *int32
 	nillable_int64          *int64
 	validate_optional_int32 *int32
+	optional_uint           *uint
+	optional_uint8          *uint8
+	optional_uint16         *uint16
+	optional_uint32         *uint32
+	optional_uint64         *uint64
 	state                   *fieldtype.State
 }
 
@@ -219,6 +224,76 @@ func (ftc *FieldTypeCreate) SetValidateOptionalInt32(i int32) *FieldTypeCreate {
 func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetValidateOptionalInt32(*i)
+	}
+	return ftc
+}
+
+// SetOptionalUint sets the optional_uint field.
+func (ftc *FieldTypeCreate) SetOptionalUint(u uint) *FieldTypeCreate {
+	ftc.optional_uint = &u
+	return ftc
+}
+
+// SetNillableOptionalUint sets the optional_uint field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint8 sets the optional_uint8 field.
+func (ftc *FieldTypeCreate) SetOptionalUint8(u uint8) *FieldTypeCreate {
+	ftc.optional_uint8 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint8 sets the optional_uint8 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint8(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint16 sets the optional_uint16 field.
+func (ftc *FieldTypeCreate) SetOptionalUint16(u uint16) *FieldTypeCreate {
+	ftc.optional_uint16 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint16 sets the optional_uint16 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint16(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint32 sets the optional_uint32 field.
+func (ftc *FieldTypeCreate) SetOptionalUint32(u uint32) *FieldTypeCreate {
+	ftc.optional_uint32 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint32 sets the optional_uint32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint32(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint64 sets the optional_uint64 field.
+func (ftc *FieldTypeCreate) SetOptionalUint64(u uint64) *FieldTypeCreate {
+	ftc.optional_uint64 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint64 sets the optional_uint64 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint64(*u)
 	}
 	return ftc
 }
@@ -414,6 +489,46 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 		ft.ValidateOptionalInt32 = *value
+	}
+	if value := ftc.optional_uint; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalUint,
+		})
+		ft.OptionalUint = *value
+	}
+	if value := ftc.optional_uint8; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint8,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalUint8,
+		})
+		ft.OptionalUint8 = *value
+	}
+	if value := ftc.optional_uint16; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint16,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalUint16,
+		})
+		ft.OptionalUint16 = *value
+	}
+	if value := ftc.optional_uint32; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalUint32,
+		})
+		ft.OptionalUint32 = *value
+	}
+	if value := ftc.optional_uint64; value != nil {
+		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalUint64,
+		})
+		ft.OptionalUint64 = *value
 	}
 	if value := ftc.state; value != nil {
 		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
