@@ -127,7 +127,7 @@ jobs:
       - run:
           name: Run integration tests
           working_directory: entc/integration
-          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race ./...
+          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race -count=2 ./...
       - *storetestdir
 
   docs:
