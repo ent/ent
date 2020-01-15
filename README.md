@@ -23,7 +23,8 @@ For proper installation using [Go modules], visit [entgo.io website][entgo insta
 The documentation for developing and using ent is available at: https://entgo.io
 
 ## Join the ent Community
-See the [CONTRIBUTING](CONTRIBUTING.md) file for how to help out.
+In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file for how to go get started.  
+If your company or your product is using `ent`, please let us know by adding yourself to the [ent users page](https://github.com/facebookincubator/ent/wiki/ent-users).
 
 ## Project Status
 `ent` was developed and maintained by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
