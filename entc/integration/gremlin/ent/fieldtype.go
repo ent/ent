@@ -52,6 +52,16 @@ type FieldType struct {
 	NillableInt64 *int64 `json:"nillable_int64,omitempty"`
 	// ValidateOptionalInt32 holds the value of the "validate_optional_int32" field.
 	ValidateOptionalInt32 int32 `json:"validate_optional_int32,omitempty"`
+	// OptionalUint holds the value of the "optional_uint" field.
+	OptionalUint uint `json:"optional_uint,omitempty"`
+	// OptionalUint8 holds the value of the "optional_uint8" field.
+	OptionalUint8 uint8 `json:"optional_uint8,omitempty"`
+	// OptionalUint16 holds the value of the "optional_uint16" field.
+	OptionalUint16 uint16 `json:"optional_uint16,omitempty"`
+	// OptionalUint32 holds the value of the "optional_uint32" field.
+	OptionalUint32 uint32 `json:"optional_uint32,omitempty"`
+	// OptionalUint64 holds the value of the "optional_uint64" field.
+	OptionalUint64 uint64 `json:"optional_uint64,omitempty"`
 	// State holds the value of the "state" field.
 	State fieldtype.State `json:"state,omitempty"`
 }
@@ -80,6 +90,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		NillableInt32         *int32          `json:"nillable_int32,omitempty"`
 		NillableInt64         *int64          `json:"nillable_int64,omitempty"`
 		ValidateOptionalInt32 int32           `json:"validate_optional_int32,omitempty"`
+		OptionalUint          uint            `json:"optional_uint,omitempty"`
+		OptionalUint8         uint8           `json:"optional_uint8,omitempty"`
+		OptionalUint16        uint16          `json:"optional_uint16,omitempty"`
+		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
+		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
@@ -102,6 +117,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.NillableInt32 = scanft.NillableInt32
 	ft.NillableInt64 = scanft.NillableInt64
 	ft.ValidateOptionalInt32 = scanft.ValidateOptionalInt32
+	ft.OptionalUint = scanft.OptionalUint
+	ft.OptionalUint8 = scanft.OptionalUint8
+	ft.OptionalUint16 = scanft.OptionalUint16
+	ft.OptionalUint32 = scanft.OptionalUint32
+	ft.OptionalUint64 = scanft.OptionalUint64
 	ft.State = scanft.State
 	return nil
 }
@@ -171,6 +191,16 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", validate_optional_int32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.ValidateOptionalInt32))
+	builder.WriteString(", optional_uint=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint))
+	builder.WriteString(", optional_uint8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint8))
+	builder.WriteString(", optional_uint16=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint16))
+	builder.WriteString(", optional_uint32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint32))
+	builder.WriteString(", optional_uint64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')
@@ -210,6 +240,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		NillableInt32         *int32          `json:"nillable_int32,omitempty"`
 		NillableInt64         *int64          `json:"nillable_int64,omitempty"`
 		ValidateOptionalInt32 int32           `json:"validate_optional_int32,omitempty"`
+		OptionalUint          uint            `json:"optional_uint,omitempty"`
+		OptionalUint8         uint8           `json:"optional_uint8,omitempty"`
+		OptionalUint16        uint16          `json:"optional_uint16,omitempty"`
+		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
+		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
@@ -234,6 +269,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			NillableInt32:         v.NillableInt32,
 			NillableInt64:         v.NillableInt64,
 			ValidateOptionalInt32: v.ValidateOptionalInt32,
+			OptionalUint:          v.OptionalUint,
+			OptionalUint8:         v.OptionalUint8,
+			OptionalUint16:        v.OptionalUint16,
+			OptionalUint32:        v.OptionalUint32,
+			OptionalUint64:        v.OptionalUint64,
 			State:                 v.State,
 		})
 	}

@@ -500,6 +500,26 @@ func HasOwnerWith(preds ...predicate.User) predicate.Card {
 	)
 }
 
+// HasSpec applies the HasEdge predicate on the "spec" edge.
+func HasSpec() predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.InE(SpecInverseLabel).InV()
+	},
+	)
+}
+
+// HasSpecWith applies the HasEdge predicate on the "spec" edge with a given conditions (other predicates).
+func HasSpecWith(preds ...predicate.Spec) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		tr := __.OutV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.InE(SpecInverseLabel).Where(tr).InV()
+	},
+	)
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.Card) predicate.Card {
 	return predicate.Card(

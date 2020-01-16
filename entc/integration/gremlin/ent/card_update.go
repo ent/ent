@@ -19,6 +19,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -31,7 +32,9 @@ type CardUpdate struct {
 	name         *string
 	clearname    bool
 	owner        map[string]struct{}
+	spec         map[string]struct{}
 	clearedOwner bool
+	removedSpec  map[string]struct{}
 	predicates   []predicate.Card
 }
 
@@ -84,10 +87,50 @@ func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
+// AddSpecIDs adds the spec edge to Spec by ids.
+func (cu *CardUpdate) AddSpecIDs(ids ...string) *CardUpdate {
+	if cu.spec == nil {
+		cu.spec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cu.spec[ids[i]] = struct{}{}
+	}
+	return cu
+}
+
+// AddSpec adds the spec edges to Spec.
+func (cu *CardUpdate) AddSpec(s ...*Spec) *CardUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.AddSpecIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.clearedOwner = true
 	return cu
+}
+
+// RemoveSpecIDs removes the spec edge to Spec by ids.
+func (cu *CardUpdate) RemoveSpecIDs(ids ...string) *CardUpdate {
+	if cu.removedSpec == nil {
+		cu.removedSpec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cu.removedSpec[ids[i]] = struct{}{}
+	}
+	return cu
+}
+
+// RemoveSpec removes spec edges to Spec.
+func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.RemoveSpecIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -181,6 +224,13 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
 		})
 	}
+	for id := range cu.removedSpec {
+		tr := rv.Clone().InE(spec.CardLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for id := range cu.spec {
+		v.AddE(spec.CardLabel).From(g.V(id)).InV()
+	}
 	v.Count()
 	if len(constraints) > 0 {
 		constraints = append(constraints, &constraint{
@@ -206,7 +256,9 @@ type CardUpdateOne struct {
 	name         *string
 	clearname    bool
 	owner        map[string]struct{}
+	spec         map[string]struct{}
 	clearedOwner bool
+	removedSpec  map[string]struct{}
 }
 
 // SetName sets the name field.
@@ -252,10 +304,50 @@ func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
 
+// AddSpecIDs adds the spec edge to Spec by ids.
+func (cuo *CardUpdateOne) AddSpecIDs(ids ...string) *CardUpdateOne {
+	if cuo.spec == nil {
+		cuo.spec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cuo.spec[ids[i]] = struct{}{}
+	}
+	return cuo
+}
+
+// AddSpec adds the spec edges to Spec.
+func (cuo *CardUpdateOne) AddSpec(s ...*Spec) *CardUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.AddSpecIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.clearedOwner = true
 	return cuo
+}
+
+// RemoveSpecIDs removes the spec edge to Spec by ids.
+func (cuo *CardUpdateOne) RemoveSpecIDs(ids ...string) *CardUpdateOne {
+	if cuo.removedSpec == nil {
+		cuo.removedSpec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cuo.removedSpec[ids[i]] = struct{}{}
+	}
+	return cuo
+}
+
+// RemoveSpec removes spec edges to Spec.
+func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.RemoveSpecIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -349,6 +441,13 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 			pred: g.E().HasLabel(user.CardLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
 		})
+	}
+	for id := range cuo.removedSpec {
+		tr := rv.Clone().InE(spec.CardLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for id := range cuo.spec {
+		v.AddE(spec.CardLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
 	if len(constraints) > 0 {

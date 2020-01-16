@@ -88,8 +88,8 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	var (
-		gi   = &GroupInfo{config: gic.config}
-		spec = &sqlgraph.CreateSpec{
+		gi    = &GroupInfo{config: gic.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: groupinfo.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -98,7 +98,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		}
 	)
 	if value := gic.desc; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: groupinfo.FieldDesc,
@@ -106,7 +106,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		gi.Desc = *value
 	}
 	if value := gic.max_users; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: groupinfo.FieldMaxUsers,
@@ -134,15 +134,15 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, gic.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	gi.ID = strconv.FormatInt(id, 10)
 	return gi, nil
 }

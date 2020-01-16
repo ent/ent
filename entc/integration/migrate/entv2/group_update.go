@@ -56,7 +56,7 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
@@ -67,13 +67,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := gu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -116,7 +116,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
@@ -128,9 +128,9 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		},
 	}
 	gr = &Group{config: guo.config}
-	spec.Assign = gr.assignValues
-	spec.ScanValues = gr.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, guo.driver, spec); err != nil {
+	_spec.Assign = gr.assignValues
+	_spec.ScanValues = gr.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

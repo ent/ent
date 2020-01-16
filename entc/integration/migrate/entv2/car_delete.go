@@ -43,7 +43,7 @@ func (cd *CarDelete) ExecX(ctx context.Context) int {
 }
 
 func (cd *CarDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: car.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (cd *CarDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := cd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, cd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, cd.driver, _spec)
 }
 
 // CarDeleteOne is the builder for deleting a single Car entity.

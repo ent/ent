@@ -64,7 +64,7 @@ func (bu *BlobUpdate) ExecX(ctx context.Context) {
 }
 
 func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
 			Columns: blob.Columns,
@@ -75,20 +75,20 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := bu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := bu.uuid; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  *value,
 			Column: blob.FieldUUID,
 		})
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -138,7 +138,7 @@ func (buo *BlobUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
 			Columns: blob.Columns,
@@ -150,16 +150,16 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 		},
 	}
 	if value := buo.uuid; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  *value,
 			Column: blob.FieldUUID,
 		})
 	}
 	b = &Blob{config: buo.config}
-	spec.Assign = b.assignValues
-	spec.ScanValues = b.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, buo.driver, spec); err != nil {
+	_spec.Assign = b.assignValues
+	_spec.ScanValues = b.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, buo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

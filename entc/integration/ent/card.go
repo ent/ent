@@ -34,6 +34,8 @@ type Card struct {
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner *User
+		// Spec holds the value of the spec edge.
+		Spec []*Spec
 	}
 	owner_id *string
 
@@ -106,6 +108,11 @@ func (c *Card) assignValues(values ...interface{}) error {
 // QueryOwner queries the owner edge of the Card.
 func (c *Card) QueryOwner() *UserQuery {
 	return (&CardClient{c.config}).QueryOwner(c)
+}
+
+// QuerySpec queries the spec edge of the Card.
+func (c *Card) QuerySpec() *SpecQuery {
+	return (&CardClient{c.config}).QuerySpec(c)
 }
 
 // Update returns a builder for updating this Card.

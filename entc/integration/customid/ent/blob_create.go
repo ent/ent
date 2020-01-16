@@ -54,8 +54,8 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 	var (
-		b    = &Blob{config: bc.config}
-		spec = &sqlgraph.CreateSpec{
+		b     = &Blob{config: bc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: blob.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
@@ -65,17 +65,17 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 	)
 	if value := bc.id; value != nil {
 		b.ID = *value
-		spec.ID.Value = *value
+		_spec.ID.Value = *value
 	}
 	if value := bc.uuid; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  *value,
 			Column: blob.FieldUUID,
 		})
 		b.UUID = *value
 	}
-	if err := sqlgraph.CreateNode(ctx, bc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

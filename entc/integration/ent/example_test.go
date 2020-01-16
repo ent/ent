@@ -368,6 +368,43 @@ func ExamplePet() {
 
 	// Output:
 }
+func ExampleSpec() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the spec's edges.
+	c0 := client.Card.
+		Create().
+		SetCreateTime(time.Now()).
+		SetUpdateTime(time.Now()).
+		SetNumber("string").
+		SetName("string").
+		SaveX(ctx)
+	log.Println("card created:", c0)
+
+	// create spec vertex with its edges.
+	s := client.Spec.
+		Create().
+		AddCard(c0).
+		SaveX(ctx)
+	log.Println("spec created:", s)
+
+	// query edges.
+	c0, err = s.QueryCard().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying card: %v", err)
+	}
+	log.Println("card found:", c0)
+
+	// Output:
+}
 func ExampleUser() {
 	if dsn == "" {
 		return

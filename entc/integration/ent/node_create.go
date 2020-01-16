@@ -104,8 +104,8 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	var (
-		n    = &Node{config: nc.config}
-		spec = &sqlgraph.CreateSpec{
+		n     = &Node{config: nc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: node.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -114,7 +114,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		}
 	)
 	if value := nc.value; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: node.FieldValue,
@@ -142,7 +142,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := nc.next; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -165,15 +165,15 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, nc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	n.ID = strconv.FormatInt(id, 10)
 	return n, nil
 }

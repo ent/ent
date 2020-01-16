@@ -40,5 +40,8 @@ type Node func(*dsl.Traversal)
 // Pet is the predicate function for pet builders.
 type Pet func(*dsl.Traversal)
 
+// Spec is the predicate function for spec builders.
+type Spec func(*dsl.Traversal)
+
 // User is the predicate function for user builders.
 type User func(*dsl.Traversal)

@@ -609,6 +609,36 @@ func HasOwnerWith(preds ...predicate.User) predicate.Card {
 	)
 }
 
+// HasSpec applies the HasEdge predicate on the "spec" edge.
+func HasSpec() predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SpecTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, SpecTable, SpecPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	},
+	)
+}
+
+// HasSpecWith applies the HasEdge predicate on the "spec" edge with a given conditions (other predicates).
+func HasSpecWith(preds ...predicate.Spec) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SpecInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, SpecTable, SpecPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	},
+	)
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.Card) predicate.Card {
 	return predicate.Card(

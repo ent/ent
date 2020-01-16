@@ -63,8 +63,8 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 	var (
-		c    = &Car{config: cc.config}
-		spec = &sqlgraph.CreateSpec{
+		c     = &Car{config: cc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: car.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -89,15 +89,15 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	c.ID = int(id)
 	return c, nil
 }

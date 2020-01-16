@@ -210,8 +210,8 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		gr   = &Group{config: gc.config}
-		spec = &sqlgraph.CreateSpec{
+		gr    = &Group{config: gc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -220,7 +220,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		}
 	)
 	if value := gc.active; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Value:  *value,
 			Column: group.FieldActive,
@@ -228,7 +228,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		gr.Active = *value
 	}
 	if value := gc.expire; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: group.FieldExpire,
@@ -236,7 +236,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		gr.Expire = *value
 	}
 	if value := gc._type; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: group.FieldType,
@@ -244,7 +244,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		gr.Type = value
 	}
 	if value := gc.max_users; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: group.FieldMaxUsers,
@@ -252,7 +252,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		gr.MaxUsers = *value
 	}
 	if value := gc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: group.FieldName,
@@ -280,7 +280,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.blocked; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -303,7 +303,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.users; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -326,7 +326,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.info; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -349,15 +349,15 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, gc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	gr.ID = strconv.FormatInt(id, 10)
 	return gr, nil
 }

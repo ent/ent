@@ -269,30 +269,30 @@ func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	var (
 		nodes []*Blob
-		spec  = bq.querySpec()
+		_spec = bq.querySpec()
 	)
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Blob{config: bq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, bq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
 		return nil, err
 	}
 	return nodes, nil
 }
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := bq.querySpec()
-	return sqlgraph.CountNodes(ctx, bq.driver, spec)
+	_spec := bq.querySpec()
+	return sqlgraph.CountNodes(ctx, bq.driver, _spec)
 }
 
 func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -304,7 +304,7 @@ func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
 			Columns: blob.Columns,
@@ -317,26 +317,26 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := bq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := bq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := bq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := bq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (bq *BlobQuery) sqlQuery() *sql.Selector {

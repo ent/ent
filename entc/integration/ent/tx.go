@@ -36,6 +36,8 @@ type Tx struct {
 	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Spec is the client for interacting with the Spec builders.
+	Spec *SpecClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -65,6 +67,7 @@ func (tx *Tx) Client() *Client {
 		Item:      NewItemClient(tx.config),
 		Node:      NewNodeClient(tx.config),
 		Pet:       NewPetClient(tx.config),
+		Spec:      NewSpecClient(tx.config),
 		User:      NewUserClient(tx.config),
 	}
 }

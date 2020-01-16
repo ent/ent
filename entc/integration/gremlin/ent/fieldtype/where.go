@@ -222,6 +222,46 @@ func ValidateOptionalInt32(v int32) predicate.FieldType {
 	)
 }
 
+// OptionalUint applies equality check predicate on the "optional_uint" field. It's identical to OptionalUintEQ.
+func OptionalUint(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint8 applies equality check predicate on the "optional_uint8" field. It's identical to OptionalUint8EQ.
+func OptionalUint8(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint16 applies equality check predicate on the "optional_uint16" field. It's identical to OptionalUint16EQ.
+func OptionalUint16(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint32 applies equality check predicate on the "optional_uint32" field. It's identical to OptionalUint32EQ.
+func OptionalUint32(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint64 applies equality check predicate on the "optional_uint64" field. It's identical to OptionalUint64EQ.
+func OptionalUint64(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.EQ(v))
+	},
+	)
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -1546,6 +1586,446 @@ func ValidateOptionalInt32IsNil() predicate.FieldType {
 func ValidateOptionalInt32NotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldValidateOptionalInt32)
+	},
+	)
+}
+
+// OptionalUintEQ applies the EQ predicate on the "optional_uint" field.
+func OptionalUintEQ(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUintNEQ applies the NEQ predicate on the "optional_uint" field.
+func OptionalUintNEQ(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.NEQ(v))
+	},
+	)
+}
+
+// OptionalUintIn applies the In predicate on the "optional_uint" field.
+func OptionalUintIn(vs ...uint) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.Within(v...))
+	},
+	)
+}
+
+// OptionalUintNotIn applies the NotIn predicate on the "optional_uint" field.
+func OptionalUintNotIn(vs ...uint) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.Without(v...))
+	},
+	)
+}
+
+// OptionalUintGT applies the GT predicate on the "optional_uint" field.
+func OptionalUintGT(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.GT(v))
+	},
+	)
+}
+
+// OptionalUintGTE applies the GTE predicate on the "optional_uint" field.
+func OptionalUintGTE(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.GTE(v))
+	},
+	)
+}
+
+// OptionalUintLT applies the LT predicate on the "optional_uint" field.
+func OptionalUintLT(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.LT(v))
+	},
+	)
+}
+
+// OptionalUintLTE applies the LTE predicate on the "optional_uint" field.
+func OptionalUintLTE(v uint) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint, p.LTE(v))
+	},
+	)
+}
+
+// OptionalUintIsNil applies the IsNil predicate on the "optional_uint" field.
+func OptionalUintIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalUint)
+	},
+	)
+}
+
+// OptionalUintNotNil applies the NotNil predicate on the "optional_uint" field.
+func OptionalUintNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalUint)
+	},
+	)
+}
+
+// OptionalUint8EQ applies the EQ predicate on the "optional_uint8" field.
+func OptionalUint8EQ(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint8NEQ applies the NEQ predicate on the "optional_uint8" field.
+func OptionalUint8NEQ(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.NEQ(v))
+	},
+	)
+}
+
+// OptionalUint8In applies the In predicate on the "optional_uint8" field.
+func OptionalUint8In(vs ...uint8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.Within(v...))
+	},
+	)
+}
+
+// OptionalUint8NotIn applies the NotIn predicate on the "optional_uint8" field.
+func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.Without(v...))
+	},
+	)
+}
+
+// OptionalUint8GT applies the GT predicate on the "optional_uint8" field.
+func OptionalUint8GT(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.GT(v))
+	},
+	)
+}
+
+// OptionalUint8GTE applies the GTE predicate on the "optional_uint8" field.
+func OptionalUint8GTE(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.GTE(v))
+	},
+	)
+}
+
+// OptionalUint8LT applies the LT predicate on the "optional_uint8" field.
+func OptionalUint8LT(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.LT(v))
+	},
+	)
+}
+
+// OptionalUint8LTE applies the LTE predicate on the "optional_uint8" field.
+func OptionalUint8LTE(v uint8) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint8, p.LTE(v))
+	},
+	)
+}
+
+// OptionalUint8IsNil applies the IsNil predicate on the "optional_uint8" field.
+func OptionalUint8IsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalUint8)
+	},
+	)
+}
+
+// OptionalUint8NotNil applies the NotNil predicate on the "optional_uint8" field.
+func OptionalUint8NotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalUint8)
+	},
+	)
+}
+
+// OptionalUint16EQ applies the EQ predicate on the "optional_uint16" field.
+func OptionalUint16EQ(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint16NEQ applies the NEQ predicate on the "optional_uint16" field.
+func OptionalUint16NEQ(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.NEQ(v))
+	},
+	)
+}
+
+// OptionalUint16In applies the In predicate on the "optional_uint16" field.
+func OptionalUint16In(vs ...uint16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.Within(v...))
+	},
+	)
+}
+
+// OptionalUint16NotIn applies the NotIn predicate on the "optional_uint16" field.
+func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.Without(v...))
+	},
+	)
+}
+
+// OptionalUint16GT applies the GT predicate on the "optional_uint16" field.
+func OptionalUint16GT(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.GT(v))
+	},
+	)
+}
+
+// OptionalUint16GTE applies the GTE predicate on the "optional_uint16" field.
+func OptionalUint16GTE(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.GTE(v))
+	},
+	)
+}
+
+// OptionalUint16LT applies the LT predicate on the "optional_uint16" field.
+func OptionalUint16LT(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.LT(v))
+	},
+	)
+}
+
+// OptionalUint16LTE applies the LTE predicate on the "optional_uint16" field.
+func OptionalUint16LTE(v uint16) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint16, p.LTE(v))
+	},
+	)
+}
+
+// OptionalUint16IsNil applies the IsNil predicate on the "optional_uint16" field.
+func OptionalUint16IsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalUint16)
+	},
+	)
+}
+
+// OptionalUint16NotNil applies the NotNil predicate on the "optional_uint16" field.
+func OptionalUint16NotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalUint16)
+	},
+	)
+}
+
+// OptionalUint32EQ applies the EQ predicate on the "optional_uint32" field.
+func OptionalUint32EQ(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint32NEQ applies the NEQ predicate on the "optional_uint32" field.
+func OptionalUint32NEQ(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.NEQ(v))
+	},
+	)
+}
+
+// OptionalUint32In applies the In predicate on the "optional_uint32" field.
+func OptionalUint32In(vs ...uint32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.Within(v...))
+	},
+	)
+}
+
+// OptionalUint32NotIn applies the NotIn predicate on the "optional_uint32" field.
+func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.Without(v...))
+	},
+	)
+}
+
+// OptionalUint32GT applies the GT predicate on the "optional_uint32" field.
+func OptionalUint32GT(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.GT(v))
+	},
+	)
+}
+
+// OptionalUint32GTE applies the GTE predicate on the "optional_uint32" field.
+func OptionalUint32GTE(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.GTE(v))
+	},
+	)
+}
+
+// OptionalUint32LT applies the LT predicate on the "optional_uint32" field.
+func OptionalUint32LT(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.LT(v))
+	},
+	)
+}
+
+// OptionalUint32LTE applies the LTE predicate on the "optional_uint32" field.
+func OptionalUint32LTE(v uint32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint32, p.LTE(v))
+	},
+	)
+}
+
+// OptionalUint32IsNil applies the IsNil predicate on the "optional_uint32" field.
+func OptionalUint32IsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalUint32)
+	},
+	)
+}
+
+// OptionalUint32NotNil applies the NotNil predicate on the "optional_uint32" field.
+func OptionalUint32NotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalUint32)
+	},
+	)
+}
+
+// OptionalUint64EQ applies the EQ predicate on the "optional_uint64" field.
+func OptionalUint64EQ(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.EQ(v))
+	},
+	)
+}
+
+// OptionalUint64NEQ applies the NEQ predicate on the "optional_uint64" field.
+func OptionalUint64NEQ(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.NEQ(v))
+	},
+	)
+}
+
+// OptionalUint64In applies the In predicate on the "optional_uint64" field.
+func OptionalUint64In(vs ...uint64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.Within(v...))
+	},
+	)
+}
+
+// OptionalUint64NotIn applies the NotIn predicate on the "optional_uint64" field.
+func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.Without(v...))
+	},
+	)
+}
+
+// OptionalUint64GT applies the GT predicate on the "optional_uint64" field.
+func OptionalUint64GT(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.GT(v))
+	},
+	)
+}
+
+// OptionalUint64GTE applies the GTE predicate on the "optional_uint64" field.
+func OptionalUint64GTE(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.GTE(v))
+	},
+	)
+}
+
+// OptionalUint64LT applies the LT predicate on the "optional_uint64" field.
+func OptionalUint64LT(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.LT(v))
+	},
+	)
+}
+
+// OptionalUint64LTE applies the LTE predicate on the "optional_uint64" field.
+func OptionalUint64LTE(v uint64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalUint64, p.LTE(v))
+	},
+	)
+}
+
+// OptionalUint64IsNil applies the IsNil predicate on the "optional_uint64" field.
+func OptionalUint64IsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalUint64)
+	},
+	)
+}
+
+// OptionalUint64NotNil applies the NotNil predicate on the "optional_uint64" field.
+func OptionalUint64NotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalUint64)
 	},
 	)
 }

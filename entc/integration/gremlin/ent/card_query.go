@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -30,6 +31,7 @@ type CardQuery struct {
 	predicates []predicate.Card
 	// eager-loading edges.
 	withOwner *UserQuery
+	withSpec  *SpecQuery
 	// intermediate query.
 	gremlin *dsl.Traversal
 }
@@ -63,6 +65,14 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
 	gremlin := cq.gremlinQuery()
 	query.gremlin = gremlin.InE(user.CardLabel).OutV()
+	return query
+}
+
+// QuerySpec chains the current query on the spec edge.
+func (cq *CardQuery) QuerySpec() *SpecQuery {
+	query := &SpecQuery{config: cq.config}
+	gremlin := cq.gremlinQuery()
+	query.gremlin = gremlin.InE(spec.CardLabel).OutV()
 	return query
 }
 
@@ -243,6 +253,17 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 		opt(query)
 	}
 	cq.withOwner = query
+	return cq
+}
+
+//  WithSpec tells the query-builder to eager-loads the nodes that are connected to
+// the "spec" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
+	query := &SpecQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withSpec = query
 	return cq
 }
 

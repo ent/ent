@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -30,7 +31,9 @@ type CardUpdate struct {
 	name         *string
 	clearname    bool
 	owner        map[string]struct{}
+	spec         map[string]struct{}
 	clearedOwner bool
+	removedSpec  map[string]struct{}
 	predicates   []predicate.Card
 }
 
@@ -83,10 +86,50 @@ func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
+// AddSpecIDs adds the spec edge to Spec by ids.
+func (cu *CardUpdate) AddSpecIDs(ids ...string) *CardUpdate {
+	if cu.spec == nil {
+		cu.spec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cu.spec[ids[i]] = struct{}{}
+	}
+	return cu
+}
+
+// AddSpec adds the spec edges to Spec.
+func (cu *CardUpdate) AddSpec(s ...*Spec) *CardUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.AddSpecIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.clearedOwner = true
 	return cu
+}
+
+// RemoveSpecIDs removes the spec edge to Spec by ids.
+func (cu *CardUpdate) RemoveSpecIDs(ids ...string) *CardUpdate {
+	if cu.removedSpec == nil {
+		cu.removedSpec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cu.removedSpec[ids[i]] = struct{}{}
+	}
+	return cu
+}
+
+// RemoveSpec removes spec edges to Spec.
+func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.RemoveSpecIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -129,7 +172,7 @@ func (cu *CardUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   card.Table,
 			Columns: card.Columns,
@@ -140,28 +183,28 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := cu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := cu.update_time; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: card.FieldUpdateTime,
 		})
 	}
 	if value := cu.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: card.FieldName,
 		})
 	}
 	if cu.clearname {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: card.FieldName,
 		})
@@ -180,7 +223,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cu.owner; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -203,9 +246,55 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, spec); err != nil {
+	if nodes := cu.removedSpec; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.spec; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return 0, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -224,7 +313,9 @@ type CardUpdateOne struct {
 	name         *string
 	clearname    bool
 	owner        map[string]struct{}
+	spec         map[string]struct{}
 	clearedOwner bool
+	removedSpec  map[string]struct{}
 }
 
 // SetName sets the name field.
@@ -270,10 +361,50 @@ func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
 
+// AddSpecIDs adds the spec edge to Spec by ids.
+func (cuo *CardUpdateOne) AddSpecIDs(ids ...string) *CardUpdateOne {
+	if cuo.spec == nil {
+		cuo.spec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cuo.spec[ids[i]] = struct{}{}
+	}
+	return cuo
+}
+
+// AddSpec adds the spec edges to Spec.
+func (cuo *CardUpdateOne) AddSpec(s ...*Spec) *CardUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.AddSpecIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.clearedOwner = true
 	return cuo
+}
+
+// RemoveSpecIDs removes the spec edge to Spec by ids.
+func (cuo *CardUpdateOne) RemoveSpecIDs(ids ...string) *CardUpdateOne {
+	if cuo.removedSpec == nil {
+		cuo.removedSpec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cuo.removedSpec[ids[i]] = struct{}{}
+	}
+	return cuo
+}
+
+// RemoveSpec removes spec edges to Spec.
+func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.RemoveSpecIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -316,7 +447,7 @@ func (cuo *CardUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   card.Table,
 			Columns: card.Columns,
@@ -328,21 +459,21 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		},
 	}
 	if value := cuo.update_time; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: card.FieldUpdateTime,
 		})
 	}
 	if value := cuo.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: card.FieldName,
 		})
 	}
 	if cuo.clearname {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: card.FieldName,
 		})
@@ -361,7 +492,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cuo.owner; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -384,12 +515,58 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := cuo.removedSpec; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.spec; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	c = &Card{config: cuo.config}
-	spec.Assign = c.assignValues
-	spec.ScanValues = c.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
+	_spec.Assign = c.assignValues
+	_spec.ScanValues = c.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
