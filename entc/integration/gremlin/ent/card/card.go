@@ -29,6 +29,8 @@ const (
 
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
 	OwnerInverseLabel = "user_card"
+	// SpecInverseLabel holds the string label denoting the spec inverse edge type in the database.
+	SpecInverseLabel = "spec_card"
 )
 
 var (

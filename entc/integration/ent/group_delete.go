@@ -43,7 +43,7 @@ func (gd *GroupDelete) ExecX(ctx context.Context) int {
 }
 
 func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := gd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, gd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, gd.driver, _spec)
 }
 
 // GroupDeleteOne is the builder for deleting a single Group entity.

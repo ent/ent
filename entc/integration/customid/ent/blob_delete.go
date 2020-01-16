@@ -43,7 +43,7 @@ func (bd *BlobDelete) ExecX(ctx context.Context) int {
 }
 
 func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: blob.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := bd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, bd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, bd.driver, _spec)
 }
 
 // BlobDeleteOne is the builder for deleting a single Blob entity.

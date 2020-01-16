@@ -43,7 +43,7 @@ func (cd *CommentDelete) ExecX(ctx context.Context) int {
 }
 
 func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: comment.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := cd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, cd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, cd.driver, _spec)
 }
 
 // CommentDeleteOne is the builder for deleting a single Comment entity.

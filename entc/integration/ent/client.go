@@ -23,6 +23,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
 	"github.com/facebookincubator/ent/dialect"
@@ -55,6 +56,8 @@ type Client struct {
 	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Spec is the client for interacting with the Spec builders.
+	Spec *SpecClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -76,6 +79,7 @@ func NewClient(opts ...Option) *Client {
 		Item:      NewItemClient(c),
 		Node:      NewNodeClient(c),
 		Pet:       NewPetClient(c),
+		Spec:      NewSpecClient(c),
 		User:      NewUserClient(c),
 	}
 }
@@ -118,6 +122,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Item:      NewItemClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
+		Spec:      NewSpecClient(cfg),
 		User:      NewUserClient(cfg),
 	}, nil
 }
@@ -147,6 +152,7 @@ func (c *Client) Debug() *Client {
 		Item:      NewItemClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
+		Spec:      NewSpecClient(cfg),
 		User:      NewUserClient(cfg),
 	}
 }
@@ -228,6 +234,20 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 		sqlgraph.From(card.Table, card.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
+	)
+	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+
+	return query
+}
+
+// QuerySpec queries the spec edge of a Card.
+func (c *CardClient) QuerySpec(ca *Card) *SpecQuery {
+	query := &SpecQuery{config: c.config}
+	id := ca.id()
+	step := sqlgraph.NewStep(
+		sqlgraph.From(card.Table, card.FieldID, id),
+		sqlgraph.To(spec.Table, spec.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, card.SpecTable, card.SpecPrimaryKey...),
 	)
 	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 
@@ -974,6 +994,84 @@ func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 		sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
 	)
 	query.sql = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+
+	return query
+}
+
+// SpecClient is a client for the Spec schema.
+type SpecClient struct {
+	config
+}
+
+// NewSpecClient returns a client for the Spec from the given config.
+func NewSpecClient(c config) *SpecClient {
+	return &SpecClient{config: c}
+}
+
+// Create returns a create builder for Spec.
+func (c *SpecClient) Create() *SpecCreate {
+	return &SpecCreate{config: c.config}
+}
+
+// Update returns an update builder for Spec.
+func (c *SpecClient) Update() *SpecUpdate {
+	return &SpecUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SpecClient) UpdateOne(s *Spec) *SpecUpdateOne {
+	return c.UpdateOneID(s.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SpecClient) UpdateOneID(id string) *SpecUpdateOne {
+	return &SpecUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for Spec.
+func (c *SpecClient) Delete() *SpecDelete {
+	return &SpecDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *SpecClient) DeleteOne(s *Spec) *SpecDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *SpecClient) DeleteOneID(id string) *SpecDeleteOne {
+	return &SpecDeleteOne{c.Delete().Where(spec.ID(id))}
+}
+
+// Create returns a query builder for Spec.
+func (c *SpecClient) Query() *SpecQuery {
+	return &SpecQuery{config: c.config}
+}
+
+// Get returns a Spec entity by its id.
+func (c *SpecClient) Get(ctx context.Context, id string) (*Spec, error) {
+	return c.Query().Where(spec.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SpecClient) GetX(ctx context.Context, id string) *Spec {
+	s, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
+// QueryCard queries the card edge of a Spec.
+func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
+	query := &CardQuery{config: c.config}
+	id := s.id()
+	step := sqlgraph.NewStep(
+		sqlgraph.From(spec.Table, spec.FieldID, id),
+		sqlgraph.To(card.Table, card.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
+	)
+	query.sql = sqlgraph.Neighbors(s.driver.Dialect(), step)
 
 	return query
 }

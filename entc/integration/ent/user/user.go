@@ -159,12 +159,12 @@ func (s Role) String() string {
 	return string(s)
 }
 
-// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
-func RoleValidator(role Role) error {
-	switch role {
+// RoleValidator is a validator for the "r" field enum values. It is called by the builders before save.
+func RoleValidator(r Role) error {
+	switch r {
 	case RoleUser, RoleAdmin:
 		return nil
 	default:
-		return fmt.Errorf("user: invalid enum value for role field: %q", role)
+		return fmt.Errorf("user: invalid enum value for role field: %q", r)
 	}
 }

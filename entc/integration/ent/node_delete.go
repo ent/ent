@@ -43,7 +43,7 @@ func (nd *NodeDelete) ExecX(ctx context.Context) int {
 }
 
 func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: node.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := nd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, nd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, nd.driver, _spec)
 }
 
 // NodeDeleteOne is the builder for deleting a single Node entity.

@@ -244,30 +244,30 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
 		nodes []*Pet
-		spec  = pq.querySpec()
+		_spec = pq.querySpec()
 	)
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("entv2: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, pq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
 	}
 	return nodes, nil
 }
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := pq.querySpec()
-	return sqlgraph.CountNodes(ctx, pq.driver, spec)
+	_spec := pq.querySpec()
+	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
 
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -279,7 +279,7 @@ func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
@@ -292,26 +292,26 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := pq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := pq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := pq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := pq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (pq *PetQuery) sqlQuery() *sql.Selector {

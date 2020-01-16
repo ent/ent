@@ -9,7 +9,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -19,13 +19,13 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 		},
 	}
 	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
 }
 
 {{ end }}

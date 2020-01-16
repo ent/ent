@@ -296,22 +296,22 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 	var (
 		nodes []*GroupInfo
-		spec  = giq.querySpec()
+		_spec = giq.querySpec()
 	)
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &GroupInfo{config: giq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, giq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, giq.driver, _spec); err != nil {
 		return nil, err
 	}
 
@@ -351,8 +351,8 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 }
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := giq.querySpec()
-	return sqlgraph.CountNodes(ctx, giq.driver, spec)
+	_spec := giq.querySpec()
+	return sqlgraph.CountNodes(ctx, giq.driver, _spec)
 }
 
 func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -364,7 +364,7 @@ func (giq *GroupInfoQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
 			Columns: groupinfo.Columns,
@@ -377,26 +377,26 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := giq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := giq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := giq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := giq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {

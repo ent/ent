@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	var (
 		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
-		spec = &sqlgraph.CreateSpec{
+		_spec = &sqlgraph.CreateSpec{
 			Table: {{ $.Package }}.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
@@ -22,12 +22,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	{{- if $.ID.UserDefined }}
 		if value := {{ $receiver }}.{{ $.ID.BuilderField }}; value != nil {
 			{{ $.Receiver }}.ID = *value
-			spec.ID.Value = *value
+			_spec.ID.Value = *value
 		}
 	{{- end }}
 	{{- range $_, $f := $.Fields }}
 		if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
-			spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 				Type: field.{{ $f.Type.ConstName }},
 				Value: *value,
 				Column: {{ $.Package }}.{{ $f.Constant }},
@@ -40,10 +40,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
 				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
 			{{- end }}
-			spec.Edges = append(spec.Edges, edge)
+			_spec.Edges = append(_spec.Edges, edge)
 		}
 	{{- end }}
-	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -55,7 +55,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- if $.ID.UserDefined }}
 			if {{ $.Receiver }}.ID == 0 {
 		{{- end }}
-			id := spec.ID.Value.(int64)
+			id := _spec.ID.Value.(int64)
 			{{ $.Receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(id, 10){{ else }}{{ $.ID.Type }}(id){{ end }}
 		{{- if and $.ID.UserDefined }}
 			}

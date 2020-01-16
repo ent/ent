@@ -18,6 +18,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -29,6 +30,7 @@ type CardCreate struct {
 	number      *string
 	name        *string
 	owner       map[string]struct{}
+	spec        map[string]struct{}
 }
 
 // SetCreateTime sets the create_time field.
@@ -99,6 +101,26 @@ func (cc *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
 // SetOwner sets the owner edge to User.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
+}
+
+// AddSpecIDs adds the spec edge to Spec by ids.
+func (cc *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
+	if cc.spec == nil {
+		cc.spec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cc.spec[ids[i]] = struct{}{}
+	}
+	return cc
+}
+
+// AddSpec adds the spec edges to Spec.
+func (cc *CardCreate) AddSpec(s ...*Spec) *CardCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cc.AddSpecIDs(ids...)
 }
 
 // Save creates the Card in the database.
@@ -178,6 +200,9 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 			pred: g.E().HasLabel(user.CardLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
 		})
+	}
+	for id := range cc.spec {
+		v.AddE(spec.CardLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

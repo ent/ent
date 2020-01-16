@@ -273,6 +273,17 @@ var (
 			},
 		},
 	}
+	// SpecsColumns holds the columns for the "specs" table.
+	SpecsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// SpecsTable holds the schema information for the "specs" table.
+	SpecsTable = &schema.Table{
+		Name:        "specs",
+		Columns:     SpecsColumns,
+		PrimaryKey:  []*schema.Column{SpecsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -314,6 +325,33 @@ var (
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// SpecCardColumns holds the columns for the "spec_card" table.
+	SpecCardColumns = []*schema.Column{
+		{Name: "spec_id", Type: field.TypeInt},
+		{Name: "card_id", Type: field.TypeInt},
+	}
+	// SpecCardTable holds the schema information for the "spec_card" table.
+	SpecCardTable = &schema.Table{
+		Name:       "spec_card",
+		Columns:    SpecCardColumns,
+		PrimaryKey: []*schema.Column{SpecCardColumns[0], SpecCardColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "spec_card_spec_id",
+				Columns: []*schema.Column{SpecCardColumns[0]},
+
+				RefColumns: []*schema.Column{SpecsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:  "spec_card_card_id",
+				Columns: []*schema.Column{SpecCardColumns[1]},
+
+				RefColumns: []*schema.Column{CardsColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -410,7 +448,9 @@ var (
 		ItemsTable,
 		NodesTable,
 		PetsTable,
+		SpecsTable,
 		UsersTable,
+		SpecCardTable,
 		UserGroupsTable,
 		UserFriendsTable,
 		UserFollowingTable,
@@ -429,6 +469,8 @@ func init() {
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable
+	SpecCardTable.ForeignKeys[0].RefTable = SpecsTable
+	SpecCardTable.ForeignKeys[1].RefTable = CardsTable
 	UserGroupsTable.ForeignKeys[0].RefTable = UsersTable
 	UserGroupsTable.ForeignKeys[1].RefTable = GroupsTable
 	UserFriendsTable.ForeignKeys[0].RefTable = UsersTable

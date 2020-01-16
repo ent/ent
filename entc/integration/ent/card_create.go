@@ -15,6 +15,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -27,6 +28,7 @@ type CardCreate struct {
 	number      *string
 	name        *string
 	owner       map[string]struct{}
+	spec        map[string]struct{}
 }
 
 // SetCreateTime sets the create_time field.
@@ -99,6 +101,26 @@ func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
 }
 
+// AddSpecIDs adds the spec edge to Spec by ids.
+func (cc *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
+	if cc.spec == nil {
+		cc.spec = make(map[string]struct{})
+	}
+	for i := range ids {
+		cc.spec[ids[i]] = struct{}{}
+	}
+	return cc
+}
+
+// AddSpec adds the spec edges to Spec.
+func (cc *CardCreate) AddSpec(s ...*Spec) *CardCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cc.AddSpecIDs(ids...)
+}
+
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if cc.create_time == nil {
@@ -137,8 +159,8 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	var (
-		c    = &Card{config: cc.config}
-		spec = &sqlgraph.CreateSpec{
+		c     = &Card{config: cc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: card.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -147,7 +169,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		}
 	)
 	if value := cc.create_time; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: card.FieldCreateTime,
@@ -155,7 +177,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		c.CreateTime = *value
 	}
 	if value := cc.update_time; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: card.FieldUpdateTime,
@@ -163,7 +185,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		c.UpdateTime = *value
 	}
 	if value := cc.number; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: card.FieldNumber,
@@ -171,7 +193,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		c.Number = *value
 	}
 	if value := cc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: card.FieldName,
@@ -199,15 +221,38 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+	if nodes := cc.spec; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			k, err := strconv.Atoi(k)
+			if err != nil {
+				return nil, err
+			}
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	c.ID = strconv.FormatInt(id, 10)
 	return c, nil
 }

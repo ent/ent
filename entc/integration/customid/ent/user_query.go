@@ -321,15 +321,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes   []*User
 		withFKs = uq.withFKs
-		spec    = uq.querySpec()
+		_spec   = uq.querySpec()
 	)
 	if uq.withParent != nil {
 		withFKs = true
 	}
 	if withFKs {
-		spec.Node.Columns = append(spec.Node.Columns, user.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
 	}
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
@@ -338,14 +338,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		}
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, uq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, uq.driver, _spec); err != nil {
 		return nil, err
 	}
 
@@ -360,7 +360,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			edgeids []int
 			edges   = make(map[int][]*User)
 		)
-		spec := &sqlgraph.EdgeQuerySpec{
+		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: true,
 				Table:   user.GroupsTable,
@@ -393,7 +393,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil
 			},
 		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, spec); err != nil {
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
 			return nil, fmt.Errorf(`query edges "groups": %v`, err)
 		}
 		query.Where(group.IDIn(edgeids...))
@@ -469,8 +469,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 }
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := uq.querySpec()
-	return sqlgraph.CountNodes(ctx, uq.driver, spec)
+	_spec := uq.querySpec()
+	return sqlgraph.CountNodes(ctx, uq.driver, _spec)
 }
 
 func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -482,7 +482,7 @@ func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -495,26 +495,26 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := uq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := uq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := uq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := uq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (uq *UserQuery) sqlQuery() *sql.Selector {

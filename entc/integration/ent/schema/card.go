@@ -35,12 +35,14 @@ func (Card) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Comment.
+// Edges of the Card.
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Comment("O2O inverse edge").
 			Ref("card").
 			Unique(),
+		edge.From("spec", Spec.Type).
+			Ref("card"),
 	}
 }

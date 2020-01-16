@@ -107,7 +107,7 @@ func (ftu *FileTypeUpdate) ExecX(ctx context.Context) {
 }
 
 func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
@@ -118,14 +118,14 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := ftu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := ftu.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: filetype.FieldName,
@@ -152,7 +152,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := ftu.files; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -175,9 +175,9 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -269,7 +269,7 @@ func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
@@ -281,7 +281,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		},
 	}
 	if value := ftuo.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: filetype.FieldName,
@@ -308,7 +308,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := ftuo.files; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -331,12 +331,12 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	ft = &FileType{config: ftuo.config}
-	spec.Assign = ft.assignValues
-	spec.ScanValues = ft.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, spec); err != nil {
+	_spec.Assign = ft.assignValues
+	_spec.ScanValues = ft.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

@@ -149,7 +149,7 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 }
 
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -160,91 +160,91 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := uu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := uu.url; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldURL,
 		})
 	}
 	if uu.clearurl {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldURL,
 		})
 	}
 	if value := uu.raw; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldRaw,
 		})
 	}
 	if uu.clearraw {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldRaw,
 		})
 	}
 	if value := uu.dirs; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldDirs,
 		})
 	}
 	if uu.cleardirs {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldDirs,
 		})
 	}
 	if value := uu.ints; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldInts,
 		})
 	}
 	if uu.clearints {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldInts,
 		})
 	}
 	if value := uu.floats; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldFloats,
 		})
 	}
 	if uu.clearfloats {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldFloats,
 		})
 	}
 	if value := uu.strings; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldStrings,
 		})
 	}
 	if uu.clearstrings {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldStrings,
 		})
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -377,7 +377,7 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -389,87 +389,87 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		},
 	}
 	if value := uuo.url; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldURL,
 		})
 	}
 	if uuo.clearurl {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldURL,
 		})
 	}
 	if value := uuo.raw; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldRaw,
 		})
 	}
 	if uuo.clearraw {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldRaw,
 		})
 	}
 	if value := uuo.dirs; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldDirs,
 		})
 	}
 	if uuo.cleardirs {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldDirs,
 		})
 	}
 	if value := uuo.ints; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldInts,
 		})
 	}
 	if uuo.clearints {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldInts,
 		})
 	}
 	if value := uuo.floats; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldFloats,
 		})
 	}
 	if uuo.clearfloats {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldFloats,
 		})
 	}
 	if value := uuo.strings; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  *value,
 			Column: user.FieldStrings,
 		})
 	}
 	if uuo.clearstrings {
-		spec.Fields.Clear = append(spec.Fields.Clear, &sqlgraph.FieldSpec{
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldStrings,
 		})
 	}
 	u = &User{config: uuo.config}
-	spec.Assign = u.assignValues
-	spec.ScanValues = u.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, spec); err != nil {
+	_spec.Assign = u.assignValues
+	_spec.ScanValues = u.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

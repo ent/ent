@@ -46,8 +46,8 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		gr   = &Group{config: gc.config}
-		spec = &sqlgraph.CreateSpec{
+		gr    = &Group{config: gc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -56,20 +56,20 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		}
 	)
 	if value := gc.max_users; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: group.FieldMaxUsers,
 		})
 		gr.MaxUsers = *value
 	}
-	if err := sqlgraph.CreateNode(ctx, gc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	gr.ID = int(id)
 	return gr, nil
 }

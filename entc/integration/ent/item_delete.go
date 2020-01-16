@@ -43,7 +43,7 @@ func (id *ItemDelete) ExecX(ctx context.Context) int {
 }
 
 func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: item.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := id.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, id.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, id.driver, _spec)
 }
 
 // ItemDeleteOne is the builder for deleting a single Item entity.

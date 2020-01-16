@@ -154,8 +154,8 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	var (
-		f    = &File{config: fc.config}
-		spec = &sqlgraph.CreateSpec{
+		f     = &File{config: fc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: file.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -164,7 +164,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		}
 	)
 	if value := fc.size; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: file.FieldSize,
@@ -172,7 +172,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		f.Size = *value
 	}
 	if value := fc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: file.FieldName,
@@ -180,7 +180,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		f.Name = *value
 	}
 	if value := fc.user; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: file.FieldUser,
@@ -188,7 +188,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		f.User = value
 	}
 	if value := fc.group; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: file.FieldGroup,
@@ -216,7 +216,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := fc._type; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -239,15 +239,15 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, fc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	f.ID = strconv.FormatInt(id, 10)
 	return f, nil
 }

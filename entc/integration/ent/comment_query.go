@@ -268,30 +268,30 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	var (
 		nodes []*Comment
-		spec  = cq.querySpec()
+		_spec = cq.querySpec()
 	)
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Comment{config: cq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
 	}
 	return nodes, nil
 }
 
 func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := cq.querySpec()
-	return sqlgraph.CountNodes(ctx, cq.driver, spec)
+	_spec := cq.querySpec()
+	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
 func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -303,7 +303,7 @@ func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   comment.Table,
 			Columns: comment.Columns,
@@ -316,26 +316,26 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := cq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := cq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := cq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := cq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (cq *CommentQuery) sqlQuery() *sql.Selector {

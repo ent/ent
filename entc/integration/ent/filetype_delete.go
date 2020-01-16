@@ -43,7 +43,7 @@ func (ftd *FileTypeDelete) ExecX(ctx context.Context) int {
 }
 
 func (ftd *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: filetype.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (ftd *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := ftd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, ftd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, ftd.driver, _spec)
 }
 
 // FileTypeDeleteOne is the builder for deleting a single FileType entity.

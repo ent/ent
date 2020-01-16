@@ -36,8 +36,8 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 	var (
-		i    = &Item{config: ic.config}
-		spec = &sqlgraph.CreateSpec{
+		i     = &Item{config: ic.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: item.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -45,13 +45,13 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 			},
 		}
 	)
-	if err := sqlgraph.CreateNode(ctx, ic.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	i.ID = strconv.FormatInt(id, 10)
 	return i, nil
 }

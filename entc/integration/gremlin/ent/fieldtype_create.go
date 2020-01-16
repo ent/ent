@@ -36,6 +36,11 @@ type FieldTypeCreate struct {
 	nillable_int32          *int32
 	nillable_int64          *int64
 	validate_optional_int32 *int32
+	optional_uint           *uint
+	optional_uint8          *uint8
+	optional_uint16         *uint16
+	optional_uint32         *uint32
+	optional_uint64         *uint64
 	state                   *fieldtype.State
 }
 
@@ -223,6 +228,76 @@ func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 	return ftc
 }
 
+// SetOptionalUint sets the optional_uint field.
+func (ftc *FieldTypeCreate) SetOptionalUint(u uint) *FieldTypeCreate {
+	ftc.optional_uint = &u
+	return ftc
+}
+
+// SetNillableOptionalUint sets the optional_uint field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint8 sets the optional_uint8 field.
+func (ftc *FieldTypeCreate) SetOptionalUint8(u uint8) *FieldTypeCreate {
+	ftc.optional_uint8 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint8 sets the optional_uint8 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint8(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint16 sets the optional_uint16 field.
+func (ftc *FieldTypeCreate) SetOptionalUint16(u uint16) *FieldTypeCreate {
+	ftc.optional_uint16 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint16 sets the optional_uint16 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint16(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint32 sets the optional_uint32 field.
+func (ftc *FieldTypeCreate) SetOptionalUint32(u uint32) *FieldTypeCreate {
+	ftc.optional_uint32 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint32 sets the optional_uint32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint32(*u)
+	}
+	return ftc
+}
+
+// SetOptionalUint64 sets the optional_uint64 field.
+func (ftc *FieldTypeCreate) SetOptionalUint64(u uint64) *FieldTypeCreate {
+	ftc.optional_uint64 = &u
+	return ftc
+}
+
+// SetNillableOptionalUint64 sets the optional_uint64 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUint64(*u)
+	}
+	return ftc
+}
+
 // SetState sets the state field.
 func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
 	ftc.state = &f
@@ -341,6 +416,21 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if ftc.validate_optional_int32 != nil {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
+	}
+	if ftc.optional_uint != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint, *ftc.optional_uint)
+	}
+	if ftc.optional_uint8 != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint8, *ftc.optional_uint8)
+	}
+	if ftc.optional_uint16 != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint16, *ftc.optional_uint16)
+	}
+	if ftc.optional_uint32 != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint32, *ftc.optional_uint32)
+	}
+	if ftc.optional_uint64 != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, *ftc.optional_uint64)
 	}
 	if ftc.state != nil {
 		v.Property(dsl.Single, fieldtype.FieldState, *ftc.state)

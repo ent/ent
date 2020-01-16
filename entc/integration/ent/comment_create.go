@@ -72,8 +72,8 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	var (
-		c    = &Comment{config: cc.config}
-		spec = &sqlgraph.CreateSpec{
+		c     = &Comment{config: cc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: comment.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -82,7 +82,7 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		}
 	)
 	if value := cc.unique_int; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: comment.FieldUniqueInt,
@@ -90,7 +90,7 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		c.UniqueInt = *value
 	}
 	if value := cc.unique_float; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  *value,
 			Column: comment.FieldUniqueFloat,
@@ -98,20 +98,20 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		c.UniqueFloat = *value
 	}
 	if value := cc.nillable_int; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: comment.FieldNillableInt,
 		})
 		c.NillableInt = value
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	c.ID = strconv.FormatInt(id, 10)
 	return c, nil
 }

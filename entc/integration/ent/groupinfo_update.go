@@ -134,7 +134,7 @@ func (giu *GroupInfoUpdate) ExecX(ctx context.Context) {
 }
 
 func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
 			Columns: groupinfo.Columns,
@@ -145,28 +145,28 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := giu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := giu.desc; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: groupinfo.FieldDesc,
 		})
 	}
 	if value := giu.max_users; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: groupinfo.FieldMaxUsers,
 		})
 	}
 	if value := giu.addmax_users; value != nil {
-		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: groupinfo.FieldMaxUsers,
@@ -193,7 +193,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := giu.groups; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -216,9 +216,9 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, giu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, giu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -337,7 +337,7 @@ func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
 			Columns: groupinfo.Columns,
@@ -349,21 +349,21 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		},
 	}
 	if value := giuo.desc; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: groupinfo.FieldDesc,
 		})
 	}
 	if value := giuo.max_users; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: groupinfo.FieldMaxUsers,
 		})
 	}
 	if value := giuo.addmax_users; value != nil {
-		spec.Fields.Add = append(spec.Fields.Add, &sqlgraph.FieldSpec{
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: groupinfo.FieldMaxUsers,
@@ -390,7 +390,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := giuo.groups; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -413,12 +413,12 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	gi = &GroupInfo{config: giuo.config}
-	spec.Assign = gi.assignValues
-	spec.ScanValues = gi.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, giuo.driver, spec); err != nil {
+	_spec.Assign = gi.assignValues
+	_spec.ScanValues = gi.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, giuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

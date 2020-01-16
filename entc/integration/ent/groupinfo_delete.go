@@ -43,7 +43,7 @@ func (gid *GroupInfoDelete) ExecX(ctx context.Context) int {
 }
 
 func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: groupinfo.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := gid.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, gid.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, gid.driver, _spec)
 }
 
 // GroupInfoDeleteOne is the builder for deleting a single GroupInfo entity.

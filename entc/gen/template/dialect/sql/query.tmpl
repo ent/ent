@@ -22,7 +22,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- with $.ForeignKeys }}
 			withFKs = {{ $receiver }}.withFKs
 		{{- end }}
-		spec = {{ $receiver }}.querySpec()
+		_spec = {{ $receiver }}.querySpec()
 	)
 	{{- with $.ForeignKeys }}
 			{{- with $.FKEdges }}
@@ -31,10 +31,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 				}
 			{{- end }}
 			if withFKs {
-				spec.Node.Columns = append(spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
+				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
 			}
 	{{- end }}
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &{{ $.Name }}{config: {{ $receiver }}.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
@@ -45,14 +45,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- end }}
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		return nil, err
 	}
 	{{- range $e := $.Edges }}
@@ -64,8 +64,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
-	spec := {{ $receiver }}.querySpec()
-	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, spec)
+	_spec := {{ $receiver }}.querySpec()
+	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
@@ -77,7 +77,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, erro
 }
 
 func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
 			Columns: {{ $.Package }}.Columns,
@@ -90,26 +90,26 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := {{ $receiver }}.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := {{ $receiver }}.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := {{ $receiver }}.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
@@ -192,7 +192,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 				edgeids []{{ $e.Type.ID.Type }}
 				edges = make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
 			)
-			spec := &sqlgraph.EdgeQuerySpec{
+			_spec := &sqlgraph.EdgeQuerySpec{
 				Edge: &sqlgraph.EdgeSpec{
 					Inverse: {{ $e.IsInverse }},
 					Table: {{ $.Package }}.{{ $e.TableConstant }},
@@ -226,7 +226,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 					return nil
 				},
 			}
-			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, spec); err != nil {
+			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
 				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %v`, err)
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(edgeids...))

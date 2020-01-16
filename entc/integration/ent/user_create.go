@@ -419,8 +419,8 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		u    = &User{config: uc.config}
-		spec = &sqlgraph.CreateSpec{
+		u     = &User{config: uc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -429,7 +429,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 	)
 	if value := uc.optional_int; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: user.FieldOptionalInt,
@@ -437,7 +437,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.OptionalInt = *value
 	}
 	if value := uc.age; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: user.FieldAge,
@@ -445,7 +445,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.Age = *value
 	}
 	if value := uc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: user.FieldName,
@@ -453,7 +453,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.Name = *value
 	}
 	if value := uc.last; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: user.FieldLast,
@@ -461,7 +461,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.Last = *value
 	}
 	if value := uc.nickname; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: user.FieldNickname,
@@ -469,7 +469,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.Nickname = *value
 	}
 	if value := uc.phone; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: user.FieldPhone,
@@ -477,7 +477,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.Phone = *value
 	}
 	if value := uc.password; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: user.FieldPassword,
@@ -485,7 +485,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		u.Password = *value
 	}
 	if value := uc.role; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  *value,
 			Column: user.FieldRole,
@@ -513,7 +513,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.pets; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -536,7 +536,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.files; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -559,7 +559,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.groups; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -582,7 +582,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.friends; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -605,7 +605,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.followers; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -628,7 +628,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.following; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -651,7 +651,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.team; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -674,7 +674,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.spouse; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -697,7 +697,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.children; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -720,7 +720,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.parent; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -743,15 +743,15 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	u.ID = strconv.FormatInt(id, 10)
 	return u, nil
 }

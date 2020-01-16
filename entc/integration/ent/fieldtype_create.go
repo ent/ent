@@ -353,8 +353,8 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 
 func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	var (
-		ft   = &FieldType{config: ftc.config}
-		spec = &sqlgraph.CreateSpec{
+		ft    = &FieldType{config: ftc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: fieldtype.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -363,7 +363,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		}
 	)
 	if value := ftc.int; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: fieldtype.FieldInt,
@@ -371,7 +371,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.Int = *value
 	}
 	if value := ftc.int8; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Value:  *value,
 			Column: fieldtype.FieldInt8,
@@ -379,7 +379,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.Int8 = *value
 	}
 	if value := ftc.int16; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Value:  *value,
 			Column: fieldtype.FieldInt16,
@@ -387,7 +387,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.Int16 = *value
 	}
 	if value := ftc.int32; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Value:  *value,
 			Column: fieldtype.FieldInt32,
@@ -395,7 +395,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.Int32 = *value
 	}
 	if value := ftc.int64; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: fieldtype.FieldInt64,
@@ -403,7 +403,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.Int64 = *value
 	}
 	if value := ftc.optional_int; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalInt,
@@ -411,7 +411,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalInt = *value
 	}
 	if value := ftc.optional_int8; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalInt8,
@@ -419,7 +419,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalInt8 = *value
 	}
 	if value := ftc.optional_int16; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalInt16,
@@ -427,7 +427,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalInt16 = *value
 	}
 	if value := ftc.optional_int32; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalInt32,
@@ -435,7 +435,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalInt32 = *value
 	}
 	if value := ftc.optional_int64; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalInt64,
@@ -443,7 +443,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalInt64 = *value
 	}
 	if value := ftc.nillable_int; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  *value,
 			Column: fieldtype.FieldNillableInt,
@@ -451,7 +451,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.NillableInt = value
 	}
 	if value := ftc.nillable_int8; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Value:  *value,
 			Column: fieldtype.FieldNillableInt8,
@@ -459,7 +459,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.NillableInt8 = value
 	}
 	if value := ftc.nillable_int16; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Value:  *value,
 			Column: fieldtype.FieldNillableInt16,
@@ -467,7 +467,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.NillableInt16 = value
 	}
 	if value := ftc.nillable_int32; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Value:  *value,
 			Column: fieldtype.FieldNillableInt32,
@@ -475,7 +475,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.NillableInt32 = value
 	}
 	if value := ftc.nillable_int64; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: fieldtype.FieldNillableInt64,
@@ -483,7 +483,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.NillableInt64 = value
 	}
 	if value := ftc.validate_optional_int32; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Value:  *value,
 			Column: fieldtype.FieldValidateOptionalInt32,
@@ -491,7 +491,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.ValidateOptionalInt32 = *value
 	}
 	if value := ftc.optional_uint; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalUint,
@@ -499,7 +499,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalUint = *value
 	}
 	if value := ftc.optional_uint8; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalUint8,
@@ -507,7 +507,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalUint8 = *value
 	}
 	if value := ftc.optional_uint16; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalUint16,
@@ -515,7 +515,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalUint16 = *value
 	}
 	if value := ftc.optional_uint32; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalUint32,
@@ -523,7 +523,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalUint32 = *value
 	}
 	if value := ftc.optional_uint64; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
 			Value:  *value,
 			Column: fieldtype.FieldOptionalUint64,
@@ -531,20 +531,20 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		ft.OptionalUint64 = *value
 	}
 	if value := ftc.state; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  *value,
 			Column: fieldtype.FieldState,
 		})
 		ft.State = *value
 	}
-	if err := sqlgraph.CreateNode(ctx, ftc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	ft.ID = strconv.FormatInt(id, 10)
 	return ft, nil
 }

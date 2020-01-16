@@ -36,6 +36,11 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "owner_id"
+	// SpecTable is the table the holds the spec relation/edge. The primary key declared below.
+	SpecTable = "spec_card"
+	// SpecInverseTable is the table name for the Spec entity.
+	// It exists in this package in order to avoid circular dependency with the "spec" package.
+	SpecInverseTable = "specs"
 )
 
 // Columns holds all SQL columns for card fields.
@@ -51,6 +56,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"owner_id",
 }
+
+var (
+	// SpecPrimaryKey and SpecColumn2 are the table columns denoting the
+	// primary key for the spec relation (M2M).
+	SpecPrimaryKey = []string{"spec_id", "card_id"}
+)
 
 var (
 	mixin       = schema.Card{}.Mixin()

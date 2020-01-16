@@ -372,15 +372,15 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
 		nodes   []*Group
 		withFKs = gq.withFKs
-		spec    = gq.querySpec()
+		_spec   = gq.querySpec()
 	)
 	if gq.withInfo != nil {
 		withFKs = true
 	}
 	if withFKs {
-		spec.Node.Columns = append(spec.Node.Columns, group.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, group.ForeignKeys...)
 	}
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Group{config: gq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
@@ -389,14 +389,14 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		}
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, gq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
 	}
 
@@ -475,7 +475,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			edgeids []string
 			edges   = make(map[string][]*Group)
 		)
-		spec := &sqlgraph.EdgeQuerySpec{
+		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: true,
 				Table:   group.UsersTable,
@@ -508,7 +508,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 				return nil
 			},
 		}
-		if err := sqlgraph.QueryEdges(ctx, gq.driver, spec); err != nil {
+		if err := sqlgraph.QueryEdges(ctx, gq.driver, _spec); err != nil {
 			return nil, fmt.Errorf(`query edges "users": %v`, err)
 		}
 		query.Where(user.IDIn(edgeids...))
@@ -556,8 +556,8 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 }
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := gq.querySpec()
-	return sqlgraph.CountNodes(ctx, gq.driver, spec)
+	_spec := gq.querySpec()
+	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
 func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -569,7 +569,7 @@ func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
@@ -582,26 +582,26 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := gq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := gq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := gq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := gq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (gq *GroupQuery) sqlQuery() *sql.Selector {
