@@ -61,7 +61,7 @@ type User struct {
 		Children []*User
 		// Parent holds the value of the parent edge.
 		Parent *User
-	}
+	} `json:"edges"`
 }
 
 // FromResponse scans the gremlin response data into User.

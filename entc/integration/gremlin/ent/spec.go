@@ -24,7 +24,7 @@ type Spec struct {
 	Edges struct {
 		// Card holds the value of the card edge.
 		Card []*Card
-	}
+	} `json:"edges"`
 }
 
 // FromResponse scans the gremlin response data into Spec.

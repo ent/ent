@@ -28,7 +28,7 @@ type {{ $.Name }} struct {
 				// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge.
 				{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
 			{{- end }}
-		}
+		} `json:"edges"`
 	{{- end -}}
 	{{- /* Additional fields to add by the storage driver. */}}
 	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}

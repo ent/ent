@@ -61,7 +61,7 @@ type User struct {
 		Children []*User
 		// Parent holds the value of the parent edge.
 		Parent *User
-	}
+	} `json:"edges"`
 	group_blocked_id *string
 	user_spouse_id   *string
 	parent_id        *string

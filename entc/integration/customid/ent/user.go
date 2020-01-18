@@ -28,7 +28,7 @@ type User struct {
 		Parent *User
 		// Children holds the value of the children edge.
 		Children []*User
-	}
+	} `json:"edges"`
 	parent_id *int
 }
 

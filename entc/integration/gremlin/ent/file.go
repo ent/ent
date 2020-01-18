@@ -34,7 +34,7 @@ type File struct {
 		Owner *User
 		// Type holds the value of the type edge.
 		Type *FileType
-	}
+	} `json:"edges"`
 }
 
 // FromResponse scans the gremlin response data into File.
