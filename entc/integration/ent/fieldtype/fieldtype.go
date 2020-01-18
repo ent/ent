@@ -124,3 +124,11 @@ func StateValidator(s State) error {
 		return fmt.Errorf("fieldtype: invalid enum value for state field: %q", s)
 	}
 }
+
+// StateAll returns all values of State enum
+func StateAll() []State {
+	return []State{
+		StateOn,
+		StateOff,
+	}
+}

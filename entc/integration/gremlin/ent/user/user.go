@@ -102,3 +102,11 @@ func RoleValidator(r Role) error {
 		return fmt.Errorf("user: invalid enum value for role field: %q", r)
 	}
 }
+
+// RoleAll returns all values of Role enum
+func RoleAll() []Role {
+	return []Role{
+		RoleUser,
+		RoleAdmin,
+	}
+}

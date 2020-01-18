@@ -134,6 +134,15 @@ var (
 					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $arg }})
 			}
 		}
+
+        // {{$enum}}All returns all values of {{$enum}} enum
+        func {{$enum}}All() []{{$enum}} {
+                return []{{$enum}}{
+                    {{- range $_, $e := $f.Enums}}
+                        {{ $f.EnumName $e }},
+                    {{- end}}
+                }
+        }
 	{{ end }}
 {{ end }}
 
