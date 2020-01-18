@@ -26,7 +26,7 @@ type FileType struct {
 	Edges struct {
 		// Files holds the value of the files edge.
 		Files []*File
-	} `json:"edges,omitempty"`
+	} `json:"edges"`
 }
 
 // FromResponse scans the gremlin response data into FileType.

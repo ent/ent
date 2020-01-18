@@ -30,7 +30,7 @@ type User struct {
 		Followers []*User
 		// Following holds the value of the following edge.
 		Following []*User
-	} `json:"edges,omitempty"`
+	} `json:"edges"`
 	user_spouse_id *uint64
 }
 

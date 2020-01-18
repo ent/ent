@@ -36,7 +36,7 @@ type Card struct {
 		Owner *User
 		// Spec holds the value of the spec edge.
 		Spec []*Spec
-	} `json:"edges,omitempty"`
+	} `json:"edges"`
 	owner_id *string
 
 	// StaticField defined by templates.

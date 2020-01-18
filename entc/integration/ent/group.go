@@ -42,7 +42,7 @@ type Group struct {
 		Users []*User
 		// Info holds the value of the info edge.
 		Info *GroupInfo
-	} `json:"edges,omitempty"`
+	} `json:"edges"`
 	info_id *string
 }
 

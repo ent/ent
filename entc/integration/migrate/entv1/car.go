@@ -24,7 +24,7 @@ type Car struct {
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner *User
-	} `json:"edges,omitempty"`
+	} `json:"edges"`
 	owner_id *int
 }
 
