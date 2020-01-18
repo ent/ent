@@ -28,7 +28,7 @@ type GroupInfo struct {
 	Edges struct {
 		// Groups holds the value of the groups edge.
 		Groups []*Group
-	}
+	} `json:"edges,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into GroupInfo.

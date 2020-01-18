@@ -28,7 +28,7 @@ type Pet struct {
 		Team *User
 		// Owner holds the value of the owner edge.
 		Owner *User
-	}
+	} `json:"edges,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Pet.

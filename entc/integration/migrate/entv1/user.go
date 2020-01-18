@@ -44,7 +44,7 @@ type User struct {
 		Spouse *User
 		// Car holds the value of the car edge.
 		Car *Car
-	}
+	} `json:"edges,omitempty"`
 	parent_id      *int
 	user_spouse_id *int
 }

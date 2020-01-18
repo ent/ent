@@ -27,7 +27,7 @@ type FileType struct {
 	Edges struct {
 		// Files holds the value of the files edge.
 		Files []*File
-	}
+	} `json:"edges,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -29,7 +29,7 @@ type Pet struct {
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner *User
-	}
+	} `json:"edges,omitempty"`
 	owner_id *int
 }
 

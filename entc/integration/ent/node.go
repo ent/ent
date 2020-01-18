@@ -29,7 +29,7 @@ type Node struct {
 		Prev *Node
 		// Next holds the value of the next edge.
 		Next *Node
-	}
+	} `json:"edges,omitempty"`
 	prev_id *string
 }
 

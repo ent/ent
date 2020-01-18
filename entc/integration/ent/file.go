@@ -35,7 +35,7 @@ type File struct {
 		Owner *User
 		// Type holds the value of the type edge.
 		Type *FileType
-	}
+	} `json:"edges,omitempty"`
 	type_id       *string
 	group_file_id *string
 	owner_id      *string

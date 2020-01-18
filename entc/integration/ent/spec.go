@@ -25,7 +25,7 @@ type Spec struct {
 	Edges struct {
 		// Card holds the value of the card edge.
 		Card []*Card
-	}
+	} `json:"edges,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
