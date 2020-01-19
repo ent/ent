@@ -28,7 +28,7 @@ type User struct {
 	Edges struct {
 		// Friends holds the value of the friends edge.
 		Friends []*User
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

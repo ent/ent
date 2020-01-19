@@ -29,7 +29,7 @@ type Card struct {
 	Edges struct {
 		// Owner holds the value of the owner edge.
 		Owner *User
-	}
+	} `json:"edges"`
 	owner_id *int
 }
 

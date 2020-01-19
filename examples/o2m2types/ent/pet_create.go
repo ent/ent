@@ -73,8 +73,8 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	var (
-		pe   = &Pet{config: pc.config}
-		spec = &sqlgraph.CreateSpec{
+		pe    = &Pet{config: pc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: pet.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -83,7 +83,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		}
 	)
 	if value := pc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: pet.FieldName,
@@ -107,15 +107,15 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, pc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	pe.ID = int(id)
 	return pe, nil
 }

@@ -28,7 +28,7 @@ type Node struct {
 		Parent *Node
 		// Children holds the value of the children edge.
 		Children []*Node
-	}
+	} `json:"edges"`
 	parent_id *int
 }
 

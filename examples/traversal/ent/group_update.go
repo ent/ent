@@ -140,7 +140,7 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 }
 
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
@@ -151,14 +151,14 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := gu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := gu.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: group.FieldName,
@@ -181,7 +181,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := gu.users; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -200,7 +200,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if gu.clearedAdmin {
 		edge := &sqlgraph.EdgeSpec{
@@ -216,7 +216,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := gu.admin; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -235,9 +235,9 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -362,7 +362,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
@@ -374,7 +374,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		},
 	}
 	if value := guo.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: group.FieldName,
@@ -397,7 +397,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := guo.users; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -416,7 +416,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if guo.clearedAdmin {
 		edge := &sqlgraph.EdgeSpec{
@@ -432,7 +432,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := guo.admin; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -451,12 +451,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	gr = &Group{config: guo.config}
-	spec.Assign = gr.assignValues
-	spec.ScanValues = gr.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, guo.driver, spec); err != nil {
+	_spec.Assign = gr.assignValues
+	_spec.ScanValues = gr.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

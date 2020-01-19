@@ -94,8 +94,8 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	var (
-		gr   = &Group{config: gc.config}
-		spec = &sqlgraph.CreateSpec{
+		gr    = &Group{config: gc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -104,7 +104,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		}
 	)
 	if value := gc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: group.FieldName,
@@ -128,7 +128,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.admin; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -147,15 +147,15 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, gc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	gr.ID = int(id)
 	return gr, nil
 }

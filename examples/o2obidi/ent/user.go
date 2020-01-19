@@ -28,7 +28,7 @@ type User struct {
 	Edges struct {
 		// Spouse holds the value of the spouse edge.
 		Spouse *User
-	}
+	} `json:"edges"`
 	user_spouse_id *int
 }
 

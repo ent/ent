@@ -30,7 +30,7 @@ type User struct {
 		Cars []*Car
 		// Groups holds the value of the groups edge.
 		Groups []*Group
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

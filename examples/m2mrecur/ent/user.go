@@ -30,7 +30,7 @@ type User struct {
 		Followers []*User
 		// Following holds the value of the following edge.
 		Following []*User
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
