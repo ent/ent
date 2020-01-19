@@ -296,15 +296,15 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	var (
 		nodes   []*Street
 		withFKs = sq.withFKs
-		spec    = sq.querySpec()
+		_spec   = sq.querySpec()
 	)
 	if sq.withCity != nil {
 		withFKs = true
 	}
 	if withFKs {
-		spec.Node.Columns = append(spec.Node.Columns, street.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
 	}
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Street{config: sq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
@@ -313,14 +313,14 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		}
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, sq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
 		return nil, err
 	}
 
@@ -353,8 +353,8 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 }
 
 func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := sq.querySpec()
-	return sqlgraph.CountNodes(ctx, sq.driver, spec)
+	_spec := sq.querySpec()
+	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
 }
 
 func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -366,7 +366,7 @@ func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   street.Table,
 			Columns: street.Columns,
@@ -379,26 +379,26 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := sq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := sq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := sq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := sq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (sq *StreetQuery) sqlQuery() *sql.Selector {

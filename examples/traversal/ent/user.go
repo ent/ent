@@ -34,7 +34,7 @@ type User struct {
 		Groups []*Group
 		// Manage holds the value of the manage edge.
 		Manage []*Group
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

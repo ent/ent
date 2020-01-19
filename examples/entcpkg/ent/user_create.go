@@ -35,8 +35,8 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	var (
-		u    = &User{config: uc.config}
-		spec = &sqlgraph.CreateSpec{
+		u     = &User{config: uc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -44,13 +44,13 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if err := sqlgraph.CreateNode(ctx, uc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	u.ID = int(id)
 	return u, nil
 }

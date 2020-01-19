@@ -26,7 +26,7 @@ type City struct {
 	Edges struct {
 		// Streets holds the value of the streets edge.
 		Streets []*Street
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

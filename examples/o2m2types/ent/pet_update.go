@@ -98,7 +98,7 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 }
 
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
@@ -109,14 +109,14 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := pu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := pu.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: pet.FieldName,
@@ -136,7 +136,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := pu.owner; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -155,9 +155,9 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -240,7 +240,7 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
@@ -252,7 +252,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		},
 	}
 	if value := puo.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: pet.FieldName,
@@ -272,7 +272,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := puo.owner; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -291,12 +291,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	pe = &Pet{config: puo.config}
-	spec.Assign = pe.assignValues
-	spec.ScanValues = pe.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, puo.driver, spec); err != nil {
+	_spec.Assign = pe.assignValues
+	_spec.ScanValues = pe.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

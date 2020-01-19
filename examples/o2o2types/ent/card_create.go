@@ -79,8 +79,8 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	var (
-		c    = &Card{config: cc.config}
-		spec = &sqlgraph.CreateSpec{
+		c     = &Card{config: cc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: card.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -89,7 +89,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		}
 	)
 	if value := cc.expired; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: card.FieldExpired,
@@ -97,7 +97,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		c.Expired = *value
 	}
 	if value := cc.number; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: card.FieldNumber,
@@ -121,15 +121,15 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	c.ID = int(id)
 	return c, nil
 }
