@@ -26,7 +26,7 @@ type Group struct {
 	Edges struct {
 		// Users holds the value of the users edge.
 		Users []*User
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

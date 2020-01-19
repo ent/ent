@@ -28,7 +28,7 @@ type User struct {
 	Edges struct {
 		// Pets holds the value of the pets edge.
 		Pets []*Pet
-	}
+	} `json:"edges"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

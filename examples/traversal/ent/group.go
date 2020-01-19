@@ -28,7 +28,7 @@ type Group struct {
 		Users []*User
 		// Admin holds the value of the admin edge.
 		Admin *User
-	}
+	} `json:"edges"`
 	admin_id *int
 }
 

@@ -73,8 +73,8 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	var (
-		s    = &Street{config: sc.config}
-		spec = &sqlgraph.CreateSpec{
+		s     = &Street{config: sc.config}
+		_spec = &sqlgraph.CreateSpec{
 			Table: street.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -83,7 +83,7 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		}
 	)
 	if value := sc.name; value != nil {
-		spec.Fields = append(spec.Fields, &sqlgraph.FieldSpec{
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: street.FieldName,
@@ -107,15 +107,15 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges = append(spec.Edges, edge)
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, sc.driver, spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	id := spec.ID.Value.(int64)
+	id := _spec.ID.Value.(int64)
 	s.ID = int(id)
 	return s, nil
 }

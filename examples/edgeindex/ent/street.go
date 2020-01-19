@@ -26,7 +26,7 @@ type Street struct {
 	Edges struct {
 		// City holds the value of the city edge.
 		City *City
-	}
+	} `json:"edges"`
 	city_id *int
 }
 

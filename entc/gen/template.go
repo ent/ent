@@ -107,6 +107,7 @@ var (
 		{
 			Name:   "example",
 			Format: "example_test.go",
+			Skip:   func(g *Graph) bool { return g.SkipExampleTest() },
 		},
 	}
 	// templates holds the Go templates for the code generation.

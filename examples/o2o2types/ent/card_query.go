@@ -296,15 +296,15 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
 		nodes   []*Card
 		withFKs = cq.withFKs
-		spec    = cq.querySpec()
+		_spec   = cq.querySpec()
 	)
 	if cq.withOwner != nil {
 		withFKs = true
 	}
 	if withFKs {
-		spec.Node.Columns = append(spec.Node.Columns, card.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
 	}
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
@@ -313,14 +313,14 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		}
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
 	}
 
@@ -353,8 +353,8 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 }
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := cq.querySpec()
-	return sqlgraph.CountNodes(ctx, cq.driver, spec)
+	_spec := cq.querySpec()
+	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -366,7 +366,7 @@ func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   card.Table,
 			Columns: card.Columns,
@@ -379,26 +379,26 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := cq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := cq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := cq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := cq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (cq *CardQuery) sqlQuery() *sql.Selector {

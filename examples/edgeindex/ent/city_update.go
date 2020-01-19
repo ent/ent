@@ -106,7 +106,7 @@ func (cu *CityUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   city.Table,
 			Columns: city.Columns,
@@ -117,14 +117,14 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := cu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := cu.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: city.FieldName,
@@ -147,7 +147,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cu.streets; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -166,9 +166,9 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -260,7 +260,7 @@ func (cuo *CityUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   city.Table,
 			Columns: city.Columns,
@@ -272,7 +272,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		},
 	}
 	if value := cuo.name; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: city.FieldName,
@@ -295,7 +295,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cuo.streets; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -314,12 +314,12 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	c = &City{config: cuo.config}
-	spec.Assign = c.assignValues
-	spec.ScanValues = c.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
+	_spec.Assign = c.assignValues
+	_spec.ScanValues = c.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

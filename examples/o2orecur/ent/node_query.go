@@ -320,15 +320,15 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
 		nodes   []*Node
 		withFKs = nq.withFKs
-		spec    = nq.querySpec()
+		_spec   = nq.querySpec()
 	)
 	if nq.withPrev != nil {
 		withFKs = true
 	}
 	if withFKs {
-		spec.Node.Columns = append(spec.Node.Columns, node.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, node.ForeignKeys...)
 	}
-	spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func() []interface{} {
 		node := &Node{config: nq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
@@ -337,14 +337,14 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		}
 		return values
 	}
-	spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(values ...interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
 		return node.assignValues(values...)
 	}
-	if err := sqlgraph.QueryNodes(ctx, nq.driver, spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, nq.driver, _spec); err != nil {
 		return nil, err
 	}
 
@@ -405,8 +405,8 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 }
 
 func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
-	spec := nq.querySpec()
-	return sqlgraph.CountNodes(ctx, nq.driver, spec)
+	_spec := nq.querySpec()
+	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
 }
 
 func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
@@ -418,7 +418,7 @@ func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
 }
 
 func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
-	spec := &sqlgraph.QuerySpec{
+	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   node.Table,
 			Columns: node.Columns,
@@ -431,26 +431,26 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if ps := nq.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if limit := nq.limit; limit != nil {
-		spec.Limit = *limit
+		_spec.Limit = *limit
 	}
 	if offset := nq.offset; offset != nil {
-		spec.Offset = *offset
+		_spec.Offset = *offset
 	}
 	if ps := nq.order; len(ps) > 0 {
-		spec.Order = func(selector *sql.Selector) {
+		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return spec
+	return _spec
 }
 
 func (nq *NodeQuery) sqlQuery() *sql.Selector {

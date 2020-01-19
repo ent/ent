@@ -106,7 +106,7 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   car.Table,
 			Columns: car.Columns,
@@ -117,21 +117,21 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		},
 	}
 	if ps := cu.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
 	if value := cu.model; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: car.FieldModel,
 		})
 	}
 	if value := cu.registered_at; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: car.FieldRegisteredAt,
@@ -151,7 +151,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cu.owner; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -170,9 +170,9 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -262,7 +262,7 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
-	spec := &sqlgraph.UpdateSpec{
+	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   car.Table,
 			Columns: car.Columns,
@@ -274,14 +274,14 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		},
 	}
 	if value := cuo.model; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
 			Column: car.FieldModel,
 		})
 	}
 	if value := cuo.registered_at; value != nil {
-		spec.Fields.Set = append(spec.Fields.Set, &sqlgraph.FieldSpec{
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
 			Column: car.FieldRegisteredAt,
@@ -301,7 +301,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 				},
 			},
 		}
-		spec.Edges.Clear = append(spec.Edges.Clear, edge)
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cuo.owner; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -320,12 +320,12 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		for k, _ := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		spec.Edges.Add = append(spec.Edges.Add, edge)
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	c = &Car{config: cuo.config}
-	spec.Assign = c.assignValues
-	spec.ScanValues = c.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, spec); err != nil {
+	_spec.Assign = c.assignValues
+	_spec.ScanValues = c.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

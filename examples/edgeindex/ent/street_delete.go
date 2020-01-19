@@ -43,7 +43,7 @@ func (sd *StreetDelete) ExecX(ctx context.Context) int {
 }
 
 func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
-	spec := &sqlgraph.DeleteSpec{
+	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: street.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -53,13 +53,13 @@ func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
 		},
 	}
 	if ps := sd.predicates; len(ps) > 0 {
-		spec.Predicate = func(selector *sql.Selector) {
+		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, sd.driver, spec)
+	return sqlgraph.DeleteNodes(ctx, sd.driver, _spec)
 }
 
 // StreetDeleteOne is the builder for deleting a single Street entity.
