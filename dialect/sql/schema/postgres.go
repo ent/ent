@@ -118,10 +118,9 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 			}
 			c.Key = UniqueKey
 			c.Unique = true
-			c.indexes.append(idx)
 			fallthrough
 		default:
-			t.AddIndex(idx.Name, idx.Unique, idx.columns)
+			t.addIndex(idx)
 		}
 	}
 	return t, nil
@@ -172,12 +171,12 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 		}
 		// If the index is prefixed with the table, it's probably was
 		// added by `addIndex` (and not entc) and it should be trimmed.
-		name = strings.TrimPrefix(name, table+"_")
-		idx, ok := names[name]
+		short := strings.TrimPrefix(name, table+"_")
+		idx, ok := names[short]
 		if !ok {
-			idx = &Index{Name: name, Unique: unique, primary: primary}
+			idx = &Index{Name: short, Unique: unique, primary: primary, realname: name}
 			idxs = append(idxs, idx)
-			names[name] = idx
+			names[short] = idx
 		}
 		idx.columns = append(idx.columns, column)
 	}
@@ -350,4 +349,54 @@ func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, tab
 		query, args = build.AlterTable(table).DropConstraint(name).Query()
 	}
 	return tx.Exec(ctx, query, args, nil)
+}
+
+// isImplicitIndex reports if the index was created implicitly for the unique column.
+func (d *Postgres) isImplicitIndex(idx *Index, col *Column) bool {
+	return strings.TrimSuffix(idx.Name, "_key") == col.Name && col.Unique
+}
+
+// renameColumn returns the statement for renaming a column.
+func (d *Postgres) renameColumn(t *Table, old, new *Column) sql.Querier {
+	return sql.Dialect(dialect.Postgres).
+		AlterTable(t.Name).
+		RenameColumn(old.Name, new.Name)
+}
+
+// renameIndex returns the statement for renaming an index.
+func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
+	if sfx := "_key"; strings.HasSuffix(old.Name, sfx) && !strings.HasSuffix(new.Name, sfx) {
+		new.Name += sfx
+	}
+	if pfx := t.Name + "_"; strings.HasPrefix(old.realname, pfx) && !strings.HasPrefix(new.Name, pfx) {
+		new.Name = pfx + new.Name
+	}
+	return sql.Dialect(dialect.Postgres).AlterIndex(old.realname).Rename(new.Name)
+}
+
+// fkColumn returns the column name of a foreign-key.
+func (d *Postgres) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (string, error) {
+	t1 := sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1").Unquote().As("t1")
+	t2 := sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2").Unquote().As("t2")
+	query, args := sql.Dialect(dialect.Postgres).
+		Select("column_name").
+		From(t1).
+		Join(t2).
+		On(t1.C("constraint_name"), t2.C("constraint_name")).
+		Where(sql.And(
+			sql.EQ(t2.C("constraint_type"), sql.Raw("'FOREIGN KEY'")),
+			sql.EQ(t1.C("table_schema"), sql.Raw("(CURRENT_SCHEMA())")),
+			sql.EQ(t2.C("constraint_name"), fk.Symbol),
+		)).
+		Query()
+	rows := &sql.Rows{}
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return "", fmt.Errorf("reading foreign-key %q column: %v", fk.Symbol, err)
+	}
+	defer rows.Close()
+	column, err := sql.ScanString(rows)
+	if err != nil {
+		return "", fmt.Errorf("scanning foreign-key %q column: %v", fk.Symbol, err)
+	}
+	return column, nil
 }

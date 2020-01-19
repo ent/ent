@@ -415,6 +415,61 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 	return i, nil
 }
 
+// isImplicitIndex reports if the index was created implicitly for the unique column.
+func (d *MySQL) isImplicitIndex(idx *Index, col *Column) bool {
+	// We execute `CHANGE COLUMN` on older versions of MySQL (<8.0), which
+	// auto create the new index. The old one, will be dropped in `changeSet`.
+	if compareVersions(d.version, "8.0.0") >= 0 {
+		return idx.Name == col.Name && col.Unique
+	}
+	return false
+}
+
+// renameColumn returns the statement for renaming a column in
+// MySQL based on its version.
+func (d *MySQL) renameColumn(t *Table, old, new *Column) sql.Querier {
+	q := sql.AlterTable(t.Name)
+	if compareVersions(d.version, "8.0.0") >= 0 {
+		return q.RenameColumn(old.Name, new.Name)
+	}
+	return q.ChangeColumn(old.Name, d.addColumn(new))
+}
+
+// renameIndex returns the statement for renaming an index.
+func (d *MySQL) renameIndex(t *Table, old, new *Index) sql.Querier {
+	q := sql.AlterTable(t.Name)
+	if compareVersions(d.version, "5.7.0") >= 0 {
+		return q.RenameIndex(old.Name, new.Name)
+	}
+	return q.DropIndex(old.Name).AddIndex(new.Builder(t.Name))
+}
+
+// fkColumn returns the column name of a foreign-key.
+func (d *MySQL) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (string, error) {
+	t1 := sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote().As("KEY_COLUMN_USAGE")
+	t2 := sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote().As("TABLE_CONSTRAINTS")
+	query, args := sql.Select("COLUMN_NAME").
+		From(t1).
+		Join(t2).
+		On(t1.C("CONSTRAINT_NAME"), t2.C("CONSTRAINT_NAME")).
+		Where(sql.And(
+			sql.EQ(t2.C("CONSTRAINT_NAME"), fk.Symbol),
+			sql.EQ(t2.C("CONSTRAINT_TYPE"), "FOREIGN KEY"),
+			sql.EQ(t1.C("TABLE_SCHEMA"), sql.Raw("(SELECT DATABASE())")),
+		)).
+		Query()
+	rows := &sql.Rows{}
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return "", fmt.Errorf("reading foreign-key %q column: %v", fk.Symbol, err)
+	}
+	defer rows.Close()
+	column, err := sql.ScanString(rows)
+	if err != nil {
+		return "", fmt.Errorf("scanning foreign-key %q column: %v", fk.Symbol, err)
+	}
+	return column, nil
+}
+
 // fkNames returns the foreign-key names of a column.
 func fkNames(ctx context.Context, tx dialect.Tx, table, column string) ([]string, error) {
 	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote()).

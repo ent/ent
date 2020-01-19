@@ -16,6 +16,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -30,7 +31,9 @@ type UserQuery struct {
 	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withCar *CarQuery
+	withCar  *CarQuery
+	withPets *PetQuery
+	withFKs  bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -66,6 +69,18 @@ func (uq *UserQuery) QueryCar() *CarQuery {
 		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
 		sqlgraph.To(car.Table, car.FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, user.CarTable, user.CarColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	return query
+}
+
+// QueryPets chains the current query on the pets edge.
+func (uq *UserQuery) QueryPets() *PetQuery {
+	query := &PetQuery{config: uq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, user.PetsTable, user.PetsColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
@@ -251,6 +266,17 @@ func (uq *UserQuery) WithCar(opts ...func(*CarQuery)) *UserQuery {
 	return uq
 }
 
+//  WithPets tells the query-builder to eager-loads the nodes that are connected to
+// the "pets" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
+	query := &PetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPets = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -295,15 +321,26 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
+		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withCar != nil,
+			uq.withPets != nil,
 		}
 	)
+	if uq.withPets != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -337,15 +374,40 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.owner_id
+			fk := n.user_car
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_car" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_car" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Car = append(node.Edges.Car, n)
+		}
+	}
+
+	if query := uq.withPets; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
+		for i := range nodes {
+			if fk := nodes[i].user_pets; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(pet.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Pets = n
+			}
 		}
 	}
 

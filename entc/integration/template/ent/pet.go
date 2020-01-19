@@ -27,8 +27,8 @@ type Pet struct {
 	LicensedAt *time.Time `json:"licensed_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
-	Edges    PetEdges `json:"edges"`
-	owner_id *int
+	Edges     PetEdges `json:"edges"`
+	user_pets *int
 }
 
 // PetEdges holds the relations/edges for other nodes in the graph.
@@ -66,7 +66,7 @@ func (*Pet) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Pet) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // owner_id
+		&sql.NullInt64{}, // user_pets
 	}
 }
 
@@ -96,10 +96,10 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 	values = values[2:]
 	if len(values) == len(pet.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
 		} else if value.Valid {
-			pe.owner_id = new(int)
-			*pe.owner_id = int(value.Int64)
+			pe.user_pets = new(int)
+			*pe.user_pets = int(value.Int64)
 		}
 	}
 	return nil

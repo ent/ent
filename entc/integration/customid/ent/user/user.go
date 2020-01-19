@@ -22,11 +22,11 @@ const (
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "parent_id"
+	ParentColumn = "user_children"
 	// ChildrenTable is the table the holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "parent_id"
+	ChildrenColumn = "user_children"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -36,7 +36,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"parent_id",
+	"user_children",
 }
 
 var (

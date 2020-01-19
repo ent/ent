@@ -23,7 +23,7 @@ type Car struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CarQuery when eager-loading is set.
 	Edges    CarEdges `json:"edges"`
-	owner_id *int
+	user_car *int
 }
 
 // CarEdges holds the relations/edges for other nodes in the graph.
@@ -59,7 +59,7 @@ func (*Car) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Car) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // owner_id
+		&sql.NullInt64{}, // user_car
 	}
 }
 
@@ -78,10 +78,10 @@ func (c *Car) assignValues(values ...interface{}) error {
 	values = values[0:]
 	if len(values) == len(car.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+			return fmt.Errorf("unexpected type %T for edge-field user_car", value)
 		} else if value.Valid {
-			c.owner_id = new(int)
-			*c.owner_id = int(value.Int64)
+			c.user_car = new(int)
+			*c.user_car = int(value.Int64)
 		}
 	}
 	return nil

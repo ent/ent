@@ -753,6 +753,13 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("PRIMARY", "id", "0", "1").
 						AddRow("old_index", "old", "0", "1").
 						AddRow("parent_id", "parent_id", "0", "1"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
+					WithArgs("FOREIGN KEY", "parent_id").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.ExpectQuery(escape("SELECT `COLUMN_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS ON `KEY_COLUMN_USAGE`.`CONSTRAINT_NAME` = `TABLE_CONSTRAINTS`.`CONSTRAINT_NAME` WHERE (`TABLE_CONSTRAINTS`.`CONSTRAINT_NAME` = ?) AND (`TABLE_CONSTRAINTS`.`CONSTRAINT_TYPE` = ?) AND (`KEY_COLUMN_USAGE`.`TABLE_SCHEMA` = (SELECT DATABASE()))")).
+					WithArgs("parent_id", "FOREIGN KEY").
+					WillReturnRows(sqlmock.NewRows([]string{"COLUMN_NAME"}).
+						AddRow("parent_id"))
 				// drop the unique index.
 				mock.ExpectExec(escape("DROP INDEX `old_index` ON `users`")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
@@ -895,9 +902,13 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
+					WithArgs("FOREIGN KEY", "user_spouse_____________________390ed76f91d3c57cd3516e7690f621dc").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `spouse_id` bigint")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
+					WithArgs("FOREIGN KEY", "user_spouse_____________________390ed76f91d3c57cd3516e7690f621dc").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
 				mock.ExpectExec("ALTER TABLE `users` ADD CONSTRAINT `.{64}` FOREIGN KEY\\(`spouse_id`\\) REFERENCES `users`\\(`id`\\) ON DELETE CASCADE").
 					WillReturnResult(sqlmock.NewResult(0, 1))

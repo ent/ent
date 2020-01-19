@@ -24,7 +24,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
-	PetsColumn = "owner_id"
+	PetsColumn = "user_pets"
 	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
@@ -38,7 +38,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	ManageInverseTable = "groups"
 	// ManageColumn is the table column denoting the manage relation/edge.
-	ManageColumn = "admin_id"
+	ManageColumn = "group_admin"
 )
 
 // Columns holds all SQL columns for user fields.

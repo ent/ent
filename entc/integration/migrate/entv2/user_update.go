@@ -8,11 +8,13 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -36,7 +38,9 @@ type UserUpdate struct {
 	state         *user.State
 	clearstate    bool
 	car           map[int]struct{}
+	pets          map[int]struct{}
 	removedCar    map[int]struct{}
+	clearedPets   bool
 	predicates    []predicate.User
 }
 
@@ -191,6 +195,28 @@ func (uu *UserUpdate) AddCar(c ...*Car) *UserUpdate {
 	return uu.AddCarIDs(ids...)
 }
 
+// SetPetsID sets the pets edge to Pet by id.
+func (uu *UserUpdate) SetPetsID(id int) *UserUpdate {
+	if uu.pets == nil {
+		uu.pets = make(map[int]struct{})
+	}
+	uu.pets[id] = struct{}{}
+	return uu
+}
+
+// SetNillablePetsID sets the pets edge to Pet by id if the given value is not nil.
+func (uu *UserUpdate) SetNillablePetsID(id *int) *UserUpdate {
+	if id != nil {
+		uu = uu.SetPetsID(*id)
+	}
+	return uu
+}
+
+// SetPets sets the pets edge to Pet.
+func (uu *UserUpdate) SetPets(p *Pet) *UserUpdate {
+	return uu.SetPetsID(p.ID)
+}
+
 // RemoveCarIDs removes the car edge to Car by ids.
 func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
 	if uu.removedCar == nil {
@@ -211,12 +237,21 @@ func (uu *UserUpdate) RemoveCar(c ...*Car) *UserUpdate {
 	return uu.RemoveCarIDs(ids...)
 }
 
+// ClearPets clears the pets edge to Pet.
+func (uu *UserUpdate) ClearPets() *UserUpdate {
+	uu.clearedPets = true
+	return uu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	if uu.state != nil {
 		if err := user.StateValidator(*uu.state); err != nil {
 			return 0, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
 		}
+	}
+	if len(uu.pets) > 1 {
+		return 0, errors.New("entv2: multiple assignments on a unique edge \"pets\"")
 	}
 	return uu.sqlSave(ctx)
 }
@@ -393,6 +428,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.clearedPets {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -421,7 +491,9 @@ type UserUpdateOne struct {
 	state         *user.State
 	clearstate    bool
 	car           map[int]struct{}
+	pets          map[int]struct{}
 	removedCar    map[int]struct{}
+	clearedPets   bool
 }
 
 // SetAge sets the age field.
@@ -569,6 +641,28 @@ func (uuo *UserUpdateOne) AddCar(c ...*Car) *UserUpdateOne {
 	return uuo.AddCarIDs(ids...)
 }
 
+// SetPetsID sets the pets edge to Pet by id.
+func (uuo *UserUpdateOne) SetPetsID(id int) *UserUpdateOne {
+	if uuo.pets == nil {
+		uuo.pets = make(map[int]struct{})
+	}
+	uuo.pets[id] = struct{}{}
+	return uuo
+}
+
+// SetNillablePetsID sets the pets edge to Pet by id if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePetsID(id *int) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetPetsID(*id)
+	}
+	return uuo
+}
+
+// SetPets sets the pets edge to Pet.
+func (uuo *UserUpdateOne) SetPets(p *Pet) *UserUpdateOne {
+	return uuo.SetPetsID(p.ID)
+}
+
 // RemoveCarIDs removes the car edge to Car by ids.
 func (uuo *UserUpdateOne) RemoveCarIDs(ids ...int) *UserUpdateOne {
 	if uuo.removedCar == nil {
@@ -589,12 +683,21 @@ func (uuo *UserUpdateOne) RemoveCar(c ...*Car) *UserUpdateOne {
 	return uuo.RemoveCarIDs(ids...)
 }
 
+// ClearPets clears the pets edge to Pet.
+func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
+	uuo.clearedPets = true
+	return uuo
+}
+
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	if uuo.state != nil {
 		if err := user.StateValidator(*uuo.state); err != nil {
 			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
 		}
+	}
+	if len(uuo.pets) > 1 {
+		return nil, errors.New("entv2: multiple assignments on a unique edge \"pets\"")
 	}
 	return uuo.sqlSave(ctx)
 }
@@ -757,6 +860,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.clearedPets {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
 				},
 			},
 		}

@@ -19,24 +19,32 @@ type ColumnScanner interface {
 	Columns() ([]string, error)
 }
 
-// ScanInt64 scans and returns an int64 from the rows columns.
-func ScanInt64(rows ColumnScanner) (int64, error) {
+// ScanOne scans one row to the given value. It fails if the rows holds more than 1 row.
+func ScanOne(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return 0, fmt.Errorf("sql/scan: failed getting column names: %v", err)
+		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
 	}
 	if n := len(columns); n != 1 {
-		return 0, fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
+		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
 	}
 	if !rows.Next() {
-		return 0, sql.ErrNoRows
+		return sql.ErrNoRows
 	}
-	var n int64
-	if err := rows.Scan(&n); err != nil {
-		return 0, err
+	if err := rows.Scan(v); err != nil {
+		return err
 	}
 	if rows.Next() {
-		return 0, fmt.Errorf("sql/scan: expect exactly one row in result set")
+		return fmt.Errorf("sql/scan: expect exactly one row in result set")
+	}
+	return nil
+}
+
+// ScanInt64 scans and returns an int64 from the rows columns.
+func ScanInt64(rows ColumnScanner) (int64, error) {
+	var n int64
+	if err := ScanOne(rows, &n); err != nil {
+		return 0, err
 	}
 	return n, nil
 }
@@ -48,6 +56,15 @@ func ScanInt(rows ColumnScanner) (int, error) {
 		return 0, err
 	}
 	return int(n), nil
+}
+
+// ScanString scans and returns a string from the rows columns.
+func ScanString(rows ColumnScanner) (string, error) {
+	var s string
+	if err := ScanOne(rows, &s); err != nil {
+		return "", err
+	}
+	return s, nil
 }
 
 // ScanSlice scans the given ColumnScanner (basically, sql.Row or sql.Rows) into the given slice.

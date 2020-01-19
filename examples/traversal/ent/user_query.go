@@ -413,13 +413,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.owner_id
+			fk := n.user_pets
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_pets" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Pets = append(node.Edges.Pets, n)
 		}
@@ -567,13 +567,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.admin_id
+			fk := n.group_admin
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "admin_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "group_admin" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "admin_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_admin" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Manage = append(node.Edges.Manage, n)
 		}

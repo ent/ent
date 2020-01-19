@@ -118,6 +118,9 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			if err != nil {
 				return err
 			}
+			if err := m.fixture(ctx, tx, curr, t); err != nil {
+				return err
+			}
 			change, err := m.changeSet(curr, t)
 			if err != nil {
 				return err
@@ -206,7 +209,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 			b.DropColumn(sql.Dialect(m.Dialect()).Column(c.Name))
 		}
 	}
-	// if there's actual action to execute on ALTER TABLE.
+	// If there's actual action to execute on ALTER TABLE.
 	if len(b.Queries) != 0 {
 		query, args := b.Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
@@ -332,6 +335,82 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	return change, nil
 }
 
+// fixture is a special migration code for renaming foreign-key columns (issue-#285).
+func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) error {
+	d, ok := m.sqlDialect.(fkRenamer)
+	if !ok {
+		return nil
+	}
+	rename := make(map[string]*Index)
+	for _, fk := range new.ForeignKeys {
+		ok, err := m.fkExist(ctx, tx, fk.Symbol)
+		if err != nil {
+			return fmt.Errorf("checking foreign-key existence %q: %v", fk.Symbol, err)
+		}
+		if !ok {
+			continue
+		}
+		column, err := d.fkColumn(ctx, tx, fk)
+		if err != nil {
+			return err
+		}
+		newcol := fk.Columns[0]
+		if column == newcol.Name {
+			continue
+		}
+		query, args := d.renameColumn(curr, &Column{Name: column}, newcol).Query()
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
+			return fmt.Errorf("rename column %q: %v", column, err)
+		}
+		prev, ok := curr.column(column)
+		if !ok {
+			continue
+		}
+		// Find all indexes that ~maybe need to be renamed.
+		for _, idx := range prev.indexes {
+			switch _, ok := new.index(idx.Name); {
+			// Ignore indexes that exist in the schema, PKs, or
+			// those who were created implicitly for the FKs.
+			case ok || idx.primary:
+			// Index that was created implicitly for a unique
+			// column needs to be renamed to the column name.
+			case d.isImplicitIndex(idx, prev):
+				idx2 := &Index{Name: newcol.Name, Unique: true, Columns: []*Column{newcol}}
+				query, args := d.renameIndex(curr, idx, idx2).Query()
+				if err := tx.Exec(ctx, query, args, nil); err != nil {
+					return fmt.Errorf("rename index %q: %v", prev.Name, err)
+				}
+				idx.Name = idx2.Name
+			default:
+				rename[idx.Name] = idx
+			}
+		}
+		// Update the name of the loaded column, so `changeSet` won't create it.
+		prev.Name = newcol.Name
+	}
+	// Go over the indexes that need to be renamed
+	// and find their ~identical in the new schema.
+	for _, idx := range rename {
+	Find:
+		// Find its ~identical in the new schema, and rename it
+		// if it doesn't exist.
+		for _, idx2 := range new.Indexes {
+			if _, ok := curr.index(idx2.Name); ok {
+				continue
+			}
+			if idx.sameAs(idx2) {
+				query, args := d.renameIndex(curr, idx, idx2).Query()
+				if err := tx.Exec(ctx, query, args, nil); err != nil {
+					return fmt.Errorf("rename index %q: %v", idx.Name, err)
+				}
+				idx.Name = idx2.Name
+				break Find
+			}
+		}
+	}
+	return nil
+}
+
 // types loads the type list from the database.
 // If the table does not create, it will create one.
 func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
@@ -395,6 +474,7 @@ func (m *Migrate) setupTable(t *Table) {
 		t.columns[c.Name] = c
 	}
 	for _, idx := range t.Indexes {
+		idx.Name = m.symbol(idx.Name)
 		for _, c := range idx.Columns {
 			c.indexes.append(idx)
 		}
@@ -406,9 +486,6 @@ func (m *Migrate) setupTable(t *Table) {
 	}
 	for _, fk := range t.ForeignKeys {
 		fk.Symbol = m.symbol(fk.Symbol)
-		for _, c := range fk.Columns {
-			c.foreign = fk
-		}
 	}
 }
 
@@ -465,4 +542,13 @@ type sqlDialect interface {
 
 type preparer interface {
 	prepare(context.Context, dialect.Tx, *changes, string) error
+}
+
+// fkRenamer is used by the fixture migration (to solve #285),
+// and it's implemented by the different dialects for renaming FKs.
+type fkRenamer interface {
+	isImplicitIndex(*Index, *Column) bool
+	renameIndex(*Table, *Index, *Index) sql.Querier
+	renameColumn(*Table, *Column, *Column) sql.Querier
+	fkColumn(context.Context, dialect.Tx, *ForeignKey) (string, error)
 }

@@ -22,7 +22,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "street" package.
 	StreetsInverseTable = "streets"
 	// StreetsColumn is the table column denoting the streets relation/edge.
-	StreetsColumn = "city_id"
+	StreetsColumn = "city_streets"
 )
 
 // Columns holds all SQL columns for city fields.

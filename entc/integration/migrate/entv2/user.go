@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 )
 
@@ -39,16 +40,19 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges     UserEdges `json:"edges"`
+	user_pets *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Car holds the value of the car edge.
 	Car []*Car
+	// Pets holds the value of the pets edge.
+	Pets *Pet
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // CarOrErr returns the Car value or an error if the edge
@@ -58,6 +62,20 @@ func (e UserEdges) CarOrErr() ([]*Car, error) {
 		return e.Car, nil
 	}
 	return nil, &NotLoadedError{edge: "car"}
+}
+
+// PetsWithError returns the Pets value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) PetsWithError() (*Pet, error) {
+	if e.loadedTypes[1] {
+		if e.Pets == nil {
+			// The edge pets was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: pet.Label}
+		}
+		return e.Pets, nil
+	}
+	return nil, &NotLoadedError{edge: "pets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -73,6 +91,13 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // new_name
 		&[]byte{},         // blob
 		&sql.NullString{}, // state
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // user_pets
 	}
 }
 
@@ -133,12 +158,26 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.State = user.State(value.String)
 	}
+	values = values[9:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
+		} else if value.Valid {
+			u.user_pets = new(int)
+			*u.user_pets = int(value.Int64)
+		}
+	}
 	return nil
 }
 
 // QueryCar queries the car edge of the User.
 func (u *User) QueryCar() *CarQuery {
 	return (&UserClient{u.config}).QueryCar(u)
+}
+
+// QueryPets queries the pets edge of the User.
+func (u *User) QueryPets() *PetQuery {
+	return (&UserClient{u.config}).QueryPets(u)
 }
 
 // Update returns a builder for updating this User.

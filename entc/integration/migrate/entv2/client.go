@@ -397,3 +397,17 @@ func (c *UserClient) QueryCar(u *User) *CarQuery {
 
 	return query
 }
+
+// QueryPets queries the pets edge of a User.
+func (c *UserClient) QueryPets(u *User) *PetQuery {
+	query := &PetQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, user.PetsTable, user.PetsColumn),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
+}
