@@ -58,7 +58,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	{{- range $e := $.Edges }}
 		{{- with extend $ "Rec" $receiver "Edge" $e }}
 			{{ template "dialect/sql/query/eagerloading" . }}
