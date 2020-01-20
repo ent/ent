@@ -201,7 +201,7 @@ func (b *stringBuilder) MaxLen(i int) *stringBuilder {
 	b.desc.Size = i
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if len(v) > i {
-			return errors.New("value is less than the required length")
+			return errors.New("value is greater than the required length")
 		}
 		return nil
 	})
