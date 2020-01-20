@@ -252,6 +252,12 @@ func (t *TableAlter) DropColumn(c *ColumnBuilder) *TableAlter {
 	return t
 }
 
+// RenameIndex appends the `RENAME INDEX` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) RenameIndex(curr, new string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("RENAME INDEX %s TO %s", t.Quote(curr), t.Quote(new))))
+	return t
+}
+
 // AddForeignKey adds a foreign key constraint to the `ALTER TABLE` statement.
 func (t *TableAlter) AddForeignKey(fk *ForeignKeyBuilder) *TableAlter {
 	t.Queries = append(t.Queries, &Wrapper{"ADD CONSTRAINT %s", fk})

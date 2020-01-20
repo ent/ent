@@ -192,6 +192,10 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `ALTER TABLE "users" ADD COLUMN "boring" varchar, ALTER COLUMN "age" TYPE int, DROP COLUMN "name"`,
 		},
 		{
+			input:     AlterTable("users").RenameIndex("old", "new"),
+			wantQuery: "ALTER TABLE `users` RENAME INDEX `old` TO `new`",
+		},
+		{
 			input:     Insert("users").Columns("age").Values(1),
 			wantQuery: "INSERT INTO `users` (`age`) VALUES (?)",
 			wantArgs:  []interface{}{1},
