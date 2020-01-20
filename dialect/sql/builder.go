@@ -292,8 +292,8 @@ func (t *TableAlter) Query() (string, []interface{}) {
 // IndexAlter is a query builder for `ALTER INDEX` statement.
 type IndexAlter struct {
 	Builder
-	name    string    // table to alter.
-	Queries []Querier // columns and foreign-keys to add.
+	name    string    // index to alter.
+	Queries []Querier // alter options.
 }
 
 // AlterIndex returns a query builder for the `ALTER INDEX` statement.
@@ -309,7 +309,7 @@ func (i *IndexAlter) Rename(name string) *IndexAlter {
 	return i
 }
 
-// Query returns query representation of the `ALTER TABLE` statement.
+// Query returns query representation of the `ALTER INDEX` statement.
 //
 //	ALTER INDEX name
 //    [alter_specification]
