@@ -348,6 +348,10 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := nq.withPrev; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Node)

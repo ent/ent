@@ -348,6 +348,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := pq.withTeam; query != nil {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*Pet)

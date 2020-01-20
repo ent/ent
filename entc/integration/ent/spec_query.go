@@ -291,6 +291,10 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := sq.withCard; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[string]*Spec, len(nodes))

@@ -324,6 +324,10 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := sq.withCity; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Street)

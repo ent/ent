@@ -349,6 +349,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := pq.withFriends; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*Pet, len(nodes))

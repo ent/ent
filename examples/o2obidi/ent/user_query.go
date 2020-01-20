@@ -323,6 +323,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := uq.withSpouse; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*User)

@@ -349,6 +349,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := gq.withUsers; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*Group, len(nodes))

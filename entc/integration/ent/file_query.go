@@ -349,6 +349,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := fq.withOwner; query != nil {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*File)
