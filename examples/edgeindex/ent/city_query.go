@@ -314,6 +314,10 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := cq.withStreets; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*City)

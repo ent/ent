@@ -351,6 +351,10 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := cq.withOwner; query != nil {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*Card)

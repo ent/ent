@@ -400,6 +400,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := gq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[string]*Group)

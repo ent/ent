@@ -324,6 +324,10 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := cq.withOwner; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Car)

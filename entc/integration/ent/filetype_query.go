@@ -315,6 +315,10 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := ftq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[string]*FileType)

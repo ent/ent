@@ -337,6 +337,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		return nil, err
 	}
 
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+
 	if query := uq.withFollowers; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*User, len(nodes))

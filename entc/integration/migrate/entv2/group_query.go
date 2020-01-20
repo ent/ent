@@ -262,6 +262,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
 	}
+
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
 	return nodes, nil
 }
 

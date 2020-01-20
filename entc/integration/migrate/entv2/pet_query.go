@@ -262,6 +262,10 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
 	}
+
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
 	return nodes, nil
 }
 

@@ -287,6 +287,10 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
 		return nil, err
 	}
+
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
 	return nodes, nil
 }
 
