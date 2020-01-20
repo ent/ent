@@ -289,6 +289,39 @@ func (t *TableAlter) Query() (string, []interface{}) {
 	return t.String(), t.args
 }
 
+// IndexAlter is a query builder for `ALTER INDEX` statement.
+type IndexAlter struct {
+	Builder
+	name    string    // index to alter.
+	Queries []Querier // alter options.
+}
+
+// AlterIndex returns a query builder for the `ALTER INDEX` statement.
+//
+//	AlterIndex("old_key").
+//		Rename("new_key")
+//
+func AlterIndex(name string) *IndexAlter { return &IndexAlter{name: name} }
+
+// Rename appends the `RENAME TO` clause to the `ALTER INDEX` statement.
+func (i *IndexAlter) Rename(name string) *IndexAlter {
+	i.Queries = append(i.Queries, Raw(fmt.Sprintf("RENAME TO %s", i.Quote(name))))
+	return i
+}
+
+// Query returns query representation of the `ALTER INDEX` statement.
+//
+//	ALTER INDEX name
+//    [alter_specification]
+//
+func (i *IndexAlter) Query() (string, []interface{}) {
+	i.WriteString("ALTER INDEX ")
+	i.Ident(i.name)
+	i.Pad()
+	i.JoinComma(i.Queries...)
+	return i.String(), i.args
+}
+
 // ForeignKeyBuilder is the builder for the foreign-key constraint clause.
 type ForeignKeyBuilder struct {
 	Builder
@@ -1996,6 +2029,18 @@ func (d *DialectBuilder) CreateTable(name string) *TableBuilder {
 //
 func (d *DialectBuilder) AlterTable(name string) *TableAlter {
 	b := AlterTable(name)
+	b.SetDialect(d.dialect)
+	return b
+}
+
+// AlterIndex creates an IndexAlter for the configured dialect.
+//
+//	Dialect(dialect.Postgres).
+//		AlterIndex("old").
+//		Rename("new")
+//
+func (d *DialectBuilder) AlterIndex(name string) *IndexAlter {
+	b := AlterIndex(name)
 	b.SetDialect(d.dialect)
 	return b
 }

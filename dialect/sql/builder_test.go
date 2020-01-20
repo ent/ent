@@ -196,6 +196,11 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` RENAME INDEX `old` TO `new`",
 		},
 		{
+			input: Dialect(dialect.Postgres).AlterIndex("old").
+				Rename("new"),
+			wantQuery: `ALTER INDEX "old" RENAME TO "new"`,
+		},
+		{
 			input:     Insert("users").Columns("age").Values(1),
 			wantQuery: "INSERT INTO `users` (`age`) VALUES (?)",
 			wantArgs:  []interface{}{1},
