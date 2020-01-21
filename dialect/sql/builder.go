@@ -252,6 +252,13 @@ func (t *TableAlter) DropColumn(c *ColumnBuilder) *TableAlter {
 	return t
 }
 
+// ChangeColumn appends the `CHANGE COLUMN` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) ChangeColumn(name string, c *ColumnBuilder) *TableAlter {
+	prefix := fmt.Sprintf("CHANGE COLUMN %s", t.Quote(name))
+	t.Queries = append(t.Queries, &Wrapper{prefix + " %s", c})
+	return t
+}
+
 // RenameIndex appends the `RENAME INDEX` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) RenameIndex(curr, new string) *TableAlter {
 	t.Queries = append(t.Queries, Raw(fmt.Sprintf("RENAME INDEX %s TO %s", t.Quote(curr), t.Quote(new))))

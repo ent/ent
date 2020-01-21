@@ -185,6 +185,11 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `ALTER TABLE "users" ALTER COLUMN "age" TYPE int, ALTER COLUMN "age" SET NOT NULL, ALTER COLUMN "name" DROP NOT NULL`,
 		},
 		{
+			input: AlterTable("users").
+				ChangeColumn("old_age", Column("age").Type("int")),
+			wantQuery: "ALTER TABLE `users` CHANGE COLUMN `old_age` `age` int",
+		},
+		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
 				AddColumn(Column("boring").Type("varchar")).
 				ModifyColumn(Column("age").Type("int")).
