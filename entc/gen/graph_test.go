@@ -205,16 +205,18 @@ func TestRelation(t *testing.T) {
 
 func TestGraph_Gen(t *testing.T) {
 	require := require.New(t)
+	skipExample := "example"
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.Remove(target)
 	external := template.Must(template.New("external").Parse("package external"))
 	graph, err := NewGraph(&Config{
-		Package:  "entc/gen",
-		Target:   target,
-		Storage:  drivers[0],
-		Template: external,
-		IDType:   &field.TypeInfo{Type: field.TypeInt},
+		Package:           "entc/gen",
+		Target:            target,
+		Storage:           drivers[0],
+		Template:          external,
+		SkipGraphTemplate: skipExample,
+		IDType:            &field.TypeInfo{Type: field.TypeInt},
 	}, &load.Schema{
 		Name: "T1",
 		Fields: []*load.Field{
@@ -230,9 +232,16 @@ func TestGraph_Gen(t *testing.T) {
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
 	// ensure graph files were generated.
-	for _, name := range []string{"ent", "client", "config", "example_test"} {
-		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
-		require.NoError(err)
+	if skipExample == "" {
+		for _, name := range []string{"ent", "client", "config", "example_test"} {
+			_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
+			require.NoError(err)
+		}
+	}
+	//if set skipExample := "example", test it
+	if skipExample == "example" {
+		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, "example_test"))
+		require.Error(err)
 	}
 	// ensure entity files were generated.
 	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {

@@ -113,6 +113,7 @@ func main() {
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 			cmd.Flags().StringSliceVarP(&template, "template", "", nil, "external templates to execute")
+			cmd.Flags().StringVar(&cfg.SkipGraphTemplate, "skip", "example", "skip schema example_test")
 			return cmd
 		}(),
 	)

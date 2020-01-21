@@ -30,6 +30,8 @@ type (
 		Target string
 		// Package name for the targeted directory that holds the generated code.
 		Package string
+		// SkipGraphTemplate support skip GraphTemplate such as example_test.go
+		SkipGraphTemplate string
 		// Header is an optional header signature for generated files.
 		Header string
 		// Storage to support in codegen.
@@ -379,6 +381,10 @@ func (g *Graph) Tables() (all []*schema.Table) {
 // SupportMigrate reports if the codegen supports schema migration.
 func (g *Graph) SupportMigrate() bool {
 	return g.Storage.SchemaMode.Support(Migrate)
+}
+
+func (g *Graph) SkipExampleTest() bool {
+	return g.Config.SkipGraphTemplate == "example"
 }
 
 func (g *Graph) typ(name string) (*Type, bool) {
