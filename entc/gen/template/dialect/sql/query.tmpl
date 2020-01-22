@@ -18,7 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	var (
-		nodes []*{{ $.Name }}
+		nodes []*{{ $.Name }} = []*{{ $.Name }}{}
 		{{- with $.ForeignKeys }}
 			withFKs = {{ $receiver }}.withFKs
 		{{- end }}
