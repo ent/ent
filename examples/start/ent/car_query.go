@@ -323,7 +323,6 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
 	}
-
 	if len(nodes) == 0 {
 		return nodes, nil
 	}

@@ -290,7 +290,6 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
 		return nil, err
 	}
-
 	if len(nodes) == 0 {
 		return nodes, nil
 	}

@@ -313,7 +313,6 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
 	}
-
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
