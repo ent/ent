@@ -26,9 +26,9 @@ type Node struct {
 	// The values are being populated by the NodeQuery when eager-loading is set.
 	Edges struct {
 		// Prev holds the value of the prev edge.
-		Prev *Node
+		Prev *Node `gqlgen:prev`
 		// Next holds the value of the next edge.
-		Next *Node
+		Next *Node `gqlgen:next`
 	} `json:"edges"`
 	prev_id *string
 }
