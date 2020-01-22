@@ -109,7 +109,7 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Ind
 }
 
 func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {
-	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", name, value), []interface{}{}, new(sql.Result))
+	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", name, value), []interface{}{}, nil)
 }
 
 // tBuilder returns the MySQL DSL query for table creation.
@@ -226,7 +226,7 @@ func (d *MySQL) addIndex(i *Index, table string) *sql.IndexBuilder {
 // dropIndex drops a MySQL index.
 func (d *MySQL) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
 	query, args := idx.DropBuilder(table).Query()
-	return tx.Exec(ctx, query, args, new(sql.Result))
+	return tx.Exec(ctx, query, args, nil)
 }
 
 // prepare runs preparation work that needs to be done to apply the change-set.
@@ -270,7 +270,7 @@ func (d *MySQL) prepare(ctx context.Context, tx dialect.Tx, change *changes, tab
 		}
 		if qr != nil {
 			query, args := qr.Query()
-			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+			if err := tx.Exec(ctx, query, args, nil); err != nil {
 				return err
 			}
 		}

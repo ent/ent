@@ -127,7 +127,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			}
 		default: // !exist
 			query, args := m.tBuilder(t).Query()
-			if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+			if err := tx.Exec(ctx, query, args, nil); err != nil {
 				return fmt.Errorf("create table %q: %v", t.Name, err)
 			}
 			// if global unique identifier is enabled and it's not a relation table,
@@ -140,7 +140,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			// indexes.
 			for _, idx := range t.Indexes {
 				query, args := m.addIndex(idx, t.Name).Query()
-				if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+				if err := tx.Exec(ctx, query, args, nil); err != nil {
 					return fmt.Errorf("create index %q: %v", idx.Name, err)
 				}
 			}
@@ -170,7 +170,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			b.AddForeignKey(fk.DSL())
 		}
 		query, args := b.Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
 		}
 	}
@@ -209,13 +209,13 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	// if there's actual action to execute on ALTER TABLE.
 	if len(b.Queries) != 0 {
 		query, args := b.Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("alter table %q: %v", table, err)
 		}
 	}
 	for _, idx := range change.index.add {
 		query, args := m.addIndex(idx, table).Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("create index %q: %v", table, err)
 		}
 	}
@@ -344,7 +344,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 			AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}).
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
 		query, args := m.tBuilder(t).Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("create types table: %v", err)
 		}
 		return nil
@@ -375,7 +375,7 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 		}
 		query, args := sql.Dialect(m.Dialect()).
 			Insert(TypeTable).Columns("type").Values(t.Name).Query()
-		if err := tx.Exec(ctx, query, args, new(sql.Result)); err != nil {
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("insert into type: %v", err)
 		}
 		id = len(m.typeRanges)

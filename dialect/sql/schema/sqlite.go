@@ -59,7 +59,7 @@ func (d *SQLite) setRange(ctx context.Context, tx dialect.Tx, name string, value
 	default: // !exists
 		query, args = sql.Insert("sqlite_sequence").Columns("name", "seq").Values(name, value).Query()
 	}
-	return tx.Exec(ctx, query, args, new(sql.Result))
+	return tx.Exec(ctx, query, args, nil)
 }
 
 func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder {
@@ -144,7 +144,7 @@ func (d *SQLite) addIndex(i *Index, table string) *sql.IndexBuilder {
 // dropIndex drops a SQLite index.
 func (d *SQLite) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
 	query, args := idx.DropBuilder("").Query()
-	return tx.Exec(ctx, query, args, new(sql.Result))
+	return tx.Exec(ctx, query, args, nil)
 }
 
 // fkExist returns always true to disable foreign-keys creation after the table was created.

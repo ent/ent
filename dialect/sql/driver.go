@@ -90,19 +90,24 @@ type conn struct {
 
 // Exec implements the dialect.Exec method.
 func (c *conn) Exec(ctx context.Context, query string, args, v interface{}) error {
-	vr, ok := v.(*sql.Result)
-	if !ok {
-		return fmt.Errorf("dialect/sql: invalid type %T. expect *sql.Result", v)
-	}
 	argv, ok := args.([]interface{})
 	if !ok {
 		return fmt.Errorf("dialect/sql: invalid type %T. expect []interface{} for args", v)
 	}
-	res, err := c.ExecContext(ctx, query, argv...)
-	if err != nil {
-		return err
+	switch v := v.(type) {
+	case nil:
+		if _, err := c.ExecContext(ctx, query, argv...); err != nil {
+			return err
+		}
+	case *sql.Result:
+		res, err := c.ExecContext(ctx, query, argv...)
+		if err != nil {
+			return err
+		}
+		*v = res
+	default:
+		return fmt.Errorf("dialect/sql: invalid type %T. expect *sql.Result", v)
 	}
-	*vr = res
 	return nil
 }
 
