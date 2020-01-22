@@ -323,7 +323,6 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
 		return nil, err
 	}
-
 	if len(nodes) == 0 {
 		return nodes, nil
 	}

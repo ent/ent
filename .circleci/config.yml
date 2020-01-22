@@ -57,7 +57,7 @@ jobs:
     - *storetestdir
 
   integration:
-    docker:
+    docker: &integration-docker
       - image: circleci/golang
       - image: circleci/mysql:5.6.35
         environment: &mysql_env
@@ -91,7 +91,7 @@ jobs:
         command: conf/gremlin-server.yaml
     steps:
       - checkout
-      - run:
+      - run: &integration-wait
           name: Wait for databases
           command: >-
             dockerize -timeout 1m
@@ -125,9 +125,41 @@ jobs:
           working_directory: entc/integration
           command: go generate
       - run:
+          name: Check untracked files
+          command: |
+            if [[ `git status --porcelain` ]]
+            then
+              echo "Running 'go generate ./...' introduced untracked files"
+              git status --porcelain
+              exit 1
+            fi
+      - run:
           name: Run integration tests
           working_directory: entc/integration
           command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race -count=2 ./...
+      - *storetestdir
+
+  migration:
+    docker: *integration-docker
+    steps:
+      - checkout
+      - run: *integration-wait
+      - *mktestdir
+      - getmods
+      - run:
+          name: Checkout master
+          command: git checkout origin/master
+      - run:
+          name: Run integration on master
+          working_directory: entc/integration
+          command: gotestsum -f short-verbose --junitfile ~/test-results/master-integration.xml -- -race -count=2 .
+      - run:
+          name: Checkout PR branch
+          command: git checkout "$CIRCLE_BRANCH"
+      - run:
+          name: Run integration on PR branch
+          working_directory: entc/integration
+          command: gotestsum -f short-verbose --junitfile ~/test-results/pr-integration.xml -- -race -count=2 .
       - *storetestdir
 
   docs:
@@ -167,6 +199,10 @@ workflows:
     - lint
     - unit
     - integration
+    - migration:
+        filters:
+          branches:
+            ignore: master
     - docs:
         filters:
           branches:
