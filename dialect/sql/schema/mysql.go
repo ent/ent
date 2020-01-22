@@ -94,7 +94,9 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Ind
 	rows := &sql.Rows{}
 	query, args := sql.Select("index_name", "column_name", "non_unique", "seq_in_index").
 		From(sql.Table("INFORMATION_SCHEMA.STATISTICS").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).Query()
+		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).
+		OrderBy("index_name", "seq_in_index").
+		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("mysql: reading index description %v", err)
 	}

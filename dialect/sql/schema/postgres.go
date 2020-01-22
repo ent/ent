@@ -133,7 +133,8 @@ const indexesQuery = `
 SELECT i.relname AS index_name,
        a.attname AS column_name,
        idx.indisprimary AS primary,
-       idx.indisunique AS unique
+       idx.indisunique AS unique,
+       array_position(idx.indkey, a.attnum) as seq_in_index
 FROM pg_class t,
      pg_class i,
      pg_index idx,
@@ -146,7 +147,8 @@ WHERE t.oid = idx.indrelid
   AND a.attnum = ANY(idx.indkey)
   AND t.relkind = 'r'
   AND n.nspname = CURRENT_SCHEMA()
-  AND t.relname = '%s';
+  AND t.relname = '%s'
+ORDER BY index_name, seq_in_index;
 `
 
 func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (Indexes, error) {
@@ -161,10 +163,11 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 	)
 	for rows.Next() {
 		var (
+			seqindex        int
 			name, column    string
 			unique, primary bool
 		)
-		if err := rows.Scan(&name, &column, &primary, &unique); err != nil {
+		if err := rows.Scan(&name, &column, &primary, &unique, &seqindex); err != nil {
 			return nil, fmt.Errorf("scanning index description: %v", err)
 		}
 		// If the index is prefixed with the table, it's probably was
