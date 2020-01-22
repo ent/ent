@@ -66,7 +66,7 @@ func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, name string, val
 	if value == 0 {
 		value = 1 // RESTART value cannot be < 1.
 	}
-	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH %d", name, value), []interface{}{}, new(sql.Result))
+	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH %d", name, value), []interface{}{}, nil)
 }
 
 // table loads the current table description from the database.
@@ -349,5 +349,5 @@ func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, tab
 	if exists {
 		query, args = build.AlterTable(table).DropConstraint(name).Query()
 	}
-	return tx.Exec(ctx, query, args, new(sql.Result))
+	return tx.Exec(ctx, query, args, nil)
 }
