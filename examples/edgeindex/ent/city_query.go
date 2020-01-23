@@ -294,8 +294,8 @@ func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
 
 func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	var (
-		nodes []*City
-		_spec = cq.querySpec()
+		nodes []*City = []*City{}
+		_spec         = cq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &City{config: cq.config}

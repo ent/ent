@@ -271,8 +271,8 @@ func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 
 func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 	var (
-		nodes []*Spec
-		_spec = sq.querySpec()
+		nodes []*Spec = []*Spec{}
+		_spec         = sq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Spec{config: sq.config}

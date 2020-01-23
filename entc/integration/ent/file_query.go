@@ -319,9 +319,9 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
-		nodes   []*File
-		withFKs = fq.withFKs
-		_spec   = fq.querySpec()
+		nodes   []*File = []*File{}
+		withFKs         = fq.withFKs
+		_spec           = fq.querySpec()
 	)
 	if fq.withOwner != nil || fq.withType != nil {
 		withFKs = true

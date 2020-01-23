@@ -321,9 +321,9 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
-		nodes   []*Card
-		withFKs = cq.withFKs
-		_spec   = cq.querySpec()
+		nodes   []*Card = []*Card{}
+		withFKs         = cq.withFKs
+		_spec           = cq.querySpec()
 	)
 	if cq.withOwner != nil {
 		withFKs = true

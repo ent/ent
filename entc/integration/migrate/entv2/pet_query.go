@@ -243,8 +243,8 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
-		nodes []*Pet
-		_spec = pq.querySpec()
+		nodes []*Pet = []*Pet{}
+		_spec        = pq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Pet{config: pq.config}

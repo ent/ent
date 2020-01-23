@@ -267,8 +267,8 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
-		nodes []*Group
-		_spec = gq.querySpec()
+		nodes []*Group = []*Group{}
+		_spec          = gq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Group{config: gq.config}

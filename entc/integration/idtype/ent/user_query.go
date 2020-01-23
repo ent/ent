@@ -342,9 +342,9 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes   []*User
-		withFKs = uq.withFKs
-		_spec   = uq.querySpec()
+		nodes   []*User = []*User{}
+		withFKs         = uq.withFKs
+		_spec           = uq.querySpec()
 	)
 	if uq.withSpouse != nil {
 		withFKs = true

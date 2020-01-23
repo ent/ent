@@ -319,9 +319,9 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
-		nodes   []*Pet
-		withFKs = pq.withFKs
-		_spec   = pq.querySpec()
+		nodes   []*Pet = []*Pet{}
+		withFKs        = pq.withFKs
+		_spec          = pq.querySpec()
 	)
 	if pq.withOwner != nil {
 		withFKs = true

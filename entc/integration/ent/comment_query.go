@@ -267,8 +267,8 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	var (
-		nodes []*Comment
-		_spec = cq.querySpec()
+		nodes []*Comment = []*Comment{}
+		_spec            = cq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Comment{config: cq.config}
