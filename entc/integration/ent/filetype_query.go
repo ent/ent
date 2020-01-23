@@ -295,8 +295,8 @@ func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect
 
 func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	var (
-		nodes []*FileType
-		_spec = ftq.querySpec()
+		nodes []*FileType = []*FileType{}
+		_spec             = ftq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &FileType{config: ftq.config}

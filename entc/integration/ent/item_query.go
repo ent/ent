@@ -243,8 +243,8 @@ func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 
 func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
 	var (
-		nodes []*Item
-		_spec = iq.querySpec()
+		nodes []*Item = []*Item{}
+		_spec         = iq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Item{config: iq.config}

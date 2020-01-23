@@ -294,9 +294,9 @@ func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
 
 func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	var (
-		nodes   []*Street
-		withFKs = sq.withFKs
-		_spec   = sq.querySpec()
+		nodes   []*Street = []*Street{}
+		withFKs           = sq.withFKs
+		_spec             = sq.querySpec()
 	)
 	if sq.withCity != nil {
 		withFKs = true

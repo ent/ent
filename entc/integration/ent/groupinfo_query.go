@@ -295,8 +295,8 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 	var (
-		nodes []*GroupInfo
-		_spec = giq.querySpec()
+		nodes []*GroupInfo = []*GroupInfo{}
+		_spec              = giq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &GroupInfo{config: giq.config}

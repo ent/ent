@@ -318,9 +318,9 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
-		nodes   []*Node
-		withFKs = nq.withFKs
-		_spec   = nq.querySpec()
+		nodes   []*Node = []*Node{}
+		withFKs         = nq.withFKs
+		_spec           = nq.querySpec()
 	)
 	if nq.withParent != nil {
 		withFKs = true

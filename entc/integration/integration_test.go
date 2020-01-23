@@ -546,7 +546,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	t.Log("query users with or condition")
 	require.Len(client.User.Query().Where(user.Or(user.Name("a8m"), user.Name("neta"))).AllX(ctx), 2)
 	require.Len(client.User.Query().Where(user.Or(user.Name("a8m"), user.Name("noam"))).AllX(ctx), 1)
-	require.Zero(client.User.Query().Where(user.Or(user.Name("alex"), user.Name("noam"))).AllX(ctx))
+	require.Len(client.User.Query().Where(user.Or(user.Name("alex"), user.Name("noam"))).AllX(ctx), 0)
 
 	t.Log("query using the in predicate")
 	require.Len(client.User.Query().Where(user.NameIn("a8m", "neta")).AllX(ctx), 2)

@@ -270,9 +270,9 @@ func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
 
 func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 	var (
-		nodes   []*Car
-		withFKs = cq.withFKs
-		_spec   = cq.querySpec()
+		nodes   []*Car = []*Car{}
+		withFKs        = cq.withFKs
+		_spec          = cq.querySpec()
 	)
 	if cq.withOwner != nil {
 		withFKs = true

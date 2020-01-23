@@ -319,9 +319,9 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
-		nodes   []*Group
-		withFKs = gq.withFKs
-		_spec   = gq.querySpec()
+		nodes   []*Group = []*Group{}
+		withFKs          = gq.withFKs
+		_spec            = gq.querySpec()
 	)
 	if gq.withAdmin != nil {
 		withFKs = true
