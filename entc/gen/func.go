@@ -51,6 +51,8 @@ var (
 		"trimPackage": trimPackage,
 		"xtemplate":   xtemplate,
 		"hasTemplate": hasTemplate,
+		"split":       strings.Split,
+		"tagLookup":   tagLookup,
 	}
 	rules   = ruleset()
 	acronym = make(map[string]bool)
@@ -304,5 +306,11 @@ func trimPackage(ident, pkg string) string {
 func indirect(v reflect.Value) reflect.Value {
 	for ; v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface; v = v.Elem() {
 	}
+	return v
+}
+
+// tagLookup returns the value associated with key in the tag string.
+func tagLookup(tag, key string) string {
+	v, _ := reflect.StructTag(tag).Lookup(key)
 	return v
 }
