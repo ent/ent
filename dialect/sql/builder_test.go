@@ -201,6 +201,13 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` RENAME INDEX `old` TO `new`",
 		},
 		{
+			input: AlterTable("users").
+				DropIndex("old").
+				AddIndex(CreateIndex("new1").Columns("c1", "c2")).
+				AddIndex(CreateIndex("new2").Columns("c1", "c2").Unique()),
+			wantQuery: "ALTER TABLE `users` DROP INDEX `old`, ADD INDEX `new1`(`c1`, `c2`), ADD UNIQUE INDEX `new2`(`c1`, `c2`)",
+		},
+		{
 			input: Dialect(dialect.Postgres).AlterIndex("old").
 				Rename("new"),
 			wantQuery: `ALTER INDEX "old" RENAME TO "new"`,

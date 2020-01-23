@@ -265,6 +265,28 @@ func (t *TableAlter) RenameIndex(curr, new string) *TableAlter {
 	return t
 }
 
+// DropIndex appends the `DROP INDEX` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) DropIndex(name string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("DROP INDEX %s", t.Quote(name))))
+	return t
+}
+
+// AddIndex appends the `ADD INDEX` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) AddIndex(idx *IndexBuilder) *TableAlter {
+	b := &Builder{dialect: t.dialect}
+	b.WriteString("ADD ")
+	if idx.unique {
+		b.WriteString("UNIQUE ")
+	}
+	b.WriteString("INDEX ")
+	b.Ident(idx.name)
+	b.Nested(func(b *Builder) {
+		b.IdentComma(idx.columns...)
+	})
+	t.Queries = append(t.Queries, b)
+	return t
+}
+
 // AddForeignKey adds a foreign key constraint to the `ALTER TABLE` statement.
 func (t *TableAlter) AddForeignKey(fk *ForeignKeyBuilder) *TableAlter {
 	t.Queries = append(t.Queries, &Wrapper{"ADD CONSTRAINT %s", fk})
