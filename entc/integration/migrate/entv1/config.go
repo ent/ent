@@ -7,6 +7,8 @@
 package entv1
 
 import (
+	"context"
+
 	"github.com/facebookincubator/ent/dialect"
 )
 
@@ -21,6 +23,10 @@ type config struct {
 	debug bool
 	// log used for logging on debug mode.
 	log func(...interface{})
+	// debugWithContext enable a debug logging with context.
+	debugWithContext bool
+	// logCtx used for logging with context on debug mode.
+	logCtx func(context.Context, ...interface{})
 }
 
 // Options applies the options on the config object.
@@ -31,6 +37,9 @@ func (c *config) options(opts ...Option) {
 	if c.debug {
 		c.driver = dialect.Debug(c.driver, c.log)
 	}
+	if c.debugWithContext {
+		c.driver = dialect.DebugWithContext(c.driver, c.logCtx)
+	}
 }
 
 // Debug enables debug logging on the ent.Driver.
@@ -40,10 +49,24 @@ func Debug() Option {
 	}
 }
 
+// DebugWithContext enables debug logging with context on the ent.Driver.
+func DebugWithContext() Option {
+	return func(c *config) {
+		c.debugWithContext = true
+	}
+}
+
 // Log sets the logging function for debug mode.
 func Log(fn func(...interface{})) Option {
 	return func(c *config) {
 		c.log = fn
+	}
+}
+
+// LogCtx sets the contextual logging function for debug mode.
+func LogCtx(fn func(context.Context, ...interface{})) Option {
+	return func(c *config) {
+		c.logCtx = fn
 	}
 }
 
