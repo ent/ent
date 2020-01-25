@@ -241,4 +241,5 @@ func TestGraph_Gen(t *testing.T) {
 	}
 	_, err = os.Stat(target + "/external.go")
 	require.NoError(err)
+	os.RemoveAll(target)
 }
