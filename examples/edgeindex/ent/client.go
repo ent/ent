@@ -34,12 +34,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	// To enable contextual logging, logger which can log with context must be configured.
-	logCtx := func(_ context.Context, i ...interface{}) {
-		log.Println(i)
-	}
-
-	c := config{log: log.Println, logCtx: logCtx}
+	c := config{log: log.Println}
 	c.options(opts...)
 	return &Client{
 		config: c,
@@ -94,39 +89,6 @@ func (c *Client) Debug() *Client {
 		return c
 	}
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
-		City:   NewCityClient(cfg),
-		Street: NewStreetClient(cfg),
-	}
-}
-
-// DebugWithContext returns a new debug-client. It's used to get verbose
-// logging with context on specific operations.
-// To enable contextual logging, logger which can log with context must be configured.
-//
-//	// using github.com/rs/zerolog
-//	logCtx := func(ctx context.Context, i ...interface{}) {
-//		log.Ctx(ctx).Print(i)
-//	}
-//
-//	client, _ := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", ent.LogCtx(logCtx))
-//
-//	client.DebugWithContext().
-//		City.
-//		Query().
-//		Count(ctx)
-//
-func (c *Client) DebugWithContext() *Client {
-	if c.debugWithContext {
-		return c
-	}
-	cfg := config{
-		driver:           dialect.DebugWithContext(c.driver, c.logCtx),
-		logCtx:           c.logCtx,
-		debugWithContext: true,
-	}
 	return &Client{
 		config: cfg,
 		Schema: migrate.NewSchema(cfg.driver),
