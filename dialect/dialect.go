@@ -79,7 +79,7 @@ func Debug(d Driver, logger ...func(...interface{})) Driver {
 	return drv
 }
 
-// DebugWithContext gets a driver and an logging function, and returns
+// DebugWithContext gets a driver and a logging function, and returns
 // a new debugged-driver that prints all outgoing operations with context.
 func DebugWithContext(d Driver, logger func(context.Context, ...interface{})) Driver {
 	drv := &DebugDriver{d, logger}
