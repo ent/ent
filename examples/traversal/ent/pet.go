@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
+	"github.com/facebookincubator/ent/examples/traversal/ent/user"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -33,6 +34,32 @@ type PetEdges struct {
 	Friends []*Pet
 	// Owner holds the value of the owner edge.
 	Owner *User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// FriendsWithError returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e PetEdges) FriendsWithError() ([]*Pet, error) {
+	if e.loadedTypes[0] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
+}
+
+// OwnerWithError returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PetEdges) OwnerWithError() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Owner, nil
+	}
+	return nil, &NotLoadedError{edge: "owner"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

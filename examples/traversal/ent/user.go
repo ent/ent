@@ -38,6 +38,45 @@ type UserEdges struct {
 	Groups []*Group
 	// Manage holds the value of the manage edge.
 	Manage []*Group
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [4]bool
+}
+
+// PetsWithError returns the Pets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PetsWithError() ([]*Pet, error) {
+	if e.loadedTypes[0] {
+		return e.Pets, nil
+	}
+	return nil, &NotLoadedError{edge: "pets"}
+}
+
+// FriendsWithError returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendsWithError() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
+}
+
+// GroupsWithError returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupsWithError() ([]*Group, error) {
+	if e.loadedTypes[2] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
+}
+
+// ManageWithError returns the Manage value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ManageWithError() ([]*Group, error) {
+	if e.loadedTypes[3] {
+		return e.Manage, nil
+	}
+	return nil, &NotLoadedError{edge: "manage"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

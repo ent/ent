@@ -319,9 +319,13 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
-		nodes   []*Group = []*Group{}
-		withFKs          = gq.withFKs
-		_spec            = gq.querySpec()
+		nodes       = []*Group{}
+		withFKs     = gq.withFKs
+		_spec       = gq.querySpec()
+		loadedTypes = [2]bool{
+			gq.withUsers != nil,
+			gq.withAdmin != nil,
+		}
 	)
 	if gq.withAdmin != nil {
 		withFKs = true
@@ -343,6 +347,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {

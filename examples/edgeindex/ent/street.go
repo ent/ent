@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
 )
 
@@ -31,6 +32,23 @@ type Street struct {
 type StreetEdges struct {
 	// City holds the value of the city edge.
 	City *City
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// CityWithError returns the City value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e StreetEdges) CityWithError() (*City, error) {
+	if e.loadedTypes[0] {
+		if e.City == nil {
+			// The edge city was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: city.Label}
+		}
+		return e.City, nil
+	}
+	return nil, &NotLoadedError{edge: "city"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

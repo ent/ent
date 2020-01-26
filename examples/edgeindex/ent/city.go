@@ -30,6 +30,18 @@ type City struct {
 type CityEdges struct {
 	// Streets holds the value of the streets edge.
 	Streets []*Street
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// StreetsWithError returns the Streets value or an error if the edge
+// was not loaded in eager-loading.
+func (e CityEdges) StreetsWithError() ([]*Street, error) {
+	if e.loadedTypes[0] {
+		return e.Streets, nil
+	}
+	return nil, &NotLoadedError{edge: "streets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

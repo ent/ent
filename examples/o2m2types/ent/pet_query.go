@@ -294,9 +294,12 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
-		nodes   []*Pet = []*Pet{}
-		withFKs        = pq.withFKs
-		_spec          = pq.querySpec()
+		nodes       = []*Pet{}
+		withFKs     = pq.withFKs
+		_spec       = pq.querySpec()
+		loadedTypes = [1]bool{
+			pq.withOwner != nil,
+		}
 	)
 	if pq.withOwner != nil {
 		withFKs = true
@@ -318,6 +321,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {

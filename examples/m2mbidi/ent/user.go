@@ -32,6 +32,18 @@ type User struct {
 type UserEdges struct {
 	// Friends holds the value of the friends edge.
 	Friends []*User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FriendsWithError returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendsWithError() ([]*User, error) {
+	if e.loadedTypes[0] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

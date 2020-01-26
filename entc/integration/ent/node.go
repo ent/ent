@@ -34,6 +34,37 @@ type NodeEdges struct {
 	Prev *Node `gqlgen:prev`
 	// Next holds the value of the next edge.
 	Next *Node `gqlgen:next`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// PrevWithError returns the Prev value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NodeEdges) PrevWithError() (*Node, error) {
+	if e.loadedTypes[0] {
+		if e.Prev == nil {
+			// The edge prev was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: node.Label}
+		}
+		return e.Prev, nil
+	}
+	return nil, &NotLoadedError{edge: "prev"}
+}
+
+// NextWithError returns the Next value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NodeEdges) NextWithError() (*Node, error) {
+	if e.loadedTypes[1] {
+		if e.Next == nil {
+			// The edge next was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: node.Label}
+		}
+		return e.Next, nil
+	}
+	return nil, &NotLoadedError{edge: "next"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

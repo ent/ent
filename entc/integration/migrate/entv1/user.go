@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 )
 
@@ -50,6 +51,60 @@ type UserEdges struct {
 	Spouse *User
 	// Car holds the value of the car edge.
 	Car *Car
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [4]bool
+}
+
+// ParentWithError returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ParentWithError() (*User, error) {
+	if e.loadedTypes[0] {
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Parent, nil
+	}
+	return nil, &NotLoadedError{edge: "parent"}
+}
+
+// ChildrenWithError returns the Children value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ChildrenWithError() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.Children, nil
+	}
+	return nil, &NotLoadedError{edge: "children"}
+}
+
+// SpouseWithError returns the Spouse value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) SpouseWithError() (*User, error) {
+	if e.loadedTypes[2] {
+		if e.Spouse == nil {
+			// The edge spouse was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Spouse, nil
+	}
+	return nil, &NotLoadedError{edge: "spouse"}
+}
+
+// CarWithError returns the Car value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) CarWithError() (*Car, error) {
+	if e.loadedTypes[3] {
+		if e.Car == nil {
+			// The edge car was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: car.Label}
+		}
+		return e.Car, nil
+	}
+	return nil, &NotLoadedError{edge: "car"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -32,6 +32,18 @@ type User struct {
 type UserEdges struct {
 	// Pets holds the value of the pets edge.
 	Pets []*Pet
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// PetsWithError returns the Pets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PetsWithError() ([]*Pet, error) {
+	if e.loadedTypes[0] {
+		return e.Pets, nil
+	}
+	return nil, &NotLoadedError{edge: "pets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

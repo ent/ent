@@ -35,6 +35,41 @@ type UserEdges struct {
 	Followers []*User
 	// Following holds the value of the following edge.
 	Following []*User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [3]bool
+}
+
+// SpouseWithError returns the Spouse value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) SpouseWithError() (*User, error) {
+	if e.loadedTypes[0] {
+		if e.Spouse == nil {
+			// The edge spouse was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Spouse, nil
+	}
+	return nil, &NotLoadedError{edge: "spouse"}
+}
+
+// FollowersWithError returns the Followers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FollowersWithError() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.Followers, nil
+	}
+	return nil, &NotLoadedError{edge: "followers"}
+}
+
+// FollowingWithError returns the Following value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FollowingWithError() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.Following, nil
+	}
+	return nil, &NotLoadedError{edge: "following"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

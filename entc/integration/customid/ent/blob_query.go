@@ -268,8 +268,8 @@ func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
 
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	var (
-		nodes []*Blob = []*Blob{}
-		_spec         = bq.querySpec()
+		nodes = []*Blob{}
+		_spec = bq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Blob{config: bq.config}

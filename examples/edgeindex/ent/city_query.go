@@ -294,8 +294,11 @@ func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
 
 func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	var (
-		nodes []*City = []*City{}
-		_spec         = cq.querySpec()
+		nodes       = []*City{}
+		_spec       = cq.querySpec()
+		loadedTypes = [1]bool{
+			cq.withStreets != nil,
+		}
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &City{config: cq.config}
@@ -308,6 +311,7 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {

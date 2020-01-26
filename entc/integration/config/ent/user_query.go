@@ -243,8 +243,8 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes []*User = []*User{}
-		_spec         = uq.querySpec()
+		nodes = []*User{}
+		_spec = uq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}

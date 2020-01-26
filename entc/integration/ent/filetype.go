@@ -31,6 +31,18 @@ type FileType struct {
 type FileTypeEdges struct {
 	// Files holds the value of the files edge.
 	Files []*File
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FilesWithError returns the Files value or an error if the edge
+// was not loaded in eager-loading.
+func (e FileTypeEdges) FilesWithError() ([]*File, error) {
+	if e.loadedTypes[0] {
+		return e.Files, nil
+	}
+	return nil, &NotLoadedError{edge: "files"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

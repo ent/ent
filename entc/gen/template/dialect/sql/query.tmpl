@@ -18,11 +18,18 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	var (
-		nodes []*{{ $.Name }} = []*{{ $.Name }}{}
+		nodes = []*{{ $.Name }}{}
 		{{- with $.ForeignKeys }}
 			withFKs = {{ $receiver }}.withFKs
 		{{- end }}
 		_spec = {{ $receiver }}.querySpec()
+		{{- with $.Edges }}
+			loadedTypes = [{{ len . }}]bool{
+				{{- range $e := . }}
+					{{ $receiver }}.with{{ pascal $e.Name }} != nil,
+				{{- end }}
+			}
+		{{- end }}
 	)
 	{{- with $.ForeignKeys }}
 			{{- with $.FKEdges }}
@@ -50,6 +57,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		{{- with $.Edges }}
+			node.Edges.loadedTypes = loadedTypes
+		{{- end }}
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {

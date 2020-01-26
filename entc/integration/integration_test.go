@@ -899,6 +899,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 			Where(user.HasSpouse()).
 			WithSpouse().
 			WithCard().
+			WithParent().
 			Order(ent.Asc(user.FieldName)).
 			AllX(ctx)
 		require.Len(users, 2)
@@ -908,6 +909,23 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.NotNil(a8m.Name, users[1].Edges.Spouse.Name)
 		require.NotNil(users[0].Edges.Card)
 		require.Nil(users[1].Edges.Card)
+
+		edges := users[0].Edges
+		pets, err := edges.PetsWithError()
+		require.True(ent.IsNotLoaded(err))
+		require.Nil(pets)
+		groups, err := edges.GroupsWithError()
+		require.True(ent.IsNotLoaded(err))
+		require.Nil(groups)
+		card, err := edges.CardWithError()
+		require.Nil(err)
+		require.NotNil(card)
+		spouse, err := edges.SpouseWithError()
+		require.Nil(err)
+		require.NotNil(spouse)
+		parent, err := edges.ParentWithError()
+		require.True(ent.IsNotFound(err), "loaded but was not found")
+		require.Nil(parent)
 	})
 
 	t.Run("O2M", func(t *testing.T) {
@@ -930,7 +948,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	})
 
 	t.Run("M2O", func(t *testing.T) {
-		a8m = client.User.Query().Where(user.ID(a8m.ID)).OnlyX(ctx)
+		a8m := client.User.Query().Where(user.ID(a8m.ID)).OnlyX(ctx)
 		require.Empty(a8m.Edges.Pets)
 
 		a8m = client.User.
