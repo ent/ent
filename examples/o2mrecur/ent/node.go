@@ -23,13 +23,16 @@ type Node struct {
 	Value int `json:"value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NodeQuery when eager-loading is set.
-	Edges struct {
-		// Parent holds the value of the parent edge.
-		Parent *Node
-		// Children holds the value of the children edge.
-		Children []*Node
-	} `json:"edges"`
+	Edges     NodeEdges `json:"edges"`
 	parent_id *int
+}
+
+// NodeEdges holds the relations/edges for other nodes in the graph.
+type NodeEdges struct {
+	// Parent holds the value of the parent edge.
+	Parent *Node
+	// Children holds the value of the children edge.
+	Children []*Node
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -32,16 +32,19 @@ type Group struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
-	Edges struct {
-		// Files holds the value of the files edge.
-		Files []*File
-		// Blocked holds the value of the blocked edge.
-		Blocked []*User
-		// Users holds the value of the users edge.
-		Users []*User
-		// Info holds the value of the info edge.
-		Info *GroupInfo
-	} `json:"edges"`
+	Edges GroupEdges `json:"edges"`
+}
+
+// GroupEdges holds the relations/edges for other nodes in the graph.
+type GroupEdges struct {
+	// Files holds the value of the files edge.
+	Files []*File
+	// Blocked holds the value of the blocked edge.
+	Blocked []*User
+	// Users holds the value of the users edge.
+	Users []*User
+	// Info holds the value of the info edge.
+	Info *GroupInfo
 }
 
 // FromResponse scans the gremlin response data into Group.

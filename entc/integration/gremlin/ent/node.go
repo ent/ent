@@ -23,12 +23,15 @@ type Node struct {
 	Value int `json:"value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NodeQuery when eager-loading is set.
-	Edges struct {
-		// Prev holds the value of the prev edge.
-		Prev *Node `gqlgen:prev`
-		// Next holds the value of the next edge.
-		Next *Node `gqlgen:next`
-	} `json:"edges"`
+	Edges NodeEdges `json:"edges"`
+}
+
+// NodeEdges holds the relations/edges for other nodes in the graph.
+type NodeEdges struct {
+	// Prev holds the value of the prev edge.
+	Prev *Node `gqlgen:prev`
+	// Next holds the value of the next edge.
+	Next *Node `gqlgen:next`
 }
 
 // FromResponse scans the gremlin response data into Node.

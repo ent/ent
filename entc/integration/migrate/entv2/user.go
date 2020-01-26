@@ -39,10 +39,13 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges struct {
-		// Car holds the value of the car edge.
-		Car []*Car
-	} `json:"edges"`
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Car holds the value of the car edge.
+	Car []*Car
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

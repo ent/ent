@@ -25,12 +25,15 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges struct {
-		// Followers holds the value of the followers edge.
-		Followers []*User
-		// Following holds the value of the following edge.
-		Following []*User
-	} `json:"edges"`
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Followers holds the value of the followers edge.
+	Followers []*User
+	// Following holds the value of the following edge.
+	Following []*User
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

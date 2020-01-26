@@ -21,10 +21,13 @@ type Spec struct {
 	ID string `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SpecQuery when eager-loading is set.
-	Edges struct {
-		// Card holds the value of the card edge.
-		Card []*Card
-	} `json:"edges"`
+	Edges SpecEdges `json:"edges"`
+}
+
+// SpecEdges holds the relations/edges for other nodes in the graph.
+type SpecEdges struct {
+	// Card holds the value of the card edge.
+	Card []*Card
 }
 
 // FromResponse scans the gremlin response data into Spec.
