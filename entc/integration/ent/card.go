@@ -31,16 +31,19 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges struct {
-		// Owner holds the value of the owner edge.
-		Owner *User
-		// Spec holds the value of the spec edge.
-		Spec []*Spec
-	} `json:"edges"`
+	Edges    CardEdges `json:"edges"`
 	owner_id *string
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`
+}
+
+// CardEdges holds the relations/edges for other nodes in the graph.
+type CardEdges struct {
+	// Owner holds the value of the owner edge.
+	Owner *User
+	// Spec holds the value of the spec edge.
+	Spec []*Spec
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

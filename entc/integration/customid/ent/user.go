@@ -21,15 +21,18 @@ type User struct {
 	ID int `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges struct {
-		// Groups holds the value of the groups edge.
-		Groups []*Group
-		// Parent holds the value of the parent edge.
-		Parent *User
-		// Children holds the value of the children edge.
-		Children []*User
-	} `json:"edges"`
+	Edges     UserEdges `json:"edges"`
 	parent_id *int
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Groups holds the value of the groups edge.
+	Groups []*Group
+	// Parent holds the value of the parent edge.
+	Parent *User
+	// Children holds the value of the children edge.
+	Children []*User
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

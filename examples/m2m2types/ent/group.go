@@ -23,10 +23,13 @@ type Group struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
-	Edges struct {
-		// Users holds the value of the users edge.
-		Users []*User
-	} `json:"edges"`
+	Edges GroupEdges `json:"edges"`
+}
+
+// GroupEdges holds the relations/edges for other nodes in the graph.
+type GroupEdges struct {
+	// Users holds the value of the users edge.
+	Users []*User
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -29,12 +29,15 @@ type File struct {
 	Group string `json:"group,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges struct {
-		// Owner holds the value of the owner edge.
-		Owner *User
-		// Type holds the value of the type edge.
-		Type *FileType
-	} `json:"edges"`
+	Edges FileEdges `json:"edges"`
+}
+
+// FileEdges holds the relations/edges for other nodes in the graph.
+type FileEdges struct {
+	// Owner holds the value of the owner edge.
+	Owner *User
+	// Type holds the value of the type edge.
+	Type *FileType
 }
 
 // FromResponse scans the gremlin response data into File.

@@ -23,11 +23,14 @@ type Street struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StreetQuery when eager-loading is set.
-	Edges struct {
-		// City holds the value of the city edge.
-		City *City
-	} `json:"edges"`
+	Edges   StreetEdges `json:"edges"`
 	city_id *int
+}
+
+// StreetEdges holds the relations/edges for other nodes in the graph.
+type StreetEdges struct {
+	// City holds the value of the city edge.
+	City *City
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

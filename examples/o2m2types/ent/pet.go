@@ -23,11 +23,14 @@ type Pet struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
-	Edges struct {
-		// Owner holds the value of the owner edge.
-		Owner *User
-	} `json:"edges"`
+	Edges    PetEdges `json:"edges"`
 	owner_id *int
+}
+
+// PetEdges holds the relations/edges for other nodes in the graph.
+type PetEdges struct {
+	// Owner holds the value of the owner edge.
+	Owner *User
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

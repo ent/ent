@@ -23,10 +23,13 @@ type FileType struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileTypeQuery when eager-loading is set.
-	Edges struct {
-		// Files holds the value of the files edge.
-		Files []*File
-	} `json:"edges"`
+	Edges FileTypeEdges `json:"edges"`
+}
+
+// FileTypeEdges holds the relations/edges for other nodes in the graph.
+type FileTypeEdges struct {
+	// Files holds the value of the files edge.
+	Files []*File
 }
 
 // FromResponse scans the gremlin response data into FileType.
