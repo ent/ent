@@ -53,6 +53,12 @@ var (
 		"hasTemplate": hasTemplate,
 		"split":       strings.Split,
 		"tagLookup":   tagLookup,
+		"toString":    toString,
+		"dict":        dict,
+		"get":         get,
+		"set":         set,
+		"unset":       unset,
+		"hasKey":      hasKey,
 	}
 	rules   = ruleset()
 	acronym = make(map[string]bool)
@@ -313,4 +319,61 @@ func indirect(v reflect.Value) reflect.Value {
 func tagLookup(tag, key string) string {
 	v, _ := reflect.StructTag(tag).Lookup(key)
 	return v
+}
+
+// toString converts `v` to a string.
+func toString(v interface{}) string {
+	switch v := v.(type) {
+	case string:
+		return v
+	case []byte:
+		return string(v)
+	case error:
+		return v.Error()
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprint(v)
+	}
+}
+
+// dict creates a dictionary from a list of pairs.
+func dict(v ...interface{}) map[string]interface{} {
+	lenv := len(v)
+	dict := make(map[string]interface{}, lenv/2)
+	for i := 0; i < lenv; i += 2 {
+		key := toString(v[i])
+		if i+1 >= lenv {
+			dict[key] = ""
+			continue
+		}
+		dict[key] = v[i+1]
+	}
+	return dict
+}
+
+// get the value from the dict for key.
+func get(d map[string]interface{}, key string) interface{} {
+	if val, ok := d[key]; ok {
+		return val
+	}
+	return ""
+}
+
+// set adds a value to the dict for key.
+func set(d map[string]interface{}, key string, value interface{}) map[string]interface{} {
+	d[key] = value
+	return d
+}
+
+// unset removes a key from the dict.
+func unset(d map[string]interface{}, key string) map[string]interface{} {
+	delete(d, key)
+	return d
+}
+
+// hasKey tests whether a key is found in dict.
+func hasKey(d map[string]interface{}, key string) bool {
+	_, ok := d[key]
+	return ok
 }
