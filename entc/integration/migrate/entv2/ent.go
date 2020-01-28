@@ -127,6 +127,22 @@ func IsNotSingular(err error) bool {
 	return ok
 }
 
+// NotLoadedError returns when trying to get a node that was not loaded by the query.
+type NotLoadedError struct {
+	label string
+}
+
+// Error implements the error interface.
+func (e *NotLoadedError) Error() string {
+	return fmt.Sprintf("entv2: %s not loaded", e.label)
+}
+
+// IsNotLoaded returns a boolean indicating whether the error is a not loaded error.
+func IsNotLoaded(err error) bool {
+	_, ok := err.(*NotLoadedError)
+	return ok
+}
+
 // ConstraintError returns when trying to create/update one or more entities and
 // one or more of their constraints failed. For example, violation of edge or
 // field uniqueness.
