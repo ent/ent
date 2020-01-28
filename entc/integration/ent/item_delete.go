@@ -74,7 +74,7 @@ func (ido *ItemDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{item.Label}
+		return &NotFoundError{item.Label}
 	default:
 		return nil
 	}

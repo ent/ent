@@ -74,7 +74,7 @@ func (sdo *StreetDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{street.Label}
+		return &NotFoundError{street.Label}
 	default:
 		return nil
 	}

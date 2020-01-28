@@ -85,14 +85,14 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 	return query
 }
 
-// First returns the first User entity in the query. Returns *ErrNotFound when no user was found.
+// First returns the first User entity in the query. Returns *NotFoundError when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 	us, err := uq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(us) == 0 {
-		return nil, &ErrNotFound{user.Label}
+		return nil, &NotFoundError{user.Label}
 	}
 	return us[0], nil
 }
@@ -106,14 +106,14 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 	return u
 }
 
-// FirstID returns the first User id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first User id in the query. Returns *NotFoundError when no id was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{user.Label}
+		err = &NotFoundError{user.Label}
 		return
 	}
 	return ids[0], nil
@@ -138,9 +138,9 @@ func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 	case 1:
 		return us[0], nil
 	case 0:
-		return nil, &ErrNotFound{user.Label}
+		return nil, &NotFoundError{user.Label}
 	default:
-		return nil, &ErrNotSingular{user.Label}
+		return nil, &NotSingularError{user.Label}
 	}
 }
 
@@ -163,9 +163,9 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{user.Label}
+		err = &NotFoundError{user.Label}
 	default:
-		err = &ErrNotSingular{user.Label}
+		err = &NotSingularError{user.Label}
 	}
 	return
 }

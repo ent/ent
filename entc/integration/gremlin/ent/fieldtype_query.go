@@ -55,14 +55,14 @@ func (ftq *FieldTypeQuery) Order(o ...Order) *FieldTypeQuery {
 	return ftq
 }
 
-// First returns the first FieldType entity in the query. Returns *ErrNotFound when no fieldtype was found.
+// First returns the first FieldType entity in the query. Returns *NotFoundError when no fieldtype was found.
 func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
 	fts, err := ftq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(fts) == 0 {
-		return nil, &ErrNotFound{fieldtype.Label}
+		return nil, &NotFoundError{fieldtype.Label}
 	}
 	return fts[0], nil
 }
@@ -76,14 +76,14 @@ func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
 	return ft
 }
 
-// FirstID returns the first FieldType id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first FieldType id in the query. Returns *NotFoundError when no id was found.
 func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{fieldtype.Label}
+		err = &NotFoundError{fieldtype.Label}
 		return
 	}
 	return ids[0], nil
@@ -108,9 +108,9 @@ func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
 	case 1:
 		return fts[0], nil
 	case 0:
-		return nil, &ErrNotFound{fieldtype.Label}
+		return nil, &NotFoundError{fieldtype.Label}
 	default:
-		return nil, &ErrNotSingular{fieldtype.Label}
+		return nil, &NotSingularError{fieldtype.Label}
 	}
 }
 
@@ -133,9 +133,9 @@ func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{fieldtype.Label}
+		err = &NotFoundError{fieldtype.Label}
 	default:
-		err = &ErrNotSingular{fieldtype.Label}
+		err = &NotSingularError{fieldtype.Label}
 	}
 	return
 }

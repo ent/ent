@@ -87,19 +87,19 @@ func Sum(field string) Aggregate {
 	}
 }
 
-// ErrNotFound returns when trying to fetch a specific entity and it was not found in the database.
-type ErrNotFound struct {
+// NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
+type NotFoundError struct {
 	label string
 }
 
 // Error implements the error interface.
-func (e *ErrNotFound) Error() string {
+func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("ent: %s not found", e.label)
 }
 
 // IsNotFound returns a boolean indicating whether the error is a not found error.
 func IsNotFound(err error) bool {
-	_, ok := err.(*ErrNotFound)
+	_, ok := err.(*NotFoundError)
 	return ok
 }
 
@@ -111,19 +111,35 @@ func MaskNotFound(err error) error {
 	return err
 }
 
-// ErrNotSingular returns when trying to fetch a singular entity and more then one was found in the database.
-type ErrNotSingular struct {
+// NotSingularError returns when trying to fetch a singular entity and more then one was found in the database.
+type NotSingularError struct {
 	label string
 }
 
 // Error implements the error interface.
-func (e *ErrNotSingular) Error() string {
+func (e *NotSingularError) Error() string {
 	return fmt.Sprintf("ent: %s not singular", e.label)
 }
 
 // IsNotSingular returns a boolean indicating whether the error is a not singular error.
 func IsNotSingular(err error) bool {
-	_, ok := err.(*ErrNotSingular)
+	_, ok := err.(*NotSingularError)
+	return ok
+}
+
+// NotLoadedError returns when trying to get a node that was not loaded by the query.
+type NotLoadedError struct {
+	label string
+}
+
+// Error implements the error interface.
+func (e *NotLoadedError) Error() string {
+	return fmt.Sprintf("ent: %s not loaded", e.label)
+}
+
+// IsNotLoaded returns a boolean indicating whether the error is a not loaded error.
+func IsNotLoaded(err error) bool {
+	_, ok := err.(*NotLoadedError)
 	return ok
 }
 

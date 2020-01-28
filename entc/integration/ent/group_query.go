@@ -114,14 +114,14 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	return query
 }
 
-// First returns the first Group entity in the query. Returns *ErrNotFound when no group was found.
+// First returns the first Group entity in the query. Returns *NotFoundError when no group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
 	grs, err := gq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(grs) == 0 {
-		return nil, &ErrNotFound{group.Label}
+		return nil, &NotFoundError{group.Label}
 	}
 	return grs[0], nil
 }
@@ -135,14 +135,14 @@ func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
 	return gr
 }
 
-// FirstID returns the first Group id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Group id in the query. Returns *NotFoundError when no id was found.
 func (gq *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = gq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{group.Label}
+		err = &NotFoundError{group.Label}
 		return
 	}
 	return ids[0], nil
@@ -167,9 +167,9 @@ func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	case 1:
 		return grs[0], nil
 	case 0:
-		return nil, &ErrNotFound{group.Label}
+		return nil, &NotFoundError{group.Label}
 	default:
-		return nil, &ErrNotSingular{group.Label}
+		return nil, &NotSingularError{group.Label}
 	}
 }
 
@@ -192,9 +192,9 @@ func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{group.Label}
+		err = &NotFoundError{group.Label}
 	default:
-		err = &ErrNotSingular{group.Label}
+		err = &NotSingularError{group.Label}
 	}
 	return
 }

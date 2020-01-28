@@ -87,14 +87,14 @@ func (cq *CardQuery) QuerySpec() *SpecQuery {
 	return query
 }
 
-// First returns the first Card entity in the query. Returns *ErrNotFound when no card was found.
+// First returns the first Card entity in the query. Returns *NotFoundError when no card was found.
 func (cq *CardQuery) First(ctx context.Context) (*Card, error) {
 	cs, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(cs) == 0 {
-		return nil, &ErrNotFound{card.Label}
+		return nil, &NotFoundError{card.Label}
 	}
 	return cs[0], nil
 }
@@ -108,14 +108,14 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 	return c
 }
 
-// FirstID returns the first Card id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Card id in the query. Returns *NotFoundError when no id was found.
 func (cq *CardQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{card.Label}
+		err = &NotFoundError{card.Label}
 		return
 	}
 	return ids[0], nil
@@ -140,9 +140,9 @@ func (cq *CardQuery) Only(ctx context.Context) (*Card, error) {
 	case 1:
 		return cs[0], nil
 	case 0:
-		return nil, &ErrNotFound{card.Label}
+		return nil, &NotFoundError{card.Label}
 	default:
-		return nil, &ErrNotSingular{card.Label}
+		return nil, &NotSingularError{card.Label}
 	}
 }
 
@@ -165,9 +165,9 @@ func (cq *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{card.Label}
+		err = &NotFoundError{card.Label}
 	default:
-		err = &ErrNotSingular{card.Label}
+		err = &NotSingularError{card.Label}
 	}
 	return
 }

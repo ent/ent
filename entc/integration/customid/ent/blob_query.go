@@ -56,14 +56,14 @@ func (bq *BlobQuery) Order(o ...Order) *BlobQuery {
 	return bq
 }
 
-// First returns the first Blob entity in the query. Returns *ErrNotFound when no blob was found.
+// First returns the first Blob entity in the query. Returns *NotFoundError when no blob was found.
 func (bq *BlobQuery) First(ctx context.Context) (*Blob, error) {
 	bs, err := bq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(bs) == 0 {
-		return nil, &ErrNotFound{blob.Label}
+		return nil, &NotFoundError{blob.Label}
 	}
 	return bs[0], nil
 }
@@ -77,14 +77,14 @@ func (bq *BlobQuery) FirstX(ctx context.Context) *Blob {
 	return b
 }
 
-// FirstID returns the first Blob id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Blob id in the query. Returns *NotFoundError when no id was found.
 func (bq *BlobQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{blob.Label}
+		err = &NotFoundError{blob.Label}
 		return
 	}
 	return ids[0], nil
@@ -109,9 +109,9 @@ func (bq *BlobQuery) Only(ctx context.Context) (*Blob, error) {
 	case 1:
 		return bs[0], nil
 	case 0:
-		return nil, &ErrNotFound{blob.Label}
+		return nil, &NotFoundError{blob.Label}
 	default:
-		return nil, &ErrNotSingular{blob.Label}
+		return nil, &NotSingularError{blob.Label}
 	}
 }
 
@@ -134,9 +134,9 @@ func (bq *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{blob.Label}
+		err = &NotFoundError{blob.Label}
 	default:
-		err = &ErrNotSingular{blob.Label}
+		err = &NotSingularError{blob.Label}
 	}
 	return
 }

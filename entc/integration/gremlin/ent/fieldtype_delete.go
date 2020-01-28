@@ -72,7 +72,7 @@ func (ftdo *FieldTypeDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{fieldtype.Label}
+		return &NotFoundError{fieldtype.Label}
 	default:
 		return nil
 	}

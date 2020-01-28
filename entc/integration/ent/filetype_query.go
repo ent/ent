@@ -72,14 +72,14 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	return query
 }
 
-// First returns the first FileType entity in the query. Returns *ErrNotFound when no filetype was found.
+// First returns the first FileType entity in the query. Returns *NotFoundError when no filetype was found.
 func (ftq *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
 	fts, err := ftq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(fts) == 0 {
-		return nil, &ErrNotFound{filetype.Label}
+		return nil, &NotFoundError{filetype.Label}
 	}
 	return fts[0], nil
 }
@@ -93,14 +93,14 @@ func (ftq *FileTypeQuery) FirstX(ctx context.Context) *FileType {
 	return ft
 }
 
-// FirstID returns the first FileType id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first FileType id in the query. Returns *NotFoundError when no id was found.
 func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{filetype.Label}
+		err = &NotFoundError{filetype.Label}
 		return
 	}
 	return ids[0], nil
@@ -125,9 +125,9 @@ func (ftq *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
 	case 1:
 		return fts[0], nil
 	case 0:
-		return nil, &ErrNotFound{filetype.Label}
+		return nil, &NotFoundError{filetype.Label}
 	default:
-		return nil, &ErrNotSingular{filetype.Label}
+		return nil, &NotSingularError{filetype.Label}
 	}
 }
 
@@ -150,9 +150,9 @@ func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{filetype.Label}
+		err = &NotFoundError{filetype.Label}
 	default:
-		err = &ErrNotSingular{filetype.Label}
+		err = &NotSingularError{filetype.Label}
 	}
 	return
 }

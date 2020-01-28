@@ -55,14 +55,14 @@ func (iq *ItemQuery) Order(o ...Order) *ItemQuery {
 	return iq
 }
 
-// First returns the first Item entity in the query. Returns *ErrNotFound when no item was found.
+// First returns the first Item entity in the query. Returns *NotFoundError when no item was found.
 func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
 	is, err := iq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(is) == 0 {
-		return nil, &ErrNotFound{item.Label}
+		return nil, &NotFoundError{item.Label}
 	}
 	return is[0], nil
 }
@@ -76,14 +76,14 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 	return i
 }
 
-// FirstID returns the first Item id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Item id in the query. Returns *NotFoundError when no id was found.
 func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{item.Label}
+		err = &NotFoundError{item.Label}
 		return
 	}
 	return ids[0], nil
@@ -108,9 +108,9 @@ func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
 	case 1:
 		return is[0], nil
 	case 0:
-		return nil, &ErrNotFound{item.Label}
+		return nil, &NotFoundError{item.Label}
 	default:
-		return nil, &ErrNotSingular{item.Label}
+		return nil, &NotSingularError{item.Label}
 	}
 }
 
@@ -133,9 +133,9 @@ func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{item.Label}
+		err = &NotFoundError{item.Label}
 	default:
-		err = &ErrNotSingular{item.Label}
+		err = &NotSingularError{item.Label}
 	}
 	return
 }
