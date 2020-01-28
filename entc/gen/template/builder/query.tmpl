@@ -75,14 +75,14 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	}
 {{ end }}
 
-// First returns the first {{ $.Name }} entity in the query. Returns *ErrNotFound when no {{ lower $.Name }} was found.
+// First returns the first {{ $.Name }} entity in the query. Returns *NotFoundError when no {{ lower $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
 	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len({{ plural $.Receiver }}) == 0 {
-		return nil, &ErrNotFound{ {{ $.Package }}.Label}
+		return nil, &NotFoundError{ {{ $.Package }}.Label}
 	}
 	return {{ plural $.Receiver }}[0], nil
 }
@@ -96,14 +96,14 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	return {{ $.Receiver }}
 }
 
-// FirstID returns the first {{ $.Name }} id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first {{ $.Name }} id in the query. Returns *NotFoundError when no id was found.
 func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 	var ids []{{ $.ID.Type }}
 	if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{ {{ $.Package }}.Label}
+		err = &NotFoundError{ {{ $.Package }}.Label}
 		return
 	}
 	return ids[0], nil
@@ -128,9 +128,9 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 	case 1:
 		return {{ plural $.Receiver }}[0], nil
 	case 0:
-		return nil, &ErrNotFound{ {{ $.Package }}.Label}
+		return nil, &NotFoundError{ {{ $.Package }}.Label}
 	default:
-		return nil, &ErrNotSingular{ {{ $.Package }}.Label}
+		return nil, &NotSingularError{ {{ $.Package }}.Label}
 	}
 }
 
@@ -153,9 +153,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.T
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{ {{ $.Package }}.Label}
+		err = &NotFoundError{ {{ $.Package }}.Label}
 	default:
-		err = &ErrNotSingular{ {{ $.Package }}.Label}
+		err = &NotSingularError{ {{ $.Package }}.Label}
 	}
 	return
 }

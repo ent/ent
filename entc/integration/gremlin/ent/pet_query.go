@@ -75,14 +75,14 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// First returns the first Pet entity in the query. Returns *ErrNotFound when no pet was found.
+// First returns the first Pet entity in the query. Returns *NotFoundError when no pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
 	pes, err := pq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(pes) == 0 {
-		return nil, &ErrNotFound{pet.Label}
+		return nil, &NotFoundError{pet.Label}
 	}
 	return pes[0], nil
 }
@@ -96,14 +96,14 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 	return pe
 }
 
-// FirstID returns the first Pet id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Pet id in the query. Returns *NotFoundError when no id was found.
 func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{pet.Label}
+		err = &NotFoundError{pet.Label}
 		return
 	}
 	return ids[0], nil
@@ -128,9 +128,9 @@ func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
 	case 1:
 		return pes[0], nil
 	case 0:
-		return nil, &ErrNotFound{pet.Label}
+		return nil, &NotFoundError{pet.Label}
 	default:
-		return nil, &ErrNotSingular{pet.Label}
+		return nil, &NotSingularError{pet.Label}
 	}
 }
 
@@ -153,9 +153,9 @@ func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{pet.Label}
+		err = &NotFoundError{pet.Label}
 	default:
-		err = &ErrNotSingular{pet.Label}
+		err = &NotSingularError{pet.Label}
 	}
 	return
 }

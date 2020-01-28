@@ -71,14 +71,14 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// First returns the first Car entity in the query. Returns *ErrNotFound when no car was found.
+// First returns the first Car entity in the query. Returns *NotFoundError when no car was found.
 func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
 	cs, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(cs) == 0 {
-		return nil, &ErrNotFound{car.Label}
+		return nil, &NotFoundError{car.Label}
 	}
 	return cs[0], nil
 }
@@ -92,14 +92,14 @@ func (cq *CarQuery) FirstX(ctx context.Context) *Car {
 	return c
 }
 
-// FirstID returns the first Car id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Car id in the query. Returns *NotFoundError when no id was found.
 func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{car.Label}
+		err = &NotFoundError{car.Label}
 		return
 	}
 	return ids[0], nil
@@ -124,9 +124,9 @@ func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
 	case 1:
 		return cs[0], nil
 	case 0:
-		return nil, &ErrNotFound{car.Label}
+		return nil, &NotFoundError{car.Label}
 	default:
-		return nil, &ErrNotSingular{car.Label}
+		return nil, &NotSingularError{car.Label}
 	}
 }
 
@@ -149,9 +149,9 @@ func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{car.Label}
+		err = &NotFoundError{car.Label}
 	default:
-		err = &ErrNotSingular{car.Label}
+		err = &NotSingularError{car.Label}
 	}
 	return
 }

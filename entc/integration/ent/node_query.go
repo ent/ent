@@ -85,14 +85,14 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 	return query
 }
 
-// First returns the first Node entity in the query. Returns *ErrNotFound when no node was found.
+// First returns the first Node entity in the query. Returns *NotFoundError when no node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
 	ns, err := nq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(ns) == 0 {
-		return nil, &ErrNotFound{node.Label}
+		return nil, &NotFoundError{node.Label}
 	}
 	return ns[0], nil
 }
@@ -106,14 +106,14 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 	return n
 }
 
-// FirstID returns the first Node id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Node id in the query. Returns *NotFoundError when no id was found.
 func (nq *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{node.Label}
+		err = &NotFoundError{node.Label}
 		return
 	}
 	return ids[0], nil
@@ -138,9 +138,9 @@ func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
 	case 1:
 		return ns[0], nil
 	case 0:
-		return nil, &ErrNotFound{node.Label}
+		return nil, &NotFoundError{node.Label}
 	default:
-		return nil, &ErrNotSingular{node.Label}
+		return nil, &NotSingularError{node.Label}
 	}
 }
 
@@ -163,9 +163,9 @@ func (nq *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{node.Label}
+		err = &NotFoundError{node.Label}
 	default:
-		err = &ErrNotSingular{node.Label}
+		err = &NotSingularError{node.Label}
 	}
 	return
 }

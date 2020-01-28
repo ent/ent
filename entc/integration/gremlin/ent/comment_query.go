@@ -55,14 +55,14 @@ func (cq *CommentQuery) Order(o ...Order) *CommentQuery {
 	return cq
 }
 
-// First returns the first Comment entity in the query. Returns *ErrNotFound when no comment was found.
+// First returns the first Comment entity in the query. Returns *NotFoundError when no comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
 	cs, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(cs) == 0 {
-		return nil, &ErrNotFound{comment.Label}
+		return nil, &NotFoundError{comment.Label}
 	}
 	return cs[0], nil
 }
@@ -76,14 +76,14 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 	return c
 }
 
-// FirstID returns the first Comment id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Comment id in the query. Returns *NotFoundError when no id was found.
 func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{comment.Label}
+		err = &NotFoundError{comment.Label}
 		return
 	}
 	return ids[0], nil
@@ -108,9 +108,9 @@ func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 	case 1:
 		return cs[0], nil
 	case 0:
-		return nil, &ErrNotFound{comment.Label}
+		return nil, &NotFoundError{comment.Label}
 	default:
-		return nil, &ErrNotSingular{comment.Label}
+		return nil, &NotSingularError{comment.Label}
 	}
 }
 
@@ -133,9 +133,9 @@ func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{comment.Label}
+		err = &NotFoundError{comment.Label}
 	default:
-		err = &ErrNotSingular{comment.Label}
+		err = &NotSingularError{comment.Label}
 	}
 	return
 }

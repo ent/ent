@@ -71,14 +71,14 @@ func (cq *CityQuery) QueryStreets() *StreetQuery {
 	return query
 }
 
-// First returns the first City entity in the query. Returns *ErrNotFound when no city was found.
+// First returns the first City entity in the query. Returns *NotFoundError when no city was found.
 func (cq *CityQuery) First(ctx context.Context) (*City, error) {
 	cs, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(cs) == 0 {
-		return nil, &ErrNotFound{city.Label}
+		return nil, &NotFoundError{city.Label}
 	}
 	return cs[0], nil
 }
@@ -92,14 +92,14 @@ func (cq *CityQuery) FirstX(ctx context.Context) *City {
 	return c
 }
 
-// FirstID returns the first City id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first City id in the query. Returns *NotFoundError when no id was found.
 func (cq *CityQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{city.Label}
+		err = &NotFoundError{city.Label}
 		return
 	}
 	return ids[0], nil
@@ -124,9 +124,9 @@ func (cq *CityQuery) Only(ctx context.Context) (*City, error) {
 	case 1:
 		return cs[0], nil
 	case 0:
-		return nil, &ErrNotFound{city.Label}
+		return nil, &NotFoundError{city.Label}
 	default:
-		return nil, &ErrNotSingular{city.Label}
+		return nil, &NotSingularError{city.Label}
 	}
 }
 
@@ -149,9 +149,9 @@ func (cq *CityQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{city.Label}
+		err = &NotFoundError{city.Label}
 	default:
-		err = &ErrNotSingular{city.Label}
+		err = &NotSingularError{city.Label}
 	}
 	return
 }

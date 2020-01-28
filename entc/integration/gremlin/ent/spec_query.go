@@ -65,14 +65,14 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 	return query
 }
 
-// First returns the first Spec entity in the query. Returns *ErrNotFound when no spec was found.
+// First returns the first Spec entity in the query. Returns *NotFoundError when no spec was found.
 func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
 	sSlice, err := sq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(sSlice) == 0 {
-		return nil, &ErrNotFound{spec.Label}
+		return nil, &NotFoundError{spec.Label}
 	}
 	return sSlice[0], nil
 }
@@ -86,14 +86,14 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 	return s
 }
 
-// FirstID returns the first Spec id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Spec id in the query. Returns *NotFoundError when no id was found.
 func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{spec.Label}
+		err = &NotFoundError{spec.Label}
 		return
 	}
 	return ids[0], nil
@@ -118,9 +118,9 @@ func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 	case 1:
 		return sSlice[0], nil
 	case 0:
-		return nil, &ErrNotFound{spec.Label}
+		return nil, &NotFoundError{spec.Label}
 	default:
-		return nil, &ErrNotSingular{spec.Label}
+		return nil, &NotSingularError{spec.Label}
 	}
 }
 
@@ -143,9 +143,9 @@ func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{spec.Label}
+		err = &NotFoundError{spec.Label}
 	default:
-		err = &ErrNotSingular{spec.Label}
+		err = &NotSingularError{spec.Label}
 	}
 	return
 }

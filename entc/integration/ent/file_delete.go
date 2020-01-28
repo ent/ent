@@ -74,7 +74,7 @@ func (fdo *FileDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{file.Label}
+		return &NotFoundError{file.Label}
 	default:
 		return nil
 	}

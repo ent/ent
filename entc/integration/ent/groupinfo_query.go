@@ -72,14 +72,14 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	return query
 }
 
-// First returns the first GroupInfo entity in the query. Returns *ErrNotFound when no groupinfo was found.
+// First returns the first GroupInfo entity in the query. Returns *NotFoundError when no groupinfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
 	gis, err := giq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(gis) == 0 {
-		return nil, &ErrNotFound{groupinfo.Label}
+		return nil, &NotFoundError{groupinfo.Label}
 	}
 	return gis[0], nil
 }
@@ -93,14 +93,14 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 	return gi
 }
 
-// FirstID returns the first GroupInfo id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first GroupInfo id in the query. Returns *NotFoundError when no id was found.
 func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = giq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{groupinfo.Label}
+		err = &NotFoundError{groupinfo.Label}
 		return
 	}
 	return ids[0], nil
@@ -125,9 +125,9 @@ func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 	case 1:
 		return gis[0], nil
 	case 0:
-		return nil, &ErrNotFound{groupinfo.Label}
+		return nil, &NotFoundError{groupinfo.Label}
 	default:
-		return nil, &ErrNotSingular{groupinfo.Label}
+		return nil, &NotSingularError{groupinfo.Label}
 	}
 }
 
@@ -150,9 +150,9 @@ func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{groupinfo.Label}
+		err = &NotFoundError{groupinfo.Label}
 	default:
-		err = &ErrNotSingular{groupinfo.Label}
+		err = &NotSingularError{groupinfo.Label}
 	}
 	return
 }

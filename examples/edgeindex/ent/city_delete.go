@@ -74,7 +74,7 @@ func (cdo *CityDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{city.Label}
+		return &NotFoundError{city.Label}
 	default:
 		return nil
 	}

@@ -60,7 +60,7 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{ {{ $.Package }}.Label}
+		return &NotFoundError{ {{ $.Package }}.Label}
 	default:
 		return nil
 	}

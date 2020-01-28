@@ -72,7 +72,7 @@ func (ndo *NodeDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{node.Label}
+		return &NotFoundError{node.Label}
 	default:
 		return nil
 	}

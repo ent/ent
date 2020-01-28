@@ -74,7 +74,7 @@ func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &ErrNotFound{group.Label}
+		return &NotFoundError{group.Label}
 	default:
 		return nil
 	}

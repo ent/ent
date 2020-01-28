@@ -71,14 +71,14 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 	return query
 }
 
-// First returns the first Street entity in the query. Returns *ErrNotFound when no street was found.
+// First returns the first Street entity in the query. Returns *NotFoundError when no street was found.
 func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
 	sSlice, err := sq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(sSlice) == 0 {
-		return nil, &ErrNotFound{street.Label}
+		return nil, &NotFoundError{street.Label}
 	}
 	return sSlice[0], nil
 }
@@ -92,14 +92,14 @@ func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
 	return s
 }
 
-// FirstID returns the first Street id in the query. Returns *ErrNotFound when no id was found.
+// FirstID returns the first Street id in the query. Returns *NotFoundError when no id was found.
 func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &ErrNotFound{street.Label}
+		err = &NotFoundError{street.Label}
 		return
 	}
 	return ids[0], nil
@@ -124,9 +124,9 @@ func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
 	case 1:
 		return sSlice[0], nil
 	case 0:
-		return nil, &ErrNotFound{street.Label}
+		return nil, &NotFoundError{street.Label}
 	default:
-		return nil, &ErrNotSingular{street.Label}
+		return nil, &NotSingularError{street.Label}
 	}
 }
 
@@ -149,9 +149,9 @@ func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &ErrNotFound{street.Label}
+		err = &NotFoundError{street.Label}
 	default:
-		err = &ErrNotSingular{street.Label}
+		err = &NotSingularError{street.Label}
 	}
 	return
 }

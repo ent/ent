@@ -164,7 +164,7 @@ func (c *Client) Noder(ctx context.Context, id int) (Noder, error) {
 	}
 	idx := id / (1<<32 - 1)
 	if idx < 0 || idx >= len(tables) {
-		return nil, fmt.Errorf("cannot resolve table from id %v: %w", id, &ErrNotFound{"invalid/unknown"})
+		return nil, fmt.Errorf("cannot resolve table from id %v: %w", id, &NotFoundError{"invalid/unknown"})
 	}
 	return c.noder(ctx, tables[idx], id)
 }
@@ -190,7 +190,7 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 		}
 		return n, nil
 	default:
-		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", tbl, &ErrNotFound{"invalid/unknown"})
+		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", tbl, &NotFoundError{"invalid/unknown"})
 	}
 }
 
