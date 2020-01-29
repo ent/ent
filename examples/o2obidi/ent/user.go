@@ -33,6 +33,23 @@ type User struct {
 type UserEdges struct {
 	// Spouse holds the value of the spouse edge.
 	Spouse *User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// SpouseWithError returns the Spouse value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) SpouseWithError() (*User, error) {
+	if e.loadedTypes[0] {
+		if e.Spouse == nil {
+			// The edge spouse was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Spouse, nil
+	}
+	return nil, &NotLoadedError{edge: "spouse"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -33,6 +33,18 @@ type GroupInfo struct {
 type GroupInfoEdges struct {
 	// Groups holds the value of the groups edge.
 	Groups []*Group
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// GroupsWithError returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupInfoEdges) GroupsWithError() ([]*Group, error) {
+	if e.loadedTypes[0] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

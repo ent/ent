@@ -33,6 +33,41 @@ type UserEdges struct {
 	Parent *User
 	// Children holds the value of the children edge.
 	Children []*User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [3]bool
+}
+
+// GroupsWithError returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupsWithError() ([]*Group, error) {
+	if e.loadedTypes[0] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
+}
+
+// ParentWithError returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ParentWithError() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Parent, nil
+	}
+	return nil, &NotLoadedError{edge: "parent"}
+}
+
+// ChildrenWithError returns the Children value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ChildrenWithError() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.Children, nil
+	}
+	return nil, &NotLoadedError{edge: "children"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

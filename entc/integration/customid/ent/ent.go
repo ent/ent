@@ -130,12 +130,12 @@ func IsNotSingular(err error) bool {
 
 // NotLoadedError returns when trying to get a node that was not loaded by the query.
 type NotLoadedError struct {
-	label string
+	edge string
 }
 
 // Error implements the error interface.
 func (e *NotLoadedError) Error() string {
-	return fmt.Sprintf("ent: %s not loaded", e.label)
+	return fmt.Sprintf("ent: %s edge was not loaded", e.edge)
 }
 
 // IsNotLoaded returns a boolean indicating whether the error is a not loaded error.

@@ -319,9 +319,14 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes   []*User = []*User{}
-		withFKs         = uq.withFKs
-		_spec           = uq.querySpec()
+		nodes       = []*User{}
+		withFKs     = uq.withFKs
+		_spec       = uq.querySpec()
+		loadedTypes = [3]bool{
+			uq.withGroups != nil,
+			uq.withParent != nil,
+			uq.withChildren != nil,
+		}
 	)
 	if uq.withParent != nil {
 		withFKs = true
@@ -343,6 +348,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, _spec); err != nil {

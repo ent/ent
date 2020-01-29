@@ -267,8 +267,8 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	var (
-		nodes []*FieldType = []*FieldType{}
-		_spec              = ftq.querySpec()
+		nodes = []*FieldType{}
+		_spec = ftq.querySpec()
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &FieldType{config: ftq.config}

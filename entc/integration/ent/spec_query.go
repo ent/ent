@@ -271,8 +271,11 @@ func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 
 func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 	var (
-		nodes []*Spec = []*Spec{}
-		_spec         = sq.querySpec()
+		nodes       = []*Spec{}
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withCard != nil,
+		}
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Spec{config: sq.config}
@@ -285,6 +288,7 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {

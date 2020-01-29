@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/examples/traversal/ent/group"
+	"github.com/facebookincubator/ent/examples/traversal/ent/user"
 )
 
 // Group is the model entity for the Group schema.
@@ -33,6 +34,32 @@ type GroupEdges struct {
 	Users []*User
 	// Admin holds the value of the admin edge.
 	Admin *User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// UsersWithError returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupEdges) UsersWithError() ([]*User, error) {
+	if e.loadedTypes[0] {
+		return e.Users, nil
+	}
+	return nil, &NotLoadedError{edge: "users"}
+}
+
+// AdminWithError returns the Admin value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GroupEdges) AdminWithError() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.Admin == nil {
+			// The edge admin was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Admin, nil
+	}
+	return nil, &NotLoadedError{edge: "admin"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -34,6 +34,27 @@ type UserEdges struct {
 	Cars []*Car
 	// Groups holds the value of the groups edge.
 	Groups []*Group
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// CarsWithError returns the Cars value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CarsWithError() ([]*Car, error) {
+	if e.loadedTypes[0] {
+		return e.Cars, nil
+	}
+	return nil, &NotLoadedError{edge: "cars"}
+}
+
+// GroupsWithError returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupsWithError() ([]*Group, error) {
+	if e.loadedTypes[1] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

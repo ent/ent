@@ -319,9 +319,13 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
-		nodes   []*File = []*File{}
-		withFKs         = fq.withFKs
-		_spec           = fq.querySpec()
+		nodes       = []*File{}
+		withFKs     = fq.withFKs
+		_spec       = fq.querySpec()
+		loadedTypes = [2]bool{
+			fq.withOwner != nil,
+			fq.withType != nil,
+		}
 	)
 	if fq.withOwner != nil || fq.withType != nil {
 		withFKs = true
@@ -343,6 +347,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, fq.driver, _spec); err != nil {

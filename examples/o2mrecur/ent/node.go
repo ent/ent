@@ -33,6 +33,32 @@ type NodeEdges struct {
 	Parent *Node
 	// Children holds the value of the children edge.
 	Children []*Node
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// ParentWithError returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NodeEdges) ParentWithError() (*Node, error) {
+	if e.loadedTypes[0] {
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: node.Label}
+		}
+		return e.Parent, nil
+	}
+	return nil, &NotLoadedError{edge: "parent"}
+}
+
+// ChildrenWithError returns the Children value or an error if the edge
+// was not loaded in eager-loading.
+func (e NodeEdges) ChildrenWithError() ([]*Node, error) {
+	if e.loadedTypes[1] {
+		return e.Children, nil
+	}
+	return nil, &NotLoadedError{edge: "children"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

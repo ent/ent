@@ -29,6 +29,18 @@ type Spec struct {
 type SpecEdges struct {
 	// Card holds the value of the card edge.
 	Card []*Card
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// CardWithError returns the Card value or an error if the edge
+// was not loaded in eager-loading.
+func (e SpecEdges) CardWithError() ([]*Card, error) {
+	if e.loadedTypes[0] {
+		return e.Card, nil
+	}
+	return nil, &NotLoadedError{edge: "card"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

@@ -294,9 +294,12 @@ func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
 
 func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	var (
-		nodes   []*Street = []*Street{}
-		withFKs           = sq.withFKs
-		_spec             = sq.querySpec()
+		nodes       = []*Street{}
+		withFKs     = sq.withFKs
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withCity != nil,
+		}
 	)
 	if sq.withCity != nil {
 		withFKs = true
@@ -318,6 +321,7 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {

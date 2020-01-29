@@ -46,6 +46,18 @@ type User struct {
 type UserEdges struct {
 	// Car holds the value of the car edge.
 	Car []*Car
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// CarWithError returns the Car value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CarWithError() ([]*Car, error) {
+	if e.loadedTypes[0] {
+		return e.Car, nil
+	}
+	return nil, &NotLoadedError{edge: "car"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

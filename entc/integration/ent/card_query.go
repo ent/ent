@@ -321,9 +321,13 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
-		nodes   []*Card = []*Card{}
-		withFKs         = cq.withFKs
-		_spec           = cq.querySpec()
+		nodes       = []*Card{}
+		withFKs     = cq.withFKs
+		_spec       = cq.querySpec()
+		loadedTypes = [2]bool{
+			cq.withOwner != nil,
+			cq.withSpec != nil,
+		}
 	)
 	if cq.withOwner != nil {
 		withFKs = true
@@ -345,6 +349,7 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {

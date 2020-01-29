@@ -295,8 +295,11 @@ func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect
 
 func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	var (
-		nodes []*FileType = []*FileType{}
-		_spec             = ftq.querySpec()
+		nodes       = []*FileType{}
+		_spec       = ftq.querySpec()
+		loadedTypes = [1]bool{
+			ftq.withFiles != nil,
+		}
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &FileType{config: ftq.config}
@@ -309,6 +312,7 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ftq.driver, _spec); err != nil {

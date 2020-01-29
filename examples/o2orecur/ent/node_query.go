@@ -318,9 +318,13 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
-		nodes   []*Node = []*Node{}
-		withFKs         = nq.withFKs
-		_spec           = nq.querySpec()
+		nodes       = []*Node{}
+		withFKs     = nq.withFKs
+		_spec       = nq.querySpec()
+		loadedTypes = [2]bool{
+			nq.withPrev != nil,
+			nq.withNext != nil,
+		}
 	)
 	if nq.withPrev != nil {
 		withFKs = true
@@ -342,6 +346,7 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, nq.driver, _spec); err != nil {
