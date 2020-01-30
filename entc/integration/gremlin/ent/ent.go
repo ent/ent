@@ -148,6 +148,9 @@ func (e *NotFoundError) Error() string {
 
 // IsNotFound returns a boolean indicating whether the error is a not found error.
 func IsNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
 	var e *NotFoundError
 	return xerrors.As(err, &e)
 }
@@ -172,6 +175,9 @@ func (e *NotSingularError) Error() string {
 
 // IsNotSingular returns a boolean indicating whether the error is a not singular error.
 func IsNotSingular(err error) bool {
+	if err == nil {
+		return false
+	}
 	var e *NotSingularError
 	return xerrors.As(err, &e)
 }
@@ -188,6 +194,9 @@ func (e *NotLoadedError) Error() string {
 
 // IsNotLoaded returns a boolean indicating whether the error is a not loaded error.
 func IsNotLoaded(err error) bool {
+	if err == nil {
+		return false
+	}
 	var e *NotLoadedError
 	return xerrors.As(err, &e)
 }
@@ -212,6 +221,9 @@ func (e *ConstraintError) Unwrap() error {
 
 // IsConstraintError returns a boolean indicating whether the error is a constraint failure.
 func IsConstraintError(err error) bool {
+	if err == nil {
+		return false
+	}
 	var e *ConstraintError
 	return xerrors.As(err, &e)
 }
