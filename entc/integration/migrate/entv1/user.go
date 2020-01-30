@@ -56,9 +56,9 @@ type UserEdges struct {
 	loadedTypes [4]bool
 }
 
-// ParentErr returns the Parent value or an error if the edge
+// ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) ParentErr() (*User, error) {
+func (e UserEdges) ParentOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
 			// The edge parent was loaded in eager-loading,
@@ -70,18 +70,18 @@ func (e UserEdges) ParentErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "parent"}
 }
 
-// ChildrenErr returns the Children value or an error if the edge
+// ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) ChildrenErr() ([]*User, error) {
+func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
 }
 
-// SpouseErr returns the Spouse value or an error if the edge
+// SpouseOrErr returns the Spouse value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) SpouseErr() (*User, error) {
+func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[2] {
 		if e.Spouse == nil {
 			// The edge spouse was loaded in eager-loading,
@@ -93,9 +93,9 @@ func (e UserEdges) SpouseErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "spouse"}
 }
 
-// CarErr returns the Car value or an error if the edge
+// CarOrErr returns the Car value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) CarErr() (*Car, error) {
+func (e UserEdges) CarOrErr() (*Car, error) {
 	if e.loadedTypes[3] {
 		if e.Car == nil {
 			// The edge car was loaded in eager-loading,

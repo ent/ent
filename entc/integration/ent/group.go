@@ -53,36 +53,36 @@ type GroupEdges struct {
 	loadedTypes [4]bool
 }
 
-// FilesErr returns the Files value or an error if the edge
+// FilesOrErr returns the Files value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) FilesErr() ([]*File, error) {
+func (e GroupEdges) FilesOrErr() ([]*File, error) {
 	if e.loadedTypes[0] {
 		return e.Files, nil
 	}
 	return nil, &NotLoadedError{edge: "files"}
 }
 
-// BlockedErr returns the Blocked value or an error if the edge
+// BlockedOrErr returns the Blocked value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) BlockedErr() ([]*User, error) {
+func (e GroupEdges) BlockedOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
 		return e.Blocked, nil
 	}
 	return nil, &NotLoadedError{edge: "blocked"}
 }
 
-// UsersErr returns the Users value or an error if the edge
+// UsersOrErr returns the Users value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) UsersErr() ([]*User, error) {
+func (e GroupEdges) UsersOrErr() ([]*User, error) {
 	if e.loadedTypes[2] {
 		return e.Users, nil
 	}
 	return nil, &NotLoadedError{edge: "users"}
 }
 
-// InfoErr returns the Info value or an error if the edge
+// InfoOrErr returns the Info value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e GroupEdges) InfoErr() (*GroupInfo, error) {
+func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 	if e.loadedTypes[3] {
 		if e.Info == nil {
 			// The edge info was loaded in eager-loading,

@@ -45,9 +45,9 @@ type FileEdges struct {
 	loadedTypes [2]bool
 }
 
-// OwnerErr returns the Owner value or an error if the edge
+// OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) OwnerErr() (*User, error) {
+func (e FileEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
 			// The edge owner was loaded in eager-loading,
@@ -59,9 +59,9 @@ func (e FileEdges) OwnerErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
-// TypeErr returns the Type value or an error if the edge
+// TypeOrErr returns the Type value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) TypeErr() (*FileType, error) {
+func (e FileEdges) TypeOrErr() (*FileType, error) {
 	if e.loadedTypes[1] {
 		if e.Type == nil {
 			// The edge type was loaded in eager-loading,

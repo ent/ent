@@ -34,9 +34,9 @@ type SpecEdges struct {
 	loadedTypes [1]bool
 }
 
-// CardErr returns the Card value or an error if the edge
+// CardOrErr returns the Card value or an error if the edge
 // was not loaded in eager-loading.
-func (e SpecEdges) CardErr() ([]*Card, error) {
+func (e SpecEdges) CardOrErr() ([]*Card, error) {
 	if e.loadedTypes[0] {
 		return e.Card, nil
 	}

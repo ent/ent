@@ -36,9 +36,9 @@ type FileTypeEdges struct {
 	loadedTypes [1]bool
 }
 
-// FilesErr returns the Files value or an error if the edge
+// FilesOrErr returns the Files value or an error if the edge
 // was not loaded in eager-loading.
-func (e FileTypeEdges) FilesErr() ([]*File, error) {
+func (e FileTypeEdges) FilesOrErr() ([]*File, error) {
 	if e.loadedTypes[0] {
 		return e.Files, nil
 	}

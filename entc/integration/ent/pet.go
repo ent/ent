@@ -41,9 +41,9 @@ type PetEdges struct {
 	loadedTypes [2]bool
 }
 
-// TeamErr returns the Team value or an error if the edge
+// TeamOrErr returns the Team value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PetEdges) TeamErr() (*User, error) {
+func (e PetEdges) TeamOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Team == nil {
 			// The edge team was loaded in eager-loading,
@@ -55,9 +55,9 @@ func (e PetEdges) TeamErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
-// OwnerErr returns the Owner value or an error if the edge
+// OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PetEdges) OwnerErr() (*User, error) {
+func (e PetEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Owner == nil {
 			// The edge owner was loaded in eager-loading,

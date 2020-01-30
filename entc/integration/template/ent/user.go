@@ -37,18 +37,18 @@ type UserEdges struct {
 	loadedTypes [2]bool
 }
 
-// PetsErr returns the Pets value or an error if the edge
+// PetsOrErr returns the Pets value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) PetsErr() ([]*Pet, error) {
+func (e UserEdges) PetsOrErr() ([]*Pet, error) {
 	if e.loadedTypes[0] {
 		return e.Pets, nil
 	}
 	return nil, &NotLoadedError{edge: "pets"}
 }
 
-// FriendsErr returns the Friends value or an error if the edge
+// FriendsOrErr returns the Friends value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FriendsErr() ([]*User, error) {
+func (e UserEdges) FriendsOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
 		return e.Friends, nil
 	}

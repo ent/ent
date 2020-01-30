@@ -38,9 +38,9 @@ type NodeEdges struct {
 	loadedTypes [2]bool
 }
 
-// ParentErr returns the Parent value or an error if the edge
+// ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e NodeEdges) ParentErr() (*Node, error) {
+func (e NodeEdges) ParentOrErr() (*Node, error) {
 	if e.loadedTypes[0] {
 		if e.Parent == nil {
 			// The edge parent was loaded in eager-loading,
@@ -52,9 +52,9 @@ func (e NodeEdges) ParentErr() (*Node, error) {
 	return nil, &NotLoadedError{edge: "parent"}
 }
 
-// ChildrenErr returns the Children value or an error if the edge
+// ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
-func (e NodeEdges) ChildrenErr() ([]*Node, error) {
+func (e NodeEdges) ChildrenOrErr() ([]*Node, error) {
 	if e.loadedTypes[1] {
 		return e.Children, nil
 	}

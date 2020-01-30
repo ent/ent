@@ -37,9 +37,9 @@ type UserEdges struct {
 	loadedTypes [1]bool
 }
 
-// PetsErr returns the Pets value or an error if the edge
+// PetsOrErr returns the Pets value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) PetsErr() ([]*Pet, error) {
+func (e UserEdges) PetsOrErr() ([]*Pet, error) {
 	if e.loadedTypes[0] {
 		return e.Pets, nil
 	}

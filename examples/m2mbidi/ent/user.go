@@ -37,9 +37,9 @@ type UserEdges struct {
 	loadedTypes [1]bool
 }
 
-// FriendsErr returns the Friends value or an error if the edge
+// FriendsOrErr returns the Friends value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FriendsErr() ([]*User, error) {
+func (e UserEdges) FriendsOrErr() ([]*User, error) {
 	if e.loadedTypes[0] {
 		return e.Friends, nil
 	}

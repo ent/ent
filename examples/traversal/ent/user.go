@@ -43,36 +43,36 @@ type UserEdges struct {
 	loadedTypes [4]bool
 }
 
-// PetsErr returns the Pets value or an error if the edge
+// PetsOrErr returns the Pets value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) PetsErr() ([]*Pet, error) {
+func (e UserEdges) PetsOrErr() ([]*Pet, error) {
 	if e.loadedTypes[0] {
 		return e.Pets, nil
 	}
 	return nil, &NotLoadedError{edge: "pets"}
 }
 
-// FriendsErr returns the Friends value or an error if the edge
+// FriendsOrErr returns the Friends value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FriendsErr() ([]*User, error) {
+func (e UserEdges) FriendsOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
 		return e.Friends, nil
 	}
 	return nil, &NotLoadedError{edge: "friends"}
 }
 
-// GroupsErr returns the Groups value or an error if the edge
+// GroupsOrErr returns the Groups value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GroupsErr() ([]*Group, error) {
+func (e UserEdges) GroupsOrErr() ([]*Group, error) {
 	if e.loadedTypes[2] {
 		return e.Groups, nil
 	}
 	return nil, &NotLoadedError{edge: "groups"}
 }
 
-// ManageErr returns the Manage value or an error if the edge
+// ManageOrErr returns the Manage value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) ManageErr() ([]*Group, error) {
+func (e UserEdges) ManageOrErr() ([]*Group, error) {
 	if e.loadedTypes[3] {
 		return e.Manage, nil
 	}
