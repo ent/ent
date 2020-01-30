@@ -15,6 +15,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
+	"golang.org/x/xerrors"
 )
 
 // Order applies an ordering on either graph traversal or sql selector.
@@ -95,13 +96,13 @@ type NotFoundError struct {
 
 // Error implements the error interface.
 func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("ent: %s not found", e.label)
+	return "ent: " + e.label + " not found"
 }
 
 // IsNotFound returns a boolean indicating whether the error is a not found error.
 func IsNotFound(err error) bool {
-	_, ok := err.(*NotFoundError)
-	return ok
+	var e *NotFoundError
+	return xerrors.As(err, &e)
 }
 
 // MaskNotFound masks nor found error.
@@ -119,13 +120,13 @@ type NotSingularError struct {
 
 // Error implements the error interface.
 func (e *NotSingularError) Error() string {
-	return fmt.Sprintf("ent: %s not singular", e.label)
+	return "ent: " + e.label + " not singular"
 }
 
 // IsNotSingular returns a boolean indicating whether the error is a not singular error.
 func IsNotSingular(err error) bool {
-	_, ok := err.(*NotSingularError)
-	return ok
+	var e *NotSingularError
+	return xerrors.As(err, &e)
 }
 
 // NotLoadedError returns when trying to get a node that was not loaded by the query.
@@ -135,13 +136,13 @@ type NotLoadedError struct {
 
 // Error implements the error interface.
 func (e *NotLoadedError) Error() string {
-	return fmt.Sprintf("ent: %s edge was not loaded", e.edge)
+	return "ent: " + e.edge + " edge was not loaded"
 }
 
 // IsNotLoaded returns a boolean indicating whether the error is a not loaded error.
 func IsNotLoaded(err error) bool {
-	_, ok := err.(*NotLoadedError)
-	return ok
+	var e *NotLoadedError
+	return xerrors.As(err, &e)
 }
 
 // ConstraintError returns when trying to create/update one or more entities and
@@ -154,7 +155,7 @@ type ConstraintError struct {
 
 // Error implements the error interface.
 func (e ConstraintError) Error() string {
-	return fmt.Sprintf("ent: constraint failed: %s", e.msg)
+	return "ent: constraint failed: " + e.msg
 }
 
 // Unwrap implements the errors.Wrapper interface.
@@ -164,8 +165,8 @@ func (e *ConstraintError) Unwrap() error {
 
 // IsConstraintError returns a boolean indicating whether the error is a constraint failure.
 func IsConstraintError(err error) bool {
-	_, ok := err.(*ConstraintError)
-	return ok
+	var e *ConstraintError
+	return xerrors.As(err, &e)
 }
 
 func isSQLConstraintError(err error) (*ConstraintError, bool) {
