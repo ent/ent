@@ -59,6 +59,7 @@ var (
 		"set":         set,
 		"unset":       unset,
 		"hasKey":      hasKey,
+		"list":        list,
 	}
 	rules   = ruleset()
 	acronym = make(map[string]bool)
@@ -376,4 +377,9 @@ func unset(d map[string]interface{}, key string) map[string]interface{} {
 func hasKey(d map[string]interface{}, key string) bool {
 	_, ok := d[key]
 	return ok
+}
+
+// list creates a list from values.
+func list(v ...interface{}) []interface{} {
+	return v
 }
