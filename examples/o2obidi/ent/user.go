@@ -38,9 +38,9 @@ type UserEdges struct {
 	loadedTypes [1]bool
 }
 
-// SpouseWithError returns the Spouse value or an error if the edge
+// SpouseErr returns the Spouse value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) SpouseWithError() (*User, error) {
+func (e UserEdges) SpouseErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Spouse == nil {
 			// The edge spouse was loaded in eager-loading,

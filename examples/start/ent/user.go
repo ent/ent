@@ -39,18 +39,18 @@ type UserEdges struct {
 	loadedTypes [2]bool
 }
 
-// CarsWithError returns the Cars value or an error if the edge
+// CarsErr returns the Cars value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) CarsWithError() ([]*Car, error) {
+func (e UserEdges) CarsErr() ([]*Car, error) {
 	if e.loadedTypes[0] {
 		return e.Cars, nil
 	}
 	return nil, &NotLoadedError{edge: "cars"}
 }
 
-// GroupsWithError returns the Groups value or an error if the edge
+// GroupsErr returns the Groups value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GroupsWithError() ([]*Group, error) {
+func (e UserEdges) GroupsErr() ([]*Group, error) {
 	if e.loadedTypes[1] {
 		return e.Groups, nil
 	}

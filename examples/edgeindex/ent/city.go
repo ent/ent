@@ -35,9 +35,9 @@ type CityEdges struct {
 	loadedTypes [1]bool
 }
 
-// StreetsWithError returns the Streets value or an error if the edge
+// StreetsErr returns the Streets value or an error if the edge
 // was not loaded in eager-loading.
-func (e CityEdges) StreetsWithError() ([]*Street, error) {
+func (e CityEdges) StreetsErr() ([]*Street, error) {
 	if e.loadedTypes[0] {
 		return e.Streets, nil
 	}

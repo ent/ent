@@ -75,9 +75,9 @@ type UserEdges struct {
 	loadedTypes [11]bool
 }
 
-// CardWithError returns the Card value or an error if the edge
+// CardErr returns the Card value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) CardWithError() (*Card, error) {
+func (e UserEdges) CardErr() (*Card, error) {
 	if e.loadedTypes[0] {
 		if e.Card == nil {
 			// The edge card was loaded in eager-loading,
@@ -89,63 +89,63 @@ func (e UserEdges) CardWithError() (*Card, error) {
 	return nil, &NotLoadedError{edge: "card"}
 }
 
-// PetsWithError returns the Pets value or an error if the edge
+// PetsErr returns the Pets value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) PetsWithError() ([]*Pet, error) {
+func (e UserEdges) PetsErr() ([]*Pet, error) {
 	if e.loadedTypes[1] {
 		return e.Pets, nil
 	}
 	return nil, &NotLoadedError{edge: "pets"}
 }
 
-// FilesWithError returns the Files value or an error if the edge
+// FilesErr returns the Files value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FilesWithError() ([]*File, error) {
+func (e UserEdges) FilesErr() ([]*File, error) {
 	if e.loadedTypes[2] {
 		return e.Files, nil
 	}
 	return nil, &NotLoadedError{edge: "files"}
 }
 
-// GroupsWithError returns the Groups value or an error if the edge
+// GroupsErr returns the Groups value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GroupsWithError() ([]*Group, error) {
+func (e UserEdges) GroupsErr() ([]*Group, error) {
 	if e.loadedTypes[3] {
 		return e.Groups, nil
 	}
 	return nil, &NotLoadedError{edge: "groups"}
 }
 
-// FriendsWithError returns the Friends value or an error if the edge
+// FriendsErr returns the Friends value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FriendsWithError() ([]*User, error) {
+func (e UserEdges) FriendsErr() ([]*User, error) {
 	if e.loadedTypes[4] {
 		return e.Friends, nil
 	}
 	return nil, &NotLoadedError{edge: "friends"}
 }
 
-// FollowersWithError returns the Followers value or an error if the edge
+// FollowersErr returns the Followers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FollowersWithError() ([]*User, error) {
+func (e UserEdges) FollowersErr() ([]*User, error) {
 	if e.loadedTypes[5] {
 		return e.Followers, nil
 	}
 	return nil, &NotLoadedError{edge: "followers"}
 }
 
-// FollowingWithError returns the Following value or an error if the edge
+// FollowingErr returns the Following value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FollowingWithError() ([]*User, error) {
+func (e UserEdges) FollowingErr() ([]*User, error) {
 	if e.loadedTypes[6] {
 		return e.Following, nil
 	}
 	return nil, &NotLoadedError{edge: "following"}
 }
 
-// TeamWithError returns the Team value or an error if the edge
+// TeamErr returns the Team value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) TeamWithError() (*Pet, error) {
+func (e UserEdges) TeamErr() (*Pet, error) {
 	if e.loadedTypes[7] {
 		if e.Team == nil {
 			// The edge team was loaded in eager-loading,
@@ -157,9 +157,9 @@ func (e UserEdges) TeamWithError() (*Pet, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
-// SpouseWithError returns the Spouse value or an error if the edge
+// SpouseErr returns the Spouse value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) SpouseWithError() (*User, error) {
+func (e UserEdges) SpouseErr() (*User, error) {
 	if e.loadedTypes[8] {
 		if e.Spouse == nil {
 			// The edge spouse was loaded in eager-loading,
@@ -171,18 +171,18 @@ func (e UserEdges) SpouseWithError() (*User, error) {
 	return nil, &NotLoadedError{edge: "spouse"}
 }
 
-// ChildrenWithError returns the Children value or an error if the edge
+// ChildrenErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) ChildrenWithError() ([]*User, error) {
+func (e UserEdges) ChildrenErr() ([]*User, error) {
 	if e.loadedTypes[9] {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
 }
 
-// ParentWithError returns the Parent value or an error if the edge
+// ParentErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) ParentWithError() (*User, error) {
+func (e UserEdges) ParentErr() (*User, error) {
 	if e.loadedTypes[10] {
 		if e.Parent == nil {
 			// The edge parent was loaded in eager-loading,
