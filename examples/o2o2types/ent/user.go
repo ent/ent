@@ -38,9 +38,9 @@ type UserEdges struct {
 	loadedTypes [1]bool
 }
 
-// CardErr returns the Card value or an error if the edge
+// CardOrErr returns the Card value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) CardErr() (*Card, error) {
+func (e UserEdges) CardOrErr() (*Card, error) {
 	if e.loadedTypes[0] {
 		if e.Card == nil {
 			// The edge card was loaded in eager-loading,

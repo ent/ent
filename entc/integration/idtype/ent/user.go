@@ -40,9 +40,9 @@ type UserEdges struct {
 	loadedTypes [3]bool
 }
 
-// SpouseErr returns the Spouse value or an error if the edge
+// SpouseOrErr returns the Spouse value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) SpouseErr() (*User, error) {
+func (e UserEdges) SpouseOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Spouse == nil {
 			// The edge spouse was loaded in eager-loading,
@@ -54,18 +54,18 @@ func (e UserEdges) SpouseErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "spouse"}
 }
 
-// FollowersErr returns the Followers value or an error if the edge
+// FollowersOrErr returns the Followers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FollowersErr() ([]*User, error) {
+func (e UserEdges) FollowersOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
 		return e.Followers, nil
 	}
 	return nil, &NotLoadedError{edge: "followers"}
 }
 
-// FollowingErr returns the Following value or an error if the edge
+// FollowingOrErr returns the Following value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FollowingErr() ([]*User, error) {
+func (e UserEdges) FollowingOrErr() ([]*User, error) {
 	if e.loadedTypes[2] {
 		return e.Following, nil
 	}

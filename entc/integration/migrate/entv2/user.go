@@ -51,9 +51,9 @@ type UserEdges struct {
 	loadedTypes [1]bool
 }
 
-// CarErr returns the Car value or an error if the edge
+// CarOrErr returns the Car value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) CarErr() ([]*Car, error) {
+func (e UserEdges) CarOrErr() ([]*Car, error) {
 	if e.loadedTypes[0] {
 		return e.Car, nil
 	}

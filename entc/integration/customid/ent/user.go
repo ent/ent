@@ -38,18 +38,18 @@ type UserEdges struct {
 	loadedTypes [3]bool
 }
 
-// GroupsErr returns the Groups value or an error if the edge
+// GroupsOrErr returns the Groups value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GroupsErr() ([]*Group, error) {
+func (e UserEdges) GroupsOrErr() ([]*Group, error) {
 	if e.loadedTypes[0] {
 		return e.Groups, nil
 	}
 	return nil, &NotLoadedError{edge: "groups"}
 }
 
-// ParentErr returns the Parent value or an error if the edge
+// ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) ParentErr() (*User, error) {
+func (e UserEdges) ParentOrErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Parent == nil {
 			// The edge parent was loaded in eager-loading,
@@ -61,9 +61,9 @@ func (e UserEdges) ParentErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "parent"}
 }
 
-// ChildrenErr returns the Children value or an error if the edge
+// ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) ChildrenErr() ([]*User, error) {
+func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 	if e.loadedTypes[2] {
 		return e.Children, nil
 	}

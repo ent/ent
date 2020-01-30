@@ -48,9 +48,9 @@ type CardEdges struct {
 	loadedTypes [2]bool
 }
 
-// OwnerErr returns the Owner value or an error if the edge
+// OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e CardEdges) OwnerErr() (*User, error) {
+func (e CardEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
 			// The edge owner was loaded in eager-loading,
@@ -62,9 +62,9 @@ func (e CardEdges) OwnerErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
-// SpecErr returns the Spec value or an error if the edge
+// SpecOrErr returns the Spec value or an error if the edge
 // was not loaded in eager-loading.
-func (e CardEdges) SpecErr() ([]*Spec, error) {
+func (e CardEdges) SpecOrErr() ([]*Spec, error) {
 	if e.loadedTypes[1] {
 		return e.Spec, nil
 	}
