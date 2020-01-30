@@ -37,9 +37,9 @@ type GroupInfoEdges struct {
 	loadedTypes [1]bool
 }
 
-// GroupsWithError returns the Groups value or an error if the edge
+// GroupsErr returns the Groups value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupInfoEdges) GroupsWithError() ([]*Group, error) {
+func (e GroupInfoEdges) GroupsErr() ([]*Group, error) {
 	if e.loadedTypes[0] {
 		return e.Groups, nil
 	}

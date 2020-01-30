@@ -37,9 +37,9 @@ type PetEdges struct {
 	loadedTypes [1]bool
 }
 
-// OwnerWithError returns the Owner value or an error if the edge
+// OwnerErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PetEdges) OwnerWithError() (*User, error) {
+func (e PetEdges) OwnerErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
 			// The edge owner was loaded in eager-loading,

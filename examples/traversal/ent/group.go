@@ -39,18 +39,18 @@ type GroupEdges struct {
 	loadedTypes [2]bool
 }
 
-// UsersWithError returns the Users value or an error if the edge
+// UsersErr returns the Users value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) UsersWithError() ([]*User, error) {
+func (e GroupEdges) UsersErr() ([]*User, error) {
 	if e.loadedTypes[0] {
 		return e.Users, nil
 	}
 	return nil, &NotLoadedError{edge: "users"}
 }
 
-// AdminWithError returns the Admin value or an error if the edge
+// AdminErr returns the Admin value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e GroupEdges) AdminWithError() (*User, error) {
+func (e GroupEdges) AdminErr() (*User, error) {
 	if e.loadedTypes[1] {
 		if e.Admin == nil {
 			// The edge admin was loaded in eager-loading,

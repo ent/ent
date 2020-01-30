@@ -38,9 +38,9 @@ type NodeEdges struct {
 	loadedTypes [2]bool
 }
 
-// PrevWithError returns the Prev value or an error if the edge
+// PrevErr returns the Prev value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e NodeEdges) PrevWithError() (*Node, error) {
+func (e NodeEdges) PrevErr() (*Node, error) {
 	if e.loadedTypes[0] {
 		if e.Prev == nil {
 			// The edge prev was loaded in eager-loading,
@@ -52,9 +52,9 @@ func (e NodeEdges) PrevWithError() (*Node, error) {
 	return nil, &NotLoadedError{edge: "prev"}
 }
 
-// NextWithError returns the Next value or an error if the edge
+// NextErr returns the Next value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e NodeEdges) NextWithError() (*Node, error) {
+func (e NodeEdges) NextErr() (*Node, error) {
 	if e.loadedTypes[1] {
 		if e.Next == nil {
 			// The edge next was loaded in eager-loading,
