@@ -444,30 +444,9 @@ func (d *MySQL) renameIndex(t *Table, old, new *Index) sql.Querier {
 	return q.DropIndex(old.Name).AddIndex(new.Builder(t.Name))
 }
 
-// fkColumn returns the column name of a foreign-key.
-func (d *MySQL) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (string, error) {
-	t1 := sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote().As("KEY_COLUMN_USAGE")
-	t2 := sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote().As("TABLE_CONSTRAINTS")
-	query, args := sql.Select("COLUMN_NAME").
-		From(t1).
-		Join(t2).
-		On(t1.C("CONSTRAINT_NAME"), t2.C("CONSTRAINT_NAME")).
-		Where(sql.And(
-			sql.EQ(t2.C("CONSTRAINT_NAME"), fk.Symbol),
-			sql.EQ(t2.C("CONSTRAINT_TYPE"), "FOREIGN KEY"),
-			sql.EQ(t1.C("TABLE_SCHEMA"), sql.Raw("(SELECT DATABASE())")),
-		)).
-		Query()
-	rows := &sql.Rows{}
-	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return "", fmt.Errorf("reading foreign-key %q column: %v", fk.Symbol, err)
-	}
-	defer rows.Close()
-	column, err := sql.ScanString(rows)
-	if err != nil {
-		return "", fmt.Errorf("scanning foreign-key %q column: %v", fk.Symbol, err)
-	}
-	return column, nil
+// tableSchema returns the query for getting the table schema.
+func (d *MySQL) tableSchema() sql.Querier {
+	return sql.Raw("(SELECT DATABASE())")
 }
 
 // fkNames returns the foreign-key names of a column.

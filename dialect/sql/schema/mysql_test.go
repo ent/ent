@@ -756,8 +756,8 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
 					WithArgs("FOREIGN KEY", "parent_id").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
-				mock.ExpectQuery(escape("SELECT `COLUMN_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS ON `KEY_COLUMN_USAGE`.`CONSTRAINT_NAME` = `TABLE_CONSTRAINTS`.`CONSTRAINT_NAME` WHERE (`TABLE_CONSTRAINTS`.`CONSTRAINT_NAME` = ?) AND (`TABLE_CONSTRAINTS`.`CONSTRAINT_TYPE` = ?) AND (`KEY_COLUMN_USAGE`.`TABLE_SCHEMA` = (SELECT DATABASE()))")).
-					WithArgs("parent_id", "FOREIGN KEY").
+				mock.ExpectQuery(escape("SELECT `column_name` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1 JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2 ON `t1`.`constraint_name` = `t2`.`constraint_name` WHERE (`t2`.`constraint_type` = 'FOREIGN KEY') AND (`t2`.`table_schema` = (SELECT DATABASE())) AND (`t1`.`table_schema` = (SELECT DATABASE())) AND (`t2`.`constraint_name` = ?)")).
+					WithArgs("parent_id").
 					WillReturnRows(sqlmock.NewRows([]string{"COLUMN_NAME"}).
 						AddRow("parent_id"))
 				// drop the unique index.

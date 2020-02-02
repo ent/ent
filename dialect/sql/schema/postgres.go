@@ -374,29 +374,7 @@ func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
 	return sql.Dialect(dialect.Postgres).AlterIndex(old.realname).Rename(new.Name)
 }
 
-// fkColumn returns the column name of a foreign-key.
-func (d *Postgres) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (string, error) {
-	t1 := sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1").Unquote().As("t1")
-	t2 := sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2").Unquote().As("t2")
-	query, args := sql.Dialect(dialect.Postgres).
-		Select("column_name").
-		From(t1).
-		Join(t2).
-		On(t1.C("constraint_name"), t2.C("constraint_name")).
-		Where(sql.And(
-			sql.EQ(t2.C("constraint_type"), sql.Raw("'FOREIGN KEY'")),
-			sql.EQ(t1.C("table_schema"), sql.Raw("(CURRENT_SCHEMA())")),
-			sql.EQ(t2.C("constraint_name"), fk.Symbol),
-		)).
-		Query()
-	rows := &sql.Rows{}
-	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return "", fmt.Errorf("reading foreign-key %q column: %v", fk.Symbol, err)
-	}
-	defer rows.Close()
-	column, err := sql.ScanString(rows)
-	if err != nil {
-		return "", fmt.Errorf("scanning foreign-key %q column: %v", fk.Symbol, err)
-	}
-	return column, nil
+// tableSchema returns the query for getting the table schema.
+func (d *Postgres) tableSchema() sql.Querier {
+	return sql.Raw("(CURRENT_SCHEMA())")
 }

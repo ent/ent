@@ -350,7 +350,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 		if !ok {
 			continue
 		}
-		column, err := d.fkColumn(ctx, tx, fk)
+		column, err := m.fkColumn(ctx, tx, fk)
 		if err != nil {
 			return err
 		}
@@ -369,8 +369,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 		// Find all indexes that ~maybe need to be renamed.
 		for _, idx := range prev.indexes {
 			switch _, ok := new.index(idx.Name); {
-			// Ignore indexes that exist in the schema, PKs, or
-			// those who were created implicitly for the FKs.
+			// Ignore indexes that exist in the schema, PKs.
 			case ok || idx.primary:
 			// Index that was created implicitly for a unique
 			// column needs to be renamed to the column name.
@@ -464,6 +463,34 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 	return m.setRange(ctx, tx, t.Name, id<<32)
 }
 
+// fkColumn returns the column name of a foreign-key.
+func (m *Migrate) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (string, error) {
+	t1 := sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1").Unquote().As("t1")
+	t2 := sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2").Unquote().As("t2")
+	query, args := sql.Dialect(m.Dialect()).
+		Select("column_name").
+		From(t1).
+		Join(t2).
+		On(t1.C("constraint_name"), t2.C("constraint_name")).
+		Where(sql.And(
+			sql.EQ(t2.C("constraint_type"), sql.Raw("'FOREIGN KEY'")),
+			sql.EQ(t2.C("table_schema"), m.sqlDialect.(fkRenamer).tableSchema()),
+			sql.EQ(t1.C("table_schema"), m.sqlDialect.(fkRenamer).tableSchema()),
+			sql.EQ(t2.C("constraint_name"), fk.Symbol),
+		)).
+		Query()
+	rows := &sql.Rows{}
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return "", fmt.Errorf("reading foreign-key %q column: %v", fk.Symbol, err)
+	}
+	defer rows.Close()
+	column, err := sql.ScanString(rows)
+	if err != nil {
+		return "", fmt.Errorf("scanning foreign-key %q column: %v", fk.Symbol, err)
+	}
+	return column, nil
+}
+
 // setup ensures the table is configured properly, like table columns
 // are linked to their indexes, and PKs columns are defined.
 func (m *Migrate) setupTable(t *Table) {
@@ -547,8 +574,8 @@ type preparer interface {
 // fkRenamer is used by the fixture migration (to solve #285),
 // and it's implemented by the different dialects for renaming FKs.
 type fkRenamer interface {
+	tableSchema() sql.Querier
 	isImplicitIndex(*Index, *Column) bool
 	renameIndex(*Table, *Index, *Index) sql.Querier
 	renameColumn(*Table, *Column, *Column) sql.Querier
-	fkColumn(context.Context, dialect.Tx, *ForeignKey) (string, error)
 }
