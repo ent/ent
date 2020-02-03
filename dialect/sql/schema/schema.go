@@ -65,16 +65,20 @@ func (t *Table) AddColumn(c *Column) *Table {
 
 // AddIndex creates and adds a new index to the table from the given options.
 func (t *Table) AddIndex(name string, unique bool, columns []string) *Table {
-	idx := &Index{
+	return t.addIndex(&Index{
 		Name:    name,
 		Unique:  unique,
 		columns: columns,
 		Columns: make([]*Column, 0, len(columns)),
-	}
-	for _, name := range columns {
+	})
+}
+
+// AddIndex creates and adds a new index to the table from the given options.
+func (t *Table) addIndex(idx *Index) *Table {
+	for _, name := range idx.columns {
 		c, ok := t.columns[name]
 		if ok {
-			c.indexes = append(c.indexes, idx)
+			c.indexes.append(idx)
 			idx.Columns = append(idx.Columns, c)
 		}
 	}
@@ -107,11 +111,13 @@ func (t *Table) index(name string) (*Index, bool) {
 		}
 	}
 	// If it is an "implicit index" (unique constraint on
-	// table creation) and it didn't load on table scanning.
+	// table creation) and it wasn't loaded in table scanning.
 	c, ok := t.column(name)
 	if !ok {
-		// Postgres naming convention for unique constraint.
-		c, ok = t.column(strings.TrimSuffix(name, "_key"))
+		// Postgres naming convention for unique constraint (<table>_<column>_key).
+		name = strings.TrimPrefix(name, t.Name+"_")
+		name = strings.TrimSuffix(name, "_key")
+		c, ok = t.column(name)
 	}
 	if ok && c.Unique {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
@@ -142,8 +148,8 @@ type Column struct {
 	Increment bool        // auto increment attribute.
 	Nullable  bool        // null or not null attribute.
 	Default   interface{} // default value.
-	indexes   Indexes     // linked indexes.
 	Enums     []string    // enum values.
+	indexes   Indexes     // linked indexes.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -338,11 +344,12 @@ func (r ReferenceOption) ConstName() string {
 
 // Index definition for table index.
 type Index struct {
-	Name    string    // index name.
-	Unique  bool      // uniqueness.
-	Columns []*Column // actual table columns.
-	columns []string  // columns loaded from query scan.
-	primary bool      // primary key index.
+	Name     string    // index name.
+	Unique   bool      // uniqueness.
+	Columns  []*Column // actual table columns.
+	columns  []string  // columns loaded from query scan.
+	primary  bool      // primary key index.
+	realname string    // real name in the database (Postgres only).
 }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.
@@ -361,6 +368,20 @@ func (i *Index) Builder(table string) *sql.IndexBuilder {
 func (i *Index) DropBuilder(table string) *sql.DropIndexBuilder {
 	idx := sql.DropIndex(i.Name).Table(table)
 	return idx
+}
+
+// sameAs reports if the index has the same properties
+// as the given index (except the name).
+func (i *Index) sameAs(idx *Index) bool {
+	if i.Unique != idx.Unique || len(i.Columns) != len(idx.Columns) {
+		return false
+	}
+	for j, c := range i.Columns {
+		if c.Name != idx.Columns[j].Name {
+			return false
+		}
+	}
+	return true
 }
 
 // Indexes used for scanning all sql.Rows into a list of indexes, because

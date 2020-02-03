@@ -238,6 +238,12 @@ func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 	return t
 }
 
+// RenameColumn appends the `RENAME COLUMN` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) RenameColumn(old, new string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("RENAME COLUMN %s TO %s", t.Quote(old), t.Quote(new))))
+	return t
+}
+
 // ModifyColumns calls ModifyColumn with each of the given builders.
 func (t *TableAlter) ModifyColumns(cs ...*ColumnBuilder) *TableAlter {
 	for _, c := range cs {

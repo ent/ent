@@ -43,21 +43,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardInverseTable = "cards"
 	// CardColumn is the table column denoting the card relation/edge.
-	CardColumn = "owner_id"
+	CardColumn = "user_card"
 	// PetsTable is the table the holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
-	PetsColumn = "owner_id"
+	PetsColumn = "user_pets"
 	// FilesTable is the table the holds the files relation/edge.
 	FilesTable = "files"
 	// FilesInverseTable is the table name for the File entity.
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
-	FilesColumn = "owner_id"
+	FilesColumn = "user_files"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
 	GroupsTable = "user_groups"
 	// GroupsInverseTable is the table name for the Group entity.
@@ -75,19 +75,19 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	TeamInverseTable = "pets"
 	// TeamColumn is the table column denoting the team relation/edge.
-	TeamColumn = "team_id"
+	TeamColumn = "user_team"
 	// SpouseTable is the table the holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
-	SpouseColumn = "user_spouse_id"
+	SpouseColumn = "user_spouse"
 	// ChildrenTable is the table the holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "parent_id"
+	ChildrenColumn = "user_parent"
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "parent_id"
+	ParentColumn = "user_parent"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -105,9 +105,9 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"group_blocked_id",
-	"user_spouse_id",
-	"parent_id",
+	"group_blocked",
+	"user_spouse",
+	"user_parent",
 }
 
 var (

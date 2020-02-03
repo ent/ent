@@ -28,7 +28,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "car" package.
 	CarsInverseTable = "cars"
 	// CarsColumn is the table column denoting the cars relation/edge.
-	CarsColumn = "owner_id"
+	CarsColumn = "user_cars"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
 	GroupsTable = "group_users"
 	// GroupsInverseTable is the table name for the Group entity.

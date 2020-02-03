@@ -224,11 +224,9 @@ func resolve(t *Type) error {
 				return fmt.Errorf("mismatch type for back-ref %q of %s.%s <-> %s.%s", e.Inverse, t.Name, e.Name, e.Type.Name, ref.Name)
 			}
 			table := t.Table()
-			// The name of the column is how we identify the other side. For example "A Parent has Children"
-			// (Parent <-O2M-> Children), or "A User has Pets" (User <-O2M-> Pet). The Children/Pet hold the
-			// relation, and they are identified the edge using how they call it in the inverse ("our parent")
-			// even though that struct is called "User".
-			column := snake(e.Name) + "_id"
+			// Name the foreign-key column in a format that wouldn't change even if an inverse
+			// edge is dropped (or added). The format is: "<Edge-Owner>_<Edge-Name>".
+			column := fmt.Sprintf("%s_%s", e.Type.Label(), snake(ref.Name))
 			switch a, b := ref.Unique, e.Unique; {
 			// If the relation column is in the inverse side/table. The rule is simple, if assoc is O2M,
 			// then inverse is M2O and the relation is in its table.
@@ -237,17 +235,16 @@ func resolve(t *Type) error {
 			case !a && b:
 				e.Rel.Type, ref.Rel.Type = M2O, O2M
 
-			// if the relation column is in the assoc side.
+			// If the relation column is in the assoc side.
 			case a && !b:
 				e.Rel.Type, ref.Rel.Type = O2M, M2O
 				table = e.Type.Table()
-				column = snake(ref.Name) + "_id"
 
 			case !a && !b:
 				e.Rel.Type, ref.Rel.Type = M2M, M2M
 				table = e.Type.Label() + "_" + ref.Name
 				c1, c2 := ref.Owner.Label()+"_id", ref.Type.Label()+"_id"
-				// if the relation is from the same type: User has Friends ([]User).
+				// If the relation is from the same type: User has Friends ([]User).
 				// give the second column a different name (the relation name).
 				if c1 == c2 {
 					c2 = rules.Singularize(e.Name) + "_id"
@@ -260,15 +257,14 @@ func resolve(t *Type) error {
 				e.Rel.Columns = []string{column}
 				ref.Rel.Columns = []string{column}
 			}
-		// assoc with uninitialized relation.
+		// Assoc with uninitialized relation.
 		case !e.IsInverse() && e.Rel.Type == Unk:
 			switch {
 			case !e.Unique && e.Type == t:
 				e.Rel.Type = M2M
 				e.Bidi = true
 				e.Rel.Table = t.Label() + "_" + e.Name
-				c1, c2 := e.Owner.Label()+"_id", rules.Singularize(e.Name)+"_id"
-				e.Rel.Columns = append(e.Rel.Columns, c1, c2)
+				e.Rel.Columns = []string{e.Owner.Label() + "_id", rules.Singularize(e.Name) + "_id"}
 			case e.Unique && e.Type == t:
 				e.Rel.Type = O2O
 				e.Bidi = true
@@ -281,9 +277,7 @@ func resolve(t *Type) error {
 				e.Rel.Table = e.Type.Table()
 			}
 			if !e.M2M() {
-				// Unlike assoc edges with inverse, we need to choose a unique name for the
-				// column in order to no conflict with other types that point to this type.
-				e.Rel.Columns = []string{fmt.Sprintf("%s_%s_id", t.Label(), snake(rules.Singularize(e.Name)))}
+				e.Rel.Columns = []string{fmt.Sprintf("%s_%s", t.Label(), snake(e.Name))}
 			}
 		}
 	}

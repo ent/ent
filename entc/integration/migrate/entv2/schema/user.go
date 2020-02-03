@@ -57,6 +57,9 @@ func (User) Edges() []ent.Edge {
 		// Edge(children<-M2O->parent) to be dropped.
 		// Edge(spouse<-O2O->spouse) to be dropped.
 		edge.To("car", Car.Type),
+		// A new edge was added.
+		edge.To("pets", Pet.Type).
+			Unique(),
 	}
 }
 

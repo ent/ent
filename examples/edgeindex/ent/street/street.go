@@ -22,7 +22,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "city" package.
 	CityInverseTable = "cities"
 	// CityColumn is the table column denoting the city relation/edge.
-	CityColumn = "city_id"
+	CityColumn = "city_streets"
 )
 
 // Columns holds all SQL columns for street fields.
@@ -33,5 +33,5 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Street type.
 var ForeignKeys = []string{
-	"city_id",
+	"city_streets",
 }

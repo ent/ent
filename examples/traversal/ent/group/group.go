@@ -27,7 +27,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	AdminInverseTable = "users"
 	// AdminColumn is the table column denoting the admin relation/edge.
-	AdminColumn = "admin_id"
+	AdminColumn = "group_admin"
 )
 
 // Columns holds all SQL columns for group fields.
@@ -38,7 +38,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
 var ForeignKeys = []string{
-	"admin_id",
+	"group_admin",
 }
 
 var (

@@ -415,6 +415,40 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 	return i, nil
 }
 
+// isImplicitIndex reports if the index was created implicitly for the unique column.
+func (d *MySQL) isImplicitIndex(idx *Index, col *Column) bool {
+	// We execute `CHANGE COLUMN` on older versions of MySQL (<8.0), which
+	// auto create the new index. The old one, will be dropped in `changeSet`.
+	if compareVersions(d.version, "8.0.0") >= 0 {
+		return idx.Name == col.Name && col.Unique
+	}
+	return false
+}
+
+// renameColumn returns the statement for renaming a column in
+// MySQL based on its version.
+func (d *MySQL) renameColumn(t *Table, old, new *Column) sql.Querier {
+	q := sql.AlterTable(t.Name)
+	if compareVersions(d.version, "8.0.0") >= 0 {
+		return q.RenameColumn(old.Name, new.Name)
+	}
+	return q.ChangeColumn(old.Name, d.addColumn(new))
+}
+
+// renameIndex returns the statement for renaming an index.
+func (d *MySQL) renameIndex(t *Table, old, new *Index) sql.Querier {
+	q := sql.AlterTable(t.Name)
+	if compareVersions(d.version, "5.7.0") >= 0 {
+		return q.RenameIndex(old.Name, new.Name)
+	}
+	return q.DropIndex(old.Name).AddIndex(new.Builder(t.Name))
+}
+
+// tableSchema returns the query for getting the table schema.
+func (d *MySQL) tableSchema() sql.Querier {
+	return sql.Raw("(SELECT DATABASE())")
+}
+
 // fkNames returns the foreign-key names of a column.
 func fkNames(ctx context.Context, tx dialect.Tx, table, column string) ([]string, error) {
 	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote()).

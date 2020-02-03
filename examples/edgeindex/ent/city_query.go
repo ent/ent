@@ -337,13 +337,13 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.city_id
+			fk := n.city_streets
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "city_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "city_streets" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "city_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Streets = append(node.Edges.Streets, n)
 		}

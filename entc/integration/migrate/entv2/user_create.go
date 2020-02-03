@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -30,6 +31,7 @@ type UserCreate struct {
 	blob     *[]byte
 	state    *user.State
 	car      map[int]struct{}
+	pets     map[int]struct{}
 }
 
 // SetAge sets the age field.
@@ -138,6 +140,28 @@ func (uc *UserCreate) AddCar(c ...*Car) *UserCreate {
 	return uc.AddCarIDs(ids...)
 }
 
+// SetPetsID sets the pets edge to Pet by id.
+func (uc *UserCreate) SetPetsID(id int) *UserCreate {
+	if uc.pets == nil {
+		uc.pets = make(map[int]struct{})
+	}
+	uc.pets[id] = struct{}{}
+	return uc
+}
+
+// SetNillablePetsID sets the pets edge to Pet by id if the given value is not nil.
+func (uc *UserCreate) SetNillablePetsID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetPetsID(*id)
+	}
+	return uc
+}
+
+// SetPets sets the pets edge to Pet.
+func (uc *UserCreate) SetPets(p *Pet) *UserCreate {
+	return uc.SetPetsID(p.ID)
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if uc.age == nil {
@@ -161,6 +185,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		if err := user.StateValidator(*uc.state); err != nil {
 			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
 		}
+	}
+	if len(uc.pets) > 1 {
+		return nil, errors.New("entv2: multiple assignments on a unique edge \"pets\"")
 	}
 	return uc.sqlSave(ctx)
 }
@@ -268,6 +295,25 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
 				},
 			},
 		}

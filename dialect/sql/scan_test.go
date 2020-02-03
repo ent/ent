@@ -153,6 +153,26 @@ func TestScanInt64(t *testing.T) {
 	require.EqualValues(t, 10, n)
 }
 
+func TestScanOne(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"name"}).
+		AddRow("10").
+		AddRow("20")
+	err := ScanOne(toRows(mock), new(string))
+	require.Error(t, err, "multiple lines")
+
+	mock = sqlmock.NewRows([]string{"name"}).
+		AddRow("10")
+	err = ScanOne(toRows(mock), "")
+	require.Error(t, err, "not a pointer")
+
+	mock = sqlmock.NewRows([]string{"name"}).
+		AddRow("10")
+	var s string
+	err = ScanOne(toRows(mock), &s)
+	require.NoError(t, err)
+	require.Equal(t, "10", s)
+}
+
 func TestInterface(t *testing.T) {
 	mock := sqlmock.NewRows([]string{"age"}).
 		AddRow("10").

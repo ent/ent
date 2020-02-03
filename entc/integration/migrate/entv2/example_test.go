@@ -106,6 +106,10 @@ func ExampleUser() {
 		Create().
 		SaveX(ctx)
 	log.Println("car created:", c0)
+	pe1 := client.Pet.
+		Create().
+		SaveX(ctx)
+	log.Println("pet created:", pe1)
 
 	// create user vertex with its edges.
 	u := client.User.
@@ -120,6 +124,7 @@ func ExampleUser() {
 		SetBlob(nil).
 		SetState(user.StateLoggedIn).
 		AddCar(c0).
+		SetPets(pe1).
 		SaveX(ctx)
 	log.Println("user created:", u)
 
@@ -129,6 +134,12 @@ func ExampleUser() {
 		log.Fatalf("failed querying car: %v", err)
 	}
 	log.Println("car found:", c0)
+
+	pe1, err = u.QueryPets().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying pets: %v", err)
+	}
+	log.Println("pets found:", pe1)
 
 	// Output:
 }

@@ -363,7 +363,7 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*Card)
 		for i := range nodes {
-			if fk := nodes[i].owner_id; fk != nil {
+			if fk := nodes[i].user_card; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -376,7 +376,7 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_card" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Owner = n

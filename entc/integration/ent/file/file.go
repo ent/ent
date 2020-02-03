@@ -32,14 +32,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "owner_id"
+	OwnerColumn = "user_files"
 	// TypeTable is the table the holds the type relation/edge.
 	TypeTable = "files"
 	// TypeInverseTable is the table name for the FileType entity.
 	// It exists in this package in order to avoid circular dependency with the "filetype" package.
 	TypeInverseTable = "file_types"
 	// TypeColumn is the table column denoting the type relation/edge.
-	TypeColumn = "type_id"
+	TypeColumn = "file_type_files"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -53,9 +53,9 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the File type.
 var ForeignKeys = []string{
-	"type_id",
-	"group_file_id",
-	"owner_id",
+	"file_type_files",
+	"group_files",
+	"user_files",
 }
 
 var (
