@@ -310,9 +310,13 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 			c.Type = field.TypeUint64
 		}
 	case "tinyint":
-		size, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return fmt.Errorf("converting varchar size to int: %v", err)
+		var size int
+		if len(parts) >= 2 {
+			var err error
+			size, err = strconv.Atoi(parts[1])
+			if err != nil {
+				return fmt.Errorf("converting tinyint size to int: %w", err)
+			}
 		}
 		switch {
 		case size == 1:
