@@ -64,9 +64,9 @@ func (e UserEdges) CarOrErr() ([]*Car, error) {
 	return nil, &NotLoadedError{edge: "car"}
 }
 
-// PetsWithError returns the Pets value or an error if the edge
+// PetsOrErr returns the Pets value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) PetsWithError() (*Pet, error) {
+func (e UserEdges) PetsOrErr() (*Pet, error) {
 	if e.loadedTypes[1] {
 		if e.Pets == nil {
 			// The edge pets was loaded in eager-loading,
