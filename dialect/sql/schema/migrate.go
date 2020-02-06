@@ -118,6 +118,9 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			if err != nil {
 				return err
 			}
+			if err := m.verify(ctx, tx, curr); err != nil {
+				return err
+			}
 			if err := m.fixture(ctx, tx, curr, t); err != nil {
 				return err
 			}
@@ -410,6 +413,19 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 	return nil
 }
 
+// verify verifies that the auto-increment counter is correct for table with universal-id support.
+func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
+	vr, ok := m.sqlDialect.(verifyRanger)
+	if !ok || !m.universalID {
+		return nil
+	}
+	id := indexOf(m.typeRanges, t.Name)
+	if id == -1 {
+		return nil
+	}
+	return vr.verifyRange(ctx, tx, t.Name, id<<32)
+}
+
 // types loads the type list from the database.
 // If the table does not create, it will create one.
 func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
@@ -438,15 +454,9 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 }
 
 func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) error {
-	id := -1
-	// if the table re-created, re-use its range from the past.
-	for i, name := range m.typeRanges {
-		if name == t.Name {
-			id = i
-			break
-		}
-	}
-	// allocate a new id-range.
+	id := indexOf(m.typeRanges, t.Name)
+	// if the table re-created, re-use its range from
+	// the past. otherwise, allocate a new id-range.
 	if id == -1 {
 		if len(m.typeRanges) > MaxTypes {
 			return fmt.Errorf("max number of types exceeded: %d", MaxTypes)
@@ -551,6 +561,15 @@ func exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}
 	return n > 0, nil
 }
 
+func indexOf(a []string, s string) int {
+	for i := range a {
+		if a[i] == s {
+			return i
+		}
+	}
+	return -1
+}
+
 type sqlDialect interface {
 	dialect.Driver
 	init(context.Context, dialect.Tx) error
@@ -578,4 +597,9 @@ type fkRenamer interface {
 	isImplicitIndex(*Index, *Column) bool
 	renameIndex(*Table, *Index, *Index) sql.Querier
 	renameColumn(*Table, *Column, *Column) sql.Querier
+}
+
+// verifyRanger wraps the method for verifying global-id range correctness.
+type verifyRanger interface {
+	verifyRange(context.Context, dialect.Tx, string, int) error
 }
