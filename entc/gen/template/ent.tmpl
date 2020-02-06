@@ -15,7 +15,7 @@ in the LICENSE file in the root directory of this source tree.
 type {{ $.Name }} struct {
 	config {{ template "model/omittags" $ }}
 	// ID of the ent.
-	ID {{ $.ID.Type }} `json:"id,omitempty"`
+	ID {{ $.ID.Type }} `{{ $.ID.StructTag }}`
 	{{- range $_, $f := $.Fields }}
 		// {{ $f.StructField }} holds the value of the "{{ $f.Name }}" field.
     	{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $f.StructTag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
