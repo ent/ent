@@ -62,7 +62,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("mysql: reading table description %v", err)
 	}
-	// call `Close` in cases of failures (`Close` is idempotent).
+	// call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
 	t := NewTable(name)
 	for rows.Next() {
@@ -110,6 +110,36 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Ind
 
 func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {
 	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", name, value), []interface{}{}, nil)
+}
+
+func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, name string, expected int) error {
+	if expected == 0 {
+		return nil
+	}
+	rows := &sql.Rows{}
+	query, args := sql.Select("AUTO_INCREMENT").
+		From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
+		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).
+		Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return fmt.Errorf("mysql: query auto_increment %v", err)
+	}
+	// call Close in cases of failures (Close is idempotent).
+	defer rows.Close()
+	actual := &sql.NullInt64{}
+	if err := sql.ScanOne(rows, actual); err != nil {
+		return fmt.Errorf("mysql: scan auto_increment %v", err)
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	// Table is empty and auto-increment is not configured. This can happen
+	// because MySQL (< 8.0) stores the auto-increment counter in main memory
+	// (not persistent), and the value is reset on restart (if table is empty).
+	if actual.Int64 == 0 {
+		return d.setRange(ctx, tx, name, expected)
+	}
+	return nil
 }
 
 // tBuilder returns the MySQL DSL query for table creation.
