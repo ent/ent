@@ -291,37 +291,60 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
-	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
+	parts := strings.FieldsFunc(c.typ, func(r rune) bool {
 		return r == '(' || r == ')' || r == ' ' || r == ','
-	}); parts[0] {
+	})
+	var (
+		size     int64
+		unsigned bool
+		err error
+	)
+	switch parts[0] {
+	case "int", "smallint", "bigint", "tinyint":
+		switch len(parts) {
+		case 2: // int(10) or int unsigned
+			if parts[1] == "unsigned" {
+				unsigned = true
+				break
+			}
+			size, err = strconv.ParseInt(parts[1], 10, 0)
+			if err != nil {
+				return fmt.Errorf("converting %s size to int: %w", parts[0], err)
+			}
+		case 3: // int(10) unsigned
+			size, err = strconv.ParseInt(parts[1], 10, 0)
+			if err != nil {
+				return fmt.Errorf("converting %s size to int: %w", parts[0], err)
+			}
+			unsigned = true
+		}
+	case "varbinary", "varchar", "char":
+		size, err = strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("converting %s size to int: %w", parts[0], err)
+		}
+	}
+	switch parts[0] {
 	case "int":
 		c.Type = field.TypeInt32
-		if len(parts) == 3 { // int(10) unsigned.
+		if unsigned {
 			c.Type = field.TypeUint32
 		}
 	case "smallint":
 		c.Type = field.TypeInt16
-		if len(parts) == 3 { // smallint(5) unsigned.
+		if unsigned {
 			c.Type = field.TypeUint16
 		}
 	case "bigint":
 		c.Type = field.TypeInt64
-		if len(parts) == 3 { // bigint(20) unsigned.
+		if unsigned {
 			c.Type = field.TypeUint64
 		}
 	case "tinyint":
-		var size int
-		if len(parts) >= 2 {
-			var err error
-			size, err = strconv.Atoi(parts[1])
-			if err != nil {
-				return fmt.Errorf("converting tinyint size to int: %w", err)
-			}
-		}
 		switch {
 		case size == 1:
 			c.Type = field.TypeBool
-		case len(parts) == 3: // tinyint(3) unsigned.
+		case unsigned:
 			c.Type = field.TypeUint8
 		default:
 			c.Type = field.TypeInt8
@@ -344,17 +367,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeBytes
 	case "varbinary":
 		c.Type = field.TypeBytes
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting varbinary size to int: %v", err)
-		}
 		c.Size = size
 	case "varchar":
 		c.Type = field.TypeString
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting varchar size to int: %v", err)
-		}
 		c.Size = size
 	case "longtext":
 		c.Size = math.MaxInt32
@@ -368,10 +383,6 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 			c.Enums[i] = strings.Trim(e, "'")
 		}
 	case "char":
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting char size to int: %v", err)
-		}
 		// UUID field has length of 36 characters (32 alphanumeric characters and 4 hyphens).
 		if size != 36 {
 			return fmt.Errorf("unknown char(%d) type (not a uuid)", size)
