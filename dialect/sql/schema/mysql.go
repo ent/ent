@@ -291,38 +291,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
-	parts := strings.FieldsFunc(c.typ, func(r rune) bool {
-		return r == '(' || r == ')' || r == ' ' || r == ','
-	})
-	var (
-		size     int64
-		unsigned bool
-		err error
-	)
-	switch parts[0] {
-	case "int", "smallint", "bigint", "tinyint":
-		switch len(parts) {
-		case 2: // int(10) or int unsigned
-			if parts[1] == "unsigned" {
-				unsigned = true
-				break
-			}
-			size, err = strconv.ParseInt(parts[1], 10, 0)
-			if err != nil {
-				return fmt.Errorf("converting %s size to int: %w", parts[0], err)
-			}
-		case 3: // int(10) unsigned
-			size, err = strconv.ParseInt(parts[1], 10, 0)
-			if err != nil {
-				return fmt.Errorf("converting %s size to int: %w", parts[0], err)
-			}
-			unsigned = true
-		}
-	case "varbinary", "varchar", "char":
-		size, err = strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting %s size to int: %w", parts[0], err)
-		}
+	parts, size, unsigned, err := columnData(c.typ)
+	if err != nil {
+		return err
 	}
 	switch parts[0] {
 	case "int":
@@ -462,6 +433,39 @@ func (d *MySQL) renameIndex(t *Table, old, new *Index) sql.Querier {
 // tableSchema returns the query for getting the table schema.
 func (d *MySQL) tableSchema() sql.Querier {
 	return sql.Raw("(SELECT DATABASE())")
+}
+
+// columnData returns column data: parts, size and signedness
+func columnData(typ string) ([]string, int64, bool, error) {
+	parts := strings.FieldsFunc(typ, func(r rune) bool {
+		return r == '(' || r == ')' || r == ' ' || r == ','
+	})
+	switch parts[0] {
+	case "int", "smallint", "bigint", "tinyint":
+		switch {
+		case len(parts) == 2 && parts[1] == "unsigned": // int unsigned
+			return parts, 0, true, nil
+		case len(parts) == 2: // int(10)
+			size, err := strconv.ParseInt(parts[1], 10, 0)
+			if err != nil {
+				return parts, 0, false, fmt.Errorf("converting %s size to int: %w", parts[0], err)
+			}
+			return parts, size, false, nil
+		case len(parts) == 3: // int(10) unsigned
+			size, err := strconv.ParseInt(parts[1], 10, 0)
+			if err != nil {
+				return parts, 0, true, fmt.Errorf("converting %s size to int: %w", parts[0], err)
+			}
+			return parts, size, true, nil
+		}
+	case "varbinary", "varchar", "char":
+		size, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return parts, 0, false, fmt.Errorf("converting %s size to int: %w", parts[0], err)
+		}
+		return parts, size, false, nil
+	}
+	return parts, 0, false, nil
 }
 
 // fkNames returns the foreign-key names of a column.
