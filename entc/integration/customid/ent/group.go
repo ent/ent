@@ -18,7 +18,7 @@ import (
 type Group struct {
 	config
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int `json:"oid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
 	Edges GroupEdges `json:"edges"`
