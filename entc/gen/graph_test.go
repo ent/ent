@@ -242,7 +242,7 @@ func TestGraph_Gen(t *testing.T) {
 	require := require.New(t)
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
-	defer os.Remove(target)
+	defer os.RemoveAll(target)
 	external := template.Must(template.New("external").Parse("package external"))
 	graph, err := NewGraph(&Config{
 		Package:  "entc/gen",
@@ -276,5 +276,4 @@ func TestGraph_Gen(t *testing.T) {
 	}
 	_, err = os.Stat(target + "/external.go")
 	require.NoError(err)
-	os.RemoveAll(target)
 }
