@@ -169,6 +169,12 @@ func TestMySQL_Create(t *testing.T) {
 						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 						{Name: "age", Type: field.TypeInt},
+						{Name: "tiny", Type: field.TypeInt8},
+						{Name: "tiny_unsigned", Type: field.TypeUint8},
+						{Name: "small", Type: field.TypeInt16},
+						{Name: "small_unsigned", Type: field.TypeUint16},
+						{Name: "big", Type: field.TypeInt64},
+						{Name: "big_unsigned", Type: field.TypeUint64},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -188,7 +194,14 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
 						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "").
 						AddRow("text", "longtext", "YES", "YES", "NULL", "", "", "").
-						AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin"))
+						AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin").
+						// 8.0.19: new int column type formats
+						AddRow("tiny", "tinyint", "NO", "YES", "NULL", "", "", "").
+						AddRow("tiny_unsigned", "tinyint unsigned", "NO", "YES", "NULL", "", "", "").
+						AddRow("small", "smallint", "NO", "YES", "NULL", "", "", "").
+						AddRow("small_unsigned", "smallint unsigned", "NO", "YES", "NULL", "", "", "").
+						AddRow("big", "bigint", "NO", "YES", "NULL", "", "", "").
+						AddRow("big_unsigned", "bigint unsigned", "NO", "YES", "NULL", "", "", ""))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
