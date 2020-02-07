@@ -291,7 +291,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
-	parts, size, unsigned, err := columnData(c.typ)
+	parts, size, unsigned, err := parseColumn(c.typ)
 	if err != nil {
 		return err
 	}
@@ -435,37 +435,28 @@ func (d *MySQL) tableSchema() sql.Querier {
 	return sql.Raw("(SELECT DATABASE())")
 }
 
-// columnData returns column data: parts, size and signedness
-func columnData(typ string) ([]string, int64, bool, error) {
-	parts := strings.FieldsFunc(typ, func(r rune) bool {
+// parseColumn returns column parts, size and signedness by mysql type
+func parseColumn(typ string) (parts []string, size int64, unsigned bool, err error) {
+	switch parts = strings.FieldsFunc(typ, func(r rune) bool {
 		return r == '(' || r == ')' || r == ' ' || r == ','
-	})
-	switch parts[0] {
+	}); parts[0] {
 	case "int", "smallint", "bigint", "tinyint":
 		switch {
 		case len(parts) == 2 && parts[1] == "unsigned": // int unsigned
-			return parts, 0, true, nil
-		case len(parts) == 2: // int(10)
-			size, err := strconv.ParseInt(parts[1], 10, 0)
-			if err != nil {
-				return parts, 0, false, fmt.Errorf("converting %s size to int: %w", parts[0], err)
-			}
-			return parts, size, false, nil
+			unsigned = true
 		case len(parts) == 3: // int(10) unsigned
-			size, err := strconv.ParseInt(parts[1], 10, 0)
-			if err != nil {
-				return parts, 0, true, fmt.Errorf("converting %s size to int: %w", parts[0], err)
-			}
-			return parts, size, true, nil
+			unsigned = true
+			fallthrough
+		case len(parts) == 2: // int(10)
+			size, err = strconv.ParseInt(parts[1], 10, 0)
 		}
 	case "varbinary", "varchar", "char":
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return parts, 0, false, fmt.Errorf("converting %s size to int: %w", parts[0], err)
-		}
-		return parts, size, false, nil
+		size, err = strconv.ParseInt(parts[1], 10, 64)
 	}
-	return parts, 0, false, nil
+	if err != nil {
+		return parts, size, unsigned, fmt.Errorf("converting %s size to int: %v", parts[0], err)
+	}
+	return parts, size, unsigned, nil
 }
 
 // fkNames returns the foreign-key names of a column.
