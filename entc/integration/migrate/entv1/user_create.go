@@ -20,6 +20,7 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
+	id       *int
 	age      *int32
 	name     *string
 	nickname *string
@@ -96,6 +97,12 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 	if u != nil {
 		uc.SetState(*u)
 	}
+	return uc
+}
+
+// SetID sets the id field.
+func (uc *UserCreate) SetID(i int) *UserCreate {
+	uc.id = &i
 	return uc
 }
 
@@ -236,6 +243,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
+	if value := uc.id; value != nil {
+		u.ID = *value
+		_spec.ID.Value = *value
+	}
 	if value := uc.age; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
@@ -374,7 +385,9 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	u.ID = int(id)
+	if u.ID == 0 {
+		id := _spec.ID.Value.(int64)
+		u.ID = int(id)
+	}
 	return u, nil
 }

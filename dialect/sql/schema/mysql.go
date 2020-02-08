@@ -108,18 +108,18 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Ind
 	return idx, nil
 }
 
-func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, name string, value int) error {
-	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", name, value), []interface{}{}, nil)
+func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, t *Table, value int) error {
+	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", t.Name, value), []interface{}{}, nil)
 }
 
-func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, name string, expected int) error {
+func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expected int) error {
 	if expected == 0 {
 		return nil
 	}
 	rows := &sql.Rows{}
 	query, args := sql.Select("AUTO_INCREMENT").
 		From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).
+		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", t.Name)).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return fmt.Errorf("mysql: query auto_increment %v", err)
@@ -137,7 +137,7 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, name string, exp
 	// because MySQL (< 8.0) stores the auto-increment counter in main memory
 	// (not persistent), and the value is reset on restart (if table is empty).
 	if actual.Int64 == 0 {
-		return d.setRange(ctx, tx, name, expected)
+		return d.setRange(ctx, tx, t, expected)
 	}
 	return nil
 }

@@ -19,6 +19,8 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("id").
+			StorageKey("oid"),
 		field.Int32("age"),
 		field.String("name").
 			MaxLen(10),

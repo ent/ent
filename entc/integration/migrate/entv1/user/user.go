@@ -16,7 +16,7 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+	FieldID = "oid"
 	// FieldAge holds the string denoting the age vertex property in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name vertex property in the database.
@@ -77,7 +77,7 @@ var (
 	fields = schema.User{}.Fields()
 
 	// descName is the schema descriptor for name field.
-	descName = fields[1].Descriptor()
+	descName = fields[2].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator = descName.Validators[0].(func(string) error)
 )
