@@ -440,7 +440,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := uint64(eout.Int64)
-				inValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -503,7 +503,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := uint64(eout.Int64)
-				inValue := uint64(eout.Int64)
+				inValue := uint64(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
