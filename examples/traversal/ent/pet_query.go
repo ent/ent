@@ -391,7 +391,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
 				outValue := int(eout.Int64)
-				inValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)

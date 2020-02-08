@@ -326,7 +326,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- if and (not $field.UserDefined) $field.IsString -}}
 		strconv.FormatInt({{ $arg }}.Int64, 10)
 	{{- else  if hasPrefix $nulltype "sql" -}}
-		{{ $field.NullTypeField "eout" -}}
+		{{ $field.NullTypeField $arg -}}
 	{{- else -}}
 		{{ $arg }}
 	{{- end }}
