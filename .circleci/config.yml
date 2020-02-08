@@ -67,7 +67,7 @@ jobs:
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3307
-      - image: circleci/mysql:8.0.18
+      - image: circleci/mysql
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
