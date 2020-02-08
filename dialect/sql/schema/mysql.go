@@ -321,33 +321,31 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
-	switch parts := strings.FieldsFunc(c.typ, func(r rune) bool {
-		return r == '(' || r == ')' || r == ' ' || r == ','
-	}); parts[0] {
+	parts, size, unsigned, err := parseColumn(c.typ)
+	if err != nil {
+		return err
+	}
+	switch parts[0] {
 	case "int":
 		c.Type = field.TypeInt32
-		if len(parts) == 3 { // int(10) unsigned.
+		if unsigned {
 			c.Type = field.TypeUint32
 		}
 	case "smallint":
 		c.Type = field.TypeInt16
-		if len(parts) == 3 { // smallint(5) unsigned.
+		if unsigned {
 			c.Type = field.TypeUint16
 		}
 	case "bigint":
 		c.Type = field.TypeInt64
-		if len(parts) == 3 { // bigint(20) unsigned.
+		if unsigned {
 			c.Type = field.TypeUint64
 		}
 	case "tinyint":
-		size, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return fmt.Errorf("converting varchar size to int: %v", err)
-		}
 		switch {
 		case size == 1:
 			c.Type = field.TypeBool
-		case len(parts) == 3: // tinyint(3) unsigned.
+		case unsigned:
 			c.Type = field.TypeUint8
 		default:
 			c.Type = field.TypeInt8
@@ -370,17 +368,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeBytes
 	case "varbinary":
 		c.Type = field.TypeBytes
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting varbinary size to int: %v", err)
-		}
 		c.Size = size
 	case "varchar":
 		c.Type = field.TypeString
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting varchar size to int: %v", err)
-		}
 		c.Size = size
 	case "longtext":
 		c.Size = math.MaxInt32
@@ -394,10 +384,6 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 			c.Enums[i] = strings.Trim(e, "'")
 		}
 	case "char":
-		size, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("converting char size to int: %v", err)
-		}
 		// UUID field has length of 36 characters (32 alphanumeric characters and 4 hyphens).
 		if size != 36 {
 			return fmt.Errorf("unknown char(%d) type (not a uuid)", size)
@@ -477,6 +463,30 @@ func (d *MySQL) renameIndex(t *Table, old, new *Index) sql.Querier {
 // tableSchema returns the query for getting the table schema.
 func (d *MySQL) tableSchema() sql.Querier {
 	return sql.Raw("(SELECT DATABASE())")
+}
+
+// parseColumn returns column parts, size and signedness by mysql type
+func parseColumn(typ string) (parts []string, size int64, unsigned bool, err error) {
+	switch parts = strings.FieldsFunc(typ, func(r rune) bool {
+		return r == '(' || r == ')' || r == ' ' || r == ','
+	}); parts[0] {
+	case "int", "smallint", "bigint", "tinyint":
+		switch {
+		case len(parts) == 2 && parts[1] == "unsigned": // int unsigned
+			unsigned = true
+		case len(parts) == 3: // int(10) unsigned
+			unsigned = true
+			fallthrough
+		case len(parts) == 2: // int(10)
+			size, err = strconv.ParseInt(parts[1], 10, 0)
+		}
+	case "varbinary", "varchar", "char":
+		size, err = strconv.ParseInt(parts[1], 10, 64)
+	}
+	if err != nil {
+		return parts, size, unsigned, fmt.Errorf("converting %s size to int: %v", parts[0], err)
+	}
+	return parts, size, unsigned, nil
 }
 
 // fkNames returns the foreign-key names of a column.
