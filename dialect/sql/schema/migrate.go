@@ -423,7 +423,7 @@ func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 	if id == -1 {
 		return nil
 	}
-	return vr.verifyRange(ctx, tx, t.Name, id<<32)
+	return vr.verifyRange(ctx, tx, t, id<<32)
 }
 
 // types loads the type list from the database.
@@ -470,7 +470,7 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 		m.typeRanges = append(m.typeRanges, t.Name)
 	}
 	// set the id offset for table.
-	return m.setRange(ctx, tx, t.Name, id<<32)
+	return m.setRange(ctx, tx, t, id<<32)
 }
 
 // fkColumn returns the column name of a foreign-key.
@@ -576,7 +576,7 @@ type sqlDialect interface {
 	table(context.Context, dialect.Tx, string) (*Table, error)
 	tableExist(context.Context, dialect.Tx, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)
-	setRange(context.Context, dialect.Tx, string, int) error
+	setRange(context.Context, dialect.Tx, *Table, int) error
 	dropIndex(context.Context, dialect.Tx, *Index, string) error
 	// table, column and index builder per dialect.
 	cType(*Column) string
@@ -601,5 +601,5 @@ type fkRenamer interface {
 
 // verifyRanger wraps the method for verifying global-id range correctness.
 type verifyRanger interface {
-	verifyRange(context.Context, dialect.Tx, string, int) error
+	verifyRange(context.Context, dialect.Tx, *Table, int) error
 }

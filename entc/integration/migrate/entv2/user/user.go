@@ -16,7 +16,7 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+	FieldID = "oid"
 	// FieldAge holds the string denoting the age vertex property in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name vertex property in the database.
@@ -77,12 +77,12 @@ var (
 	fields = schema.User{}.Fields()
 
 	// descPhone is the schema descriptor for phone field.
-	descPhone = fields[3].Descriptor()
+	descPhone = fields[4].Descriptor()
 	// DefaultPhone holds the default value on creation for the phone field.
 	DefaultPhone = descPhone.Default.(string)
 
 	// descTitle is the schema descriptor for title field.
-	descTitle = fields[5].Descriptor()
+	descTitle = fields[6].Descriptor()
 	// DefaultTitle holds the default value on creation for the title field.
 	DefaultTitle = descTitle.Default.(string)
 )
