@@ -15,12 +15,10 @@ import (
 
 // ID filters vertices based on their identifier.
 func ID(id string) predicate.Item {
-	return predicate.Item(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.EQ(s.C(FieldID), id))
-		},
-	)
+	return predicate.Item(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.EQ(s.C(FieldID), id))
+	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
@@ -28,8 +26,7 @@ func IDEQ(id string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.EQ(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
@@ -37,8 +34,7 @@ func IDNEQ(id string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.NEQ(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDIn applies the In predicate on the ID field.
@@ -55,8 +51,7 @@ func IDIn(ids ...string) predicate.Item {
 			v[i], _ = strconv.Atoi(ids[i])
 		}
 		s.Where(sql.In(s.C(FieldID), v...))
-	},
-	)
+	})
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
@@ -73,8 +68,7 @@ func IDNotIn(ids ...string) predicate.Item {
 			v[i], _ = strconv.Atoi(ids[i])
 		}
 		s.Where(sql.NotIn(s.C(FieldID), v...))
-	},
-	)
+	})
 }
 
 // IDGT applies the GT predicate on the ID field.
@@ -82,8 +76,7 @@ func IDGT(id string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.GT(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
@@ -91,8 +84,7 @@ func IDGTE(id string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.GTE(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDLT applies the LT predicate on the ID field.
@@ -100,8 +92,7 @@ func IDLT(id string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.LT(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
@@ -109,44 +100,37 @@ func IDLTE(id string) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.LTE(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
-	return predicate.Item(
-		func(s *sql.Selector) {
-			s1 := s.Clone().SetP(nil)
-			for _, p := range predicates {
-				p(s1)
-			}
-			s.Where(s1.P())
-		},
-	)
+	return predicate.Item(func(s *sql.Selector) {
+		s1 := s.Clone().SetP(nil)
+		for _, p := range predicates {
+			p(s1)
+		}
+		s.Where(s1.P())
+	})
 }
 
 // Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.Item) predicate.Item {
-	return predicate.Item(
-		func(s *sql.Selector) {
-			s1 := s.Clone().SetP(nil)
-			for i, p := range predicates {
-				if i > 0 {
-					s1.Or()
-				}
-				p(s1)
+	return predicate.Item(func(s *sql.Selector) {
+		s1 := s.Clone().SetP(nil)
+		for i, p := range predicates {
+			if i > 0 {
+				s1.Or()
 			}
-			s.Where(s1.P())
-		},
-	)
+			p(s1)
+		}
+		s.Where(s1.P())
+	})
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.Item) predicate.Item {
-	return predicate.Item(
-		func(s *sql.Selector) {
-			p(s.Not())
-		},
-	)
+	return predicate.Item(func(s *sql.Selector) {
+		p(s.Not())
+	})
 }
