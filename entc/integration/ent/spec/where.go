@@ -16,12 +16,10 @@ import (
 
 // ID filters vertices based on their identifier.
 func ID(id string) predicate.Spec {
-	return predicate.Spec(
-		func(s *sql.Selector) {
-			id, _ := strconv.Atoi(id)
-			s.Where(sql.EQ(s.C(FieldID), id))
-		},
-	)
+	return predicate.Spec(func(s *sql.Selector) {
+		id, _ := strconv.Atoi(id)
+		s.Where(sql.EQ(s.C(FieldID), id))
+	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
@@ -29,8 +27,7 @@ func IDEQ(id string) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.EQ(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
@@ -38,8 +35,7 @@ func IDNEQ(id string) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.NEQ(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDIn applies the In predicate on the ID field.
@@ -56,8 +52,7 @@ func IDIn(ids ...string) predicate.Spec {
 			v[i], _ = strconv.Atoi(ids[i])
 		}
 		s.Where(sql.In(s.C(FieldID), v...))
-	},
-	)
+	})
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
@@ -74,8 +69,7 @@ func IDNotIn(ids ...string) predicate.Spec {
 			v[i], _ = strconv.Atoi(ids[i])
 		}
 		s.Where(sql.NotIn(s.C(FieldID), v...))
-	},
-	)
+	})
 }
 
 // IDGT applies the GT predicate on the ID field.
@@ -83,8 +77,7 @@ func IDGT(id string) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.GT(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
@@ -92,8 +85,7 @@ func IDGTE(id string) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.GTE(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDLT applies the LT predicate on the ID field.
@@ -101,8 +93,7 @@ func IDLT(id string) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.LT(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
@@ -110,8 +101,7 @@ func IDLTE(id string) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		id, _ := strconv.Atoi(id)
 		s.Where(sql.LTE(s.C(FieldID), id))
-	},
-	)
+	})
 }
 
 // HasCard applies the HasEdge predicate on the "card" edge.
@@ -123,8 +113,7 @@ func HasCard() predicate.Spec {
 			sqlgraph.Edge(sqlgraph.M2M, false, CardTable, CardPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
-	},
-	)
+	})
 }
 
 // HasCardWith applies the HasEdge predicate on the "card" edge with a given conditions (other predicates).
@@ -140,44 +129,37 @@ func HasCardWith(preds ...predicate.Card) predicate.Spec {
 				p(s)
 			}
 		})
-	},
-	)
+	})
 }
 
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.Spec) predicate.Spec {
-	return predicate.Spec(
-		func(s *sql.Selector) {
-			s1 := s.Clone().SetP(nil)
-			for _, p := range predicates {
-				p(s1)
-			}
-			s.Where(s1.P())
-		},
-	)
+	return predicate.Spec(func(s *sql.Selector) {
+		s1 := s.Clone().SetP(nil)
+		for _, p := range predicates {
+			p(s1)
+		}
+		s.Where(s1.P())
+	})
 }
 
 // Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.Spec) predicate.Spec {
-	return predicate.Spec(
-		func(s *sql.Selector) {
-			s1 := s.Clone().SetP(nil)
-			for i, p := range predicates {
-				if i > 0 {
-					s1.Or()
-				}
-				p(s1)
+	return predicate.Spec(func(s *sql.Selector) {
+		s1 := s.Clone().SetP(nil)
+		for i, p := range predicates {
+			if i > 0 {
+				s1.Or()
 			}
-			s.Where(s1.P())
-		},
-	)
+			p(s1)
+		}
+		s.Where(s1.P())
+	})
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.Spec) predicate.Spec {
-	return predicate.Spec(
-		func(s *sql.Selector) {
-			p(s.Not())
-		},
-	)
+	return predicate.Spec(func(s *sql.Selector) {
+		p(s.Not())
+	})
 }

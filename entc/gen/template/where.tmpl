@@ -15,8 +15,8 @@ in the LICENSE file in the root directory of this source tree.
 // ID filters vertices based on their identifier.
 func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
-		{{ $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
-		{{- xtemplate $tmpl $ }},
+		{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+		{{- xtemplate $tmpl $ -}}
 	)
 }
 
@@ -28,8 +28,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}(
 			{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
 				{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
-				{{- xtemplate $tmpl . }},
-			{{ end -}}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
 		)
 	}
 {{ end }}
@@ -43,8 +43,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 			return predicate.{{ $.Name }}(
 				{{- with extend $ "Field" $f -}}
 					{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
-					{{- xtemplate $tmpl . }},
-				{{ end -}}
+					{{- xtemplate $tmpl . }}
+				{{- end -}}
 			)
 		}
 	{{- end }}
@@ -70,8 +70,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}(
 			{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
 				{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
-				{{- xtemplate $tmpl . }},
-			{{ end -}}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
 		)
 	}
 	{{ end }}
@@ -84,8 +84,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}(
 			{{- with extend $ "Edge" $e -}}
 				{{ $tmpl := printf "dialect/%s/predicate/edge/has" $.Storage }}
-				{{- xtemplate $tmpl . }},
-			{{ end -}}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
 		)
 	}
 	{{ $func = printf "%sWith" $func }}
@@ -94,8 +94,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}(
 			{{- with extend $ "Edge" $e -}}
 				{{ $tmpl := printf "dialect/%s/predicate/edge/haswith" $.Storage }}
-				{{- xtemplate $tmpl . }},
-			{{ end -}}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
 		)
 	}
 {{ end }}
@@ -103,24 +103,24 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
-		{{ $tmpl := printf "dialect/%s/predicate/and" $.Storage }}
-		{{- xtemplate $tmpl . }},
+		{{- $tmpl = printf "dialect/%s/predicate/and" $.Storage }}
+		{{- xtemplate $tmpl . -}}
 	)
 }
 
 // Or groups list of predicates with the OR operator between them.
 func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
-		{{ $tmpl = printf "dialect/%s/predicate/or" $.Storage }}
-		{{- xtemplate $tmpl . }},
+		{{- $tmpl = printf "dialect/%s/predicate/or" $.Storage }}
+		{{- xtemplate $tmpl . -}}
 	)
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
-		{{ $tmpl = printf "dialect/%s/predicate/not" $.Storage }}
-		{{- xtemplate $tmpl . }},
+		{{- $tmpl = printf "dialect/%s/predicate/not" $.Storage }}
+		{{- xtemplate $tmpl . -}}
 	)
 }
 
