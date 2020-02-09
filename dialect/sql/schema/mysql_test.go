@@ -1087,7 +1087,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"AUTO_INCREMENT"}).
-						AddRow(0))
+						AddRow(1))
 				// restore the auto-increment counter.
 				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 4294967296")).
 					WillReturnResult(sqlmock.NewResult(0, 1))

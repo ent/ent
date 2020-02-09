@@ -136,7 +136,7 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 	// Table is empty and auto-increment is not configured. This can happen
 	// because MySQL (< 8.0) stores the auto-increment counter in main memory
 	// (not persistent), and the value is reset on restart (if table is empty).
-	if actual.Int64 == 0 {
+	if actual.Int64 <= 1 {
 		return d.setRange(ctx, tx, t, expected)
 	}
 	return nil
