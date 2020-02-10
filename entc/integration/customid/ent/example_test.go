@@ -77,6 +77,29 @@ func ExampleGroup() {
 
 	// Output:
 }
+func ExamplePet() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the pet's edges.
+
+	// create pet vertex with its edges.
+	pe := client.Pet.
+		Create().
+		SaveX(ctx)
+	log.Println("pet created:", pe)
+
+	// query edges.
+
+	// Output:
+}
 func ExampleUser() {
 	if dsn == "" {
 		return

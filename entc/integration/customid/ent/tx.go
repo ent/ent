@@ -20,6 +20,8 @@ type Tx struct {
 	Blob *BlobClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// Pet is the client for interacting with the Pet builders.
+	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -41,6 +43,7 @@ func (tx *Tx) Client() *Client {
 		Schema: migrate.NewSchema(tx.driver),
 		Blob:   NewBlobClient(tx.config),
 		Group:  NewGroupClient(tx.config),
+		Pet:    NewPetClient(tx.config),
 		User:   NewUserClient(tx.config),
 	}
 }
