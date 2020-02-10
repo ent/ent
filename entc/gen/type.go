@@ -558,10 +558,8 @@ func (f Field) Column() *schema.Column {
 		Nullable: f.Optional,
 		Enums:    f.Enums(),
 	}
-	if f.def != nil {
-		if f.def.Size != nil {
-			c.Size = *f.def.Size
-		}
+	if f.def != nil && f.def.Size != nil {
+		c.Size = *f.def.Size
 	}
 	if f.Default && !f.IsTime() {
 		c.Default = f.DefaultName()
@@ -581,6 +579,10 @@ func (f Field) PK() *schema.Column {
 	if f.UserDefined && !f.Type.Numeric() {
 		c.Increment = false
 		c.Type = f.Type.Type
+		c.Unique = f.Unique
+		if f.def != nil && f.def.Size != nil {
+			c.Size = *f.def.Size
+		}
 	}
 	return c
 }

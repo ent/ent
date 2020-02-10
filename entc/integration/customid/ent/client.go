@@ -16,6 +16,7 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 
 	"github.com/facebookincubator/ent/dialect"
@@ -32,6 +33,8 @@ type Client struct {
 	Blob *BlobClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// Pet is the client for interacting with the Pet builders.
+	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -45,6 +48,7 @@ func NewClient(opts ...Option) *Client {
 		Schema: migrate.NewSchema(c.driver),
 		Blob:   NewBlobClient(c),
 		Group:  NewGroupClient(c),
+		Pet:    NewPetClient(c),
 		User:   NewUserClient(c),
 	}
 }
@@ -79,6 +83,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config: cfg,
 		Blob:   NewBlobClient(cfg),
 		Group:  NewGroupClient(cfg),
+		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
 }
@@ -100,6 +105,7 @@ func (c *Client) Debug() *Client {
 		Schema: migrate.NewSchema(cfg.driver),
 		Blob:   NewBlobClient(cfg),
 		Group:  NewGroupClient(cfg),
+		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
 	}
 }
@@ -249,6 +255,70 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query.sql = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 
 	return query
+}
+
+// PetClient is a client for the Pet schema.
+type PetClient struct {
+	config
+}
+
+// NewPetClient returns a client for the Pet from the given config.
+func NewPetClient(c config) *PetClient {
+	return &PetClient{config: c}
+}
+
+// Create returns a create builder for Pet.
+func (c *PetClient) Create() *PetCreate {
+	return &PetCreate{config: c.config}
+}
+
+// Update returns an update builder for Pet.
+func (c *PetClient) Update() *PetUpdate {
+	return &PetUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PetClient) UpdateOne(pe *Pet) *PetUpdateOne {
+	return c.UpdateOneID(pe.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PetClient) UpdateOneID(id string) *PetUpdateOne {
+	return &PetUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for Pet.
+func (c *PetClient) Delete() *PetDelete {
+	return &PetDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
+	return c.DeleteOneID(pe.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
+	return &PetDeleteOne{c.Delete().Where(pet.ID(id))}
+}
+
+// Create returns a query builder for Pet.
+func (c *PetClient) Query() *PetQuery {
+	return &PetQuery{config: c.config}
+}
+
+// Get returns a Pet entity by its id.
+func (c *PetClient) Get(ctx context.Context, id string) (*Pet, error) {
+	return c.Query().Where(pet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
+	pe, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return pe
 }
 
 // UserClient is a client for the User schema.

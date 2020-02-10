@@ -37,6 +37,17 @@ var (
 		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// PetsColumns holds the columns for the "pets" table.
+	PetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 25},
+	}
+	// PetsTable holds the schema information for the "pets" table.
+	PetsTable = &schema.Table{
+		Name:        "pets",
+		Columns:     PetsColumns,
+		PrimaryKey:  []*schema.Column{PetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -88,6 +99,7 @@ var (
 	Tables = []*schema.Table{
 		BlobsTable,
 		GroupsTable,
+		PetsTable,
 		UsersTable,
 		GroupUsersTable,
 	}
