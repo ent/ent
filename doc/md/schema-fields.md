@@ -242,7 +242,7 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
 		field.Time("created_at").
-			Default(time.Now),
+			Default(time.Now).
 			Immutable(),
 	}
 }
