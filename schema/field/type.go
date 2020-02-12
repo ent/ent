@@ -19,6 +19,7 @@ const (
 	TypeBytes
 	TypeEnum
 	TypeString
+	TypeCustom
 	TypeInt8
 	TypeInt16
 	TypeInt32
@@ -68,10 +69,11 @@ func (t Type) ConstName() string {
 // TypeInfo holds the information regarding field type.
 // Used by complex types like JSON and  Bytes.
 type TypeInfo struct {
-	Type     Type
-	Ident    string
-	PkgPath  string
-	Nillable bool // slices or pointers.
+	Type       Type
+	Ident      string
+	PkgPath    string
+	Nillable   bool // slices or pointers.
+	CustomType string
 }
 
 // String returns the string representation of a type.
@@ -79,6 +81,8 @@ func (t TypeInfo) String() string {
 	switch {
 	case t.Ident != "":
 		return t.Ident
+	case t.Type == TypeCustom:
+		return t.CustomType
 	case t.Type < endTypes:
 		return typeNames[t.Type]
 	default:
@@ -123,6 +127,7 @@ var (
 		TypeUint64:  "uint64",
 		TypeFloat32: "float32",
 		TypeFloat64: "float64",
+		TypeCustom:  "Custom",
 	}
 	constNames = [...]string{
 		TypeJSON:  "TypeJSON",

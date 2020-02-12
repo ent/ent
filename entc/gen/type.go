@@ -552,11 +552,12 @@ func (f Field) NullTypeField(rec string) string {
 func (f Field) Column() *schema.Column {
 	f.Enums()
 	c := &schema.Column{
-		Name:     f.StorageKey(),
-		Type:     f.Type.Type,
-		Unique:   f.Unique,
-		Nullable: f.Optional,
-		Enums:    f.Enums(),
+		Name:            f.StorageKey(),
+		Type:            f.Type.Type,
+		Unique:          f.Unique,
+		Nullable:        f.Optional,
+		Enums:           f.Enums(),
+		CustomFieldName: f.Type.CustomType,
 	}
 	if f.def != nil && f.def.Size != nil {
 		c.Size = *f.def.Size
