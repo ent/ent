@@ -8,16 +8,19 @@ package ent
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	id *string
+	id    *string
+	owner map[int]struct{}
 }
 
 // SetID sets the id field.
@@ -26,8 +29,33 @@ func (pc *PetCreate) SetID(s string) *PetCreate {
 	return pc
 }
 
+// SetOwnerID sets the owner edge to User by id.
+func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
+	if pc.owner == nil {
+		pc.owner = make(map[int]struct{})
+	}
+	pc.owner[id] = struct{}{}
+	return pc
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
+	if id != nil {
+		pc = pc.SetOwnerID(*id)
+	}
+	return pc
+}
+
+// SetOwner sets the owner edge to User.
+func (pc *PetCreate) SetOwner(u *User) *PetCreate {
+	return pc.SetOwnerID(u.ID)
+}
+
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	if len(pc.owner) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	}
 	return pc.sqlSave(ctx)
 }
 
@@ -54,6 +82,25 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	if value := pc.id; value != nil {
 		pe.ID = *value
 		_spec.ID.Value = *value
+	}
+	if nodes := pc.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

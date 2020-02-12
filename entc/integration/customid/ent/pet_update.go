@@ -8,18 +8,22 @@ package ent
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	predicates []predicate.Pet
+	owner        map[int]struct{}
+	clearedOwner bool
+	predicates   []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
@@ -28,8 +32,39 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// SetOwnerID sets the owner edge to User by id.
+func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
+	if pu.owner == nil {
+		pu.owner = make(map[int]struct{})
+	}
+	pu.owner[id] = struct{}{}
+	return pu
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
+	if id != nil {
+		pu = pu.SetOwnerID(*id)
+	}
+	return pu
+}
+
+// SetOwner sets the owner edge to User.
+func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
+	return pu.SetOwnerID(u.ID)
+}
+
+// ClearOwner clears the owner edge to User.
+func (pu *PetUpdate) ClearOwner() *PetUpdate {
+	pu.clearedOwner = true
+	return pu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
+	if len(pu.owner) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	}
 	return pu.sqlSave(ctx)
 }
 
@@ -73,6 +108,41 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if pu.clearedOwner {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -85,11 +155,44 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id string
+	id           string
+	owner        map[int]struct{}
+	clearedOwner bool
+}
+
+// SetOwnerID sets the owner edge to User by id.
+func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
+	if puo.owner == nil {
+		puo.owner = make(map[int]struct{})
+	}
+	puo.owner[id] = struct{}{}
+	return puo
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
+	if id != nil {
+		puo = puo.SetOwnerID(*id)
+	}
+	return puo
+}
+
+// SetOwner sets the owner edge to User.
+func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
+	return puo.SetOwnerID(u.ID)
+}
+
+// ClearOwner clears the owner edge to User.
+func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
+	puo.clearedOwner = true
+	return puo
 }
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
+	if len(puo.owner) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	}
 	return puo.sqlSave(ctx)
 }
 
@@ -126,6 +229,41 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				Column: pet.FieldID,
 			},
 		},
+	}
+	if puo.clearedOwner {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.owner; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	pe = &Pet{config: puo.config}
 	_spec.Assign = pe.assignValues

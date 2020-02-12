@@ -112,7 +112,7 @@ func (g *Graph) Gen() (err error) {
 	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it's
-	// suspended to end of the writing.
+	// suspended to the end of the writing.
 	return formatFiles(written)
 }
 
@@ -138,7 +138,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		typ, ok := g.typ(e.Type)
 		expect(ok, "type %q does not exist for edge", e.Type)
 		switch {
-		// assoc only.
+		// Assoc only.
 		case !e.Inverse:
 			t.Edges = append(t.Edges, &Edge{
 				Type:      typ,
@@ -148,7 +148,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Optional:  !e.Required,
 				StructTag: e.Tag,
 			})
-		// inverse only.
+		// Inverse only.
 		case e.Inverse && e.Ref == nil:
 			expect(e.RefName != "", "missing reference name for inverse edge: %s.%s", t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
@@ -160,7 +160,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Optional:  !e.Required,
 				StructTag: e.Tag,
 			})
-		// inverse and assoc.
+		// Inverse and assoc.
 		case e.Inverse:
 			ref := e.Ref
 			expect(e.RefName == "", "reference name is derived from the assoc name: %s.%s <-> %s.%s", t.Name, ref.Name, t.Name, e.Name)
@@ -296,7 +296,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 		all = append(all, table)
 	}
 	for _, n := range g.Nodes {
-		// foreign key + reference OR join table.
+		// Foreign key + reference OR join table.
 		for _, e := range n.Edges {
 			if e.IsInverse() {
 				continue
@@ -360,7 +360,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 			}
 		}
 	}
-	// append indexes to tables after all columns were added (including relation columns).
+	// Append indexes to tables after all columns were added (including relation columns).
 	for _, n := range g.Nodes {
 		table := tables[n.Table()]
 		for _, idx := range n.Indexes {
@@ -394,8 +394,8 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 	external := make([]GraphTemplate, 0)
 	for _, tmpl := range g.Template.Templates() {
 		name := tmpl.Name()
-		// check that is not defined in the default templates
-		// it's not the root.
+		// Check that is not defined in the default templates
+		// if it's not the root.
 		if templates.Lookup(name) == nil && !parse.IsEmptyTree(tmpl.Root) {
 			external = append(external, GraphTemplate{
 				Name:   name,

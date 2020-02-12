@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -23,6 +24,7 @@ type UserCreate struct {
 	groups   map[int]struct{}
 	parent   map[int]struct{}
 	children map[int]struct{}
+	pets     map[string]struct{}
 }
 
 // SetID sets the id field.
@@ -91,6 +93,26 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 		ids[i] = u[i].ID
 	}
 	return uc.AddChildIDs(ids...)
+}
+
+// AddPetIDs adds the pets edge to Pet by ids.
+func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
+	if uc.pets == nil {
+		uc.pets = make(map[string]struct{})
+	}
+	for i := range ids {
+		uc.pets[ids[i]] = struct{}{}
+	}
+	return uc
+}
+
+// AddPets adds the pets edges to Pet.
+func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uc.AddPetIDs(ids...)
 }
 
 // Save creates the User in the database.
@@ -174,6 +196,25 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
 				},
 			},
 		}

@@ -116,11 +116,16 @@ func ExampleUser() {
 		Create().
 		SaveX(ctx)
 	log.Println("user created:", u2)
+	pe3 := client.Pet.
+		Create().
+		SaveX(ctx)
+	log.Println("pet created:", pe3)
 
 	// create user vertex with its edges.
 	u := client.User.
 		Create().
 		AddChildren(u2).
+		AddPets(pe3).
 		SaveX(ctx)
 	log.Println("user created:", u)
 
@@ -131,6 +136,12 @@ func ExampleUser() {
 		log.Fatalf("failed querying children: %v", err)
 	}
 	log.Println("children found:", u2)
+
+	pe3, err = u.QueryPets().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying pets: %v", err)
+	}
+	log.Println("pets found:", pe3)
 
 	// Output:
 }

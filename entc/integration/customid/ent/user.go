@@ -33,9 +33,11 @@ type UserEdges struct {
 	Parent *User
 	// Children holds the value of the children edge.
 	Children []*User
+	// Pets holds the value of the pets edge.
+	Pets []*Pet
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // GroupsOrErr returns the Groups value or an error if the edge
@@ -68,6 +70,15 @@ func (e UserEdges) ChildrenOrErr() ([]*User, error) {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
+}
+
+// PetsOrErr returns the Pets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PetsOrErr() ([]*Pet, error) {
+	if e.loadedTypes[3] {
+		return e.Pets, nil
+	}
+	return nil, &NotLoadedError{edge: "pets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -121,6 +132,11 @@ func (u *User) QueryParent() *UserQuery {
 // QueryChildren queries the children edge of the User.
 func (u *User) QueryChildren() *UserQuery {
 	return (&UserClient{u.config}).QueryChildren(u)
+}
+
+// QueryPets queries the pets edge of the User.
+func (u *User) QueryPets() *PetQuery {
+	return (&UserClient{u.config}).QueryPets(u)
 }
 
 // Update returns a builder for updating this User.
