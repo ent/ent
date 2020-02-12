@@ -27,6 +27,13 @@ const (
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "user_children"
+	// PetsTable is the table the holds the pets relation/edge.
+	PetsTable = "pets"
+	// PetsInverseTable is the table name for the Pet entity.
+	// It exists in this package in order to avoid circular dependency with the "pet" package.
+	PetsInverseTable = "pets"
+	// PetsColumn is the table column denoting the pets relation/edge.
+	PetsColumn = "user_pets"
 )
 
 // Columns holds all SQL columns for user fields.

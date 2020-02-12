@@ -130,7 +130,7 @@ func snake(s string) string {
 	var b strings.Builder
 	for i := 0; i < len(s); i++ {
 		r := rune(s[i])
-		// put '_' if it is not a start or end of a word, current letter is an uppercase letter,
+		// Put '_' if it is not a start or end of a word, current letter is an uppercase letter,
 		// and previous letter is a lowercase letter (cases like: "UserInfo"), or next letter is
 		// also a lowercase letter and previous letter is not "_".
 		if i > 0 && i < len(s)-1 && unicode.IsUpper(r) &&

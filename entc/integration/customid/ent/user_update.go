@@ -13,6 +13,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -24,9 +25,11 @@ type UserUpdate struct {
 	groups          map[int]struct{}
 	parent          map[int]struct{}
 	children        map[int]struct{}
+	pets            map[string]struct{}
 	removedGroups   map[int]struct{}
 	clearedParent   bool
 	removedChildren map[int]struct{}
+	removedPets     map[string]struct{}
 	predicates      []predicate.User
 }
 
@@ -98,6 +101,26 @@ func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 	return uu.AddChildIDs(ids...)
 }
 
+// AddPetIDs adds the pets edge to Pet by ids.
+func (uu *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
+	if uu.pets == nil {
+		uu.pets = make(map[string]struct{})
+	}
+	for i := range ids {
+		uu.pets[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// AddPets adds the pets edges to Pet.
+func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.AddPetIDs(ids...)
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	if uu.removedGroups == nil {
@@ -142,6 +165,26 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 		ids[i] = u[i].ID
 	}
 	return uu.RemoveChildIDs(ids...)
+}
+
+// RemovePetIDs removes the pets edge to Pet by ids.
+func (uu *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
+	if uu.removedPets == nil {
+		uu.removedPets = make(map[string]struct{})
+	}
+	for i := range ids {
+		uu.removedPets[ids[i]] = struct{}{}
+	}
+	return uu
+}
+
+// RemovePets removes pets edges to Pet.
+func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.RemovePetIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -303,6 +346,44 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if nodes := uu.removedPets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -319,9 +400,11 @@ type UserUpdateOne struct {
 	groups          map[int]struct{}
 	parent          map[int]struct{}
 	children        map[int]struct{}
+	pets            map[string]struct{}
 	removedGroups   map[int]struct{}
 	clearedParent   bool
 	removedChildren map[int]struct{}
+	removedPets     map[string]struct{}
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
@@ -386,6 +469,26 @@ func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 	return uuo.AddChildIDs(ids...)
 }
 
+// AddPetIDs adds the pets edge to Pet by ids.
+func (uuo *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
+	if uuo.pets == nil {
+		uuo.pets = make(map[string]struct{})
+	}
+	for i := range ids {
+		uuo.pets[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// AddPets adds the pets edges to Pet.
+func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.AddPetIDs(ids...)
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	if uuo.removedGroups == nil {
@@ -430,6 +533,26 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 		ids[i] = u[i].ID
 	}
 	return uuo.RemoveChildIDs(ids...)
+}
+
+// RemovePetIDs removes the pets edge to Pet by ids.
+func (uuo *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
+	if uuo.removedPets == nil {
+		uuo.removedPets = make(map[string]struct{})
+	}
+	for i := range ids {
+		uuo.removedPets[ids[i]] = struct{}{}
+	}
+	return uuo
+}
+
+// RemovePets removes pets edges to Pet.
+func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.RemovePetIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -577,6 +700,44 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := uuo.removedPets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.pets; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
 				},
 			},
 		}

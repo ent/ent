@@ -139,7 +139,7 @@ var buildTmpl = templates()
 func templates() *template.Template {
 	tmpl := template.New("templates").Funcs(template.FuncMap{"base": filepath.Base})
 	tmpl = template.Must(tmpl.Parse(string(internal.MustAsset("template/main.tmpl"))))
-	// turns the schema file and its imports into templates.
+	// Turns the schema file and its imports into templates.
 	tmpls, err := schemaTemplates()
 	if err != nil {
 		panic(err)

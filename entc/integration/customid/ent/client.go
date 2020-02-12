@@ -321,6 +321,20 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 	return pe
 }
 
+// QueryOwner queries the owner edge of a Pet.
+func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := pe.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	)
+	query.sql = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+
+	return query
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -421,6 +435,20 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryPets queries the pets edge of a User.
+func (c *UserClient) QueryPets(u *User) *PetQuery {
+	query := &PetQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 	)
 	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 

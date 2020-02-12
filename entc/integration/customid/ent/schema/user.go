@@ -30,5 +30,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("children", User.Type).
 			From("parent").
 			Unique(),
+		edge.To("pets", Pet.Type),
 	}
 }

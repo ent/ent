@@ -29,8 +29,8 @@ func PkgPath(config *packages.Config, target string) (string, error) {
 		parts = append(parts, filepath.Base(pathCheck))
 		pathCheck = filepath.Dir(pathCheck)
 	}
-	// Try maximum 2 directories above the given target
-	// to find the root packages or module.
+	// Try maximum 2 directories above the given
+	// target to find the root package or module.
 	for i := 0; i < 2; i++ {
 		pkgs, err := packages.Load(config, pathCheck)
 		if err != nil {

@@ -175,7 +175,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver -}}
-	id := {{ $receiver }}.{{- if $n.ID.IsString }}id(){{ else }}ID{{ end }}
+	id := {{ $receiver }}.{{ if and $.ID.IsString (not $.ID.UserDefined) }}id(){{ else }}ID{{ end }}
 	step := sqlgraph.NewStep(
 		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
 		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),

@@ -11,6 +11,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/idtype/ent"
 	"github.com/facebookincubator/ent/entc/integration/idtype/ent/migrate"
 	"github.com/facebookincubator/ent/entc/integration/idtype/ent/user"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )

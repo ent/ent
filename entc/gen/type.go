@@ -30,7 +30,6 @@ type (
 		ID *Field
 		// Fields holds all the primitive fields of this type.
 		Fields []*Field
-		// fields map for fast lookup.
 		fields map[string]*Field
 		// Edge holds all the edges of this type.
 		Edges []*Edge
@@ -38,7 +37,6 @@ type (
 		Indexes []*Index
 		// ForeignKeys are the foreign-keys that resides in the type table.
 		ForeignKeys []*ForeignKey
-		// foreignkeys used for first lookup from edge name to foreign-key.
 		foreignkeys map[string]*ForeignKey
 	}
 
@@ -172,7 +170,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			if err := validEnums(f); err != nil {
 				return nil, err
 			}
-			// enum types should be named as follows: typepkg.Field.
+			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", typ.Package(), pascal(f.Name))
 		}
 		tf := &Field{
@@ -417,11 +415,15 @@ func (t *Type) resolveFKs() {
 		if e.IsInverse() || e.M2M() {
 			continue
 		}
+		typ := t.ID.Type
+		if e.OwnFK() {
+			typ = e.Type.ID.Type
+		}
 		fk := &ForeignKey{
 			Edge: e,
 			Field: &Field{
 				Name:        e.Rel.Column(),
-				Type:        e.Type.ID.Type,
+				Type:        typ,
 				Nillable:    true,
 				Optional:    true,
 				Unique:      e.Unique,
