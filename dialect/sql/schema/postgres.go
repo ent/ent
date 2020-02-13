@@ -77,7 +77,7 @@ func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, t *Table, value 
 func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Dialect(dialect.Postgres).
-		Select("column_name", "data_type", "is_nullable", "column_default").
+		Select("column_name", "data_type", "is_nullable", "column_default", "udt_name").
 		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
 		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("table_name", name)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -193,10 +193,11 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable sql.NullString
-		defaults sql.NullString
+		nullable        sql.NullString
+		defaults        sql.NullString
+		userDefinedType sql.NullString
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &userDefinedType); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
 	}
 	if nullable.Valid {
