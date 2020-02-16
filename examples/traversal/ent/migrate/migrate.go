@@ -32,6 +32,9 @@ var (
 	// and therefore, it's recommended to enable this option to get more
 	// flexibility in the schema changes.
 	WithDropIndex = schema.WithDropIndex
+	// WithFixture sets the foreign-key renaming option to the migration when upgrading
+	// ent from v0.1.0 (issue-#285). Defaults to true.
+	WithFixture = schema.WithFixture
 )
 
 // Schema is the API for creating, migrating and dropping a schema.
