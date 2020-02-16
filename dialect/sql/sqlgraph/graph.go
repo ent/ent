@@ -403,6 +403,17 @@ func UpdateNodes(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) (int
 	return affected, tx.Commit()
 }
 
+// NotFoundError returns when trying to update an
+// entity and it was not found in the database.
+type NotFoundError struct {
+	table string
+	id    driver.Value
+}
+
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("record with id %v not found in table %s", e.id, e.table)
+}
+
 // DeleteSpec holds the information for delete one
 // or more nodes in the graph.
 type DeleteSpec struct {
@@ -712,7 +723,7 @@ func (u *updater) setTableColumns(update *sql.UpdateBuilder, addEdges, clearEdge
 func (u *updater) scan(rows *sql.Rows) error {
 	defer rows.Close()
 	if !rows.Next() {
-		return fmt.Errorf("record with id %v not found in table %s", u.Node.ID.Value, u.Node.Table)
+		return &NotFoundError{table: u.Node.Table, id: u.Node.ID.Value}
 	}
 	if err := rows.Scan(u.ScanValues...); err != nil {
 		return fmt.Errorf("failed scanning rows: %v", err)

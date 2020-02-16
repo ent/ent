@@ -184,6 +184,10 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr = client.User.UpdateOne(usr).SetName("baz").AddGroups(grp).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
+	// update unknown vertex.
+	_, err := client.User.UpdateOneID(usr.ID + usr.ID).SetName("foo").Save(ctx)
+	require.Error(err)
+	require.True(ent.IsNotFound(err))
 
 	// grouping.
 	var v []struct {
