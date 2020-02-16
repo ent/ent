@@ -51,18 +51,27 @@ func WithDropIndex(b bool) MigrateOption {
 	}
 }
 
+// WithFixture sets the foreign-key renaming option to the migration when upgrading
+// ent from v0.1.0 (issue-#285). Defaults to true.
+func WithFixture(b bool) MigrateOption {
+	return func(m *Migrate) {
+		m.withFixture = b
+	}
+}
+
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
 	universalID bool     // global unique ids.
 	dropColumns bool     // drop deleted columns.
 	dropIndexes bool     // drop deleted indexes.
+	withFixture bool     // with fks rename fixture.
 	typeRanges  []string // types order by their range.
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{}
+	m := &Migrate{withFixture: true}
 	switch d.Dialect() {
 	case dialect.MySQL:
 		m.sqlDialect = &MySQL{Driver: d}
@@ -341,7 +350,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 // fixture is a special migration code for renaming foreign-key columns (issue-#285).
 func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) error {
 	d, ok := m.sqlDialect.(fkRenamer)
-	if !ok {
+	if !m.withFixture || !ok {
 		return nil
 	}
 	rename := make(map[string]*Index)
