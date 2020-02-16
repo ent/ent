@@ -98,6 +98,47 @@ func (User) Fields() []ent.Field {
 
 To read more about how each type is mapped to its database-type, go to the [Migration](migrate.md) section.
 
+## ID Field
+
+The `id` field is builtin in the schema and does not need declaration. In SQL-based
+databases, its type defaults to `int` (but can be changed with a [codegen option](code-gen.md#code-generation-options))
+and auto-incremented in the database.
+
+In order to configure the `id` field to be unique across all tables, use the
+[WithGlobalUniqueID](migrate.md#universal-ids) option when running schema migration.
+
+If a different configuration for the `id` field is needed, or the `id` value should
+be provided on entity creation by the application (e.g. UUID), override the builtin
+`id` configuration. For example:
+
+```go
+// Fields of the Group.
+func (Group) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("id").
+			StructTag(`json:"oid,omitempty"`),
+	}
+}
+
+// Fields of the Blob.
+func (Blob) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("id", uuid.UUID{}),
+	}
+}
+
+// Fields of the Pet.
+func (Pet) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("id").
+			MaxLen(25).
+			NotEmpty().
+			Unique().
+			Immutable(),
+	}
+}
+```
+
 ## Default Values
 
 **Non-unique** fields support default values using the `.Default` and `.UpdateDefault` methods.
