@@ -216,17 +216,6 @@ func TestType_AddIndex(t *testing.T) {
 	require.NoError(t, err, "valid index on M2O relation and field")
 }
 
-func TestField(t *testing.T) {
-	f := &Field{Type: &field.TypeInfo{Type: field.TypeTime}}
-	require.True(t, f.IsTime())
-	require.Equal(t, "time.Now()", f.ExampleCode())
-
-	require.Equal(t, "1", Field{Type: &field.TypeInfo{Type: field.TypeInt}}.ExampleCode())
-	require.Equal(t, "true", Field{Type: &field.TypeInfo{Type: field.TypeBool}}.ExampleCode())
-	require.Equal(t, "1", Field{Type: &field.TypeInfo{Type: field.TypeFloat64}}.ExampleCode())
-	require.Equal(t, "\"string\"", Field{Type: &field.TypeInfo{Type: field.TypeString}}.ExampleCode())
-}
-
 func TestField_Constant(t *testing.T) {
 	tests := []struct {
 		name     string

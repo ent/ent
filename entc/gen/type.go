@@ -589,31 +589,6 @@ func (f Field) PK() *schema.Column {
 	return c
 }
 
-// ExampleCode returns an example code of the field value for the example_test file.
-func (f Field) ExampleCode() string {
-	switch t := f.Type.Type; {
-	case t.Numeric():
-		return "1"
-	case t == field.TypeBool:
-		return "true"
-	case t == field.TypeTime:
-		return "time.Now()"
-	case t == field.TypeString:
-		return `"string"`
-	case t == field.TypeEnum:
-		enums := f.Enums()
-		if len(enums) == 0 {
-			return `""`
-		}
-		parts := strings.Split(f.Type.Ident, ".")
-		return fmt.Sprintf("%s.%s%s", parts[0], pascal(f.Name), pascal(enums[0]))
-	case t == field.TypeUUID:
-		return fmt.Sprintf("%s{}", f.Type)
-	default:
-		return "nil"
-	}
-}
-
 // StorageKey returns the storage name of the field.
 // SQL columns or Gremlin property.
 func (f Field) StorageKey() string {

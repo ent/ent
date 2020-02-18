@@ -104,10 +104,6 @@ var (
 			Name:   "predicate",
 			Format: "predicate/predicate.go",
 		},
-		{
-			Name:   "example",
-			Format: "example_test.go",
-		},
 	}
 	// templates holds the Go templates for the code generation.
 	// the init function below initializes the templates and its
