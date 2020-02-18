@@ -99,7 +99,6 @@ ent
 ├── config.go
 ├── context.go
 ├── ent.go
-├── example_test.go
 ├── migrate
 │   ├── migrate.go
 │   └── schema.go

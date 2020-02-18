@@ -265,7 +265,7 @@ func TestGraph_Gen(t *testing.T) {
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
 	// ensure graph files were generated.
-	for _, name := range []string{"ent", "client", "config", "example_test"} {
+	for _, name := range []string{"ent", "client", "config"} {
 		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
 		require.NoError(err)
 	}
