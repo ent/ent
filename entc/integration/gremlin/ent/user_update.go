@@ -23,43 +23,9 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	optional_int      *int
-	addoptional_int   *int
-	clearoptional_int bool
-	age               *int
-	addage            *int
-	name              *string
-	last              *string
-	nickname          *string
-	clearnickname     bool
-	phone             *string
-	clearphone        bool
-	password          *string
-	clearpassword     bool
-	role              *user.Role
-	card              map[string]struct{}
-	pets              map[string]struct{}
-	files             map[string]struct{}
-	groups            map[string]struct{}
-	friends           map[string]struct{}
-	followers         map[string]struct{}
-	following         map[string]struct{}
-	team              map[string]struct{}
-	spouse            map[string]struct{}
-	children          map[string]struct{}
-	parent            map[string]struct{}
-	clearedCard       bool
-	removedPets       map[string]struct{}
-	removedFiles      map[string]struct{}
-	removedGroups     map[string]struct{}
-	removedFriends    map[string]struct{}
-	removedFollowers  map[string]struct{}
-	removedFollowing  map[string]struct{}
-	clearedTeam       bool
-	clearedSpouse     bool
-	removedChildren   map[string]struct{}
-	clearedParent     bool
-	predicates        []predicate.User
+	hooks      []Hook
+	mutation   *UserMutation
+	predicates []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -70,8 +36,8 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // SetOptionalInt sets the optional_int field.
 func (uu *UserUpdate) SetOptionalInt(i int) *UserUpdate {
-	uu.optional_int = &i
-	uu.addoptional_int = nil
+	uu.mutation.ResetOptionalInt()
+	uu.mutation.SetOptionalInt(i)
 	return uu
 }
 
@@ -85,47 +51,38 @@ func (uu *UserUpdate) SetNillableOptionalInt(i *int) *UserUpdate {
 
 // AddOptionalInt adds i to optional_int.
 func (uu *UserUpdate) AddOptionalInt(i int) *UserUpdate {
-	if uu.addoptional_int == nil {
-		uu.addoptional_int = &i
-	} else {
-		*uu.addoptional_int += i
-	}
+	uu.mutation.AddOptionalInt(i)
 	return uu
 }
 
 // ClearOptionalInt clears the value of optional_int.
 func (uu *UserUpdate) ClearOptionalInt() *UserUpdate {
-	uu.optional_int = nil
-	uu.clearoptional_int = true
+	uu.mutation.ClearOptionalInt()
 	return uu
 }
 
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
-	uu.age = &i
-	uu.addage = nil
+	uu.mutation.ResetAge()
+	uu.mutation.SetAge(i)
 	return uu
 }
 
 // AddAge adds i to age.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
-	if uu.addage == nil {
-		uu.addage = &i
-	} else {
-		*uu.addage += i
-	}
+	uu.mutation.AddAge(i)
 	return uu
 }
 
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.name = &s
+	uu.mutation.SetName(s)
 	return uu
 }
 
 // SetLast sets the last field.
 func (uu *UserUpdate) SetLast(s string) *UserUpdate {
-	uu.last = &s
+	uu.mutation.SetLast(s)
 	return uu
 }
 
@@ -139,7 +96,7 @@ func (uu *UserUpdate) SetNillableLast(s *string) *UserUpdate {
 
 // SetNickname sets the nickname field.
 func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
-	uu.nickname = &s
+	uu.mutation.SetNickname(s)
 	return uu
 }
 
@@ -153,14 +110,13 @@ func (uu *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
 
 // ClearNickname clears the value of nickname.
 func (uu *UserUpdate) ClearNickname() *UserUpdate {
-	uu.nickname = nil
-	uu.clearnickname = true
+	uu.mutation.ClearNickname()
 	return uu
 }
 
 // SetPhone sets the phone field.
 func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
-	uu.phone = &s
+	uu.mutation.SetPhone(s)
 	return uu
 }
 
@@ -174,14 +130,13 @@ func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 
 // ClearPhone clears the value of phone.
 func (uu *UserUpdate) ClearPhone() *UserUpdate {
-	uu.phone = nil
-	uu.clearphone = true
+	uu.mutation.ClearPhone()
 	return uu
 }
 
 // SetPassword sets the password field.
 func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
-	uu.password = &s
+	uu.mutation.SetPassword(s)
 	return uu
 }
 
@@ -195,14 +150,13 @@ func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
 
 // ClearPassword clears the value of password.
 func (uu *UserUpdate) ClearPassword() *UserUpdate {
-	uu.password = nil
-	uu.clearpassword = true
+	uu.mutation.ClearPassword()
 	return uu
 }
 
 // SetRole sets the role field.
 func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
-	uu.role = &u
+	uu.mutation.SetRole(u)
 	return uu
 }
 
@@ -216,10 +170,7 @@ func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 
 // SetCardID sets the card edge to Card by id.
 func (uu *UserUpdate) SetCardID(id string) *UserUpdate {
-	if uu.card == nil {
-		uu.card = make(map[string]struct{})
-	}
-	uu.card[id] = struct{}{}
+	uu.mutation.SetCardID(id)
 	return uu
 }
 
@@ -238,12 +189,7 @@ func (uu *UserUpdate) SetCard(c *Card) *UserUpdate {
 
 // AddPetIDs adds the pets edge to Pet by ids.
 func (uu *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
-	if uu.pets == nil {
-		uu.pets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.pets[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddPetIDs(ids...)
 	return uu
 }
 
@@ -258,12 +204,7 @@ func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 
 // AddFileIDs adds the files edge to File by ids.
 func (uu *UserUpdate) AddFileIDs(ids ...string) *UserUpdate {
-	if uu.files == nil {
-		uu.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.files[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddFileIDs(ids...)
 	return uu
 }
 
@@ -278,12 +219,7 @@ func (uu *UserUpdate) AddFiles(f ...*File) *UserUpdate {
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (uu *UserUpdate) AddGroupIDs(ids ...string) *UserUpdate {
-	if uu.groups == nil {
-		uu.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.groups[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddGroupIDs(ids...)
 	return uu
 }
 
@@ -298,12 +234,7 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 
 // AddFriendIDs adds the friends edge to User by ids.
 func (uu *UserUpdate) AddFriendIDs(ids ...string) *UserUpdate {
-	if uu.friends == nil {
-		uu.friends = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.friends[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddFriendIDs(ids...)
 	return uu
 }
 
@@ -318,12 +249,7 @@ func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 
 // AddFollowerIDs adds the followers edge to User by ids.
 func (uu *UserUpdate) AddFollowerIDs(ids ...string) *UserUpdate {
-	if uu.followers == nil {
-		uu.followers = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.followers[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddFollowerIDs(ids...)
 	return uu
 }
 
@@ -338,12 +264,7 @@ func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
 
 // AddFollowingIDs adds the following edge to User by ids.
 func (uu *UserUpdate) AddFollowingIDs(ids ...string) *UserUpdate {
-	if uu.following == nil {
-		uu.following = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.following[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddFollowingIDs(ids...)
 	return uu
 }
 
@@ -358,10 +279,7 @@ func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
 
 // SetTeamID sets the team edge to Pet by id.
 func (uu *UserUpdate) SetTeamID(id string) *UserUpdate {
-	if uu.team == nil {
-		uu.team = make(map[string]struct{})
-	}
-	uu.team[id] = struct{}{}
+	uu.mutation.SetTeamID(id)
 	return uu
 }
 
@@ -380,10 +298,7 @@ func (uu *UserUpdate) SetTeam(p *Pet) *UserUpdate {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uu *UserUpdate) SetSpouseID(id string) *UserUpdate {
-	if uu.spouse == nil {
-		uu.spouse = make(map[string]struct{})
-	}
-	uu.spouse[id] = struct{}{}
+	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
@@ -402,12 +317,7 @@ func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uu *UserUpdate) AddChildIDs(ids ...string) *UserUpdate {
-	if uu.children == nil {
-		uu.children = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.children[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddChildIDs(ids...)
 	return uu
 }
 
@@ -422,10 +332,7 @@ func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 
 // SetParentID sets the parent edge to User by id.
 func (uu *UserUpdate) SetParentID(id string) *UserUpdate {
-	if uu.parent == nil {
-		uu.parent = make(map[string]struct{})
-	}
-	uu.parent[id] = struct{}{}
+	uu.mutation.SetParentID(id)
 	return uu
 }
 
@@ -444,18 +351,13 @@ func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 
 // ClearCard clears the card edge to Card.
 func (uu *UserUpdate) ClearCard() *UserUpdate {
-	uu.clearedCard = true
+	uu.mutation.ClearCard()
 	return uu
 }
 
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (uu *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
-	if uu.removedPets == nil {
-		uu.removedPets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedPets[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemovePetIDs(ids...)
 	return uu
 }
 
@@ -470,12 +372,7 @@ func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 
 // RemoveFileIDs removes the files edge to File by ids.
 func (uu *UserUpdate) RemoveFileIDs(ids ...string) *UserUpdate {
-	if uu.removedFiles == nil {
-		uu.removedFiles = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedFiles[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveFileIDs(ids...)
 	return uu
 }
 
@@ -490,12 +387,7 @@ func (uu *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
-	if uu.removedGroups == nil {
-		uu.removedGroups = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedGroups[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveGroupIDs(ids...)
 	return uu
 }
 
@@ -510,12 +402,7 @@ func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 
 // RemoveFriendIDs removes the friends edge to User by ids.
 func (uu *UserUpdate) RemoveFriendIDs(ids ...string) *UserUpdate {
-	if uu.removedFriends == nil {
-		uu.removedFriends = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedFriends[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveFriendIDs(ids...)
 	return uu
 }
 
@@ -530,12 +417,7 @@ func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
 func (uu *UserUpdate) RemoveFollowerIDs(ids ...string) *UserUpdate {
-	if uu.removedFollowers == nil {
-		uu.removedFollowers = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedFollowers[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveFollowerIDs(ids...)
 	return uu
 }
 
@@ -550,12 +432,7 @@ func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
 
 // RemoveFollowingIDs removes the following edge to User by ids.
 func (uu *UserUpdate) RemoveFollowingIDs(ids ...string) *UserUpdate {
-	if uu.removedFollowing == nil {
-		uu.removedFollowing = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedFollowing[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveFollowingIDs(ids...)
 	return uu
 }
 
@@ -570,24 +447,19 @@ func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
 
 // ClearTeam clears the team edge to Pet.
 func (uu *UserUpdate) ClearTeam() *UserUpdate {
-	uu.clearedTeam = true
+	uu.mutation.ClearTeam()
 	return uu
 }
 
 // ClearSpouse clears the spouse edge to User.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
-	uu.clearedSpouse = true
+	uu.mutation.ClearSpouse()
 	return uu
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
 func (uu *UserUpdate) RemoveChildIDs(ids ...string) *UserUpdate {
-	if uu.removedChildren == nil {
-		uu.removedChildren = make(map[string]struct{})
-	}
-	for i := range ids {
-		uu.removedChildren[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveChildIDs(ids...)
 	return uu
 }
 
@@ -602,35 +474,58 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 
 // ClearParent clears the parent edge to User.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
-	uu.clearedParent = true
+	uu.mutation.ClearParent()
 	return uu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	if uu.optional_int != nil {
-		if err := user.OptionalIntValidator(*uu.optional_int); err != nil {
+	if v, ok := uu.mutation.OptionalInt(); ok {
+		if err := user.OptionalIntValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
-	if uu.role != nil {
-		if err := user.RoleValidator(*uu.role); err != nil {
+	if v, ok := uu.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
 		}
 	}
-	if len(uu.card) > 1 {
+	if len(uu.mutation.CardIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
-	if len(uu.team) > 1 {
+	if len(uu.mutation.TeamIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"team\"")
 	}
-	if len(uu.spouse) > 1 {
+	if len(uu.mutation.SpouseIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
 	}
-	if len(uu.parent) > 1 {
+	if len(uu.mutation.ParentIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
-	return uu.gremlinSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(uu.hooks) == 0 {
+		affected, err = uu.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uu.mutation = mutation
+			affected, err = uu.gremlinSave(ctx)
+			return affected, err
+		})
+		for _, hook := range uu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -683,137 +578,137 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := uu.optional_int; value != nil {
-		v.Property(dsl.Single, user.FieldOptionalInt, *value)
+	if value, ok := uu.mutation.OptionalInt(); ok {
+		v.Property(dsl.Single, user.FieldOptionalInt, value)
 	}
-	if value := uu.addoptional_int; value != nil {
-		v.Property(dsl.Single, user.FieldOptionalInt, __.Union(__.Values(user.FieldOptionalInt), __.Constant(*value)).Sum())
+	if value, ok := uu.mutation.AddedOptionalInt(); ok {
+		v.Property(dsl.Single, user.FieldOptionalInt, __.Union(__.Values(user.FieldOptionalInt), __.Constant(value)).Sum())
 	}
-	if value := uu.age; value != nil {
-		v.Property(dsl.Single, user.FieldAge, *value)
+	if value, ok := uu.mutation.Age(); ok {
+		v.Property(dsl.Single, user.FieldAge, value)
 	}
-	if value := uu.addage; value != nil {
-		v.Property(dsl.Single, user.FieldAge, __.Union(__.Values(user.FieldAge), __.Constant(*value)).Sum())
+	if value, ok := uu.mutation.AddedAge(); ok {
+		v.Property(dsl.Single, user.FieldAge, __.Union(__.Values(user.FieldAge), __.Constant(value)).Sum())
 	}
-	if value := uu.name; value != nil {
-		v.Property(dsl.Single, user.FieldName, *value)
+	if value, ok := uu.mutation.Name(); ok {
+		v.Property(dsl.Single, user.FieldName, value)
 	}
-	if value := uu.last; value != nil {
-		v.Property(dsl.Single, user.FieldLast, *value)
+	if value, ok := uu.mutation.Last(); ok {
+		v.Property(dsl.Single, user.FieldLast, value)
 	}
-	if value := uu.nickname; value != nil {
+	if value, ok := uu.mutation.Nickname(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldNickname, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *value)),
+			pred: g.V().Has(user.Label, user.FieldNickname, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, value)),
 		})
-		v.Property(dsl.Single, user.FieldNickname, *value)
+		v.Property(dsl.Single, user.FieldNickname, value)
 	}
-	if value := uu.phone; value != nil {
+	if value, ok := uu.mutation.Phone(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldPhone, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *value)),
+			pred: g.V().Has(user.Label, user.FieldPhone, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, value)),
 		})
-		v.Property(dsl.Single, user.FieldPhone, *value)
+		v.Property(dsl.Single, user.FieldPhone, value)
 	}
-	if value := uu.password; value != nil {
-		v.Property(dsl.Single, user.FieldPassword, *value)
+	if value, ok := uu.mutation.Password(); ok {
+		v.Property(dsl.Single, user.FieldPassword, value)
 	}
-	if value := uu.role; value != nil {
-		v.Property(dsl.Single, user.FieldRole, *value)
+	if value, ok := uu.mutation.Role(); ok {
+		v.Property(dsl.Single, user.FieldRole, value)
 	}
 	var properties []interface{}
-	if uu.clearoptional_int {
+	if uu.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
 	}
-	if uu.clearnickname {
+	if uu.mutation.NicknameCleared() {
 		properties = append(properties, user.FieldNickname)
 	}
-	if uu.clearphone {
+	if uu.mutation.PhoneCleared() {
 		properties = append(properties, user.FieldPhone)
 	}
-	if uu.clearpassword {
+	if uu.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if uu.clearedCard {
+	if uu.mutation.CardCleared() {
 		tr := rv.Clone().OutE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.card {
+	for _, id := range uu.mutation.CardIDs() {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.CardLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.CardLabel, id)),
 		})
 	}
-	for id := range uu.removedPets {
+	for _, id := range uu.mutation.RemovedPetsIDs() {
 		tr := rv.Clone().OutE(user.PetsLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.pets {
+	for _, id := range uu.mutation.PetsIDs() {
 		v.AddE(user.PetsLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.PetsLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.PetsLabel, id)),
 		})
 	}
-	for id := range uu.removedFiles {
+	for _, id := range uu.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(user.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.files {
+	for _, id := range uu.mutation.FilesIDs() {
 		v.AddE(user.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.FilesLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.FilesLabel, id)),
 		})
 	}
-	for id := range uu.removedGroups {
+	for _, id := range uu.mutation.RemovedGroupsIDs() {
 		tr := rv.Clone().OutE(user.GroupsLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.groups {
+	for _, id := range uu.mutation.GroupsIDs() {
 		v.AddE(user.GroupsLabel).To(g.V(id)).OutV()
 	}
-	for id := range uu.removedFriends {
+	for _, id := range uu.mutation.RemovedFriendsIDs() {
 		tr := rv.Clone().BothE(user.FriendsLabel).Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.friends {
+	for _, id := range uu.mutation.FriendsIDs() {
 		v.AddE(user.FriendsLabel).To(g.V(id)).OutV()
 	}
-	for id := range uu.removedFollowers {
+	for _, id := range uu.mutation.RemovedFollowersIDs() {
 		tr := rv.Clone().InE(user.FollowingLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.followers {
+	for _, id := range uu.mutation.FollowersIDs() {
 		v.AddE(user.FollowingLabel).From(g.V(id)).InV()
 	}
-	for id := range uu.removedFollowing {
+	for _, id := range uu.mutation.RemovedFollowingIDs() {
 		tr := rv.Clone().OutE(user.FollowingLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.following {
+	for _, id := range uu.mutation.FollowingIDs() {
 		v.AddE(user.FollowingLabel).To(g.V(id)).OutV()
 	}
-	if uu.clearedTeam {
+	if uu.mutation.TeamCleared() {
 		tr := rv.Clone().OutE(user.TeamLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.team {
+	for _, id := range uu.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.TeamLabel, id)),
 		})
 	}
-	if uu.clearedSpouse {
+	if uu.mutation.SpouseCleared() {
 		tr := rv.Clone().BothE(user.SpouseLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.spouse {
+	for _, id := range uu.mutation.SpouseIDs() {
 		v.AddE(user.SpouseLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: rv.Clone().Both(user.SpouseLabel).Count(),
@@ -824,22 +719,22 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SpouseLabel, id)),
 		})
 	}
-	for id := range uu.removedChildren {
+	for _, id := range uu.mutation.RemovedChildrenIDs() {
 		tr := rv.Clone().InE(user.ParentLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.children {
+	for _, id := range uu.mutation.ChildrenIDs() {
 		v.AddE(user.ParentLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.ParentLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.ParentLabel, id)),
 		})
 	}
-	if uu.clearedParent {
+	if uu.mutation.ParentCleared() {
 		tr := rv.Clone().OutE(user.ParentLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uu.parent {
+	for _, id := range uu.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
 	v.Count()
@@ -860,49 +755,14 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id                string
-	optional_int      *int
-	addoptional_int   *int
-	clearoptional_int bool
-	age               *int
-	addage            *int
-	name              *string
-	last              *string
-	nickname          *string
-	clearnickname     bool
-	phone             *string
-	clearphone        bool
-	password          *string
-	clearpassword     bool
-	role              *user.Role
-	card              map[string]struct{}
-	pets              map[string]struct{}
-	files             map[string]struct{}
-	groups            map[string]struct{}
-	friends           map[string]struct{}
-	followers         map[string]struct{}
-	following         map[string]struct{}
-	team              map[string]struct{}
-	spouse            map[string]struct{}
-	children          map[string]struct{}
-	parent            map[string]struct{}
-	clearedCard       bool
-	removedPets       map[string]struct{}
-	removedFiles      map[string]struct{}
-	removedGroups     map[string]struct{}
-	removedFriends    map[string]struct{}
-	removedFollowers  map[string]struct{}
-	removedFollowing  map[string]struct{}
-	clearedTeam       bool
-	clearedSpouse     bool
-	removedChildren   map[string]struct{}
-	clearedParent     bool
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // SetOptionalInt sets the optional_int field.
 func (uuo *UserUpdateOne) SetOptionalInt(i int) *UserUpdateOne {
-	uuo.optional_int = &i
-	uuo.addoptional_int = nil
+	uuo.mutation.ResetOptionalInt()
+	uuo.mutation.SetOptionalInt(i)
 	return uuo
 }
 
@@ -916,47 +776,38 @@ func (uuo *UserUpdateOne) SetNillableOptionalInt(i *int) *UserUpdateOne {
 
 // AddOptionalInt adds i to optional_int.
 func (uuo *UserUpdateOne) AddOptionalInt(i int) *UserUpdateOne {
-	if uuo.addoptional_int == nil {
-		uuo.addoptional_int = &i
-	} else {
-		*uuo.addoptional_int += i
-	}
+	uuo.mutation.AddOptionalInt(i)
 	return uuo
 }
 
 // ClearOptionalInt clears the value of optional_int.
 func (uuo *UserUpdateOne) ClearOptionalInt() *UserUpdateOne {
-	uuo.optional_int = nil
-	uuo.clearoptional_int = true
+	uuo.mutation.ClearOptionalInt()
 	return uuo
 }
 
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
-	uuo.age = &i
-	uuo.addage = nil
+	uuo.mutation.ResetAge()
+	uuo.mutation.SetAge(i)
 	return uuo
 }
 
 // AddAge adds i to age.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	if uuo.addage == nil {
-		uuo.addage = &i
-	} else {
-		*uuo.addage += i
-	}
+	uuo.mutation.AddAge(i)
 	return uuo
 }
 
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.name = &s
+	uuo.mutation.SetName(s)
 	return uuo
 }
 
 // SetLast sets the last field.
 func (uuo *UserUpdateOne) SetLast(s string) *UserUpdateOne {
-	uuo.last = &s
+	uuo.mutation.SetLast(s)
 	return uuo
 }
 
@@ -970,7 +821,7 @@ func (uuo *UserUpdateOne) SetNillableLast(s *string) *UserUpdateOne {
 
 // SetNickname sets the nickname field.
 func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
-	uuo.nickname = &s
+	uuo.mutation.SetNickname(s)
 	return uuo
 }
 
@@ -984,14 +835,13 @@ func (uuo *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
 
 // ClearNickname clears the value of nickname.
 func (uuo *UserUpdateOne) ClearNickname() *UserUpdateOne {
-	uuo.nickname = nil
-	uuo.clearnickname = true
+	uuo.mutation.ClearNickname()
 	return uuo
 }
 
 // SetPhone sets the phone field.
 func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
-	uuo.phone = &s
+	uuo.mutation.SetPhone(s)
 	return uuo
 }
 
@@ -1005,14 +855,13 @@ func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 
 // ClearPhone clears the value of phone.
 func (uuo *UserUpdateOne) ClearPhone() *UserUpdateOne {
-	uuo.phone = nil
-	uuo.clearphone = true
+	uuo.mutation.ClearPhone()
 	return uuo
 }
 
 // SetPassword sets the password field.
 func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	uuo.password = &s
+	uuo.mutation.SetPassword(s)
 	return uuo
 }
 
@@ -1026,14 +875,13 @@ func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 
 // ClearPassword clears the value of password.
 func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
-	uuo.password = nil
-	uuo.clearpassword = true
+	uuo.mutation.ClearPassword()
 	return uuo
 }
 
 // SetRole sets the role field.
 func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
-	uuo.role = &u
+	uuo.mutation.SetRole(u)
 	return uuo
 }
 
@@ -1047,10 +895,7 @@ func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 
 // SetCardID sets the card edge to Card by id.
 func (uuo *UserUpdateOne) SetCardID(id string) *UserUpdateOne {
-	if uuo.card == nil {
-		uuo.card = make(map[string]struct{})
-	}
-	uuo.card[id] = struct{}{}
+	uuo.mutation.SetCardID(id)
 	return uuo
 }
 
@@ -1069,12 +914,7 @@ func (uuo *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
 
 // AddPetIDs adds the pets edge to Pet by ids.
 func (uuo *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
-	if uuo.pets == nil {
-		uuo.pets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.pets[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddPetIDs(ids...)
 	return uuo
 }
 
@@ -1089,12 +929,7 @@ func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 
 // AddFileIDs adds the files edge to File by ids.
 func (uuo *UserUpdateOne) AddFileIDs(ids ...string) *UserUpdateOne {
-	if uuo.files == nil {
-		uuo.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.files[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddFileIDs(ids...)
 	return uuo
 }
 
@@ -1109,12 +944,7 @@ func (uuo *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (uuo *UserUpdateOne) AddGroupIDs(ids ...string) *UserUpdateOne {
-	if uuo.groups == nil {
-		uuo.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.groups[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddGroupIDs(ids...)
 	return uuo
 }
 
@@ -1129,12 +959,7 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 
 // AddFriendIDs adds the friends edge to User by ids.
 func (uuo *UserUpdateOne) AddFriendIDs(ids ...string) *UserUpdateOne {
-	if uuo.friends == nil {
-		uuo.friends = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.friends[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddFriendIDs(ids...)
 	return uuo
 }
 
@@ -1149,12 +974,7 @@ func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 
 // AddFollowerIDs adds the followers edge to User by ids.
 func (uuo *UserUpdateOne) AddFollowerIDs(ids ...string) *UserUpdateOne {
-	if uuo.followers == nil {
-		uuo.followers = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.followers[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddFollowerIDs(ids...)
 	return uuo
 }
 
@@ -1169,12 +989,7 @@ func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
 
 // AddFollowingIDs adds the following edge to User by ids.
 func (uuo *UserUpdateOne) AddFollowingIDs(ids ...string) *UserUpdateOne {
-	if uuo.following == nil {
-		uuo.following = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.following[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddFollowingIDs(ids...)
 	return uuo
 }
 
@@ -1189,10 +1004,7 @@ func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
 
 // SetTeamID sets the team edge to Pet by id.
 func (uuo *UserUpdateOne) SetTeamID(id string) *UserUpdateOne {
-	if uuo.team == nil {
-		uuo.team = make(map[string]struct{})
-	}
-	uuo.team[id] = struct{}{}
+	uuo.mutation.SetTeamID(id)
 	return uuo
 }
 
@@ -1211,10 +1023,7 @@ func (uuo *UserUpdateOne) SetTeam(p *Pet) *UserUpdateOne {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uuo *UserUpdateOne) SetSpouseID(id string) *UserUpdateOne {
-	if uuo.spouse == nil {
-		uuo.spouse = make(map[string]struct{})
-	}
-	uuo.spouse[id] = struct{}{}
+	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
@@ -1233,12 +1042,7 @@ func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uuo *UserUpdateOne) AddChildIDs(ids ...string) *UserUpdateOne {
-	if uuo.children == nil {
-		uuo.children = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.children[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddChildIDs(ids...)
 	return uuo
 }
 
@@ -1253,10 +1057,7 @@ func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 
 // SetParentID sets the parent edge to User by id.
 func (uuo *UserUpdateOne) SetParentID(id string) *UserUpdateOne {
-	if uuo.parent == nil {
-		uuo.parent = make(map[string]struct{})
-	}
-	uuo.parent[id] = struct{}{}
+	uuo.mutation.SetParentID(id)
 	return uuo
 }
 
@@ -1275,18 +1076,13 @@ func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 
 // ClearCard clears the card edge to Card.
 func (uuo *UserUpdateOne) ClearCard() *UserUpdateOne {
-	uuo.clearedCard = true
+	uuo.mutation.ClearCard()
 	return uuo
 }
 
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (uuo *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedPets == nil {
-		uuo.removedPets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedPets[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemovePetIDs(ids...)
 	return uuo
 }
 
@@ -1301,12 +1097,7 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 
 // RemoveFileIDs removes the files edge to File by ids.
 func (uuo *UserUpdateOne) RemoveFileIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedFiles == nil {
-		uuo.removedFiles = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedFiles[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveFileIDs(ids...)
 	return uuo
 }
 
@@ -1321,12 +1112,7 @@ func (uuo *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedGroups == nil {
-		uuo.removedGroups = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedGroups[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveGroupIDs(ids...)
 	return uuo
 }
 
@@ -1341,12 +1127,7 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 
 // RemoveFriendIDs removes the friends edge to User by ids.
 func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedFriends == nil {
-		uuo.removedFriends = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedFriends[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveFriendIDs(ids...)
 	return uuo
 }
 
@@ -1361,12 +1142,7 @@ func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
 func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedFollowers == nil {
-		uuo.removedFollowers = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedFollowers[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveFollowerIDs(ids...)
 	return uuo
 }
 
@@ -1381,12 +1157,7 @@ func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
 
 // RemoveFollowingIDs removes the following edge to User by ids.
 func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedFollowing == nil {
-		uuo.removedFollowing = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedFollowing[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveFollowingIDs(ids...)
 	return uuo
 }
 
@@ -1401,24 +1172,19 @@ func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
 
 // ClearTeam clears the team edge to Pet.
 func (uuo *UserUpdateOne) ClearTeam() *UserUpdateOne {
-	uuo.clearedTeam = true
+	uuo.mutation.ClearTeam()
 	return uuo
 }
 
 // ClearSpouse clears the spouse edge to User.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	uuo.clearedSpouse = true
+	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
 func (uuo *UserUpdateOne) RemoveChildIDs(ids ...string) *UserUpdateOne {
-	if uuo.removedChildren == nil {
-		uuo.removedChildren = make(map[string]struct{})
-	}
-	for i := range ids {
-		uuo.removedChildren[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveChildIDs(ids...)
 	return uuo
 }
 
@@ -1433,35 +1199,58 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 
 // ClearParent clears the parent edge to User.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
-	uuo.clearedParent = true
+	uuo.mutation.ClearParent()
 	return uuo
 }
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	if uuo.optional_int != nil {
-		if err := user.OptionalIntValidator(*uuo.optional_int); err != nil {
+	if v, ok := uuo.mutation.OptionalInt(); ok {
+		if err := user.OptionalIntValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
-	if uuo.role != nil {
-		if err := user.RoleValidator(*uuo.role); err != nil {
+	if v, ok := uuo.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
 		}
 	}
-	if len(uuo.card) > 1 {
+	if len(uuo.mutation.CardIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
-	if len(uuo.team) > 1 {
+	if len(uuo.mutation.TeamIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
 	}
-	if len(uuo.spouse) > 1 {
+	if len(uuo.mutation.SpouseIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
 	}
-	if len(uuo.parent) > 1 {
+	if len(uuo.mutation.ParentIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
-	return uuo.gremlinSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uuo.hooks) == 0 {
+		node, err = uuo.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uuo.mutation = mutation
+			node, err = uuo.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range uuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1488,7 +1277,11 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 
 func (uuo *UserUpdateOne) gremlinSave(ctx context.Context) (*User, error) {
 	res := &gremlin.Response{}
-	query, bindings := uuo.gremlin(uuo.id).Query()
+	id, ok := uuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing User.ID for update")
+	}
+	query, bindings := uuo.gremlin(id).Query()
 	if err := uuo.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -1515,137 +1308,137 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := uuo.optional_int; value != nil {
-		v.Property(dsl.Single, user.FieldOptionalInt, *value)
+	if value, ok := uuo.mutation.OptionalInt(); ok {
+		v.Property(dsl.Single, user.FieldOptionalInt, value)
 	}
-	if value := uuo.addoptional_int; value != nil {
-		v.Property(dsl.Single, user.FieldOptionalInt, __.Union(__.Values(user.FieldOptionalInt), __.Constant(*value)).Sum())
+	if value, ok := uuo.mutation.AddedOptionalInt(); ok {
+		v.Property(dsl.Single, user.FieldOptionalInt, __.Union(__.Values(user.FieldOptionalInt), __.Constant(value)).Sum())
 	}
-	if value := uuo.age; value != nil {
-		v.Property(dsl.Single, user.FieldAge, *value)
+	if value, ok := uuo.mutation.Age(); ok {
+		v.Property(dsl.Single, user.FieldAge, value)
 	}
-	if value := uuo.addage; value != nil {
-		v.Property(dsl.Single, user.FieldAge, __.Union(__.Values(user.FieldAge), __.Constant(*value)).Sum())
+	if value, ok := uuo.mutation.AddedAge(); ok {
+		v.Property(dsl.Single, user.FieldAge, __.Union(__.Values(user.FieldAge), __.Constant(value)).Sum())
 	}
-	if value := uuo.name; value != nil {
-		v.Property(dsl.Single, user.FieldName, *value)
+	if value, ok := uuo.mutation.Name(); ok {
+		v.Property(dsl.Single, user.FieldName, value)
 	}
-	if value := uuo.last; value != nil {
-		v.Property(dsl.Single, user.FieldLast, *value)
+	if value, ok := uuo.mutation.Last(); ok {
+		v.Property(dsl.Single, user.FieldLast, value)
 	}
-	if value := uuo.nickname; value != nil {
+	if value, ok := uuo.mutation.Nickname(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldNickname, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *value)),
+			pred: g.V().Has(user.Label, user.FieldNickname, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, value)),
 		})
-		v.Property(dsl.Single, user.FieldNickname, *value)
+		v.Property(dsl.Single, user.FieldNickname, value)
 	}
-	if value := uuo.phone; value != nil {
+	if value, ok := uuo.mutation.Phone(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldPhone, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *value)),
+			pred: g.V().Has(user.Label, user.FieldPhone, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, value)),
 		})
-		v.Property(dsl.Single, user.FieldPhone, *value)
+		v.Property(dsl.Single, user.FieldPhone, value)
 	}
-	if value := uuo.password; value != nil {
-		v.Property(dsl.Single, user.FieldPassword, *value)
+	if value, ok := uuo.mutation.Password(); ok {
+		v.Property(dsl.Single, user.FieldPassword, value)
 	}
-	if value := uuo.role; value != nil {
-		v.Property(dsl.Single, user.FieldRole, *value)
+	if value, ok := uuo.mutation.Role(); ok {
+		v.Property(dsl.Single, user.FieldRole, value)
 	}
 	var properties []interface{}
-	if uuo.clearoptional_int {
+	if uuo.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
 	}
-	if uuo.clearnickname {
+	if uuo.mutation.NicknameCleared() {
 		properties = append(properties, user.FieldNickname)
 	}
-	if uuo.clearphone {
+	if uuo.mutation.PhoneCleared() {
 		properties = append(properties, user.FieldPhone)
 	}
-	if uuo.clearpassword {
+	if uuo.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if uuo.clearedCard {
+	if uuo.mutation.CardCleared() {
 		tr := rv.Clone().OutE(user.CardLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.card {
+	for _, id := range uuo.mutation.CardIDs() {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.CardLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.CardLabel, id)),
 		})
 	}
-	for id := range uuo.removedPets {
+	for _, id := range uuo.mutation.RemovedPetsIDs() {
 		tr := rv.Clone().OutE(user.PetsLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.pets {
+	for _, id := range uuo.mutation.PetsIDs() {
 		v.AddE(user.PetsLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.PetsLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.PetsLabel, id)),
 		})
 	}
-	for id := range uuo.removedFiles {
+	for _, id := range uuo.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(user.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.files {
+	for _, id := range uuo.mutation.FilesIDs() {
 		v.AddE(user.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.FilesLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.FilesLabel, id)),
 		})
 	}
-	for id := range uuo.removedGroups {
+	for _, id := range uuo.mutation.RemovedGroupsIDs() {
 		tr := rv.Clone().OutE(user.GroupsLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.groups {
+	for _, id := range uuo.mutation.GroupsIDs() {
 		v.AddE(user.GroupsLabel).To(g.V(id)).OutV()
 	}
-	for id := range uuo.removedFriends {
+	for _, id := range uuo.mutation.RemovedFriendsIDs() {
 		tr := rv.Clone().BothE(user.FriendsLabel).Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.friends {
+	for _, id := range uuo.mutation.FriendsIDs() {
 		v.AddE(user.FriendsLabel).To(g.V(id)).OutV()
 	}
-	for id := range uuo.removedFollowers {
+	for _, id := range uuo.mutation.RemovedFollowersIDs() {
 		tr := rv.Clone().InE(user.FollowingLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.followers {
+	for _, id := range uuo.mutation.FollowersIDs() {
 		v.AddE(user.FollowingLabel).From(g.V(id)).InV()
 	}
-	for id := range uuo.removedFollowing {
+	for _, id := range uuo.mutation.RemovedFollowingIDs() {
 		tr := rv.Clone().OutE(user.FollowingLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.following {
+	for _, id := range uuo.mutation.FollowingIDs() {
 		v.AddE(user.FollowingLabel).To(g.V(id)).OutV()
 	}
-	if uuo.clearedTeam {
+	if uuo.mutation.TeamCleared() {
 		tr := rv.Clone().OutE(user.TeamLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.team {
+	for _, id := range uuo.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.TeamLabel, id)),
 		})
 	}
-	if uuo.clearedSpouse {
+	if uuo.mutation.SpouseCleared() {
 		tr := rv.Clone().BothE(user.SpouseLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.spouse {
+	for _, id := range uuo.mutation.SpouseIDs() {
 		v.AddE(user.SpouseLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: rv.Clone().Both(user.SpouseLabel).Count(),
@@ -1656,22 +1449,22 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SpouseLabel, id)),
 		})
 	}
-	for id := range uuo.removedChildren {
+	for _, id := range uuo.mutation.RemovedChildrenIDs() {
 		tr := rv.Clone().InE(user.ParentLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.children {
+	for _, id := range uuo.mutation.ChildrenIDs() {
 		v.AddE(user.ParentLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.ParentLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.ParentLabel, id)),
 		})
 	}
-	if uuo.clearedParent {
+	if uuo.mutation.ParentCleared() {
 		tr := rv.Clone().OutE(user.ParentLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range uuo.parent {
+	for _, id := range uuo.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
 	v.ValueMap(true)

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,6 +20,8 @@ import (
 // CardDelete is the builder for deleting a Card entity.
 type CardDelete struct {
 	config
+	hooks      []Hook
+	mutation   *CardMutation
 	predicates []predicate.Card
 }
 
@@ -30,7 +33,30 @@ func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CardDelete) Exec(ctx context.Context) (int, error) {
-	return cd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(cd.hooks) == 0 {
+		affected, err = cd.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CardMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cd.mutation = mutation
+			affected, err = cd.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range cd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

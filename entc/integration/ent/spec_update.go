@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -21,9 +22,9 @@ import (
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	config
-	card        map[string]struct{}
-	removedCard map[string]struct{}
-	predicates  []predicate.Spec
+	hooks      []Hook
+	mutation   *SpecMutation
+	predicates []predicate.Spec
 }
 
 // Where adds a new predicate for the builder.
@@ -34,12 +35,7 @@ func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 
 // AddCardIDs adds the card edge to Card by ids.
 func (su *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
-	if su.card == nil {
-		su.card = make(map[string]struct{})
-	}
-	for i := range ids {
-		su.card[ids[i]] = struct{}{}
-	}
+	su.mutation.AddCardIDs(ids...)
 	return su
 }
 
@@ -54,12 +50,7 @@ func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
-	if su.removedCard == nil {
-		su.removedCard = make(map[string]struct{})
-	}
-	for i := range ids {
-		su.removedCard[ids[i]] = struct{}{}
-	}
+	su.mutation.RemoveCardIDs(ids...)
 	return su
 }
 
@@ -74,7 +65,30 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
-	return su.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(su.hooks) == 0 {
+		affected, err = su.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*SpecMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			su.mutation = mutation
+			affected, err = su.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range su.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -117,7 +131,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if nodes := su.removedCard; len(nodes) > 0 {
+	if nodes := su.mutation.RemovedCardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -131,7 +145,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return 0, err
@@ -140,7 +154,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.card; len(nodes) > 0 {
+	if nodes := su.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -154,7 +168,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return 0, err
@@ -177,19 +191,13 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // SpecUpdateOne is the builder for updating a single Spec entity.
 type SpecUpdateOne struct {
 	config
-	id          string
-	card        map[string]struct{}
-	removedCard map[string]struct{}
+	hooks    []Hook
+	mutation *SpecMutation
 }
 
 // AddCardIDs adds the card edge to Card by ids.
 func (suo *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
-	if suo.card == nil {
-		suo.card = make(map[string]struct{})
-	}
-	for i := range ids {
-		suo.card[ids[i]] = struct{}{}
-	}
+	suo.mutation.AddCardIDs(ids...)
 	return suo
 }
 
@@ -204,12 +212,7 @@ func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 
 // RemoveCardIDs removes the card edge to Card by ids.
 func (suo *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
-	if suo.removedCard == nil {
-		suo.removedCard = make(map[string]struct{})
-	}
-	for i := range ids {
-		suo.removedCard[ids[i]] = struct{}{}
-	}
+	suo.mutation.RemoveCardIDs(ids...)
 	return suo
 }
 
@@ -224,7 +227,30 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-	return suo.sqlSave(ctx)
+	var (
+		err  error
+		node *Spec
+	)
+	if len(suo.hooks) == 0 {
+		node, err = suo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*SpecMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			suo.mutation = mutation
+			node, err = suo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range suo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, suo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -255,13 +281,17 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 			Table:   spec.Table,
 			Columns: spec.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  suo.id,
 				Type:   field.TypeString,
 				Column: spec.FieldID,
 			},
 		},
 	}
-	if nodes := suo.removedCard; len(nodes) > 0 {
+	id, ok := suo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Spec.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if nodes := suo.mutation.RemovedCardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -275,7 +305,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err
@@ -284,7 +314,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.card; len(nodes) > 0 {
+	if nodes := suo.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -298,7 +328,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err

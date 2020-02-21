@@ -10,9 +10,15 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldName holds the string denoting the name vertex property in the database.
+	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+
+	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
+	EdgeSpouse = "spouse"
+	// EdgeFollowers holds the string denoting the followers edge name in mutations.
+	EdgeFollowers = "followers"
+	// EdgeFollowing holds the string denoting the following edge name in mutations.
+	EdgeFollowing = "following"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"

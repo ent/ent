@@ -7,10 +7,14 @@ package gen
 import (
 	"fmt"
 	"go/token"
+	"path"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/facebookincubator/ent"
 
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
@@ -196,6 +200,9 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			typ.fields[f.Name] = tf
 		}
 	}
+	if typ.NumHooks() > 0 {
+		typ.noSchemaImport = true
+	}
 	return typ, nil
 }
 
@@ -264,6 +271,16 @@ func (t Type) HasUpdateDefault() bool {
 func (t Type) HasOptional() bool {
 	for _, f := range t.Fields {
 		if f.Optional {
+			return true
+		}
+	}
+	return false
+}
+
+// HasNumeric reports if this type has a numeric field.
+func (t Type) HasNumeric() bool {
+	for _, f := range t.Fields {
+		if f.Type.Numeric() {
 			return true
 		}
 	}
@@ -452,8 +469,44 @@ func (t Type) QueryName() string {
 	return pascal(t.Name) + "Query"
 }
 
+// MutationName returns the struct name of the mutation builder for this type.
+func (t Type) MutationName() string {
+	return pascal(t.Name) + "Mutation"
+}
+
+// SiblingImports returns all sibling packages that are needed for the different builders.
+func (t Type) SiblingImports() []string {
+	var (
+		paths = []string{path.Join(t.Config.Package, t.Package())}
+		seen  = map[string]bool{paths[0]: true}
+	)
+	for _, e := range t.Edges {
+		name := path.Join(t.Config.Package, e.Type.Package())
+		if !seen[name] {
+			seen[name] = true
+			paths = append(paths, name)
+		}
+	}
+	return paths
+}
+
+// NumHooks returns the number of hooks declared in the type schema.
+func (t Type) NumHooks() int {
+	if t.schema != nil {
+		return t.schema.Hooks
+	}
+	return 0
+}
+
+// ImportSchema reports if the type-package need to import the schema.
+func (t Type) ImportSchema() bool {
+	return !t.state.noSchemaImport
+}
+
 // Constant returns the constant name of the field.
-func (f Field) Constant() string { return "Field" + pascal(f.Name) }
+func (f Field) Constant() string {
+	return "Field" + pascal(f.Name)
+}
 
 // DefaultName returns the variable name of the default value of this field.
 func (f Field) DefaultName() string { return "Default" + pascal(f.Name) }
@@ -489,6 +542,27 @@ func (f Field) EnumName(enum string) string {
 
 // Validator returns the validator name.
 func (f Field) Validator() string { return pascal(f.Name) + "Validator" }
+
+// mutMethods returns the method names of mutation interface.
+var mutMethods = func() map[string]struct{} {
+	t := reflect.TypeOf(new(ent.Mutation)).Elem()
+	names := make(map[string]struct{})
+	for i := 0; i < t.NumMethod(); i++ {
+		names[t.Method(i).Name] = struct{}{}
+	}
+	return names
+}()
+
+// MutationGet returns the method name for getting the field value.
+// The default name is just a pascal format. If the the method conflicts
+// with the mutation methods, prefix the method with "Get".
+func (f Field) MutationGet() string {
+	name := pascal(f.Name)
+	if _, ok := mutMethods[name]; ok {
+		name = "Get" + name
+	}
+	return name
+}
 
 // IsTime returns true if the field is a timestamp field.
 func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.TypeTime }
@@ -563,8 +637,13 @@ func (f Field) Column() *schema.Column {
 	if f.def != nil && f.def.Size != nil {
 		c.Size = *f.def.Size
 	}
-	if f.Default && !f.IsTime() {
-		c.Default = f.DefaultName()
+	switch {
+	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
+		c.Default = f.DefaultValue()
+	case f.Default && (f.IsString() || f.IsEnum()):
+		if s, ok := f.DefaultValue().(string); ok {
+			c.Default = strconv.Quote(s)
+		}
 	}
 	return c
 }
@@ -607,6 +686,11 @@ func (e Edge) Label() string {
 	return fmt.Sprintf("%s_%s", e.Owner.Label(), snake(e.Name))
 }
 
+// Constant returns the constant name of the edge.
+func (e Edge) Constant() string {
+	return "Edge" + pascal(e.Name)
+}
+
 // M2M indicates if this edge is M2M edge.
 func (e Edge) M2M() bool { return e.Rel.Type == M2M }
 
@@ -622,9 +706,9 @@ func (e Edge) O2O() bool { return e.Rel.Type == O2O }
 // IsInverse returns if this edge is an inverse edge.
 func (e Edge) IsInverse() bool { return e.Inverse != "" }
 
-// Constant returns the constant name of the edge.
+// Constant returns the constant name of the edge for the gremlin dialect.
 // If the edge is inverse, it returns the constant name of the owner-edge (assoc-edge).
-func (e Edge) Constant() string {
+func (e Edge) LabelConstant() string {
 	name := e.Name
 	if e.IsInverse() {
 		name = e.Inverse
@@ -633,7 +717,7 @@ func (e Edge) Constant() string {
 }
 
 // InverseConstant returns the inverse constant name of the edge.
-func (e Edge) InverseConstant() string { return pascal(e.Name) + "InverseLabel" }
+func (e Edge) InverseLabelConstant() string { return pascal(e.Name) + "InverseLabel" }
 
 // TableConstant returns the constant name of the relation table.
 func (e Edge) TableConstant() string { return pascal(e.Name) + "Table" }

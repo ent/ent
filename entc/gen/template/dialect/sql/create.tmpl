@@ -7,6 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/create" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	var (
@@ -20,23 +21,23 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		}
 	)
 	{{- if $.ID.UserDefined }}
-		if value := {{ $receiver }}.{{ $.ID.BuilderField }}; value != nil {
-			{{ $.Receiver }}.ID = *value
-			_spec.ID.Value = *value
+		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
+			{{ $.Receiver }}.ID = id
+			_spec.ID.Value = id
 		}
 	{{- end }}
 	{{- range $_, $f := $.Fields }}
-		if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 				Type: field.{{ $f.Type.ConstName }},
-				Value: *value,
+				Value: value,
 				Column: {{ $.Package }}.{{ $f.Constant }},
 			})
-			{{ $.Receiver }}.{{ $f.StructField }} = {{ if not $f.Nillable }}*{{ end }}value
+			{{ $.Receiver }}.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
 		}
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
-		if nodes := {{ $receiver }}.{{ $e.BuilderField }}; len(nodes) > 0 {
+		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
 				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
 			{{- end }}

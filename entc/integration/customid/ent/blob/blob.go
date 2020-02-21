@@ -15,9 +15,13 @@ const (
 	// Label holds the string label denoting the blob type in the database.
 	Label = "blob"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldUUID holds the string denoting the uuid vertex property in the database.
+	FieldID   = "id" // FieldUUID holds the string denoting the uuid vertex property in the database.
 	FieldUUID = "uuid"
+
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeLinks holds the string denoting the links edge name in mutations.
+	EdgeLinks = "links"
 
 	// Table holds the table name of the blob in the database.
 	Table = "blobs"
@@ -48,7 +52,6 @@ var (
 
 var (
 	fields = schema.Blob{}.Fields()
-
 	// descUUID is the schema descriptor for uuid field.
 	descUUID = fields[1].Descriptor()
 	// DefaultUUID holds the default value on creation for the uuid field.

@@ -16,25 +16,21 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "oid"
-	// FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
-	// FieldNickname holds the string denoting the nickname vertex property in the database.
-	FieldNickname = "nickname"
-	// FieldPhone holds the string denoting the phone vertex property in the database.
-	FieldPhone = "phone"
-	// FieldBuffer holds the string denoting the buffer vertex property in the database.
-	FieldBuffer = "buffer"
-	// FieldTitle holds the string denoting the title vertex property in the database.
-	FieldTitle = "title"
-	// FieldNewName holds the string denoting the new_name vertex property in the database.
-	FieldNewName = "renamed"
-	// FieldBlob holds the string denoting the blob vertex property in the database.
-	FieldBlob = "blob"
-	// FieldState holds the string denoting the state vertex property in the database.
-	FieldState = "state"
+	FieldID       = "oid"      // FieldAge holds the string denoting the age vertex property in the database.
+	FieldAge      = "age"      // FieldName holds the string denoting the name vertex property in the database.
+	FieldName     = "name"     // FieldNickname holds the string denoting the nickname vertex property in the database.
+	FieldNickname = "nickname" // FieldPhone holds the string denoting the phone vertex property in the database.
+	FieldPhone    = "phone"    // FieldBuffer holds the string denoting the buffer vertex property in the database.
+	FieldBuffer   = "buffer"   // FieldTitle holds the string denoting the title vertex property in the database.
+	FieldTitle    = "title"    // FieldNewName holds the string denoting the new_name vertex property in the database.
+	FieldNewName  = "renamed"  // FieldBlob holds the string denoting the blob vertex property in the database.
+	FieldBlob     = "blob"     // FieldState holds the string denoting the state vertex property in the database.
+	FieldState    = "state"
+
+	// EdgeCar holds the string denoting the car edge name in mutations.
+	EdgeCar = "car"
+	// EdgePets holds the string denoting the pets edge name in mutations.
+	EdgePets = "pets"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -75,12 +71,10 @@ var ForeignKeys = []string{
 
 var (
 	fields = schema.User{}.Fields()
-
 	// descPhone is the schema descriptor for phone field.
 	descPhone = fields[4].Descriptor()
 	// DefaultPhone holds the default value on creation for the phone field.
 	DefaultPhone = descPhone.Default.(string)
-
 	// descTitle is the schema descriptor for title field.
 	descTitle = fields[6].Descriptor()
 	// DefaultTitle holds the default value on creation for the title field.

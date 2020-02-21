@@ -11,6 +11,13 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+import (
+	{{- range $path := $.SiblingImports }}
+		"{{ $path }}"
+	{{- end }}
+)
+
+
 {{ $builder := $.QueryName }}
 {{ $receiver := receiver $builder }}
 

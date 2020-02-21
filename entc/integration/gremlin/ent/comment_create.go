@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -21,26 +22,25 @@ import (
 // CommentCreate is the builder for creating a Comment entity.
 type CommentCreate struct {
 	config
-	unique_int   *int
-	unique_float *float64
-	nillable_int *int
+	mutation *CommentMutation
+	hooks    []Hook
 }
 
 // SetUniqueInt sets the unique_int field.
 func (cc *CommentCreate) SetUniqueInt(i int) *CommentCreate {
-	cc.unique_int = &i
+	cc.mutation.SetUniqueInt(i)
 	return cc
 }
 
 // SetUniqueFloat sets the unique_float field.
 func (cc *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
-	cc.unique_float = &f
+	cc.mutation.SetUniqueFloat(f)
 	return cc
 }
 
 // SetNillableInt sets the nillable_int field.
 func (cc *CommentCreate) SetNillableInt(i int) *CommentCreate {
-	cc.nillable_int = &i
+	cc.mutation.SetNillableInt(i)
 	return cc
 }
 
@@ -54,13 +54,36 @@ func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 
 // Save creates the Comment in the database.
 func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
-	if cc.unique_int == nil {
+	if _, ok := cc.mutation.UniqueInt(); !ok {
 		return nil, errors.New("ent: missing required field \"unique_int\"")
 	}
-	if cc.unique_float == nil {
+	if _, ok := cc.mutation.UniqueFloat(); !ok {
 		return nil, errors.New("ent: missing required field \"unique_float\"")
 	}
-	return cc.gremlinSave(ctx)
+	var (
+		err  error
+		node *Comment
+	)
+	if len(cc.hooks) == 0 {
+		node, err = cc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CommentMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cc.mutation = mutation
+			node, err = cc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range cc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -95,22 +118,22 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(comment.Label)
-	if cc.unique_int != nil {
+	if value, ok := cc.mutation.UniqueInt(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, *cc.unique_int).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, *cc.unique_int)),
+			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, value)),
 		})
-		v.Property(dsl.Single, comment.FieldUniqueInt, *cc.unique_int)
+		v.Property(dsl.Single, comment.FieldUniqueInt, value)
 	}
-	if cc.unique_float != nil {
+	if value, ok := cc.mutation.UniqueFloat(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, *cc.unique_float).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, *cc.unique_float)),
+			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, value)),
 		})
-		v.Property(dsl.Single, comment.FieldUniqueFloat, *cc.unique_float)
+		v.Property(dsl.Single, comment.FieldUniqueFloat, value)
 	}
-	if cc.nillable_int != nil {
-		v.Property(dsl.Single, comment.FieldNillableInt, *cc.nillable_int)
+	if value, ok := cc.mutation.NillableInt(); ok {
+		v.Property(dsl.Single, comment.FieldNillableInt, value)
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -21,14 +22,13 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	value *int
-	prev  map[string]struct{}
-	next  map[string]struct{}
+	mutation *NodeMutation
+	hooks    []Hook
 }
 
 // SetValue sets the value field.
 func (nc *NodeCreate) SetValue(i int) *NodeCreate {
-	nc.value = &i
+	nc.mutation.SetValue(i)
 	return nc
 }
 
@@ -42,10 +42,7 @@ func (nc *NodeCreate) SetNillableValue(i *int) *NodeCreate {
 
 // SetPrevID sets the prev edge to Node by id.
 func (nc *NodeCreate) SetPrevID(id string) *NodeCreate {
-	if nc.prev == nil {
-		nc.prev = make(map[string]struct{})
-	}
-	nc.prev[id] = struct{}{}
+	nc.mutation.SetPrevID(id)
 	return nc
 }
 
@@ -64,10 +61,7 @@ func (nc *NodeCreate) SetPrev(n *Node) *NodeCreate {
 
 // SetNextID sets the next edge to Node by id.
 func (nc *NodeCreate) SetNextID(id string) *NodeCreate {
-	if nc.next == nil {
-		nc.next = make(map[string]struct{})
-	}
-	nc.next[id] = struct{}{}
+	nc.mutation.SetNextID(id)
 	return nc
 }
 
@@ -86,13 +80,36 @@ func (nc *NodeCreate) SetNext(n *Node) *NodeCreate {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	if len(nc.prev) > 1 {
+	if len(nc.mutation.PrevIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"prev\"")
 	}
-	if len(nc.next) > 1 {
+	if len(nc.mutation.NextIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
 	}
-	return nc.gremlinSave(ctx)
+	var (
+		err  error
+		node *Node
+	)
+	if len(nc.hooks) == 0 {
+		node, err = nc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nc.mutation = mutation
+			node, err = nc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range nc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -127,17 +144,17 @@ func (nc *NodeCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(node.Label)
-	if nc.value != nil {
-		v.Property(dsl.Single, node.FieldValue, *nc.value)
+	if value, ok := nc.mutation.Value(); ok {
+		v.Property(dsl.Single, node.FieldValue, value)
 	}
-	for id := range nc.prev {
+	for _, id := range nc.mutation.PrevIDs() {
 		v.AddE(node.NextLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	for id := range nc.next {
+	for _, id := range nc.mutation.NextIDs() {
 		v.AddE(node.NextLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),

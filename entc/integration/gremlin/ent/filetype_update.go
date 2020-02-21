@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -21,10 +22,9 @@ import (
 // FileTypeUpdate is the builder for updating FileType entities.
 type FileTypeUpdate struct {
 	config
-	name         *string
-	files        map[string]struct{}
-	removedFiles map[string]struct{}
-	predicates   []predicate.FileType
+	hooks      []Hook
+	mutation   *FileTypeMutation
+	predicates []predicate.FileType
 }
 
 // Where adds a new predicate for the builder.
@@ -35,18 +35,13 @@ func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 
 // SetName sets the name field.
 func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
-	ftu.name = &s
+	ftu.mutation.SetName(s)
 	return ftu
 }
 
 // AddFileIDs adds the files edge to File by ids.
 func (ftu *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
-	if ftu.files == nil {
-		ftu.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		ftu.files[ids[i]] = struct{}{}
-	}
+	ftu.mutation.AddFileIDs(ids...)
 	return ftu
 }
 
@@ -61,12 +56,7 @@ func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
 
 // RemoveFileIDs removes the files edge to File by ids.
 func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
-	if ftu.removedFiles == nil {
-		ftu.removedFiles = make(map[string]struct{})
-	}
-	for i := range ids {
-		ftu.removedFiles[ids[i]] = struct{}{}
-	}
+	ftu.mutation.RemoveFileIDs(ids...)
 	return ftu
 }
 
@@ -81,7 +71,30 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	return ftu.gremlinSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ftu.hooks) == 0 {
+		affected, err = ftu.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftu.mutation = mutation
+			affected, err = ftu.gremlinSave(ctx)
+			return affected, err
+		})
+		for _, hook := range ftu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -134,18 +147,18 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := ftu.name; value != nil {
+	if value, ok := ftu.mutation.Name(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *value)),
+			pred: g.V().Has(filetype.Label, filetype.FieldName, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, value)),
 		})
-		v.Property(dsl.Single, filetype.FieldName, *value)
+		v.Property(dsl.Single, filetype.FieldName, value)
 	}
-	for id := range ftu.removedFiles {
+	for _, id := range ftu.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range ftu.files {
+	for _, id := range ftu.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),
@@ -170,26 +183,19 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
 type FileTypeUpdateOne struct {
 	config
-	id           string
-	name         *string
-	files        map[string]struct{}
-	removedFiles map[string]struct{}
+	hooks    []Hook
+	mutation *FileTypeMutation
 }
 
 // SetName sets the name field.
 func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
-	ftuo.name = &s
+	ftuo.mutation.SetName(s)
 	return ftuo
 }
 
 // AddFileIDs adds the files edge to File by ids.
 func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
-	if ftuo.files == nil {
-		ftuo.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		ftuo.files[ids[i]] = struct{}{}
-	}
+	ftuo.mutation.AddFileIDs(ids...)
 	return ftuo
 }
 
@@ -204,12 +210,7 @@ func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 
 // RemoveFileIDs removes the files edge to File by ids.
 func (ftuo *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
-	if ftuo.removedFiles == nil {
-		ftuo.removedFiles = make(map[string]struct{})
-	}
-	for i := range ids {
-		ftuo.removedFiles[ids[i]] = struct{}{}
-	}
+	ftuo.mutation.RemoveFileIDs(ids...)
 	return ftuo
 }
 
@@ -224,7 +225,30 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	return ftuo.gremlinSave(ctx)
+	var (
+		err  error
+		node *FileType
+	)
+	if len(ftuo.hooks) == 0 {
+		node, err = ftuo.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftuo.mutation = mutation
+			node, err = ftuo.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range ftuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -251,7 +275,11 @@ func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
 
 func (ftuo *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftuo.gremlin(ftuo.id).Query()
+	id, ok := ftuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing FileType.ID for update")
+	}
+	query, bindings := ftuo.gremlin(id).Query()
 	if err := ftuo.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -278,18 +306,18 @@ func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := ftuo.name; value != nil {
+	if value, ok := ftuo.mutation.Name(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *value).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *value)),
+			pred: g.V().Has(filetype.Label, filetype.FieldName, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, value)),
 		})
-		v.Property(dsl.Single, filetype.FieldName, *value)
+		v.Property(dsl.Single, filetype.FieldName, value)
 	}
-	for id := range ftuo.removedFiles {
+	for _, id := range ftuo.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range ftuo.files {
+	for _, id := range ftuo.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),

@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -20,24 +21,19 @@ import (
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	config
-	name  *string
-	files map[string]struct{}
+	mutation *FileTypeMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
-	ftc.name = &s
+	ftc.mutation.SetName(s)
 	return ftc
 }
 
 // AddFileIDs adds the files edge to File by ids.
 func (ftc *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
-	if ftc.files == nil {
-		ftc.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		ftc.files[ids[i]] = struct{}{}
-	}
+	ftc.mutation.AddFileIDs(ids...)
 	return ftc
 }
 
@@ -52,10 +48,33 @@ func (ftc *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	if ftc.name == nil {
+	if _, ok := ftc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	return ftc.sqlSave(ctx)
+	var (
+		err  error
+		node *FileType
+	)
+	if len(ftc.hooks) == 0 {
+		node, err = ftc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftc.mutation = mutation
+			node, err = ftc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range ftc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -78,15 +97,15 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 			},
 		}
 	)
-	if value := ftc.name; value != nil {
+	if value, ok := ftc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: filetype.FieldName,
 		})
-		ft.Name = *value
+		ft.Name = value
 	}
-	if nodes := ftc.files; len(nodes) > 0 {
+	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -100,7 +119,7 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err

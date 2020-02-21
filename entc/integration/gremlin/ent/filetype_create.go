@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -21,24 +22,19 @@ import (
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	config
-	name  *string
-	files map[string]struct{}
+	mutation *FileTypeMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
-	ftc.name = &s
+	ftc.mutation.SetName(s)
 	return ftc
 }
 
 // AddFileIDs adds the files edge to File by ids.
 func (ftc *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
-	if ftc.files == nil {
-		ftc.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		ftc.files[ids[i]] = struct{}{}
-	}
+	ftc.mutation.AddFileIDs(ids...)
 	return ftc
 }
 
@@ -53,10 +49,33 @@ func (ftc *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	if ftc.name == nil {
+	if _, ok := ftc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	return ftc.gremlinSave(ctx)
+	var (
+		err  error
+		node *FileType
+	)
+	if len(ftc.hooks) == 0 {
+		node, err = ftc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftc.mutation = mutation
+			node, err = ftc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range ftc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -91,14 +110,14 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(filetype.Label)
-	if ftc.name != nil {
+	if value, ok := ftc.mutation.Name(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(filetype.Label, filetype.FieldName, *ftc.name).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, *ftc.name)),
+			pred: g.V().Has(filetype.Label, filetype.FieldName, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, value)),
 		})
-		v.Property(dsl.Single, filetype.FieldName, *ftc.name)
+		v.Property(dsl.Single, filetype.FieldName, value)
 	}
-	for id := range ftc.files {
+	for _, id := range ftc.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),

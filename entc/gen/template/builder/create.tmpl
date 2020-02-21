@@ -11,21 +11,20 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+import (
+	{{- range $path := $.SiblingImports }}
+		"{{ $path }}"
+	{{- end }}
+)
+
 {{ $builder := print (pascal $.Name) "Create" }}
 {{ $receiver := receiver $builder }}
 
 // {{ $builder }} is the builder for creating a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	config
-	{{- if $.ID.UserDefined }}
-		{{ $.ID.BuilderField }} *{{ $.ID.Type }}
-	{{- end }}
-	{{ range $_, $f := $.Fields }}
-		{{- $f.BuilderField }} *{{ $f.Type }}
-	{{ end }}
-	{{- range $_, $e := $.Edges }}
-		{{- $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
-	{{ end -}}
+	mutation *{{  $.MutationName }}
+	hooks []Hook
 }
 
 {{ with extend $ "Builder" $builder }}
@@ -34,40 +33,62 @@ type {{ $builder }} struct {
 
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
+	{{- $mutation := print $receiver ".mutation" }}
 	{{ range $_, $f := $.Fields -}}
 		{{- if or $f.Default (not $f.Optional) -}}
-			if {{ $receiver }}.{{ $f.BuilderField }} == nil {
+			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
 				{{ if $f.Default -}}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
-					{{ $receiver }}.{{ $f.BuilderField }} = &v
+					{{ $mutation }}.Set{{ $f.StructField }}(v)
 				{{ else -}}
 					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")
 				{{ end -}}
 			}
 		{{ end -}}
 		{{ with or $f.Validators $f.IsEnum -}}
-			{{/* add nullable check only for optional fields without default value */ -}}
-			{{ $nullable := and $f.Optional (not $f.Default) -}}
-			{{- if $nullable }} if {{ $receiver }}.{{ $f.BuilderField }} != nil { {{ end -}}
-				if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.BuilderField }}); err != nil {
+			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+				if err := {{ $.Package }}.{{ $f.Validator }}(v); err != nil {
 					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
 				}
-			{{- if $nullable }} } {{ end }}
+			}
 		{{ end -}}
 	{{ end -}}
 	{{- range $_, $e := $.Edges }}
 		{{- if $e.Unique -}}
-			if len({{ $receiver }}.{{ $e.BuilderField }}) > 1 {
+			if len({{ $mutation }}.{{ $e.StructField }}IDs()) > 1 {
 				return nil, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}
 		{{- if not $e.Optional -}}
-			if {{ $receiver }}.{{ $e.BuilderField }} == nil {
+			if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
 				return nil, errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}
 	{{ end -}}
-	return {{ $receiver }}.{{ $.Storage }}Save(ctx)
+	var (
+		err error
+		node *{{ $.Name }}
+	)
+	if len({{ $receiver }}.hooks) == 0 {
+		node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*{{ $.MutationName }})
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			{{ $mutation }} = mutation
+			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+			return node, err
+		})
+		for _, hook := range {{ $receiver }}.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -10,9 +10,13 @@ const (
 	// Label holds the string label denoting the node type in the database.
 	Label = "node"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldValue holds the string denoting the value vertex property in the database.
+	FieldID    = "id" // FieldValue holds the string denoting the value vertex property in the database.
 	FieldValue = "value"
+
+	// EdgePrev holds the string denoting the prev edge name in mutations.
+	EdgePrev = "prev"
+	// EdgeNext holds the string denoting the next edge name in mutations.
+	EdgeNext = "next"
 
 	// PrevInverseLabel holds the string label denoting the prev inverse edge type in the database.
 	PrevInverseLabel = "node_next"

@@ -6,8 +6,8 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* constants needed for gremlin dialects. */}}
 {{ define "dialect/gremlin/meta/constants" }}
-	{{ range $_, $e := $.Edges }}{{ $label := $e.Constant -}}
-		{{ if $e.IsInverse }}{{- $label = $e.InverseConstant -}}
+	{{ range $_, $e := $.Edges }}{{ $label := $e.LabelConstant -}}
+		{{ if $e.IsInverse }}{{- $label = $e.InverseLabelConstant -}}
 			// {{ $label }} holds the string label denoting the {{ lower $e.Name }} inverse edge type in the database.
 		{{ else -}}
 			// {{ $label }} holds the string label denoting the {{ lower $e.Name }} edge type in the database.

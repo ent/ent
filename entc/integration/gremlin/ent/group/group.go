@@ -6,25 +6,27 @@
 
 package group
 
-import (
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-)
+import "github.com/facebookincubator/ent/entc/integration/ent/schema"
 
 const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldActive holds the string denoting the active vertex property in the database.
-	FieldActive = "active"
-	// FieldExpire holds the string denoting the expire vertex property in the database.
-	FieldExpire = "expire"
-	// FieldType holds the string denoting the type vertex property in the database.
-	FieldType = "type"
-	// FieldMaxUsers holds the string denoting the max_users vertex property in the database.
-	FieldMaxUsers = "max_users"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
+	FieldID       = "id"        // FieldActive holds the string denoting the active vertex property in the database.
+	FieldActive   = "active"    // FieldExpire holds the string denoting the expire vertex property in the database.
+	FieldExpire   = "expire"    // FieldType holds the string denoting the type vertex property in the database.
+	FieldType     = "type"      // FieldMaxUsers holds the string denoting the max_users vertex property in the database.
+	FieldMaxUsers = "max_users" // FieldName holds the string denoting the name vertex property in the database.
+	FieldName     = "name"
+
+	// EdgeFiles holds the string denoting the files edge name in mutations.
+	EdgeFiles = "files"
+	// EdgeBlocked holds the string denoting the blocked edge name in mutations.
+	EdgeBlocked = "blocked"
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
+	// EdgeInfo holds the string denoting the info edge name in mutations.
+	EdgeInfo = "info"
 
 	// FilesLabel holds the string label denoting the files edge type in the database.
 	FilesLabel = "group_files"
@@ -38,12 +40,10 @@ const (
 
 var (
 	fields = schema.Group{}.Fields()
-
 	// descActive is the schema descriptor for active field.
 	descActive = fields[0].Descriptor()
 	// DefaultActive holds the default value on creation for the active field.
 	DefaultActive = descActive.Default.(bool)
-
 	// descType is the schema descriptor for type field.
 	descType = fields[2].Descriptor()
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
@@ -62,14 +62,12 @@ var (
 			return nil
 		}
 	}()
-
 	// descMaxUsers is the schema descriptor for max_users field.
 	descMaxUsers = fields[3].Descriptor()
 	// DefaultMaxUsers holds the default value on creation for the max_users field.
 	DefaultMaxUsers = descMaxUsers.Default.(int)
 	// MaxUsersValidator is a validator for the "max_users" field. It is called by the builders before save.
 	MaxUsersValidator = descMaxUsers.Validators[0].(func(int) error)
-
 	// descName is the schema descriptor for name field.
 	descName = fields[4].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.

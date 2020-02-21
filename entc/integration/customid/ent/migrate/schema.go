@@ -7,8 +7,6 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -17,7 +15,7 @@ var (
 	// BlobsColumns holds the columns for the "blobs" table.
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "uuid", Type: field.TypeUUID, Default: blob.DefaultUUID},
+		{Name: "uuid", Type: field.TypeUUID},
 		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BlobsTable holds the schema information for the "blobs" table.

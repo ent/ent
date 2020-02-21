@@ -10,9 +10,13 @@ const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldName holds the string denoting the name vertex property in the database.
+	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
+	// EdgeAdmin holds the string denoting the admin edge name in mutations.
+	EdgeAdmin = "admin"
 
 	// Table holds the table name of the group in the database.
 	Table = "groups"

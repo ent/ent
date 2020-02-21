@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
@@ -17,11 +18,36 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
+	mutation *GroupMutation
+	hooks    []Hook
 }
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	return gc.sqlSave(ctx)
+	var (
+		err  error
+		node *Group
+	)
+	if len(gc.hooks) == 0 {
+		node, err = gc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gc.mutation = mutation
+			node, err = gc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range gc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.

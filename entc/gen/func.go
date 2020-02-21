@@ -29,6 +29,7 @@ var (
 		"append":      reflect.Append,
 		"appends":     reflect.AppendSlice,
 		"order":       order,
+		"camel":       camel,
 		"snake":       snake,
 		"pascal":      pascal,
 		"extend":      extend,
@@ -118,6 +119,20 @@ func pascal(s string) string {
 		}
 	}
 	return strings.Join(words, "")
+}
+
+// camel converts the given column name into a camelCase.
+//
+//	user_info => userInfo
+//	full_name => fullName
+//	user_id   => userID
+//
+func camel(s string) string {
+	words := strings.SplitN(s, "_", 2)
+	if len(words) == 1 {
+		return strings.ToLower(words[0])
+	}
+	return strings.ToLower(words[0]) + pascal(words[1])
 }
 
 // snake converts the given struct or field name into a snake_case.

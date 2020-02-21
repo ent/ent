@@ -6,23 +6,22 @@
 
 package file
 
-import (
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-)
+import "github.com/facebookincubator/ent/entc/integration/ent/schema"
 
 const (
 	// Label holds the string label denoting the file type in the database.
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldSize holds the string denoting the size vertex property in the database.
-	FieldSize = "fsize"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
-	// FieldUser holds the string denoting the user vertex property in the database.
-	FieldUser = "user"
-	// FieldGroup holds the string denoting the group vertex property in the database.
+	FieldID    = "id"    // FieldSize holds the string denoting the size vertex property in the database.
+	FieldSize  = "fsize" // FieldName holds the string denoting the name vertex property in the database.
+	FieldName  = "name"  // FieldUser holds the string denoting the user vertex property in the database.
+	FieldUser  = "user"  // FieldGroup holds the string denoting the group vertex property in the database.
 	FieldGroup = "group"
+
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
+	// EdgeType holds the string denoting the type edge name in mutations.
+	EdgeType = "type"
 
 	// Table holds the table name of the file in the database.
 	Table = "files"
@@ -60,7 +59,6 @@ var ForeignKeys = []string{
 
 var (
 	fields = schema.File{}.Fields()
-
 	// descSize is the schema descriptor for size field.
 	descSize = fields[0].Descriptor()
 	// DefaultSize holds the default value on creation for the size field.

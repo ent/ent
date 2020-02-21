@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -20,20 +21,19 @@ import (
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	config
-	desc      *string
-	max_users *int
-	groups    map[string]struct{}
+	mutation *GroupInfoMutation
+	hooks    []Hook
 }
 
 // SetDesc sets the desc field.
 func (gic *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
-	gic.desc = &s
+	gic.mutation.SetDesc(s)
 	return gic
 }
 
 // SetMaxUsers sets the max_users field.
 func (gic *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
-	gic.max_users = &i
+	gic.mutation.SetMaxUsers(i)
 	return gic
 }
 
@@ -47,12 +47,7 @@ func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (gic *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
-	if gic.groups == nil {
-		gic.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		gic.groups[ids[i]] = struct{}{}
-	}
+	gic.mutation.AddGroupIDs(ids...)
 	return gic
 }
 
@@ -67,14 +62,37 @@ func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
 
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	if gic.desc == nil {
+	if _, ok := gic.mutation.Desc(); !ok {
 		return nil, errors.New("ent: missing required field \"desc\"")
 	}
-	if gic.max_users == nil {
+	if _, ok := gic.mutation.MaxUsers(); !ok {
 		v := groupinfo.DefaultMaxUsers
-		gic.max_users = &v
+		gic.mutation.SetMaxUsers(v)
 	}
-	return gic.sqlSave(ctx)
+	var (
+		err  error
+		node *GroupInfo
+	)
+	if len(gic.hooks) == 0 {
+		node, err = gic.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupInfoMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gic.mutation = mutation
+			node, err = gic.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range gic.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -97,23 +115,23 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 			},
 		}
 	)
-	if value := gic.desc; value != nil {
+	if value, ok := gic.mutation.Desc(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: groupinfo.FieldDesc,
 		})
-		gi.Desc = *value
+		gi.Desc = value
 	}
-	if value := gic.max_users; value != nil {
+	if value, ok := gic.mutation.MaxUsers(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: groupinfo.FieldMaxUsers,
 		})
-		gi.MaxUsers = *value
+		gi.MaxUsers = value
 	}
-	if nodes := gic.groups; len(nodes) > 0 {
+	if nodes := gic.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -127,7 +145,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err

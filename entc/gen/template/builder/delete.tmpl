@@ -11,24 +11,56 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+import (
+	"{{ $.Config.Package }}/{{ $.Package }}"
+)
+
+
 {{ $builder := print (pascal $.Name) "Delete" }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
+
 // {{ $builder }} is the builder for deleting a {{ pascal $.Name }} entity.
 type {{ $builder }} struct {
 	config
+	hooks      []Hook
+	mutation   *{{ $.MutationName }}
 	predicates []predicate.{{ $.Name }}
 }
 
 
 // Where adds a new predicate to the delete builder.
-func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
+func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
 	return {{ $receiver }}
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	return {{ $receiver }}.{{ $.Storage }}Exec(ctx)
+	var (
+		err error
+		affected int
+	)
+	if len({{ $receiver }}.hooks) == 0 {
+		affected, err = {{ $receiver }}.{{ $.Storage }}Exec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*{{ $.MutationName }})
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			{{ $mutation }} = mutation
+			affected, err = {{ $receiver }}.{{ $.Storage }}Exec(ctx)
+			return affected, err
+		})
+		for _, hook := range {{ $receiver }}.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

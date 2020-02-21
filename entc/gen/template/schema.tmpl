@@ -1,0 +1,125 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "entschema" }}
+
+{{ with extend $ "Package" "entschema" -}}
+	{{ template "header" . }}
+{{ end }}
+
+{{ $register := false }}
+{{ range $n := $.Nodes }}{{ if not $n.ImportSchema }}{{ $register = true }}{{ end }}{{ end }}
+{{ if $register }}
+	{{ template "entschema/register" $ }}
+{{ end }}
+
+{{ $module := $.ModuleInfo }}
+{{ if or $module.Version $module.Sum }}
+	// entc build info
+	const (
+		{{- with $module.Version }}
+			Version = "{{ . }}"
+		{{- end }}
+		{{- with $module.Sum }}
+			Sum = "{{ . }}"
+		{{- end }}
+	)
+{{ end }}
+{{ end }}
+
+
+{{/* register schema handlers to type packages */}}
+{{ define "entschema/register" }}
+import (
+	"{{ $.Config.Schema }}"
+
+	{{ range $n := $.Nodes }}
+		"{{ $.Config.Package }}/{{ $n.Package }}"
+	{{- end }}
+
+	"github.com/facebookincubator/ent"
+)
+
+
+// The init function reads all schema descriptors with runtime
+// code (default values, validators or hooks) and stitches it
+// to their package variables.
+
+func init() {
+{{- range $n := $.Nodes }}
+	{{- $pkg :=  $n.Package }}
+	{{- $schema := base $.Config.Schema }}
+	{{- if $n.NumHooks }}
+		{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
+		for i, h := range {{ print $pkg "Hooks" }} {
+			{{ print $pkg ".Hooks" }}[i] = h
+		}
+	{{- end }}
+	{{- if or $n.HasDefault $n.HasValidators }}
+		{{- with $n.MixedInWithDefaultOrValidator }}
+			{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
+			{{ $pkg }}MixinFields := [...][]ent.Field{
+				{{- range $i, $_ := xrange $n.NumMixin }}
+					{{ $pkg }}Mixin[{{ $i }}].Fields(),
+				{{- end }}
+			}
+		{{- end }}
+		{{- with $n.Fields }}
+			{{ $pkg }}Fields := {{ $schema }}.{{ $n.Name }}{}.Fields()
+		{{- end }}
+		{{- range $i, $f := $n.Fields }}
+			{{- $desc := print $pkg "Desc" $f.StructField }}
+			{{- /* enum default values handled near their declarations (in type package). */}}
+			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators }}
+				{{- if $f.Position.MixedIn }}
+				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+				{{ $desc }} := {{ $pkg }}MixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
+			{{- else }}
+				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+				{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
+			{{- end }}
+		{{- end }}
+		{{- if and $f.Default (not $f.IsEnum) }}
+			{{- $default := print $pkg "." $f.DefaultName }}
+			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+			{{ $default }} = {{ $desc }}.Default.({{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }})
+		{{- end }}
+		{{- if $f.UpdateDefault }}
+			{{- $default := print $pkg "." $f.UpdateDefaultName }}
+			// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
+			{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+		{{- end }}
+		{{- with $f.Validators }}
+			{{- $name := print $pkg "." $f.Validator }}
+			{{- $type :=  printf "func (%s) error" $f.Type }}
+			// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
+			{{- if eq $f.Validators 1 }}
+				{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
+			{{- else }}
+				{{ $name }} = func() {{ $type }} {
+					validators := {{ $desc }}.Validators
+					fns := [...]func({{ $f.Type }}) error {
+						{{- range $j, $n := xrange $f.Validators }}
+							validators[{{ $j }}].(func({{ $f.Type }}) error),
+						{{- end }}
+					}
+					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
+						for _, fn := range fns {
+							if err := fn({{ $f.BuilderField }}); err != nil {
+								return err
+							}
+						}
+						return nil
+					}
+				}()
+			{{- end }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+{{- end }}
+}
+
+{{ end }}

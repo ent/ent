@@ -37,7 +37,7 @@ func main() {
 }
 
 func fail(err error) {
-	os.Stderr.WriteString(err.Error())
+	os.Stderr.WriteString(err.Error()+"\n")
 	os.Exit(1)
 }
 

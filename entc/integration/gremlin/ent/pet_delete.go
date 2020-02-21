@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -20,6 +21,8 @@ import (
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
+	hooks      []Hook
+	mutation   *PetMutation
 	predicates []predicate.Pet
 }
 
@@ -31,7 +34,30 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
-	return pd.gremlinExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(pd.hooks) == 0 {
+		affected, err = pd.gremlinExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pd.mutation = mutation
+			affected, err = pd.gremlinExec(ctx)
+			return affected, err
+		})
+		for _, hook := range pd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, pd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

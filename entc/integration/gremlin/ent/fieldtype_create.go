@@ -20,65 +20,43 @@ import (
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	int                     *int
-	int8                    *int8
-	int16                   *int16
-	int32                   *int32
-	int64                   *int64
-	optional_int            *int
-	optional_int8           *int8
-	optional_int16          *int16
-	optional_int32          *int32
-	optional_int64          *int64
-	nillable_int            *int
-	nillable_int8           *int8
-	nillable_int16          *int16
-	nillable_int32          *int32
-	nillable_int64          *int64
-	validate_optional_int32 *int32
-	optional_uint           *uint
-	optional_uint8          *uint8
-	optional_uint16         *uint16
-	optional_uint32         *uint32
-	optional_uint64         *uint64
-	state                   *fieldtype.State
-	optional_float          *float64
-	optional_float32        *float32
+	mutation *FieldTypeMutation
+	hooks    []Hook
 }
 
 // SetInt sets the int field.
 func (ftc *FieldTypeCreate) SetInt(i int) *FieldTypeCreate {
-	ftc.int = &i
+	ftc.mutation.SetInt(i)
 	return ftc
 }
 
 // SetInt8 sets the int8 field.
 func (ftc *FieldTypeCreate) SetInt8(i int8) *FieldTypeCreate {
-	ftc.int8 = &i
+	ftc.mutation.SetInt8(i)
 	return ftc
 }
 
 // SetInt16 sets the int16 field.
 func (ftc *FieldTypeCreate) SetInt16(i int16) *FieldTypeCreate {
-	ftc.int16 = &i
+	ftc.mutation.SetInt16(i)
 	return ftc
 }
 
 // SetInt32 sets the int32 field.
 func (ftc *FieldTypeCreate) SetInt32(i int32) *FieldTypeCreate {
-	ftc.int32 = &i
+	ftc.mutation.SetInt32(i)
 	return ftc
 }
 
 // SetInt64 sets the int64 field.
 func (ftc *FieldTypeCreate) SetInt64(i int64) *FieldTypeCreate {
-	ftc.int64 = &i
+	ftc.mutation.SetInt64(i)
 	return ftc
 }
 
 // SetOptionalInt sets the optional_int field.
 func (ftc *FieldTypeCreate) SetOptionalInt(i int) *FieldTypeCreate {
-	ftc.optional_int = &i
+	ftc.mutation.SetOptionalInt(i)
 	return ftc
 }
 
@@ -92,7 +70,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt(i *int) *FieldTypeCreate {
 
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftc *FieldTypeCreate) SetOptionalInt8(i int8) *FieldTypeCreate {
-	ftc.optional_int8 = &i
+	ftc.mutation.SetOptionalInt8(i)
 	return ftc
 }
 
@@ -106,7 +84,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt8(i *int8) *FieldTypeCreate {
 
 // SetOptionalInt16 sets the optional_int16 field.
 func (ftc *FieldTypeCreate) SetOptionalInt16(i int16) *FieldTypeCreate {
-	ftc.optional_int16 = &i
+	ftc.mutation.SetOptionalInt16(i)
 	return ftc
 }
 
@@ -120,7 +98,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt16(i *int16) *FieldTypeCreate 
 
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftc *FieldTypeCreate) SetOptionalInt32(i int32) *FieldTypeCreate {
-	ftc.optional_int32 = &i
+	ftc.mutation.SetOptionalInt32(i)
 	return ftc
 }
 
@@ -134,7 +112,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt32(i *int32) *FieldTypeCreate 
 
 // SetOptionalInt64 sets the optional_int64 field.
 func (ftc *FieldTypeCreate) SetOptionalInt64(i int64) *FieldTypeCreate {
-	ftc.optional_int64 = &i
+	ftc.mutation.SetOptionalInt64(i)
 	return ftc
 }
 
@@ -148,7 +126,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt64(i *int64) *FieldTypeCreate 
 
 // SetNillableInt sets the nillable_int field.
 func (ftc *FieldTypeCreate) SetNillableInt(i int) *FieldTypeCreate {
-	ftc.nillable_int = &i
+	ftc.mutation.SetNillableInt(i)
 	return ftc
 }
 
@@ -162,7 +140,7 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
 
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftc *FieldTypeCreate) SetNillableInt8(i int8) *FieldTypeCreate {
-	ftc.nillable_int8 = &i
+	ftc.mutation.SetNillableInt8(i)
 	return ftc
 }
 
@@ -176,7 +154,7 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
 
 // SetNillableInt16 sets the nillable_int16 field.
 func (ftc *FieldTypeCreate) SetNillableInt16(i int16) *FieldTypeCreate {
-	ftc.nillable_int16 = &i
+	ftc.mutation.SetNillableInt16(i)
 	return ftc
 }
 
@@ -190,7 +168,7 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate 
 
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftc *FieldTypeCreate) SetNillableInt32(i int32) *FieldTypeCreate {
-	ftc.nillable_int32 = &i
+	ftc.mutation.SetNillableInt32(i)
 	return ftc
 }
 
@@ -204,7 +182,7 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate 
 
 // SetNillableInt64 sets the nillable_int64 field.
 func (ftc *FieldTypeCreate) SetNillableInt64(i int64) *FieldTypeCreate {
-	ftc.nillable_int64 = &i
+	ftc.mutation.SetNillableInt64(i)
 	return ftc
 }
 
@@ -218,7 +196,7 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate 
 
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftc *FieldTypeCreate) SetValidateOptionalInt32(i int32) *FieldTypeCreate {
-	ftc.validate_optional_int32 = &i
+	ftc.mutation.SetValidateOptionalInt32(i)
 	return ftc
 }
 
@@ -232,7 +210,7 @@ func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 
 // SetOptionalUint sets the optional_uint field.
 func (ftc *FieldTypeCreate) SetOptionalUint(u uint) *FieldTypeCreate {
-	ftc.optional_uint = &u
+	ftc.mutation.SetOptionalUint(u)
 	return ftc
 }
 
@@ -246,7 +224,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
 
 // SetOptionalUint8 sets the optional_uint8 field.
 func (ftc *FieldTypeCreate) SetOptionalUint8(u uint8) *FieldTypeCreate {
-	ftc.optional_uint8 = &u
+	ftc.mutation.SetOptionalUint8(u)
 	return ftc
 }
 
@@ -260,7 +238,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate 
 
 // SetOptionalUint16 sets the optional_uint16 field.
 func (ftc *FieldTypeCreate) SetOptionalUint16(u uint16) *FieldTypeCreate {
-	ftc.optional_uint16 = &u
+	ftc.mutation.SetOptionalUint16(u)
 	return ftc
 }
 
@@ -274,7 +252,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreat
 
 // SetOptionalUint32 sets the optional_uint32 field.
 func (ftc *FieldTypeCreate) SetOptionalUint32(u uint32) *FieldTypeCreate {
-	ftc.optional_uint32 = &u
+	ftc.mutation.SetOptionalUint32(u)
 	return ftc
 }
 
@@ -288,7 +266,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreat
 
 // SetOptionalUint64 sets the optional_uint64 field.
 func (ftc *FieldTypeCreate) SetOptionalUint64(u uint64) *FieldTypeCreate {
-	ftc.optional_uint64 = &u
+	ftc.mutation.SetOptionalUint64(u)
 	return ftc
 }
 
@@ -302,7 +280,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreat
 
 // SetState sets the state field.
 func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
-	ftc.state = &f
+	ftc.mutation.SetState(f)
 	return ftc
 }
 
@@ -316,7 +294,7 @@ func (ftc *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreat
 
 // SetOptionalFloat sets the optional_float field.
 func (ftc *FieldTypeCreate) SetOptionalFloat(f float64) *FieldTypeCreate {
-	ftc.optional_float = &f
+	ftc.mutation.SetOptionalFloat(f)
 	return ftc
 }
 
@@ -330,7 +308,7 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat(f *float64) *FieldTypeCreat
 
 // SetOptionalFloat32 sets the optional_float32 field.
 func (ftc *FieldTypeCreate) SetOptionalFloat32(f float32) *FieldTypeCreate {
-	ftc.optional_float32 = &f
+	ftc.mutation.SetOptionalFloat32(f)
 	return ftc
 }
 
@@ -344,32 +322,55 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	if ftc.int == nil {
+	if _, ok := ftc.mutation.Int(); !ok {
 		return nil, errors.New("ent: missing required field \"int\"")
 	}
-	if ftc.int8 == nil {
+	if _, ok := ftc.mutation.Int8(); !ok {
 		return nil, errors.New("ent: missing required field \"int8\"")
 	}
-	if ftc.int16 == nil {
+	if _, ok := ftc.mutation.Int16(); !ok {
 		return nil, errors.New("ent: missing required field \"int16\"")
 	}
-	if ftc.int32 == nil {
+	if _, ok := ftc.mutation.Int32(); !ok {
 		return nil, errors.New("ent: missing required field \"int32\"")
 	}
-	if ftc.int64 == nil {
+	if _, ok := ftc.mutation.Int64(); !ok {
 		return nil, errors.New("ent: missing required field \"int64\"")
 	}
-	if ftc.validate_optional_int32 != nil {
-		if err := fieldtype.ValidateOptionalInt32Validator(*ftc.validate_optional_int32); err != nil {
+	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
 		}
 	}
-	if ftc.state != nil {
-		if err := fieldtype.StateValidator(*ftc.state); err != nil {
+	if v, ok := ftc.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
-	return ftc.gremlinSave(ctx)
+	var (
+		err  error
+		node *FieldType
+	)
+	if len(ftc.hooks) == 0 {
+		node, err = ftc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FieldTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftc.mutation = mutation
+			node, err = ftc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range ftc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -399,77 +400,77 @@ func (ftc *FieldTypeCreate) gremlinSave(ctx context.Context) (*FieldType, error)
 
 func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(fieldtype.Label)
-	if ftc.int != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt, *ftc.int)
+	if value, ok := ftc.mutation.Int(); ok {
+		v.Property(dsl.Single, fieldtype.FieldInt, value)
 	}
-	if ftc.int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt8, *ftc.int8)
+	if value, ok := ftc.mutation.Int8(); ok {
+		v.Property(dsl.Single, fieldtype.FieldInt8, value)
 	}
-	if ftc.int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt16, *ftc.int16)
+	if value, ok := ftc.mutation.Int16(); ok {
+		v.Property(dsl.Single, fieldtype.FieldInt16, value)
 	}
-	if ftc.int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt32, *ftc.int32)
+	if value, ok := ftc.mutation.Int32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldInt32, value)
 	}
-	if ftc.int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldInt64, *ftc.int64)
+	if value, ok := ftc.mutation.Int64(); ok {
+		v.Property(dsl.Single, fieldtype.FieldInt64, value)
 	}
-	if ftc.optional_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt, *ftc.optional_int)
+	if value, ok := ftc.mutation.OptionalInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalInt, value)
 	}
-	if ftc.optional_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt8, *ftc.optional_int8)
+	if value, ok := ftc.mutation.OptionalInt8(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalInt8, value)
 	}
-	if ftc.optional_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt16, *ftc.optional_int16)
+	if value, ok := ftc.mutation.OptionalInt16(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalInt16, value)
 	}
-	if ftc.optional_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt32, *ftc.optional_int32)
+	if value, ok := ftc.mutation.OptionalInt32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalInt32, value)
 	}
-	if ftc.optional_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, *ftc.optional_int64)
+	if value, ok := ftc.mutation.OptionalInt64(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, value)
 	}
-	if ftc.nillable_int != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt, *ftc.nillable_int)
+	if value, ok := ftc.mutation.NillableInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt, value)
 	}
-	if ftc.nillable_int8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt8, *ftc.nillable_int8)
+	if value, ok := ftc.mutation.NillableInt8(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt8, value)
 	}
-	if ftc.nillable_int16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt16, *ftc.nillable_int16)
+	if value, ok := ftc.mutation.NillableInt16(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt16, value)
 	}
-	if ftc.nillable_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt32, *ftc.nillable_int32)
+	if value, ok := ftc.mutation.NillableInt32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt32, value)
 	}
-	if ftc.nillable_int64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldNillableInt64, *ftc.nillable_int64)
+	if value, ok := ftc.mutation.NillableInt64(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableInt64, value)
 	}
-	if ftc.validate_optional_int32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, *ftc.validate_optional_int32)
+	if value, ok := ftc.mutation.ValidateOptionalInt32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, value)
 	}
-	if ftc.optional_uint != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalUint, *ftc.optional_uint)
+	if value, ok := ftc.mutation.OptionalUint(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint, value)
 	}
-	if ftc.optional_uint8 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalUint8, *ftc.optional_uint8)
+	if value, ok := ftc.mutation.OptionalUint8(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint8, value)
 	}
-	if ftc.optional_uint16 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalUint16, *ftc.optional_uint16)
+	if value, ok := ftc.mutation.OptionalUint16(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint16, value)
 	}
-	if ftc.optional_uint32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalUint32, *ftc.optional_uint32)
+	if value, ok := ftc.mutation.OptionalUint32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint32, value)
 	}
-	if ftc.optional_uint64 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, *ftc.optional_uint64)
+	if value, ok := ftc.mutation.OptionalUint64(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, value)
 	}
-	if ftc.state != nil {
-		v.Property(dsl.Single, fieldtype.FieldState, *ftc.state)
+	if value, ok := ftc.mutation.State(); ok {
+		v.Property(dsl.Single, fieldtype.FieldState, value)
 	}
-	if ftc.optional_float != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, *ftc.optional_float)
+	if value, ok := ftc.mutation.OptionalFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, value)
 	}
-	if ftc.optional_float32 != nil {
-		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, *ftc.optional_float32)
+	if value, ok := ftc.mutation.OptionalFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, value)
 	}
 	return v.ValueMap(true)
 }

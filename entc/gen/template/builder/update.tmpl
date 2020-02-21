@@ -11,8 +11,16 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+import (
+	{{- range $path := $.SiblingImports }}
+		"{{ $path }}"
+	{{- end }}
+)
+
+
 {{ $builder := print (pascal $.Name) "Update" }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
@@ -40,7 +48,30 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" 0 -}}
 		{{ template "update/save" . }}
 	{{- end -}}
-	return {{ $receiver }}.{{ $.Storage }}Save(ctx)
+	var (
+		err error
+		affected int
+	)
+	if len({{ $receiver }}.hooks) == 0 {
+		affected, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*{{ $.MutationName }})
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			{{ $mutation }} = mutation
+			affected, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+			return affected, err
+		})
+		for _, hook := range {{ $receiver }}.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -72,11 +103,11 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 
 {{ $onebuilder := printf "%sOne" $builder }}
 {{ $receiver = receiver $onebuilder }}
+{{ $mutation = print $receiver ".mutation" }}
 
 // {{ $onebuilder }} is the builder for updating a single {{ $.Name }} entity.
 type {{ $onebuilder }} struct {
 	config
-	id {{ $.ID.Type }}
 	{{- template "update/fields" $ }}
 }
 
@@ -94,7 +125,30 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 	{{ with extend $ "Receiver" $receiver "Package" $pkg "ZeroValue" "nil" -}}
 		{{ template "update/save" . }}
 	{{- end -}}
-	return {{ $receiver }}.{{ $.Storage }}Save(ctx)
+	var (
+		err error
+		node *{{ $.Name }}
+	)
+	if len({{ $receiver }}.hooks) == 0 {
+		node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*{{ $.MutationName }})
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			{{ $mutation }} = mutation
+			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+			return node, err
+		})
+		for _, hook := range {{ $receiver }}.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -128,37 +182,22 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 
 {{/* shared struct fields between the two updaters */}}
 {{ define "update/fields"}}
-{{ range $_, $f := $.Fields }}
-	{{- if or (not $f.Immutable) $f.UpdateDefault }}
-		{{- $f.BuilderField }} *{{ $f.Type }}
-		{{- if $f.Type.Numeric }}
-			add{{ $f.BuilderField }} *{{ $f.Type }}
-		{{- end }}
-	{{- end }}
-	{{- if $f.Optional }}
-		clear{{ $f.BuilderField }} bool
-	{{- end }}
-{{ end }}
-{{- range $_, $e := $.Edges }}
-	{{- $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
-{{ end }}
-{{- range $_, $e := $.Edges }}
-	{{- $p := "removed" }}{{ if $e.Unique }}{{ $p = "cleared" }}{{ end }}
-	{{- print $p $e.StructField }} {{ if $e.Unique }}bool{{ else }}map[{{ $e.Type.ID.Type }}]struct{}{{ end }}
-{{ end -}}
+	hooks []Hook
+	mutation *{{ $.MutationName }}
 {{ end }}
 
 {{/* shared edges removal between the two updaters */}}
 {{ define "update/edges" }}
 {{ $builder := pascal .Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 {{ range $_, $e := $.Edges }}
 	{{ if $e.Unique }}
 		{{ $func := print "Clear" $e.StructField }}
 		// {{ $func }} clears the {{ $e.Name }} edge to {{ $e.Type.Name }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{ $receiver }}.cleared{{ $e.StructField }} = true
+			{{ $mutation }}.{{ $func }}()
 			return {{ $receiver }}
 		}
 	{{ else }}
@@ -168,12 +207,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the {{ $e.Name }} edge to {{ $e.Type.Name }} by ids.
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
-			if {{ $receiver }}.removed{{ $e.StructField }} == nil {
-				{{ $receiver }}.removed{{ $e.StructField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
-			}
-			for i := range ids {
-				{{ $receiver }}.removed{{ $e.StructField }}[ids[i]] = struct{}{}
-			}
+			{{ $mutation }}.{{ $idsFunc }}(ids...)
 			return {{ $receiver }}
 		}
 		{{ $func := print "Remove" $e.StructField }}
@@ -195,16 +229,18 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{- $pkg := .Scope.Package -}}
 {{- $zero := .Scope.ZeroValue }}
 {{- $receiver := .Scope.Receiver -}}
+{{- $mutation := print $receiver ".mutation" -}}
+
 {{- range $_, $f := $.Fields -}}
 	{{- if $f.UpdateDefault -}}
-		if {{ $receiver }}.{{ $f.BuilderField }} == nil {{ if $f.Optional }} && !{{ $receiver }}.clear{{ $f.BuilderField }} {{ end }} {
+		if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
 			v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
-			{{ $receiver }}.{{ $f.BuilderField }} = &v
+			{{ $mutation }}.Set{{ $f.StructField }}(v)
 		}
 	{{ end -}}
 	{{ with and (or $f.Validators $f.IsEnum) (not $f.Immutable) -}}
-		if {{ $receiver }}.{{ $f.BuilderField }} != nil {
-			if err := {{ $.Package }}.{{ $f.Validator }}(*{{ $receiver }}.{{ $f.BuilderField }}); err != nil {
+		if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			if err := {{ $.Package }}.{{ $f.Validator }}(v); err != nil {
 				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
 			}
 		}
@@ -212,11 +248,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ end -}}
 {{- range $_, $e := $.Edges }}
 	{{- if $e.Unique -}}
-		if len({{ $receiver }}.{{ $e.BuilderField }}) > 1 {
+		if len({{ $mutation }}.{{ $e.StructField }}IDs()) > 1 {
 			return {{ $zero }}, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
 		}
 		{{ if not $e.Optional -}}
-			if {{ $receiver }}.cleared{{ $e.StructField }} && {{ $receiver }}.{{ $e.BuilderField }} == nil {
+			if {{ $mutation }}.{{ $e.StructField }}Cleared() && len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
 				return {{ $zero }}, errors.New("{{ $pkg }}: clearing a unique edge \"{{ $e.Name }}\"")
 			}
 		{{ end -}}

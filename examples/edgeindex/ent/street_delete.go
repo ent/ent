@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,6 +20,8 @@ import (
 // StreetDelete is the builder for deleting a Street entity.
 type StreetDelete struct {
 	config
+	hooks      []Hook
+	mutation   *StreetMutation
 	predicates []predicate.Street
 }
 
@@ -30,7 +33,30 @@ func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *StreetDelete) Exec(ctx context.Context) (int, error) {
-	return sd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(sd.hooks) == 0 {
+		affected, err = sd.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*StreetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			sd.mutation = mutation
+			affected, err = sd.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range sd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, sd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

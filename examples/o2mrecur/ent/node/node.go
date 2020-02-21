@@ -10,9 +10,13 @@ const (
 	// Label holds the string label denoting the node type in the database.
 	Label = "node"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldValue holds the string denoting the value vertex property in the database.
+	FieldID    = "id" // FieldValue holds the string denoting the value vertex property in the database.
 	FieldValue = "value"
+
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
 
 	// Table holds the table name of the node in the database.
 	Table = "nodes"

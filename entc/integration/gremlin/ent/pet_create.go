@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -22,23 +23,19 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	name  *string
-	team  map[string]struct{}
-	owner map[string]struct{}
+	mutation *PetMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
-	pc.name = &s
+	pc.mutation.SetName(s)
 	return pc
 }
 
 // SetTeamID sets the team edge to User by id.
 func (pc *PetCreate) SetTeamID(id string) *PetCreate {
-	if pc.team == nil {
-		pc.team = make(map[string]struct{})
-	}
-	pc.team[id] = struct{}{}
+	pc.mutation.SetTeamID(id)
 	return pc
 }
 
@@ -57,10 +54,7 @@ func (pc *PetCreate) SetTeam(u *User) *PetCreate {
 
 // SetOwnerID sets the owner edge to User by id.
 func (pc *PetCreate) SetOwnerID(id string) *PetCreate {
-	if pc.owner == nil {
-		pc.owner = make(map[string]struct{})
-	}
-	pc.owner[id] = struct{}{}
+	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
@@ -79,16 +73,39 @@ func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	if pc.name == nil {
+	if _, ok := pc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(pc.team) > 1 {
+	if len(pc.mutation.TeamIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
 	}
-	if len(pc.owner) > 1 {
+	if len(pc.mutation.OwnerIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	return pc.gremlinSave(ctx)
+	var (
+		err  error
+		node *Pet
+	)
+	if len(pc.hooks) == 0 {
+		node, err = pc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pc.mutation = mutation
+			node, err = pc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range pc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -123,17 +140,17 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(pet.Label)
-	if pc.name != nil {
-		v.Property(dsl.Single, pet.FieldName, *pc.name)
+	if value, ok := pc.mutation.Name(); ok {
+		v.Property(dsl.Single, pet.FieldName, value)
 	}
-	for id := range pc.team {
+	for _, id := range pc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
 		})
 	}
-	for id := range pc.owner {
+	for _, id := range pc.mutation.OwnerIDs() {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {

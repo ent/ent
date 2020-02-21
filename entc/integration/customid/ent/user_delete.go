@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,6 +20,8 @@ import (
 // UserDelete is the builder for deleting a User entity.
 type UserDelete struct {
 	config
+	hooks      []Hook
+	mutation   *UserMutation
 	predicates []predicate.User
 }
 
@@ -30,7 +33,30 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
-	return ud.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ud.hooks) == 0 {
+		affected, err = ud.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ud.mutation = mutation
+			affected, err = ud.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range ud.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ud.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

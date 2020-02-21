@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"text/template"
 	"text/template/parse"
 
@@ -22,13 +23,13 @@ import (
 )
 
 type (
-	// Config for global generator configuration that similar for all nodes.
+	// Config for global codegen to be shared between all nodes.
 	Config struct {
-		// Schema is the package path for the schema directory.
+		// Schema is the package path for the schema package.
 		Schema string
-		// Target is the path for the directory that holding the generated code.
+		// Target is the filepath for the directory that holds the generated code.
 		Target string
-		// Package name for the targeted directory that holds the generated code.
+		// Package path for the targeted directory that holds the generated code.
 		Package string
 		// Header is an optional header signature for generated files.
 		Header string
@@ -43,6 +44,8 @@ type (
 		// Note that, additional templates are executed on the Graph object and
 		// the execution output is stored in a file derived by the template name.
 		Template *template.Template
+		// codegen state.
+		state
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -52,6 +55,13 @@ type (
 		Nodes []*Type
 		// Schemas holds the raw interfaces for the loaded schemas.
 		Schemas []*load.Schema
+	}
+	// state holds the codegen state for the graph.
+	state struct {
+		// noSchemaImport indicates that the generated type package should
+		// ignore importing the user's schema package. It's True if one of
+		// the user's schemas uses hooks and circular imports is possible.
+		noSchemaImport bool
 	}
 )
 
@@ -407,6 +417,15 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 		templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 	}
 	return templates, external
+}
+
+// ModuleInfo returns the entc binary module version.
+func (Config) ModuleInfo() (m debug.Module) {
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		m = info.Main
+	}
+	return
 }
 
 // formatFiles runs "goimports" on given paths.

@@ -24,18 +24,9 @@ import (
 // FileUpdate is the builder for updating File entities.
 type FileUpdate struct {
 	config
-	size         *int
-	addsize      *int
-	name         *string
-	user         *string
-	clearuser    bool
-	group        *string
-	cleargroup   bool
-	owner        map[string]struct{}
-	_type        map[string]struct{}
-	clearedOwner bool
-	clearedType  bool
-	predicates   []predicate.File
+	hooks      []Hook
+	mutation   *FileMutation
+	predicates []predicate.File
 }
 
 // Where adds a new predicate for the builder.
@@ -46,8 +37,8 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 
 // SetSize sets the size field.
 func (fu *FileUpdate) SetSize(i int) *FileUpdate {
-	fu.size = &i
-	fu.addsize = nil
+	fu.mutation.ResetSize()
+	fu.mutation.SetSize(i)
 	return fu
 }
 
@@ -61,23 +52,19 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 
 // AddSize adds i to size.
 func (fu *FileUpdate) AddSize(i int) *FileUpdate {
-	if fu.addsize == nil {
-		fu.addsize = &i
-	} else {
-		*fu.addsize += i
-	}
+	fu.mutation.AddSize(i)
 	return fu
 }
 
 // SetName sets the name field.
 func (fu *FileUpdate) SetName(s string) *FileUpdate {
-	fu.name = &s
+	fu.mutation.SetName(s)
 	return fu
 }
 
 // SetUser sets the user field.
 func (fu *FileUpdate) SetUser(s string) *FileUpdate {
-	fu.user = &s
+	fu.mutation.SetUser(s)
 	return fu
 }
 
@@ -91,14 +78,13 @@ func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
 
 // ClearUser clears the value of user.
 func (fu *FileUpdate) ClearUser() *FileUpdate {
-	fu.user = nil
-	fu.clearuser = true
+	fu.mutation.ClearUser()
 	return fu
 }
 
 // SetGroup sets the group field.
 func (fu *FileUpdate) SetGroup(s string) *FileUpdate {
-	fu.group = &s
+	fu.mutation.SetGroup(s)
 	return fu
 }
 
@@ -112,17 +98,13 @@ func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 
 // ClearGroup clears the value of group.
 func (fu *FileUpdate) ClearGroup() *FileUpdate {
-	fu.group = nil
-	fu.cleargroup = true
+	fu.mutation.ClearGroup()
 	return fu
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
-	if fu.owner == nil {
-		fu.owner = make(map[string]struct{})
-	}
-	fu.owner[id] = struct{}{}
+	fu.mutation.SetOwnerID(id)
 	return fu
 }
 
@@ -141,10 +123,7 @@ func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
 
 // SetTypeID sets the type edge to FileType by id.
 func (fu *FileUpdate) SetTypeID(id string) *FileUpdate {
-	if fu._type == nil {
-		fu._type = make(map[string]struct{})
-	}
-	fu._type[id] = struct{}{}
+	fu.mutation.SetTypeID(id)
 	return fu
 }
 
@@ -163,30 +142,53 @@ func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
 
 // ClearOwner clears the owner edge to User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
-	fu.clearedOwner = true
+	fu.mutation.ClearOwner()
 	return fu
 }
 
 // ClearType clears the type edge to FileType.
 func (fu *FileUpdate) ClearType() *FileUpdate {
-	fu.clearedType = true
+	fu.mutation.ClearType()
 	return fu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
-	if fu.size != nil {
-		if err := file.SizeValidator(*fu.size); err != nil {
+	if v, ok := fu.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
 		}
 	}
-	if len(fu.owner) > 1 {
+	if len(fu.mutation.OwnerIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	if len(fu._type) > 1 {
+	if len(fu.mutation.TypeIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
-	return fu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(fu.hooks) == 0 {
+		affected, err = fu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			fu.mutation = mutation
+			affected, err = fu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range fu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, fu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -229,54 +231,54 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := fu.size; value != nil {
+	if value, ok := fu.mutation.Size(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldSize,
 		})
 	}
-	if value := fu.addsize; value != nil {
+	if value, ok := fu.mutation.AddedSize(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldSize,
 		})
 	}
-	if value := fu.name; value != nil {
+	if value, ok := fu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldName,
 		})
 	}
-	if value := fu.user; value != nil {
+	if value, ok := fu.mutation.User(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldUser,
 		})
 	}
-	if fu.clearuser {
+	if fu.mutation.UserCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldUser,
 		})
 	}
-	if value := fu.group; value != nil {
+	if value, ok := fu.mutation.Group(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldGroup,
 		})
 	}
-	if fu.cleargroup {
+	if fu.mutation.GroupCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldGroup,
 		})
 	}
-	if fu.clearedOwner {
+	if fu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -292,7 +294,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.owner; len(nodes) > 0 {
+	if nodes := fu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -306,7 +308,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return 0, err
@@ -315,7 +317,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fu.clearedType {
+	if fu.mutation.TypeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -331,7 +333,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu._type; len(nodes) > 0 {
+	if nodes := fu.mutation.TypeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -345,7 +347,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return 0, err
@@ -368,24 +370,14 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FileUpdateOne is the builder for updating a single File entity.
 type FileUpdateOne struct {
 	config
-	id           string
-	size         *int
-	addsize      *int
-	name         *string
-	user         *string
-	clearuser    bool
-	group        *string
-	cleargroup   bool
-	owner        map[string]struct{}
-	_type        map[string]struct{}
-	clearedOwner bool
-	clearedType  bool
+	hooks    []Hook
+	mutation *FileMutation
 }
 
 // SetSize sets the size field.
 func (fuo *FileUpdateOne) SetSize(i int) *FileUpdateOne {
-	fuo.size = &i
-	fuo.addsize = nil
+	fuo.mutation.ResetSize()
+	fuo.mutation.SetSize(i)
 	return fuo
 }
 
@@ -399,23 +391,19 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 
 // AddSize adds i to size.
 func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
-	if fuo.addsize == nil {
-		fuo.addsize = &i
-	} else {
-		*fuo.addsize += i
-	}
+	fuo.mutation.AddSize(i)
 	return fuo
 }
 
 // SetName sets the name field.
 func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
-	fuo.name = &s
+	fuo.mutation.SetName(s)
 	return fuo
 }
 
 // SetUser sets the user field.
 func (fuo *FileUpdateOne) SetUser(s string) *FileUpdateOne {
-	fuo.user = &s
+	fuo.mutation.SetUser(s)
 	return fuo
 }
 
@@ -429,14 +417,13 @@ func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
 
 // ClearUser clears the value of user.
 func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
-	fuo.user = nil
-	fuo.clearuser = true
+	fuo.mutation.ClearUser()
 	return fuo
 }
 
 // SetGroup sets the group field.
 func (fuo *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
-	fuo.group = &s
+	fuo.mutation.SetGroup(s)
 	return fuo
 }
 
@@ -450,17 +437,13 @@ func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 
 // ClearGroup clears the value of group.
 func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
-	fuo.group = nil
-	fuo.cleargroup = true
+	fuo.mutation.ClearGroup()
 	return fuo
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (fuo *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
-	if fuo.owner == nil {
-		fuo.owner = make(map[string]struct{})
-	}
-	fuo.owner[id] = struct{}{}
+	fuo.mutation.SetOwnerID(id)
 	return fuo
 }
 
@@ -479,10 +462,7 @@ func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
 
 // SetTypeID sets the type edge to FileType by id.
 func (fuo *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
-	if fuo._type == nil {
-		fuo._type = make(map[string]struct{})
-	}
-	fuo._type[id] = struct{}{}
+	fuo.mutation.SetTypeID(id)
 	return fuo
 }
 
@@ -501,30 +481,53 @@ func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
 
 // ClearOwner clears the owner edge to User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
-	fuo.clearedOwner = true
+	fuo.mutation.ClearOwner()
 	return fuo
 }
 
 // ClearType clears the type edge to FileType.
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
-	fuo.clearedType = true
+	fuo.mutation.ClearType()
 	return fuo
 }
 
 // Save executes the query and returns the updated entity.
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
-	if fuo.size != nil {
-		if err := file.SizeValidator(*fuo.size); err != nil {
+	if v, ok := fuo.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
 		}
 	}
-	if len(fuo.owner) > 1 {
+	if len(fuo.mutation.OwnerIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	if len(fuo._type) > 1 {
+	if len(fuo.mutation.TypeIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
 	}
-	return fuo.sqlSave(ctx)
+	var (
+		err  error
+		node *File
+	)
+	if len(fuo.hooks) == 0 {
+		node, err = fuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			fuo.mutation = mutation
+			node, err = fuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range fuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, fuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -555,60 +558,64 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  fuo.id,
 				Type:   field.TypeString,
 				Column: file.FieldID,
 			},
 		},
 	}
-	if value := fuo.size; value != nil {
+	id, ok := fuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing File.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := fuo.mutation.Size(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldSize,
 		})
 	}
-	if value := fuo.addsize; value != nil {
+	if value, ok := fuo.mutation.AddedSize(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldSize,
 		})
 	}
-	if value := fuo.name; value != nil {
+	if value, ok := fuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldName,
 		})
 	}
-	if value := fuo.user; value != nil {
+	if value, ok := fuo.mutation.User(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldUser,
 		})
 	}
-	if fuo.clearuser {
+	if fuo.mutation.UserCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldUser,
 		})
 	}
-	if value := fuo.group; value != nil {
+	if value, ok := fuo.mutation.Group(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: file.FieldGroup,
 		})
 	}
-	if fuo.cleargroup {
+	if fuo.mutation.GroupCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldGroup,
 		})
 	}
-	if fuo.clearedOwner {
+	if fuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -624,7 +631,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.owner; len(nodes) > 0 {
+	if nodes := fuo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -638,7 +645,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err
@@ -647,7 +654,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fuo.clearedType {
+	if fuo.mutation.TypeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -663,7 +670,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo._type; len(nodes) > 0 {
+	if nodes := fuo.mutation.TypeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -677,7 +684,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err

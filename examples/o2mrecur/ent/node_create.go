@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
@@ -18,23 +19,19 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	value    *int
-	parent   map[int]struct{}
-	children map[int]struct{}
+	mutation *NodeMutation
+	hooks    []Hook
 }
 
 // SetValue sets the value field.
 func (nc *NodeCreate) SetValue(i int) *NodeCreate {
-	nc.value = &i
+	nc.mutation.SetValue(i)
 	return nc
 }
 
 // SetParentID sets the parent edge to Node by id.
 func (nc *NodeCreate) SetParentID(id int) *NodeCreate {
-	if nc.parent == nil {
-		nc.parent = make(map[int]struct{})
-	}
-	nc.parent[id] = struct{}{}
+	nc.mutation.SetParentID(id)
 	return nc
 }
 
@@ -53,12 +50,7 @@ func (nc *NodeCreate) SetParent(n *Node) *NodeCreate {
 
 // AddChildIDs adds the children edge to Node by ids.
 func (nc *NodeCreate) AddChildIDs(ids ...int) *NodeCreate {
-	if nc.children == nil {
-		nc.children = make(map[int]struct{})
-	}
-	for i := range ids {
-		nc.children[ids[i]] = struct{}{}
-	}
+	nc.mutation.AddChildIDs(ids...)
 	return nc
 }
 
@@ -73,13 +65,36 @@ func (nc *NodeCreate) AddChildren(n ...*Node) *NodeCreate {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	if nc.value == nil {
+	if _, ok := nc.mutation.Value(); !ok {
 		return nil, errors.New("ent: missing required field \"value\"")
 	}
-	if len(nc.parent) > 1 {
+	if len(nc.mutation.ParentIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
-	return nc.sqlSave(ctx)
+	var (
+		err  error
+		node *Node
+	)
+	if len(nc.hooks) == 0 {
+		node, err = nc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nc.mutation = mutation
+			node, err = nc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range nc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -102,15 +117,15 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 			},
 		}
 	)
-	if value := nc.value; value != nil {
+	if value, ok := nc.mutation.Value(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: node.FieldValue,
 		})
-		n.Value = *value
+		n.Value = value
 	}
-	if nodes := nc.parent; len(nodes) > 0 {
+	if nodes := nc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -124,12 +139,12 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := nc.children; len(nodes) > 0 {
+	if nodes := nc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -143,7 +158,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

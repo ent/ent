@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -20,6 +21,8 @@ import (
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
+	hooks      []Hook
+	mutation   *GroupMutation
 	predicates []predicate.Group
 }
 
@@ -31,7 +34,30 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
-	return gd.gremlinExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(gd.hooks) == 0 {
+		affected, err = gd.gremlinExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gd.mutation = mutation
+			affected, err = gd.gremlinExec(ctx)
+			return affected, err
+		})
+		for _, hook := range gd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

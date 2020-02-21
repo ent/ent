@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -20,12 +21,9 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	age           *int
-	addage        *int
-	name          *string
-	spouse        map[int]struct{}
-	clearedSpouse bool
-	predicates    []predicate.User
+	hooks      []Hook
+	mutation   *UserMutation
+	predicates []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -36,33 +34,26 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
-	uu.age = &i
-	uu.addage = nil
+	uu.mutation.ResetAge()
+	uu.mutation.SetAge(i)
 	return uu
 }
 
 // AddAge adds i to age.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
-	if uu.addage == nil {
-		uu.addage = &i
-	} else {
-		*uu.addage += i
-	}
+	uu.mutation.AddAge(i)
 	return uu
 }
 
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.name = &s
+	uu.mutation.SetName(s)
 	return uu
 }
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uu *UserUpdate) SetSpouseID(id int) *UserUpdate {
-	if uu.spouse == nil {
-		uu.spouse = make(map[int]struct{})
-	}
-	uu.spouse[id] = struct{}{}
+	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
@@ -81,16 +72,39 @@ func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 
 // ClearSpouse clears the spouse edge to User.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
-	uu.clearedSpouse = true
+	uu.mutation.ClearSpouse()
 	return uu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	if len(uu.spouse) > 1 {
+	if len(uu.mutation.SpouseIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
 	}
-	return uu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(uu.hooks) == 0 {
+		affected, err = uu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uu.mutation = mutation
+			affected, err = uu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range uu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -133,28 +147,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := uu.age; value != nil {
+	if value, ok := uu.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uu.addage; value != nil {
+	if value, ok := uu.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uu.name; value != nil {
+	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if uu.clearedSpouse {
+	if uu.mutation.SpouseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -170,7 +184,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.spouse; len(nodes) > 0 {
+	if nodes := uu.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -184,7 +198,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -203,43 +217,32 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id            int
-	age           *int
-	addage        *int
-	name          *string
-	spouse        map[int]struct{}
-	clearedSpouse bool
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
-	uuo.age = &i
-	uuo.addage = nil
+	uuo.mutation.ResetAge()
+	uuo.mutation.SetAge(i)
 	return uuo
 }
 
 // AddAge adds i to age.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	if uuo.addage == nil {
-		uuo.addage = &i
-	} else {
-		*uuo.addage += i
-	}
+	uuo.mutation.AddAge(i)
 	return uuo
 }
 
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.name = &s
+	uuo.mutation.SetName(s)
 	return uuo
 }
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uuo *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
-	if uuo.spouse == nil {
-		uuo.spouse = make(map[int]struct{})
-	}
-	uuo.spouse[id] = struct{}{}
+	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
@@ -258,16 +261,39 @@ func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 
 // ClearSpouse clears the spouse edge to User.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	uuo.clearedSpouse = true
+	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	if len(uuo.spouse) > 1 {
+	if len(uuo.mutation.SpouseIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
 	}
-	return uuo.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uuo.hooks) == 0 {
+		node, err = uuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uuo.mutation = mutation
+			node, err = uuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -298,34 +324,38 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  uuo.id,
 				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
 	}
-	if value := uuo.age; value != nil {
+	id, ok := uuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing User.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := uuo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uuo.addage; value != nil {
+	if value, ok := uuo.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uuo.name; value != nil {
+	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if uuo.clearedSpouse {
+	if uuo.mutation.SpouseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -341,7 +371,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.spouse; len(nodes) > 0 {
+	if nodes := uuo.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -355,7 +385,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

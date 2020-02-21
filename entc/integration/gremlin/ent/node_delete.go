@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -20,6 +21,8 @@ import (
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
+	hooks      []Hook
+	mutation   *NodeMutation
 	predicates []predicate.Node
 }
 
@@ -31,7 +34,30 @@ func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
-	return nd.gremlinExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(nd.hooks) == 0 {
+		affected, err = nd.gremlinExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nd.mutation = mutation
+			affected, err = nd.gremlinExec(ctx)
+			return affected, err
+		})
+		for _, hook := range nd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, nd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

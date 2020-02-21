@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,9 +20,9 @@ import (
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
-	max_users    *int
-	addmax_users *int
-	predicates   []predicate.Group
+	hooks      []Hook
+	mutation   *GroupMutation
+	predicates []predicate.Group
 }
 
 // Where adds a new predicate for the builder.
@@ -32,24 +33,43 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 
 // SetMaxUsers sets the max_users field.
 func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
-	gu.max_users = &i
-	gu.addmax_users = nil
+	gu.mutation.ResetMaxUsers()
+	gu.mutation.SetMaxUsers(i)
 	return gu
 }
 
 // AddMaxUsers adds i to max_users.
 func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
-	if gu.addmax_users == nil {
-		gu.addmax_users = &i
-	} else {
-		*gu.addmax_users += i
-	}
+	gu.mutation.AddMaxUsers(i)
 	return gu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	return gu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(gu.hooks) == 0 {
+		affected, err = gu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gu.mutation = mutation
+			affected, err = gu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range gu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -92,17 +112,17 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := gu.max_users; value != nil {
+	if value, ok := gu.mutation.MaxUsers(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if value := gu.addmax_users; value != nil {
+	if value, ok := gu.mutation.AddedMaxUsers(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
@@ -120,31 +140,49 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
-	id           int
-	max_users    *int
-	addmax_users *int
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // SetMaxUsers sets the max_users field.
 func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
-	guo.max_users = &i
-	guo.addmax_users = nil
+	guo.mutation.ResetMaxUsers()
+	guo.mutation.SetMaxUsers(i)
 	return guo
 }
 
 // AddMaxUsers adds i to max_users.
 func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
-	if guo.addmax_users == nil {
-		guo.addmax_users = &i
-	} else {
-		*guo.addmax_users += i
-	}
+	guo.mutation.AddMaxUsers(i)
 	return guo
 }
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	return guo.sqlSave(ctx)
+	var (
+		err  error
+		node *Group
+	)
+	if len(guo.hooks) == 0 {
+		node, err = guo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			guo.mutation = mutation
+			node, err = guo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range guo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -175,23 +213,27 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  guo.id,
 				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
 	}
-	if value := guo.max_users; value != nil {
+	id, ok := guo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Group.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := guo.mutation.MaxUsers(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if value := guo.addmax_users; value != nil {
+	if value, ok := guo.mutation.AddedMaxUsers(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,14 +20,9 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	age              *int
-	addage           *int
-	name             *string
-	followers        map[int]struct{}
-	following        map[int]struct{}
-	removedFollowers map[int]struct{}
-	removedFollowing map[int]struct{}
-	predicates       []predicate.User
+	hooks      []Hook
+	mutation   *UserMutation
+	predicates []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -37,35 +33,26 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
-	uu.age = &i
-	uu.addage = nil
+	uu.mutation.ResetAge()
+	uu.mutation.SetAge(i)
 	return uu
 }
 
 // AddAge adds i to age.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
-	if uu.addage == nil {
-		uu.addage = &i
-	} else {
-		*uu.addage += i
-	}
+	uu.mutation.AddAge(i)
 	return uu
 }
 
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.name = &s
+	uu.mutation.SetName(s)
 	return uu
 }
 
 // AddFollowerIDs adds the followers edge to User by ids.
 func (uu *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
-	if uu.followers == nil {
-		uu.followers = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.followers[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddFollowerIDs(ids...)
 	return uu
 }
 
@@ -80,12 +67,7 @@ func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
 
 // AddFollowingIDs adds the following edge to User by ids.
 func (uu *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
-	if uu.following == nil {
-		uu.following = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.following[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddFollowingIDs(ids...)
 	return uu
 }
 
@@ -100,12 +82,7 @@ func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
 func (uu *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
-	if uu.removedFollowers == nil {
-		uu.removedFollowers = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.removedFollowers[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveFollowerIDs(ids...)
 	return uu
 }
 
@@ -120,12 +97,7 @@ func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
 
 // RemoveFollowingIDs removes the following edge to User by ids.
 func (uu *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
-	if uu.removedFollowing == nil {
-		uu.removedFollowing = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.removedFollowing[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveFollowingIDs(ids...)
 	return uu
 }
 
@@ -140,7 +112,30 @@ func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return uu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(uu.hooks) == 0 {
+		affected, err = uu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uu.mutation = mutation
+			affected, err = uu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range uu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -183,28 +178,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := uu.age; value != nil {
+	if value, ok := uu.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uu.addage; value != nil {
+	if value, ok := uu.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uu.name; value != nil {
+	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if nodes := uu.removedFollowers; len(nodes) > 0 {
+	if nodes := uu.mutation.RemovedFollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -218,12 +213,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.followers; len(nodes) > 0 {
+	if nodes := uu.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -237,12 +232,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uu.removedFollowing; len(nodes) > 0 {
+	if nodes := uu.mutation.RemovedFollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -256,12 +251,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.following; len(nodes) > 0 {
+	if nodes := uu.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -275,7 +270,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -294,47 +289,32 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id               int
-	age              *int
-	addage           *int
-	name             *string
-	followers        map[int]struct{}
-	following        map[int]struct{}
-	removedFollowers map[int]struct{}
-	removedFollowing map[int]struct{}
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
-	uuo.age = &i
-	uuo.addage = nil
+	uuo.mutation.ResetAge()
+	uuo.mutation.SetAge(i)
 	return uuo
 }
 
 // AddAge adds i to age.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	if uuo.addage == nil {
-		uuo.addage = &i
-	} else {
-		*uuo.addage += i
-	}
+	uuo.mutation.AddAge(i)
 	return uuo
 }
 
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.name = &s
+	uuo.mutation.SetName(s)
 	return uuo
 }
 
 // AddFollowerIDs adds the followers edge to User by ids.
 func (uuo *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
-	if uuo.followers == nil {
-		uuo.followers = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.followers[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddFollowerIDs(ids...)
 	return uuo
 }
 
@@ -349,12 +329,7 @@ func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
 
 // AddFollowingIDs adds the following edge to User by ids.
 func (uuo *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
-	if uuo.following == nil {
-		uuo.following = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.following[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddFollowingIDs(ids...)
 	return uuo
 }
 
@@ -369,12 +344,7 @@ func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
 func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
-	if uuo.removedFollowers == nil {
-		uuo.removedFollowers = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.removedFollowers[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveFollowerIDs(ids...)
 	return uuo
 }
 
@@ -389,12 +359,7 @@ func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
 
 // RemoveFollowingIDs removes the following edge to User by ids.
 func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
-	if uuo.removedFollowing == nil {
-		uuo.removedFollowing = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.removedFollowing[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveFollowingIDs(ids...)
 	return uuo
 }
 
@@ -409,7 +374,30 @@ func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return uuo.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uuo.hooks) == 0 {
+		node, err = uuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uuo.mutation = mutation
+			node, err = uuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -440,34 +428,38 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  uuo.id,
 				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
 	}
-	if value := uuo.age; value != nil {
+	id, ok := uuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing User.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := uuo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uuo.addage; value != nil {
+	if value, ok := uuo.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uuo.name; value != nil {
+	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if nodes := uuo.removedFollowers; len(nodes) > 0 {
+	if nodes := uuo.mutation.RemovedFollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -481,12 +473,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.followers; len(nodes) > 0 {
+	if nodes := uuo.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -500,12 +492,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uuo.removedFollowing; len(nodes) > 0 {
+	if nodes := uuo.mutation.RemovedFollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -519,12 +511,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.following; len(nodes) > 0 {
+	if nodes := uuo.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -538,7 +530,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,6 +20,8 @@ import (
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
+	hooks      []Hook
+	mutation   *GroupInfoMutation
 	predicates []predicate.GroupInfo
 }
 
@@ -30,7 +33,30 @@ func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
-	return gid.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(gid.hooks) == 0 {
+		affected, err = gid.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupInfoMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gid.mutation = mutation
+			affected, err = gid.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range gid.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

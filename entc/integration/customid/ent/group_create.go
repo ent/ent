@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
@@ -18,24 +19,19 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	id    *int
-	users map[int]struct{}
+	mutation *GroupMutation
+	hooks    []Hook
 }
 
 // SetID sets the id field.
 func (gc *GroupCreate) SetID(i int) *GroupCreate {
-	gc.id = &i
+	gc.mutation.SetID(i)
 	return gc
 }
 
 // AddUserIDs adds the users edge to User by ids.
 func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	if gc.users == nil {
-		gc.users = make(map[int]struct{})
-	}
-	for i := range ids {
-		gc.users[ids[i]] = struct{}{}
-	}
+	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
@@ -50,7 +46,30 @@ func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	return gc.sqlSave(ctx)
+	var (
+		err  error
+		node *Group
+	)
+	if len(gc.hooks) == 0 {
+		node, err = gc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gc.mutation = mutation
+			node, err = gc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range gc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -73,11 +92,11 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			},
 		}
 	)
-	if value := gc.id; value != nil {
-		gr.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := gc.mutation.ID(); ok {
+		gr.ID = id
+		_spec.ID.Value = id
 	}
-	if nodes := gc.users; len(nodes) > 0 {
+	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -91,7 +110,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

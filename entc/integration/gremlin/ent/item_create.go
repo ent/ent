@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -18,11 +19,36 @@ import (
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	config
+	mutation *ItemMutation
+	hooks    []Hook
 }
 
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	return ic.gremlinSave(ctx)
+	var (
+		err  error
+		node *Item
+	)
+	if len(ic.hooks) == 0 {
+		node, err = ic.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*ItemMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ic.mutation = mutation
+			node, err = ic.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range ic.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.

@@ -10,8 +10,7 @@ const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldMaxUsers holds the string denoting the max_users vertex property in the database.
+	FieldID       = "id" // FieldMaxUsers holds the string denoting the max_users vertex property in the database.
 	FieldMaxUsers = "max_users"
 
 	// Table holds the table name of the group in the database.

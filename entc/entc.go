@@ -18,7 +18,7 @@ import (
 )
 
 // LoadGraph loads the schema package from the given schema path,
-// and construct a *gen.Graph.
+// and constructs a *gen.Graph.
 func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 	spec, err := (&load.Config{Path: schemaPath}).Load()
 	if err != nil {
@@ -27,7 +27,7 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 	cfg.Schema = spec.PkgPath
 	if cfg.Package == "" {
 		// default package-path for codegen is one package
-		// above the schema package (`<project>/ent/schema`).
+		// before the schema package (`<project>/ent/schema`).
 		cfg.Package = path.Dir(spec.PkgPath)
 	}
 	return gen.NewGraph(cfg, spec.Schemas...)

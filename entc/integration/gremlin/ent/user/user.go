@@ -17,23 +17,38 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldOptionalInt holds the string denoting the optional_int vertex property in the database.
-	FieldOptionalInt = "optional_int"
-	// FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
-	// FieldLast holds the string denoting the last vertex property in the database.
-	FieldLast = "last"
-	// FieldNickname holds the string denoting the nickname vertex property in the database.
-	FieldNickname = "nickname"
-	// FieldPhone holds the string denoting the phone vertex property in the database.
-	FieldPhone = "phone"
-	// FieldPassword holds the string denoting the password vertex property in the database.
-	FieldPassword = "password"
-	// FieldRole holds the string denoting the role vertex property in the database.
-	FieldRole = "role"
+	FieldID          = "id"           // FieldOptionalInt holds the string denoting the optional_int vertex property in the database.
+	FieldOptionalInt = "optional_int" // FieldAge holds the string denoting the age vertex property in the database.
+	FieldAge         = "age"          // FieldName holds the string denoting the name vertex property in the database.
+	FieldName        = "name"         // FieldLast holds the string denoting the last vertex property in the database.
+	FieldLast        = "last"         // FieldNickname holds the string denoting the nickname vertex property in the database.
+	FieldNickname    = "nickname"     // FieldPhone holds the string denoting the phone vertex property in the database.
+	FieldPhone       = "phone"        // FieldPassword holds the string denoting the password vertex property in the database.
+	FieldPassword    = "password"     // FieldRole holds the string denoting the role vertex property in the database.
+	FieldRole        = "role"
+
+	// EdgeCard holds the string denoting the card edge name in mutations.
+	EdgeCard = "card"
+	// EdgePets holds the string denoting the pets edge name in mutations.
+	EdgePets = "pets"
+	// EdgeFiles holds the string denoting the files edge name in mutations.
+	EdgeFiles = "files"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
+	// EdgeFriends holds the string denoting the friends edge name in mutations.
+	EdgeFriends = "friends"
+	// EdgeFollowers holds the string denoting the followers edge name in mutations.
+	EdgeFollowers = "followers"
+	// EdgeFollowing holds the string denoting the following edge name in mutations.
+	EdgeFollowing = "following"
+	// EdgeTeam holds the string denoting the team edge name in mutations.
+	EdgeTeam = "team"
+	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
+	EdgeSpouse = "spouse"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
 
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "user_card"
@@ -65,12 +80,10 @@ var (
 		mixin[0].Fields(),
 	}
 	fields = schema.User{}.Fields()
-
 	// descOptionalInt is the schema descriptor for optional_int field.
 	descOptionalInt = mixinFields[0][0].Descriptor()
 	// OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.
 	OptionalIntValidator = descOptionalInt.Validators[0].(func(int) error)
-
 	// descLast is the schema descriptor for last field.
 	descLast = fields[2].Descriptor()
 	// DefaultLast holds the default value on creation for the last field.

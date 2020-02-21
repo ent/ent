@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2m2types/ent/pet"
@@ -19,22 +20,19 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	name  *string
-	owner map[int]struct{}
+	mutation *PetMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
-	pc.name = &s
+	pc.mutation.SetName(s)
 	return pc
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
-	if pc.owner == nil {
-		pc.owner = make(map[int]struct{})
-	}
-	pc.owner[id] = struct{}{}
+	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
@@ -53,13 +51,36 @@ func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	if pc.name == nil {
+	if _, ok := pc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(pc.owner) > 1 {
+	if len(pc.mutation.OwnerIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	return pc.sqlSave(ctx)
+	var (
+		err  error
+		node *Pet
+	)
+	if len(pc.hooks) == 0 {
+		node, err = pc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pc.mutation = mutation
+			node, err = pc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range pc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -82,15 +103,15 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			},
 		}
 	)
-	if value := pc.name; value != nil {
+	if value, ok := pc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldName,
 		})
-		pe.Name = *value
+		pe.Name = value
 	}
-	if nodes := pc.owner; len(nodes) > 0 {
+	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -104,7 +125,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

@@ -11,11 +11,22 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"golang.org/x/xerrors"
+)
+
+// ent aliases to avoid import conflict in user's code.
+type (
+	Op         = ent.Op
+	Hook       = ent.Hook
+	Value      = ent.Value
+	Mutator    = ent.Mutator
+	Mutation   = ent.Mutation
+	MutateFunc = ent.MutateFunc
 )
 
 // Order applies an ordering on either graph traversal or sql selector.

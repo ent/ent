@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/idtype/ent/user"
@@ -18,24 +19,19 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	name      *string
-	spouse    map[uint64]struct{}
-	followers map[uint64]struct{}
-	following map[uint64]struct{}
+	mutation *UserMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uc *UserCreate) SetSpouseID(id uint64) *UserCreate {
-	if uc.spouse == nil {
-		uc.spouse = make(map[uint64]struct{})
-	}
-	uc.spouse[id] = struct{}{}
+	uc.mutation.SetSpouseID(id)
 	return uc
 }
 
@@ -54,12 +50,7 @@ func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
 
 // AddFollowerIDs adds the followers edge to User by ids.
 func (uc *UserCreate) AddFollowerIDs(ids ...uint64) *UserCreate {
-	if uc.followers == nil {
-		uc.followers = make(map[uint64]struct{})
-	}
-	for i := range ids {
-		uc.followers[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddFollowerIDs(ids...)
 	return uc
 }
 
@@ -74,12 +65,7 @@ func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 
 // AddFollowingIDs adds the following edge to User by ids.
 func (uc *UserCreate) AddFollowingIDs(ids ...uint64) *UserCreate {
-	if uc.following == nil {
-		uc.following = make(map[uint64]struct{})
-	}
-	for i := range ids {
-		uc.following[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddFollowingIDs(ids...)
 	return uc
 }
 
@@ -94,13 +80,36 @@ func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.name == nil {
+	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(uc.spouse) > 1 {
+	if len(uc.mutation.SpouseIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
 	}
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -123,15 +132,15 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.name; value != nil {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = *value
+		u.Name = value
 	}
-	if nodes := uc.spouse; len(nodes) > 0 {
+	if nodes := uc.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -145,12 +154,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.followers; len(nodes) > 0 {
+	if nodes := uc.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -164,12 +173,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.following; len(nodes) > 0 {
+	if nodes := uc.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -183,7 +192,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

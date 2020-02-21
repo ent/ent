@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/config/ent/user"
@@ -17,11 +18,36 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
+	mutation *UserMutation
+	hooks    []Hook
 }
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.

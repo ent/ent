@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,6 +20,8 @@ import (
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
+	hooks      []Hook
+	mutation   *PetMutation
 	predicates []predicate.Pet
 }
 
@@ -30,7 +33,30 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	return pu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(pu.hooks) == 0 {
+		affected, err = pu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pu.mutation = mutation
+			affected, err = pu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range pu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -87,12 +113,36 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id int
+	hooks    []Hook
+	mutation *PetMutation
 }
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	return puo.sqlSave(ctx)
+	var (
+		err  error
+		node *Pet
+	)
+	if len(puo.hooks) == 0 {
+		node, err = puo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			puo.mutation = mutation
+			node, err = puo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range puo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -123,12 +173,16 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  puo.id,
 				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		},
 	}
+	id, ok := puo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Pet.ID for update")
+	}
+	_spec.Node.ID.Value = id
 	pe = &Pet{config: puo.config}
 	_spec.Assign = pe.assignValues
 	_spec.ScanValues = pe.scanValues()

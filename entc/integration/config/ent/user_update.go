@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,6 +20,8 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
+	hooks      []Hook
+	mutation   *UserMutation
 	predicates []predicate.User
 }
 
@@ -30,7 +33,30 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return uu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(uu.hooks) == 0 {
+		affected, err = uu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uu.mutation = mutation
+			affected, err = uu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range uu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -87,12 +113,36 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id int
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return uuo.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uuo.hooks) == 0 {
+		node, err = uuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uuo.mutation = mutation
+			node, err = uuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -123,12 +173,16 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  uuo.id,
 				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
 	}
+	id, ok := uuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing User.ID for update")
+	}
+	_spec.Node.ID.Value = id
 	u = &User{config: uuo.config}
 	_spec.Assign = u.assignValues
 	_spec.ScanValues = u.scanValues()

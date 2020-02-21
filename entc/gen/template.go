@@ -28,9 +28,10 @@ type (
 	// GraphTemplate specifies a template that is executed with
 	// the Graph object.
 	GraphTemplate struct {
-		Name   string            // template name.
-		Format string            // file name format.
-		Skip   func(*Graph) bool // skip condition.
+		Name    string               // template name.
+		Skip    func(*Graph) bool    // skip condition.
+		Format  string               // file name format.
+		BaseDir func(*Config) string // Target base dir.
 	}
 )
 
@@ -91,6 +92,10 @@ var (
 			Format: "config.go",
 		},
 		{
+			Name:   "mutation",
+			Format: "mutation.go",
+		},
+		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
 			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
@@ -103,6 +108,14 @@ var (
 		{
 			Name:   "predicate",
 			Format: "predicate/predicate.go",
+		},
+		{
+			Name:   "hook",
+			Format: "hook/hook.go",
+		},
+		{
+			Name:   "entschema",
+			Format: "entschema/entschema.go",
 		},
 	}
 	// templates holds the Go templates for the code generation.

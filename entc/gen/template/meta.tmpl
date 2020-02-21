@@ -12,15 +12,26 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+{{ if and $.ImportSchema $.Config.Schema }}
+	import "{{  $.Config.Schema }}"
+{{ end }}
+
 const (
 	// Label holds the string label denoting the {{ lower $.Name }} type in the database.
 	Label = "{{ $.Label }}"
 	// {{ $.ID.Constant }} holds the string denoting the id field in the database.
 	{{ $.ID.Constant }} = "{{ $.ID.StorageKey }}"
-	{{ range $_, $f := $.Fields -}}{{ $field := $f.Constant -}}
+	{{- range $f := $.Fields -}}{{ $field := $f.Constant -}}
 		// {{ $field }} holds the string denoting the {{ lower $f.Name }} vertex property in the database.
 		{{ $field }} = "{{ $f.StorageKey }}"
-	{{ end -}}
+	{{- end }}
+
+	{{ range $e := $.Edges }}
+		{{- $edge := $e.Constant }}
+		// {{ $edge }} holds the string denoting the {{ lower $e.Name }} edge name in mutations.
+		{{ $edge }} = "{{ $e.Name }}"
+	{{- end }}
+
 	{{ $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
 	{{ xtemplate $tmpl $ }}
 )
@@ -30,68 +41,101 @@ const (
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
-{{ if or $.HasDefault $.HasValidators }}
-var (
-	{{- with $.MixedInWithDefaultOrValidator }}
-		mixin = {{ base $.Schema }}.{{ $.Name }}{}.Mixin()
-		mixinFields = [...][]ent.Field{
-			{{- range $i, $_ := xrange $.NumMixin }}
-				mixin[{{ $i }}].Fields(),
-			{{- end }}
-		}
-	{{- end }}
-	fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
-	{{ range $i, $f := $.Fields -}}
-		{{- $desc := print "desc" $f.StructField -}}
-		{{- /* enum default values handled near their declarations. */}}
-		{{ if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators -}}
-			{{- if $f.Position.MixedIn }}
-				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
-				{{ $desc }} = mixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
-			{{- else }}
-				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
-				{{ $desc }} = fields[{{ $f.Position.Index }}].Descriptor()
-			{{- end }}
-		{{ end -}}
-		{{ if and $f.Default (not $f.IsEnum) }}
-			{{- $default := $f.DefaultName -}}
-			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.Default.({{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }})
-		{{ end -}}
-		{{ if $f.UpdateDefault }}
-			{{- $default := $f.UpdateDefaultName -}}
-			// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
-		{{ end -}}
-		{{ with $f.Validators -}}
-			{{ $name := $f.Validator -}}
-			{{ $type :=  printf "func (%s) error" $f.Type -}}
-			// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
-			{{ if eq $f.Validators 1 -}}
-				{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
-			{{ else -}}
-				{{ $name }} = func() {{ $type }} {
-					validators := {{ $desc }}.Validators
-					fns := [...]func({{ $f.Type }}) error {
-						{{- range $j, $n := xrange $f.Validators }}
-							validators[{{ $j }}].(func({{ $f.Type }}) error),
+{{ if or $.HasDefault $.HasValidators $.NumHooks }}{{/* Runtime code from schema package */}}
+	{{ if $.ImportSchema }}{{/* No option for circular imports */}}
+		{{ if or $.HasDefault $.HasValidators }}
+			var (
+				{{- with $.MixedInWithDefaultOrValidator }}
+					mixin = {{ base $.Schema }}.{{ $.Name }}{}.Mixin()
+					mixinFields = [...][]ent.Field{
+						{{- range $i, $_ := xrange $.NumMixin }}
+							mixin[{{ $i }}].Fields(),
 						{{- end }}
 					}
-					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
-						for _, fn := range fns {
-							if err := fn({{ $f.BuilderField }}); err != nil {
-								return err
-							}
-						}
-						return nil
-					}
-				}()
-			{{ end -}}
-		{{ end -}}
-	{{ end -}}
-)
+				{{- end }}
+				fields = {{ base $.Schema }}.{{ $.Name }}{}.Fields()
+				{{- range $f := $.Fields }}
+					{{- $desc := print "desc" $f.StructField }}
+					{{- /* Enum default values handled near their declarations. */ -}}
+					{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators }}
+						{{- if $f.Position.MixedIn }}
+							// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+							{{ $desc }} = mixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
+						{{- else }}
+							// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+							{{ $desc }} = fields[{{ $f.Position.Index }}].Descriptor()
+						{{- end }}
+					{{- end }}
+					{{- if and $f.Default (not $f.IsEnum) }}
+						{{- $default := $f.DefaultName }}
+						// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+						{{ $default }} = {{ $desc }}.Default.({{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }})
+					{{- end }}
+					{{- if $f.UpdateDefault }}
+						{{- $default := $f.UpdateDefaultName }}
+						// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
+						{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+					{{- end }}
+					{{- with $f.Validators }}
+						{{- $name := $f.Validator }}
+						{{- $type :=  printf "func (%s) error" $f.Type }}
+						// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
+						{{- if eq $f.Validators 1 }}
+							{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
+						{{- else }}
+							{{ $name }} = func() {{ $type }} {
+								validators := {{ $desc }}.Validators
+								fns := [...]func({{ $f.Type }}) error {
+									{{- range $j, $n := xrange $f.Validators }}
+										validators[{{ $j }}].(func({{ $f.Type }}) error),
+									{{- end }}
+								}
+								return func({{ $f.BuilderField }} {{ $f.Type }}) error {
+									for _, fn := range fns {
+										if err := fn({{ $f.BuilderField }}); err != nil {
+											return err
+										}
+									}
+									return nil
+								}
+							}()
+						{{- end }}
+					{{- end }}
+				{{- end }}
+			)
+		{{- end }}
+	{{ else }}{{/* Circular imports is possible.*/}}
+		// Note that the variables below are initialized by the schema package
+		// on the initialization of the application. Therefore, the schema package
+		// should be imported in the main as follows:
+		//
+		//	import _ "{{ $.Config.Schema }}"
+		//
+		var (
+			{{- if $.NumHooks }}
+				Hooks [{{ $.NumHooks }}]ent.Hook
+			{{- end }}
+			{{- range $f := $.Fields }}
+				{{- if and $f.Default (not $f.IsEnum) }}
+					{{- $default := $f.DefaultName }}
+					// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+					{{ $default }} {{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }}
+				{{- end }}
+				{{- if $f.UpdateDefault }}
+					{{- $default := $f.UpdateDefaultName }}
+					// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
+					{{ $default }} {{ if $f.IsTime }}func() {{ end }}{{ $f.Type }}
+				{{- end }}
+				{{- with $f.Validators }}
+					{{- $name := $f.Validator }}
+					{{- $type :=  printf "func (%s) error" $f.Type }}
+					// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
+					{{ $name }} {{ $type }}
+				{{- end }}
+			{{- end }}
+		)
+	{{ end }}
 {{ end }}
-
 
 {{/* define custom type for enum fields */}}
 {{ range $_, $f := $.Fields -}}
