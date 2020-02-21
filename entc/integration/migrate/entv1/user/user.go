@@ -8,29 +8,29 @@ package user
 
 import (
 	"fmt"
-
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/schema"
 )
 
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "oid"
-	// FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
-	// FieldNickname holds the string denoting the nickname vertex property in the database.
-	FieldNickname = "nickname"
-	// FieldAddress holds the string denoting the address vertex property in the database.
-	FieldAddress = "address"
-	// FieldRenamed holds the string denoting the renamed vertex property in the database.
-	FieldRenamed = "renamed"
-	// FieldBlob holds the string denoting the blob vertex property in the database.
-	FieldBlob = "blob"
-	// FieldState holds the string denoting the state vertex property in the database.
-	FieldState = "state"
+	FieldID       = "oid"      // FieldAge holds the string denoting the age vertex property in the database.
+	FieldAge      = "age"      // FieldName holds the string denoting the name vertex property in the database.
+	FieldName     = "name"     // FieldNickname holds the string denoting the nickname vertex property in the database.
+	FieldNickname = "nickname" // FieldAddress holds the string denoting the address vertex property in the database.
+	FieldAddress  = "address"  // FieldRenamed holds the string denoting the renamed vertex property in the database.
+	FieldRenamed  = "renamed"  // FieldBlob holds the string denoting the blob vertex property in the database.
+	FieldBlob     = "blob"     // FieldState holds the string denoting the state vertex property in the database.
+	FieldState    = "state"
+
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
+	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
+	EdgeSpouse = "spouse"
+	// EdgeCar holds the string denoting the car edge name in mutations.
+	EdgeCar = "car"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -73,13 +73,11 @@ var ForeignKeys = []string{
 	"user_spouse",
 }
 
+// Note that the variables below are initialized by by the `ent`
+// package in the initialization of the application (using `init`).
 var (
-	fields = schema.User{}.Fields()
-
-	// descName is the schema descriptor for name field.
-	descName = fields[2].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
+	NameValidator func(string) error
 )
 
 // State defines the type for the state enum field.

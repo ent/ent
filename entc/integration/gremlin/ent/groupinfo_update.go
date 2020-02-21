@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
@@ -22,12 +24,9 @@ import (
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
 type GroupInfoUpdate struct {
 	config
-	desc          *string
-	max_users     *int
-	addmax_users  *int
-	groups        map[string]struct{}
-	removedGroups map[string]struct{}
-	predicates    []predicate.GroupInfo
+	hooks      []ent.Hook
+	mutation   *GroupInfoMutation
+	predicates []predicate.GroupInfo
 }
 
 // Where adds a new predicate for the builder.
@@ -38,14 +37,14 @@ func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
 
 // SetDesc sets the desc field.
 func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
-	giu.desc = &s
+	giu.mutation.SetDesc(s)
 	return giu
 }
 
 // SetMaxUsers sets the max_users field.
 func (giu *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
-	giu.max_users = &i
-	giu.addmax_users = nil
+	giu.mutation.ResetMaxUsers()
+	giu.mutation.SetMaxUsers(i)
 	return giu
 }
 
@@ -59,22 +58,13 @@ func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 
 // AddMaxUsers adds i to max_users.
 func (giu *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
-	if giu.addmax_users == nil {
-		giu.addmax_users = &i
-	} else {
-		*giu.addmax_users += i
-	}
+	giu.mutation.AddMaxUsers(i)
 	return giu
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (giu *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
-	if giu.groups == nil {
-		giu.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		giu.groups[ids[i]] = struct{}{}
-	}
+	giu.mutation.AddGroupIDs(ids...)
 	return giu
 }
 
@@ -89,12 +79,7 @@ func (giu *GroupInfoUpdate) AddGroups(g ...*Group) *GroupInfoUpdate {
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
-	if giu.removedGroups == nil {
-		giu.removedGroups = make(map[string]struct{})
-	}
-	for i := range ids {
-		giu.removedGroups[ids[i]] = struct{}{}
-	}
+	giu.mutation.RemoveGroupIDs(ids...)
 	return giu
 }
 
@@ -109,7 +94,30 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
-	return giu.gremlinSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(giu.hooks) == 0 {
+		affected, err = giu.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupInfoMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			giu.mutation = mutation
+			affected, err = giu.gremlinSave(ctx)
+			return affected, err
+		})
+		for _, hook := range giu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, giu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -162,20 +170,20 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := giu.desc; value != nil {
-		v.Property(dsl.Single, groupinfo.FieldDesc, *value)
+	if value, ok := giu.mutation.Desc(); ok {
+		v.Property(dsl.Single, groupinfo.FieldDesc, value)
 	}
-	if value := giu.max_users; value != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *value)
+	if value, ok := giu.mutation.MaxUsers(); ok {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, value)
 	}
-	if value := giu.addmax_users; value != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(*value)).Sum())
+	if value, ok := giu.mutation.AddedMaxUsers(); ok {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(value)).Sum())
 	}
-	for id := range giu.removedGroups {
+	for _, id := range giu.mutation.RemovedGroupsIDs() {
 		tr := rv.Clone().InE(group.InfoLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range giu.groups {
+	for _, id := range giu.mutation.GroupsIDs() {
 		v.AddE(group.InfoLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),
@@ -200,24 +208,20 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 // GroupInfoUpdateOne is the builder for updating a single GroupInfo entity.
 type GroupInfoUpdateOne struct {
 	config
-	id            string
-	desc          *string
-	max_users     *int
-	addmax_users  *int
-	groups        map[string]struct{}
-	removedGroups map[string]struct{}
+	hooks    []ent.Hook
+	mutation *GroupInfoMutation
 }
 
 // SetDesc sets the desc field.
 func (giuo *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
-	giuo.desc = &s
+	giuo.mutation.SetDesc(s)
 	return giuo
 }
 
 // SetMaxUsers sets the max_users field.
 func (giuo *GroupInfoUpdateOne) SetMaxUsers(i int) *GroupInfoUpdateOne {
-	giuo.max_users = &i
-	giuo.addmax_users = nil
+	giuo.mutation.ResetMaxUsers()
+	giuo.mutation.SetMaxUsers(i)
 	return giuo
 }
 
@@ -231,22 +235,13 @@ func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne 
 
 // AddMaxUsers adds i to max_users.
 func (giuo *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
-	if giuo.addmax_users == nil {
-		giuo.addmax_users = &i
-	} else {
-		*giuo.addmax_users += i
-	}
+	giuo.mutation.AddMaxUsers(i)
 	return giuo
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (giuo *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	if giuo.groups == nil {
-		giuo.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		giuo.groups[ids[i]] = struct{}{}
-	}
+	giuo.mutation.AddGroupIDs(ids...)
 	return giuo
 }
 
@@ -261,12 +256,7 @@ func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giuo *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	if giuo.removedGroups == nil {
-		giuo.removedGroups = make(map[string]struct{})
-	}
-	for i := range ids {
-		giuo.removedGroups[ids[i]] = struct{}{}
-	}
+	giuo.mutation.RemoveGroupIDs(ids...)
 	return giuo
 }
 
@@ -281,7 +271,30 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
-	return giuo.gremlinSave(ctx)
+	var (
+		err  error
+		node *GroupInfo
+	)
+	if len(giuo.hooks) == 0 {
+		node, err = giuo.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupInfoMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			giuo.mutation = mutation
+			node, err = giuo.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range giuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, giuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -308,7 +321,11 @@ func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
 
 func (giuo *GroupInfoUpdateOne) gremlinSave(ctx context.Context) (*GroupInfo, error) {
 	res := &gremlin.Response{}
-	query, bindings := giuo.gremlin(giuo.id).Query()
+	id, ok := giuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing GroupInfo.ID for update")
+	}
+	query, bindings := giuo.gremlin(id).Query()
 	if err := giuo.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -335,20 +352,20 @@ func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := giuo.desc; value != nil {
-		v.Property(dsl.Single, groupinfo.FieldDesc, *value)
+	if value, ok := giuo.mutation.Desc(); ok {
+		v.Property(dsl.Single, groupinfo.FieldDesc, value)
 	}
-	if value := giuo.max_users; value != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *value)
+	if value, ok := giuo.mutation.MaxUsers(); ok {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, value)
 	}
-	if value := giuo.addmax_users; value != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(*value)).Sum())
+	if value, ok := giuo.mutation.AddedMaxUsers(); ok {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(value)).Sum())
 	}
-	for id := range giuo.removedGroups {
+	for _, id := range giuo.mutation.RemovedGroupsIDs() {
 		tr := rv.Clone().InE(group.InfoLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range giuo.groups {
+	for _, id := range giuo.mutation.GroupsIDs() {
 		v.AddE(group.InfoLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),

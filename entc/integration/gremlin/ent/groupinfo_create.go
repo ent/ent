@@ -9,7 +9,9 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
@@ -22,20 +24,19 @@ import (
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	config
-	desc      *string
-	max_users *int
-	groups    map[string]struct{}
+	mutation *GroupInfoMutation
+	hooks    []ent.Hook
 }
 
 // SetDesc sets the desc field.
 func (gic *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
-	gic.desc = &s
+	gic.mutation.SetDesc(s)
 	return gic
 }
 
 // SetMaxUsers sets the max_users field.
 func (gic *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
-	gic.max_users = &i
+	gic.mutation.SetMaxUsers(i)
 	return gic
 }
 
@@ -49,12 +50,7 @@ func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (gic *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
-	if gic.groups == nil {
-		gic.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		gic.groups[ids[i]] = struct{}{}
-	}
+	gic.mutation.AddGroupIDs(ids...)
 	return gic
 }
 
@@ -69,14 +65,37 @@ func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
 
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	if gic.desc == nil {
+	if _, ok := gic.mutation.Desc(); !ok {
 		return nil, errors.New("ent: missing required field \"desc\"")
 	}
-	if gic.max_users == nil {
+	if _, ok := gic.mutation.MaxUsers(); !ok {
 		v := groupinfo.DefaultMaxUsers
-		gic.max_users = &v
+		gic.mutation.SetMaxUsers(v)
 	}
-	return gic.gremlinSave(ctx)
+	var (
+		err  error
+		node *GroupInfo
+	)
+	if len(gic.hooks) == 0 {
+		node, err = gic.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupInfoMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gic.mutation = mutation
+			node, err = gic.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range gic.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -111,13 +130,13 @@ func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(groupinfo.Label)
-	if gic.desc != nil {
-		v.Property(dsl.Single, groupinfo.FieldDesc, *gic.desc)
+	if value, ok := gic.mutation.Desc(); ok {
+		v.Property(dsl.Single, groupinfo.FieldDesc, value)
 	}
-	if gic.max_users != nil {
-		v.Property(dsl.Single, groupinfo.FieldMaxUsers, *gic.max_users)
+	if value, ok := gic.mutation.MaxUsers(); ok {
+		v.Property(dsl.Single, groupinfo.FieldMaxUsers, value)
 	}
-	for id := range gic.groups {
+	for _, id := range gic.mutation.GroupsIDs() {
 		v.AddE(group.InfoLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),

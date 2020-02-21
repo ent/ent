@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/migrate"
 
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
@@ -102,6 +103,13 @@ func (c *Client) Close() error {
 	return c.driver.Close()
 }
 
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...ent.Hook) {
+	c.City.Use(hooks...)
+	c.Street.Use(hooks...)
+}
+
 // CityClient is a client for the City schema.
 type CityClient struct {
 	config
@@ -112,14 +120,24 @@ func NewCityClient(c config) *CityClient {
 	return &CityClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `city.Hooks(f(g(h())))`.
+func (c *CityClient) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for City.
 func (c *CityClient) Create() *CityCreate {
-	return &CityCreate{config: c.config}
+	hooks := c.hooks
+	mutation := newCityMutation(OpCreate)
+	return &CityCreate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for City.
 func (c *CityClient) Update() *CityUpdate {
-	return &CityUpdate{config: c.config}
+	hooks := c.hooks
+	mutation := newCityMutation(OpUpdate)
+	return &CityUpdate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -129,12 +147,17 @@ func (c *CityClient) UpdateOne(ci *City) *CityUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CityClient) UpdateOneID(id int) *CityUpdateOne {
-	return &CityUpdateOne{config: c.config, id: id}
+	hooks := c.hooks
+	mutation := newCityMutation(OpUpdateOne)
+	mutation.id = &id
+	return &CityUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for City.
 func (c *CityClient) Delete() *CityDelete {
-	return &CityDelete{config: c.config}
+	hooks := c.hooks
+	mutation := newCityMutation(OpDelete)
+	return &CityDelete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -144,7 +167,10 @@ func (c *CityClient) DeleteOne(ci *City) *CityDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
-	return &CityDeleteOne{c.Delete().Where(city.ID(id))}
+	builder := c.Delete().Where(city.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CityDeleteOne{builder}
 }
 
 // Create returns a query builder for City.
@@ -190,14 +216,24 @@ func NewStreetClient(c config) *StreetClient {
 	return &StreetClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `street.Hooks(f(g(h())))`.
+func (c *StreetClient) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for Street.
 func (c *StreetClient) Create() *StreetCreate {
-	return &StreetCreate{config: c.config}
+	hooks := c.hooks
+	mutation := newStreetMutation(OpCreate)
+	return &StreetCreate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for Street.
 func (c *StreetClient) Update() *StreetUpdate {
-	return &StreetUpdate{config: c.config}
+	hooks := c.hooks
+	mutation := newStreetMutation(OpUpdate)
+	return &StreetUpdate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -207,12 +243,17 @@ func (c *StreetClient) UpdateOne(s *Street) *StreetUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *StreetClient) UpdateOneID(id int) *StreetUpdateOne {
-	return &StreetUpdateOne{config: c.config, id: id}
+	hooks := c.hooks
+	mutation := newStreetMutation(OpUpdateOne)
+	mutation.id = &id
+	return &StreetUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for Street.
 func (c *StreetClient) Delete() *StreetDelete {
-	return &StreetDelete{config: c.config}
+	hooks := c.hooks
+	mutation := newStreetMutation(OpDelete)
+	return &StreetDelete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -222,7 +263,10 @@ func (c *StreetClient) DeleteOne(s *Street) *StreetDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
-	return &StreetDeleteOne{c.Delete().Where(street.ID(id))}
+	builder := c.Delete().Where(street.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StreetDeleteOne{builder}
 }
 
 // Create returns a query builder for Street.

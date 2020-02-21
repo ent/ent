@@ -16,10 +16,6 @@ import (
 	{{- /* ignore generting on graph specififc templates */}}
 	{{- if not (eq $.Config.Package $.Package) }}
 		"{{ $.Config.Package }}/predicate"
-		"{{ $.Config.Package }}/{{ $.Package }}"
-		{{- with $.Config.Schema  }}
-			"{{ . }}"
-		{{- end }}
 		{{- range $_, $f := $.Fields }}
 			{{- with $f.Type.PkgPath }}
 				"{{ . }}"

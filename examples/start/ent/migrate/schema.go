@@ -7,8 +7,6 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/examples/start/ent/user"
-
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -52,7 +50,7 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt},
-		{Name: "name", Type: field.TypeString, Default: user.DefaultName},
+		{Name: "name", Type: field.TypeString, Default: "unknown"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

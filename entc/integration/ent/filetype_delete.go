@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
@@ -19,6 +21,8 @@ import (
 // FileTypeDelete is the builder for deleting a FileType entity.
 type FileTypeDelete struct {
 	config
+	hooks      []ent.Hook
+	mutation   *FileTypeMutation
 	predicates []predicate.FileType
 }
 
@@ -30,7 +34,30 @@ func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
-	return ftd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ftd.hooks) == 0 {
+		affected, err = ftd.sqlExec(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*FileTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftd.mutation = mutation
+			affected, err = ftd.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range ftd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

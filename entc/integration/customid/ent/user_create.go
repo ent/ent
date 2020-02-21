@@ -9,7 +9,9 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
@@ -20,27 +22,19 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	id       *int
-	groups   map[int]struct{}
-	parent   map[int]struct{}
-	children map[int]struct{}
-	pets     map[string]struct{}
+	mutation *UserMutation
+	hooks    []ent.Hook
 }
 
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
-	uc.id = &i
+	uc.mutation.SetID(i)
 	return uc
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	if uc.groups == nil {
-		uc.groups = make(map[int]struct{})
-	}
-	for i := range ids {
-		uc.groups[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
@@ -55,10 +49,7 @@ func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 
 // SetParentID sets the parent edge to User by id.
 func (uc *UserCreate) SetParentID(id int) *UserCreate {
-	if uc.parent == nil {
-		uc.parent = make(map[int]struct{})
-	}
-	uc.parent[id] = struct{}{}
+	uc.mutation.SetParentID(id)
 	return uc
 }
 
@@ -77,12 +68,7 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	if uc.children == nil {
-		uc.children = make(map[int]struct{})
-	}
-	for i := range ids {
-		uc.children[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddChildIDs(ids...)
 	return uc
 }
 
@@ -97,12 +83,7 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 
 // AddPetIDs adds the pets edge to Pet by ids.
 func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	if uc.pets == nil {
-		uc.pets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.pets[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddPetIDs(ids...)
 	return uc
 }
 
@@ -117,10 +98,33 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if len(uc.parent) > 1 {
+	if len(uc.mutation.ParentIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -143,11 +147,11 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.id; value != nil {
-		u.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := uc.mutation.ID(); ok {
+		u.ID = id
+		_spec.ID.Value = id
 	}
-	if nodes := uc.groups; len(nodes) > 0 {
+	if nodes := uc.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -161,12 +165,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.parent; len(nodes) > 0 {
+	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -180,12 +184,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.children; len(nodes) > 0 {
+	if nodes := uc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -199,12 +203,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.pets; len(nodes) > 0 {
+	if nodes := uc.mutation.PetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -218,7 +222,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

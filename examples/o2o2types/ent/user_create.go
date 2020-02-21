@@ -9,7 +9,9 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
 	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
@@ -19,29 +21,25 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age  *int
-	name *string
-	card map[int]struct{}
+	mutation *UserMutation
+	hooks    []ent.Hook
 }
 
 // SetAge sets the age field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
-	uc.age = &i
+	uc.mutation.SetAge(i)
 	return uc
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
 // SetCardID sets the card edge to Card by id.
 func (uc *UserCreate) SetCardID(id int) *UserCreate {
-	if uc.card == nil {
-		uc.card = make(map[int]struct{})
-	}
-	uc.card[id] = struct{}{}
+	uc.mutation.SetCardID(id)
 	return uc
 }
 
@@ -60,16 +58,39 @@ func (uc *UserCreate) SetCard(c *Card) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.age == nil {
+	if _, ok := uc.mutation.Age(); !ok {
 		return nil, errors.New("ent: missing required field \"age\"")
 	}
-	if uc.name == nil {
+	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(uc.card) > 1 {
+	if len(uc.mutation.CardIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -92,23 +113,23 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.age; value != nil {
+	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
-		u.Age = *value
+		u.Age = value
 	}
-	if value := uc.name; value != nil {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = *value
+		u.Name = value
 	}
-	if nodes := uc.card; len(nodes) > 0 {
+	if nodes := uc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -122,7 +143,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

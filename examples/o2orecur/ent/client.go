@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/migrate"
 
 	"github.com/facebookincubator/ent/examples/o2orecur/ent/node"
@@ -96,6 +97,12 @@ func (c *Client) Close() error {
 	return c.driver.Close()
 }
 
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...ent.Hook) {
+	c.Node.Use(hooks...)
+}
+
 // NodeClient is a client for the Node schema.
 type NodeClient struct {
 	config
@@ -106,14 +113,24 @@ func NewNodeClient(c config) *NodeClient {
 	return &NodeClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `node.Hooks(f(g(h())))`.
+func (c *NodeClient) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for Node.
 func (c *NodeClient) Create() *NodeCreate {
-	return &NodeCreate{config: c.config}
+	hooks := c.hooks
+	mutation := newNodeMutation(OpCreate)
+	return &NodeCreate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for Node.
 func (c *NodeClient) Update() *NodeUpdate {
-	return &NodeUpdate{config: c.config}
+	hooks := c.hooks
+	mutation := newNodeMutation(OpUpdate)
+	return &NodeUpdate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -123,12 +140,17 @@ func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
-	return &NodeUpdateOne{config: c.config, id: id}
+	hooks := c.hooks
+	mutation := newNodeMutation(OpUpdateOne)
+	mutation.id = &id
+	return &NodeUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for Node.
 func (c *NodeClient) Delete() *NodeDelete {
-	return &NodeDelete{config: c.config}
+	hooks := c.hooks
+	mutation := newNodeMutation(OpDelete)
+	return &NodeDelete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -138,7 +160,10 @@ func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
-	return &NodeDeleteOne{c.Delete().Where(node.ID(id))}
+	builder := c.Delete().Where(node.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NodeDeleteOne{builder}
 }
 
 // Create returns a query builder for Node.

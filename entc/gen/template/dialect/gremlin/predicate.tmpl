@@ -47,12 +47,12 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
-	{{- $label := $e.Constant -}}
+	{{- $label := $e.LabelConstant -}}
 	{{- $direction := "Out" -}}
 	{{- if $e.IsInverse -}}
 		{{- $direction = "In" -}}
 		{{/* avoid circular dependecies */}}
-		{{- $label = $e.InverseConstant -}}
+		{{- $label = $e.InverseLabelConstant -}}
 	{{- end -}}
 	func(t *dsl.Traversal) {
 		{{- /* if it's an edge with self-reference, take the two vertices */}}
@@ -66,14 +66,14 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
-	{{- $label := $e.Constant -}}
+	{{- $label := $e.LabelConstant -}}
 	{{- $direction := "Out" -}}
 	{{- $inverse_direction := "In" -}}
 	{{- if $e.IsInverse -}}
 		{{- $direction = "In" -}}
 		{{- $inverse_direction = "Out" -}}
 		{{/* avoid circular dependecies */}}
-		{{- $label = $e.InverseConstant -}}
+		{{- $label = $e.InverseLabelConstant -}}
 	{{- end -}}
 	func(t *dsl.Traversal) {
 		{{- if $e.Bidi }}{{/* selfref means it should be true in one of the directions */}}

@@ -9,7 +9,9 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
 	"github.com/facebookincubator/ent/schema/field"
@@ -18,21 +20,45 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	max_users *int
+	mutation *GroupMutation
+	hooks    []ent.Hook
 }
 
 // SetMaxUsers sets the max_users field.
 func (gc *GroupCreate) SetMaxUsers(i int) *GroupCreate {
-	gc.max_users = &i
+	gc.mutation.SetMaxUsers(i)
 	return gc
 }
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if gc.max_users == nil {
+	if _, ok := gc.mutation.MaxUsers(); !ok {
 		return nil, errors.New("ent: missing required field \"max_users\"")
 	}
-	return gc.sqlSave(ctx)
+	var (
+		err  error
+		node *Group
+	)
+	if len(gc.hooks) == 0 {
+		node, err = gc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gc.mutation = mutation
+			node, err = gc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range gc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -55,13 +81,13 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			},
 		}
 	)
-	if value := gc.max_users; value != nil {
+	if value, ok := gc.mutation.MaxUsers(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
-		gr.MaxUsers = *value
+		gr.MaxUsers = value
 	}
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

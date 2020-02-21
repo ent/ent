@@ -6,19 +6,18 @@
 
 package user
 
-import (
-	"github.com/facebookincubator/ent/examples/start/ent/schema"
-)
-
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
+	FieldID   = "id"  // FieldAge holds the string denoting the age vertex property in the database.
+	FieldAge  = "age" // FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+
+	// EdgeCars holds the string denoting the cars edge name in mutations.
+	EdgeCars = "cars"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -49,16 +48,11 @@ var (
 	GroupsPrimaryKey = []string{"group_id", "user_id"}
 )
 
+// Note that the variables below are initialized by by the `ent`
+// package in the initialization of the application (using `init`).
 var (
-	fields = schema.User{}.Fields()
-
-	// descAge is the schema descriptor for age field.
-	descAge = fields[0].Descriptor()
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	AgeValidator = descAge.Validators[0].(func(int) error)
-
-	// descName is the schema descriptor for name field.
-	descName = fields[1].Descriptor()
+	AgeValidator func(int) error
 	// DefaultName holds the default value on creation for the name field.
-	DefaultName = descName.Default.(string)
+	DefaultName string
 )

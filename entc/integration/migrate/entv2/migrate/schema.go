@@ -7,8 +7,6 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
-
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -62,9 +60,9 @@ var (
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "nickname", Type: field.TypeString},
-		{Name: "phone", Type: field.TypeString, Default: user.DefaultPhone},
+		{Name: "phone", Type: field.TypeString, Default: "unknown"},
 		{Name: "buffer", Type: field.TypeBytes, Nullable: true},
-		{Name: "title", Type: field.TypeString, Default: user.DefaultTitle},
+		{Name: "title", Type: field.TypeString, Default: "SWE"},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},

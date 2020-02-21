@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/examples/o2m2types/ent/migrate"
 
 	"github.com/facebookincubator/ent/examples/o2m2types/ent/pet"
@@ -102,6 +103,13 @@ func (c *Client) Close() error {
 	return c.driver.Close()
 }
 
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...ent.Hook) {
+	c.Pet.Use(hooks...)
+	c.User.Use(hooks...)
+}
+
 // PetClient is a client for the Pet schema.
 type PetClient struct {
 	config
@@ -112,14 +120,24 @@ func NewPetClient(c config) *PetClient {
 	return &PetClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pet.Hooks(f(g(h())))`.
+func (c *PetClient) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for Pet.
 func (c *PetClient) Create() *PetCreate {
-	return &PetCreate{config: c.config}
+	hooks := c.hooks
+	mutation := newPetMutation(OpCreate)
+	return &PetCreate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for Pet.
 func (c *PetClient) Update() *PetUpdate {
-	return &PetUpdate{config: c.config}
+	hooks := c.hooks
+	mutation := newPetMutation(OpUpdate)
+	return &PetUpdate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -129,12 +147,17 @@ func (c *PetClient) UpdateOne(pe *Pet) *PetUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *PetClient) UpdateOneID(id int) *PetUpdateOne {
-	return &PetUpdateOne{config: c.config, id: id}
+	hooks := c.hooks
+	mutation := newPetMutation(OpUpdateOne)
+	mutation.id = &id
+	return &PetUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for Pet.
 func (c *PetClient) Delete() *PetDelete {
-	return &PetDelete{config: c.config}
+	hooks := c.hooks
+	mutation := newPetMutation(OpDelete)
+	return &PetDelete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -144,7 +167,10 @@ func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
-	return &PetDeleteOne{c.Delete().Where(pet.ID(id))}
+	builder := c.Delete().Where(pet.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PetDeleteOne{builder}
 }
 
 // Create returns a query builder for Pet.
@@ -190,14 +216,24 @@ func NewUserClient(c config) *UserClient {
 	return &UserClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for User.
 func (c *UserClient) Create() *UserCreate {
-	return &UserCreate{config: c.config}
+	hooks := c.hooks
+	mutation := newUserMutation(OpCreate)
+	return &UserCreate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
-	return &UserUpdate{config: c.config}
+	hooks := c.hooks
+	mutation := newUserMutation(OpUpdate)
+	return &UserUpdate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -207,12 +243,17 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	return &UserUpdateOne{config: c.config, id: id}
+	hooks := c.hooks
+	mutation := newUserMutation(OpUpdateOne)
+	mutation.id = &id
+	return &UserUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for User.
 func (c *UserClient) Delete() *UserDelete {
-	return &UserDelete{config: c.config}
+	hooks := c.hooks
+	mutation := newUserMutation(OpDelete)
+	return &UserDelete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -222,7 +263,10 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
-	return &UserDeleteOne{c.Delete().Where(user.ID(id))}
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
 }
 
 // Create returns a query builder for User.

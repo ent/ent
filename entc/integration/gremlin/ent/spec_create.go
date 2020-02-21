@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
@@ -18,17 +20,13 @@ import (
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	config
-	card map[string]struct{}
+	mutation *SpecMutation
+	hooks    []ent.Hook
 }
 
 // AddCardIDs adds the card edge to Card by ids.
 func (sc *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
-	if sc.card == nil {
-		sc.card = make(map[string]struct{})
-	}
-	for i := range ids {
-		sc.card[ids[i]] = struct{}{}
-	}
+	sc.mutation.AddCardIDs(ids...)
 	return sc
 }
 
@@ -43,7 +41,30 @@ func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
 
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	return sc.gremlinSave(ctx)
+	var (
+		err  error
+		node *Spec
+	)
+	if len(sc.hooks) == 0 {
+		node, err = sc.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*SpecMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			sc.mutation = mutation
+			node, err = sc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range sc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -73,7 +94,7 @@ func (sc *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
 
 func (sc *SpecCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(spec.Label)
-	for id := range sc.card {
+	for _, id := range sc.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	return v.ValueMap(true)

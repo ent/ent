@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
@@ -22,27 +23,9 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	age             *int32
-	addage          *int32
-	name            *string
-	nickname        *string
-	address         *string
-	clearaddress    bool
-	renamed         *string
-	clearrenamed    bool
-	blob            *[]byte
-	clearblob       bool
-	state           *user.State
-	clearstate      bool
-	parent          map[int]struct{}
-	children        map[int]struct{}
-	spouse          map[int]struct{}
-	car             map[int]struct{}
-	clearedParent   bool
-	removedChildren map[int]struct{}
-	clearedSpouse   bool
-	clearedCar      bool
-	predicates      []predicate.User
+	hooks      []ent.Hook
+	mutation   *UserMutation
+	predicates []predicate.User
 }
 
 // Where adds a new predicate for the builder.
@@ -53,36 +36,32 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int32) *UserUpdate {
-	uu.age = &i
-	uu.addage = nil
+	uu.mutation.ResetAge()
+	uu.mutation.SetAge(i)
 	return uu
 }
 
 // AddAge adds i to age.
 func (uu *UserUpdate) AddAge(i int32) *UserUpdate {
-	if uu.addage == nil {
-		uu.addage = &i
-	} else {
-		*uu.addage += i
-	}
+	uu.mutation.AddAge(i)
 	return uu
 }
 
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.name = &s
+	uu.mutation.SetName(s)
 	return uu
 }
 
 // SetNickname sets the nickname field.
 func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
-	uu.nickname = &s
+	uu.mutation.SetNickname(s)
 	return uu
 }
 
 // SetAddress sets the address field.
 func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
-	uu.address = &s
+	uu.mutation.SetAddress(s)
 	return uu
 }
 
@@ -96,14 +75,13 @@ func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 
 // ClearAddress clears the value of address.
 func (uu *UserUpdate) ClearAddress() *UserUpdate {
-	uu.address = nil
-	uu.clearaddress = true
+	uu.mutation.ClearAddress()
 	return uu
 }
 
 // SetRenamed sets the renamed field.
 func (uu *UserUpdate) SetRenamed(s string) *UserUpdate {
-	uu.renamed = &s
+	uu.mutation.SetRenamed(s)
 	return uu
 }
 
@@ -117,27 +95,25 @@ func (uu *UserUpdate) SetNillableRenamed(s *string) *UserUpdate {
 
 // ClearRenamed clears the value of renamed.
 func (uu *UserUpdate) ClearRenamed() *UserUpdate {
-	uu.renamed = nil
-	uu.clearrenamed = true
+	uu.mutation.ClearRenamed()
 	return uu
 }
 
 // SetBlob sets the blob field.
 func (uu *UserUpdate) SetBlob(b []byte) *UserUpdate {
-	uu.blob = &b
+	uu.mutation.SetBlob(b)
 	return uu
 }
 
 // ClearBlob clears the value of blob.
 func (uu *UserUpdate) ClearBlob() *UserUpdate {
-	uu.blob = nil
-	uu.clearblob = true
+	uu.mutation.ClearBlob()
 	return uu
 }
 
 // SetState sets the state field.
 func (uu *UserUpdate) SetState(u user.State) *UserUpdate {
-	uu.state = &u
+	uu.mutation.SetState(u)
 	return uu
 }
 
@@ -151,17 +127,13 @@ func (uu *UserUpdate) SetNillableState(u *user.State) *UserUpdate {
 
 // ClearState clears the value of state.
 func (uu *UserUpdate) ClearState() *UserUpdate {
-	uu.state = nil
-	uu.clearstate = true
+	uu.mutation.ClearState()
 	return uu
 }
 
 // SetParentID sets the parent edge to User by id.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
-	if uu.parent == nil {
-		uu.parent = make(map[int]struct{})
-	}
-	uu.parent[id] = struct{}{}
+	uu.mutation.SetParentID(id)
 	return uu
 }
 
@@ -180,12 +152,7 @@ func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	if uu.children == nil {
-		uu.children = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.children[ids[i]] = struct{}{}
-	}
+	uu.mutation.AddChildIDs(ids...)
 	return uu
 }
 
@@ -200,10 +167,7 @@ func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uu *UserUpdate) SetSpouseID(id int) *UserUpdate {
-	if uu.spouse == nil {
-		uu.spouse = make(map[int]struct{})
-	}
-	uu.spouse[id] = struct{}{}
+	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
@@ -222,10 +186,7 @@ func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 
 // SetCarID sets the car edge to Car by id.
 func (uu *UserUpdate) SetCarID(id int) *UserUpdate {
-	if uu.car == nil {
-		uu.car = make(map[int]struct{})
-	}
-	uu.car[id] = struct{}{}
+	uu.mutation.SetCarID(id)
 	return uu
 }
 
@@ -244,18 +205,13 @@ func (uu *UserUpdate) SetCar(c *Car) *UserUpdate {
 
 // ClearParent clears the parent edge to User.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
-	uu.clearedParent = true
+	uu.mutation.ClearParent()
 	return uu
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
 func (uu *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
-	if uu.removedChildren == nil {
-		uu.removedChildren = make(map[int]struct{})
-	}
-	for i := range ids {
-		uu.removedChildren[ids[i]] = struct{}{}
-	}
+	uu.mutation.RemoveChildIDs(ids...)
 	return uu
 }
 
@@ -270,38 +226,61 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 
 // ClearSpouse clears the spouse edge to User.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
-	uu.clearedSpouse = true
+	uu.mutation.ClearSpouse()
 	return uu
 }
 
 // ClearCar clears the car edge to Car.
 func (uu *UserUpdate) ClearCar() *UserUpdate {
-	uu.clearedCar = true
+	uu.mutation.ClearCar()
 	return uu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	if uu.name != nil {
-		if err := user.NameValidator(*uu.name); err != nil {
+	if v, ok := uu.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
 			return 0, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
 		}
 	}
-	if uu.state != nil {
-		if err := user.StateValidator(*uu.state); err != nil {
+	if v, ok := uu.mutation.State(); ok {
+		if err := user.StateValidator(v); err != nil {
 			return 0, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
 		}
 	}
-	if len(uu.parent) > 1 {
+	if len(uu.mutation.ParentIDs()) > 1 {
 		return 0, errors.New("entv1: multiple assignments on a unique edge \"parent\"")
 	}
-	if len(uu.spouse) > 1 {
+	if len(uu.mutation.SpouseIDs()) > 1 {
 		return 0, errors.New("entv1: multiple assignments on a unique edge \"spouse\"")
 	}
-	if len(uu.car) > 1 {
+	if len(uu.mutation.CarIDs()) > 1 {
 		return 0, errors.New("entv1: multiple assignments on a unique edge \"car\"")
 	}
-	return uu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(uu.hooks) == 0 {
+		affected, err = uu.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uu.mutation = mutation
+			affected, err = uu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range uu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -344,87 +323,87 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := uu.age; value != nil {
+	if value, ok := uu.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uu.addage; value != nil {
+	if value, ok := uu.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uu.name; value != nil {
+	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if value := uu.nickname; value != nil {
+	if value, ok := uu.mutation.Nickname(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldNickname,
 		})
 	}
-	if value := uu.address; value != nil {
+	if value, ok := uu.mutation.Address(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAddress,
 		})
 	}
-	if uu.clearaddress {
+	if uu.mutation.AddressCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldAddress,
 		})
 	}
-	if value := uu.renamed; value != nil {
+	if value, ok := uu.mutation.Renamed(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldRenamed,
 		})
 	}
-	if uu.clearrenamed {
+	if uu.mutation.RenamedCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldRenamed,
 		})
 	}
-	if value := uu.blob; value != nil {
+	if value, ok := uu.mutation.Blob(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldBlob,
 		})
 	}
-	if uu.clearblob {
+	if uu.mutation.BlobCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: user.FieldBlob,
 		})
 	}
-	if value := uu.state; value != nil {
+	if value, ok := uu.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldState,
 		})
 	}
-	if uu.clearstate {
+	if uu.mutation.StateCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: user.FieldState,
 		})
 	}
-	if uu.clearedParent {
+	if uu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -440,7 +419,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.parent; len(nodes) > 0 {
+	if nodes := uu.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -454,12 +433,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uu.removedChildren; len(nodes) > 0 {
+	if nodes := uu.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -473,12 +452,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.children; len(nodes) > 0 {
+	if nodes := uu.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -492,12 +471,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.clearedSpouse {
+	if uu.mutation.SpouseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -513,7 +492,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.spouse; len(nodes) > 0 {
+	if nodes := uu.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -527,12 +506,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.clearedCar {
+	if uu.mutation.CarCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -548,7 +527,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.car; len(nodes) > 0 {
+	if nodes := uu.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -562,7 +541,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -581,61 +560,38 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
-	id              int
-	age             *int32
-	addage          *int32
-	name            *string
-	nickname        *string
-	address         *string
-	clearaddress    bool
-	renamed         *string
-	clearrenamed    bool
-	blob            *[]byte
-	clearblob       bool
-	state           *user.State
-	clearstate      bool
-	parent          map[int]struct{}
-	children        map[int]struct{}
-	spouse          map[int]struct{}
-	car             map[int]struct{}
-	clearedParent   bool
-	removedChildren map[int]struct{}
-	clearedSpouse   bool
-	clearedCar      bool
+	hooks    []ent.Hook
+	mutation *UserMutation
 }
 
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
-	uuo.age = &i
-	uuo.addage = nil
+	uuo.mutation.ResetAge()
+	uuo.mutation.SetAge(i)
 	return uuo
 }
 
 // AddAge adds i to age.
 func (uuo *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
-	if uuo.addage == nil {
-		uuo.addage = &i
-	} else {
-		*uuo.addage += i
-	}
+	uuo.mutation.AddAge(i)
 	return uuo
 }
 
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.name = &s
+	uuo.mutation.SetName(s)
 	return uuo
 }
 
 // SetNickname sets the nickname field.
 func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
-	uuo.nickname = &s
+	uuo.mutation.SetNickname(s)
 	return uuo
 }
 
 // SetAddress sets the address field.
 func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
-	uuo.address = &s
+	uuo.mutation.SetAddress(s)
 	return uuo
 }
 
@@ -649,14 +605,13 @@ func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 
 // ClearAddress clears the value of address.
 func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	uuo.address = nil
-	uuo.clearaddress = true
+	uuo.mutation.ClearAddress()
 	return uuo
 }
 
 // SetRenamed sets the renamed field.
 func (uuo *UserUpdateOne) SetRenamed(s string) *UserUpdateOne {
-	uuo.renamed = &s
+	uuo.mutation.SetRenamed(s)
 	return uuo
 }
 
@@ -670,27 +625,25 @@ func (uuo *UserUpdateOne) SetNillableRenamed(s *string) *UserUpdateOne {
 
 // ClearRenamed clears the value of renamed.
 func (uuo *UserUpdateOne) ClearRenamed() *UserUpdateOne {
-	uuo.renamed = nil
-	uuo.clearrenamed = true
+	uuo.mutation.ClearRenamed()
 	return uuo
 }
 
 // SetBlob sets the blob field.
 func (uuo *UserUpdateOne) SetBlob(b []byte) *UserUpdateOne {
-	uuo.blob = &b
+	uuo.mutation.SetBlob(b)
 	return uuo
 }
 
 // ClearBlob clears the value of blob.
 func (uuo *UserUpdateOne) ClearBlob() *UserUpdateOne {
-	uuo.blob = nil
-	uuo.clearblob = true
+	uuo.mutation.ClearBlob()
 	return uuo
 }
 
 // SetState sets the state field.
 func (uuo *UserUpdateOne) SetState(u user.State) *UserUpdateOne {
-	uuo.state = &u
+	uuo.mutation.SetState(u)
 	return uuo
 }
 
@@ -704,17 +657,13 @@ func (uuo *UserUpdateOne) SetNillableState(u *user.State) *UserUpdateOne {
 
 // ClearState clears the value of state.
 func (uuo *UserUpdateOne) ClearState() *UserUpdateOne {
-	uuo.state = nil
-	uuo.clearstate = true
+	uuo.mutation.ClearState()
 	return uuo
 }
 
 // SetParentID sets the parent edge to User by id.
 func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
-	if uuo.parent == nil {
-		uuo.parent = make(map[int]struct{})
-	}
-	uuo.parent[id] = struct{}{}
+	uuo.mutation.SetParentID(id)
 	return uuo
 }
 
@@ -733,12 +682,7 @@ func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
-	if uuo.children == nil {
-		uuo.children = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.children[ids[i]] = struct{}{}
-	}
+	uuo.mutation.AddChildIDs(ids...)
 	return uuo
 }
 
@@ -753,10 +697,7 @@ func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uuo *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
-	if uuo.spouse == nil {
-		uuo.spouse = make(map[int]struct{})
-	}
-	uuo.spouse[id] = struct{}{}
+	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
@@ -775,10 +716,7 @@ func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 
 // SetCarID sets the car edge to Car by id.
 func (uuo *UserUpdateOne) SetCarID(id int) *UserUpdateOne {
-	if uuo.car == nil {
-		uuo.car = make(map[int]struct{})
-	}
-	uuo.car[id] = struct{}{}
+	uuo.mutation.SetCarID(id)
 	return uuo
 }
 
@@ -797,18 +735,13 @@ func (uuo *UserUpdateOne) SetCar(c *Car) *UserUpdateOne {
 
 // ClearParent clears the parent edge to User.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
-	uuo.clearedParent = true
+	uuo.mutation.ClearParent()
 	return uuo
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
 func (uuo *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
-	if uuo.removedChildren == nil {
-		uuo.removedChildren = make(map[int]struct{})
-	}
-	for i := range ids {
-		uuo.removedChildren[ids[i]] = struct{}{}
-	}
+	uuo.mutation.RemoveChildIDs(ids...)
 	return uuo
 }
 
@@ -823,38 +756,61 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 
 // ClearSpouse clears the spouse edge to User.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	uuo.clearedSpouse = true
+	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
 // ClearCar clears the car edge to Car.
 func (uuo *UserUpdateOne) ClearCar() *UserUpdateOne {
-	uuo.clearedCar = true
+	uuo.mutation.ClearCar()
 	return uuo
 }
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	if uuo.name != nil {
-		if err := user.NameValidator(*uuo.name); err != nil {
+	if v, ok := uuo.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
 			return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
 		}
 	}
-	if uuo.state != nil {
-		if err := user.StateValidator(*uuo.state); err != nil {
+	if v, ok := uuo.mutation.State(); ok {
+		if err := user.StateValidator(v); err != nil {
 			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
 		}
 	}
-	if len(uuo.parent) > 1 {
+	if len(uuo.mutation.ParentIDs()) > 1 {
 		return nil, errors.New("entv1: multiple assignments on a unique edge \"parent\"")
 	}
-	if len(uuo.spouse) > 1 {
+	if len(uuo.mutation.SpouseIDs()) > 1 {
 		return nil, errors.New("entv1: multiple assignments on a unique edge \"spouse\"")
 	}
-	if len(uuo.car) > 1 {
+	if len(uuo.mutation.CarIDs()) > 1 {
 		return nil, errors.New("entv1: multiple assignments on a unique edge \"car\"")
 	}
-	return uuo.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uuo.hooks) == 0 {
+		node, err = uuo.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uuo.mutation = mutation
+			node, err = uuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -885,93 +841,97 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  uuo.id,
 				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
 	}
-	if value := uuo.age; value != nil {
+	id, ok := uuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing User.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := uuo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uuo.addage; value != nil {
+	if value, ok := uuo.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
 	}
-	if value := uuo.name; value != nil {
+	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
 	}
-	if value := uuo.nickname; value != nil {
+	if value, ok := uuo.mutation.Nickname(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldNickname,
 		})
 	}
-	if value := uuo.address; value != nil {
+	if value, ok := uuo.mutation.Address(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAddress,
 		})
 	}
-	if uuo.clearaddress {
+	if uuo.mutation.AddressCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldAddress,
 		})
 	}
-	if value := uuo.renamed; value != nil {
+	if value, ok := uuo.mutation.Renamed(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldRenamed,
 		})
 	}
-	if uuo.clearrenamed {
+	if uuo.mutation.RenamedCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldRenamed,
 		})
 	}
-	if value := uuo.blob; value != nil {
+	if value, ok := uuo.mutation.Blob(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldBlob,
 		})
 	}
-	if uuo.clearblob {
+	if uuo.mutation.BlobCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: user.FieldBlob,
 		})
 	}
-	if value := uuo.state; value != nil {
+	if value, ok := uuo.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldState,
 		})
 	}
-	if uuo.clearstate {
+	if uuo.mutation.StateCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: user.FieldState,
 		})
 	}
-	if uuo.clearedParent {
+	if uuo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -987,7 +947,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.parent; len(nodes) > 0 {
+	if nodes := uuo.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -1001,12 +961,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uuo.removedChildren; len(nodes) > 0 {
+	if nodes := uuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1020,12 +980,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.children; len(nodes) > 0 {
+	if nodes := uuo.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1039,12 +999,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.clearedSpouse {
+	if uuo.mutation.SpouseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1060,7 +1020,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.spouse; len(nodes) > 0 {
+	if nodes := uuo.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1074,12 +1034,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.clearedCar {
+	if uuo.mutation.CarCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1095,7 +1055,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.car; len(nodes) > 0 {
+	if nodes := uuo.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1109,7 +1069,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

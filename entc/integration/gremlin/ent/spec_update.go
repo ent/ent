@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
@@ -20,9 +22,9 @@ import (
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	config
-	card        map[string]struct{}
-	removedCard map[string]struct{}
-	predicates  []predicate.Spec
+	hooks      []ent.Hook
+	mutation   *SpecMutation
+	predicates []predicate.Spec
 }
 
 // Where adds a new predicate for the builder.
@@ -33,12 +35,7 @@ func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 
 // AddCardIDs adds the card edge to Card by ids.
 func (su *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
-	if su.card == nil {
-		su.card = make(map[string]struct{})
-	}
-	for i := range ids {
-		su.card[ids[i]] = struct{}{}
-	}
+	su.mutation.AddCardIDs(ids...)
 	return su
 }
 
@@ -53,12 +50,7 @@ func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
-	if su.removedCard == nil {
-		su.removedCard = make(map[string]struct{})
-	}
-	for i := range ids {
-		su.removedCard[ids[i]] = struct{}{}
-	}
+	su.mutation.RemoveCardIDs(ids...)
 	return su
 }
 
@@ -73,7 +65,30 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
-	return su.gremlinSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(su.hooks) == 0 {
+		affected, err = su.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*SpecMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			su.mutation = mutation
+			affected, err = su.gremlinSave(ctx)
+			return affected, err
+		})
+		for _, hook := range su.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -121,11 +136,11 @@ func (su *SpecUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	for id := range su.removedCard {
+	for _, id := range su.mutation.RemovedCardIDs() {
 		tr := rv.Clone().OutE(spec.CardLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range su.card {
+	for _, id := range su.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	v.Count()
@@ -136,19 +151,13 @@ func (su *SpecUpdate) gremlin() *dsl.Traversal {
 // SpecUpdateOne is the builder for updating a single Spec entity.
 type SpecUpdateOne struct {
 	config
-	id          string
-	card        map[string]struct{}
-	removedCard map[string]struct{}
+	hooks    []ent.Hook
+	mutation *SpecMutation
 }
 
 // AddCardIDs adds the card edge to Card by ids.
 func (suo *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
-	if suo.card == nil {
-		suo.card = make(map[string]struct{})
-	}
-	for i := range ids {
-		suo.card[ids[i]] = struct{}{}
-	}
+	suo.mutation.AddCardIDs(ids...)
 	return suo
 }
 
@@ -163,12 +172,7 @@ func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 
 // RemoveCardIDs removes the card edge to Card by ids.
 func (suo *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
-	if suo.removedCard == nil {
-		suo.removedCard = make(map[string]struct{})
-	}
-	for i := range ids {
-		suo.removedCard[ids[i]] = struct{}{}
-	}
+	suo.mutation.RemoveCardIDs(ids...)
 	return suo
 }
 
@@ -183,7 +187,30 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-	return suo.gremlinSave(ctx)
+	var (
+		err  error
+		node *Spec
+	)
+	if len(suo.hooks) == 0 {
+		node, err = suo.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*SpecMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			suo.mutation = mutation
+			node, err = suo.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range suo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, suo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -210,7 +237,11 @@ func (suo *SpecUpdateOne) ExecX(ctx context.Context) {
 
 func (suo *SpecUpdateOne) gremlinSave(ctx context.Context) (*Spec, error) {
 	res := &gremlin.Response{}
-	query, bindings := suo.gremlin(suo.id).Query()
+	id, ok := suo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Spec.ID for update")
+	}
+	query, bindings := suo.gremlin(id).Query()
 	if err := suo.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -232,11 +263,11 @@ func (suo *SpecUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	for id := range suo.removedCard {
+	for _, id := range suo.mutation.RemovedCardIDs() {
 		tr := rv.Clone().OutE(spec.CardLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range suo.card {
+	for _, id := range suo.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	v.ValueMap(true)

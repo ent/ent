@@ -8,8 +8,10 @@ package ent
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
 	"github.com/facebookincubator/ent/schema/field"
@@ -18,11 +20,36 @@ import (
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	config
+	mutation *ItemMutation
+	hooks    []ent.Hook
 }
 
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	return ic.sqlSave(ctx)
+	var (
+		err  error
+		node *Item
+	)
+	if len(ic.hooks) == 0 {
+		node, err = ic.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*ItemMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ic.mutation = mutation
+			node, err = ic.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range ic.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.

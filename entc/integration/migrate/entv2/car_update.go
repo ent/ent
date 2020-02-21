@@ -9,7 +9,9 @@ package entv2
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
@@ -21,9 +23,9 @@ import (
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	config
-	owner        map[int]struct{}
-	clearedOwner bool
-	predicates   []predicate.Car
+	hooks      []ent.Hook
+	mutation   *CarMutation
+	predicates []predicate.Car
 }
 
 // Where adds a new predicate for the builder.
@@ -34,10 +36,7 @@ func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 
 // SetOwnerID sets the owner edge to User by id.
 func (cu *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	if cu.owner == nil {
-		cu.owner = make(map[int]struct{})
-	}
-	cu.owner[id] = struct{}{}
+	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
@@ -56,16 +55,39 @@ func (cu *CarUpdate) SetOwner(u *User) *CarUpdate {
 
 // ClearOwner clears the owner edge to User.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
-	cu.clearedOwner = true
+	cu.mutation.ClearOwner()
 	return cu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	if len(cu.owner) > 1 {
+	if len(cu.mutation.OwnerIDs()) > 1 {
 		return 0, errors.New("entv2: multiple assignments on a unique edge \"owner\"")
 	}
-	return cu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(cu.hooks) == 0 {
+		affected, err = cu.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*CarMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cu.mutation = mutation
+			affected, err = cu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range cu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -108,7 +130,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if cu.clearedOwner {
+	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -124,7 +146,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.owner; len(nodes) > 0 {
+	if nodes := cu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -138,7 +160,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -157,17 +179,13 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CarUpdateOne is the builder for updating a single Car entity.
 type CarUpdateOne struct {
 	config
-	id           int
-	owner        map[int]struct{}
-	clearedOwner bool
+	hooks    []ent.Hook
+	mutation *CarMutation
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (cuo *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	if cuo.owner == nil {
-		cuo.owner = make(map[int]struct{})
-	}
-	cuo.owner[id] = struct{}{}
+	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
@@ -186,16 +204,39 @@ func (cuo *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
 
 // ClearOwner clears the owner edge to User.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	cuo.clearedOwner = true
+	cuo.mutation.ClearOwner()
 	return cuo
 }
 
 // Save executes the query and returns the updated entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	if len(cuo.owner) > 1 {
+	if len(cuo.mutation.OwnerIDs()) > 1 {
 		return nil, errors.New("entv2: multiple assignments on a unique edge \"owner\"")
 	}
-	return cuo.sqlSave(ctx)
+	var (
+		err  error
+		node *Car
+	)
+	if len(cuo.hooks) == 0 {
+		node, err = cuo.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*CarMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cuo.mutation = mutation
+			node, err = cuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range cuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -226,13 +267,17 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 			Table:   car.Table,
 			Columns: car.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  cuo.id,
 				Type:   field.TypeInt,
 				Column: car.FieldID,
 			},
 		},
 	}
-	if cuo.clearedOwner {
+	id, ok := cuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Car.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -248,7 +293,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.owner; len(nodes) > 0 {
+	if nodes := cuo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -262,7 +307,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

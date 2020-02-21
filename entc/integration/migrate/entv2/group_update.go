@@ -8,7 +8,9 @@ package entv2
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
@@ -19,6 +21,8 @@ import (
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
+	hooks      []ent.Hook
+	mutation   *GroupMutation
 	predicates []predicate.Group
 }
 
@@ -30,7 +34,30 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	return gu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(gu.hooks) == 0 {
+		affected, err = gu.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gu.mutation = mutation
+			affected, err = gu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range gu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -87,12 +114,36 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
-	id int
+	hooks    []ent.Hook
+	mutation *GroupMutation
 }
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	return guo.sqlSave(ctx)
+	var (
+		err  error
+		node *Group
+	)
+	if len(guo.hooks) == 0 {
+		node, err = guo.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			guo.mutation = mutation
+			node, err = guo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range guo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -123,12 +174,16 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  guo.id,
 				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
 	}
+	id, ok := guo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Group.ID for update")
+	}
+	_spec.Node.ID.Value = id
 	gr = &Group{config: guo.config}
 	_spec.Assign = gr.assignValues
 	_spec.ScanValues = gr.scanValues()

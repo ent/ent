@@ -91,6 +91,10 @@ var (
 			Format: "config.go",
 		},
 		{
+			Name:   "mutation",
+			Format: "mutation.go",
+		},
+		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
 			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
@@ -103,6 +107,20 @@ var (
 		{
 			Name:   "predicate",
 			Format: "predicate/predicate.go",
+		},
+		// The 2 definitions below declare the entschema template, but with
+		// 2 different destinations. If any of the schemas has static hooks
+		// a cyclic-imports is possible (between ent and the schema package),
+		// and we move the "schema runtime binding" to a separate package.
+		{
+			Name:   "entschema",
+			Format: "entschema.go",
+			Skip:   func(g *Graph) bool { return hasStaticHooks(g) || !hasRuntimeSchema(g) },
+		},
+		{
+			Name:   "entschema",
+			Format: "entschema/entschema.go",
+			Skip:   func(g *Graph) bool { return !hasStaticHooks(g) },
 		},
 	}
 	// templates holds the Go templates for the code generation.
@@ -136,4 +154,26 @@ func init() {
 
 func pkgf(s string) func(t *Type) string {
 	return func(t *Type) string { return fmt.Sprintf(s, t.Package()) }
+}
+
+// hasStaticHooks reports whether any of the schemas
+// in the schema package has static hook.
+func hasStaticHooks(g *Graph) bool {
+	for _, n := range g.Nodes {
+		if n.NumHooks() > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// hasRuntimeSchema reports whether any of the schemas needs
+// to be loaded at runtime (for default values or validators).
+func hasRuntimeSchema(g *Graph) bool {
+	for _, n := range g.Nodes {
+		if n.HasDefault() || n.HasValidators() {
+			return true
+		}
+	}
+	return false
 }

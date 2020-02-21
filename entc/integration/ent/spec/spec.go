@@ -12,6 +12,9 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 
+	// EdgeCard holds the string denoting the card edge name in mutations.
+	EdgeCard = "card"
+
 	// Table holds the table name of the spec in the database.
 	Table = "specs"
 	// CardTable is the table the holds the card relation/edge. The primary key declared below.

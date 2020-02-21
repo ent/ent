@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
@@ -20,7 +22,8 @@ import (
 // BlobUpdate is the builder for updating Blob entities.
 type BlobUpdate struct {
 	config
-	uuid       *uuid.UUID
+	hooks      []ent.Hook
+	mutation   *BlobMutation
 	predicates []predicate.Blob
 }
 
@@ -32,13 +35,36 @@ func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 
 // SetUUID sets the uuid field.
 func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
-	bu.uuid = &u
+	bu.mutation.SetUUID(u)
 	return bu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
-	return bu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(bu.hooks) == 0 {
+		affected, err = bu.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*BlobMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			bu.mutation = mutation
+			affected, err = bu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range bu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -81,10 +107,10 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := bu.uuid; value != nil {
+	if value, ok := bu.mutation.UUID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Value:  *value,
+			Value:  value,
 			Column: blob.FieldUUID,
 		})
 	}
@@ -102,19 +128,42 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // BlobUpdateOne is the builder for updating a single Blob entity.
 type BlobUpdateOne struct {
 	config
-	id   uuid.UUID
-	uuid *uuid.UUID
+	hooks    []ent.Hook
+	mutation *BlobMutation
 }
 
 // SetUUID sets the uuid field.
 func (buo *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
-	buo.uuid = &u
+	buo.mutation.SetUUID(u)
 	return buo
 }
 
 // Save executes the query and returns the updated entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-	return buo.sqlSave(ctx)
+	var (
+		err  error
+		node *Blob
+	)
+	if len(buo.hooks) == 0 {
+		node, err = buo.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*BlobMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			buo.mutation = mutation
+			node, err = buo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range buo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, buo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -145,16 +194,20 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 			Table:   blob.Table,
 			Columns: blob.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  buo.id,
 				Type:   field.TypeUUID,
 				Column: blob.FieldID,
 			},
 		},
 	}
-	if value := buo.uuid; value != nil {
+	id, ok := buo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Blob.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := buo.mutation.UUID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Value:  *value,
+			Value:  value,
 			Column: blob.FieldUUID,
 		})
 	}

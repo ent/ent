@@ -10,12 +10,9 @@ const (
 	// Label holds the string label denoting the comment type in the database.
 	Label = "comment"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldUniqueInt holds the string denoting the unique_int vertex property in the database.
-	FieldUniqueInt = "unique_int"
-	// FieldUniqueFloat holds the string denoting the unique_float vertex property in the database.
-	FieldUniqueFloat = "unique_float"
-	// FieldNillableInt holds the string denoting the nillable_int vertex property in the database.
+	FieldID          = "id"           // FieldUniqueInt holds the string denoting the unique_int vertex property in the database.
+	FieldUniqueInt   = "unique_int"   // FieldUniqueFloat holds the string denoting the unique_float vertex property in the database.
+	FieldUniqueFloat = "unique_float" // FieldNillableInt holds the string denoting the nillable_int vertex property in the database.
 	FieldNillableInt = "nillable_int"
 
 	// Table holds the table name of the comment in the database.

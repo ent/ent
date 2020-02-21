@@ -6,17 +6,15 @@
 
 package group
 
-import (
-	"github.com/facebookincubator/ent/examples/start/ent/schema"
-)
-
 const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldName holds the string denoting the name vertex property in the database.
+	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
 
 	// Table holds the table name of the group in the database.
 	Table = "groups"
@@ -39,11 +37,9 @@ var (
 	UsersPrimaryKey = []string{"group_id", "user_id"}
 )
 
+// Note that the variables below are initialized by by the `ent`
+// package in the initialization of the application (using `init`).
 var (
-	fields = schema.Group{}.Fields()
-
-	// descName is the schema descriptor for name field.
-	descName = fields[0].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
+	NameValidator func(string) error
 )

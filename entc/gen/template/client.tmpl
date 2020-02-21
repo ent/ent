@@ -111,7 +111,16 @@ func (c *Client) Close() error {
 	return c.driver.Close()
 }
 
-{{ range $_, $n := $.Nodes -}}
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...ent.Hook) {
+	{{- range $_, $n := $.Nodes }}
+		c.{{ $n.Name }}.Use(hooks...)
+	{{- end }}
+}
+
+
+{{ range $_, $n := $.Nodes }}
 {{ $client := print $n.Name "Client" }}
 // {{ $client }} is a client for the {{ $n.Name }} schema.
 type {{ $client }} struct {
@@ -125,14 +134,24 @@ func New{{ $client }}(c config) *{{ $client }} {
 	return &{{ $client }}{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
+func (c *{{ $client }}) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for {{ $n.Name }}.
 func (c *{{ $client }}) Create() *{{ $n.Name }}Create {
-	return &{{ $n.Name }}Create{config: c.config}
+	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
+	mutation := new{{ $n.MutationName }}(OpCreate)
+	return &{{ $n.Name }}Create{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $n.Name }}Update {
-	return &{{ $n.Name }}Update{config: c.config}
+	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
+	mutation := new{{ $n.MutationName }}(OpUpdate)
+	return &{{ $n.Name }}Update{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -142,12 +161,17 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}Updat
 
 // UpdateOneID returns an update builder for the given id.
 func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}UpdateOne {
-	return &{{ $n.Name }}UpdateOne{config: c.config, id: id}
+	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
+	mutation := new{{ $n.MutationName }}(OpUpdateOne)
+	mutation.id = &id
+	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $n.Name }}Delete {
-	return &{{ $n.Name }}Delete{config: c.config}
+	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
+	mutation := new{{ $n.MutationName }}(OpDelete)
+	return &{{ $n.Name }}Delete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -157,7 +181,10 @@ func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}Delet
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}DeleteOne {
-	return &{{ $n.Name }}DeleteOne{c.Delete().Where({{ $n.Package }}.ID(id))}
+	builder := c.Delete().Where({{ $n.Package }}.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &{{ $n.Name }}DeleteOne{builder}
 }
 
 // Create returns a query builder for {{ $n.Name }}.

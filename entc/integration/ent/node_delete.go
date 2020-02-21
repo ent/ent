@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
@@ -19,6 +21,8 @@ import (
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
+	hooks      []ent.Hook
+	mutation   *NodeMutation
 	predicates []predicate.Node
 }
 
@@ -30,7 +34,30 @@ func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
-	return nd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(nd.hooks) == 0 {
+		affected, err = nd.sqlExec(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nd.mutation = mutation
+			affected, err = nd.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range nd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, nd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

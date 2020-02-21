@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
@@ -19,6 +21,8 @@ import (
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
+	hooks      []ent.Hook
+	mutation   *ItemMutation
 	predicates []predicate.Item
 }
 
@@ -30,7 +34,30 @@ func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
-	return id.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(id.hooks) == 0 {
+		affected, err = id.sqlExec(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*ItemMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			id.mutation = mutation
+			affected, err = id.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range id.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

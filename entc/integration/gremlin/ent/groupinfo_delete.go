@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
@@ -20,6 +22,8 @@ import (
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
+	hooks      []ent.Hook
+	mutation   *GroupInfoMutation
 	predicates []predicate.GroupInfo
 }
 
@@ -31,7 +35,30 @@ func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
-	return gid.gremlinExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(gid.hooks) == 0 {
+		affected, err = gid.gremlinExec(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*GroupInfoMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gid.mutation = mutation
+			affected, err = gid.gremlinExec(ctx)
+			return affected, err
+		})
+		for _, hook := range gid.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

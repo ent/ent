@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
@@ -20,6 +22,8 @@ import (
 // FileDelete is the builder for deleting a File entity.
 type FileDelete struct {
 	config
+	hooks      []ent.Hook
+	mutation   *FileMutation
 	predicates []predicate.File
 }
 
@@ -31,7 +35,30 @@ func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
-	return fd.gremlinExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(fd.hooks) == 0 {
+		affected, err = fd.gremlinExec(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*FileMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			fd.mutation = mutation
+			affected, err = fd.gremlinExec(ctx)
+			return affected, err
+		})
+		for _, hook := range fd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, fd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

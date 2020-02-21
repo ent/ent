@@ -9,7 +9,9 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/traversal/ent/pet"
@@ -21,12 +23,9 @@ import (
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	name           *string
-	friends        map[int]struct{}
-	owner          map[int]struct{}
-	removedFriends map[int]struct{}
-	clearedOwner   bool
-	predicates     []predicate.Pet
+	hooks      []ent.Hook
+	mutation   *PetMutation
+	predicates []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
@@ -37,18 +36,13 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 
 // SetName sets the name field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
-	pu.name = &s
+	pu.mutation.SetName(s)
 	return pu
 }
 
 // AddFriendIDs adds the friends edge to Pet by ids.
 func (pu *PetUpdate) AddFriendIDs(ids ...int) *PetUpdate {
-	if pu.friends == nil {
-		pu.friends = make(map[int]struct{})
-	}
-	for i := range ids {
-		pu.friends[ids[i]] = struct{}{}
-	}
+	pu.mutation.AddFriendIDs(ids...)
 	return pu
 }
 
@@ -63,10 +57,7 @@ func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 
 // SetOwnerID sets the owner edge to User by id.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	if pu.owner == nil {
-		pu.owner = make(map[int]struct{})
-	}
-	pu.owner[id] = struct{}{}
+	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
@@ -85,12 +76,7 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 
 // RemoveFriendIDs removes the friends edge to Pet by ids.
 func (pu *PetUpdate) RemoveFriendIDs(ids ...int) *PetUpdate {
-	if pu.removedFriends == nil {
-		pu.removedFriends = make(map[int]struct{})
-	}
-	for i := range ids {
-		pu.removedFriends[ids[i]] = struct{}{}
-	}
+	pu.mutation.RemoveFriendIDs(ids...)
 	return pu
 }
 
@@ -105,16 +91,39 @@ func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 
 // ClearOwner clears the owner edge to User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
-	pu.clearedOwner = true
+	pu.mutation.ClearOwner()
 	return pu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	if len(pu.owner) > 1 {
+	if len(pu.mutation.OwnerIDs()) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	return pu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(pu.hooks) == 0 {
+		affected, err = pu.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pu.mutation = mutation
+			affected, err = pu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range pu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -157,14 +166,14 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := pu.name; value != nil {
+	if value, ok := pu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldName,
 		})
 	}
-	if nodes := pu.removedFriends; len(nodes) > 0 {
+	if nodes := pu.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -178,12 +187,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.friends; len(nodes) > 0 {
+	if nodes := pu.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -197,12 +206,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pu.clearedOwner {
+	if pu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -218,7 +227,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.owner; len(nodes) > 0 {
+	if nodes := pu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -232,7 +241,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -251,28 +260,19 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id             int
-	name           *string
-	friends        map[int]struct{}
-	owner          map[int]struct{}
-	removedFriends map[int]struct{}
-	clearedOwner   bool
+	hooks    []ent.Hook
+	mutation *PetMutation
 }
 
 // SetName sets the name field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
-	puo.name = &s
+	puo.mutation.SetName(s)
 	return puo
 }
 
 // AddFriendIDs adds the friends edge to Pet by ids.
 func (puo *PetUpdateOne) AddFriendIDs(ids ...int) *PetUpdateOne {
-	if puo.friends == nil {
-		puo.friends = make(map[int]struct{})
-	}
-	for i := range ids {
-		puo.friends[ids[i]] = struct{}{}
-	}
+	puo.mutation.AddFriendIDs(ids...)
 	return puo
 }
 
@@ -287,10 +287,7 @@ func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 
 // SetOwnerID sets the owner edge to User by id.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	if puo.owner == nil {
-		puo.owner = make(map[int]struct{})
-	}
-	puo.owner[id] = struct{}{}
+	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
@@ -309,12 +306,7 @@ func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 
 // RemoveFriendIDs removes the friends edge to Pet by ids.
 func (puo *PetUpdateOne) RemoveFriendIDs(ids ...int) *PetUpdateOne {
-	if puo.removedFriends == nil {
-		puo.removedFriends = make(map[int]struct{})
-	}
-	for i := range ids {
-		puo.removedFriends[ids[i]] = struct{}{}
-	}
+	puo.mutation.RemoveFriendIDs(ids...)
 	return puo
 }
 
@@ -329,16 +321,39 @@ func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 
 // ClearOwner clears the owner edge to User.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	puo.clearedOwner = true
+	puo.mutation.ClearOwner()
 	return puo
 }
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	if len(puo.owner) > 1 {
+	if len(puo.mutation.OwnerIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	return puo.sqlSave(ctx)
+	var (
+		err  error
+		node *Pet
+	)
+	if len(puo.hooks) == 0 {
+		node, err = puo.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			puo.mutation = mutation
+			node, err = puo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range puo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -369,20 +384,24 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  puo.id,
 				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		},
 	}
-	if value := puo.name; value != nil {
+	id, ok := puo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing Pet.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := puo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldName,
 		})
 	}
-	if nodes := puo.removedFriends; len(nodes) > 0 {
+	if nodes := puo.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -396,12 +415,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.friends; len(nodes) > 0 {
+	if nodes := puo.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -415,12 +434,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if puo.clearedOwner {
+	if puo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -436,7 +455,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.owner; len(nodes) > 0 {
+	if nodes := puo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -450,7 +469,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

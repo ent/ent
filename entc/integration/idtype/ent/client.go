@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/integration/idtype/ent/migrate"
 
 	"github.com/facebookincubator/ent/entc/integration/idtype/ent/user"
@@ -96,6 +97,12 @@ func (c *Client) Close() error {
 	return c.driver.Close()
 }
 
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...ent.Hook) {
+	c.User.Use(hooks...)
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -106,14 +113,24 @@ func NewUserClient(c config) *UserClient {
 	return &UserClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...ent.Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
 // Create returns a create builder for User.
 func (c *UserClient) Create() *UserCreate {
-	return &UserCreate{config: c.config}
+	hooks := c.hooks
+	mutation := newUserMutation(OpCreate)
+	return &UserCreate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
-	return &UserUpdate{config: c.config}
+	hooks := c.hooks
+	mutation := newUserMutation(OpUpdate)
+	return &UserUpdate{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -123,12 +140,17 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id uint64) *UserUpdateOne {
-	return &UserUpdateOne{config: c.config, id: id}
+	hooks := c.hooks
+	mutation := newUserMutation(OpUpdateOne)
+	mutation.id = &id
+	return &UserUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // Delete returns a delete builder for User.
 func (c *UserClient) Delete() *UserDelete {
-	return &UserDelete{config: c.config}
+	hooks := c.hooks
+	mutation := newUserMutation(OpDelete)
+	return &UserDelete{config: c.config, hooks: hooks, mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -138,7 +160,10 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *UserClient) DeleteOneID(id uint64) *UserDeleteOne {
-	return &UserDeleteOne{c.Delete().Where(user.ID(id))}
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
 }
 
 // Create returns a query builder for User.

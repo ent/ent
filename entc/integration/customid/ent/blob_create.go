@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
 	"github.com/facebookincubator/ent/schema/field"
@@ -18,29 +20,52 @@ import (
 // BlobCreate is the builder for creating a Blob entity.
 type BlobCreate struct {
 	config
-	id   *uuid.UUID
-	uuid *uuid.UUID
+	mutation *BlobMutation
+	hooks    []ent.Hook
 }
 
 // SetUUID sets the uuid field.
 func (bc *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
-	bc.uuid = &u
+	bc.mutation.SetUUID(u)
 	return bc
 }
 
 // SetID sets the id field.
 func (bc *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
-	bc.id = &u
+	bc.mutation.SetID(u)
 	return bc
 }
 
 // Save creates the Blob in the database.
 func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
-	if bc.uuid == nil {
+	if _, ok := bc.mutation.UUID(); !ok {
 		v := blob.DefaultUUID()
-		bc.uuid = &v
+		bc.mutation.SetUUID(v)
 	}
-	return bc.sqlSave(ctx)
+	var (
+		err  error
+		node *Blob
+	)
+	if len(bc.hooks) == 0 {
+		node, err = bc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*BlobMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			bc.mutation = mutation
+			node, err = bc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range bc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -63,17 +88,17 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 			},
 		}
 	)
-	if value := bc.id; value != nil {
-		b.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := bc.mutation.ID(); ok {
+		b.ID = id
+		_spec.ID.Value = id
 	}
-	if value := bc.uuid; value != nil {
+	if value, ok := bc.mutation.UUID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Value:  *value,
+			Value:  value,
 			Column: blob.FieldUUID,
 		})
-		b.UUID = *value
+		b.UUID = value
 	}
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

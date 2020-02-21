@@ -9,8 +9,10 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/start/ent/car"
 	"github.com/facebookincubator/ent/examples/start/ent/user"
@@ -20,29 +22,25 @@ import (
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	config
-	model         *string
-	registered_at *time.Time
-	owner         map[int]struct{}
+	mutation *CarMutation
+	hooks    []ent.Hook
 }
 
 // SetModel sets the model field.
 func (cc *CarCreate) SetModel(s string) *CarCreate {
-	cc.model = &s
+	cc.mutation.SetModel(s)
 	return cc
 }
 
 // SetRegisteredAt sets the registered_at field.
 func (cc *CarCreate) SetRegisteredAt(t time.Time) *CarCreate {
-	cc.registered_at = &t
+	cc.mutation.SetRegisteredAt(t)
 	return cc
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (cc *CarCreate) SetOwnerID(id int) *CarCreate {
-	if cc.owner == nil {
-		cc.owner = make(map[int]struct{})
-	}
-	cc.owner[id] = struct{}{}
+	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
@@ -61,16 +59,39 @@ func (cc *CarCreate) SetOwner(u *User) *CarCreate {
 
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
-	if cc.model == nil {
+	if _, ok := cc.mutation.Model(); !ok {
 		return nil, errors.New("ent: missing required field \"model\"")
 	}
-	if cc.registered_at == nil {
+	if _, ok := cc.mutation.RegisteredAt(); !ok {
 		return nil, errors.New("ent: missing required field \"registered_at\"")
 	}
-	if len(cc.owner) > 1 {
+	if len(cc.mutation.OwnerIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
 	}
-	return cc.sqlSave(ctx)
+	var (
+		err  error
+		node *Car
+	)
+	if len(cc.hooks) == 0 {
+		node, err = cc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*CarMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cc.mutation = mutation
+			node, err = cc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range cc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -93,23 +114,23 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			},
 		}
 	)
-	if value := cc.model; value != nil {
+	if value, ok := cc.mutation.Model(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: car.FieldModel,
 		})
-		c.Model = *value
+		c.Model = value
 	}
-	if value := cc.registered_at; value != nil {
+	if value, ok := cc.mutation.RegisteredAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: car.FieldRegisteredAt,
 		})
-		c.RegisteredAt = *value
+		c.RegisteredAt = value
 	}
-	if nodes := cc.owner; len(nodes) > 0 {
+	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -123,7 +144,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

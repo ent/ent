@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
@@ -19,6 +21,8 @@ import (
 // CityDelete is the builder for deleting a City entity.
 type CityDelete struct {
 	config
+	hooks      []ent.Hook
+	mutation   *CityMutation
 	predicates []predicate.City
 }
 
@@ -30,7 +34,30 @@ func (cd *CityDelete) Where(ps ...predicate.City) *CityDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CityDelete) Exec(ctx context.Context) (int, error) {
-	return cd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(cd.hooks) == 0 {
+		affected, err = cd.sqlExec(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*CityMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cd.mutation = mutation
+			affected, err = cd.sqlExec(ctx)
+			return affected, err
+		})
+		for _, hook := range cd.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

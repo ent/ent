@@ -9,9 +9,11 @@ package ent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -20,53 +22,72 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	url     **url.URL
-	raw     *json.RawMessage
-	dirs    *[]http.Dir
-	ints    *[]int
-	floats  *[]float64
-	strings *[]string
+	mutation *UserMutation
+	hooks    []ent.Hook
 }
 
 // SetURL sets the url field.
 func (uc *UserCreate) SetURL(u *url.URL) *UserCreate {
-	uc.url = &u
+	uc.mutation.SetURL(u)
 	return uc
 }
 
 // SetRaw sets the raw field.
 func (uc *UserCreate) SetRaw(jm json.RawMessage) *UserCreate {
-	uc.raw = &jm
+	uc.mutation.SetRaw(jm)
 	return uc
 }
 
 // SetDirs sets the dirs field.
 func (uc *UserCreate) SetDirs(h []http.Dir) *UserCreate {
-	uc.dirs = &h
+	uc.mutation.SetDirs(h)
 	return uc
 }
 
 // SetInts sets the ints field.
 func (uc *UserCreate) SetInts(i []int) *UserCreate {
-	uc.ints = &i
+	uc.mutation.SetInts(i)
 	return uc
 }
 
 // SetFloats sets the floats field.
 func (uc *UserCreate) SetFloats(f []float64) *UserCreate {
-	uc.floats = &f
+	uc.mutation.SetFloats(f)
 	return uc
 }
 
 // SetStrings sets the strings field.
 func (uc *UserCreate) SetStrings(s []string) *UserCreate {
-	uc.strings = &s
+	uc.mutation.SetStrings(s)
 	return uc
 }
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -89,53 +110,53 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.url; value != nil {
+	if value, ok := uc.mutation.URL(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldURL,
 		})
-		u.URL = *value
+		u.URL = value
 	}
-	if value := uc.raw; value != nil {
+	if value, ok := uc.mutation.Raw(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldRaw,
 		})
-		u.Raw = *value
+		u.Raw = value
 	}
-	if value := uc.dirs; value != nil {
+	if value, ok := uc.mutation.Dirs(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldDirs,
 		})
-		u.Dirs = *value
+		u.Dirs = value
 	}
-	if value := uc.ints; value != nil {
+	if value, ok := uc.mutation.Ints(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldInts,
 		})
-		u.Ints = *value
+		u.Ints = value
 	}
-	if value := uc.floats; value != nil {
+	if value, ok := uc.mutation.Floats(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldFloats,
 		})
-		u.Floats = *value
+		u.Floats = value
 	}
-	if value := uc.strings; value != nil {
+	if value, ok := uc.mutation.Strings(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldStrings,
 		})
-		u.Strings = *value
+		u.Strings = value
 	}
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

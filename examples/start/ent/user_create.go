@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/start/ent/car"
 	"github.com/facebookincubator/ent/examples/start/ent/group"
@@ -21,21 +22,19 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	age    *int
-	name   *string
-	cars   map[int]struct{}
-	groups map[int]struct{}
+	mutation *UserMutation
+	hooks    []ent.Hook
 }
 
 // SetAge sets the age field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
-	uc.age = &i
+	uc.mutation.SetAge(i)
 	return uc
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
@@ -49,12 +48,7 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 
 // AddCarIDs adds the cars edge to Car by ids.
 func (uc *UserCreate) AddCarIDs(ids ...int) *UserCreate {
-	if uc.cars == nil {
-		uc.cars = make(map[int]struct{})
-	}
-	for i := range ids {
-		uc.cars[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddCarIDs(ids...)
 	return uc
 }
 
@@ -69,12 +63,7 @@ func (uc *UserCreate) AddCars(c ...*Car) *UserCreate {
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	if uc.groups == nil {
-		uc.groups = make(map[int]struct{})
-	}
-	for i := range ids {
-		uc.groups[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
@@ -89,17 +78,42 @@ func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.age == nil {
+	if _, ok := uc.mutation.Age(); !ok {
 		return nil, errors.New("ent: missing required field \"age\"")
 	}
-	if err := user.AgeValidator(*uc.age); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"age\": %v", err)
+	if v, ok := uc.mutation.Age(); ok {
+		if err := user.AgeValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"age\": %v", err)
+		}
 	}
-	if uc.name == nil {
+	if _, ok := uc.mutation.Name(); !ok {
 		v := user.DefaultName
-		uc.name = &v
+		uc.mutation.SetName(v)
 	}
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -122,23 +136,23 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.age; value != nil {
+	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
-		u.Age = *value
+		u.Age = value
 	}
-	if value := uc.name; value != nil {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = *value
+		u.Name = value
 	}
-	if nodes := uc.cars; len(nodes) > 0 {
+	if nodes := uc.mutation.CarsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -152,12 +166,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.groups; len(nodes) > 0 {
+	if nodes := uc.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -171,7 +185,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

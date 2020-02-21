@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
@@ -22,30 +23,13 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	optional_int *int
-	age          *int
-	name         *string
-	last         *string
-	nickname     *string
-	phone        *string
-	password     *string
-	role         *user.Role
-	card         map[string]struct{}
-	pets         map[string]struct{}
-	files        map[string]struct{}
-	groups       map[string]struct{}
-	friends      map[string]struct{}
-	followers    map[string]struct{}
-	following    map[string]struct{}
-	team         map[string]struct{}
-	spouse       map[string]struct{}
-	children     map[string]struct{}
-	parent       map[string]struct{}
+	mutation *UserMutation
+	hooks    []ent.Hook
 }
 
 // SetOptionalInt sets the optional_int field.
 func (uc *UserCreate) SetOptionalInt(i int) *UserCreate {
-	uc.optional_int = &i
+	uc.mutation.SetOptionalInt(i)
 	return uc
 }
 
@@ -59,19 +43,19 @@ func (uc *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
 
 // SetAge sets the age field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
-	uc.age = &i
+	uc.mutation.SetAge(i)
 	return uc
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
 // SetLast sets the last field.
 func (uc *UserCreate) SetLast(s string) *UserCreate {
-	uc.last = &s
+	uc.mutation.SetLast(s)
 	return uc
 }
 
@@ -85,7 +69,7 @@ func (uc *UserCreate) SetNillableLast(s *string) *UserCreate {
 
 // SetNickname sets the nickname field.
 func (uc *UserCreate) SetNickname(s string) *UserCreate {
-	uc.nickname = &s
+	uc.mutation.SetNickname(s)
 	return uc
 }
 
@@ -99,7 +83,7 @@ func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
 
 // SetPhone sets the phone field.
 func (uc *UserCreate) SetPhone(s string) *UserCreate {
-	uc.phone = &s
+	uc.mutation.SetPhone(s)
 	return uc
 }
 
@@ -113,7 +97,7 @@ func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 
 // SetPassword sets the password field.
 func (uc *UserCreate) SetPassword(s string) *UserCreate {
-	uc.password = &s
+	uc.mutation.SetPassword(s)
 	return uc
 }
 
@@ -127,7 +111,7 @@ func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 
 // SetRole sets the role field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
-	uc.role = &u
+	uc.mutation.SetRole(u)
 	return uc
 }
 
@@ -141,10 +125,7 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 
 // SetCardID sets the card edge to Card by id.
 func (uc *UserCreate) SetCardID(id string) *UserCreate {
-	if uc.card == nil {
-		uc.card = make(map[string]struct{})
-	}
-	uc.card[id] = struct{}{}
+	uc.mutation.SetCardID(id)
 	return uc
 }
 
@@ -163,12 +144,7 @@ func (uc *UserCreate) SetCard(c *Card) *UserCreate {
 
 // AddPetIDs adds the pets edge to Pet by ids.
 func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	if uc.pets == nil {
-		uc.pets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.pets[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddPetIDs(ids...)
 	return uc
 }
 
@@ -183,12 +159,7 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 
 // AddFileIDs adds the files edge to File by ids.
 func (uc *UserCreate) AddFileIDs(ids ...string) *UserCreate {
-	if uc.files == nil {
-		uc.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.files[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddFileIDs(ids...)
 	return uc
 }
 
@@ -203,12 +174,7 @@ func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
 
 // AddGroupIDs adds the groups edge to Group by ids.
 func (uc *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
-	if uc.groups == nil {
-		uc.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.groups[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
@@ -223,12 +189,7 @@ func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 
 // AddFriendIDs adds the friends edge to User by ids.
 func (uc *UserCreate) AddFriendIDs(ids ...string) *UserCreate {
-	if uc.friends == nil {
-		uc.friends = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.friends[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddFriendIDs(ids...)
 	return uc
 }
 
@@ -243,12 +204,7 @@ func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 
 // AddFollowerIDs adds the followers edge to User by ids.
 func (uc *UserCreate) AddFollowerIDs(ids ...string) *UserCreate {
-	if uc.followers == nil {
-		uc.followers = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.followers[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddFollowerIDs(ids...)
 	return uc
 }
 
@@ -263,12 +219,7 @@ func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 
 // AddFollowingIDs adds the following edge to User by ids.
 func (uc *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
-	if uc.following == nil {
-		uc.following = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.following[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddFollowingIDs(ids...)
 	return uc
 }
 
@@ -283,10 +234,7 @@ func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 
 // SetTeamID sets the team edge to Pet by id.
 func (uc *UserCreate) SetTeamID(id string) *UserCreate {
-	if uc.team == nil {
-		uc.team = make(map[string]struct{})
-	}
-	uc.team[id] = struct{}{}
+	uc.mutation.SetTeamID(id)
 	return uc
 }
 
@@ -305,10 +253,7 @@ func (uc *UserCreate) SetTeam(p *Pet) *UserCreate {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uc *UserCreate) SetSpouseID(id string) *UserCreate {
-	if uc.spouse == nil {
-		uc.spouse = make(map[string]struct{})
-	}
-	uc.spouse[id] = struct{}{}
+	uc.mutation.SetSpouseID(id)
 	return uc
 }
 
@@ -327,12 +272,7 @@ func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uc *UserCreate) AddChildIDs(ids ...string) *UserCreate {
-	if uc.children == nil {
-		uc.children = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.children[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddChildIDs(ids...)
 	return uc
 }
 
@@ -347,10 +287,7 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 
 // SetParentID sets the parent edge to User by id.
 func (uc *UserCreate) SetParentID(id string) *UserCreate {
-	if uc.parent == nil {
-		uc.parent = make(map[string]struct{})
-	}
-	uc.parent[id] = struct{}{}
+	uc.mutation.SetParentID(id)
 	return uc
 }
 
@@ -369,41 +306,66 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.optional_int != nil {
-		if err := user.OptionalIntValidator(*uc.optional_int); err != nil {
+	if v, ok := uc.mutation.OptionalInt(); ok {
+		if err := user.OptionalIntValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
 		}
 	}
-	if uc.age == nil {
+	if _, ok := uc.mutation.Age(); !ok {
 		return nil, errors.New("ent: missing required field \"age\"")
 	}
-	if uc.name == nil {
+	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if uc.last == nil {
+	if _, ok := uc.mutation.Last(); !ok {
 		v := user.DefaultLast
-		uc.last = &v
+		uc.mutation.SetLast(v)
 	}
-	if uc.role == nil {
+	if _, ok := uc.mutation.Role(); !ok {
 		v := user.DefaultRole
-		uc.role = &v
+		uc.mutation.SetRole(v)
 	}
-	if err := user.RoleValidator(*uc.role); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+	if v, ok := uc.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+		}
 	}
-	if len(uc.card) > 1 {
+	if len(uc.mutation.CardIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
 	}
-	if len(uc.team) > 1 {
+	if len(uc.mutation.TeamIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
 	}
-	if len(uc.spouse) > 1 {
+	if len(uc.mutation.SpouseIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
 	}
-	if len(uc.parent) > 1 {
+	if len(uc.mutation.ParentIDs()) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
-	return uc.gremlinSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.gremlinSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.gremlinSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -438,93 +400,93 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 8)
 	v := g.AddV(user.Label)
-	if uc.optional_int != nil {
-		v.Property(dsl.Single, user.FieldOptionalInt, *uc.optional_int)
+	if value, ok := uc.mutation.OptionalInt(); ok {
+		v.Property(dsl.Single, user.FieldOptionalInt, value)
 	}
-	if uc.age != nil {
-		v.Property(dsl.Single, user.FieldAge, *uc.age)
+	if value, ok := uc.mutation.Age(); ok {
+		v.Property(dsl.Single, user.FieldAge, value)
 	}
-	if uc.name != nil {
-		v.Property(dsl.Single, user.FieldName, *uc.name)
+	if value, ok := uc.mutation.Name(); ok {
+		v.Property(dsl.Single, user.FieldName, value)
 	}
-	if uc.last != nil {
-		v.Property(dsl.Single, user.FieldLast, *uc.last)
+	if value, ok := uc.mutation.Last(); ok {
+		v.Property(dsl.Single, user.FieldLast, value)
 	}
-	if uc.nickname != nil {
+	if value, ok := uc.mutation.Nickname(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldNickname, *uc.nickname).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, *uc.nickname)),
+			pred: g.V().Has(user.Label, user.FieldNickname, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, value)),
 		})
-		v.Property(dsl.Single, user.FieldNickname, *uc.nickname)
+		v.Property(dsl.Single, user.FieldNickname, value)
 	}
-	if uc.phone != nil {
+	if value, ok := uc.mutation.Phone(); ok {
 		constraints = append(constraints, &constraint{
-			pred: g.V().Has(user.Label, user.FieldPhone, *uc.phone).Count(),
-			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, *uc.phone)),
+			pred: g.V().Has(user.Label, user.FieldPhone, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, value)),
 		})
-		v.Property(dsl.Single, user.FieldPhone, *uc.phone)
+		v.Property(dsl.Single, user.FieldPhone, value)
 	}
-	if uc.password != nil {
-		v.Property(dsl.Single, user.FieldPassword, *uc.password)
+	if value, ok := uc.mutation.Password(); ok {
+		v.Property(dsl.Single, user.FieldPassword, value)
 	}
-	if uc.role != nil {
-		v.Property(dsl.Single, user.FieldRole, *uc.role)
+	if value, ok := uc.mutation.Role(); ok {
+		v.Property(dsl.Single, user.FieldRole, value)
 	}
-	for id := range uc.card {
+	for _, id := range uc.mutation.CardIDs() {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.CardLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.CardLabel, id)),
 		})
 	}
-	for id := range uc.pets {
+	for _, id := range uc.mutation.PetsIDs() {
 		v.AddE(user.PetsLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.PetsLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.PetsLabel, id)),
 		})
 	}
-	for id := range uc.files {
+	for _, id := range uc.mutation.FilesIDs() {
 		v.AddE(user.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.FilesLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.FilesLabel, id)),
 		})
 	}
-	for id := range uc.groups {
+	for _, id := range uc.mutation.GroupsIDs() {
 		v.AddE(user.GroupsLabel).To(g.V(id)).OutV()
 	}
-	for id := range uc.friends {
+	for _, id := range uc.mutation.FriendsIDs() {
 		v.AddE(user.FriendsLabel).To(g.V(id)).OutV()
 	}
-	for id := range uc.followers {
+	for _, id := range uc.mutation.FollowersIDs() {
 		v.AddE(user.FollowingLabel).From(g.V(id)).InV()
 	}
-	for id := range uc.following {
+	for _, id := range uc.mutation.FollowingIDs() {
 		v.AddE(user.FollowingLabel).To(g.V(id)).OutV()
 	}
-	for id := range uc.team {
+	for _, id := range uc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.TeamLabel, id)),
 		})
 	}
-	for id := range uc.spouse {
+	for _, id := range uc.mutation.SpouseIDs() {
 		v.AddE(user.SpouseLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.SpouseLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SpouseLabel, id)),
 		})
 	}
-	for id := range uc.children {
+	for _, id := range uc.mutation.ChildrenIDs() {
 		v.AddE(user.ParentLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.ParentLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.ParentLabel, id)),
 		})
 	}
-	for id := range uc.parent {
+	for _, id := range uc.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
 	if len(constraints) == 0 {

@@ -8,7 +8,9 @@ package entv2
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebookincubator/ent/schema/field"
@@ -17,11 +19,36 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
+	mutation *PetMutation
+	hooks    []ent.Hook
 }
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	return pc.sqlSave(ctx)
+	var (
+		err  error
+		node *Pet
+	)
+	if len(pc.hooks) == 0 {
+		node, err = pc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pc.mutation = mutation
+			node, err = pc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range pc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.

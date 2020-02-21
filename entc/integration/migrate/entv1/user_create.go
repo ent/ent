@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
@@ -20,41 +21,31 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	id       *int
-	age      *int32
-	name     *string
-	nickname *string
-	address  *string
-	renamed  *string
-	blob     *[]byte
-	state    *user.State
-	parent   map[int]struct{}
-	children map[int]struct{}
-	spouse   map[int]struct{}
-	car      map[int]struct{}
+	mutation *UserMutation
+	hooks    []ent.Hook
 }
 
 // SetAge sets the age field.
 func (uc *UserCreate) SetAge(i int32) *UserCreate {
-	uc.age = &i
+	uc.mutation.SetAge(i)
 	return uc
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
 // SetNickname sets the nickname field.
 func (uc *UserCreate) SetNickname(s string) *UserCreate {
-	uc.nickname = &s
+	uc.mutation.SetNickname(s)
 	return uc
 }
 
 // SetAddress sets the address field.
 func (uc *UserCreate) SetAddress(s string) *UserCreate {
-	uc.address = &s
+	uc.mutation.SetAddress(s)
 	return uc
 }
 
@@ -68,7 +59,7 @@ func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
 
 // SetRenamed sets the renamed field.
 func (uc *UserCreate) SetRenamed(s string) *UserCreate {
-	uc.renamed = &s
+	uc.mutation.SetRenamed(s)
 	return uc
 }
 
@@ -82,13 +73,13 @@ func (uc *UserCreate) SetNillableRenamed(s *string) *UserCreate {
 
 // SetBlob sets the blob field.
 func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
-	uc.blob = &b
+	uc.mutation.SetBlob(b)
 	return uc
 }
 
 // SetState sets the state field.
 func (uc *UserCreate) SetState(u user.State) *UserCreate {
-	uc.state = &u
+	uc.mutation.SetState(u)
 	return uc
 }
 
@@ -102,16 +93,13 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
-	uc.id = &i
+	uc.mutation.SetID(i)
 	return uc
 }
 
 // SetParentID sets the parent edge to User by id.
 func (uc *UserCreate) SetParentID(id int) *UserCreate {
-	if uc.parent == nil {
-		uc.parent = make(map[int]struct{})
-	}
-	uc.parent[id] = struct{}{}
+	uc.mutation.SetParentID(id)
 	return uc
 }
 
@@ -130,12 +118,7 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 
 // AddChildIDs adds the children edge to User by ids.
 func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	if uc.children == nil {
-		uc.children = make(map[int]struct{})
-	}
-	for i := range ids {
-		uc.children[ids[i]] = struct{}{}
-	}
+	uc.mutation.AddChildIDs(ids...)
 	return uc
 }
 
@@ -150,10 +133,7 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (uc *UserCreate) SetSpouseID(id int) *UserCreate {
-	if uc.spouse == nil {
-		uc.spouse = make(map[int]struct{})
-	}
-	uc.spouse[id] = struct{}{}
+	uc.mutation.SetSpouseID(id)
 	return uc
 }
 
@@ -172,10 +152,7 @@ func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
 
 // SetCarID sets the car edge to Car by id.
 func (uc *UserCreate) SetCarID(id int) *UserCreate {
-	if uc.car == nil {
-		uc.car = make(map[int]struct{})
-	}
-	uc.car[id] = struct{}{}
+	uc.mutation.SetCarID(id)
 	return uc
 }
 
@@ -194,33 +171,58 @@ func (uc *UserCreate) SetCar(c *Car) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.age == nil {
+	if _, ok := uc.mutation.Age(); !ok {
 		return nil, errors.New("entv1: missing required field \"age\"")
 	}
-	if uc.name == nil {
+	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("entv1: missing required field \"name\"")
 	}
-	if err := user.NameValidator(*uc.name); err != nil {
-		return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
+	if v, ok := uc.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
+			return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
+		}
 	}
-	if uc.nickname == nil {
+	if _, ok := uc.mutation.Nickname(); !ok {
 		return nil, errors.New("entv1: missing required field \"nickname\"")
 	}
-	if uc.state != nil {
-		if err := user.StateValidator(*uc.state); err != nil {
+	if v, ok := uc.mutation.State(); ok {
+		if err := user.StateValidator(v); err != nil {
 			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
 		}
 	}
-	if len(uc.parent) > 1 {
+	if len(uc.mutation.ParentIDs()) > 1 {
 		return nil, errors.New("entv1: multiple assignments on a unique edge \"parent\"")
 	}
-	if len(uc.spouse) > 1 {
+	if len(uc.mutation.SpouseIDs()) > 1 {
 		return nil, errors.New("entv1: multiple assignments on a unique edge \"spouse\"")
 	}
-	if len(uc.car) > 1 {
+	if len(uc.mutation.CarIDs()) > 1 {
 		return nil, errors.New("entv1: multiple assignments on a unique edge \"car\"")
 	}
-	return uc.sqlSave(ctx)
+	var (
+		err  error
+		node *User
+	)
+	if len(uc.hooks) == 0 {
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range uc.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -243,67 +245,67 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
-	if value := uc.id; value != nil {
-		u.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := uc.mutation.ID(); ok {
+		u.ID = id
+		_spec.ID.Value = id
 	}
-	if value := uc.age; value != nil {
+	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
-		u.Age = *value
+		u.Age = value
 	}
-	if value := uc.name; value != nil {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = *value
+		u.Name = value
 	}
-	if value := uc.nickname; value != nil {
+	if value, ok := uc.mutation.Nickname(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldNickname,
 		})
-		u.Nickname = *value
+		u.Nickname = value
 	}
-	if value := uc.address; value != nil {
+	if value, ok := uc.mutation.Address(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAddress,
 		})
-		u.Address = *value
+		u.Address = value
 	}
-	if value := uc.renamed; value != nil {
+	if value, ok := uc.mutation.Renamed(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldRenamed,
 		})
-		u.Renamed = *value
+		u.Renamed = value
 	}
-	if value := uc.blob; value != nil {
+	if value, ok := uc.mutation.Blob(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldBlob,
 		})
-		u.Blob = *value
+		u.Blob = value
 	}
-	if value := uc.state; value != nil {
+	if value, ok := uc.mutation.State(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldState,
 		})
-		u.State = *value
+		u.State = value
 	}
-	if nodes := uc.parent; len(nodes) > 0 {
+	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -317,12 +319,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.children; len(nodes) > 0 {
+	if nodes := uc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -336,12 +338,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.spouse; len(nodes) > 0 {
+	if nodes := uc.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -355,12 +357,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.car; len(nodes) > 0 {
+	if nodes := uc.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -374,7 +376,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

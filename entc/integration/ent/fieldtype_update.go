@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
@@ -20,67 +21,9 @@ import (
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	int                          *int
-	addint                       *int
-	int8                         *int8
-	addint8                      *int8
-	int16                        *int16
-	addint16                     *int16
-	int32                        *int32
-	addint32                     *int32
-	int64                        *int64
-	addint64                     *int64
-	optional_int                 *int
-	addoptional_int              *int
-	clearoptional_int            bool
-	optional_int8                *int8
-	addoptional_int8             *int8
-	clearoptional_int8           bool
-	optional_int16               *int16
-	addoptional_int16            *int16
-	clearoptional_int16          bool
-	optional_int32               *int32
-	addoptional_int32            *int32
-	clearoptional_int32          bool
-	optional_int64               *int64
-	addoptional_int64            *int64
-	clearoptional_int64          bool
-	nillable_int                 *int
-	addnillable_int              *int
-	clearnillable_int            bool
-	nillable_int8                *int8
-	addnillable_int8             *int8
-	clearnillable_int8           bool
-	nillable_int16               *int16
-	addnillable_int16            *int16
-	clearnillable_int16          bool
-	nillable_int32               *int32
-	addnillable_int32            *int32
-	clearnillable_int32          bool
-	nillable_int64               *int64
-	addnillable_int64            *int64
-	clearnillable_int64          bool
-	validate_optional_int32      *int32
-	addvalidate_optional_int32   *int32
-	clearvalidate_optional_int32 bool
-	optional_uint                *uint
-	addoptional_uint             *uint
-	clearoptional_uint           bool
-	optional_uint8               *uint8
-	addoptional_uint8            *uint8
-	clearoptional_uint8          bool
-	optional_uint16              *uint16
-	addoptional_uint16           *uint16
-	clearoptional_uint16         bool
-	optional_uint32              *uint32
-	addoptional_uint32           *uint32
-	clearoptional_uint32         bool
-	optional_uint64              *uint64
-	addoptional_uint64           *uint64
-	clearoptional_uint64         bool
-	state                        *fieldtype.State
-	clearstate                   bool
-	predicates                   []predicate.FieldType
+	hooks      []ent.Hook
+	mutation   *FieldTypeMutation
+	predicates []predicate.FieldType
 }
 
 // Where adds a new predicate for the builder.
@@ -91,93 +34,73 @@ func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 
 // SetInt sets the int field.
 func (ftu *FieldTypeUpdate) SetInt(i int) *FieldTypeUpdate {
-	ftu.int = &i
-	ftu.addint = nil
+	ftu.mutation.ResetInt()
+	ftu.mutation.SetInt(i)
 	return ftu
 }
 
 // AddInt adds i to int.
 func (ftu *FieldTypeUpdate) AddInt(i int) *FieldTypeUpdate {
-	if ftu.addint == nil {
-		ftu.addint = &i
-	} else {
-		*ftu.addint += i
-	}
+	ftu.mutation.AddInt(i)
 	return ftu
 }
 
 // SetInt8 sets the int8 field.
 func (ftu *FieldTypeUpdate) SetInt8(i int8) *FieldTypeUpdate {
-	ftu.int8 = &i
-	ftu.addint8 = nil
+	ftu.mutation.ResetInt8()
+	ftu.mutation.SetInt8(i)
 	return ftu
 }
 
 // AddInt8 adds i to int8.
 func (ftu *FieldTypeUpdate) AddInt8(i int8) *FieldTypeUpdate {
-	if ftu.addint8 == nil {
-		ftu.addint8 = &i
-	} else {
-		*ftu.addint8 += i
-	}
+	ftu.mutation.AddInt8(i)
 	return ftu
 }
 
 // SetInt16 sets the int16 field.
 func (ftu *FieldTypeUpdate) SetInt16(i int16) *FieldTypeUpdate {
-	ftu.int16 = &i
-	ftu.addint16 = nil
+	ftu.mutation.ResetInt16()
+	ftu.mutation.SetInt16(i)
 	return ftu
 }
 
 // AddInt16 adds i to int16.
 func (ftu *FieldTypeUpdate) AddInt16(i int16) *FieldTypeUpdate {
-	if ftu.addint16 == nil {
-		ftu.addint16 = &i
-	} else {
-		*ftu.addint16 += i
-	}
+	ftu.mutation.AddInt16(i)
 	return ftu
 }
 
 // SetInt32 sets the int32 field.
 func (ftu *FieldTypeUpdate) SetInt32(i int32) *FieldTypeUpdate {
-	ftu.int32 = &i
-	ftu.addint32 = nil
+	ftu.mutation.ResetInt32()
+	ftu.mutation.SetInt32(i)
 	return ftu
 }
 
 // AddInt32 adds i to int32.
 func (ftu *FieldTypeUpdate) AddInt32(i int32) *FieldTypeUpdate {
-	if ftu.addint32 == nil {
-		ftu.addint32 = &i
-	} else {
-		*ftu.addint32 += i
-	}
+	ftu.mutation.AddInt32(i)
 	return ftu
 }
 
 // SetInt64 sets the int64 field.
 func (ftu *FieldTypeUpdate) SetInt64(i int64) *FieldTypeUpdate {
-	ftu.int64 = &i
-	ftu.addint64 = nil
+	ftu.mutation.ResetInt64()
+	ftu.mutation.SetInt64(i)
 	return ftu
 }
 
 // AddInt64 adds i to int64.
 func (ftu *FieldTypeUpdate) AddInt64(i int64) *FieldTypeUpdate {
-	if ftu.addint64 == nil {
-		ftu.addint64 = &i
-	} else {
-		*ftu.addint64 += i
-	}
+	ftu.mutation.AddInt64(i)
 	return ftu
 }
 
 // SetOptionalInt sets the optional_int field.
 func (ftu *FieldTypeUpdate) SetOptionalInt(i int) *FieldTypeUpdate {
-	ftu.optional_int = &i
-	ftu.addoptional_int = nil
+	ftu.mutation.ResetOptionalInt()
+	ftu.mutation.SetOptionalInt(i)
 	return ftu
 }
 
@@ -191,25 +114,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt(i *int) *FieldTypeUpdate {
 
 // AddOptionalInt adds i to optional_int.
 func (ftu *FieldTypeUpdate) AddOptionalInt(i int) *FieldTypeUpdate {
-	if ftu.addoptional_int == nil {
-		ftu.addoptional_int = &i
-	} else {
-		*ftu.addoptional_int += i
-	}
+	ftu.mutation.AddOptionalInt(i)
 	return ftu
 }
 
 // ClearOptionalInt clears the value of optional_int.
 func (ftu *FieldTypeUpdate) ClearOptionalInt() *FieldTypeUpdate {
-	ftu.optional_int = nil
-	ftu.clearoptional_int = true
+	ftu.mutation.ClearOptionalInt()
 	return ftu
 }
 
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt8(i int8) *FieldTypeUpdate {
-	ftu.optional_int8 = &i
-	ftu.addoptional_int8 = nil
+	ftu.mutation.ResetOptionalInt8()
+	ftu.mutation.SetOptionalInt8(i)
 	return ftu
 }
 
@@ -223,25 +141,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt8(i *int8) *FieldTypeUpdate {
 
 // AddOptionalInt8 adds i to optional_int8.
 func (ftu *FieldTypeUpdate) AddOptionalInt8(i int8) *FieldTypeUpdate {
-	if ftu.addoptional_int8 == nil {
-		ftu.addoptional_int8 = &i
-	} else {
-		*ftu.addoptional_int8 += i
-	}
+	ftu.mutation.AddOptionalInt8(i)
 	return ftu
 }
 
 // ClearOptionalInt8 clears the value of optional_int8.
 func (ftu *FieldTypeUpdate) ClearOptionalInt8() *FieldTypeUpdate {
-	ftu.optional_int8 = nil
-	ftu.clearoptional_int8 = true
+	ftu.mutation.ClearOptionalInt8()
 	return ftu
 }
 
 // SetOptionalInt16 sets the optional_int16 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt16(i int16) *FieldTypeUpdate {
-	ftu.optional_int16 = &i
-	ftu.addoptional_int16 = nil
+	ftu.mutation.ResetOptionalInt16()
+	ftu.mutation.SetOptionalInt16(i)
 	return ftu
 }
 
@@ -255,25 +168,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt16(i *int16) *FieldTypeUpdate 
 
 // AddOptionalInt16 adds i to optional_int16.
 func (ftu *FieldTypeUpdate) AddOptionalInt16(i int16) *FieldTypeUpdate {
-	if ftu.addoptional_int16 == nil {
-		ftu.addoptional_int16 = &i
-	} else {
-		*ftu.addoptional_int16 += i
-	}
+	ftu.mutation.AddOptionalInt16(i)
 	return ftu
 }
 
 // ClearOptionalInt16 clears the value of optional_int16.
 func (ftu *FieldTypeUpdate) ClearOptionalInt16() *FieldTypeUpdate {
-	ftu.optional_int16 = nil
-	ftu.clearoptional_int16 = true
+	ftu.mutation.ClearOptionalInt16()
 	return ftu
 }
 
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt32(i int32) *FieldTypeUpdate {
-	ftu.optional_int32 = &i
-	ftu.addoptional_int32 = nil
+	ftu.mutation.ResetOptionalInt32()
+	ftu.mutation.SetOptionalInt32(i)
 	return ftu
 }
 
@@ -287,25 +195,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt32(i *int32) *FieldTypeUpdate 
 
 // AddOptionalInt32 adds i to optional_int32.
 func (ftu *FieldTypeUpdate) AddOptionalInt32(i int32) *FieldTypeUpdate {
-	if ftu.addoptional_int32 == nil {
-		ftu.addoptional_int32 = &i
-	} else {
-		*ftu.addoptional_int32 += i
-	}
+	ftu.mutation.AddOptionalInt32(i)
 	return ftu
 }
 
 // ClearOptionalInt32 clears the value of optional_int32.
 func (ftu *FieldTypeUpdate) ClearOptionalInt32() *FieldTypeUpdate {
-	ftu.optional_int32 = nil
-	ftu.clearoptional_int32 = true
+	ftu.mutation.ClearOptionalInt32()
 	return ftu
 }
 
 // SetOptionalInt64 sets the optional_int64 field.
 func (ftu *FieldTypeUpdate) SetOptionalInt64(i int64) *FieldTypeUpdate {
-	ftu.optional_int64 = &i
-	ftu.addoptional_int64 = nil
+	ftu.mutation.ResetOptionalInt64()
+	ftu.mutation.SetOptionalInt64(i)
 	return ftu
 }
 
@@ -319,25 +222,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt64(i *int64) *FieldTypeUpdate 
 
 // AddOptionalInt64 adds i to optional_int64.
 func (ftu *FieldTypeUpdate) AddOptionalInt64(i int64) *FieldTypeUpdate {
-	if ftu.addoptional_int64 == nil {
-		ftu.addoptional_int64 = &i
-	} else {
-		*ftu.addoptional_int64 += i
-	}
+	ftu.mutation.AddOptionalInt64(i)
 	return ftu
 }
 
 // ClearOptionalInt64 clears the value of optional_int64.
 func (ftu *FieldTypeUpdate) ClearOptionalInt64() *FieldTypeUpdate {
-	ftu.optional_int64 = nil
-	ftu.clearoptional_int64 = true
+	ftu.mutation.ClearOptionalInt64()
 	return ftu
 }
 
 // SetNillableInt sets the nillable_int field.
 func (ftu *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
-	ftu.nillable_int = &i
-	ftu.addnillable_int = nil
+	ftu.mutation.ResetNillableInt()
+	ftu.mutation.SetNillableInt(i)
 	return ftu
 }
 
@@ -351,25 +249,20 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
 
 // AddNillableInt adds i to nillable_int.
 func (ftu *FieldTypeUpdate) AddNillableInt(i int) *FieldTypeUpdate {
-	if ftu.addnillable_int == nil {
-		ftu.addnillable_int = &i
-	} else {
-		*ftu.addnillable_int += i
-	}
+	ftu.mutation.AddNillableInt(i)
 	return ftu
 }
 
 // ClearNillableInt clears the value of nillable_int.
 func (ftu *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
-	ftu.nillable_int = nil
-	ftu.clearnillable_int = true
+	ftu.mutation.ClearNillableInt()
 	return ftu
 }
 
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftu *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
-	ftu.nillable_int8 = &i
-	ftu.addnillable_int8 = nil
+	ftu.mutation.ResetNillableInt8()
+	ftu.mutation.SetNillableInt8(i)
 	return ftu
 }
 
@@ -383,25 +276,20 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
 
 // AddNillableInt8 adds i to nillable_int8.
 func (ftu *FieldTypeUpdate) AddNillableInt8(i int8) *FieldTypeUpdate {
-	if ftu.addnillable_int8 == nil {
-		ftu.addnillable_int8 = &i
-	} else {
-		*ftu.addnillable_int8 += i
-	}
+	ftu.mutation.AddNillableInt8(i)
 	return ftu
 }
 
 // ClearNillableInt8 clears the value of nillable_int8.
 func (ftu *FieldTypeUpdate) ClearNillableInt8() *FieldTypeUpdate {
-	ftu.nillable_int8 = nil
-	ftu.clearnillable_int8 = true
+	ftu.mutation.ClearNillableInt8()
 	return ftu
 }
 
 // SetNillableInt16 sets the nillable_int16 field.
 func (ftu *FieldTypeUpdate) SetNillableInt16(i int16) *FieldTypeUpdate {
-	ftu.nillable_int16 = &i
-	ftu.addnillable_int16 = nil
+	ftu.mutation.ResetNillableInt16()
+	ftu.mutation.SetNillableInt16(i)
 	return ftu
 }
 
@@ -415,25 +303,20 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate 
 
 // AddNillableInt16 adds i to nillable_int16.
 func (ftu *FieldTypeUpdate) AddNillableInt16(i int16) *FieldTypeUpdate {
-	if ftu.addnillable_int16 == nil {
-		ftu.addnillable_int16 = &i
-	} else {
-		*ftu.addnillable_int16 += i
-	}
+	ftu.mutation.AddNillableInt16(i)
 	return ftu
 }
 
 // ClearNillableInt16 clears the value of nillable_int16.
 func (ftu *FieldTypeUpdate) ClearNillableInt16() *FieldTypeUpdate {
-	ftu.nillable_int16 = nil
-	ftu.clearnillable_int16 = true
+	ftu.mutation.ClearNillableInt16()
 	return ftu
 }
 
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftu *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
-	ftu.nillable_int32 = &i
-	ftu.addnillable_int32 = nil
+	ftu.mutation.ResetNillableInt32()
+	ftu.mutation.SetNillableInt32(i)
 	return ftu
 }
 
@@ -447,25 +330,20 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate 
 
 // AddNillableInt32 adds i to nillable_int32.
 func (ftu *FieldTypeUpdate) AddNillableInt32(i int32) *FieldTypeUpdate {
-	if ftu.addnillable_int32 == nil {
-		ftu.addnillable_int32 = &i
-	} else {
-		*ftu.addnillable_int32 += i
-	}
+	ftu.mutation.AddNillableInt32(i)
 	return ftu
 }
 
 // ClearNillableInt32 clears the value of nillable_int32.
 func (ftu *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
-	ftu.nillable_int32 = nil
-	ftu.clearnillable_int32 = true
+	ftu.mutation.ClearNillableInt32()
 	return ftu
 }
 
 // SetNillableInt64 sets the nillable_int64 field.
 func (ftu *FieldTypeUpdate) SetNillableInt64(i int64) *FieldTypeUpdate {
-	ftu.nillable_int64 = &i
-	ftu.addnillable_int64 = nil
+	ftu.mutation.ResetNillableInt64()
+	ftu.mutation.SetNillableInt64(i)
 	return ftu
 }
 
@@ -479,25 +357,20 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate 
 
 // AddNillableInt64 adds i to nillable_int64.
 func (ftu *FieldTypeUpdate) AddNillableInt64(i int64) *FieldTypeUpdate {
-	if ftu.addnillable_int64 == nil {
-		ftu.addnillable_int64 = &i
-	} else {
-		*ftu.addnillable_int64 += i
-	}
+	ftu.mutation.AddNillableInt64(i)
 	return ftu
 }
 
 // ClearNillableInt64 clears the value of nillable_int64.
 func (ftu *FieldTypeUpdate) ClearNillableInt64() *FieldTypeUpdate {
-	ftu.nillable_int64 = nil
-	ftu.clearnillable_int64 = true
+	ftu.mutation.ClearNillableInt64()
 	return ftu
 }
 
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftu *FieldTypeUpdate) SetValidateOptionalInt32(i int32) *FieldTypeUpdate {
-	ftu.validate_optional_int32 = &i
-	ftu.addvalidate_optional_int32 = nil
+	ftu.mutation.ResetValidateOptionalInt32()
+	ftu.mutation.SetValidateOptionalInt32(i)
 	return ftu
 }
 
@@ -511,25 +384,20 @@ func (ftu *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 
 // AddValidateOptionalInt32 adds i to validate_optional_int32.
 func (ftu *FieldTypeUpdate) AddValidateOptionalInt32(i int32) *FieldTypeUpdate {
-	if ftu.addvalidate_optional_int32 == nil {
-		ftu.addvalidate_optional_int32 = &i
-	} else {
-		*ftu.addvalidate_optional_int32 += i
-	}
+	ftu.mutation.AddValidateOptionalInt32(i)
 	return ftu
 }
 
 // ClearValidateOptionalInt32 clears the value of validate_optional_int32.
 func (ftu *FieldTypeUpdate) ClearValidateOptionalInt32() *FieldTypeUpdate {
-	ftu.validate_optional_int32 = nil
-	ftu.clearvalidate_optional_int32 = true
+	ftu.mutation.ClearValidateOptionalInt32()
 	return ftu
 }
 
 // SetOptionalUint sets the optional_uint field.
 func (ftu *FieldTypeUpdate) SetOptionalUint(u uint) *FieldTypeUpdate {
-	ftu.optional_uint = &u
-	ftu.addoptional_uint = nil
+	ftu.mutation.ResetOptionalUint()
+	ftu.mutation.SetOptionalUint(u)
 	return ftu
 }
 
@@ -543,25 +411,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint(u *uint) *FieldTypeUpdate {
 
 // AddOptionalUint adds u to optional_uint.
 func (ftu *FieldTypeUpdate) AddOptionalUint(u uint) *FieldTypeUpdate {
-	if ftu.addoptional_uint == nil {
-		ftu.addoptional_uint = &u
-	} else {
-		*ftu.addoptional_uint += u
-	}
+	ftu.mutation.AddOptionalUint(u)
 	return ftu
 }
 
 // ClearOptionalUint clears the value of optional_uint.
 func (ftu *FieldTypeUpdate) ClearOptionalUint() *FieldTypeUpdate {
-	ftu.optional_uint = nil
-	ftu.clearoptional_uint = true
+	ftu.mutation.ClearOptionalUint()
 	return ftu
 }
 
 // SetOptionalUint8 sets the optional_uint8 field.
 func (ftu *FieldTypeUpdate) SetOptionalUint8(u uint8) *FieldTypeUpdate {
-	ftu.optional_uint8 = &u
-	ftu.addoptional_uint8 = nil
+	ftu.mutation.ResetOptionalUint8()
+	ftu.mutation.SetOptionalUint8(u)
 	return ftu
 }
 
@@ -575,25 +438,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdate 
 
 // AddOptionalUint8 adds u to optional_uint8.
 func (ftu *FieldTypeUpdate) AddOptionalUint8(u uint8) *FieldTypeUpdate {
-	if ftu.addoptional_uint8 == nil {
-		ftu.addoptional_uint8 = &u
-	} else {
-		*ftu.addoptional_uint8 += u
-	}
+	ftu.mutation.AddOptionalUint8(u)
 	return ftu
 }
 
 // ClearOptionalUint8 clears the value of optional_uint8.
 func (ftu *FieldTypeUpdate) ClearOptionalUint8() *FieldTypeUpdate {
-	ftu.optional_uint8 = nil
-	ftu.clearoptional_uint8 = true
+	ftu.mutation.ClearOptionalUint8()
 	return ftu
 }
 
 // SetOptionalUint16 sets the optional_uint16 field.
 func (ftu *FieldTypeUpdate) SetOptionalUint16(u uint16) *FieldTypeUpdate {
-	ftu.optional_uint16 = &u
-	ftu.addoptional_uint16 = nil
+	ftu.mutation.ResetOptionalUint16()
+	ftu.mutation.SetOptionalUint16(u)
 	return ftu
 }
 
@@ -607,25 +465,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdat
 
 // AddOptionalUint16 adds u to optional_uint16.
 func (ftu *FieldTypeUpdate) AddOptionalUint16(u uint16) *FieldTypeUpdate {
-	if ftu.addoptional_uint16 == nil {
-		ftu.addoptional_uint16 = &u
-	} else {
-		*ftu.addoptional_uint16 += u
-	}
+	ftu.mutation.AddOptionalUint16(u)
 	return ftu
 }
 
 // ClearOptionalUint16 clears the value of optional_uint16.
 func (ftu *FieldTypeUpdate) ClearOptionalUint16() *FieldTypeUpdate {
-	ftu.optional_uint16 = nil
-	ftu.clearoptional_uint16 = true
+	ftu.mutation.ClearOptionalUint16()
 	return ftu
 }
 
 // SetOptionalUint32 sets the optional_uint32 field.
 func (ftu *FieldTypeUpdate) SetOptionalUint32(u uint32) *FieldTypeUpdate {
-	ftu.optional_uint32 = &u
-	ftu.addoptional_uint32 = nil
+	ftu.mutation.ResetOptionalUint32()
+	ftu.mutation.SetOptionalUint32(u)
 	return ftu
 }
 
@@ -639,25 +492,20 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdat
 
 // AddOptionalUint32 adds u to optional_uint32.
 func (ftu *FieldTypeUpdate) AddOptionalUint32(u uint32) *FieldTypeUpdate {
-	if ftu.addoptional_uint32 == nil {
-		ftu.addoptional_uint32 = &u
-	} else {
-		*ftu.addoptional_uint32 += u
-	}
+	ftu.mutation.AddOptionalUint32(u)
 	return ftu
 }
 
 // ClearOptionalUint32 clears the value of optional_uint32.
 func (ftu *FieldTypeUpdate) ClearOptionalUint32() *FieldTypeUpdate {
-	ftu.optional_uint32 = nil
-	ftu.clearoptional_uint32 = true
+	ftu.mutation.ClearOptionalUint32()
 	return ftu
 }
 
 // SetOptionalUint64 sets the optional_uint64 field.
 func (ftu *FieldTypeUpdate) SetOptionalUint64(u uint64) *FieldTypeUpdate {
-	ftu.optional_uint64 = &u
-	ftu.addoptional_uint64 = nil
+	ftu.mutation.ResetOptionalUint64()
+	ftu.mutation.SetOptionalUint64(u)
 	return ftu
 }
 
@@ -671,24 +519,19 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdat
 
 // AddOptionalUint64 adds u to optional_uint64.
 func (ftu *FieldTypeUpdate) AddOptionalUint64(u uint64) *FieldTypeUpdate {
-	if ftu.addoptional_uint64 == nil {
-		ftu.addoptional_uint64 = &u
-	} else {
-		*ftu.addoptional_uint64 += u
-	}
+	ftu.mutation.AddOptionalUint64(u)
 	return ftu
 }
 
 // ClearOptionalUint64 clears the value of optional_uint64.
 func (ftu *FieldTypeUpdate) ClearOptionalUint64() *FieldTypeUpdate {
-	ftu.optional_uint64 = nil
-	ftu.clearoptional_uint64 = true
+	ftu.mutation.ClearOptionalUint64()
 	return ftu
 }
 
 // SetState sets the state field.
 func (ftu *FieldTypeUpdate) SetState(f fieldtype.State) *FieldTypeUpdate {
-	ftu.state = &f
+	ftu.mutation.SetState(f)
 	return ftu
 }
 
@@ -702,24 +545,46 @@ func (ftu *FieldTypeUpdate) SetNillableState(f *fieldtype.State) *FieldTypeUpdat
 
 // ClearState clears the value of state.
 func (ftu *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
-	ftu.state = nil
-	ftu.clearstate = true
+	ftu.mutation.ClearState()
 	return ftu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
-	if ftu.validate_optional_int32 != nil {
-		if err := fieldtype.ValidateOptionalInt32Validator(*ftu.validate_optional_int32); err != nil {
+	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
 		}
 	}
-	if ftu.state != nil {
-		if err := fieldtype.StateValidator(*ftu.state); err != nil {
+	if v, ok := ftu.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
-	return ftu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ftu.hooks) == 0 {
+		affected, err = ftu.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*FieldTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftu.mutation = mutation
+			affected, err = ftu.sqlSave(ctx)
+			return affected, err
+		})
+		for _, hook := range ftu.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -762,404 +627,404 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := ftu.int; value != nil {
+	if value, ok := ftu.mutation.Int(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt,
 		})
 	}
-	if value := ftu.addint; value != nil {
+	if value, ok := ftu.mutation.AddedInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt,
 		})
 	}
-	if value := ftu.int8; value != nil {
+	if value, ok := ftu.mutation.Int8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt8,
 		})
 	}
-	if value := ftu.addint8; value != nil {
+	if value, ok := ftu.mutation.AddedInt8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt8,
 		})
 	}
-	if value := ftu.int16; value != nil {
+	if value, ok := ftu.mutation.Int16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt16,
 		})
 	}
-	if value := ftu.addint16; value != nil {
+	if value, ok := ftu.mutation.AddedInt16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt16,
 		})
 	}
-	if value := ftu.int32; value != nil {
+	if value, ok := ftu.mutation.Int32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt32,
 		})
 	}
-	if value := ftu.addint32; value != nil {
+	if value, ok := ftu.mutation.AddedInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt32,
 		})
 	}
-	if value := ftu.int64; value != nil {
+	if value, ok := ftu.mutation.Int64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt64,
 		})
 	}
-	if value := ftu.addint64; value != nil {
+	if value, ok := ftu.mutation.AddedInt64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt64,
 		})
 	}
-	if value := ftu.optional_int; value != nil {
+	if value, ok := ftu.mutation.OptionalInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt,
 		})
 	}
-	if value := ftu.addoptional_int; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt,
 		})
 	}
-	if ftu.clearoptional_int {
+	if ftu.mutation.OptionalIntCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: fieldtype.FieldOptionalInt,
 		})
 	}
-	if value := ftu.optional_int8; value != nil {
+	if value, ok := ftu.mutation.OptionalInt8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt8,
 		})
 	}
-	if value := ftu.addoptional_int8; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalInt8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt8,
 		})
 	}
-	if ftu.clearoptional_int8 {
+	if ftu.mutation.OptionalInt8Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Column: fieldtype.FieldOptionalInt8,
 		})
 	}
-	if value := ftu.optional_int16; value != nil {
+	if value, ok := ftu.mutation.OptionalInt16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt16,
 		})
 	}
-	if value := ftu.addoptional_int16; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalInt16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt16,
 		})
 	}
-	if ftu.clearoptional_int16 {
+	if ftu.mutation.OptionalInt16Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Column: fieldtype.FieldOptionalInt16,
 		})
 	}
-	if value := ftu.optional_int32; value != nil {
+	if value, ok := ftu.mutation.OptionalInt32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt32,
 		})
 	}
-	if value := ftu.addoptional_int32; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt32,
 		})
 	}
-	if ftu.clearoptional_int32 {
+	if ftu.mutation.OptionalInt32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Column: fieldtype.FieldOptionalInt32,
 		})
 	}
-	if value := ftu.optional_int64; value != nil {
+	if value, ok := ftu.mutation.OptionalInt64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt64,
 		})
 	}
-	if value := ftu.addoptional_int64; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalInt64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt64,
 		})
 	}
-	if ftu.clearoptional_int64 {
+	if ftu.mutation.OptionalInt64Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: fieldtype.FieldOptionalInt64,
 		})
 	}
-	if value := ftu.nillable_int; value != nil {
+	if value, ok := ftu.mutation.NillableInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt,
 		})
 	}
-	if value := ftu.addnillable_int; value != nil {
+	if value, ok := ftu.mutation.AddedNillableInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt,
 		})
 	}
-	if ftu.clearnillable_int {
+	if ftu.mutation.NillableIntCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: fieldtype.FieldNillableInt,
 		})
 	}
-	if value := ftu.nillable_int8; value != nil {
+	if value, ok := ftu.mutation.NillableInt8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt8,
 		})
 	}
-	if value := ftu.addnillable_int8; value != nil {
+	if value, ok := ftu.mutation.AddedNillableInt8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt8,
 		})
 	}
-	if ftu.clearnillable_int8 {
+	if ftu.mutation.NillableInt8Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Column: fieldtype.FieldNillableInt8,
 		})
 	}
-	if value := ftu.nillable_int16; value != nil {
+	if value, ok := ftu.mutation.NillableInt16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt16,
 		})
 	}
-	if value := ftu.addnillable_int16; value != nil {
+	if value, ok := ftu.mutation.AddedNillableInt16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt16,
 		})
 	}
-	if ftu.clearnillable_int16 {
+	if ftu.mutation.NillableInt16Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Column: fieldtype.FieldNillableInt16,
 		})
 	}
-	if value := ftu.nillable_int32; value != nil {
+	if value, ok := ftu.mutation.NillableInt32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt32,
 		})
 	}
-	if value := ftu.addnillable_int32; value != nil {
+	if value, ok := ftu.mutation.AddedNillableInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt32,
 		})
 	}
-	if ftu.clearnillable_int32 {
+	if ftu.mutation.NillableInt32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Column: fieldtype.FieldNillableInt32,
 		})
 	}
-	if value := ftu.nillable_int64; value != nil {
+	if value, ok := ftu.mutation.NillableInt64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt64,
 		})
 	}
-	if value := ftu.addnillable_int64; value != nil {
+	if value, ok := ftu.mutation.AddedNillableInt64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt64,
 		})
 	}
-	if ftu.clearnillable_int64 {
+	if ftu.mutation.NillableInt64Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: fieldtype.FieldNillableInt64,
 		})
 	}
-	if value := ftu.validate_optional_int32; value != nil {
+	if value, ok := ftu.mutation.ValidateOptionalInt32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 	}
-	if value := ftu.addvalidate_optional_int32; value != nil {
+	if value, ok := ftu.mutation.AddedValidateOptionalInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 	}
-	if ftu.clearvalidate_optional_int32 {
+	if ftu.mutation.ValidateOptionalInt32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 	}
-	if value := ftu.optional_uint; value != nil {
+	if value, ok := ftu.mutation.OptionalUint(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint,
 		})
 	}
-	if value := ftu.addoptional_uint; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalUint(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint,
 		})
 	}
-	if ftu.clearoptional_uint {
+	if ftu.mutation.OptionalUintCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
 			Column: fieldtype.FieldOptionalUint,
 		})
 	}
-	if value := ftu.optional_uint8; value != nil {
+	if value, ok := ftu.mutation.OptionalUint8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint8,
 		})
 	}
-	if value := ftu.addoptional_uint8; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalUint8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint8,
 		})
 	}
-	if ftu.clearoptional_uint8 {
+	if ftu.mutation.OptionalUint8Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
 			Column: fieldtype.FieldOptionalUint8,
 		})
 	}
-	if value := ftu.optional_uint16; value != nil {
+	if value, ok := ftu.mutation.OptionalUint16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint16,
 		})
 	}
-	if value := ftu.addoptional_uint16; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalUint16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint16,
 		})
 	}
-	if ftu.clearoptional_uint16 {
+	if ftu.mutation.OptionalUint16Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
 			Column: fieldtype.FieldOptionalUint16,
 		})
 	}
-	if value := ftu.optional_uint32; value != nil {
+	if value, ok := ftu.mutation.OptionalUint32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint32,
 		})
 	}
-	if value := ftu.addoptional_uint32; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalUint32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint32,
 		})
 	}
-	if ftu.clearoptional_uint32 {
+	if ftu.mutation.OptionalUint32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Column: fieldtype.FieldOptionalUint32,
 		})
 	}
-	if value := ftu.optional_uint64; value != nil {
+	if value, ok := ftu.mutation.OptionalUint64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint64,
 		})
 	}
-	if value := ftu.addoptional_uint64; value != nil {
+	if value, ok := ftu.mutation.AddedOptionalUint64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint64,
 		})
 	}
-	if ftu.clearoptional_uint64 {
+	if ftu.mutation.OptionalUint64Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
 			Column: fieldtype.FieldOptionalUint64,
 		})
 	}
-	if value := ftu.state; value != nil {
+	if value, ok := ftu.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldState,
 		})
 	}
-	if ftu.clearstate {
+	if ftu.mutation.StateCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: fieldtype.FieldState,
@@ -1179,158 +1044,79 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
-	id                           string
-	int                          *int
-	addint                       *int
-	int8                         *int8
-	addint8                      *int8
-	int16                        *int16
-	addint16                     *int16
-	int32                        *int32
-	addint32                     *int32
-	int64                        *int64
-	addint64                     *int64
-	optional_int                 *int
-	addoptional_int              *int
-	clearoptional_int            bool
-	optional_int8                *int8
-	addoptional_int8             *int8
-	clearoptional_int8           bool
-	optional_int16               *int16
-	addoptional_int16            *int16
-	clearoptional_int16          bool
-	optional_int32               *int32
-	addoptional_int32            *int32
-	clearoptional_int32          bool
-	optional_int64               *int64
-	addoptional_int64            *int64
-	clearoptional_int64          bool
-	nillable_int                 *int
-	addnillable_int              *int
-	clearnillable_int            bool
-	nillable_int8                *int8
-	addnillable_int8             *int8
-	clearnillable_int8           bool
-	nillable_int16               *int16
-	addnillable_int16            *int16
-	clearnillable_int16          bool
-	nillable_int32               *int32
-	addnillable_int32            *int32
-	clearnillable_int32          bool
-	nillable_int64               *int64
-	addnillable_int64            *int64
-	clearnillable_int64          bool
-	validate_optional_int32      *int32
-	addvalidate_optional_int32   *int32
-	clearvalidate_optional_int32 bool
-	optional_uint                *uint
-	addoptional_uint             *uint
-	clearoptional_uint           bool
-	optional_uint8               *uint8
-	addoptional_uint8            *uint8
-	clearoptional_uint8          bool
-	optional_uint16              *uint16
-	addoptional_uint16           *uint16
-	clearoptional_uint16         bool
-	optional_uint32              *uint32
-	addoptional_uint32           *uint32
-	clearoptional_uint32         bool
-	optional_uint64              *uint64
-	addoptional_uint64           *uint64
-	clearoptional_uint64         bool
-	state                        *fieldtype.State
-	clearstate                   bool
+	hooks    []ent.Hook
+	mutation *FieldTypeMutation
 }
 
 // SetInt sets the int field.
 func (ftuo *FieldTypeUpdateOne) SetInt(i int) *FieldTypeUpdateOne {
-	ftuo.int = &i
-	ftuo.addint = nil
+	ftuo.mutation.ResetInt()
+	ftuo.mutation.SetInt(i)
 	return ftuo
 }
 
 // AddInt adds i to int.
 func (ftuo *FieldTypeUpdateOne) AddInt(i int) *FieldTypeUpdateOne {
-	if ftuo.addint == nil {
-		ftuo.addint = &i
-	} else {
-		*ftuo.addint += i
-	}
+	ftuo.mutation.AddInt(i)
 	return ftuo
 }
 
 // SetInt8 sets the int8 field.
 func (ftuo *FieldTypeUpdateOne) SetInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.int8 = &i
-	ftuo.addint8 = nil
+	ftuo.mutation.ResetInt8()
+	ftuo.mutation.SetInt8(i)
 	return ftuo
 }
 
 // AddInt8 adds i to int8.
 func (ftuo *FieldTypeUpdateOne) AddInt8(i int8) *FieldTypeUpdateOne {
-	if ftuo.addint8 == nil {
-		ftuo.addint8 = &i
-	} else {
-		*ftuo.addint8 += i
-	}
+	ftuo.mutation.AddInt8(i)
 	return ftuo
 }
 
 // SetInt16 sets the int16 field.
 func (ftuo *FieldTypeUpdateOne) SetInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.int16 = &i
-	ftuo.addint16 = nil
+	ftuo.mutation.ResetInt16()
+	ftuo.mutation.SetInt16(i)
 	return ftuo
 }
 
 // AddInt16 adds i to int16.
 func (ftuo *FieldTypeUpdateOne) AddInt16(i int16) *FieldTypeUpdateOne {
-	if ftuo.addint16 == nil {
-		ftuo.addint16 = &i
-	} else {
-		*ftuo.addint16 += i
-	}
+	ftuo.mutation.AddInt16(i)
 	return ftuo
 }
 
 // SetInt32 sets the int32 field.
 func (ftuo *FieldTypeUpdateOne) SetInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.int32 = &i
-	ftuo.addint32 = nil
+	ftuo.mutation.ResetInt32()
+	ftuo.mutation.SetInt32(i)
 	return ftuo
 }
 
 // AddInt32 adds i to int32.
 func (ftuo *FieldTypeUpdateOne) AddInt32(i int32) *FieldTypeUpdateOne {
-	if ftuo.addint32 == nil {
-		ftuo.addint32 = &i
-	} else {
-		*ftuo.addint32 += i
-	}
+	ftuo.mutation.AddInt32(i)
 	return ftuo
 }
 
 // SetInt64 sets the int64 field.
 func (ftuo *FieldTypeUpdateOne) SetInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.int64 = &i
-	ftuo.addint64 = nil
+	ftuo.mutation.ResetInt64()
+	ftuo.mutation.SetInt64(i)
 	return ftuo
 }
 
 // AddInt64 adds i to int64.
 func (ftuo *FieldTypeUpdateOne) AddInt64(i int64) *FieldTypeUpdateOne {
-	if ftuo.addint64 == nil {
-		ftuo.addint64 = &i
-	} else {
-		*ftuo.addint64 += i
-	}
+	ftuo.mutation.AddInt64(i)
 	return ftuo
 }
 
 // SetOptionalInt sets the optional_int field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt(i int) *FieldTypeUpdateOne {
-	ftuo.optional_int = &i
-	ftuo.addoptional_int = nil
+	ftuo.mutation.ResetOptionalInt()
+	ftuo.mutation.SetOptionalInt(i)
 	return ftuo
 }
 
@@ -1344,25 +1130,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt(i *int) *FieldTypeUpdateO
 
 // AddOptionalInt adds i to optional_int.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt(i int) *FieldTypeUpdateOne {
-	if ftuo.addoptional_int == nil {
-		ftuo.addoptional_int = &i
-	} else {
-		*ftuo.addoptional_int += i
-	}
+	ftuo.mutation.AddOptionalInt(i)
 	return ftuo
 }
 
 // ClearOptionalInt clears the value of optional_int.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt() *FieldTypeUpdateOne {
-	ftuo.optional_int = nil
-	ftuo.clearoptional_int = true
+	ftuo.mutation.ClearOptionalInt()
 	return ftuo
 }
 
 // SetOptionalInt8 sets the optional_int8 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.optional_int8 = &i
-	ftuo.addoptional_int8 = nil
+	ftuo.mutation.ResetOptionalInt8()
+	ftuo.mutation.SetOptionalInt8(i)
 	return ftuo
 }
 
@@ -1376,25 +1157,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt8(i *int8) *FieldTypeUpdat
 
 // AddOptionalInt8 adds i to optional_int8.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt8(i int8) *FieldTypeUpdateOne {
-	if ftuo.addoptional_int8 == nil {
-		ftuo.addoptional_int8 = &i
-	} else {
-		*ftuo.addoptional_int8 += i
-	}
+	ftuo.mutation.AddOptionalInt8(i)
 	return ftuo
 }
 
 // ClearOptionalInt8 clears the value of optional_int8.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt8() *FieldTypeUpdateOne {
-	ftuo.optional_int8 = nil
-	ftuo.clearoptional_int8 = true
+	ftuo.mutation.ClearOptionalInt8()
 	return ftuo
 }
 
 // SetOptionalInt16 sets the optional_int16 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.optional_int16 = &i
-	ftuo.addoptional_int16 = nil
+	ftuo.mutation.ResetOptionalInt16()
+	ftuo.mutation.SetOptionalInt16(i)
 	return ftuo
 }
 
@@ -1408,25 +1184,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt16(i *int16) *FieldTypeUpd
 
 // AddOptionalInt16 adds i to optional_int16.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt16(i int16) *FieldTypeUpdateOne {
-	if ftuo.addoptional_int16 == nil {
-		ftuo.addoptional_int16 = &i
-	} else {
-		*ftuo.addoptional_int16 += i
-	}
+	ftuo.mutation.AddOptionalInt16(i)
 	return ftuo
 }
 
 // ClearOptionalInt16 clears the value of optional_int16.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt16() *FieldTypeUpdateOne {
-	ftuo.optional_int16 = nil
-	ftuo.clearoptional_int16 = true
+	ftuo.mutation.ClearOptionalInt16()
 	return ftuo
 }
 
 // SetOptionalInt32 sets the optional_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.optional_int32 = &i
-	ftuo.addoptional_int32 = nil
+	ftuo.mutation.ResetOptionalInt32()
+	ftuo.mutation.SetOptionalInt32(i)
 	return ftuo
 }
 
@@ -1440,25 +1211,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt32(i *int32) *FieldTypeUpd
 
 // AddOptionalInt32 adds i to optional_int32.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt32(i int32) *FieldTypeUpdateOne {
-	if ftuo.addoptional_int32 == nil {
-		ftuo.addoptional_int32 = &i
-	} else {
-		*ftuo.addoptional_int32 += i
-	}
+	ftuo.mutation.AddOptionalInt32(i)
 	return ftuo
 }
 
 // ClearOptionalInt32 clears the value of optional_int32.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt32() *FieldTypeUpdateOne {
-	ftuo.optional_int32 = nil
-	ftuo.clearoptional_int32 = true
+	ftuo.mutation.ClearOptionalInt32()
 	return ftuo
 }
 
 // SetOptionalInt64 sets the optional_int64 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.optional_int64 = &i
-	ftuo.addoptional_int64 = nil
+	ftuo.mutation.ResetOptionalInt64()
+	ftuo.mutation.SetOptionalInt64(i)
 	return ftuo
 }
 
@@ -1472,25 +1238,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt64(i *int64) *FieldTypeUpd
 
 // AddOptionalInt64 adds i to optional_int64.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt64(i int64) *FieldTypeUpdateOne {
-	if ftuo.addoptional_int64 == nil {
-		ftuo.addoptional_int64 = &i
-	} else {
-		*ftuo.addoptional_int64 += i
-	}
+	ftuo.mutation.AddOptionalInt64(i)
 	return ftuo
 }
 
 // ClearOptionalInt64 clears the value of optional_int64.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt64() *FieldTypeUpdateOne {
-	ftuo.optional_int64 = nil
-	ftuo.clearoptional_int64 = true
+	ftuo.mutation.ClearOptionalInt64()
 	return ftuo
 }
 
 // SetNillableInt sets the nillable_int field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
-	ftuo.nillable_int = &i
-	ftuo.addnillable_int = nil
+	ftuo.mutation.ResetNillableInt()
+	ftuo.mutation.SetNillableInt(i)
 	return ftuo
 }
 
@@ -1504,25 +1265,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateO
 
 // AddNillableInt adds i to nillable_int.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt(i int) *FieldTypeUpdateOne {
-	if ftuo.addnillable_int == nil {
-		ftuo.addnillable_int = &i
-	} else {
-		*ftuo.addnillable_int += i
-	}
+	ftuo.mutation.AddNillableInt(i)
 	return ftuo
 }
 
 // ClearNillableInt clears the value of nillable_int.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
-	ftuo.nillable_int = nil
-	ftuo.clearnillable_int = true
+	ftuo.mutation.ClearNillableInt()
 	return ftuo
 }
 
 // SetNillableInt8 sets the nillable_int8 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
-	ftuo.nillable_int8 = &i
-	ftuo.addnillable_int8 = nil
+	ftuo.mutation.ResetNillableInt8()
+	ftuo.mutation.SetNillableInt8(i)
 	return ftuo
 }
 
@@ -1536,25 +1292,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdat
 
 // AddNillableInt8 adds i to nillable_int8.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt8(i int8) *FieldTypeUpdateOne {
-	if ftuo.addnillable_int8 == nil {
-		ftuo.addnillable_int8 = &i
-	} else {
-		*ftuo.addnillable_int8 += i
-	}
+	ftuo.mutation.AddNillableInt8(i)
 	return ftuo
 }
 
 // ClearNillableInt8 clears the value of nillable_int8.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt8() *FieldTypeUpdateOne {
-	ftuo.nillable_int8 = nil
-	ftuo.clearnillable_int8 = true
+	ftuo.mutation.ClearNillableInt8()
 	return ftuo
 }
 
 // SetNillableInt16 sets the nillable_int16 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt16(i int16) *FieldTypeUpdateOne {
-	ftuo.nillable_int16 = &i
-	ftuo.addnillable_int16 = nil
+	ftuo.mutation.ResetNillableInt16()
+	ftuo.mutation.SetNillableInt16(i)
 	return ftuo
 }
 
@@ -1568,25 +1319,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpd
 
 // AddNillableInt16 adds i to nillable_int16.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt16(i int16) *FieldTypeUpdateOne {
-	if ftuo.addnillable_int16 == nil {
-		ftuo.addnillable_int16 = &i
-	} else {
-		*ftuo.addnillable_int16 += i
-	}
+	ftuo.mutation.AddNillableInt16(i)
 	return ftuo
 }
 
 // ClearNillableInt16 clears the value of nillable_int16.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt16() *FieldTypeUpdateOne {
-	ftuo.nillable_int16 = nil
-	ftuo.clearnillable_int16 = true
+	ftuo.mutation.ClearNillableInt16()
 	return ftuo
 }
 
 // SetNillableInt32 sets the nillable_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.nillable_int32 = &i
-	ftuo.addnillable_int32 = nil
+	ftuo.mutation.ResetNillableInt32()
+	ftuo.mutation.SetNillableInt32(i)
 	return ftuo
 }
 
@@ -1600,25 +1346,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpd
 
 // AddNillableInt32 adds i to nillable_int32.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt32(i int32) *FieldTypeUpdateOne {
-	if ftuo.addnillable_int32 == nil {
-		ftuo.addnillable_int32 = &i
-	} else {
-		*ftuo.addnillable_int32 += i
-	}
+	ftuo.mutation.AddNillableInt32(i)
 	return ftuo
 }
 
 // ClearNillableInt32 clears the value of nillable_int32.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
-	ftuo.nillable_int32 = nil
-	ftuo.clearnillable_int32 = true
+	ftuo.mutation.ClearNillableInt32()
 	return ftuo
 }
 
 // SetNillableInt64 sets the nillable_int64 field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt64(i int64) *FieldTypeUpdateOne {
-	ftuo.nillable_int64 = &i
-	ftuo.addnillable_int64 = nil
+	ftuo.mutation.ResetNillableInt64()
+	ftuo.mutation.SetNillableInt64(i)
 	return ftuo
 }
 
@@ -1632,25 +1373,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpd
 
 // AddNillableInt64 adds i to nillable_int64.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt64(i int64) *FieldTypeUpdateOne {
-	if ftuo.addnillable_int64 == nil {
-		ftuo.addnillable_int64 = &i
-	} else {
-		*ftuo.addnillable_int64 += i
-	}
+	ftuo.mutation.AddNillableInt64(i)
 	return ftuo
 }
 
 // ClearNillableInt64 clears the value of nillable_int64.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt64() *FieldTypeUpdateOne {
-	ftuo.nillable_int64 = nil
-	ftuo.clearnillable_int64 = true
+	ftuo.mutation.ClearNillableInt64()
 	return ftuo
 }
 
 // SetValidateOptionalInt32 sets the validate_optional_int32 field.
 func (ftuo *FieldTypeUpdateOne) SetValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
-	ftuo.validate_optional_int32 = &i
-	ftuo.addvalidate_optional_int32 = nil
+	ftuo.mutation.ResetValidateOptionalInt32()
+	ftuo.mutation.SetValidateOptionalInt32(i)
 	return ftuo
 }
 
@@ -1664,25 +1400,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *Fiel
 
 // AddValidateOptionalInt32 adds i to validate_optional_int32.
 func (ftuo *FieldTypeUpdateOne) AddValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
-	if ftuo.addvalidate_optional_int32 == nil {
-		ftuo.addvalidate_optional_int32 = &i
-	} else {
-		*ftuo.addvalidate_optional_int32 += i
-	}
+	ftuo.mutation.AddValidateOptionalInt32(i)
 	return ftuo
 }
 
 // ClearValidateOptionalInt32 clears the value of validate_optional_int32.
 func (ftuo *FieldTypeUpdateOne) ClearValidateOptionalInt32() *FieldTypeUpdateOne {
-	ftuo.validate_optional_int32 = nil
-	ftuo.clearvalidate_optional_int32 = true
+	ftuo.mutation.ClearValidateOptionalInt32()
 	return ftuo
 }
 
 // SetOptionalUint sets the optional_uint field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint(u uint) *FieldTypeUpdateOne {
-	ftuo.optional_uint = &u
-	ftuo.addoptional_uint = nil
+	ftuo.mutation.ResetOptionalUint()
+	ftuo.mutation.SetOptionalUint(u)
 	return ftuo
 }
 
@@ -1696,25 +1427,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint(u *uint) *FieldTypeUpdat
 
 // AddOptionalUint adds u to optional_uint.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint(u uint) *FieldTypeUpdateOne {
-	if ftuo.addoptional_uint == nil {
-		ftuo.addoptional_uint = &u
-	} else {
-		*ftuo.addoptional_uint += u
-	}
+	ftuo.mutation.AddOptionalUint(u)
 	return ftuo
 }
 
 // ClearOptionalUint clears the value of optional_uint.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint() *FieldTypeUpdateOne {
-	ftuo.optional_uint = nil
-	ftuo.clearoptional_uint = true
+	ftuo.mutation.ClearOptionalUint()
 	return ftuo
 }
 
 // SetOptionalUint8 sets the optional_uint8 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint8(u uint8) *FieldTypeUpdateOne {
-	ftuo.optional_uint8 = &u
-	ftuo.addoptional_uint8 = nil
+	ftuo.mutation.ResetOptionalUint8()
+	ftuo.mutation.SetOptionalUint8(u)
 	return ftuo
 }
 
@@ -1728,25 +1454,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint8(u *uint8) *FieldTypeUpd
 
 // AddOptionalUint8 adds u to optional_uint8.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint8(u uint8) *FieldTypeUpdateOne {
-	if ftuo.addoptional_uint8 == nil {
-		ftuo.addoptional_uint8 = &u
-	} else {
-		*ftuo.addoptional_uint8 += u
-	}
+	ftuo.mutation.AddOptionalUint8(u)
 	return ftuo
 }
 
 // ClearOptionalUint8 clears the value of optional_uint8.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint8() *FieldTypeUpdateOne {
-	ftuo.optional_uint8 = nil
-	ftuo.clearoptional_uint8 = true
+	ftuo.mutation.ClearOptionalUint8()
 	return ftuo
 }
 
 // SetOptionalUint16 sets the optional_uint16 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint16(u uint16) *FieldTypeUpdateOne {
-	ftuo.optional_uint16 = &u
-	ftuo.addoptional_uint16 = nil
+	ftuo.mutation.ResetOptionalUint16()
+	ftuo.mutation.SetOptionalUint16(u)
 	return ftuo
 }
 
@@ -1760,25 +1481,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint16(u *uint16) *FieldTypeU
 
 // AddOptionalUint16 adds u to optional_uint16.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint16(u uint16) *FieldTypeUpdateOne {
-	if ftuo.addoptional_uint16 == nil {
-		ftuo.addoptional_uint16 = &u
-	} else {
-		*ftuo.addoptional_uint16 += u
-	}
+	ftuo.mutation.AddOptionalUint16(u)
 	return ftuo
 }
 
 // ClearOptionalUint16 clears the value of optional_uint16.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint16() *FieldTypeUpdateOne {
-	ftuo.optional_uint16 = nil
-	ftuo.clearoptional_uint16 = true
+	ftuo.mutation.ClearOptionalUint16()
 	return ftuo
 }
 
 // SetOptionalUint32 sets the optional_uint32 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint32(u uint32) *FieldTypeUpdateOne {
-	ftuo.optional_uint32 = &u
-	ftuo.addoptional_uint32 = nil
+	ftuo.mutation.ResetOptionalUint32()
+	ftuo.mutation.SetOptionalUint32(u)
 	return ftuo
 }
 
@@ -1792,25 +1508,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint32(u *uint32) *FieldTypeU
 
 // AddOptionalUint32 adds u to optional_uint32.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint32(u uint32) *FieldTypeUpdateOne {
-	if ftuo.addoptional_uint32 == nil {
-		ftuo.addoptional_uint32 = &u
-	} else {
-		*ftuo.addoptional_uint32 += u
-	}
+	ftuo.mutation.AddOptionalUint32(u)
 	return ftuo
 }
 
 // ClearOptionalUint32 clears the value of optional_uint32.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint32() *FieldTypeUpdateOne {
-	ftuo.optional_uint32 = nil
-	ftuo.clearoptional_uint32 = true
+	ftuo.mutation.ClearOptionalUint32()
 	return ftuo
 }
 
 // SetOptionalUint64 sets the optional_uint64 field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint64(u uint64) *FieldTypeUpdateOne {
-	ftuo.optional_uint64 = &u
-	ftuo.addoptional_uint64 = nil
+	ftuo.mutation.ResetOptionalUint64()
+	ftuo.mutation.SetOptionalUint64(u)
 	return ftuo
 }
 
@@ -1824,24 +1535,19 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint64(u *uint64) *FieldTypeU
 
 // AddOptionalUint64 adds u to optional_uint64.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u uint64) *FieldTypeUpdateOne {
-	if ftuo.addoptional_uint64 == nil {
-		ftuo.addoptional_uint64 = &u
-	} else {
-		*ftuo.addoptional_uint64 += u
-	}
+	ftuo.mutation.AddOptionalUint64(u)
 	return ftuo
 }
 
 // ClearOptionalUint64 clears the value of optional_uint64.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint64() *FieldTypeUpdateOne {
-	ftuo.optional_uint64 = nil
-	ftuo.clearoptional_uint64 = true
+	ftuo.mutation.ClearOptionalUint64()
 	return ftuo
 }
 
 // SetState sets the state field.
 func (ftuo *FieldTypeUpdateOne) SetState(f fieldtype.State) *FieldTypeUpdateOne {
-	ftuo.state = &f
+	ftuo.mutation.SetState(f)
 	return ftuo
 }
 
@@ -1855,24 +1561,46 @@ func (ftuo *FieldTypeUpdateOne) SetNillableState(f *fieldtype.State) *FieldTypeU
 
 // ClearState clears the value of state.
 func (ftuo *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
-	ftuo.state = nil
-	ftuo.clearstate = true
+	ftuo.mutation.ClearState()
 	return ftuo
 }
 
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
-	if ftuo.validate_optional_int32 != nil {
-		if err := fieldtype.ValidateOptionalInt32Validator(*ftuo.validate_optional_int32); err != nil {
+	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
 		}
 	}
-	if ftuo.state != nil {
-		if err := fieldtype.StateValidator(*ftuo.state); err != nil {
+	if v, ok := ftuo.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
 		}
 	}
-	return ftuo.sqlSave(ctx)
+	var (
+		err  error
+		node *FieldType
+	)
+	if len(ftuo.hooks) == 0 {
+		node, err = ftuo.sqlSave(ctx)
+	} else {
+		var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			mutation, ok := m.(*FieldTypeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ftuo.mutation = mutation
+			node, err = ftuo.sqlSave(ctx)
+			return node, err
+		})
+		for _, hook := range ftuo.hooks {
+			mut = hook(mut)
+		}
+		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1903,410 +1631,414 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			Table:   fieldtype.Table,
 			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  ftuo.id,
 				Type:   field.TypeString,
 				Column: fieldtype.FieldID,
 			},
 		},
 	}
-	if value := ftuo.int; value != nil {
+	id, ok := ftuo.mutation.ID()
+	if !ok {
+		return nil, fmt.Errorf("missing FieldType.ID for update")
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := ftuo.mutation.Int(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt,
 		})
 	}
-	if value := ftuo.addint; value != nil {
+	if value, ok := ftuo.mutation.AddedInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt,
 		})
 	}
-	if value := ftuo.int8; value != nil {
+	if value, ok := ftuo.mutation.Int8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt8,
 		})
 	}
-	if value := ftuo.addint8; value != nil {
+	if value, ok := ftuo.mutation.AddedInt8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt8,
 		})
 	}
-	if value := ftuo.int16; value != nil {
+	if value, ok := ftuo.mutation.Int16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt16,
 		})
 	}
-	if value := ftuo.addint16; value != nil {
+	if value, ok := ftuo.mutation.AddedInt16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt16,
 		})
 	}
-	if value := ftuo.int32; value != nil {
+	if value, ok := ftuo.mutation.Int32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt32,
 		})
 	}
-	if value := ftuo.addint32; value != nil {
+	if value, ok := ftuo.mutation.AddedInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt32,
 		})
 	}
-	if value := ftuo.int64; value != nil {
+	if value, ok := ftuo.mutation.Int64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt64,
 		})
 	}
-	if value := ftuo.addint64; value != nil {
+	if value, ok := ftuo.mutation.AddedInt64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldInt64,
 		})
 	}
-	if value := ftuo.optional_int; value != nil {
+	if value, ok := ftuo.mutation.OptionalInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt,
 		})
 	}
-	if value := ftuo.addoptional_int; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt,
 		})
 	}
-	if ftuo.clearoptional_int {
+	if ftuo.mutation.OptionalIntCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: fieldtype.FieldOptionalInt,
 		})
 	}
-	if value := ftuo.optional_int8; value != nil {
+	if value, ok := ftuo.mutation.OptionalInt8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt8,
 		})
 	}
-	if value := ftuo.addoptional_int8; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalInt8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt8,
 		})
 	}
-	if ftuo.clearoptional_int8 {
+	if ftuo.mutation.OptionalInt8Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Column: fieldtype.FieldOptionalInt8,
 		})
 	}
-	if value := ftuo.optional_int16; value != nil {
+	if value, ok := ftuo.mutation.OptionalInt16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt16,
 		})
 	}
-	if value := ftuo.addoptional_int16; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalInt16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt16,
 		})
 	}
-	if ftuo.clearoptional_int16 {
+	if ftuo.mutation.OptionalInt16Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Column: fieldtype.FieldOptionalInt16,
 		})
 	}
-	if value := ftuo.optional_int32; value != nil {
+	if value, ok := ftuo.mutation.OptionalInt32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt32,
 		})
 	}
-	if value := ftuo.addoptional_int32; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt32,
 		})
 	}
-	if ftuo.clearoptional_int32 {
+	if ftuo.mutation.OptionalInt32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Column: fieldtype.FieldOptionalInt32,
 		})
 	}
-	if value := ftuo.optional_int64; value != nil {
+	if value, ok := ftuo.mutation.OptionalInt64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt64,
 		})
 	}
-	if value := ftuo.addoptional_int64; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalInt64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalInt64,
 		})
 	}
-	if ftuo.clearoptional_int64 {
+	if ftuo.mutation.OptionalInt64Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: fieldtype.FieldOptionalInt64,
 		})
 	}
-	if value := ftuo.nillable_int; value != nil {
+	if value, ok := ftuo.mutation.NillableInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt,
 		})
 	}
-	if value := ftuo.addnillable_int; value != nil {
+	if value, ok := ftuo.mutation.AddedNillableInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt,
 		})
 	}
-	if ftuo.clearnillable_int {
+	if ftuo.mutation.NillableIntCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: fieldtype.FieldNillableInt,
 		})
 	}
-	if value := ftuo.nillable_int8; value != nil {
+	if value, ok := ftuo.mutation.NillableInt8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt8,
 		})
 	}
-	if value := ftuo.addnillable_int8; value != nil {
+	if value, ok := ftuo.mutation.AddedNillableInt8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt8,
 		})
 	}
-	if ftuo.clearnillable_int8 {
+	if ftuo.mutation.NillableInt8Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
 			Column: fieldtype.FieldNillableInt8,
 		})
 	}
-	if value := ftuo.nillable_int16; value != nil {
+	if value, ok := ftuo.mutation.NillableInt16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt16,
 		})
 	}
-	if value := ftuo.addnillable_int16; value != nil {
+	if value, ok := ftuo.mutation.AddedNillableInt16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt16,
 		})
 	}
-	if ftuo.clearnillable_int16 {
+	if ftuo.mutation.NillableInt16Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt16,
 			Column: fieldtype.FieldNillableInt16,
 		})
 	}
-	if value := ftuo.nillable_int32; value != nil {
+	if value, ok := ftuo.mutation.NillableInt32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt32,
 		})
 	}
-	if value := ftuo.addnillable_int32; value != nil {
+	if value, ok := ftuo.mutation.AddedNillableInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt32,
 		})
 	}
-	if ftuo.clearnillable_int32 {
+	if ftuo.mutation.NillableInt32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Column: fieldtype.FieldNillableInt32,
 		})
 	}
-	if value := ftuo.nillable_int64; value != nil {
+	if value, ok := ftuo.mutation.NillableInt64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt64,
 		})
 	}
-	if value := ftuo.addnillable_int64; value != nil {
+	if value, ok := ftuo.mutation.AddedNillableInt64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldNillableInt64,
 		})
 	}
-	if ftuo.clearnillable_int64 {
+	if ftuo.mutation.NillableInt64Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: fieldtype.FieldNillableInt64,
 		})
 	}
-	if value := ftuo.validate_optional_int32; value != nil {
+	if value, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 	}
-	if value := ftuo.addvalidate_optional_int32; value != nil {
+	if value, ok := ftuo.mutation.AddedValidateOptionalInt32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 	}
-	if ftuo.clearvalidate_optional_int32 {
+	if ftuo.mutation.ValidateOptionalInt32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
 			Column: fieldtype.FieldValidateOptionalInt32,
 		})
 	}
-	if value := ftuo.optional_uint; value != nil {
+	if value, ok := ftuo.mutation.OptionalUint(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint,
 		})
 	}
-	if value := ftuo.addoptional_uint; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalUint(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint,
 		})
 	}
-	if ftuo.clearoptional_uint {
+	if ftuo.mutation.OptionalUintCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint,
 			Column: fieldtype.FieldOptionalUint,
 		})
 	}
-	if value := ftuo.optional_uint8; value != nil {
+	if value, ok := ftuo.mutation.OptionalUint8(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint8,
 		})
 	}
-	if value := ftuo.addoptional_uint8; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalUint8(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint8,
 		})
 	}
-	if ftuo.clearoptional_uint8 {
+	if ftuo.mutation.OptionalUint8Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
 			Column: fieldtype.FieldOptionalUint8,
 		})
 	}
-	if value := ftuo.optional_uint16; value != nil {
+	if value, ok := ftuo.mutation.OptionalUint16(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint16,
 		})
 	}
-	if value := ftuo.addoptional_uint16; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalUint16(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint16,
 		})
 	}
-	if ftuo.clearoptional_uint16 {
+	if ftuo.mutation.OptionalUint16Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint16,
 			Column: fieldtype.FieldOptionalUint16,
 		})
 	}
-	if value := ftuo.optional_uint32; value != nil {
+	if value, ok := ftuo.mutation.OptionalUint32(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint32,
 		})
 	}
-	if value := ftuo.addoptional_uint32; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalUint32(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint32,
 		})
 	}
-	if ftuo.clearoptional_uint32 {
+	if ftuo.mutation.OptionalUint32Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Column: fieldtype.FieldOptionalUint32,
 		})
 	}
-	if value := ftuo.optional_uint64; value != nil {
+	if value, ok := ftuo.mutation.OptionalUint64(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint64,
 		})
 	}
-	if value := ftuo.addoptional_uint64; value != nil {
+	if value, ok := ftuo.mutation.AddedOptionalUint64(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldOptionalUint64,
 		})
 	}
-	if ftuo.clearoptional_uint64 {
+	if ftuo.mutation.OptionalUint64Cleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
 			Column: fieldtype.FieldOptionalUint64,
 		})
 	}
-	if value := ftuo.state; value != nil {
+	if value, ok := ftuo.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
-			Value:  *value,
+			Value:  value,
 			Column: fieldtype.FieldState,
 		})
 	}
-	if ftuo.clearstate {
+	if ftuo.mutation.StateCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: fieldtype.FieldState,
