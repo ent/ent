@@ -55,7 +55,7 @@ func (b *Blob) assignValues(values ...interface{}) error {
 // Note that, you need to call Blob.Unwrap() before calling this method, if this Blob
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Blob) Update() *BlobUpdateOne {
-	return (&BlobClient{b.config}).UpdateOne(b)
+	return (&BlobClient{config: b.config}).UpdateOne(b)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

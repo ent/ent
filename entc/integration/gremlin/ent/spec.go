@@ -60,14 +60,14 @@ func (s *Spec) FromResponse(res *gremlin.Response) error {
 
 // QueryCard queries the card edge of the Spec.
 func (s *Spec) QueryCard() *CardQuery {
-	return (&SpecClient{s.config}).QueryCard(s)
+	return (&SpecClient{config: s.config}).QueryCard(s)
 }
 
 // Update returns a builder for updating this Spec.
 // Note that, you need to call Spec.Unwrap() before calling this method, if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Spec) Update() *SpecUpdateOne {
-	return (&SpecClient{s.config}).UpdateOne(s)
+	return (&SpecClient{config: s.config}).UpdateOne(s)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

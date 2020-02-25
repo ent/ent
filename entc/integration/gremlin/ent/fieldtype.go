@@ -130,7 +130,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 // Note that, you need to call FieldType.Unwrap() before calling this method, if this FieldType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ft *FieldType) Update() *FieldTypeUpdateOne {
-	return (&FieldTypeClient{ft.config}).UpdateOne(ft)
+	return (&FieldTypeClient{config: ft.config}).UpdateOne(ft)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

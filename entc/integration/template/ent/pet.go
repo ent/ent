@@ -107,14 +107,14 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 
 // QueryOwner queries the owner edge of the Pet.
 func (pe *Pet) QueryOwner() *UserQuery {
-	return (&PetClient{pe.config}).QueryOwner(pe)
+	return (&PetClient{config: pe.config}).QueryOwner(pe)
 }
 
 // Update returns a builder for updating this Pet.
 // Note that, you need to call Pet.Unwrap() before calling this method, if this Pet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (pe *Pet) Update() *PetUpdateOne {
-	return (&PetClient{pe.config}).UpdateOne(pe)
+	return (&PetClient{config: pe.config}).UpdateOne(pe)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

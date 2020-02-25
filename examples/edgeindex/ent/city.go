@@ -74,14 +74,14 @@ func (c *City) assignValues(values ...interface{}) error {
 
 // QueryStreets queries the streets edge of the City.
 func (c *City) QueryStreets() *StreetQuery {
-	return (&CityClient{c.config}).QueryStreets(c)
+	return (&CityClient{config: c.config}).QueryStreets(c)
 }
 
 // Update returns a builder for updating this City.
 // Note that, you need to call City.Unwrap() before calling this method, if this City
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *City) Update() *CityUpdateOne {
-	return (&CityClient{c.config}).UpdateOne(c)
+	return (&CityClient{config: c.config}).UpdateOne(c)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

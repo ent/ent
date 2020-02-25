@@ -73,7 +73,7 @@ func (c *Comment) assignValues(values ...interface{}) error {
 // Note that, you need to call Comment.Unwrap() before calling this method, if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Comment) Update() *CommentUpdateOne {
-	return (&CommentClient{c.config}).UpdateOne(c)
+	return (&CommentClient{config: c.config}).UpdateOne(c)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

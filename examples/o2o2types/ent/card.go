@@ -106,14 +106,14 @@ func (c *Card) assignValues(values ...interface{}) error {
 
 // QueryOwner queries the owner edge of the Card.
 func (c *Card) QueryOwner() *UserQuery {
-	return (&CardClient{c.config}).QueryOwner(c)
+	return (&CardClient{config: c.config}).QueryOwner(c)
 }
 
 // Update returns a builder for updating this Card.
 // Note that, you need to call Card.Unwrap() before calling this method, if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Card) Update() *CardUpdateOne {
-	return (&CardClient{c.config}).UpdateOne(c)
+	return (&CardClient{config: c.config}).UpdateOne(c)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
