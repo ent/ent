@@ -41,7 +41,7 @@ func (i *Item) FromResponse(res *gremlin.Response) error {
 // Note that, you need to call Item.Unwrap() before calling this method, if this Item
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (i *Item) Update() *ItemUpdateOne {
-	return (&ItemClient{i.config}).UpdateOne(i)
+	return (&ItemClient{config: i.config}).UpdateOne(i)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

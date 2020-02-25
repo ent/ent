@@ -156,19 +156,19 @@ func (f *File) assignValues(values ...interface{}) error {
 
 // QueryOwner queries the owner edge of the File.
 func (f *File) QueryOwner() *UserQuery {
-	return (&FileClient{f.config}).QueryOwner(f)
+	return (&FileClient{config: f.config}).QueryOwner(f)
 }
 
 // QueryType queries the type edge of the File.
 func (f *File) QueryType() *FileTypeQuery {
-	return (&FileClient{f.config}).QueryType(f)
+	return (&FileClient{config: f.config}).QueryType(f)
 }
 
 // Update returns a builder for updating this File.
 // Note that, you need to call File.Unwrap() before calling this method, if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (f *File) Update() *FileUpdateOne {
-	return (&FileClient{f.config}).UpdateOne(f)
+	return (&FileClient{config: f.config}).UpdateOne(f)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

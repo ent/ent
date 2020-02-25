@@ -66,14 +66,14 @@ func (gr *Group) assignValues(values ...interface{}) error {
 
 // QueryUsers queries the users edge of the Group.
 func (gr *Group) QueryUsers() *UserQuery {
-	return (&GroupClient{gr.config}).QueryUsers(gr)
+	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
 // Update returns a builder for updating this Group.
 // Note that, you need to call Group.Unwrap() before calling this method, if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
-	return (&GroupClient{gr.config}).UpdateOne(gr)
+	return (&GroupClient{config: gr.config}).UpdateOne(gr)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

@@ -93,19 +93,19 @@ func (u *User) assignValues(values ...interface{}) error {
 
 // QueryCars queries the cars edge of the User.
 func (u *User) QueryCars() *CarQuery {
-	return (&UserClient{u.config}).QueryCars(u)
+	return (&UserClient{config: u.config}).QueryCars(u)
 }
 
 // QueryGroups queries the groups edge of the User.
 func (u *User) QueryGroups() *GroupQuery {
-	return (&UserClient{u.config}).QueryGroups(u)
+	return (&UserClient{config: u.config}).QueryGroups(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that, you need to call User.Unwrap() before calling this method, if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{u.config}).UpdateOne(u)
+	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,

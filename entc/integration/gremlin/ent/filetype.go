@@ -64,14 +64,14 @@ func (ft *FileType) FromResponse(res *gremlin.Response) error {
 
 // QueryFiles queries the files edge of the FileType.
 func (ft *FileType) QueryFiles() *FileQuery {
-	return (&FileTypeClient{ft.config}).QueryFiles(ft)
+	return (&FileTypeClient{config: ft.config}).QueryFiles(ft)
 }
 
 // Update returns a builder for updating this FileType.
 // Note that, you need to call FileType.Unwrap() before calling this method, if this FileType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ft *FileType) Update() *FileTypeUpdateOne {
-	return (&FileTypeClient{ft.config}).UpdateOne(ft)
+	return (&FileTypeClient{config: ft.config}).UpdateOne(ft)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
