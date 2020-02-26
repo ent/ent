@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/facebookincubator/ent/dialect/sql"
 	"math"
 	"net"
 	"reflect"
@@ -116,6 +117,7 @@ var tests = []func(*testing.T, *ent.Client){
 	ImmutableValue,
 	Sensitive,
 	EagerLoading,
+	CustomPredicate,
 }
 
 func Sanity(t *testing.T, client *ent.Client) {
@@ -874,6 +876,27 @@ func Sensitive(t *testing.T, client *ent.Client) {
 	b, err := json.Marshal(usr)
 	require.NoError(err)
 	require.NotContains(string(b), "secret-password")
+}
+
+func CustomPredicate(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	_ = client.User.Create().SetName("foo").SetAge(20).SetPassword("secret-password").SaveX(ctx)
+
+	_ = client.User.
+		Query().
+		Where(user.CustomPredicate(func(b sql.PredicateBuilder) {
+			b.Ident("name").WriteString(" = ")
+			b.Arg("foo")
+		})).
+		OnlyX(ctx)
+
+	_ = client.User.
+		Query().
+		// Age is even
+		Where(user.CustomPredicate(func(b sql.PredicateBuilder) {
+			b.Ident("age").WriteString(" % 2 = 0")
+		})).
+		OnlyX(ctx)
 }
 
 func EagerLoading(t *testing.T, client *ent.Client) {

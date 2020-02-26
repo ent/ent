@@ -209,3 +209,12 @@ func Not(p predicate.Blob) predicate.Blob {
 		p(s.Not())
 	})
 }
+
+// CustomPredicate allows the user to write a custom predicate
+func CustomPredicate(f func(builder sql.PredicateBuilder)) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.P().CustomPredicate(func(builder *sql.Builder) {
+			f(sql.NewPredicateBuilder(builder))
+		}))
+	})
+}

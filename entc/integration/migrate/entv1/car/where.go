@@ -154,3 +154,12 @@ func Not(p predicate.Car) predicate.Car {
 		p(s.Not())
 	})
 }
+
+// CustomPredicate allows the user to write a custom predicate
+func CustomPredicate(f func(builder sql.PredicateBuilder)) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.P().CustomPredicate(func(builder *sql.Builder) {
+			f(sql.NewPredicateBuilder(builder))
+		}))
+	})
+}

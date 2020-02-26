@@ -1198,6 +1198,12 @@ func (p *Predicate) append(f func(*Builder)) *Predicate {
 	return p
 }
 
+// CustomPredicate allows users to build their own predicates
+func (p *Predicate) CustomPredicate(f func(*Builder)) *Predicate {
+	p.append(f)
+	return p
+}
+
 // Func represents an SQL function.
 type Func struct {
 	Builder
@@ -1813,6 +1819,38 @@ type Builder struct {
 	dialect      string        // configured dialect.
 	args         []interface{} // query parameters.
 	total        int           // total number of parameters in query tree.
+}
+
+// PredicateBuilder Limited builder for use in custom predicates
+type PredicateBuilder struct {
+	builder *Builder
+}
+
+func NewPredicateBuilder(b *Builder) PredicateBuilder {
+	return PredicateBuilder{builder: b}
+}
+
+func (b PredicateBuilder) Ident(s string) PredicateBuilder {
+	b.builder.Ident(s)
+	return b
+}
+
+func (b PredicateBuilder) WriteString(s string) (n int, err error) {
+	return b.builder.WriteString(s)
+}
+
+func (b PredicateBuilder) Arg(a interface{}) PredicateBuilder {
+	b.builder.Arg(a)
+	return b
+}
+
+func (b PredicateBuilder) Args(a ...interface{}) PredicateBuilder {
+	b.builder.Args(a)
+	return b
+}
+
+func (b PredicateBuilder) Quote(ident string) string {
+	return b.builder.Quote(ident)
 }
 
 // Quote quotes the given identifier with the characters based

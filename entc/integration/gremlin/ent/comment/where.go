@@ -10,6 +10,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
 )
 
@@ -343,5 +344,14 @@ func Not(p predicate.Comment) predicate.Comment {
 		t := __.New()
 		p(t)
 		tr.Where(__.Not(t))
+	})
+}
+
+// CustomPredicate allows the user to write a custom predicate
+func CustomPredicate(f func(builder sql.PredicateBuilder)) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.P().CustomPredicate(func(builder *sql.Builder) {
+			f(sql.NewPredicateBuilder(builder))
+		}))
 	})
 }
