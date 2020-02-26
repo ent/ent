@@ -175,7 +175,7 @@ func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
 	return cq.gremlinAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Card.
+// StreamAll executes the query and returns a channel of Card. Eager loading not supported!
 func (cq *CardQuery) StreamAll(ctx context.Context, chanSize int) (chan *Card, chan error) {
 	return cq.gremlinStreamAll(ctx, chanSize)
 }

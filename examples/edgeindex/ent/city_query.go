@@ -170,7 +170,7 @@ func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
 	return cq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of City.
+// StreamAll executes the query and returns a channel of City. Eager loading not supported!
 func (cq *CityQuery) StreamAll(ctx context.Context, chanSize int) (chan *City, chan error) {
 	return cq.sqlStreamAll(ctx, chanSize)
 }

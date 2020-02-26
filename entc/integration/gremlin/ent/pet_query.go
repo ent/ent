@@ -174,7 +174,7 @@ func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	return pq.gremlinAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Pet.
+// StreamAll executes the query and returns a channel of Pet. Eager loading not supported!
 func (pq *PetQuery) StreamAll(ctx context.Context, chanSize int) (chan *Pet, chan error) {
 	return pq.gremlinStreamAll(ctx, chanSize)
 }

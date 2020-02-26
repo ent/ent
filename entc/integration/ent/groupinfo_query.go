@@ -171,7 +171,7 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	return giq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of GroupInfo.
+// StreamAll executes the query and returns a channel of GroupInfo. Eager loading not supported!
 func (giq *GroupInfoQuery) StreamAll(ctx context.Context, chanSize int) (chan *GroupInfo, chan error) {
 	return giq.sqlStreamAll(ctx, chanSize)
 }

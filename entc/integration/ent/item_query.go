@@ -154,7 +154,7 @@ func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 	return iq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Item.
+// StreamAll executes the query and returns a channel of Item. Eager loading not supported!
 func (iq *ItemQuery) StreamAll(ctx context.Context, chanSize int) (chan *Item, chan error) {
 	return iq.sqlStreamAll(ctx, chanSize)
 }

@@ -183,7 +183,7 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	return uq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of User.
+// StreamAll executes the query and returns a channel of User. Eager loading not supported!
 func (uq *UserQuery) StreamAll(ctx context.Context, chanSize int) (chan *User, chan error) {
 	return uq.sqlStreamAll(ctx, chanSize)
 }

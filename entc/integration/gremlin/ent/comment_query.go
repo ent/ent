@@ -154,7 +154,7 @@ func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 	return cq.gremlinAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Comment.
+// StreamAll executes the query and returns a channel of Comment. Eager loading not supported!
 func (cq *CommentQuery) StreamAll(ctx context.Context, chanSize int) (chan *Comment, chan error) {
 	return cq.gremlinStreamAll(ctx, chanSize)
 }

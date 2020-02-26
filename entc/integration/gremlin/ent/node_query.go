@@ -173,7 +173,7 @@ func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	return nq.gremlinAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Node.
+// StreamAll executes the query and returns a channel of Node. Eager loading not supported!
 func (nq *NodeQuery) StreamAll(ctx context.Context, chanSize int) (chan *Node, chan error) {
 	return nq.gremlinStreamAll(ctx, chanSize)
 }

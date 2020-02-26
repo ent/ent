@@ -170,7 +170,7 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	return gq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Group.
+// StreamAll executes the query and returns a channel of Group. Eager loading not supported!
 func (gq *GroupQuery) StreamAll(ctx context.Context, chanSize int) (chan *Group, chan error) {
 	return gq.sqlStreamAll(ctx, chanSize)
 }

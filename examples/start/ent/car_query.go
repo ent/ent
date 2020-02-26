@@ -170,7 +170,7 @@ func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
 	return cq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Car.
+// StreamAll executes the query and returns a channel of Car. Eager loading not supported!
 func (cq *CarQuery) StreamAll(ctx context.Context, chanSize int) (chan *Car, chan error) {
 	return cq.sqlStreamAll(ctx, chanSize)
 }

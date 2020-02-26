@@ -175,7 +175,7 @@ func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	return fq.gremlinAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of File.
+// StreamAll executes the query and returns a channel of File. Eager loading not supported!
 func (fq *FileQuery) StreamAll(ctx context.Context, chanSize int) (chan *File, chan error) {
 	return fq.gremlinStreamAll(ctx, chanSize)
 }

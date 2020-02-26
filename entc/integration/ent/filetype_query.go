@@ -171,7 +171,7 @@ func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	return ftq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of FileType.
+// StreamAll executes the query and returns a channel of FileType. Eager loading not supported!
 func (ftq *FileTypeQuery) StreamAll(ctx context.Context, chanSize int) (chan *FileType, chan error) {
 	return ftq.sqlStreamAll(ctx, chanSize)
 }

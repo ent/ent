@@ -171,7 +171,7 @@ func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
 	return sq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Spec.
+// StreamAll executes the query and returns a channel of Spec. Eager loading not supported!
 func (sq *SpecQuery) StreamAll(ctx context.Context, chanSize int) (chan *Spec, chan error) {
 	return sq.sqlStreamAll(ctx, chanSize)
 }

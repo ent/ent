@@ -183,7 +183,7 @@ func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	return nq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Node.
+// StreamAll executes the query and returns a channel of Node. Eager loading not supported!
 func (nq *NodeQuery) StreamAll(ctx context.Context, chanSize int) (chan *Node, chan error) {
 	return nq.sqlStreamAll(ctx, chanSize)
 }

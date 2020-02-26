@@ -155,7 +155,7 @@ func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
 	return bq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Blob.
+// StreamAll executes the query and returns a channel of Blob. Eager loading not supported!
 func (bq *BlobQuery) StreamAll(ctx context.Context, chanSize int) (chan *Blob, chan error) {
 	return bq.sqlStreamAll(ctx, chanSize)
 }

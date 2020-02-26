@@ -170,7 +170,7 @@ func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
 	return sq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of Street.
+// StreamAll executes the query and returns a channel of Street. Eager loading not supported!
 func (sq *StreetQuery) StreamAll(ctx context.Context, chanSize int) (chan *Street, chan error) {
 	return sq.sqlStreamAll(ctx, chanSize)
 }

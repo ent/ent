@@ -154,7 +154,7 @@ func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	return ftq.sqlAll(ctx)
 }
 
-// StreamAll executes the query and returns a channel of FieldType.
+// StreamAll executes the query and returns a channel of FieldType. Eager loading not supported!
 func (ftq *FieldTypeQuery) StreamAll(ctx context.Context, chanSize int) (chan *FieldType, chan error) {
 	return ftq.sqlStreamAll(ctx, chanSize)
 }
