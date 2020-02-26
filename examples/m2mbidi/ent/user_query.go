@@ -169,6 +169,11 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	return uq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of User.
+func (uq *UserQuery) StreamAll(ctx context.Context, chanSize int) (chan *User, chan error) {
+	return uq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (uq *UserQuery) AllX(ctx context.Context) []*User {
 	us, err := uq.All(ctx)
@@ -384,6 +389,47 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	return nodes, nil
+}
+
+func (uq *UserQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *User, chan error) {
+	var (
+		nodes       = make(chan *User, chanSize)
+		currNode    *User
+		_spec       = uq.querySpec()
+		loadedTypes = [1]bool{
+			uq.withFriends != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &User{config: uq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, uq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {

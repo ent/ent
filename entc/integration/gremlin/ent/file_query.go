@@ -175,6 +175,11 @@ func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	return fq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of File.
+func (fq *FileQuery) StreamAll(ctx context.Context, chanSize int) (chan *File, chan error) {
+	return fq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (fq *FileQuery) AllX(ctx context.Context) []*File {
 	fs, err := fq.All(ctx)
@@ -320,6 +325,35 @@ func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {
 	}
 	fs.config(fq.config)
 	return fs, nil
+}
+
+func (fq *FileQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *File, chan error) {
+	nodes := make(chan *File, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := fq.gremlinQuery().ValueMap(true).Query()
+		if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var fs Files
+		if err := fs.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		fs.config(fq.config)
+
+		for _, v := range fs {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (fq *FileQuery) gremlinCount(ctx context.Context) (int, error) {

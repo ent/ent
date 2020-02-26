@@ -76,6 +76,71 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 	return nodes, nil
 }
 
+func ({{ $receiver }} *{{ $builder }}) sqlStreamAll(ctx context.Context, chanSize int) (chan *{{ $.Name }}, chan error) {
+	var (
+		nodes = make(chan *{{ $.Name }}, chanSize)
+		currNode *{{ $.Name }}
+		{{- with $.ForeignKeys }}
+			withFKs = {{ $receiver }}.withFKs
+		{{- end }}
+		_spec = {{ $receiver }}.querySpec()
+		{{- with $.Edges }}
+			loadedTypes = [{{ len . }}]bool{
+				{{- range $e := . }}
+					{{ $receiver }}.with{{ pascal $e.Name }} != nil,
+				{{- end }}
+			}
+		{{- end }}
+	)
+	{{- with $.ForeignKeys }}
+			{{- with $.FKEdges }}
+				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
+					withFKs = true
+				}
+			{{- end }}
+			if withFKs {
+				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
+			}
+	{{- end }}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &{{ $.Name }}{config: {{ $receiver }}.config}
+		values := currNode.scanValues()
+		{{- with $.ForeignKeys }}
+			if withFKs {
+				values = append(values, currNode.fkValues()...)
+			}
+		{{- end }}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
+		}
+		{{- with $.Edges }}
+			currNode.Edges.loadedTypes = loadedTypes
+		{{- end }}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec)
+	}()
+
+	return nodes, chanErr
+}
+
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
 	_spec := {{ $receiver }}.querySpec()
 	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)

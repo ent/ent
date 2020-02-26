@@ -154,6 +154,11 @@ func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	return ftq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of FieldType.
+func (ftq *FieldTypeQuery) StreamAll(ctx context.Context, chanSize int) (chan *FieldType, chan error) {
+	return ftq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
 	fts, err := ftq.All(ctx)
@@ -277,6 +282,35 @@ func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error)
 	}
 	fts.config(ftq.config)
 	return fts, nil
+}
+
+func (ftq *FieldTypeQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *FieldType, chan error) {
+	nodes := make(chan *FieldType, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
+		if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var fts FieldTypes
+		if err := fts.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		fts.config(ftq.config)
+
+		for _, v := range fts {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (ftq *FieldTypeQuery) gremlinCount(ctx context.Context) (int, error) {

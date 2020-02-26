@@ -154,6 +154,11 @@ func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	return pq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Pet.
+func (pq *PetQuery) StreamAll(ctx context.Context, chanSize int) (chan *Pet, chan error) {
+	return pq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 	pes, err := pq.All(ctx)
@@ -266,6 +271,43 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		return nodes, nil
 	}
 	return nodes, nil
+}
+
+func (pq *PetQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Pet, chan error) {
+	var (
+		nodes    = make(chan *Pet, chanSize)
+		currNode *Pet
+		_spec    = pq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Pet{config: pq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("entv2: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, pq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {

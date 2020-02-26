@@ -184,6 +184,11 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	return gq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Group.
+func (gq *GroupQuery) StreamAll(ctx context.Context, chanSize int) (chan *Group, chan error) {
+	return gq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 	grs, err := gq.All(ctx)
@@ -446,6 +451,58 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	}
 
 	return nodes, nil
+}
+
+func (gq *GroupQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Group, chan error) {
+	var (
+		nodes       = make(chan *Group, chanSize)
+		currNode    *Group
+		withFKs     = gq.withFKs
+		_spec       = gq.querySpec()
+		loadedTypes = [2]bool{
+			gq.withUsers != nil,
+			gq.withAdmin != nil,
+		}
+	)
+	if gq.withAdmin != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, group.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Group{config: gq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, gq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {

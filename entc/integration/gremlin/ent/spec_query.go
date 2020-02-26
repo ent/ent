@@ -164,6 +164,11 @@ func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
 	return sq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Spec.
+func (sq *SpecQuery) StreamAll(ctx context.Context, chanSize int) (chan *Spec, chan error) {
+	return sq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 	sSlice, err := sq.All(ctx)
@@ -274,6 +279,35 @@ func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {
 	}
 	sSlice.config(sq.config)
 	return sSlice, nil
+}
+
+func (sq *SpecQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Spec, chan error) {
+	nodes := make(chan *Spec, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := sq.gremlinQuery().ValueMap(true).Query()
+		if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var sSlice Specs
+		if err := sSlice.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		sSlice.config(sq.config)
+
+		for _, v := range sSlice {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (sq *SpecQuery) gremlinCount(ctx context.Context) (int, error) {

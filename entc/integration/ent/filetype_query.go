@@ -171,6 +171,11 @@ func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	return ftq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of FileType.
+func (ftq *FileTypeQuery) StreamAll(ctx context.Context, chanSize int) (chan *FileType, chan error) {
+	return ftq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
 	fts, err := ftq.All(ctx)
@@ -355,6 +360,47 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 	}
 
 	return nodes, nil
+}
+
+func (ftq *FileTypeQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *FileType, chan error) {
+	var (
+		nodes       = make(chan *FileType, chanSize)
+		currNode    *FileType
+		_spec       = ftq.querySpec()
+		loadedTypes = [1]bool{
+			ftq.withFiles != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &FileType{config: ftq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, ftq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {

@@ -184,6 +184,11 @@ func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	return fq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of File.
+func (fq *FileQuery) StreamAll(ctx context.Context, chanSize int) (chan *File, chan error) {
+	return fq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (fq *FileQuery) AllX(ctx context.Context) []*File {
 	fs, err := fq.All(ctx)
@@ -408,6 +413,58 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	}
 
 	return nodes, nil
+}
+
+func (fq *FileQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *File, chan error) {
+	var (
+		nodes       = make(chan *File, chanSize)
+		currNode    *File
+		withFKs     = fq.withFKs
+		_spec       = fq.querySpec()
+		loadedTypes = [2]bool{
+			fq.withOwner != nil,
+			fq.withType != nil,
+		}
+	)
+	if fq.withOwner != nil || fq.withType != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, file.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &File{config: fq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, fq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {

@@ -165,6 +165,11 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	return giq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of GroupInfo.
+func (giq *GroupInfoQuery) StreamAll(ctx context.Context, chanSize int) (chan *GroupInfo, chan error) {
+	return giq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 	gis, err := giq.All(ctx)
@@ -299,6 +304,35 @@ func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error)
 	}
 	gis.config(giq.config)
 	return gis, nil
+}
+
+func (giq *GroupInfoQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *GroupInfo, chan error) {
+	nodes := make(chan *GroupInfo, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := giq.gremlinQuery().ValueMap(true).Query()
+		if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var gis GroupInfos
+		if err := gis.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		gis.config(giq.config)
+
+		for _, v := range gis {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (giq *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {

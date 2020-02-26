@@ -154,6 +154,11 @@ func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 	return iq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Item.
+func (iq *ItemQuery) StreamAll(ctx context.Context, chanSize int) (chan *Item, chan error) {
+	return iq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 	is, err := iq.All(ctx)
@@ -253,6 +258,35 @@ func (iq *ItemQuery) gremlinAll(ctx context.Context) ([]*Item, error) {
 	}
 	is.config(iq.config)
 	return is, nil
+}
+
+func (iq *ItemQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Item, chan error) {
+	nodes := make(chan *Item, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := iq.gremlinQuery().ValueMap(true).Query()
+		if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var is Items
+		if err := is.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		is.config(iq.config)
+
+		for _, v := range is {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (iq *ItemQuery) gremlinCount(ctx context.Context) (int, error) {

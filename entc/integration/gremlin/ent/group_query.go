@@ -192,6 +192,11 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	return gq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Group.
+func (gq *GroupQuery) StreamAll(ctx context.Context, chanSize int) (chan *Group, chan error) {
+	return gq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
 	grs, err := gq.All(ctx)
@@ -359,6 +364,35 @@ func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 	}
 	grs.config(gq.config)
 	return grs, nil
+}
+
+func (gq *GroupQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Group, chan error) {
+	nodes := make(chan *Group, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := gq.gremlinQuery().ValueMap(true).Query()
+		if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var grs Groups
+		if err := grs.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		grs.config(gq.config)
+
+		for _, v := range grs {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (gq *GroupQuery) gremlinCount(ctx context.Context) (int, error) {

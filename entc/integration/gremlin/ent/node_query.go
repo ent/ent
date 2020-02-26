@@ -173,6 +173,11 @@ func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	return nq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Node.
+func (nq *NodeQuery) StreamAll(ctx context.Context, chanSize int) (chan *Node, chan error) {
+	return nq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 	ns, err := nq.All(ctx)
@@ -318,6 +323,35 @@ func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 	}
 	ns.config(nq.config)
 	return ns, nil
+}
+
+func (nq *NodeQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Node, chan error) {
+	nodes := make(chan *Node, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := nq.gremlinQuery().ValueMap(true).Query()
+		if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var ns Nodes
+		if err := ns.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		ns.config(nq.config)
+
+		for _, v := range ns {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (nq *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
