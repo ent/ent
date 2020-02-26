@@ -57,6 +57,9 @@ func main() {
 	if err := QueryGroupWithUsers(ctx, client); err != nil {
 		log.Fatal(err)
 	}
+	if err := QueryStreamingCars(ctx, a8m); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
@@ -276,4 +279,27 @@ func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {
 	log.Println("groups returned:", groups)
 	// Output: (Group(Name=GitHub), Group(Name=GitLab),)
 	return nil
+}
+
+func QueryStreamingCars(ctx context.Context, a8m *ent.User) error {
+	ctxCanceled, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	chCars, chErr := a8m.QueryCars().StreamAll(ctxCanceled, 5)
+
+	for {
+		select {
+		case car, ok := <-chCars:
+			if !ok {
+				return nil
+			}
+			if car != nil {
+				log.Println("returned car:", car)
+			}
+		case err := <-chErr:
+			if err != nil {
+				return fmt.Errorf("failed querying user cars: %v", err)
+			}
+		}
+	}
 }
