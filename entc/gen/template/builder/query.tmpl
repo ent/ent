@@ -174,7 +174,7 @@ func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}
 	return {{ $receiver }}.{{ $.Storage }}All(ctx)
 }
 
-// StreamAll executes the query and returns a channel of {{ $.Name }}.
+// StreamAll executes the query and returns a channel of {{ $.Name }}. Eager loading not supported!
 func ({{ $receiver }} *{{ $builder }}) StreamAll(ctx context.Context, chanSize int) (chan *{{ $.Name }}, chan error) {
 	return {{ $receiver }}.{{ $.Storage }}StreamAll(ctx, chanSize)
 }
