@@ -224,6 +224,8 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
 	case field.TypeUUID:
 		t = "char(36) binary"
+	case field.TypeCustom:
+		t = c.CustomFieldName
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}

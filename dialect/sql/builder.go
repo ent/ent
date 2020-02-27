@@ -1198,6 +1198,11 @@ func (p *Predicate) append(f func(*Builder)) *Predicate {
 	return p
 }
 
+func (p *Predicate) Append(f func(*Builder)) *Predicate {
+	p.append(f)
+	return p
+}
+
 // Func represents an SQL function.
 type Func struct {
 	Builder

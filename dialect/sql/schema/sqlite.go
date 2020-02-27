@@ -113,6 +113,8 @@ func (*SQLite) cType(c *Column) (t string) {
 		t = "json"
 	case field.TypeUUID:
 		t = "uuid"
+	case field.TypeCustom:
+		t = c.CustomFieldName
 	default:
 		panic("unsupported type " + c.Type.String())
 	}

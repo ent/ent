@@ -138,18 +138,19 @@ func (t *Table) fk(symbol string) (*ForeignKey, bool) {
 
 // Column schema definition for SQL dialects.
 type Column struct {
-	Name      string      // column name.
-	Type      field.Type  // column type.
-	typ       string      // row column type (used for Rows.Scan).
-	Attr      string      // extra attributes.
-	Size      int64       // max size parameter for string, blob, etc.
-	Key       string      // key definition (PRI, UNI or MUL).
-	Unique    bool        // column with unique constraint.
-	Increment bool        // auto increment attribute.
-	Nullable  bool        // null or not null attribute.
-	Default   interface{} // default value.
-	Enums     []string    // enum values.
-	indexes   Indexes     // linked indexes.
+	Name            string      // column name.
+	Type            field.Type  // column type.
+	typ             string      // row column type (used for Rows.Scan).
+	Attr            string      // extra attributes.
+	Size            int64       // max size parameter for string, blob, etc.
+	Key             string      // key definition (PRI, UNI or MUL).
+	Unique          bool        // column with unique constraint.
+	Increment       bool        // auto increment attribute.
+	Nullable        bool        // null or not null attribute.
+	Default         interface{} // default value.
+	Enums           []string    // enum values.
+	indexes         Indexes     // linked indexes.
+	CustomFieldName string      // custom field name if the Type is Custom
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
