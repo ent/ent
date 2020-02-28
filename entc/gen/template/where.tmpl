@@ -124,4 +124,9 @@ func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	)
 }
 
+{{ template "where/additional" $ }}
+
 {{ end }}
+
+{{/* A template that can be overrided in order to add additional code for the type package. */}}
+{{ define "where/additional" }}{{ end }}
