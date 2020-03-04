@@ -8,6 +8,28 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
+func ({{ $receiver }} *{{ $builder }}) gremlinWalkAll(ctx context.Context, f func(*{{ $.Name }}) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlinQuery().ValueMap(true).Query()
+	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var {{ plural $.Receiver }} {{ plural $.Name  }}
+	if err := {{ plural $.Receiver }}.FromResponse(res); err != nil {
+		return err
+	}
+	{{ plural $.Receiver }}.config({{ $receiver }}.config)
+
+	for _, v := range {{ plural $.Receiver }} {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlinQuery().ValueMap(true).Query()

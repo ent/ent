@@ -169,6 +169,11 @@ func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func ({{ $receiver }} *{{ $builder }}) WalkAll(ctx context.Context, f func(*{{ $.Name }}) error) error {
+	return {{ $receiver }}.{{ $.Storage }}WalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
 	return {{ $receiver }}.{{ $.Storage }}All(ctx)
