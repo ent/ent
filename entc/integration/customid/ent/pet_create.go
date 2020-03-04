@@ -11,6 +11,7 @@ import (
 	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
@@ -21,6 +22,7 @@ type PetCreate struct {
 	config
 	id    *string
 	owner map[int]struct{}
+	cars  map[int]struct{}
 }
 
 // SetID sets the id field.
@@ -49,6 +51,26 @@ func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 // SetOwner sets the owner edge to User.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
+}
+
+// AddCarIDs adds the cars edge to Car by ids.
+func (pc *PetCreate) AddCarIDs(ids ...int) *PetCreate {
+	if pc.cars == nil {
+		pc.cars = make(map[int]struct{})
+	}
+	for i := range ids {
+		pc.cars[ids[i]] = struct{}{}
+	}
+	return pc
+}
+
+// AddCars adds the cars edges to Car.
+func (pc *PetCreate) AddCars(c ...*Car) *PetCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pc.AddCarIDs(ids...)
 }
 
 // Save creates the Pet in the database.
@@ -94,6 +116,25 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.cars; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   pet.CarsTable,
+			Columns: []string{pet.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
 				},
 			},
 		}

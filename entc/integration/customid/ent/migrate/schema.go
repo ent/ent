@@ -26,6 +26,27 @@ var (
 		PrimaryKey:  []*schema.Column{BlobsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// CarsColumns holds the columns for the "cars" table.
+	CarsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "model", Type: field.TypeString},
+		{Name: "pet_cars", Type: field.TypeString, Nullable: true, Size: 25},
+	}
+	// CarsTable holds the schema information for the "cars" table.
+	CarsTable = &schema.Table{
+		Name:       "cars",
+		Columns:    CarsColumns,
+		PrimaryKey: []*schema.Column{CarsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "cars_pets_cars",
+				Columns: []*schema.Column{CarsColumns[2]},
+
+				RefColumns: []*schema.Column{PetsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -107,6 +128,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BlobsTable,
+		CarsTable,
 		GroupsTable,
 		PetsTable,
 		UsersTable,
@@ -115,6 +137,7 @@ var (
 )
 
 func init() {
+	CarsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable

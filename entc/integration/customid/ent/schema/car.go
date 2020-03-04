@@ -10,28 +10,23 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
-// Pet holds the schema definition for the Pet entity.
-type Pet struct {
+// Car holds the schema definition for the Car entity.
+type Car struct {
 	ent.Schema
 }
 
-// Fields of the Pet.
-func (Pet) Fields() []ent.Field {
+// Fields of the Car.
+func (Car) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").
-			MaxLen(25).
-			NotEmpty().
-			Unique().
-			Immutable(),
+		field.String("model"),
 	}
 }
 
-// Edges of the Pet.
-func (Pet) Edges() []ent.Edge {
+// Edges of the Car.
+func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("owner", User.Type).
-			Ref("pets").
+		edge.From("owner", Pet.Type).
+			Ref("cars").
 			Unique(),
-		edge.To("cars", Car.Type),
 	}
 }

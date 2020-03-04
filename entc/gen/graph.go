@@ -306,7 +306,8 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				// "owner" is the table that owns the relations (we set the foreign-key on)
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
-				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Unique: e.Rel.Type == O2O, Nullable: true}
+				pk := ref.PrimaryKey[0]
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
 				owner.AddColumn(column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -317,7 +318,8 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
-				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Nullable: true}
+				pk := ref.PrimaryKey[0]
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Nullable: true}
 				owner.AddColumn(column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,

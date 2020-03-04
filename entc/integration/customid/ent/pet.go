@@ -30,9 +30,11 @@ type Pet struct {
 type PetEdges struct {
 	// Owner holds the value of the owner edge.
 	Owner *User
+	// Cars holds the value of the cars edge.
+	Cars []*Car
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -47,6 +49,15 @@ func (e PetEdges) OwnerOrErr() (*User, error) {
 		return e.Owner, nil
 	}
 	return nil, &NotLoadedError{edge: "owner"}
+}
+
+// CarsOrErr returns the Cars value or an error if the edge
+// was not loaded in eager-loading.
+func (e PetEdges) CarsOrErr() ([]*Car, error) {
+	if e.loadedTypes[1] {
+		return e.Cars, nil
+	}
+	return nil, &NotLoadedError{edge: "cars"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -90,6 +101,11 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 // QueryOwner queries the owner edge of the Pet.
 func (pe *Pet) QueryOwner() *UserQuery {
 	return (&PetClient{config: pe.config}).QueryOwner(pe)
+}
+
+// QueryCars queries the cars edge of the Pet.
+func (pe *Pet) QueryCars() *CarQuery {
+	return (&PetClient{config: pe.config}).QueryCars(pe)
 }
 
 // Update returns a builder for updating this Pet.

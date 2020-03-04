@@ -21,6 +21,13 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "user_pets"
+	// CarsTable is the table the holds the cars relation/edge.
+	CarsTable = "cars"
+	// CarsInverseTable is the table name for the Car entity.
+	// It exists in this package in order to avoid circular dependency with the "car" package.
+	CarsInverseTable = "cars"
+	// CarsColumn is the table column denoting the cars relation/edge.
+	CarsColumn = "pet_cars"
 )
 
 // Columns holds all SQL columns for pet fields.
