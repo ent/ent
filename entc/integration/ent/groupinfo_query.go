@@ -171,6 +171,11 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	return giq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of GroupInfo. Eager loading not supported!
+func (giq *GroupInfoQuery) StreamAll(ctx context.Context, chanSize int) (chan *GroupInfo, chan error) {
+	return giq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 	gis, err := giq.All(ctx)
@@ -355,6 +360,47 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 	}
 
 	return nodes, nil
+}
+
+func (giq *GroupInfoQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *GroupInfo, chan error) {
+	var (
+		nodes       = make(chan *GroupInfo, chanSize)
+		currNode    *GroupInfo
+		_spec       = giq.querySpec()
+		loadedTypes = [1]bool{
+			giq.withGroups != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &GroupInfo{config: giq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, giq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {

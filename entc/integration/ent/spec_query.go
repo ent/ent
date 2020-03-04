@@ -171,6 +171,11 @@ func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
 	return sq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Spec. Eager loading not supported!
+func (sq *SpecQuery) StreamAll(ctx context.Context, chanSize int) (chan *Spec, chan error) {
+	return sq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 	sSlice, err := sq.All(ctx)
@@ -362,6 +367,47 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 	}
 
 	return nodes, nil
+}
+
+func (sq *SpecQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Spec, chan error) {
+	var (
+		nodes       = make(chan *Spec, chanSize)
+		currNode    *Spec
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withCard != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Spec{config: sq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, sq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {

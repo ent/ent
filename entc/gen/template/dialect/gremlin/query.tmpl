@@ -22,6 +22,35 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.
 	return {{ plural $.Receiver }}, nil
 }
 
+func ({{ $receiver }} *{{ $builder }}) gremlinStreamAll(ctx context.Context, chanSize int) (chan *{{ $.Name }}, chan error) {
+	nodes := make(chan *{{ $.Name }}, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := {{ $receiver }}.gremlinQuery().ValueMap(true).Query()
+		if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var {{ plural $.Receiver }} {{ plural $.Name  }}
+		if err := {{ plural $.Receiver }}.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		{{ plural $.Receiver }}.config({{ $receiver }}.config)
+
+		for _, v := range {{ plural $.Receiver }} {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
+}
+
 func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlinQuery().Count().Query()

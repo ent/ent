@@ -155,6 +155,11 @@ func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
 	return bq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Blob. Eager loading not supported!
+func (bq *BlobQuery) StreamAll(ctx context.Context, chanSize int) (chan *Blob, chan error) {
+	return bq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (bq *BlobQuery) AllX(ctx context.Context) []*Blob {
 	bs, err := bq.All(ctx)
@@ -291,6 +296,43 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 		return nodes, nil
 	}
 	return nodes, nil
+}
+
+func (bq *BlobQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Blob, chan error) {
+	var (
+		nodes    = make(chan *Blob, chanSize)
+		currNode *Blob
+		_spec    = bq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Blob{config: bq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, bq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {

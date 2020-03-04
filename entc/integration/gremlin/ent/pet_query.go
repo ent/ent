@@ -174,6 +174,11 @@ func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	return pq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Pet. Eager loading not supported!
+func (pq *PetQuery) StreamAll(ctx context.Context, chanSize int) (chan *Pet, chan error) {
+	return pq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 	pes, err := pq.All(ctx)
@@ -319,6 +324,35 @@ func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
 	}
 	pes.config(pq.config)
 	return pes, nil
+}
+
+func (pq *PetQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Pet, chan error) {
+	nodes := make(chan *Pet, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := pq.gremlinQuery().ValueMap(true).Query()
+		if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var pes Pets
+		if err := pes.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		pes.config(pq.config)
+
+		for _, v := range pes {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {

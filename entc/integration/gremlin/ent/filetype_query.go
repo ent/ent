@@ -164,6 +164,11 @@ func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	return ftq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of FileType. Eager loading not supported!
+func (ftq *FileTypeQuery) StreamAll(ctx context.Context, chanSize int) (chan *FileType, chan error) {
+	return ftq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
 	fts, err := ftq.All(ctx)
@@ -298,6 +303,35 @@ func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
 	}
 	fts.config(ftq.config)
 	return fts, nil
+}
+
+func (ftq *FileTypeQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *FileType, chan error) {
+	nodes := make(chan *FileType, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
+		if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var fts FileTypes
+		if err := fts.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		fts.config(ftq.config)
+
+		for _, v := range fts {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (ftq *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {

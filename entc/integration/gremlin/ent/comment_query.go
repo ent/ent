@@ -154,6 +154,11 @@ func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 	return cq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Comment. Eager loading not supported!
+func (cq *CommentQuery) StreamAll(ctx context.Context, chanSize int) (chan *Comment, chan error) {
+	return cq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 	cs, err := cq.All(ctx)
@@ -277,6 +282,35 @@ func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
 	}
 	cs.config(cq.config)
 	return cs, nil
+}
+
+func (cq *CommentQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Comment, chan error) {
+	nodes := make(chan *Comment, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := cq.gremlinQuery().ValueMap(true).Query()
+		if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var cs Comments
+		if err := cs.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		cs.config(cq.config)
+
+		for _, v := range cs {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (cq *CommentQuery) gremlinCount(ctx context.Context) (int, error) {

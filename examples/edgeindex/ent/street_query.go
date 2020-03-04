@@ -170,6 +170,11 @@ func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
 	return sq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Street. Eager loading not supported!
+func (sq *StreetQuery) StreamAll(ctx context.Context, chanSize int) (chan *Street, chan error) {
+	return sq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
 	sSlice, err := sq.All(ctx)
@@ -357,6 +362,57 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 	}
 
 	return nodes, nil
+}
+
+func (sq *StreetQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Street, chan error) {
+	var (
+		nodes       = make(chan *Street, chanSize)
+		currNode    *Street
+		withFKs     = sq.withFKs
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withCity != nil,
+		}
+	)
+	if sq.withCity != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Street{config: sq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, sq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {

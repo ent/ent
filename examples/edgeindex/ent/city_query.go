@@ -170,6 +170,11 @@ func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
 	return cq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of City. Eager loading not supported!
+func (cq *CityQuery) StreamAll(ctx context.Context, chanSize int) (chan *City, chan error) {
+	return cq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (cq *CityQuery) AllX(ctx context.Context) []*City {
 	cs, err := cq.All(ctx)
@@ -350,6 +355,47 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 	}
 
 	return nodes, nil
+}
+
+func (cq *CityQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *City, chan error) {
+	var (
+		nodes       = make(chan *City, chanSize)
+		currNode    *City
+		_spec       = cq.querySpec()
+		loadedTypes = [1]bool{
+			cq.withStreets != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &City{config: cq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, cq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {

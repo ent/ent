@@ -254,6 +254,11 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	return uq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of User. Eager loading not supported!
+func (uq *UserQuery) StreamAll(ctx context.Context, chanSize int) (chan *User, chan error) {
+	return uq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (uq *UserQuery) AllX(ctx context.Context) []*User {
 	us, err := uq.All(ctx)
@@ -498,6 +503,35 @@ func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 	}
 	us.config(uq.config)
 	return us, nil
+}
+
+func (uq *UserQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *User, chan error) {
+	nodes := make(chan *User, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := uq.gremlinQuery().ValueMap(true).Query()
+		if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var us Users
+		if err := us.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		us.config(uq.config)
+
+		for _, v := range us {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {

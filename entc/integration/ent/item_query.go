@@ -154,6 +154,11 @@ func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 	return iq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Item. Eager loading not supported!
+func (iq *ItemQuery) StreamAll(ctx context.Context, chanSize int) (chan *Item, chan error) {
+	return iq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 	is, err := iq.All(ctx)
@@ -266,6 +271,43 @@ func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
 		return nodes, nil
 	}
 	return nodes, nil
+}
+
+func (iq *ItemQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Item, chan error) {
+	var (
+		nodes    = make(chan *Item, chanSize)
+		currNode *Item
+		_spec    = iq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Item{config: iq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, iq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {

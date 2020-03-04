@@ -170,6 +170,11 @@ func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
 	return cq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Car. Eager loading not supported!
+func (cq *CarQuery) StreamAll(ctx context.Context, chanSize int) (chan *Car, chan error) {
+	return cq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 	cs, err := cq.All(ctx)
@@ -357,6 +362,57 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 	}
 
 	return nodes, nil
+}
+
+func (cq *CarQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *Car, chan error) {
+	var (
+		nodes       = make(chan *Car, chanSize)
+		currNode    *Car
+		withFKs     = cq.withFKs
+		_spec       = cq.querySpec()
+		loadedTypes = [1]bool{
+			cq.withOwner != nil,
+		}
+	)
+	if cq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, car.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Car{config: cq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, cq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {

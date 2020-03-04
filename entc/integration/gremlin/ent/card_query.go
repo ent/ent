@@ -175,6 +175,11 @@ func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
 	return cq.gremlinAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of Card. Eager loading not supported!
+func (cq *CardQuery) StreamAll(ctx context.Context, chanSize int) (chan *Card, chan error) {
+	return cq.gremlinStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 	cs, err := cq.All(ctx)
@@ -320,6 +325,35 @@ func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
 	}
 	cs.config(cq.config)
 	return cs, nil
+}
+
+func (cq *CardQuery) gremlinStreamAll(ctx context.Context, chanSize int) (chan *Card, chan error) {
+	nodes := make(chan *Card, chanSize)
+	chanErr := make(chan error)
+
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+
+		res := &gremlin.Response{}
+		query, bindings := cq.gremlinQuery().ValueMap(true).Query()
+		if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
+			chanErr <- err
+			return
+		}
+		var cs Cards
+		if err := cs.FromResponse(res); err != nil {
+			chanErr <- err
+			return
+		}
+		cs.config(cq.config)
+
+		for _, v := range cs {
+			nodes <- v
+		}
+	}()
+
+	return nodes, chanErr
 }
 
 func (cq *CardQuery) gremlinCount(ctx context.Context) (int, error) {

@@ -154,6 +154,11 @@ func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	return ftq.sqlAll(ctx)
 }
 
+// StreamAll executes the query and returns a channel of FieldType. Eager loading not supported!
+func (ftq *FieldTypeQuery) StreamAll(ctx context.Context, chanSize int) (chan *FieldType, chan error) {
+	return ftq.sqlStreamAll(ctx, chanSize)
+}
+
 // AllX is like All, but panics if an error occurs.
 func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
 	fts, err := ftq.All(ctx)
@@ -290,6 +295,43 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 		return nodes, nil
 	}
 	return nodes, nil
+}
+
+func (ftq *FieldTypeQuery) sqlStreamAll(ctx context.Context, chanSize int) (chan *FieldType, chan error) {
+	var (
+		nodes    = make(chan *FieldType, chanSize)
+		currNode *FieldType
+		_spec    = ftq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &FieldType{config: ftq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case nodes <- currNode:
+		}
+		return nil
+	}
+
+	chanErr := make(chan error)
+	go func() {
+		defer close(nodes)
+		defer close(chanErr)
+		chanErr <- sqlgraph.QueryNodes(ctx, ftq.driver, _spec)
+	}()
+
+	return nodes, chanErr
 }
 
 func (ftq *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
