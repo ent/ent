@@ -8,12 +8,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
@@ -30,6 +32,7 @@ type PetQuery struct {
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withOwner *UserQuery
+	withCars  *CarQuery
 	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
@@ -66,6 +69,18 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+	return query
+}
+
+// QueryCars chains the current query on the cars edge.
+func (pq *PetQuery) QueryCars() *CarQuery {
+	query := &CarQuery{config: pq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(car.Table, car.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, pet.CarsTable, pet.CarsColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
@@ -251,6 +266,17 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 	return pq
 }
 
+//  WithCars tells the query-builder to eager-loads the nodes that are connected to
+// the "cars" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithCars(opts ...func(*CarQuery)) *PetQuery {
+	query := &CarQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withCars = query
+	return pq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
@@ -273,8 +299,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		nodes       = []*Pet{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			pq.withOwner != nil,
+			pq.withCars != nil,
 		}
 	)
 	if pq.withOwner != nil {
@@ -329,6 +356,34 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 			for i := range nodes {
 				nodes[i].Edges.Owner = n
 			}
+		}
+	}
+
+	if query := pq.withCars; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[string]*Pet)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Car(func(s *sql.Selector) {
+			s.Where(sql.InValues(pet.CarsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.pet_cars
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "pet_cars" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "pet_cars" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Cars = append(node.Edges.Cars, n)
 		}
 	}
 

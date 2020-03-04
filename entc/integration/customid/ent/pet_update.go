@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
@@ -22,7 +23,9 @@ import (
 type PetUpdate struct {
 	config
 	owner        map[int]struct{}
+	cars         map[int]struct{}
 	clearedOwner bool
+	removedCars  map[int]struct{}
 	predicates   []predicate.Pet
 }
 
@@ -54,10 +57,50 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
+// AddCarIDs adds the cars edge to Car by ids.
+func (pu *PetUpdate) AddCarIDs(ids ...int) *PetUpdate {
+	if pu.cars == nil {
+		pu.cars = make(map[int]struct{})
+	}
+	for i := range ids {
+		pu.cars[ids[i]] = struct{}{}
+	}
+	return pu
+}
+
+// AddCars adds the cars edges to Car.
+func (pu *PetUpdate) AddCars(c ...*Car) *PetUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pu.AddCarIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.clearedOwner = true
 	return pu
+}
+
+// RemoveCarIDs removes the cars edge to Car by ids.
+func (pu *PetUpdate) RemoveCarIDs(ids ...int) *PetUpdate {
+	if pu.removedCars == nil {
+		pu.removedCars = make(map[int]struct{})
+	}
+	for i := range ids {
+		pu.removedCars[ids[i]] = struct{}{}
+	}
+	return pu
+}
+
+// RemoveCars removes cars edges to Car.
+func (pu *PetUpdate) RemoveCars(c ...*Car) *PetUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pu.RemoveCarIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -143,6 +186,44 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if nodes := pu.removedCars; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   pet.CarsTable,
+			Columns: []string{pet.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.cars; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   pet.CarsTable,
+			Columns: []string{pet.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
@@ -159,7 +240,9 @@ type PetUpdateOne struct {
 	config
 	id           string
 	owner        map[int]struct{}
+	cars         map[int]struct{}
 	clearedOwner bool
+	removedCars  map[int]struct{}
 }
 
 // SetOwnerID sets the owner edge to User by id.
@@ -184,10 +267,50 @@ func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
 
+// AddCarIDs adds the cars edge to Car by ids.
+func (puo *PetUpdateOne) AddCarIDs(ids ...int) *PetUpdateOne {
+	if puo.cars == nil {
+		puo.cars = make(map[int]struct{})
+	}
+	for i := range ids {
+		puo.cars[ids[i]] = struct{}{}
+	}
+	return puo
+}
+
+// AddCars adds the cars edges to Car.
+func (puo *PetUpdateOne) AddCars(c ...*Car) *PetUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return puo.AddCarIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.clearedOwner = true
 	return puo
+}
+
+// RemoveCarIDs removes the cars edge to Car by ids.
+func (puo *PetUpdateOne) RemoveCarIDs(ids ...int) *PetUpdateOne {
+	if puo.removedCars == nil {
+		puo.removedCars = make(map[int]struct{})
+	}
+	for i := range ids {
+		puo.removedCars[ids[i]] = struct{}{}
+	}
+	return puo
+}
+
+// RemoveCars removes cars edges to Car.
+func (puo *PetUpdateOne) RemoveCars(c ...*Car) *PetUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return puo.RemoveCarIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -259,6 +382,44 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := puo.removedCars; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   pet.CarsTable,
+			Columns: []string{pet.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.cars; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   pet.CarsTable,
+			Columns: []string{pet.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
 				},
 			},
 		}
