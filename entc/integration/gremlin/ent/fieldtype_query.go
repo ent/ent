@@ -149,6 +149,11 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (ftq *FieldTypeQuery) WalkAll(ctx context.Context, f func(*FieldType) error) error {
+	return ftq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	return ftq.gremlinAll(ctx)
@@ -263,6 +268,28 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = ftq.gremlinQuery()
 	return selector
+}
+
+func (ftq *FieldTypeQuery) gremlinWalkAll(ctx context.Context, f func(*FieldType) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
+	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var fts FieldTypes
+	if err := fts.FromResponse(res); err != nil {
+		return err
+	}
+	fts.config(ftq.config)
+
+	for _, v := range fts {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error) {

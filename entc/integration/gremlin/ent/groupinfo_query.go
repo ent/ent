@@ -160,6 +160,11 @@ func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (giq *GroupInfoQuery) WalkAll(ctx context.Context, f func(*GroupInfo) error) error {
+	return giq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	return giq.gremlinAll(ctx)
@@ -285,6 +290,28 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = giq.gremlinQuery()
 	return selector
+}
+
+func (giq *GroupInfoQuery) gremlinWalkAll(ctx context.Context, f func(*GroupInfo) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := giq.gremlinQuery().ValueMap(true).Query()
+	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var gis GroupInfos
+	if err := gis.FromResponse(res); err != nil {
+		return err
+	}
+	gis.config(giq.config)
+
+	for _, v := range gis {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error) {

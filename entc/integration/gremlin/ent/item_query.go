@@ -149,6 +149,11 @@ func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (iq *ItemQuery) WalkAll(ctx context.Context, f func(*Item) error) error {
+	return iq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 	return iq.gremlinAll(ctx)
@@ -239,6 +244,28 @@ func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = iq.gremlinQuery()
 	return selector
+}
+
+func (iq *ItemQuery) gremlinWalkAll(ctx context.Context, f func(*Item) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := iq.gremlinQuery().ValueMap(true).Query()
+	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var is Items
+	if err := is.FromResponse(res); err != nil {
+		return err
+	}
+	is.config(iq.config)
+
+	for _, v := range is {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (iq *ItemQuery) gremlinAll(ctx context.Context) ([]*Item, error) {

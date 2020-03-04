@@ -159,6 +159,11 @@ func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (sq *SpecQuery) WalkAll(ctx context.Context, f func(*Spec) error) error {
+	return sq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Specs.
 func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
 	return sq.gremlinAll(ctx)
@@ -260,6 +265,28 @@ func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = sq.gremlinQuery()
 	return selector
+}
+
+func (sq *SpecQuery) gremlinWalkAll(ctx context.Context, f func(*Spec) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := sq.gremlinQuery().ValueMap(true).Query()
+	if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var sSlice Specs
+	if err := sSlice.FromResponse(res); err != nil {
+		return err
+	}
+	sSlice.config(sq.config)
+
+	for _, v := range sSlice {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {

@@ -166,6 +166,11 @@ func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (ftq *FileTypeQuery) WalkAll(ctx context.Context, f func(*FileType) error) error {
+	return ftq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of FileTypes.
 func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	return ftq.sqlAll(ctx)
@@ -291,6 +296,39 @@ func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = ftq.sqlQuery()
 	return selector
+}
+
+func (ftq *FileTypeQuery) sqlWalkAll(ctx context.Context, f func(*FileType) error) error {
+	var (
+		currNode    *FileType
+		_spec       = ftq.querySpec()
+		loadedTypes = [1]bool{
+			ftq.withFiles != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &FileType{config: ftq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, ftq.driver, _spec)
 }
 
 func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {

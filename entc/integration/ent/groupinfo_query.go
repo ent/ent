@@ -166,6 +166,11 @@ func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (giq *GroupInfoQuery) WalkAll(ctx context.Context, f func(*GroupInfo) error) error {
+	return giq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 	return giq.sqlAll(ctx)
@@ -291,6 +296,39 @@ func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSele
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = giq.sqlQuery()
 	return selector
+}
+
+func (giq *GroupInfoQuery) sqlWalkAll(ctx context.Context, f func(*GroupInfo) error) error {
+	var (
+		currNode    *GroupInfo
+		_spec       = giq.querySpec()
+		loadedTypes = [1]bool{
+			giq.withGroups != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &GroupInfo{config: giq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, giq.driver, _spec)
 }
 
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {

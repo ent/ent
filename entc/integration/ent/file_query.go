@@ -179,6 +179,11 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (fq *FileQuery) WalkAll(ctx context.Context, f func(*File) error) error {
+	return fq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	return fq.sqlAll(ctx)
@@ -315,6 +320,50 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = fq.sqlQuery()
 	return selector
+}
+
+func (fq *FileQuery) sqlWalkAll(ctx context.Context, f func(*File) error) error {
+	var (
+		currNode    *File
+		withFKs     = fq.withFKs
+		_spec       = fq.querySpec()
+		loadedTypes = [2]bool{
+			fq.withOwner != nil,
+			fq.withType != nil,
+		}
+	)
+	if fq.withOwner != nil || fq.withType != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, file.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &File{config: fq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, fq.driver, _spec)
 }
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {

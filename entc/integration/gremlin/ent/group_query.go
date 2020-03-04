@@ -187,6 +187,11 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (gq *GroupQuery) WalkAll(ctx context.Context, f func(*Group) error) error {
+	return gq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	return gq.gremlinAll(ctx)
@@ -345,6 +350,28 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = gq.gremlinQuery()
 	return selector
+}
+
+func (gq *GroupQuery) gremlinWalkAll(ctx context.Context, f func(*Group) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := gq.gremlinQuery().ValueMap(true).Query()
+	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var grs Groups
+	if err := grs.FromResponse(res); err != nil {
+		return err
+	}
+	grs.config(gq.config)
+
+	for _, v := range grs {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {

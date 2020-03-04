@@ -149,6 +149,11 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (ftq *FieldTypeQuery) WalkAll(ctx context.Context, f func(*FieldType) error) error {
+	return ftq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 	return ftq.sqlAll(ctx)
@@ -263,6 +268,35 @@ func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSele
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = ftq.sqlQuery()
 	return selector
+}
+
+func (ftq *FieldTypeQuery) sqlWalkAll(ctx context.Context, f func(*FieldType) error) error {
+	var (
+		currNode *FieldType
+		_spec    = ftq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &FieldType{config: ftq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, ftq.driver, _spec)
 }
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {

@@ -165,6 +165,11 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (pq *PetQuery) WalkAll(ctx context.Context, f func(*Pet) error) error {
+	return pq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	return pq.sqlAll(ctx)
@@ -266,6 +271,49 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = pq.sqlQuery()
 	return selector
+}
+
+func (pq *PetQuery) sqlWalkAll(ctx context.Context, f func(*Pet) error) error {
+	var (
+		currNode    *Pet
+		withFKs     = pq.withFKs
+		_spec       = pq.querySpec()
+		loadedTypes = [1]bool{
+			pq.withOwner != nil,
+		}
+	)
+	if pq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Pet{config: pq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, pq.driver, _spec)
 }
 
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
