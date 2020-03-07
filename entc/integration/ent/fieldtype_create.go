@@ -42,6 +42,8 @@ type FieldTypeCreate struct {
 	optional_uint32         *uint32
 	optional_uint64         *uint64
 	state                   *fieldtype.State
+	optional_float          *float64
+	optional_float32        *float32
 }
 
 // SetInt sets the int field.
@@ -312,6 +314,34 @@ func (ftc *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreat
 	return ftc
 }
 
+// SetOptionalFloat sets the optional_float field.
+func (ftc *FieldTypeCreate) SetOptionalFloat(f float64) *FieldTypeCreate {
+	ftc.optional_float = &f
+	return ftc
+}
+
+// SetNillableOptionalFloat sets the optional_float field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalFloat(f *float64) *FieldTypeCreate {
+	if f != nil {
+		ftc.SetOptionalFloat(*f)
+	}
+	return ftc
+}
+
+// SetOptionalFloat32 sets the optional_float32 field.
+func (ftc *FieldTypeCreate) SetOptionalFloat32(f float32) *FieldTypeCreate {
+	ftc.optional_float32 = &f
+	return ftc
+}
+
+// SetNillableOptionalFloat32 sets the optional_float32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCreate {
+	if f != nil {
+		ftc.SetOptionalFloat32(*f)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if ftc.int == nil {
@@ -537,6 +567,22 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldState,
 		})
 		ft.State = *value
+	}
+	if value := ftc.optional_float; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalFloat,
+		})
+		ft.OptionalFloat = *value
+	}
+	if value := ftc.optional_float32; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Value:  *value,
+			Column: fieldtype.FieldOptionalFloat32,
+		})
+		ft.OptionalFloat32 = *value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

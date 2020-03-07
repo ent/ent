@@ -80,6 +80,8 @@ var (
 		{Name: "optional_uint32", Type: field.TypeUint32, Nullable: true},
 		{Name: "optional_uint64", Type: field.TypeUint64, Nullable: true},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
+		{Name: "optional_float", Type: field.TypeFloat64, Nullable: true},
+		{Name: "optional_float32", Type: field.TypeFloat32, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
 	FieldTypesTable = &schema.Table{

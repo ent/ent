@@ -542,7 +542,7 @@ func (f Field) NullTypeField(rec string) string {
 	case field.TypeTime:
 		return fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
-		return fmt.Sprintf("%s(%s.Float32)", f.Type, rec)
+		return fmt.Sprintf("%s(%s.Float64)", f.Type, rec)
 	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32,
 		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
 		return fmt.Sprintf("%s(%s.Int64)", f.Type, rec)

@@ -231,6 +231,20 @@ func OptionalUint64(v uint64) predicate.FieldType {
 	})
 }
 
+// OptionalFloat applies equality check predicate on the "optional_float" field. It's identical to OptionalFloatEQ.
+func OptionalFloat(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.EQ(v))
+	})
+}
+
+// OptionalFloat32 applies equality check predicate on the "optional_float32" field. It's identical to OptionalFloat32EQ.
+func OptionalFloat32(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.EQ(v))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -1846,6 +1860,162 @@ func StateIsNil() predicate.FieldType {
 func StateNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldState)
+	})
+}
+
+// OptionalFloatEQ applies the EQ predicate on the "optional_float" field.
+func OptionalFloatEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.EQ(v))
+	})
+}
+
+// OptionalFloatNEQ applies the NEQ predicate on the "optional_float" field.
+func OptionalFloatNEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.NEQ(v))
+	})
+}
+
+// OptionalFloatIn applies the In predicate on the "optional_float" field.
+func OptionalFloatIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.Within(v...))
+	})
+}
+
+// OptionalFloatNotIn applies the NotIn predicate on the "optional_float" field.
+func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.Without(v...))
+	})
+}
+
+// OptionalFloatGT applies the GT predicate on the "optional_float" field.
+func OptionalFloatGT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.GT(v))
+	})
+}
+
+// OptionalFloatGTE applies the GTE predicate on the "optional_float" field.
+func OptionalFloatGTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.GTE(v))
+	})
+}
+
+// OptionalFloatLT applies the LT predicate on the "optional_float" field.
+func OptionalFloatLT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.LT(v))
+	})
+}
+
+// OptionalFloatLTE applies the LTE predicate on the "optional_float" field.
+func OptionalFloatLTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat, p.LTE(v))
+	})
+}
+
+// OptionalFloatIsNil applies the IsNil predicate on the "optional_float" field.
+func OptionalFloatIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalFloat)
+	})
+}
+
+// OptionalFloatNotNil applies the NotNil predicate on the "optional_float" field.
+func OptionalFloatNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalFloat)
+	})
+}
+
+// OptionalFloat32EQ applies the EQ predicate on the "optional_float32" field.
+func OptionalFloat32EQ(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.EQ(v))
+	})
+}
+
+// OptionalFloat32NEQ applies the NEQ predicate on the "optional_float32" field.
+func OptionalFloat32NEQ(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.NEQ(v))
+	})
+}
+
+// OptionalFloat32In applies the In predicate on the "optional_float32" field.
+func OptionalFloat32In(vs ...float32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.Within(v...))
+	})
+}
+
+// OptionalFloat32NotIn applies the NotIn predicate on the "optional_float32" field.
+func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.Without(v...))
+	})
+}
+
+// OptionalFloat32GT applies the GT predicate on the "optional_float32" field.
+func OptionalFloat32GT(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.GT(v))
+	})
+}
+
+// OptionalFloat32GTE applies the GTE predicate on the "optional_float32" field.
+func OptionalFloat32GTE(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.GTE(v))
+	})
+}
+
+// OptionalFloat32LT applies the LT predicate on the "optional_float32" field.
+func OptionalFloat32LT(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.LT(v))
+	})
+}
+
+// OptionalFloat32LTE applies the LTE predicate on the "optional_float32" field.
+func OptionalFloat32LTE(v float32) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOptionalFloat32, p.LTE(v))
+	})
+}
+
+// OptionalFloat32IsNil applies the IsNil predicate on the "optional_float32" field.
+func OptionalFloat32IsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOptionalFloat32)
+	})
+}
+
+// OptionalFloat32NotNil applies the NotNil predicate on the "optional_float32" field.
+func OptionalFloat32NotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOptionalFloat32)
 	})
 }
 

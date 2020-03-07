@@ -81,6 +81,12 @@ type FieldTypeUpdate struct {
 	clearoptional_uint64         bool
 	state                        *fieldtype.State
 	clearstate                   bool
+	optional_float               *float64
+	addoptional_float            *float64
+	clearoptional_float          bool
+	optional_float32             *float32
+	addoptional_float32          *float32
+	clearoptional_float32        bool
 	predicates                   []predicate.FieldType
 }
 
@@ -708,6 +714,70 @@ func (ftu *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetOptionalFloat sets the optional_float field.
+func (ftu *FieldTypeUpdate) SetOptionalFloat(f float64) *FieldTypeUpdate {
+	ftu.optional_float = &f
+	ftu.addoptional_float = nil
+	return ftu
+}
+
+// SetNillableOptionalFloat sets the optional_float field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableOptionalFloat(f *float64) *FieldTypeUpdate {
+	if f != nil {
+		ftu.SetOptionalFloat(*f)
+	}
+	return ftu
+}
+
+// AddOptionalFloat adds f to optional_float.
+func (ftu *FieldTypeUpdate) AddOptionalFloat(f float64) *FieldTypeUpdate {
+	if ftu.addoptional_float == nil {
+		ftu.addoptional_float = &f
+	} else {
+		*ftu.addoptional_float += f
+	}
+	return ftu
+}
+
+// ClearOptionalFloat clears the value of optional_float.
+func (ftu *FieldTypeUpdate) ClearOptionalFloat() *FieldTypeUpdate {
+	ftu.optional_float = nil
+	ftu.clearoptional_float = true
+	return ftu
+}
+
+// SetOptionalFloat32 sets the optional_float32 field.
+func (ftu *FieldTypeUpdate) SetOptionalFloat32(f float32) *FieldTypeUpdate {
+	ftu.optional_float32 = &f
+	ftu.addoptional_float32 = nil
+	return ftu
+}
+
+// SetNillableOptionalFloat32 sets the optional_float32 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableOptionalFloat32(f *float32) *FieldTypeUpdate {
+	if f != nil {
+		ftu.SetOptionalFloat32(*f)
+	}
+	return ftu
+}
+
+// AddOptionalFloat32 adds f to optional_float32.
+func (ftu *FieldTypeUpdate) AddOptionalFloat32(f float32) *FieldTypeUpdate {
+	if ftu.addoptional_float32 == nil {
+		ftu.addoptional_float32 = &f
+	} else {
+		*ftu.addoptional_float32 += f
+	}
+	return ftu
+}
+
+// ClearOptionalFloat32 clears the value of optional_float32.
+func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
+	ftu.optional_float32 = nil
+	ftu.clearoptional_float32 = true
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if ftu.validate_optional_int32 != nil {
@@ -894,6 +964,18 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value := ftu.state; value != nil {
 		v.Property(dsl.Single, fieldtype.FieldState, *value)
 	}
+	if value := ftu.optional_float; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, *value)
+	}
+	if value := ftu.addoptional_float; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, __.Union(__.Values(fieldtype.FieldOptionalFloat), __.Constant(*value)).Sum())
+	}
+	if value := ftu.optional_float32; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, *value)
+	}
+	if value := ftu.addoptional_float32; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(*value)).Sum())
+	}
 	var properties []interface{}
 	if ftu.clearoptional_int {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -945,6 +1027,12 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.clearstate {
 		properties = append(properties, fieldtype.FieldState)
+	}
+	if ftu.clearoptional_float {
+		properties = append(properties, fieldtype.FieldOptionalFloat)
+	}
+	if ftu.clearoptional_float32 {
+		properties = append(properties, fieldtype.FieldOptionalFloat32)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1018,6 +1106,12 @@ type FieldTypeUpdateOne struct {
 	clearoptional_uint64         bool
 	state                        *fieldtype.State
 	clearstate                   bool
+	optional_float               *float64
+	addoptional_float            *float64
+	clearoptional_float          bool
+	optional_float32             *float32
+	addoptional_float32          *float32
+	clearoptional_float32        bool
 }
 
 // SetInt sets the int field.
@@ -1638,6 +1732,70 @@ func (ftuo *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetOptionalFloat sets the optional_float field.
+func (ftuo *FieldTypeUpdateOne) SetOptionalFloat(f float64) *FieldTypeUpdateOne {
+	ftuo.optional_float = &f
+	ftuo.addoptional_float = nil
+	return ftuo
+}
+
+// SetNillableOptionalFloat sets the optional_float field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableOptionalFloat(f *float64) *FieldTypeUpdateOne {
+	if f != nil {
+		ftuo.SetOptionalFloat(*f)
+	}
+	return ftuo
+}
+
+// AddOptionalFloat adds f to optional_float.
+func (ftuo *FieldTypeUpdateOne) AddOptionalFloat(f float64) *FieldTypeUpdateOne {
+	if ftuo.addoptional_float == nil {
+		ftuo.addoptional_float = &f
+	} else {
+		*ftuo.addoptional_float += f
+	}
+	return ftuo
+}
+
+// ClearOptionalFloat clears the value of optional_float.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat() *FieldTypeUpdateOne {
+	ftuo.optional_float = nil
+	ftuo.clearoptional_float = true
+	return ftuo
+}
+
+// SetOptionalFloat32 sets the optional_float32 field.
+func (ftuo *FieldTypeUpdateOne) SetOptionalFloat32(f float32) *FieldTypeUpdateOne {
+	ftuo.optional_float32 = &f
+	ftuo.addoptional_float32 = nil
+	return ftuo
+}
+
+// SetNillableOptionalFloat32 sets the optional_float32 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableOptionalFloat32(f *float32) *FieldTypeUpdateOne {
+	if f != nil {
+		ftuo.SetOptionalFloat32(*f)
+	}
+	return ftuo
+}
+
+// AddOptionalFloat32 adds f to optional_float32.
+func (ftuo *FieldTypeUpdateOne) AddOptionalFloat32(f float32) *FieldTypeUpdateOne {
+	if ftuo.addoptional_float32 == nil {
+		ftuo.addoptional_float32 = &f
+	} else {
+		*ftuo.addoptional_float32 += f
+	}
+	return ftuo
+}
+
+// ClearOptionalFloat32 clears the value of optional_float32.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
+	ftuo.optional_float32 = nil
+	ftuo.clearoptional_float32 = true
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if ftuo.validate_optional_int32 != nil {
@@ -1825,6 +1983,18 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value := ftuo.state; value != nil {
 		v.Property(dsl.Single, fieldtype.FieldState, *value)
 	}
+	if value := ftuo.optional_float; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, *value)
+	}
+	if value := ftuo.addoptional_float; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, __.Union(__.Values(fieldtype.FieldOptionalFloat), __.Constant(*value)).Sum())
+	}
+	if value := ftuo.optional_float32; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, *value)
+	}
+	if value := ftuo.addoptional_float32; value != nil {
+		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(*value)).Sum())
+	}
 	var properties []interface{}
 	if ftuo.clearoptional_int {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1876,6 +2046,12 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.clearstate {
 		properties = append(properties, fieldtype.FieldState)
+	}
+	if ftuo.clearoptional_float {
+		properties = append(properties, fieldtype.FieldOptionalFloat)
+	}
+	if ftuo.clearoptional_float32 {
+		properties = append(properties, fieldtype.FieldOptionalFloat32)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

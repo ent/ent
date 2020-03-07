@@ -64,6 +64,10 @@ type FieldType struct {
 	OptionalUint64 uint64 `json:"optional_uint64,omitempty"`
 	// State holds the value of the "state" field.
 	State fieldtype.State `json:"state,omitempty"`
+	// OptionalFloat holds the value of the "optional_float" field.
+	OptionalFloat float64 `json:"optional_float,omitempty"`
+	// OptionalFloat32 holds the value of the "optional_float32" field.
+	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -96,6 +100,8 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
 		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
+		OptionalFloat         float64         `json:"optional_float,omitempty"`
+		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -123,6 +129,8 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.OptionalUint32 = scanft.OptionalUint32
 	ft.OptionalUint64 = scanft.OptionalUint64
 	ft.State = scanft.State
+	ft.OptionalFloat = scanft.OptionalFloat
+	ft.OptionalFloat32 = scanft.OptionalFloat32
 	return nil
 }
 
@@ -203,6 +211,10 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteString(", optional_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
+	builder.WriteString(", optional_float32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -246,6 +258,8 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
 		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
+		OptionalFloat         float64         `json:"optional_float,omitempty"`
+		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -275,6 +289,8 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			OptionalUint32:        v.OptionalUint32,
 			OptionalUint64:        v.OptionalUint64,
 			State:                 v.State,
+			OptionalFloat:         v.OptionalFloat,
+			OptionalFloat32:       v.OptionalFloat32,
 		})
 	}
 	return nil

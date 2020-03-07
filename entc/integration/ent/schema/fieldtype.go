@@ -44,5 +44,7 @@ func (FieldType) Fields() []ent.Field {
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
+		field.Float("optional_float").Optional(),
+		field.Float32("optional_float32").Optional(),
 	}
 }
