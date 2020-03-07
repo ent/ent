@@ -166,6 +166,11 @@ func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (sq *SpecQuery) WalkAll(ctx context.Context, f func(*Spec) error) error {
+	return sq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Specs.
 func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
 	return sq.sqlAll(ctx)
@@ -267,6 +272,39 @@ func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = sq.sqlQuery()
 	return selector
+}
+
+func (sq *SpecQuery) sqlWalkAll(ctx context.Context, f func(*Spec) error) error {
+	var (
+		currNode    *Spec
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withCard != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Spec{config: sq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, sq.driver, _spec)
 }
 
 func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {

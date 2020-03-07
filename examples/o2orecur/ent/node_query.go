@@ -178,6 +178,11 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) int {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (nq *NodeQuery) WalkAll(ctx context.Context, f func(*Node) error) error {
+	return nq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	return nq.sqlAll(ctx)
@@ -314,6 +319,50 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = nq.sqlQuery()
 	return selector
+}
+
+func (nq *NodeQuery) sqlWalkAll(ctx context.Context, f func(*Node) error) error {
+	var (
+		currNode    *Node
+		withFKs     = nq.withFKs
+		_spec       = nq.querySpec()
+		loadedTypes = [2]bool{
+			nq.withPrev != nil,
+			nq.withNext != nil,
+		}
+	)
+	if nq.withPrev != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, node.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Node{config: nq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, nq.driver, _spec)
 }
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {

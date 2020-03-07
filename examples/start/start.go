@@ -57,6 +57,9 @@ func main() {
 	if err := QueryGroupWithUsers(ctx, client); err != nil {
 		log.Fatal(err)
 	}
+	if err := QueryWalkCars(ctx, a8m); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
@@ -275,5 +278,20 @@ func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {
 	}
 	log.Println("groups returned:", groups)
 	// Output: (Group(Name=GitHub), Group(Name=GitLab),)
+	return nil
+}
+
+func QueryWalkCars(ctx context.Context, a8m *ent.User) error {
+	ctxCanceled, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	err := a8m.QueryCars().WalkAll(ctxCanceled, func(car *ent.Car) error {
+		log.Println("returned car:", car)
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed querying user cars: %v", err)
+	}
 	return nil
 }

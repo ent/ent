@@ -165,6 +165,11 @@ func (sq *StreetQuery) OnlyXID(ctx context.Context) int {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (sq *StreetQuery) WalkAll(ctx context.Context, f func(*Street) error) error {
+	return sq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Streets.
 func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
 	return sq.sqlAll(ctx)
@@ -290,6 +295,49 @@ func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = sq.sqlQuery()
 	return selector
+}
+
+func (sq *StreetQuery) sqlWalkAll(ctx context.Context, f func(*Street) error) error {
+	var (
+		currNode    *Street
+		withFKs     = sq.withFKs
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withCity != nil,
+		}
+	)
+	if sq.withCity != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Street{config: sq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, sq.driver, _spec)
 }
 
 func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {

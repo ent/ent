@@ -149,6 +149,11 @@ func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (cq *CommentQuery) WalkAll(ctx context.Context, f func(*Comment) error) error {
+	return cq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 	return cq.sqlAll(ctx)
@@ -263,6 +268,35 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = cq.sqlQuery()
 	return selector
+}
+
+func (cq *CommentQuery) sqlWalkAll(ctx context.Context, f func(*Comment) error) error {
+	var (
+		currNode *Comment
+		_spec    = cq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Comment{config: cq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, cq.driver, _spec)
 }
 
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {

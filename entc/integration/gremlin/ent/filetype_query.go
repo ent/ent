@@ -159,6 +159,11 @@ func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (ftq *FileTypeQuery) WalkAll(ctx context.Context, f func(*FileType) error) error {
+	return ftq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of FileTypes.
 func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
 	return ftq.gremlinAll(ctx)
@@ -284,6 +289,28 @@ func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = ftq.gremlinQuery()
 	return selector
+}
+
+func (ftq *FileTypeQuery) gremlinWalkAll(ctx context.Context, f func(*FileType) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
+	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var fts FileTypes
+	if err := fts.FromResponse(res); err != nil {
+		return err
+	}
+	fts.config(ftq.config)
+
+	for _, v := range fts {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {

@@ -149,6 +149,11 @@ func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (cq *CommentQuery) WalkAll(ctx context.Context, f func(*Comment) error) error {
+	return cq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 	return cq.gremlinAll(ctx)
@@ -263,6 +268,28 @@ func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = cq.gremlinQuery()
 	return selector
+}
+
+func (cq *CommentQuery) gremlinWalkAll(ctx context.Context, f func(*Comment) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := cq.gremlinQuery().ValueMap(true).Query()
+	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var cs Comments
+	if err := cs.FromResponse(res); err != nil {
+		return err
+	}
+	cs.config(cq.config)
+
+	for _, v := range cs {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {

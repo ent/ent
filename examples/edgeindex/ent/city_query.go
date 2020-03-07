@@ -165,6 +165,11 @@ func (cq *CityQuery) OnlyXID(ctx context.Context) int {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (cq *CityQuery) WalkAll(ctx context.Context, f func(*City) error) error {
+	return cq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Cities.
 func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
 	return cq.sqlAll(ctx)
@@ -290,6 +295,39 @@ func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = cq.sqlQuery()
 	return selector
+}
+
+func (cq *CityQuery) sqlWalkAll(ctx context.Context, f func(*City) error) error {
+	var (
+		currNode    *City
+		_spec       = cq.querySpec()
+		loadedTypes = [1]bool{
+			cq.withStreets != nil,
+		}
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &City{config: cq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, cq.driver, _spec)
 }
 
 func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {

@@ -165,6 +165,11 @@ func (cq *CarQuery) OnlyXID(ctx context.Context) int {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (cq *CarQuery) WalkAll(ctx context.Context, f func(*Car) error) error {
+	return cq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Cars.
 func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
 	return cq.sqlAll(ctx)
@@ -290,6 +295,49 @@ func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = cq.sqlQuery()
 	return selector
+}
+
+func (cq *CarQuery) sqlWalkAll(ctx context.Context, f func(*Car) error) error {
+	var (
+		currNode    *Car
+		withFKs     = cq.withFKs
+		_spec       = cq.querySpec()
+		loadedTypes = [1]bool{
+			cq.withOwner != nil,
+		}
+	)
+	if cq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, car.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Car{config: cq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, cq.driver, _spec)
 }
 
 func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {

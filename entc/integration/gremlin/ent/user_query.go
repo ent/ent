@@ -249,6 +249,11 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (uq *UserQuery) WalkAll(ctx context.Context, f func(*User) error) error {
+	return uq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	return uq.gremlinAll(ctx)
@@ -484,6 +489,28 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = uq.gremlinQuery()
 	return selector
+}
+
+func (uq *UserQuery) gremlinWalkAll(ctx context.Context, f func(*User) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := uq.gremlinQuery().ValueMap(true).Query()
+	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var us Users
+	if err := us.FromResponse(res); err != nil {
+		return err
+	}
+	us.config(uq.config)
+
+	for _, v := range us {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {

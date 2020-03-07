@@ -208,6 +208,11 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (gq *GroupQuery) WalkAll(ctx context.Context, f func(*Group) error) error {
+	return gq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 	return gq.sqlAll(ctx)
@@ -366,6 +371,52 @@ func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = gq.sqlQuery()
 	return selector
+}
+
+func (gq *GroupQuery) sqlWalkAll(ctx context.Context, f func(*Group) error) error {
+	var (
+		currNode    *Group
+		withFKs     = gq.withFKs
+		_spec       = gq.querySpec()
+		loadedTypes = [4]bool{
+			gq.withFiles != nil,
+			gq.withBlocked != nil,
+			gq.withUsers != nil,
+			gq.withInfo != nil,
+		}
+	)
+	if gq.withInfo != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, group.ForeignKeys...)
+	}
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Group{config: gq.config}
+		values := currNode.scanValues()
+		if withFKs {
+			values = append(values, currNode.fkValues()...)
+		}
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		currNode.Edges.loadedTypes = loadedTypes
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, gq.driver, _spec)
 }
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {

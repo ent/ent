@@ -169,6 +169,11 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (pq *PetQuery) WalkAll(ctx context.Context, f func(*Pet) error) error {
+	return pq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 	return pq.gremlinAll(ctx)
@@ -305,6 +310,28 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = pq.gremlinQuery()
 	return selector
+}
+
+func (pq *PetQuery) gremlinWalkAll(ctx context.Context, f func(*Pet) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := pq.gremlinQuery().ValueMap(true).Query()
+	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var pes Pets
+	if err := pes.FromResponse(res); err != nil {
+		return err
+	}
+	pes.config(pq.config)
+
+	for _, v := range pes {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {

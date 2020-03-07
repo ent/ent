@@ -149,6 +149,11 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) int {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (uq *UserQuery) WalkAll(ctx context.Context, f func(*User) error) error {
+	return uq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 	return uq.sqlAll(ctx)
@@ -239,6 +244,35 @@ func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = uq.sqlQuery()
 	return selector
+}
+
+func (uq *UserQuery) sqlWalkAll(ctx context.Context, f func(*User) error) error {
+	var (
+		currNode *User
+		_spec    = uq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &User{config: uq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, uq.driver, _spec)
 }
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {

@@ -150,6 +150,11 @@ func (bq *BlobQuery) OnlyXID(ctx context.Context) uuid.UUID {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (bq *BlobQuery) WalkAll(ctx context.Context, f func(*Blob) error) error {
+	return bq.sqlWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Blobs.
 func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
 	return bq.sqlAll(ctx)
@@ -264,6 +269,35 @@ func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.sql = bq.sqlQuery()
 	return selector
+}
+
+func (bq *BlobQuery) sqlWalkAll(ctx context.Context, f func(*Blob) error) error {
+	var (
+		currNode *Blob
+		_spec    = bq.querySpec()
+	)
+	_spec.ScanValues = func() []interface{} {
+		currNode = &Blob{config: bq.config}
+		values := currNode.scanValues()
+		return values
+	}
+	_spec.Assign = func(values ...interface{}) error {
+		if currNode == nil {
+			return fmt.Errorf("ent: Assign called without calling ScanValues")
+		}
+		if err := currNode.assignValues(values...); err != nil {
+			return err
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		return f(currNode)
+	}
+
+	return sqlgraph.QueryNodes(ctx, bq.driver, _spec)
 }
 
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {

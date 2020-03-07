@@ -170,6 +170,11 @@ func (cq *CardQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (cq *CardQuery) WalkAll(ctx context.Context, f func(*Card) error) error {
+	return cq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
 	return cq.gremlinAll(ctx)
@@ -306,6 +311,28 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = cq.gremlinQuery()
 	return selector
+}
+
+func (cq *CardQuery) gremlinWalkAll(ctx context.Context, f func(*Card) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := cq.gremlinQuery().ValueMap(true).Query()
+	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var cs Cards
+	if err := cs.FromResponse(res); err != nil {
+		return err
+	}
+	cs.config(cq.config)
+
+	for _, v := range cs {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {

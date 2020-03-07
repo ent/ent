@@ -170,6 +170,11 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (fq *FileQuery) WalkAll(ctx context.Context, f func(*File) error) error {
+	return fq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
 	return fq.gremlinAll(ctx)
@@ -306,6 +311,28 @@ func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = fq.gremlinQuery()
 	return selector
+}
+
+func (fq *FileQuery) gremlinWalkAll(ctx context.Context, f func(*File) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := fq.gremlinQuery().ValueMap(true).Query()
+	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var fs Files
+	if err := fs.FromResponse(res); err != nil {
+		return err
+	}
+	fs.config(fq.config)
+
+	for _, v := range fs {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {

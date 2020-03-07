@@ -168,6 +168,11 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
 	return id
 }
 
+// WalkAll executes the query and walk results with callback func. Eager loading not supported!
+func (nq *NodeQuery) WalkAll(ctx context.Context, f func(*Node) error) error {
+	return nq.gremlinWalkAll(ctx, f)
+}
+
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 	return nq.gremlinAll(ctx)
@@ -304,6 +309,28 @@ func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector.fields = append([]string{field}, fields...)
 	selector.gremlin = nq.gremlinQuery()
 	return selector
+}
+
+func (nq *NodeQuery) gremlinWalkAll(ctx context.Context, f func(*Node) error) error {
+
+	res := &gremlin.Response{}
+	query, bindings := nq.gremlinQuery().ValueMap(true).Query()
+	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
+		return err
+	}
+	var ns Nodes
+	if err := ns.FromResponse(res); err != nil {
+		return err
+	}
+	ns.config(nq.config)
+
+	for _, v := range ns {
+		if err := f(v); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
