@@ -185,6 +185,34 @@ func (c *BlobClient) GetX(ctx context.Context, id uuid.UUID) *Blob {
 	return b
 }
 
+// QueryParent queries the parent edge of a Blob.
+func (c *BlobClient) QueryParent(b *Blob) *BlobQuery {
+	query := &BlobQuery{config: c.config}
+	id := b.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(blob.Table, blob.FieldID, id),
+		sqlgraph.To(blob.Table, blob.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
+	)
+	query.sql = sqlgraph.Neighbors(b.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryLinks queries the links edge of a Blob.
+func (c *BlobClient) QueryLinks(b *Blob) *BlobQuery {
+	query := &BlobQuery{config: c.config}
+	id := b.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(blob.Table, blob.FieldID, id),
+		sqlgraph.To(blob.Table, blob.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
+	)
+	query.sql = sqlgraph.Neighbors(b.driver.Dialect(), step)
+
+	return query
+}
+
 // CarClient is a client for the Car schema.
 type CarClient struct {
 	config

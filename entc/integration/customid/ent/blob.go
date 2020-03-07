@@ -21,6 +21,44 @@ type Blob struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the BlobQuery when eager-loading is set.
+	Edges       BlobEdges `json:"edges"`
+	blob_parent *uuid.UUID
+}
+
+// BlobEdges holds the relations/edges for other nodes in the graph.
+type BlobEdges struct {
+	// Parent holds the value of the parent edge.
+	Parent *Blob
+	// Links holds the value of the links edge.
+	Links []*Blob
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// ParentOrErr returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e BlobEdges) ParentOrErr() (*Blob, error) {
+	if e.loadedTypes[0] {
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: blob.Label}
+		}
+		return e.Parent, nil
+	}
+	return nil, &NotLoadedError{edge: "parent"}
+}
+
+// LinksOrErr returns the Links value or an error if the edge
+// was not loaded in eager-loading.
+func (e BlobEdges) LinksOrErr() ([]*Blob, error) {
+	if e.loadedTypes[1] {
+		return e.Links, nil
+	}
+	return nil, &NotLoadedError{edge: "links"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,6 +66,13 @@ func (*Blob) scanValues() []interface{} {
 	return []interface{}{
 		&uuid.UUID{}, // id
 		&uuid.UUID{}, // uuid
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Blob) fkValues() []interface{} {
+	return []interface{}{
+		&uuid.UUID{}, // blob_parent
 	}
 }
 
@@ -48,7 +93,25 @@ func (b *Blob) assignValues(values ...interface{}) error {
 	} else if value != nil {
 		b.UUID = *value
 	}
+	values = values[1:]
+	if len(values) == len(blob.ForeignKeys) {
+		if value, ok := values[0].(*uuid.UUID); !ok {
+			return fmt.Errorf("unexpected type %T for field blob_parent", values[0])
+		} else if value != nil {
+			b.blob_parent = value
+		}
+	}
 	return nil
+}
+
+// QueryParent queries the parent edge of the Blob.
+func (b *Blob) QueryParent() *BlobQuery {
+	return (&BlobClient{config: b.config}).QueryParent(b)
+}
+
+// QueryLinks queries the links edge of the Blob.
+func (b *Blob) QueryLinks() *BlobQuery {
+	return (&BlobClient{config: b.config}).QueryLinks(b)
 }
 
 // Update returns a builder for updating this Blob.

@@ -91,8 +91,14 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, 3, hub.ID)
 	require.Equal(t, []int{1, 5}, hub.QueryUsers().Order(ent.Asc(user.FieldID)).IDsX(ctx))
 
-	b := client.Blob.Create().SetID(uuid.New()).SaveX(ctx)
-	require.NotEmpty(t, b.ID)
+	blb := client.Blob.Create().SetID(uuid.New()).SaveX(ctx)
+	require.NotEmpty(t, blb.ID)
+	chd := client.Blob.Create().SetID(uuid.New()).SetParent(blb).SaveX(ctx)
+	require.Equal(t, blb.ID, chd.QueryParent().OnlyX(ctx).ID)
+	lnk := client.Blob.Create().SetID(uuid.New()).AddLinks(chd, blb).SaveX(ctx)
+	require.Equal(t, 2, lnk.QueryLinks().CountX(ctx))
+	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
+	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
 	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyXID(ctx))

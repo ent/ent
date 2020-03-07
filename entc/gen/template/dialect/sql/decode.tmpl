@@ -103,7 +103,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 				{{- end }}
 		{{- else }}
 			} else if value != nil {
-				{{ $ret }}.{{ $field }} = *value
+				{{ $ret }}.{{ $field }} = {{ if not $f.Nillable }}*{{ end }}value
 		{{- end }}
 		}
 	{{- end }}
