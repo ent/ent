@@ -61,6 +61,10 @@ const (
 	FieldOptionalUint64 = "optional_uint64"
 	// FieldState holds the string denoting the state vertex property in the database.
 	FieldState = "state"
+	// FieldOptionalFloat holds the string denoting the optional_float vertex property in the database.
+	FieldOptionalFloat = "optional_float"
+	// FieldOptionalFloat32 holds the string denoting the optional_float32 vertex property in the database.
+	FieldOptionalFloat32 = "optional_float32"
 )
 
 var (

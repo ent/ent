@@ -250,6 +250,20 @@ func OptionalUint64(v uint64) predicate.FieldType {
 	})
 }
 
+// OptionalFloat applies equality check predicate on the "optional_float" field. It's identical to OptionalFloatEQ.
+func OptionalFloat(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloat32 applies equality check predicate on the "optional_float32" field. It's identical to OptionalFloat32EQ.
+func OptionalFloat32(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalFloat32), v))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -2129,6 +2143,186 @@ func StateIsNil() predicate.FieldType {
 func StateNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldState)))
+	})
+}
+
+// OptionalFloatEQ applies the EQ predicate on the "optional_float" field.
+func OptionalFloatEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloatNEQ applies the NEQ predicate on the "optional_float" field.
+func OptionalFloatNEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloatIn applies the In predicate on the "optional_float" field.
+func OptionalFloatIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalFloat), v...))
+	})
+}
+
+// OptionalFloatNotIn applies the NotIn predicate on the "optional_float" field.
+func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalFloat), v...))
+	})
+}
+
+// OptionalFloatGT applies the GT predicate on the "optional_float" field.
+func OptionalFloatGT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloatGTE applies the GTE predicate on the "optional_float" field.
+func OptionalFloatGTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloatLT applies the LT predicate on the "optional_float" field.
+func OptionalFloatLT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloatLTE applies the LTE predicate on the "optional_float" field.
+func OptionalFloatLTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalFloat), v))
+	})
+}
+
+// OptionalFloatIsNil applies the IsNil predicate on the "optional_float" field.
+func OptionalFloatIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalFloat)))
+	})
+}
+
+// OptionalFloatNotNil applies the NotNil predicate on the "optional_float" field.
+func OptionalFloatNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalFloat)))
+	})
+}
+
+// OptionalFloat32EQ applies the EQ predicate on the "optional_float32" field.
+func OptionalFloat32EQ(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// OptionalFloat32NEQ applies the NEQ predicate on the "optional_float32" field.
+func OptionalFloat32NEQ(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// OptionalFloat32In applies the In predicate on the "optional_float32" field.
+func OptionalFloat32In(vs ...float32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOptionalFloat32), v...))
+	})
+}
+
+// OptionalFloat32NotIn applies the NotIn predicate on the "optional_float32" field.
+func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOptionalFloat32), v...))
+	})
+}
+
+// OptionalFloat32GT applies the GT predicate on the "optional_float32" field.
+func OptionalFloat32GT(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// OptionalFloat32GTE applies the GTE predicate on the "optional_float32" field.
+func OptionalFloat32GTE(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// OptionalFloat32LT applies the LT predicate on the "optional_float32" field.
+func OptionalFloat32LT(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// OptionalFloat32LTE applies the LTE predicate on the "optional_float32" field.
+func OptionalFloat32LTE(v float32) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// OptionalFloat32IsNil applies the IsNil predicate on the "optional_float32" field.
+func OptionalFloat32IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOptionalFloat32)))
+	})
+}
+
+// OptionalFloat32NotNil applies the NotNil predicate on the "optional_float32" field.
+func OptionalFloat32NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOptionalFloat32)))
 	})
 }
 
