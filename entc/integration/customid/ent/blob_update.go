@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -20,8 +21,12 @@ import (
 // BlobUpdate is the builder for updating Blob entities.
 type BlobUpdate struct {
 	config
-	uuid       *uuid.UUID
-	predicates []predicate.Blob
+	uuid          *uuid.UUID
+	parent        map[uuid.UUID]struct{}
+	links         map[uuid.UUID]struct{}
+	clearedParent bool
+	removedLinks  map[uuid.UUID]struct{}
+	predicates    []predicate.Blob
 }
 
 // Where adds a new predicate for the builder.
@@ -36,8 +41,79 @@ func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
 	return bu
 }
 
+// SetParentID sets the parent edge to Blob by id.
+func (bu *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
+	if bu.parent == nil {
+		bu.parent = make(map[uuid.UUID]struct{})
+	}
+	bu.parent[id] = struct{}{}
+	return bu
+}
+
+// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+func (bu *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
+	if id != nil {
+		bu = bu.SetParentID(*id)
+	}
+	return bu
+}
+
+// SetParent sets the parent edge to Blob.
+func (bu *BlobUpdate) SetParent(b *Blob) *BlobUpdate {
+	return bu.SetParentID(b.ID)
+}
+
+// AddLinkIDs adds the links edge to Blob by ids.
+func (bu *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
+	if bu.links == nil {
+		bu.links = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		bu.links[ids[i]] = struct{}{}
+	}
+	return bu
+}
+
+// AddLinks adds the links edges to Blob.
+func (bu *BlobUpdate) AddLinks(b ...*Blob) *BlobUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.AddLinkIDs(ids...)
+}
+
+// ClearParent clears the parent edge to Blob.
+func (bu *BlobUpdate) ClearParent() *BlobUpdate {
+	bu.clearedParent = true
+	return bu
+}
+
+// RemoveLinkIDs removes the links edge to Blob by ids.
+func (bu *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
+	if bu.removedLinks == nil {
+		bu.removedLinks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		bu.removedLinks[ids[i]] = struct{}{}
+	}
+	return bu
+}
+
+// RemoveLinks removes links edges to Blob.
+func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.RemoveLinkIDs(ids...)
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
+	if len(bu.parent) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
+	}
 	return bu.sqlSave(ctx)
 }
 
@@ -88,6 +164,79 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: blob.FieldUUID,
 		})
 	}
+	if bu.clearedParent {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   blob.ParentTable,
+			Columns: []string{blob.ParentColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   blob.ParentTable,
+			Columns: []string{blob.ParentColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := bu.removedLinks; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.links; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
@@ -102,8 +251,12 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // BlobUpdateOne is the builder for updating a single Blob entity.
 type BlobUpdateOne struct {
 	config
-	id   uuid.UUID
-	uuid *uuid.UUID
+	id            uuid.UUID
+	uuid          *uuid.UUID
+	parent        map[uuid.UUID]struct{}
+	links         map[uuid.UUID]struct{}
+	clearedParent bool
+	removedLinks  map[uuid.UUID]struct{}
 }
 
 // SetUUID sets the uuid field.
@@ -112,8 +265,79 @@ func (buo *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
 	return buo
 }
 
+// SetParentID sets the parent edge to Blob by id.
+func (buo *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
+	if buo.parent == nil {
+		buo.parent = make(map[uuid.UUID]struct{})
+	}
+	buo.parent[id] = struct{}{}
+	return buo
+}
+
+// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+func (buo *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
+	if id != nil {
+		buo = buo.SetParentID(*id)
+	}
+	return buo
+}
+
+// SetParent sets the parent edge to Blob.
+func (buo *BlobUpdateOne) SetParent(b *Blob) *BlobUpdateOne {
+	return buo.SetParentID(b.ID)
+}
+
+// AddLinkIDs adds the links edge to Blob by ids.
+func (buo *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
+	if buo.links == nil {
+		buo.links = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		buo.links[ids[i]] = struct{}{}
+	}
+	return buo
+}
+
+// AddLinks adds the links edges to Blob.
+func (buo *BlobUpdateOne) AddLinks(b ...*Blob) *BlobUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.AddLinkIDs(ids...)
+}
+
+// ClearParent clears the parent edge to Blob.
+func (buo *BlobUpdateOne) ClearParent() *BlobUpdateOne {
+	buo.clearedParent = true
+	return buo
+}
+
+// RemoveLinkIDs removes the links edge to Blob by ids.
+func (buo *BlobUpdateOne) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
+	if buo.removedLinks == nil {
+		buo.removedLinks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		buo.removedLinks[ids[i]] = struct{}{}
+	}
+	return buo
+}
+
+// RemoveLinks removes links edges to Blob.
+func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.RemoveLinkIDs(ids...)
+}
+
 // Save executes the query and returns the updated entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
+	if len(buo.parent) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
+	}
 	return buo.sqlSave(ctx)
 }
 
@@ -157,6 +381,79 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 			Value:  *value,
 			Column: blob.FieldUUID,
 		})
+	}
+	if buo.clearedParent {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   blob.ParentTable,
+			Columns: []string{blob.ParentColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   blob.ParentTable,
+			Columns: []string{blob.ParentColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := buo.removedLinks; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.links; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	b = &Blob{config: buo.config}
 	_spec.Assign = b.assignValues

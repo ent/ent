@@ -18,13 +18,22 @@ var (
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "uuid", Type: field.TypeUUID, Default: blob.DefaultUUID},
+		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BlobsTable holds the schema information for the "blobs" table.
 	BlobsTable = &schema.Table{
-		Name:        "blobs",
-		Columns:     BlobsColumns,
-		PrimaryKey:  []*schema.Column{BlobsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "blobs",
+		Columns:    BlobsColumns,
+		PrimaryKey: []*schema.Column{BlobsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "blobs_blobs_parent",
+				Columns: []*schema.Column{BlobsColumns[2]},
+
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
@@ -98,6 +107,33 @@ var (
 			},
 		},
 	}
+	// BlobLinksColumns holds the columns for the "blob_links" table.
+	BlobLinksColumns = []*schema.Column{
+		{Name: "blob_id", Type: field.TypeUUID},
+		{Name: "link_id", Type: field.TypeUUID},
+	}
+	// BlobLinksTable holds the schema information for the "blob_links" table.
+	BlobLinksTable = &schema.Table{
+		Name:       "blob_links",
+		Columns:    BlobLinksColumns,
+		PrimaryKey: []*schema.Column{BlobLinksColumns[0], BlobLinksColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "blob_links_blob_id",
+				Columns: []*schema.Column{BlobLinksColumns[0]},
+
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:  "blob_links_link_id",
+				Columns: []*schema.Column{BlobLinksColumns[1]},
+
+				RefColumns: []*schema.Column{BlobsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// GroupUsersColumns holds the columns for the "group_users" table.
 	GroupUsersColumns = []*schema.Column{
 		{Name: "group_id", Type: field.TypeInt},
@@ -132,14 +168,18 @@ var (
 		GroupsTable,
 		PetsTable,
 		UsersTable,
+		BlobLinksTable,
 		GroupUsersTable,
 	}
 )
 
 func init() {
+	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
+	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
+	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable
 }

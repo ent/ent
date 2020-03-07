@@ -21,6 +21,12 @@ const (
 
 	// Table holds the table name of the blob in the database.
 	Table = "blobs"
+	// ParentTable is the table the holds the parent relation/edge.
+	ParentTable = "blobs"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "blob_parent"
+	// LinksTable is the table the holds the links relation/edge. The primary key declared below.
+	LinksTable = "blob_links"
 )
 
 // Columns holds all SQL columns for blob fields.
@@ -28,6 +34,17 @@ var Columns = []string{
 	FieldID,
 	FieldUUID,
 }
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Blob type.
+var ForeignKeys = []string{
+	"blob_parent",
+}
+
+var (
+	// LinksPrimaryKey and LinksColumn2 are the table columns denoting the
+	// primary key for the links relation (M2M).
+	LinksPrimaryKey = []string{"blob_id", "link_id"}
+)
 
 var (
 	fields = schema.Blob{}.Fields()

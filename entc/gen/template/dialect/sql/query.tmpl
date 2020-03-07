@@ -328,6 +328,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- else  if hasPrefix $nulltype "sql" -}}
 		{{ $field.NullTypeField $arg -}}
 	{{- else -}}
-		{{ $arg }}
+		{{ if not $field.Nillable }}*{{ end }}{{ $arg }}
 	{{- end }}
 {{- end }}

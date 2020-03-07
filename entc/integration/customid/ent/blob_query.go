@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -28,6 +29,10 @@ type BlobQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Blob
+	// eager-loading edges.
+	withParent *BlobQuery
+	withLinks  *BlobQuery
+	withFKs    bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -54,6 +59,30 @@ func (bq *BlobQuery) Offset(offset int) *BlobQuery {
 func (bq *BlobQuery) Order(o ...Order) *BlobQuery {
 	bq.order = append(bq.order, o...)
 	return bq
+}
+
+// QueryParent chains the current query on the parent edge.
+func (bq *BlobQuery) QueryParent() *BlobQuery {
+	query := &BlobQuery{config: bq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
+		sqlgraph.To(blob.Table, blob.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+	return query
+}
+
+// QueryLinks chains the current query on the links edge.
+func (bq *BlobQuery) QueryLinks() *BlobQuery {
+	query := &BlobQuery{config: bq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
+		sqlgraph.To(blob.Table, blob.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
+	)
+	query.sql = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+	return query
 }
 
 // First returns the first Blob entity in the query. Returns *NotFoundError when no blob was found.
@@ -225,6 +254,28 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 	}
 }
 
+//  WithParent tells the query-builder to eager-loads the nodes that are connected to
+// the "parent" edge. The optional arguments used to configure the query builder of the edge.
+func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
+	query := &BlobQuery{config: bq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withParent = query
+	return bq
+}
+
+//  WithLinks tells the query-builder to eager-loads the nodes that are connected to
+// the "links" edge. The optional arguments used to configure the query builder of the edge.
+func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
+	query := &BlobQuery{config: bq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withLinks = query
+	return bq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -268,13 +319,27 @@ func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
 
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	var (
-		nodes = []*Blob{}
-		_spec = bq.querySpec()
+		nodes       = []*Blob{}
+		withFKs     = bq.withFKs
+		_spec       = bq.querySpec()
+		loadedTypes = [2]bool{
+			bq.withParent != nil,
+			bq.withLinks != nil,
+		}
 	)
+	if bq.withParent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, blob.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Blob{config: bq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -282,6 +347,7 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
@@ -290,6 +356,95 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := bq.withParent; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Blob)
+		for i := range nodes {
+			if fk := nodes[i].blob_parent; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(blob.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "blob_parent" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Parent = n
+			}
+		}
+	}
+
+	if query := bq.withLinks; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uuid.UUID]*Blob, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+		}
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Blob)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   blob.LinksTable,
+				Columns: blob.LinksPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(blob.LinksPrimaryKey[0], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, bq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "links": %v`, err)
+		}
+		query.Where(blob.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "links" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Links = append(nodes[i].Edges.Links, n)
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

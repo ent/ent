@@ -6,6 +6,7 @@ package schema
 
 import (
 	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/google/uuid"
@@ -22,5 +23,14 @@ func (Blob) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}),
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New),
+	}
+}
+
+// Edges of the Blob.
+func (Blob) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("parent", Blob.Type).
+			Unique(),
+		edge.To("links", Blob.Type),
 	}
 }

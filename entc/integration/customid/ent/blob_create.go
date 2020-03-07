@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
@@ -18,8 +19,10 @@ import (
 // BlobCreate is the builder for creating a Blob entity.
 type BlobCreate struct {
 	config
-	id   *uuid.UUID
-	uuid *uuid.UUID
+	id     *uuid.UUID
+	uuid   *uuid.UUID
+	parent map[uuid.UUID]struct{}
+	links  map[uuid.UUID]struct{}
 }
 
 // SetUUID sets the uuid field.
@@ -34,11 +37,56 @@ func (bc *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
 	return bc
 }
 
+// SetParentID sets the parent edge to Blob by id.
+func (bc *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
+	if bc.parent == nil {
+		bc.parent = make(map[uuid.UUID]struct{})
+	}
+	bc.parent[id] = struct{}{}
+	return bc
+}
+
+// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+func (bc *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
+	if id != nil {
+		bc = bc.SetParentID(*id)
+	}
+	return bc
+}
+
+// SetParent sets the parent edge to Blob.
+func (bc *BlobCreate) SetParent(b *Blob) *BlobCreate {
+	return bc.SetParentID(b.ID)
+}
+
+// AddLinkIDs adds the links edge to Blob by ids.
+func (bc *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
+	if bc.links == nil {
+		bc.links = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		bc.links[ids[i]] = struct{}{}
+	}
+	return bc
+}
+
+// AddLinks adds the links edges to Blob.
+func (bc *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bc.AddLinkIDs(ids...)
+}
+
 // Save creates the Blob in the database.
 func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 	if bc.uuid == nil {
 		v := blob.DefaultUUID()
 		bc.uuid = &v
+	}
+	if len(bc.parent) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
 	return bc.sqlSave(ctx)
 }
@@ -74,6 +122,44 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 			Column: blob.FieldUUID,
 		})
 		b.UUID = *value
+	}
+	if nodes := bc.parent; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   blob.ParentTable,
+			Columns: []string{blob.ParentColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.links; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
