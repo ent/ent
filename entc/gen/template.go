@@ -117,6 +117,10 @@ var (
 			Name:   "entschema",
 			Format: "entschema/entschema.go",
 		},
+		{
+			Name:   "privacy",
+			Format: "privacy/privacy.go",
+		},
 	}
 	// templates holds the Go templates for the code generation.
 	// the init function below initializes the templates and its

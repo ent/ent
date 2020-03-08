@@ -22,6 +22,7 @@ type Schema struct {
 	Fields  []*Field   `json:"fields,omitempty"`
 	Indexes []*Index   `json:"indexes,omitempty"`
 	Hooks   int        `json:"hooks,omitempty"`
+	Policy  bool       `json:"policy,omitempty"`
 }
 
 // Position describes a field position in the schema.
@@ -158,6 +159,9 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	if err := s.loadHooks(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
 	}
+	if err := s.loadPolicy(schema); err != nil {
+		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+	}
 	return json.Marshal(s)
 }
 
@@ -220,6 +224,15 @@ func (s *Schema) loadHooks(schema ent.Interface) error {
 		return err
 	}
 	s.Hooks = len(hooks)
+	return nil
+}
+
+func (s *Schema) loadPolicy(schema ent.Interface) error {
+	policy, err := safePolicy(schema)
+	if err != nil {
+		return err
+	}
+	s.Policy = policy != nil
 	return nil
 }
 
@@ -293,6 +306,17 @@ func safeHooks(schema ent.Interface) (hooks []ent.Hook, err error) {
 		}
 	}()
 	return schema.Hooks(), nil
+}
+
+// safePolicy wraps the schema.Policy method with recover to ensure no panics in marshaling.
+func safePolicy(schema ent.Interface) (policy ent.Policy, err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			err = fmt.Errorf("schema.Policy panics: %v", v)
+			policy = nil
+		}
+	}()
+	return schema.Policy(), nil
 }
 
 func indirect(t reflect.Type) reflect.Type {

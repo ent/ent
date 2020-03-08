@@ -36,9 +36,9 @@ in the LICENSE file in the root directory of this source tree.
 import (
 	"{{ $.Config.Schema }}"
 
-	{{ range $n := $.Nodes }}
+	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
-	{{- end }}
+	{{ end -}}
 
 	"github.com/facebookincubator/ent"
 )
@@ -47,15 +47,25 @@ import (
 // The init function reads all schema descriptors with runtime
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
-
 func init() {
 {{- range $n := $.Nodes }}
 	{{- $pkg :=  $n.Package }}
 	{{- $schema := base $.Config.Schema }}
+	{{- if $n.HasPolicy }}
+		policy := {{ $schema }}.{{ $n.Name }}{}.Policy()
+		{{ print $pkg ".Hooks" }}[0] = func(next ent.Mutator) ent.Mutator {
+			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+				if err := policy.EvalWrite(ctx, m); err != nil {
+					return nil, err
+				}
+				return next.Mutate(ctx, m)
+			})
+		}
+	{{- end }}
 	{{- if $n.NumHooks }}
 		{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
 		for i, h := range {{ print $pkg "Hooks" }} {
-			{{ print $pkg ".Hooks" }}[i] = h
+			{{ print $pkg ".Hooks" }}[i{{ if $n.HasPolicy }}+1{{ end }}] = h
 		}
 	{{- end }}
 	{{- if or $n.HasDefault $n.HasValidators }}

@@ -53,6 +53,8 @@ type (
 		// Hooks returns an optional list of Hook to apply on
 		// mutations.
 		Hooks() []Hook
+		// Policy returns the privacy policy of the schema.
+		Policy() Policy
 	}
 
 	// A Field interface returns a field descriptor for vertex fields/properties.
@@ -141,6 +143,21 @@ type (
 		Fields() []Field
 	}
 
+	// The Policy type defines the read/write privacy policy of an entity.
+	// The usage for the interface is as follows:
+	//
+	// type T struct {
+	//   ent.Schema
+	// }
+	//
+	// func(T) Policy() ent.Policy {
+	//     return privacy.AlwaysAllowReadWrite()
+	// }
+	Policy interface {
+		EvalRead(context.Context, Value) error
+		EvalWrite(context.Context, Mutation) error
+	}
+
 	// Schema is the default implementation for the schema Interface.
 	// It can be embedded in end-user schemas as follows:
 	//
@@ -170,6 +187,9 @@ func (Schema) Mixin() []Mixin { return nil }
 
 // Hooks of the schema.
 func (Schema) Hooks() []Hook { return nil }
+
+// Policy of the schema.
+func (Schema) Policy() Policy { return nil }
 
 type (
 	// Value represents a value returned by ent.

@@ -41,7 +41,7 @@ const (
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
-{{ if or $.HasDefault $.HasValidators $.NumHooks }}{{/* Runtime code from schema package */}}
+{{ if or $.HasDefault $.HasValidators $.NumHooks $.HasPolicy }}{{/* Runtime code from schema package */}}
 	{{ if $.ImportSchema }}{{/* No option for circular imports */}}
 		{{ if or $.HasDefault $.HasValidators }}
 			var (
@@ -112,8 +112,12 @@ const (
 		//	import _ "{{ $.Config.Schema }}"
 		//
 		var (
-			{{- if $.NumHooks }}
-				Hooks [{{ $.NumHooks }}]ent.Hook
+			{{- $numHooks := $.NumHooks }}
+			{{- if $.HasPolicy }}
+				{{- $numHooks = add $numHooks 1 }}
+			{{- end }}
+			{{- if $numHooks }}
+				Hooks [{{ $numHooks }}]ent.Hook
 			{{- end }}
 			{{- range $f := $.Fields }}
 				{{- if and $f.Default (not $f.IsEnum) }}

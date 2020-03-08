@@ -30,7 +30,6 @@ func (Card) Hooks() []ent.Hook {
 	}
 }
 
-// Fields of the Comment.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("boring").

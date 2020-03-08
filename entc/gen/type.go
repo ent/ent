@@ -41,7 +41,7 @@ type (
 		Indexes []*Index
 		// ForeignKeys are the foreign-keys that resides in the type table.
 		ForeignKeys []*ForeignKey
-		foreignkeys map[string]*ForeignKey
+		foreignKeys map[string]struct{}
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -154,7 +154,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		Name:        schema.Name,
 		Fields:      make([]*Field, 0, len(schema.Fields)),
 		fields:      make(map[string]*Field, len(schema.Fields)),
-		foreignkeys: make(map[string]*ForeignKey),
+		foreignKeys: make(map[string]struct{}),
 	}
 	for _, f := range schema.Fields {
 		switch {
@@ -200,7 +200,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			typ.fields[f.Name] = tf
 		}
 	}
-	if typ.NumHooks() > 0 {
+	if typ.NumHooks() > 0 || typ.HasPolicy() {
 		typ.noSchemaImport = true
 	}
 	return typ, nil
@@ -457,10 +457,10 @@ func (t *Type) resolveFKs() {
 
 // AddForeignKey adds a foreign-key for the type if it doesn't exist.
 func (t *Type) addFK(fk *ForeignKey) {
-	if _, ok := t.foreignkeys[fk.Field.Name]; ok {
+	if _, ok := t.foreignKeys[fk.Field.Name]; ok {
 		return
 	}
-	t.foreignkeys[fk.Field.Name] = fk
+	t.foreignKeys[fk.Field.Name] = struct{}{}
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
@@ -496,6 +496,14 @@ func (t Type) NumHooks() int {
 		return t.schema.Hooks
 	}
 	return 0
+}
+
+// HasPolicy returns whether a privacy policy was declared in the type schema.
+func (t Type) HasPolicy() bool {
+	if t.schema != nil {
+		return t.schema.Policy
+	}
+	return false
 }
 
 // ImportSchema reports if the type-package need to import the schema.
