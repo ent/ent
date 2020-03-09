@@ -55,11 +55,11 @@ var (
 	FriendsPrimaryKey = []string{"card_id", "friend_id"}
 )
 
-// Note that the variables below are initialized by the schema package
-// on the initialization of the application. Therefore, the schema package
-// should be imported in the main as follows:
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
 //
-//	import _ "github.com/facebookincubator/ent/entc/integration/hooks/ent/schema"
+//	import _ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
 //
 var (
 	Hooks [1]ent.Hook

@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent"
-	_ "github.com/facebookincubator/ent/entc/integration/hooks/ent/entschema"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
+	_ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
 	_ "github.com/mattn/go-sqlite3"
 )
 

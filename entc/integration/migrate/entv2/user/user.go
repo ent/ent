@@ -8,8 +8,6 @@ package user
 
 import (
 	"fmt"
-
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/schema"
 )
 
 const (
@@ -70,15 +68,10 @@ var ForeignKeys = []string{
 }
 
 var (
-	fields = schema.User{}.Fields()
-	// descPhone is the schema descriptor for phone field.
-	descPhone = fields[4].Descriptor()
 	// DefaultPhone holds the default value on creation for the phone field.
-	DefaultPhone = descPhone.Default.(string)
-	// descTitle is the schema descriptor for title field.
-	descTitle = fields[6].Descriptor()
+	DefaultPhone string
 	// DefaultTitle holds the default value on creation for the title field.
-	DefaultTitle = descTitle.Default.(string)
+	DefaultTitle string
 )
 
 // State defines the type for the state enum field.

@@ -6,8 +6,6 @@
 
 package user
 
-import "github.com/facebookincubator/ent/examples/start/ent/schema"
-
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
@@ -51,13 +49,8 @@ var (
 )
 
 var (
-	fields = schema.User{}.Fields()
-	// descAge is the schema descriptor for age field.
-	descAge = fields[0].Descriptor()
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	AgeValidator = descAge.Validators[0].(func(int) error)
-	// descName is the schema descriptor for name field.
-	descName = fields[1].Descriptor()
+	AgeValidator func(int) error
 	// DefaultName holds the default value on creation for the name field.
-	DefaultName = descName.Default.(string)
+	DefaultName string
 )

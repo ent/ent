@@ -200,9 +200,6 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			typ.fields[f.Name] = tf
 		}
 	}
-	if typ.NumHooks() > 0 || typ.HasPolicy() {
-		typ.noSchemaImport = true
-	}
 	return typ, nil
 }
 
@@ -504,11 +501,6 @@ func (t Type) HasPolicy() bool {
 		return t.schema.Policy
 	}
 	return false
-}
-
-// ImportSchema reports if the type-package need to import the schema.
-func (t Type) ImportSchema() bool {
-	return !t.state.noSchemaImport
 }
 
 // Constant returns the constant name of the field.

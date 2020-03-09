@@ -223,6 +223,11 @@ func extend(v interface{}, kv ...interface{}) (interface{}, error) {
 			scope[k] = v.Scope[k]
 		}
 		return &typeScope{Type: v.Type, Scope: scope}, nil
+	case *graphScope:
+		for k := range v.Scope {
+			scope[k] = v.Scope[k]
+		}
+		return &graphScope{Graph: v.Graph, Scope: scope}, nil
 	default:
 		return nil, fmt.Errorf("invalid type for extend: %T", v)
 	}

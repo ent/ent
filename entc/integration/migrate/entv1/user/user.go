@@ -8,8 +8,6 @@ package user
 
 import (
 	"fmt"
-
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/schema"
 )
 
 const (
@@ -76,11 +74,8 @@ var ForeignKeys = []string{
 }
 
 var (
-	fields = schema.User{}.Fields()
-	// descName is the schema descriptor for name field.
-	descName = fields[2].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
+	NameValidator func(string) error
 )
 
 // State defines the type for the state enum field.

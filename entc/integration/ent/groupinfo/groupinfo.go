@@ -6,8 +6,6 @@
 
 package groupinfo
 
-import "github.com/facebookincubator/ent/entc/integration/ent/schema"
-
 const (
 	// Label holds the string label denoting the groupinfo type in the database.
 	Label = "group_info"
@@ -38,9 +36,6 @@ var Columns = []string{
 }
 
 var (
-	fields = schema.GroupInfo{}.Fields()
-	// descMaxUsers is the schema descriptor for max_users field.
-	descMaxUsers = fields[1].Descriptor()
 	// DefaultMaxUsers holds the default value on creation for the max_users field.
-	DefaultMaxUsers = descMaxUsers.Default.(int)
+	DefaultMaxUsers int
 )

@@ -45,7 +45,7 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 //		IDType: &field.TypeInfo{Type: field.TypeInt},
 //	})
 //
-func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
+func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error) {
 	if cfg.Target == "" {
 		abs, err := filepath.Abs(schemaPath)
 		if err != nil {
@@ -67,6 +67,15 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
 		}
 		cfg.Storage = driver
 	}
+	undo, err := gen.PrepareEnv(cfg)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = undo()
+		}
+	}()
 	graph, err := LoadGraph(schemaPath, cfg)
 	if err != nil {
 		return err

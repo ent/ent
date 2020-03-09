@@ -10,6 +10,9 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent"
+	gen "github.com/facebookincubator/ent/entc/integration/hooks/ent"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
+
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -22,7 +25,7 @@ type Card struct {
 func (Card) Hooks() []ent.Hook {
 	return []ent.Hook{
 		func(next ent.Mutator) ent.Mutator {
-			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
 				fmt.Printf("Schema Hook\tOp: %s\tType: %s\tConcreteType: %T\n", m.Op(), m.Type(), m)
 				return next.Mutate(ctx, m)
 			})

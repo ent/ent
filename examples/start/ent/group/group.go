@@ -6,8 +6,6 @@
 
 package group
 
-import "github.com/facebookincubator/ent/examples/start/ent/schema"
-
 const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
@@ -40,9 +38,6 @@ var (
 )
 
 var (
-	fields = schema.Group{}.Fields()
-	// descName is the schema descriptor for name field.
-	descName = fields[0].Descriptor()
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
+	NameValidator func(string) error
 )

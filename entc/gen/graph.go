@@ -8,6 +8,8 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -44,8 +46,6 @@ type (
 		// Note that, additional templates are executed on the Graph object and
 		// the execution output is stored in a file derived by the template name.
 		Template *template.Template
-		// codegen state.
-		state
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -55,13 +55,6 @@ type (
 		Nodes []*Type
 		// Schemas holds the raw interfaces for the loaded schemas.
 		Schemas []*load.Schema
-	}
-	// state holds the codegen state for the graph.
-	state struct {
-		// noSchemaImport indicates that the generated type package should
-		// ignore importing the user's schema package. It's True if one of
-		// the user's schemas uses hooks and circular imports is possible.
-		noSchemaImport bool
 	}
 )
 
@@ -426,6 +419,34 @@ func (Config) ModuleInfo() (m debug.Module) {
 		m = info.Main
 	}
 	return
+}
+
+// PrepareEnv makes sure the generated directory (environment)
+// is suitable for loading the `ent` package (avoid cyclic imports).
+func PrepareEnv(c *Config) (undo func() error, err error) {
+	var (
+		nop  = func() error { return nil }
+		path = filepath.Join(c.Target, "runtime.go")
+	)
+	out, err := ioutil.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nop, nil
+		}
+		return nil, err
+	}
+	fi, err := parser.ParseFile(token.NewFileSet(), path, out, parser.ImportsOnly)
+	if err != nil {
+		return nil, err
+	}
+	// Targeted package doesn't import the schema.
+	if len(fi.Imports) == 0 {
+		return nop, nil
+	}
+	if err := ioutil.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+		return nil, err
+	}
+	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
 }
 
 // formatFiles runs "goimports" on given paths.

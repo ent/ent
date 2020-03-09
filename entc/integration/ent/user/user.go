@@ -8,9 +8,6 @@ package user
 
 import (
 	"fmt"
-
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -141,19 +138,10 @@ var (
 )
 
 var (
-	mixin       = schema.User{}.Mixin()
-	mixinFields = [...][]ent.Field{
-		mixin[0].Fields(),
-	}
-	fields = schema.User{}.Fields()
-	// descOptionalInt is the schema descriptor for optional_int field.
-	descOptionalInt = mixinFields[0][0].Descriptor()
 	// OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.
-	OptionalIntValidator = descOptionalInt.Validators[0].(func(int) error)
-	// descLast is the schema descriptor for last field.
-	descLast = fields[2].Descriptor()
+	OptionalIntValidator func(int) error
 	// DefaultLast holds the default value on creation for the last field.
-	DefaultLast = descLast.Default.(string)
+	DefaultLast string
 )
 
 // Role defines the type for the role enum field.

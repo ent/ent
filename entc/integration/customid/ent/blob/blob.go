@@ -7,7 +7,6 @@
 package blob
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -51,9 +50,6 @@ var (
 )
 
 var (
-	fields = schema.Blob{}.Fields()
-	// descUUID is the schema descriptor for uuid field.
-	descUUID = fields[1].Descriptor()
 	// DefaultUUID holds the default value on creation for the uuid field.
-	DefaultUUID = descUUID.Default.(func() uuid.UUID)
+	DefaultUUID func() uuid.UUID
 )
