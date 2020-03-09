@@ -9,15 +9,13 @@ package entschema
 import (
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/schema"
-
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
-
 func init() {
 	cardHooks := schema.Card{}.Hooks()
 	for i, h := range cardHooks {
