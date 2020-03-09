@@ -14,6 +14,86 @@ import (
 	"github.com/facebookincubator/ent"
 )
 
+// ErrSkip may be returned by read/write rules to indicate at runtime that
+// rule evaluation should continue to the next rule.
+var ErrSkip = errors.New("ent/privacy: skip rule")
+
+type (
+	// ReadPolicy combines multiple read rules into a single policy.
+	ReadPolicy []ReadRule
+
+	// ReadRule defines the interface deciding whether a read is allowed.
+	ReadRule interface {
+		EvalRead(context.Context, ent.Value) error
+	}
+)
+
+// EvalRead evaluates a load against a read policy.
+func (rules ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
+	for _, rule := range rules {
+		if err := rule.EvalRead(ctx, v); !errors.Is(err, ErrSkip) {
+			return err
+		}
+	}
+	return nil
+}
+
+// ReadRuleFunc type is an adapter to allow the use of
+// ordinary functions as read rules.
+type ReadRuleFunc func(context.Context, ent.Value) error
+
+// Eval calls f(ctx, v).
+func (f ReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
+	return f(ctx, v)
+}
+
+type (
+	// WritePolicy combines multiple write rules into a single policy.
+	WritePolicy []WriteRule
+
+	// WriteRule defines the interface deciding whether a write is allowed.
+	WriteRule interface {
+		EvalWrite(context.Context, ent.Mutation) error
+	}
+)
+
+// EvalWrite evaluates a mutation against a write policy.
+func (rules WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
+	for _, rule := range rules {
+		if err := rule.EvalWrite(ctx, m); !errors.Is(err, ErrSkip) {
+			return err
+		}
+	}
+	return nil
+}
+
+// WriteRuleFunc type is an adapter to allow the use of
+// ordinary functions as write rules.
+type WriteRuleFunc func(context.Context, ent.Mutation) error
+
+// Eval calls f(ctx, m).
+func (f WriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
+	return f(ctx, m)
+}
+
+// Policy groups ReadPolicy and WritePolicy.
+type Policy struct {
+	ReadPolicy
+	WritePolicy
+}
+
+// ReadRules appends a set read of rules to policy.
+func (p *Policy) ReadRules(rules ...ReadRule) *Policy {
+	p.ReadPolicy = append(p.ReadPolicy, rules...)
+	return p
+}
+
+// WriteRules appends a set read of rules to policy.
+func (p *Policy) WriteRules(rules ...WriteRule) *Policy {
+	p.WritePolicy = append(p.WritePolicy, rules...)
+	return p
+}
+
 // AlwaysAllowReadWrite returns a privacy policy allowing both reads and writes.
 func AlwaysAllowReadWrite() ent.Policy {
 	return alwaysAllowReadWrite{}
