@@ -70,10 +70,30 @@ var _ ent.Mutation = (*CardMutation)(nil)
 // newCardMutation creates new mutation for $n.Name.
 func newCardMutation(c config, op Op) *CardMutation {
 	return &CardMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeCard,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CardMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CardMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -522,10 +542,30 @@ var _ ent.Mutation = (*CommentMutation)(nil)
 // newCommentMutation creates new mutation for $n.Name.
 func newCommentMutation(c config, op Op) *CommentMutation {
 	return &CommentMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeComment,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CommentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CommentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -967,10 +1007,30 @@ var _ ent.Mutation = (*FieldTypeMutation)(nil)
 // newFieldTypeMutation creates new mutation for $n.Name.
 func newFieldTypeMutation(c config, op Op) *FieldTypeMutation {
 	return &FieldTypeMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeFieldType,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FieldTypeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FieldTypeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -3069,10 +3129,30 @@ var _ ent.Mutation = (*FileMutation)(nil)
 // newFileMutation creates new mutation for $n.Name.
 func newFileMutation(c config, op Op) *FileMutation {
 	return &FileMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeFile,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -3561,10 +3641,30 @@ var _ ent.Mutation = (*FileTypeMutation)(nil)
 // newFileTypeMutation creates new mutation for $n.Name.
 func newFileTypeMutation(c config, op Op) *FileTypeMutation {
 	return &FileTypeMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeFileType,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FileTypeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FileTypeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -3847,10 +3947,30 @@ var _ ent.Mutation = (*GroupMutation)(nil)
 // newGroupMutation creates new mutation for $n.Name.
 func newGroupMutation(c config, op Op) *GroupMutation {
 	return &GroupMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeGroup,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GroupMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GroupMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -4508,10 +4628,30 @@ var _ ent.Mutation = (*GroupInfoMutation)(nil)
 // newGroupInfoMutation creates new mutation for $n.Name.
 func newGroupInfoMutation(c config, op Op) *GroupInfoMutation {
 	return &GroupInfoMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeGroupInfo,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GroupInfoMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GroupInfoMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -4849,10 +4989,30 @@ var _ ent.Mutation = (*ItemMutation)(nil)
 // newItemMutation creates new mutation for $n.Name.
 func newItemMutation(c config, op Op) *ItemMutation {
 	return &ItemMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeItem,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ItemMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ItemMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -5030,10 +5190,30 @@ var _ ent.Mutation = (*NodeMutation)(nil)
 // newNodeMutation creates new mutation for $n.Name.
 func newNodeMutation(c config, op Op) *NodeMutation {
 	return &NodeMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeNode,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m NodeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m NodeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -5405,10 +5585,30 @@ var _ ent.Mutation = (*PetMutation)(nil)
 // newPetMutation creates new mutation for $n.Name.
 func newPetMutation(c config, op Op) *PetMutation {
 	return &PetMutation{
+		config:        c,
 		op:            op,
 		typ:           TypePet,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PetMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PetMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -5720,10 +5920,30 @@ var _ ent.Mutation = (*SpecMutation)(nil)
 // newSpecMutation creates new mutation for $n.Name.
 func newSpecMutation(c config, op Op) *SpecMutation {
 	return &SpecMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeSpec,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SpecMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SpecMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -5990,10 +6210,30 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // newUserMutation creates new mutation for $n.Name.
 func newUserMutation(c config, op Op) *UserMutation {
 	return &UserMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeUser,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UserMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UserMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id

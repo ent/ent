@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -29,9 +30,7 @@ type CardQuery struct {
 	unique     []string
 	predicates []predicate.Card
 	// eager-loading edges.
-	withFriends    *CardQuery
-	withBestFriend *CardQuery
-	withFKs        bool
+	withOwner *UserQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -60,25 +59,13 @@ func (cq *CardQuery) Order(o ...Order) *CardQuery {
 	return cq
 }
 
-// QueryFriends chains the current query on the friends edge.
-func (cq *CardQuery) QueryFriends() *CardQuery {
-	query := &CardQuery{config: cq.config}
+// QueryOwner chains the current query on the owner edge.
+func (cq *CardQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: cq.config}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(card.Table, card.FieldID, cq.sqlQuery()),
-		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, card.FriendsTable, card.FriendsPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
-	return query
-}
-
-// QueryBestFriend chains the current query on the best_friend edge.
-func (cq *CardQuery) QueryBestFriend() *CardQuery {
-	query := &CardQuery{config: cq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(card.Table, card.FieldID, cq.sqlQuery()),
-		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, card.BestFriendTable, card.BestFriendColumn),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, card.OwnerTable, card.OwnerPrimaryKey...),
 	)
 	query.sql = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 	return query
@@ -253,25 +240,14 @@ func (cq *CardQuery) Clone() *CardQuery {
 	}
 }
 
-//  WithFriends tells the query-builder to eager-loads the nodes that are connected to
-// the "friends" edge. The optional arguments used to configure the query builder of the edge.
-func (cq *CardQuery) WithFriends(opts ...func(*CardQuery)) *CardQuery {
-	query := &CardQuery{config: cq.config}
+//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
+// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
+	query := &UserQuery{config: cq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withFriends = query
-	return cq
-}
-
-//  WithBestFriend tells the query-builder to eager-loads the nodes that are connected to
-// the "best_friend" edge. The optional arguments used to configure the query builder of the edge.
-func (cq *CardQuery) WithBestFriend(opts ...func(*CardQuery)) *CardQuery {
-	query := &CardQuery{config: cq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	cq.withBestFriend = query
+	cq.withOwner = query
 	return cq
 }
 
@@ -281,12 +257,12 @@ func (cq *CardQuery) WithBestFriend(opts ...func(*CardQuery)) *CardQuery {
 // Example:
 //
 //	var v []struct {
-//		Boring time.Time `json:"boring,omitempty"`
+//		Number string `json:"number,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Card.Query().
-//		GroupBy(card.FieldBoring).
+//		GroupBy(card.FieldNumber).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -302,11 +278,11 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Boring time.Time `json:"boring,omitempty"`
+//		Number string `json:"number,omitempty"`
 //	}
 //
 //	client.Card.Query().
-//		Select(card.FieldBoring).
+//		Select(card.FieldNumber).
 //		Scan(ctx, &v)
 //
 func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
@@ -319,26 +295,15 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
 		nodes       = []*Card{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [2]bool{
-			cq.withFriends != nil,
-			cq.withBestFriend != nil,
+		loadedTypes = [1]bool{
+			cq.withOwner != nil,
 		}
 	)
-	if cq.withBestFriend != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
-	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
-		if withFKs {
-			values = append(values, node.fkValues()...)
-		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -356,7 +321,7 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		return nodes, nil
 	}
 
-	if query := cq.withFriends; query != nil {
+	if query := cq.withOwner; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*Card, len(nodes))
 		for _, node := range nodes {
@@ -369,12 +334,12 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   card.FriendsTable,
-				Columns: card.FriendsPrimaryKey,
+				Inverse: true,
+				Table:   card.OwnerTable,
+				Columns: card.OwnerPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(card.FriendsPrimaryKey[0], fks...))
+				s.Where(sql.InValues(card.OwnerPrimaryKey[1], fks...))
 			},
 
 			ScanValues: func() [2]interface{} {
@@ -401,9 +366,9 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "friends": %v`, err)
+			return nil, fmt.Errorf(`query edges "owner": %v`, err)
 		}
-		query.Where(card.IDIn(edgeids...))
+		query.Where(user.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -411,35 +376,10 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "owner" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Friends = append(nodes[i].Edges.Friends, n)
-			}
-		}
-	}
-
-	if query := cq.withBestFriend; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Card)
-		for i := range nodes {
-			if fk := nodes[i].card_best_friend; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(card.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "card_best_friend" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.BestFriend = n
+				nodes[i].Edges.Owner = append(nodes[i].Edges.Owner, n)
 			}
 		}
 	}

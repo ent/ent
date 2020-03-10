@@ -20,66 +20,42 @@ type Card struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Boring holds the value of the "boring" field.
-	Boring time.Time `json:"boring,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges            CardEdges `json:"edges"`
-	card_best_friend *int
+	Edges CardEdges `json:"edges"`
 }
 
 // CardEdges holds the relations/edges for other nodes in the graph.
 type CardEdges struct {
-	// Friends holds the value of the friends edge.
-	Friends []*Card
-	// BestFriend holds the value of the best_friend edge.
-	BestFriend *Card
+	// Owner holds the value of the owner edge.
+	Owner []*User
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
-// FriendsOrErr returns the Friends value or an error if the edge
+// OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading.
-func (e CardEdges) FriendsOrErr() ([]*Card, error) {
+func (e CardEdges) OwnerOrErr() ([]*User, error) {
 	if e.loadedTypes[0] {
-		return e.Friends, nil
+		return e.Owner, nil
 	}
-	return nil, &NotLoadedError{edge: "friends"}
-}
-
-// BestFriendOrErr returns the BestFriend value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CardEdges) BestFriendOrErr() (*Card, error) {
-	if e.loadedTypes[1] {
-		if e.BestFriend == nil {
-			// The edge best_friend was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: card.Label}
-		}
-		return e.BestFriend, nil
-	}
-	return nil, &NotLoadedError{edge: "best_friend"}
+	return nil, &NotLoadedError{edge: "owner"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Card) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
-		&sql.NullTime{},   // boring
 		&sql.NullString{}, // number
 		&sql.NullString{}, // name
-	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Card) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // card_best_friend
+		&sql.NullTime{},   // created_at
 	}
 }
 
@@ -95,41 +71,27 @@ func (c *Card) assignValues(values ...interface{}) error {
 	}
 	c.ID = int(value.Int64)
 	values = values[1:]
-	if value, ok := values[0].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field boring", values[0])
-	} else if value.Valid {
-		c.Boring = value.Time
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field number", values[1])
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field number", values[0])
 	} else if value.Valid {
 		c.Number = value.String
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[2])
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[1])
 	} else if value.Valid {
 		c.Name = value.String
 	}
-	values = values[3:]
-	if len(values) == len(card.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field card_best_friend", value)
-		} else if value.Valid {
-			c.card_best_friend = new(int)
-			*c.card_best_friend = int(value.Int64)
-		}
+	if value, ok := values[2].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field created_at", values[2])
+	} else if value.Valid {
+		c.CreatedAt = value.Time
 	}
 	return nil
 }
 
-// QueryFriends queries the friends edge of the Card.
-func (c *Card) QueryFriends() *CardQuery {
-	return (&CardClient{config: c.config}).QueryFriends(c)
-}
-
-// QueryBestFriend queries the best_friend edge of the Card.
-func (c *Card) QueryBestFriend() *CardQuery {
-	return (&CardClient{config: c.config}).QueryBestFriend(c)
+// QueryOwner queries the owner edge of the Card.
+func (c *Card) QueryOwner() *UserQuery {
+	return (&CardClient{config: c.config}).QueryOwner(c)
 }
 
 // Update returns a builder for updating this Card.
@@ -155,12 +117,12 @@ func (c *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", boring=")
-	builder.WriteString(c.Boring.Format(time.ANSIC))
 	builder.WriteString(", number=")
 	builder.WriteString(c.Number)
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
+	builder.WriteString(", created_at=")
+	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/migrate"
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -27,17 +28,23 @@ type Client struct {
 	Schema *migrate.Schema
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 }
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config: c,
-		Schema: migrate.NewSchema(c.driver),
-		Card:   NewCardClient(c),
-	}
+	cfg := config{log: log.Println}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	c.Schema = migrate.NewSchema(c.driver)
+	c.Card = NewCardClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 // Open opens a connection to the database specified by the driver name and a
@@ -69,6 +76,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		config: cfg,
 		Card:   NewCardClient(cfg),
+		User:   NewUserClient(cfg),
 	}, nil
 }
 
@@ -84,11 +92,9 @@ func (c *Client) Debug() *Client {
 		return c
 	}
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
-		Card:   NewCardClient(cfg),
-	}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.
@@ -100,6 +106,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Card.Use(hooks...)
+	c.User.Use(hooks...)
 }
 
 // CardClient is a client for the Card schema.
@@ -184,30 +191,140 @@ func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 	return ca
 }
 
-// QueryFriends queries the friends edge of a Card.
-func (c *CardClient) QueryFriends(ca *Card) *CardQuery {
-	query := &CardQuery{config: c.config}
+// QueryOwner queries the owner edge of a Card.
+func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
+	query := &UserQuery{config: c.config}
 	id := ca.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(card.Table, card.FieldID, id),
-		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, card.FriendsTable, card.FriendsPrimaryKey...),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, card.OwnerTable, card.OwnerPrimaryKey...),
 	)
 	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 
 	return query
 }
 
-// QueryBestFriend queries the best_friend edge of a Card.
-func (c *CardClient) QueryBestFriend(ca *Card) *CardQuery {
+// UserClient is a client for the User schema.
+type UserClient struct {
+	config
+}
+
+// NewUserClient returns a client for the User from the given config.
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+}
+
+// Create returns a create builder for User.
+func (c *UserClient) Create() *UserCreate {
+	hooks := c.hooks
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: hooks, mutation: mutation}
+}
+
+// Update returns an update builder for User.
+func (c *UserClient) Update() *UserUpdate {
+	hooks := c.hooks
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: hooks, mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
+	return c.UpdateOneID(u.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+	hooks := c.hooks
+	mutation := newUserMutation(c.config, OpUpdateOne)
+	mutation.id = &id
+	return &UserUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
+}
+
+// Delete returns a delete builder for User.
+func (c *UserClient) Delete() *UserDelete {
+	hooks := c.hooks
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: hooks, mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
+	return c.DeleteOneID(u.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
+}
+
+// Create returns a query builder for User.
+func (c *UserClient) Query() *UserQuery {
+	return &UserQuery{config: c.config}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	u, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
+
+// QueryCards queries the cards edge of a User.
+func (c *UserClient) QueryCards(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
-	id := ca.ID
+	id := u.ID
 	step := sqlgraph.NewStep(
-		sqlgraph.From(card.Table, card.FieldID, id),
+		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, card.BestFriendTable, card.BestFriendColumn),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.CardsTable, user.CardsPrimaryKey...),
 	)
-	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryFriends queries the friends edge of a User.
+func (c *UserClient) QueryFriends(u *User) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryBestFriend queries the best_friend edge of a User.
+func (c *UserClient) QueryBestFriend(u *User) *UserQuery {
+	query := &UserQuery{config: c.config}
+	id := u.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(user.Table, user.FieldID, id),
+		sqlgraph.To(user.Table, user.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, user.BestFriendTable, user.BestFriendColumn),
+	)
+	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
 }

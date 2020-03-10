@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -30,20 +30,6 @@ type CardUpdate struct {
 // Where adds a new predicate for the builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.predicates = append(cu.predicates, ps...)
-	return cu
-}
-
-// SetBoring sets the boring field.
-func (cu *CardUpdate) SetBoring(t time.Time) *CardUpdate {
-	cu.mutation.SetBoring(t)
-	return cu
-}
-
-// SetNillableBoring sets the boring field if the given value is not nil.
-func (cu *CardUpdate) SetNillableBoring(t *time.Time) *CardUpdate {
-	if t != nil {
-		cu.SetBoring(*t)
-	}
 	return cu
 }
 
@@ -67,66 +53,52 @@ func (cu *CardUpdate) ClearName() *CardUpdate {
 	return cu
 }
 
-// AddFriendIDs adds the friends edge to Card by ids.
-func (cu *CardUpdate) AddFriendIDs(ids ...int) *CardUpdate {
-	cu.mutation.AddFriendIDs(ids...)
+// SetCreatedAt sets the created_at field.
+func (cu *CardUpdate) SetCreatedAt(t time.Time) *CardUpdate {
+	cu.mutation.SetCreatedAt(t)
 	return cu
 }
 
-// AddFriends adds the friends edges to Card.
-func (cu *CardUpdate) AddFriends(c ...*Card) *CardUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return cu.AddFriendIDs(ids...)
-}
-
-// SetBestFriendID sets the best_friend edge to Card by id.
-func (cu *CardUpdate) SetBestFriendID(id int) *CardUpdate {
-	cu.mutation.SetBestFriendID(id)
-	return cu
-}
-
-// SetNillableBestFriendID sets the best_friend edge to Card by id if the given value is not nil.
-func (cu *CardUpdate) SetNillableBestFriendID(id *int) *CardUpdate {
-	if id != nil {
-		cu = cu.SetBestFriendID(*id)
+// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+func (cu *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
+	if t != nil {
+		cu.SetCreatedAt(*t)
 	}
 	return cu
 }
 
-// SetBestFriend sets the best_friend edge to Card.
-func (cu *CardUpdate) SetBestFriend(c *Card) *CardUpdate {
-	return cu.SetBestFriendID(c.ID)
-}
-
-// RemoveFriendIDs removes the friends edge to Card by ids.
-func (cu *CardUpdate) RemoveFriendIDs(ids ...int) *CardUpdate {
-	cu.mutation.RemoveFriendIDs(ids...)
+// AddOwnerIDs adds the owner edge to User by ids.
+func (cu *CardUpdate) AddOwnerIDs(ids ...int) *CardUpdate {
+	cu.mutation.AddOwnerIDs(ids...)
 	return cu
 }
 
-// RemoveFriends removes friends edges to Card.
-func (cu *CardUpdate) RemoveFriends(c ...*Card) *CardUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// AddOwner adds the owner edges to User.
+func (cu *CardUpdate) AddOwner(u ...*User) *CardUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return cu.RemoveFriendIDs(ids...)
+	return cu.AddOwnerIDs(ids...)
 }
 
-// ClearBestFriend clears the best_friend edge to Card.
-func (cu *CardUpdate) ClearBestFriend() *CardUpdate {
-	cu.mutation.ClearBestFriend()
+// RemoveOwnerIDs removes the owner edge to User by ids.
+func (cu *CardUpdate) RemoveOwnerIDs(ids ...int) *CardUpdate {
+	cu.mutation.RemoveOwnerIDs(ids...)
 	return cu
+}
+
+// RemoveOwner removes owner edges to User.
+func (cu *CardUpdate) RemoveOwner(u ...*User) *CardUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cu.RemoveOwnerIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-	if len(cu.mutation.BestFriendIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"best_friend\"")
-	}
 	var (
 		err      error
 		affected int
@@ -193,13 +165,6 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.Boring(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldBoring,
-		})
-	}
 	if value, ok := cu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -213,17 +178,24 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: card.FieldName,
 		})
 	}
-	if nodes := cu.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
+	if value, ok := cu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: card.FieldCreatedAt,
+		})
+	}
+	if nodes := cu.mutation.RemovedOwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   card.FriendsTable,
-			Columns: card.FriendsPrimaryKey,
-			Bidi:    true,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: card.OwnerPrimaryKey,
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: card.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -232,52 +204,17 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   card.FriendsTable,
-			Columns: card.FriendsPrimaryKey,
-			Bidi:    true,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: card.OwnerPrimaryKey,
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: card.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if cu.mutation.BestFriendCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   card.BestFriendTable,
-			Columns: []string{card.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: card.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.BestFriendIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   card.BestFriendTable,
-			Columns: []string{card.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: card.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -304,20 +241,6 @@ type CardUpdateOne struct {
 	mutation *CardMutation
 }
 
-// SetBoring sets the boring field.
-func (cuo *CardUpdateOne) SetBoring(t time.Time) *CardUpdateOne {
-	cuo.mutation.SetBoring(t)
-	return cuo
-}
-
-// SetNillableBoring sets the boring field if the given value is not nil.
-func (cuo *CardUpdateOne) SetNillableBoring(t *time.Time) *CardUpdateOne {
-	if t != nil {
-		cuo.SetBoring(*t)
-	}
-	return cuo
-}
-
 // SetName sets the name field.
 func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
 	cuo.mutation.SetName(s)
@@ -338,66 +261,52 @@ func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
 	return cuo
 }
 
-// AddFriendIDs adds the friends edge to Card by ids.
-func (cuo *CardUpdateOne) AddFriendIDs(ids ...int) *CardUpdateOne {
-	cuo.mutation.AddFriendIDs(ids...)
+// SetCreatedAt sets the created_at field.
+func (cuo *CardUpdateOne) SetCreatedAt(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetCreatedAt(t)
 	return cuo
 }
 
-// AddFriends adds the friends edges to Card.
-func (cuo *CardUpdateOne) AddFriends(c ...*Card) *CardUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return cuo.AddFriendIDs(ids...)
-}
-
-// SetBestFriendID sets the best_friend edge to Card by id.
-func (cuo *CardUpdateOne) SetBestFriendID(id int) *CardUpdateOne {
-	cuo.mutation.SetBestFriendID(id)
-	return cuo
-}
-
-// SetNillableBestFriendID sets the best_friend edge to Card by id if the given value is not nil.
-func (cuo *CardUpdateOne) SetNillableBestFriendID(id *int) *CardUpdateOne {
-	if id != nil {
-		cuo = cuo.SetBestFriendID(*id)
+// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
+	if t != nil {
+		cuo.SetCreatedAt(*t)
 	}
 	return cuo
 }
 
-// SetBestFriend sets the best_friend edge to Card.
-func (cuo *CardUpdateOne) SetBestFriend(c *Card) *CardUpdateOne {
-	return cuo.SetBestFriendID(c.ID)
-}
-
-// RemoveFriendIDs removes the friends edge to Card by ids.
-func (cuo *CardUpdateOne) RemoveFriendIDs(ids ...int) *CardUpdateOne {
-	cuo.mutation.RemoveFriendIDs(ids...)
+// AddOwnerIDs adds the owner edge to User by ids.
+func (cuo *CardUpdateOne) AddOwnerIDs(ids ...int) *CardUpdateOne {
+	cuo.mutation.AddOwnerIDs(ids...)
 	return cuo
 }
 
-// RemoveFriends removes friends edges to Card.
-func (cuo *CardUpdateOne) RemoveFriends(c ...*Card) *CardUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// AddOwner adds the owner edges to User.
+func (cuo *CardUpdateOne) AddOwner(u ...*User) *CardUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return cuo.RemoveFriendIDs(ids...)
+	return cuo.AddOwnerIDs(ids...)
 }
 
-// ClearBestFriend clears the best_friend edge to Card.
-func (cuo *CardUpdateOne) ClearBestFriend() *CardUpdateOne {
-	cuo.mutation.ClearBestFriend()
+// RemoveOwnerIDs removes the owner edge to User by ids.
+func (cuo *CardUpdateOne) RemoveOwnerIDs(ids ...int) *CardUpdateOne {
+	cuo.mutation.RemoveOwnerIDs(ids...)
 	return cuo
+}
+
+// RemoveOwner removes owner edges to User.
+func (cuo *CardUpdateOne) RemoveOwner(u ...*User) *CardUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cuo.RemoveOwnerIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	if len(cuo.mutation.BestFriendIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"best_friend\"")
-	}
 	var (
 		err  error
 		node *Card
@@ -462,13 +371,6 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		return nil, fmt.Errorf("missing Card.ID for update")
 	}
 	_spec.Node.ID.Value = id
-	if value, ok := cuo.mutation.Boring(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldBoring,
-		})
-	}
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -482,17 +384,24 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 			Column: card.FieldName,
 		})
 	}
-	if nodes := cuo.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
+	if value, ok := cuo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: card.FieldCreatedAt,
+		})
+	}
+	if nodes := cuo.mutation.RemovedOwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   card.FriendsTable,
-			Columns: card.FriendsPrimaryKey,
-			Bidi:    true,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: card.OwnerPrimaryKey,
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: card.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -501,52 +410,17 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   card.FriendsTable,
-			Columns: card.FriendsPrimaryKey,
-			Bidi:    true,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: card.OwnerPrimaryKey,
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: card.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if cuo.mutation.BestFriendCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   card.BestFriendTable,
-			Columns: []string{card.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: card.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.BestFriendIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   card.BestFriendTable,
-			Columns: []string{card.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: card.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}

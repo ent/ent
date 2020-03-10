@@ -34,14 +34,17 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config: c,
-		Schema: migrate.NewSchema(c.driver),
-		City:   NewCityClient(c),
-		Street: NewStreetClient(c),
-	}
+	cfg := config{log: log.Println}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	c.Schema = migrate.NewSchema(c.driver)
+	c.City = NewCityClient(c.config)
+	c.Street = NewStreetClient(c.config)
 }
 
 // Open opens a connection to the database specified by the driver name and a
@@ -89,12 +92,9 @@ func (c *Client) Debug() *Client {
 		return c
 	}
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
-		City:   NewCityClient(cfg),
-		Street: NewStreetClient(cfg),
-	}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.

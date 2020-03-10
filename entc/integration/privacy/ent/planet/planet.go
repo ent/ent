@@ -40,11 +40,11 @@ var (
 	NeighborsPrimaryKey = []string{"planet_id", "neighbor_id"}
 )
 
-// Note that the variables below are initialized by the schema package
-// on the initialization of the application. Therefore, the schema package
-// should be imported in the main as follows:
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
 //
-//	import _ "github.com/facebookincubator/ent/entc/integration/privacy/ent/schema"
+//	import _ "github.com/facebookincubator/ent/entc/integration/privacy/ent/runtime"
 //
 var (
 	Hooks [2]ent.Hook

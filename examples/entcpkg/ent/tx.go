@@ -10,7 +10,6 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/examples/entcpkg/ent/migrate"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -32,11 +31,13 @@ func (tx *Tx) Rollback() error {
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config: tx.config,
-		Schema: migrate.NewSchema(tx.driver),
-		User:   NewUserClient(tx.config),
-	}
+	client := &Client{config: tx.config}
+	client.init()
+	return client
+}
+
+func (tx *Tx) init() {
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

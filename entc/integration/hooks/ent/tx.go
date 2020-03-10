@@ -10,7 +10,6 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/migrate"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -18,6 +17,8 @@ type Tx struct {
 	config
 	// Card is the client for interacting with the Card builders.
 	Card *CardClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 }
 
 // Commit commits the transaction.
@@ -32,11 +33,14 @@ func (tx *Tx) Rollback() error {
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config: tx.config,
-		Schema: migrate.NewSchema(tx.driver),
-		Card:   NewCardClient(tx.config),
-	}
+	client := &Client{config: tx.config}
+	client.init()
+	return client
+}
+
+func (tx *Tx) init() {
+	tx.Card = NewCardClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

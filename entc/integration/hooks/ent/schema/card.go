@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+
 	"github.com/facebookincubator/ent"
 	gen "github.com/facebookincubator/ent/entc/integration/hooks/ent"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
@@ -25,8 +27,23 @@ type Card struct {
 func (Card) Hooks() []ent.Hook {
 	return []ent.Hook{
 		func(next ent.Mutator) ent.Mutator {
+			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+				num, ok := m.Field(card.FieldNumber)
+				if !ok {
+					return nil, fmt.Errorf("missing card number value")
+				}
+				// Validator in hooks.
+				if len(num.(string)) < 4 {
+					return nil, fmt.Errorf("card number is too short")
+				}
+				return next.Mutate(ctx, m)
+			})
+		},
+		func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
-				fmt.Printf("Schema Hook\tOp: %s\tType: %s\tConcreteType: %T\n", m.Op(), m.Type(), m)
+				if _, ok := m.Name(); !ok {
+					m.SetName("unknown")
+				}
 				return next.Mutate(ctx, m)
 			})
 		},
@@ -35,22 +52,21 @@ func (Card) Hooks() []ent.Hook {
 
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("boring").
-			Default(time.Now),
 		field.String("number").
 			Immutable().
-			Default("111").
+			Default("unknown").
 			NotEmpty(),
 		field.String("name").
 			Optional().
 			Comment("Exact name written on card"),
+		field.Time("created_at").
+			Default(time.Now),
 	}
 }
 
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("friends", Card.Type),
-		edge.To("best_friend", Card.Type).
-			Unique(),
+		edge.From("owner", User.Type).
+			Ref("cards"),
 	}
 }

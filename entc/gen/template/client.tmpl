@@ -39,17 +39,20 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config: c,
-		{{- if $.SupportMigrate }}
-			Schema: migrate.NewSchema(c.driver),
-		{{- end }}
-		{{ range $_, $n := $.Nodes -}}
-			{{ $n.Name }}: New{{ $n.Name }}Client(c),
-		{{ end -}}
-	}
+	cfg := config{log: log.Println}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	{{- if $.SupportMigrate }}
+		c.Schema = migrate.NewSchema(c.driver)
+	{{- end }}
+	{{- range $_, $n := $.Nodes }}
+    	c.{{ $n.Name }} =  New{{ $n.Name }}Client(c.config)
+	{{- end }}
 }
 
 // Open opens a connection to the database specified by the driver name and a
@@ -95,15 +98,9 @@ func (c *Client) Debug() *Client {
 		return c
 	}
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		{{- if $.SupportMigrate }}
-			Schema: migrate.NewSchema(cfg.driver),
-		{{- end }}
-		{{ range $_, $n := $.Nodes -}}
-			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
-		{{ end -}}
-	}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.

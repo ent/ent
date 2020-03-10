@@ -13,8 +13,11 @@ import (
 	"github.com/facebookincubator/ent/examples/o2orecur/ent"
 )
 
+// The NodeFunc type is an adapter to allow the use of ordinary
+// function as Node mutator.
 type NodeFunc func(context.Context, *ent.NodeMutation) (ent.Value, error)
 
+// Mutate calls f(ctx, m).
 func (f NodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 	mv, ok := m.(*ent.NodeMutation)
 	if !ok {
@@ -23,11 +26,34 @@ func (f NodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
+// On executes the given hook only of the given operation.
+//
+//	hook.On(Log, ent.Delete|ent.Create)
+//
 func On(hk ent.Hook, op ent.Op) ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			if m.Op().Is(op) {
 				return hk(next).Mutate(ctx, m)
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+}
+
+// Reject returns a hook that rejects all operations that match op.
+//
+//	func (T) Hooks() []ent.Hook {
+//		return []ent.Hook{
+//			Reject(ent.Delete|ent.Update),
+//		}
+//	}
+//
+func Reject(op ent.Op) ent.Hook {
+	return func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if m.Op().Is(op) {
+				return nil, fmt.Errorf("%s operation is not allowed", m.Op())
 			}
 			return next.Mutate(ctx, m)
 		})

@@ -8,12 +8,12 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -22,20 +22,6 @@ type CardCreate struct {
 	config
 	mutation *CardMutation
 	hooks    []Hook
-}
-
-// SetBoring sets the boring field.
-func (cc *CardCreate) SetBoring(t time.Time) *CardCreate {
-	cc.mutation.SetBoring(t)
-	return cc
-}
-
-// SetNillableBoring sets the boring field if the given value is not nil.
-func (cc *CardCreate) SetNillableBoring(t *time.Time) *CardCreate {
-	if t != nil {
-		cc.SetBoring(*t)
-	}
-	return cc
 }
 
 // SetNumber sets the number field.
@@ -66,46 +52,37 @@ func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
 	return cc
 }
 
-// AddFriendIDs adds the friends edge to Card by ids.
-func (cc *CardCreate) AddFriendIDs(ids ...int) *CardCreate {
-	cc.mutation.AddFriendIDs(ids...)
+// SetCreatedAt sets the created_at field.
+func (cc *CardCreate) SetCreatedAt(t time.Time) *CardCreate {
+	cc.mutation.SetCreatedAt(t)
 	return cc
 }
 
-// AddFriends adds the friends edges to Card.
-func (cc *CardCreate) AddFriends(c ...*Card) *CardCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return cc.AddFriendIDs(ids...)
-}
-
-// SetBestFriendID sets the best_friend edge to Card by id.
-func (cc *CardCreate) SetBestFriendID(id int) *CardCreate {
-	cc.mutation.SetBestFriendID(id)
-	return cc
-}
-
-// SetNillableBestFriendID sets the best_friend edge to Card by id if the given value is not nil.
-func (cc *CardCreate) SetNillableBestFriendID(id *int) *CardCreate {
-	if id != nil {
-		cc = cc.SetBestFriendID(*id)
+// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
+	if t != nil {
+		cc.SetCreatedAt(*t)
 	}
 	return cc
 }
 
-// SetBestFriend sets the best_friend edge to Card.
-func (cc *CardCreate) SetBestFriend(c *Card) *CardCreate {
-	return cc.SetBestFriendID(c.ID)
+// AddOwnerIDs adds the owner edge to User by ids.
+func (cc *CardCreate) AddOwnerIDs(ids ...int) *CardCreate {
+	cc.mutation.AddOwnerIDs(ids...)
+	return cc
+}
+
+// AddOwner adds the owner edges to User.
+func (cc *CardCreate) AddOwner(u ...*User) *CardCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return cc.AddOwnerIDs(ids...)
 }
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if _, ok := cc.mutation.Boring(); !ok {
-		v := card.DefaultBoring()
-		cc.mutation.SetBoring(v)
-	}
 	if _, ok := cc.mutation.Number(); !ok {
 		v := card.DefaultNumber
 		cc.mutation.SetNumber(v)
@@ -115,8 +92,9 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
 		}
 	}
-	if len(cc.mutation.BestFriendIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"best_friend\"")
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		v := card.DefaultCreatedAt()
+		cc.mutation.SetCreatedAt(v)
 	}
 	var (
 		err  error
@@ -164,14 +142,6 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 			},
 		}
 	)
-	if value, ok := cc.mutation.Boring(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: card.FieldBoring,
-		})
-		c.Boring = value
-	}
 	if value, ok := cc.mutation.Number(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -188,36 +158,25 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		})
 		c.Name = value
 	}
-	if nodes := cc.mutation.FriendsIDs(); len(nodes) > 0 {
+	if value, ok := cc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: card.FieldCreatedAt,
+		})
+		c.CreatedAt = value
+	}
+	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   card.FriendsTable,
-			Columns: card.FriendsPrimaryKey,
-			Bidi:    true,
+			Inverse: true,
+			Table:   card.OwnerTable,
+			Columns: card.OwnerPrimaryKey,
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: card.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := cc.mutation.BestFriendIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   card.BestFriendTable,
-			Columns: []string{card.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: card.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}

@@ -61,10 +61,30 @@ var _ ent.Mutation = (*{{ $mutation }})(nil)
 // new{{ $mutation }} creates new mutation for $n.Name.
 func new{{ $mutation }}(c config, op Op) *{{ $mutation }} {
 	return &{{ $mutation }}{
+		config:        c,
 		op:            op,
 		typ:           Type{{ $n.Name }},
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m {{ $mutation }}) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m {{ $mutation }}) Tx() (*Tx, error) {
+	if 	_, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("{{ $pkg }}: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 {{- if $n.ID.UserDefined }}

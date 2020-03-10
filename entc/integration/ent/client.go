@@ -64,24 +64,27 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config:    c,
-		Schema:    migrate.NewSchema(c.driver),
-		Card:      NewCardClient(c),
-		Comment:   NewCommentClient(c),
-		FieldType: NewFieldTypeClient(c),
-		File:      NewFileClient(c),
-		FileType:  NewFileTypeClient(c),
-		Group:     NewGroupClient(c),
-		GroupInfo: NewGroupInfoClient(c),
-		Item:      NewItemClient(c),
-		Node:      NewNodeClient(c),
-		Pet:       NewPetClient(c),
-		Spec:      NewSpecClient(c),
-		User:      NewUserClient(c),
-	}
+	cfg := config{log: log.Println}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	c.Schema = migrate.NewSchema(c.driver)
+	c.Card = NewCardClient(c.config)
+	c.Comment = NewCommentClient(c.config)
+	c.FieldType = NewFieldTypeClient(c.config)
+	c.File = NewFileClient(c.config)
+	c.FileType = NewFileTypeClient(c.config)
+	c.Group = NewGroupClient(c.config)
+	c.GroupInfo = NewGroupInfoClient(c.config)
+	c.Item = NewItemClient(c.config)
+	c.Node = NewNodeClient(c.config)
+	c.Pet = NewPetClient(c.config)
+	c.Spec = NewSpecClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 // Open opens a connection to the database specified by the driver name and a
@@ -139,22 +142,9 @@ func (c *Client) Debug() *Client {
 		return c
 	}
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config:    cfg,
-		Schema:    migrate.NewSchema(cfg.driver),
-		Card:      NewCardClient(cfg),
-		Comment:   NewCommentClient(cfg),
-		FieldType: NewFieldTypeClient(cfg),
-		File:      NewFileClient(cfg),
-		FileType:  NewFileTypeClient(cfg),
-		Group:     NewGroupClient(cfg),
-		GroupInfo: NewGroupInfoClient(cfg),
-		Item:      NewItemClient(cfg),
-		Node:      NewNodeClient(cfg),
-		Pet:       NewPetClient(cfg),
-		Spec:      NewSpecClient(cfg),
-		User:      NewUserClient(cfg),
-	}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.

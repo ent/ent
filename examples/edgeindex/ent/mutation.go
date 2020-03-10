@@ -45,10 +45,30 @@ var _ ent.Mutation = (*CityMutation)(nil)
 // newCityMutation creates new mutation for $n.Name.
 func newCityMutation(c config, op Op) *CityMutation {
 	return &CityMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeCity,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CityMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CityMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -320,10 +340,30 @@ var _ ent.Mutation = (*StreetMutation)(nil)
 // newStreetMutation creates new mutation for $n.Name.
 func newStreetMutation(c config, op Op) *StreetMutation {
 	return &StreetMutation{
+		config:        c,
 		op:            op,
 		typ:           TypeStreet,
 		clearedFields: make(map[string]bool),
 	}
+}
+
+// Client returns an `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StreetMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StreetMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
 }
 
 // ID returns the id value in the mutation. Note that, the id

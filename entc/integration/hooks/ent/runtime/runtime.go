@@ -22,16 +22,16 @@ func init() {
 		card.Hooks[i] = h
 	}
 	cardFields := schema.Card{}.Fields()
-	// cardDescBoring is the schema descriptor for boring field.
-	cardDescBoring := cardFields[0].Descriptor()
-	// card.DefaultBoring holds the default value on creation for the boring field.
-	card.DefaultBoring = cardDescBoring.Default.(func() time.Time)
 	// cardDescNumber is the schema descriptor for number field.
-	cardDescNumber := cardFields[1].Descriptor()
+	cardDescNumber := cardFields[0].Descriptor()
 	// card.DefaultNumber holds the default value on creation for the number field.
 	card.DefaultNumber = cardDescNumber.Default.(string)
 	// card.NumberValidator is a validator for the "number" field. It is called by the builders before save.
 	card.NumberValidator = cardDescNumber.Validators[0].(func(string) error)
+	// cardDescCreatedAt is the schema descriptor for created_at field.
+	cardDescCreatedAt := cardFields[2].Descriptor()
+	// card.DefaultCreatedAt holds the default value on creation for the created_at field.
+	card.DefaultCreatedAt = cardDescCreatedAt.Default.(func() time.Time)
 }
 
 const (

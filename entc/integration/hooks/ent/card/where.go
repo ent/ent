@@ -97,13 +97,6 @@ func IDLTE(id int) predicate.Card {
 	})
 }
 
-// Boring applies equality check predicate on the "boring" field. It's identical to BoringEQ.
-func Boring(v time.Time) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBoring), v))
-	})
-}
-
 // Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
 func Number(v string) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
@@ -118,79 +111,10 @@ func Name(v string) predicate.Card {
 	})
 }
 
-// BoringEQ applies the EQ predicate on the "boring" field.
-func BoringEQ(v time.Time) predicate.Card {
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBoring), v))
-	})
-}
-
-// BoringNEQ applies the NEQ predicate on the "boring" field.
-func BoringNEQ(v time.Time) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBoring), v))
-	})
-}
-
-// BoringIn applies the In predicate on the "boring" field.
-func BoringIn(vs ...time.Time) predicate.Card {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldBoring), v...))
-	})
-}
-
-// BoringNotIn applies the NotIn predicate on the "boring" field.
-func BoringNotIn(vs ...time.Time) predicate.Card {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Card(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldBoring), v...))
-	})
-}
-
-// BoringGT applies the GT predicate on the "boring" field.
-func BoringGT(v time.Time) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBoring), v))
-	})
-}
-
-// BoringGTE applies the GTE predicate on the "boring" field.
-func BoringGTE(v time.Time) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBoring), v))
-	})
-}
-
-// BoringLT applies the LT predicate on the "boring" field.
-func BoringLT(v time.Time) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBoring), v))
-	})
-}
-
-// BoringLTE applies the LTE predicate on the "boring" field.
-func BoringLTE(v time.Time) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBoring), v))
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
 	})
 }
 
@@ -430,53 +354,101 @@ func NameContainsFold(v string) predicate.Card {
 	})
 }
 
-// HasFriends applies the HasEdge predicate on the "friends" edge.
-func HasFriends() predicate.Card {
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasOwner applies the HasEdge predicate on the "owner" edge.
+func HasOwner() predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FriendsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
+			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, OwnerTable, OwnerPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
-func HasFriendsWith(preds ...predicate.Card) predicate.Card {
+// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
+func HasOwnerWith(preds ...predicate.User) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasBestFriend applies the HasEdge predicate on the "best_friend" edge.
-func HasBestFriend() predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(BestFriendTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasBestFriendWith applies the HasEdge predicate on the "best_friend" edge with a given conditions (other predicates).
-func HasBestFriendWith(preds ...predicate.Card) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
+			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, OwnerTable, OwnerPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

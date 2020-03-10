@@ -36,15 +36,15 @@ func (tx *Tx) Rollback() error {
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config: tx.config,
-		{{- if $.SupportMigrate }}
-			Schema: migrate.NewSchema(tx.driver),
-		{{- end }}
-		{{ range $_, $n := $.Nodes -}}
-			{{ $n.Name }}: New{{ $n.Name }}Client(tx.config),
-		{{ end -}}
-	}
+	client := &Client{config: tx.config}
+	client.init()
+	return client
+}
+
+func (tx *Tx) init() {
+	{{ range $_, $n := $.Nodes -}}
+    	tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
+	{{ end -}}
 }
 
 {{/* first node for doc example */}}
