@@ -4,9 +4,7 @@
 
 package graphson
 
-import (
-	"github.com/json-iterator/go"
-)
+import jsoniter "github.com/json-iterator/go"
 
 // DecoratorOfStructField decorates a struct field value encoder.
 func (encodeExtension) DecoratorOfStructField(enc jsoniter.ValEncoder, tag string) jsoniter.ValEncoder {

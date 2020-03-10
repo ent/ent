@@ -7,7 +7,7 @@ package graphson
 import (
 	"testing"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type book struct {

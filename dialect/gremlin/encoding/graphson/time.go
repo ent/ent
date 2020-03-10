@@ -8,7 +8,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 func init() {
