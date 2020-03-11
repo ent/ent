@@ -9,8 +9,16 @@ package privacy
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent"
+)
+
+type (
+	// Value is an alias to ent.Value.
+	Value = ent.Value
+	// Mutation is an alias to ent.Mutation.
+	Mutation = ent.Mutation
 )
 
 var (
@@ -27,20 +35,39 @@ var (
 	Skip = errors.New("ent/privacy: skip rule")
 )
 
+// Allowf returns an formatted wrapped Allow decision.
+func Allowf(format string, a ...interface{}) error {
+	return fmt.Errorf(format+": %w", append(a, Allow)...)
+}
+
+// Denyf returns an formatted wrapped Deny decision.
+func Denyf(format string, a ...interface{}) error {
+	return fmt.Errorf(format+": %w", append(a, Deny)...)
+}
+
+// Skipf returns an formatted wrapped Skip decision.
+func Skipf(format string, a ...interface{}) error {
+	return fmt.Errorf(format+": %w", append(a, Skip)...)
+}
+
 type (
 	// ReadPolicy combines multiple read rules into a single policy.
 	ReadPolicy []ReadRule
 
 	// ReadRule defines the interface deciding whether a read is allowed.
 	ReadRule interface {
-		EvalRead(context.Context, ent.Value) error
+		EvalRead(context.Context, Value) error
 	}
 )
 
 // EvalRead evaluates a load against a read policy.
-func (rules ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
-	for _, rule := range rules {
-		if err := rule.EvalRead(ctx, v); !errors.Is(err, ErrSkip) {
+func (policy ReadPolicy) EvalRead(ctx context.Context, v Value) error {
+	for _, rule := range policy {
+		switch err := rule.EvalRead(ctx, v); {
+		case err == nil || errors.Is(err, Skip):
+		case errors.Is(err, Allow):
+			return nil
+		default:
 			return err
 		}
 	}
@@ -49,10 +76,10 @@ func (rules ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
 
 // ReadRuleFunc type is an adapter to allow the use of
 // ordinary functions as read rules.
-type ReadRuleFunc func(context.Context, ent.Value) error
+type ReadRuleFunc func(context.Context, Value) error
 
 // Eval calls f(ctx, v).
-func (f ReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
+func (f ReadRuleFunc) EvalRead(ctx context.Context, v Value) error {
 	return f(ctx, v)
 }
 
@@ -62,13 +89,13 @@ type (
 
 	// WriteRule defines the interface deciding whether a write is allowed.
 	WriteRule interface {
-		EvalWrite(context.Context, ent.Mutation) error
+		EvalWrite(context.Context, Mutation) error
 	}
 )
 
 // EvalWrite evaluates a mutation against a write policy.
-func (rules WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
-	for _, rule := range rules {
+func (policy WritePolicy) EvalWrite(ctx context.Context, m Mutation) error {
+	for _, rule := range policy {
 		switch err := rule.EvalWrite(ctx, m); {
 		case err == nil || errors.Is(err, Skip):
 		case errors.Is(err, Allow):
@@ -82,10 +109,10 @@ func (rules WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
 
 // WriteRuleFunc type is an adapter to allow the use of
 // ordinary functions as write rules.
-type WriteRuleFunc func(context.Context, ent.Mutation) error
+type WriteRuleFunc func(context.Context, Mutation) error
 
 // Eval calls f(ctx, m).
-func (f WriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (f WriteRuleFunc) EvalWrite(ctx context.Context, m Mutation) error {
 	return f(ctx, m)
 }
 
@@ -107,6 +134,27 @@ func (p *Policy) WriteRules(rules ...WriteRule) *Policy {
 	return p
 }
 
+// ReadWriteRule is the interface that groups read and write rules.
+type ReadWriteRule interface {
+	ReadRule
+	WriteRule
+}
+
+// AlwaysAllowRule returns a read/write rule that returns an allow decision.
+func AlwaysAllowRule() ReadWriteRule {
+	return fixedDecisionRule{Allow}
+}
+
+// AlwaysDenyRule returns a read/write rule that returns a deny decision.
+func AlwaysDenyRule() ReadWriteRule {
+	return fixedDecisionRule{Deny}
+}
+
+type fixedDecisionRule struct{ err error }
+
+func (f fixedDecisionRule) EvalRead(context.Context, Value) error     { return f.err }
+func (f fixedDecisionRule) EvalWrite(context.Context, Mutation) error { return f.err }
+
 // AlwaysAllowReadWrite returns a privacy policy allowing both reads and writes.
 func AlwaysAllowReadWrite() ent.Policy {
 	return alwaysAllowReadWrite{}
@@ -114,5 +162,5 @@ func AlwaysAllowReadWrite() ent.Policy {
 
 type alwaysAllowReadWrite struct{}
 
-func (alwaysAllowReadWrite) EvalRead(context.Context, ent.Value) error     { return nil }
-func (alwaysAllowReadWrite) EvalWrite(context.Context, ent.Mutation) error { return nil }
+func (alwaysAllowReadWrite) EvalRead(context.Context, Value) error     { return nil }
+func (alwaysAllowReadWrite) EvalWrite(context.Context, Mutation) error { return nil }
