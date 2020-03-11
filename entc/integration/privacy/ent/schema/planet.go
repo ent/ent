@@ -6,6 +6,7 @@ import (
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/privacy"
+	"github.com/facebookincubator/ent/entc/integration/privacy/rule"
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -44,5 +45,14 @@ func (Planet) Hooks() []ent.Hook {
 }
 
 func (Planet) Policy() ent.Policy {
-	return privacy.AlwaysAllowReadWrite()
+	return privacy.Policy{
+		WritePolicy: privacy.WritePolicy{
+			rule.DenyUpdateOperationRule(),
+			rule.DenyPlanetSelfLinkRule(),
+			privacy.AlwaysAllowRule(),
+		},
+		ReadPolicy: privacy.ReadPolicy{
+			privacy.AlwaysAllowRule(),
+		},
+	}
 }

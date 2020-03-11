@@ -13,9 +13,19 @@ import (
 	"github.com/facebookincubator/ent"
 )
 
-// ErrSkip may be returned by read/write rules to indicate at runtime that
-// rule evaluation should continue to the next rule.
-var ErrSkip = errors.New("ent/privacy: skip rule")
+var (
+	// Allow may be returned by read/write rules to indicate that the policy
+	// evaluation should terminate with an allow decision.
+	Allow = errors.New("ent/privacy: allow rule")
+
+	// Deny may be returned by read/write rules to indicate that the policy
+	// evaluation should terminate with an deny decision.
+	Deny = errors.New("ent/privacy: deny rule")
+
+	// Skip may be returned by read/write rules to indicate that the policy
+	// evaluation should continue to the next rule.
+	Skip = errors.New("ent/privacy: skip rule")
+)
 
 type (
 	// ReadPolicy combines multiple read rules into a single policy.
@@ -59,7 +69,11 @@ type (
 // EvalWrite evaluates a mutation against a write policy.
 func (rules WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
 	for _, rule := range rules {
-		if err := rule.EvalWrite(ctx, m); !errors.Is(err, ErrSkip) {
+		switch err := rule.EvalWrite(ctx, m); {
+		case err == nil || errors.Is(err, Skip):
+		case errors.Is(err, Allow):
+			return nil
+		default:
 			return err
 		}
 	}
