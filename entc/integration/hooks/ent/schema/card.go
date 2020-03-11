@@ -26,19 +26,22 @@ type Card struct {
 
 func (Card) Hooks() []ent.Hook {
 	return []ent.Hook{
-		func(next ent.Mutator) ent.Mutator {
-			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				num, ok := m.Field(card.FieldNumber)
-				if !ok {
-					return nil, fmt.Errorf("missing card number value")
-				}
-				// Validator in hooks.
-				if len(num.(string)) < 4 {
-					return nil, fmt.Errorf("card number is too short")
-				}
-				return next.Mutate(ctx, m)
-			})
-		},
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+					num, ok := m.Field(card.FieldNumber)
+					if !ok {
+						return nil, fmt.Errorf("missing card number value")
+					}
+					// Validator in hooks.
+					if len(num.(string)) < 4 {
+						return nil, fmt.Errorf("card number is too short")
+					}
+					return next.Mutate(ctx, m)
+				})
+			},
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+		),
 		func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
 				if _, ok := m.Name(); !ok {

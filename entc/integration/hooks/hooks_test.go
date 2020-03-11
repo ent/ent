@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/migrate"
 	_ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
@@ -93,4 +95,32 @@ func TestMutationTx(t *testing.T) {
 	require.Nil(t, crd)
 	_, err = tx.Card.Query().All(ctx)
 	require.Error(t, err, "tx already rolled back")
+}
+
+func TestDeletion(t *testing.T) {
+	ctx := context.Background()
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+	client.User.Use(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			if !m.Op().Is(ent.OpDeleteOne) {
+				return next.Mutate(ctx, m)
+			}
+			id, ok := m.ID()
+			if !ok {
+				return nil, fmt.Errorf("missing id")
+			}
+			m.Client().Card.Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
+			return next.Mutate(ctx, m)
+		})
+	})
+	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	for i := 0; i < 5; i++ {
+		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(a8m).SaveX(ctx)
+	}
+	client.User.DeleteOne(a8m).ExecX(ctx)
+	require.Zero(t, client.User.Query().CountX(ctx))
+	require.Zero(t, client.Card.Query().CountX(ctx))
 }
