@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -96,9 +95,7 @@ func (gu *GroupUpdate) ClearAdmin() *GroupUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	if len(gu.mutation.AdminIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"admin\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -326,9 +323,7 @@ func (guo *GroupUpdateOne) ClearAdmin() *GroupUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	if len(guo.mutation.AdminIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"admin\"")
-	}
+
 	var (
 		err  error
 		node *Group

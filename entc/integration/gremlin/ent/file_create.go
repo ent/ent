@@ -126,12 +126,6 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if _, ok := fc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(fc.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if len(fc.mutation.TypeIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
-	}
 	var (
 		err  error
 		node *File

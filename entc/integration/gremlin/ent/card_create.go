@@ -134,9 +134,6 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if len(cc.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
 	var (
 		err  error
 		node *Card

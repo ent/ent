@@ -75,6 +75,7 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
+
 	var (
 		err      error
 		affected int
@@ -247,6 +248,7 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
+
 	var (
 		err  error
 		node *Group

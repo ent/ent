@@ -234,10 +234,8 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if len(gu.mutation.InfoIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"info\"")
-	}
-	if gu.mutation.InfoCleared() && len(gu.mutation.InfoIDs()) == 0 {
+
+	if _, ok := gu.mutation.InfoID(); gu.mutation.InfoCleared() && !ok {
 		return 0, errors.New("ent: clearing a unique edge \"info\"")
 	}
 	var (
@@ -752,10 +750,8 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if len(guo.mutation.InfoIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"info\"")
-	}
-	if guo.mutation.InfoCleared() && len(guo.mutation.InfoIDs()) == 0 {
+
+	if _, ok := guo.mutation.InfoID(); guo.mutation.InfoCleared() && !ok {
 		return nil, errors.New("ent: clearing a unique edge \"info\"")
 	}
 	var (

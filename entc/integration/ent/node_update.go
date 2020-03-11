@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -112,12 +111,7 @@ func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-	if len(nu.mutation.PrevIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"prev\"")
-	}
-	if len(nu.mutation.NextIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"next\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -379,12 +373,7 @@ func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	if len(nuo.mutation.PrevIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"prev\"")
-	}
-	if len(nuo.mutation.NextIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
-	}
+
 	var (
 		err  error
 		node *Node

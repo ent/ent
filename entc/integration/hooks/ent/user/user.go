@@ -22,11 +22,13 @@ const (
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// CardsTable is the table the holds the cards relation/edge. The primary key declared below.
-	CardsTable = "user_cards"
+	// CardsTable is the table the holds the cards relation/edge.
+	CardsTable = "cards"
 	// CardsInverseTable is the table name for the Card entity.
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardsInverseTable = "cards"
+	// CardsColumn is the table column denoting the cards relation/edge.
+	CardsColumn = "user_cards"
 	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 	// BestFriendTable is the table the holds the best_friend relation/edge.
@@ -47,9 +49,6 @@ var ForeignKeys = []string{
 }
 
 var (
-	// CardsPrimaryKey and CardsColumn2 are the table columns denoting the
-	// primary key for the cards relation (M2M).
-	CardsPrimaryKey = []string{"user_id", "card_id"}
 	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
 	// primary key for the friends relation (M2M).
 	FriendsPrimaryKey = []string{"user_id", "friend_id"}

@@ -70,6 +70,7 @@ func (cu *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
+
 	var (
 		err      error
 		affected int
@@ -237,6 +238,7 @@ func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
+
 	var (
 		err  error
 		node *City

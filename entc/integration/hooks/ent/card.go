@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 )
 
 // Card is the model entity for the Card schema.
@@ -28,22 +29,28 @@ type Card struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges CardEdges `json:"edges"`
+	Edges      CardEdges `json:"edges"`
+	user_cards *int
 }
 
 // CardEdges holds the relations/edges for other nodes in the graph.
 type CardEdges struct {
 	// Owner holds the value of the owner edge.
-	Owner []*User
+	Owner *User
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
-// was not loaded in eager-loading.
-func (e CardEdges) OwnerOrErr() ([]*User, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CardEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
 		return e.Owner, nil
 	}
 	return nil, &NotLoadedError{edge: "owner"}
@@ -56,6 +63,13 @@ func (*Card) scanValues() []interface{} {
 		&sql.NullString{}, // number
 		&sql.NullString{}, // name
 		&sql.NullTime{},   // created_at
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Card) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // user_cards
 	}
 }
 
@@ -85,6 +99,15 @@ func (c *Card) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field created_at", values[2])
 	} else if value.Valid {
 		c.CreatedAt = value.Time
+	}
+	values = values[3:]
+	if len(values) == len(card.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field user_cards", value)
+		} else if value.Valid {
+			c.user_cards = new(int)
+			*c.user_cards = int(value.Int64)
+		}
 	}
 	return nil
 }

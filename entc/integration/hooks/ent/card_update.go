@@ -67,38 +67,34 @@ func (cu *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
 	return cu
 }
 
-// AddOwnerIDs adds the owner edge to User by ids.
-func (cu *CardUpdate) AddOwnerIDs(ids ...int) *CardUpdate {
-	cu.mutation.AddOwnerIDs(ids...)
+// SetOwnerID sets the owner edge to User by id.
+func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
+	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// AddOwner adds the owner edges to User.
-func (cu *CardUpdate) AddOwner(u ...*User) *CardUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
+	if id != nil {
+		cu = cu.SetOwnerID(*id)
 	}
-	return cu.AddOwnerIDs(ids...)
-}
-
-// RemoveOwnerIDs removes the owner edge to User by ids.
-func (cu *CardUpdate) RemoveOwnerIDs(ids ...int) *CardUpdate {
-	cu.mutation.RemoveOwnerIDs(ids...)
 	return cu
 }
 
-// RemoveOwner removes owner edges to User.
-func (cu *CardUpdate) RemoveOwner(u ...*User) *CardUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cu.RemoveOwnerIDs(ids...)
+// SetOwner sets the owner edge to User.
+func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
+	return cu.SetOwnerID(u.ID)
+}
+
+// ClearOwner clears the owner edge to User.
+func (cu *CardUpdate) ClearOwner() *CardUpdate {
+	cu.mutation.ClearOwner()
+	return cu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
+
 	var (
 		err      error
 		affected int
@@ -185,12 +181,12 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: card.FieldCreatedAt,
 		})
 	}
-	if nodes := cu.mutation.RemovedOwnerIDs(); len(nodes) > 0 {
+	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   card.OwnerTable,
-			Columns: card.OwnerPrimaryKey,
+			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -199,17 +195,14 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   card.OwnerTable,
-			Columns: card.OwnerPrimaryKey,
+			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -275,38 +268,34 @@ func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
 	return cuo
 }
 
-// AddOwnerIDs adds the owner edge to User by ids.
-func (cuo *CardUpdateOne) AddOwnerIDs(ids ...int) *CardUpdateOne {
-	cuo.mutation.AddOwnerIDs(ids...)
+// SetOwnerID sets the owner edge to User by id.
+func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
+	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// AddOwner adds the owner edges to User.
-func (cuo *CardUpdateOne) AddOwner(u ...*User) *CardUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
+	if id != nil {
+		cuo = cuo.SetOwnerID(*id)
 	}
-	return cuo.AddOwnerIDs(ids...)
-}
-
-// RemoveOwnerIDs removes the owner edge to User by ids.
-func (cuo *CardUpdateOne) RemoveOwnerIDs(ids ...int) *CardUpdateOne {
-	cuo.mutation.RemoveOwnerIDs(ids...)
 	return cuo
 }
 
-// RemoveOwner removes owner edges to User.
-func (cuo *CardUpdateOne) RemoveOwner(u ...*User) *CardUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return cuo.RemoveOwnerIDs(ids...)
+// SetOwner sets the owner edge to User.
+func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
+	return cuo.SetOwnerID(u.ID)
+}
+
+// ClearOwner clears the owner edge to User.
+func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
+	cuo.mutation.ClearOwner()
+	return cuo
 }
 
 // Save executes the query and returns the updated entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
+
 	var (
 		err  error
 		node *Card
@@ -391,12 +380,12 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 			Column: card.FieldCreatedAt,
 		})
 	}
-	if nodes := cuo.mutation.RemovedOwnerIDs(); len(nodes) > 0 {
+	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   card.OwnerTable,
-			Columns: card.OwnerPrimaryKey,
+			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -405,17 +394,14 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 				},
 			},
 		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := cuo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   card.OwnerTable,
-			Columns: card.OwnerPrimaryKey,
+			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

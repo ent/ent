@@ -8,7 +8,6 @@ package entv1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -247,15 +246,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
 		}
 	}
-	if len(uu.mutation.ParentIDs()) > 1 {
-		return 0, errors.New("entv1: multiple assignments on a unique edge \"parent\"")
-	}
-	if len(uu.mutation.SpouseIDs()) > 1 {
-		return 0, errors.New("entv1: multiple assignments on a unique edge \"spouse\"")
-	}
-	if len(uu.mutation.CarIDs()) > 1 {
-		return 0, errors.New("entv1: multiple assignments on a unique edge \"car\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -777,15 +768,7 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
 		}
 	}
-	if len(uuo.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("entv1: multiple assignments on a unique edge \"parent\"")
-	}
-	if len(uuo.mutation.SpouseIDs()) > 1 {
-		return nil, errors.New("entv1: multiple assignments on a unique edge \"spouse\"")
-	}
-	if len(uuo.mutation.CarIDs()) > 1 {
-		return nil, errors.New("entv1: multiple assignments on a unique edge \"car\"")
-	}
+
 	var (
 		err  error
 		node *User

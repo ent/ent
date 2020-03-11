@@ -65,10 +65,8 @@ func (cu *CardUpdate) ClearOwner() *CardUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-	if len(cu.mutation.OwnerIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if cu.mutation.OwnerCleared() && len(cu.mutation.OwnerIDs()) == 0 {
+
+	if _, ok := cu.mutation.OwnerID(); cu.mutation.OwnerCleared() && !ok {
 		return 0, errors.New("ent: clearing a unique edge \"owner\"")
 	}
 	var (
@@ -235,10 +233,8 @@ func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	if len(cuo.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if cuo.mutation.OwnerCleared() && len(cuo.mutation.OwnerIDs()) == 0 {
+
+	if _, ok := cuo.mutation.OwnerID(); cuo.mutation.OwnerCleared() && !ok {
 		return nil, errors.New("ent: clearing a unique edge \"owner\"")
 	}
 	var (

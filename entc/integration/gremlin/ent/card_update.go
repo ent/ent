@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -122,9 +121,7 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if len(cu.mutation.OwnerIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -340,9 +337,7 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if len(cuo.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
+
 	var (
 		err  error
 		node *Card

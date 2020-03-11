@@ -63,9 +63,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(uc.mutation.CardIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
-	}
 	var (
 		err  error
 		node *User

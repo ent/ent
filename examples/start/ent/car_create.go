@@ -64,9 +64,6 @@ func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 	if _, ok := cc.mutation.RegisteredAt(); !ok {
 		return nil, errors.New("ent: missing required field \"registered_at\"")
 	}
-	if len(cc.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
 	var (
 		err  error
 		node *Car

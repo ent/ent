@@ -36,7 +36,7 @@ type UserMutation struct {
 	addage        *int
 	name          *string
 	clearedFields map[string]bool
-	spouse        map[int]struct{}
+	spouse        *int
 	clearedspouse bool
 }
 
@@ -52,7 +52,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -140,10 +140,7 @@ func (m *UserMutation) ResetName() {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (m *UserMutation) SetSpouseID(id int) {
-	if m.spouse == nil {
-		m.spouse = make(map[int]struct{})
-	}
-	m.spouse[id] = struct{}{}
+	m.spouse = &id
 }
 
 // ClearSpouse clears the spouse edge to User.
@@ -156,10 +153,20 @@ func (m *UserMutation) SpouseCleared() bool {
 	return m.clearedspouse
 }
 
+// SpouseID returns the spouse id in the mutation.
+func (m *UserMutation) SpouseID() (id int, exists bool) {
+	if m.spouse != nil {
+		return *m.spouse, true
+	}
+	return
+}
+
 // SpouseIDs returns the spouse ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// SpouseID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) SpouseIDs() (ids []int) {
-	for id := range m.spouse {
-		ids = append(ids, id)
+	if id := m.spouse; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -315,9 +322,8 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeSpouse:
-		ids := make([]int, 0, len(m.spouse))
-		for id := range m.spouse {
-			ids = append(ids, id)
+		if id := m.spouse; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil

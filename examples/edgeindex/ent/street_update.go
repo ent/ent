@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -66,9 +65,7 @@ func (su *StreetUpdate) ClearCity() *StreetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *StreetUpdate) Save(ctx context.Context) (int, error) {
-	if len(su.mutation.CityIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"city\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -228,9 +225,7 @@ func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
-	if len(suo.mutation.CityIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"city\"")
-	}
+
 	var (
 		err  error
 		node *Street

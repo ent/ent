@@ -26,11 +26,13 @@ const (
 
 	// Table holds the table name of the card in the database.
 	Table = "cards"
-	// OwnerTable is the table the holds the owner relation/edge. The primary key declared below.
-	OwnerTable = "user_cards"
+	// OwnerTable is the table the holds the owner relation/edge.
+	OwnerTable = "cards"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "user_cards"
 )
 
 // Columns holds all SQL columns for card fields.
@@ -41,11 +43,10 @@ var Columns = []string{
 	FieldCreatedAt,
 }
 
-var (
-	// OwnerPrimaryKey and OwnerColumn2 are the table columns denoting the
-	// primary key for the owner relation (M2M).
-	OwnerPrimaryKey = []string{"user_id", "card_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
+var ForeignKeys = []string{
+	"user_cards",
+}
 
 // Note that the variables below are initialized by the runtime
 // package on the initialization of the application. Therefore,

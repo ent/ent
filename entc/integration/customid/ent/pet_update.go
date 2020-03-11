@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -91,9 +90,7 @@ func (pu *PetUpdate) RemoveCars(c ...*Car) *PetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	if len(pu.mutation.OwnerIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -308,9 +305,7 @@ func (puo *PetUpdateOne) RemoveCars(c ...*Car) *PetUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	if len(puo.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
+
 	var (
 		err  error
 		node *Pet

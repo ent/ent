@@ -54,7 +54,7 @@ func newGroupMutation(c config, op Op) *GroupMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m GroupMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -307,7 +307,7 @@ type PetMutation struct {
 	addage        *int
 	licensed_at   *time.Time
 	clearedFields map[string]bool
-	owner         map[int]struct{}
+	owner         *int
 	clearedowner  bool
 }
 
@@ -323,7 +323,7 @@ func newPetMutation(c config, op Op) *PetMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m PetMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -423,10 +423,7 @@ func (m *PetMutation) ResetLicensedAt() {
 
 // SetOwnerID sets the owner edge to User by id.
 func (m *PetMutation) SetOwnerID(id int) {
-	if m.owner == nil {
-		m.owner = make(map[int]struct{})
-	}
-	m.owner[id] = struct{}{}
+	m.owner = &id
 }
 
 // ClearOwner clears the owner edge to User.
@@ -439,10 +436,20 @@ func (m *PetMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
 
+// OwnerID returns the owner id in the mutation.
+func (m *PetMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
 // OwnerIDs returns the owner ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
 func (m *PetMutation) OwnerIDs() (ids []int) {
-	for id := range m.owner {
-		ids = append(ids, id)
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -607,9 +614,8 @@ func (m *PetMutation) AddedEdges() []string {
 func (m *PetMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case pet.EdgeOwner:
-		ids := make([]int, 0, len(m.owner))
-		for id := range m.owner {
-			ids = append(ids, id)
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -700,7 +706,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -949,15 +955,17 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgePets:
-		ids := make([]int, 0, len(m.pets))
+		ids := make([]ent.Value, 0, len(m.pets))
 		for id := range m.pets {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeFriends:
-		ids := make([]int, 0, len(m.friends))
+		ids := make([]ent.Value, 0, len(m.friends))
 		for id := range m.friends {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -980,15 +988,17 @@ func (m *UserMutation) RemovedEdges() []string {
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgePets:
-		ids := make([]int, 0, len(m.removedpets))
+		ids := make([]ent.Value, 0, len(m.removedpets))
 		for id := range m.removedpets {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeFriends:
-		ids := make([]int, 0, len(m.removedfriends))
+		ids := make([]ent.Value, 0, len(m.removedfriends))
 		for id := range m.removedfriends {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

@@ -34,37 +34,36 @@ type {{ $builder }} struct {
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
 	{{- $mutation := print $receiver ".mutation" }}
-	{{ range $_, $f := $.Fields -}}
-		{{- if or $f.Default (not $f.Optional) -}}
+	{{- range $_, $f := $.Fields }}
+		{{- if or $f.Default (not $f.Optional) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				{{ if $f.Default -}}
+				{{- if $f.Default }}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
 					{{ $mutation }}.Set{{ $f.StructField }}(v)
-				{{ else -}}
+				{{- else }}
 					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")
-				{{ end -}}
+				{{- end }}
 			}
-		{{ end -}}
-		{{ with or $f.Validators $f.IsEnum -}}
+		{{- end }}
+		{{- with or $f.Validators $f.IsEnum }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				if err := {{ $.Package }}.{{ $f.Validator }}(v); err != nil {
 					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
 				}
 			}
-		{{ end -}}
-	{{ end -}}
+		{{- end }}
+	{{- end }}
 	{{- range $_, $e := $.Edges }}
-		{{- if $e.Unique -}}
-			if len({{ $mutation }}.{{ $e.StructField }}IDs()) > 1 {
-				return nil, errors.New("{{ $pkg }}: multiple assignments on a unique edge \"{{ $e.Name }}\"")
-			}
-		{{ end -}}
-		{{- if not $e.Optional -}}
-			if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
+		{{- if not $e.Optional }}
+			{{- if $e.Unique }}
+				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); !ok {
+			{{- else }}
+				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
+			{{- end }}
 				return nil, errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")
 			}
-		{{ end -}}
-	{{ end -}}
+		{{- end }}
+	{{- end }}
 	var (
 		err error
 		node *{{ $.Name }}

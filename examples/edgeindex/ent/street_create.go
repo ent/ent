@@ -54,9 +54,6 @@ func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
 	if _, ok := sc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(sc.mutation.CityIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"city\"")
-	}
 	var (
 		err  error
 		node *Street

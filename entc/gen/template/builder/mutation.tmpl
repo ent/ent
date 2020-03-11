@@ -47,10 +47,11 @@ type {{ $mutation }} struct {
 	{{- end }}
 	clearedFields map[string]bool
 	{{- range $e := $n.Edges }}
-		{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 		{{- if $e.Unique }}
+            {{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
 			cleared{{ $e.BuilderField }} bool
 		{{- else }}
+            {{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 			removed{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 		{{- end }}
 	{{- end }}
@@ -68,7 +69,7 @@ func new{{ $mutation }}(c config, op Op) *{{ $mutation }} {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m {{ $mutation }}) Client() *Client {
 	client := &Client{config: m.config}
@@ -184,12 +185,12 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	{{ $idsFunc := print (pascal $op) (singular $e.Name | pascal) "IDs" }}{{ if $e.Unique }}{{ $idsFunc = print (pascal $op) (pascal $e.Name) "ID" }}{{ end }}
 	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
 	func (m *{{ $mutation }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) {
-		if m.{{ $e.BuilderField }} == nil {
-			m.{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
-		}
 		{{- if $e.Unique }}
-			m.{{ $e.BuilderField }}[id] = struct{}{}
+			m.{{ $e.BuilderField }} = &id
 		{{- else }}
+			if m.{{ $e.BuilderField }} == nil {
+				m.{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
+			}
 			for i := range ids {
 				m.{{ $e.BuilderField }}[ids[i]] = struct{}{}
 			}
@@ -206,6 +207,14 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		// {{ $func }} returns if the edge {{ $e.Name }} was cleared.
 		func (m *{{ $mutation }}) {{ $func }}() bool {
 			return m.cleared{{ $e.BuilderField }}
+		}
+
+		// {{ $e.StructField }}ID returns the {{ $e.Name }} id in the mutation.
+		func (m *{{ $mutation }}) {{ $e.StructField }}ID() (id {{ $e.Type.ID.Type }}, exists bool) {
+			if m.{{ $e.BuilderField }} != nil {
+				return *m.{{ $e.BuilderField }}, true
+			}
+			return
 		}
 	{{ else }}
 		{{ $p := lower (printf "%.1s" $e.Type.Name) }}
@@ -235,10 +244,20 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	{{ end }}
 
 	// {{ $e.StructField }}IDs returns the {{ $e.Name }} ids in the mutation.
+    {{- if $e.Unique }}
+		// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+		// {{ $e.StructField }}ID instead. It exists only for internal usage by the builders.
+	{{- end }}
 	func (m *{{ $mutation }}) {{ $e.StructField }}IDs() (ids []{{ $e.Type.ID.Type }}) {
-		for id := range m.{{ $e.BuilderField }} {
-			ids = append(ids, id)
-		}
+    	{{- if $e.Unique }}
+			if id := m.{{ $e.BuilderField }}; id != nil {
+				ids = append(ids, *id)
+			}
+		{{- else }}
+			for id := range m.{{ $e.BuilderField }} {
+				ids = append(ids, id)
+			}
+		{{- end}}
 		return
 	}
 
@@ -451,10 +470,17 @@ func (m *{{ $mutation }}) AddedIDs(name string) []ent.Value {
 	{{- range $e := $n.Edges }}
 		{{- $const := print $n.Package "." $e.Constant }}
 		case {{ $const }}:
-			ids := make([]{{ $e.Type.ID.Type }}, 0, len(m.{{ $e.BuilderField }}))
-			for id := range m.{{ $e.BuilderField }} {
-				ids = append(ids, id)
-			}
+			{{- if $e.Unique }}
+				if id := m.{{ $e.BuilderField }}; id != nil {
+					return []ent.Value{*id}
+				}
+			{{- else }}
+				ids := make([]ent.Value, 0, len(m.{{ $e.BuilderField }}))
+				for id := range m.{{ $e.BuilderField }} {
+					ids = append(ids, id)
+				}
+				return ids
+			{{- end }}
 	{{- end }}
 	}
 	return nil
@@ -483,10 +509,11 @@ func (m *{{ $mutation }}) RemovedIDs(name string) []ent.Value {
 		{{- if not $e.Unique }}
 			{{- $const := print $n.Package "." $e.Constant }}
 			case {{ $const }}:
-				ids := make([]{{ $e.Type.ID.Type }}, 0, len(m.removed{{ $e.BuilderField }}))
+				ids := make([]ent.Value, 0, len(m.removed{{ $e.BuilderField }}))
 				for id := range m.removed{{ $e.BuilderField }} {
 					ids = append(ids, id)
 				}
+				return ids
 		{{- end }}
 	{{- end }}
 	}

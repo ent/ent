@@ -112,22 +112,33 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
-	return &Tx{
-		config:    cfg,
-		Card:      NewCardClient(cfg),
-		Comment:   NewCommentClient(cfg),
-		FieldType: NewFieldTypeClient(cfg),
-		File:      NewFileClient(cfg),
-		FileType:  NewFileTypeClient(cfg),
-		Group:     NewGroupClient(cfg),
-		GroupInfo: NewGroupInfoClient(cfg),
-		Item:      NewItemClient(cfg),
-		Node:      NewNodeClient(cfg),
-		Pet:       NewPetClient(cfg),
-		Spec:      NewSpecClient(cfg),
-		User:      NewUserClient(cfg),
-	}, nil
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	txc := &Tx{config: cfg}
+	txc.Card = NewCardClient(cfg)
+	txc.Card.hooks = c.Card.hooks
+	txc.Comment = NewCommentClient(cfg)
+	txc.Comment.hooks = c.Comment.hooks
+	txc.FieldType = NewFieldTypeClient(cfg)
+	txc.FieldType.hooks = c.FieldType.hooks
+	txc.File = NewFileClient(cfg)
+	txc.File.hooks = c.File.hooks
+	txc.FileType = NewFileTypeClient(cfg)
+	txc.FileType.hooks = c.FileType.hooks
+	txc.Group = NewGroupClient(cfg)
+	txc.Group.hooks = c.Group.hooks
+	txc.GroupInfo = NewGroupInfoClient(cfg)
+	txc.GroupInfo.hooks = c.GroupInfo.hooks
+	txc.Item = NewItemClient(cfg)
+	txc.Item.hooks = c.Item.hooks
+	txc.Node = NewNodeClient(cfg)
+	txc.Node.hooks = c.Node.hooks
+	txc.Pet = NewPetClient(cfg)
+	txc.Pet.hooks = c.Pet.hooks
+	txc.Spec = NewSpecClient(cfg)
+	txc.Spec.hooks = c.Spec.hooks
+	txc.User = NewUserClient(cfg)
+	txc.User.hooks = c.User.hooks
+	return txc, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -141,7 +152,7 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
 	client := &Client{config: cfg}
 	client.init()
 	return client

@@ -169,10 +169,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
 		}
 	}
-	if len(gc.mutation.InfoIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"info\"")
-	}
-	if len(gc.mutation.InfoIDs()) == 0 {
+	if _, ok := gc.mutation.InfoID(); !ok {
 		return nil, errors.New("ent: missing required edge \"info\"")
 	}
 	var (

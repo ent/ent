@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -78,9 +77,7 @@ func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	if len(uu.mutation.SpouseIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -267,9 +264,7 @@ func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	if len(uuo.mutation.SpouseIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
-	}
+
 	var (
 		err  error
 		node *User

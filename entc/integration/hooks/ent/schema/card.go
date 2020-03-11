@@ -67,6 +67,7 @@ func (Card) Fields() []ent.Field {
 func (Card) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
-			Ref("cards"),
+			Ref("cards").
+			Unique(),
 	}
 }

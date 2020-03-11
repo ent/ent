@@ -52,7 +52,7 @@ func newCityMutation(c config, op Op) *CityMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m CityMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -256,10 +256,11 @@ func (m *CityMutation) AddedEdges() []string {
 func (m *CityMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case city.EdgeStreets:
-		ids := make([]int, 0, len(m.streets))
+		ids := make([]ent.Value, 0, len(m.streets))
 		for id := range m.streets {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -279,10 +280,11 @@ func (m *CityMutation) RemovedEdges() []string {
 func (m *CityMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case city.EdgeStreets:
-		ids := make([]int, 0, len(m.removedstreets))
+		ids := make([]ent.Value, 0, len(m.removedstreets))
 		for id := range m.removedstreets {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -331,7 +333,7 @@ type StreetMutation struct {
 	id            *int
 	name          *string
 	clearedFields map[string]bool
-	city          map[int]struct{}
+	city          *int
 	clearedcity   bool
 }
 
@@ -347,7 +349,7 @@ func newStreetMutation(c config, op Op) *StreetMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m StreetMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -396,10 +398,7 @@ func (m *StreetMutation) ResetName() {
 
 // SetCityID sets the city edge to City by id.
 func (m *StreetMutation) SetCityID(id int) {
-	if m.city == nil {
-		m.city = make(map[int]struct{})
-	}
-	m.city[id] = struct{}{}
+	m.city = &id
 }
 
 // ClearCity clears the city edge to City.
@@ -412,10 +411,20 @@ func (m *StreetMutation) CityCleared() bool {
 	return m.clearedcity
 }
 
+// CityID returns the city id in the mutation.
+func (m *StreetMutation) CityID() (id int, exists bool) {
+	if m.city != nil {
+		return *m.city, true
+	}
+	return
+}
+
 // CityIDs returns the city ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// CityID instead. It exists only for internal usage by the builders.
 func (m *StreetMutation) CityIDs() (ids []int) {
-	for id := range m.city {
-		ids = append(ids, id)
+	if id := m.city; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -541,9 +550,8 @@ func (m *StreetMutation) AddedEdges() []string {
 func (m *StreetMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case street.EdgeCity:
-		ids := make([]int, 0, len(m.city))
-		for id := range m.city {
-			ids = append(ids, id)
+		if id := m.city; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil

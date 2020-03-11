@@ -35,9 +35,9 @@ type NodeMutation struct {
 	value         *int
 	addvalue      *int
 	clearedFields map[string]bool
-	prev          map[int]struct{}
+	prev          *int
 	clearedprev   bool
-	next          map[int]struct{}
+	next          *int
 	clearednext   bool
 }
 
@@ -53,7 +53,7 @@ func newNodeMutation(c config, op Op) *NodeMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m NodeMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -122,10 +122,7 @@ func (m *NodeMutation) ResetValue() {
 
 // SetPrevID sets the prev edge to Node by id.
 func (m *NodeMutation) SetPrevID(id int) {
-	if m.prev == nil {
-		m.prev = make(map[int]struct{})
-	}
-	m.prev[id] = struct{}{}
+	m.prev = &id
 }
 
 // ClearPrev clears the prev edge to Node.
@@ -138,10 +135,20 @@ func (m *NodeMutation) PrevCleared() bool {
 	return m.clearedprev
 }
 
+// PrevID returns the prev id in the mutation.
+func (m *NodeMutation) PrevID() (id int, exists bool) {
+	if m.prev != nil {
+		return *m.prev, true
+	}
+	return
+}
+
 // PrevIDs returns the prev ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// PrevID instead. It exists only for internal usage by the builders.
 func (m *NodeMutation) PrevIDs() (ids []int) {
-	for id := range m.prev {
-		ids = append(ids, id)
+	if id := m.prev; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -154,10 +161,7 @@ func (m *NodeMutation) ResetPrev() {
 
 // SetNextID sets the next edge to Node by id.
 func (m *NodeMutation) SetNextID(id int) {
-	if m.next == nil {
-		m.next = make(map[int]struct{})
-	}
-	m.next[id] = struct{}{}
+	m.next = &id
 }
 
 // ClearNext clears the next edge to Node.
@@ -170,10 +174,20 @@ func (m *NodeMutation) NextCleared() bool {
 	return m.clearednext
 }
 
+// NextID returns the next id in the mutation.
+func (m *NodeMutation) NextID() (id int, exists bool) {
+	if m.next != nil {
+		return *m.next, true
+	}
+	return
+}
+
 // NextIDs returns the next ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// NextID instead. It exists only for internal usage by the builders.
 func (m *NodeMutation) NextIDs() (ids []int) {
-	for id := range m.next {
-		ids = append(ids, id)
+	if id := m.next; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -317,14 +331,12 @@ func (m *NodeMutation) AddedEdges() []string {
 func (m *NodeMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case node.EdgePrev:
-		ids := make([]int, 0, len(m.prev))
-		for id := range m.prev {
-			ids = append(ids, id)
+		if id := m.prev; id != nil {
+			return []ent.Value{*id}
 		}
 	case node.EdgeNext:
-		ids := make([]int, 0, len(m.next))
-		for id := range m.next {
-			ids = append(ids, id)
+		if id := m.next; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil

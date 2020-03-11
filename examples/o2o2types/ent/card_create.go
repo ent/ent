@@ -56,10 +56,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if _, ok := cc.mutation.Number(); !ok {
 		return nil, errors.New("ent: missing required field \"number\"")
 	}
-	if len(cc.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if len(cc.mutation.OwnerIDs()) == 0 {
+	if _, ok := cc.mutation.OwnerID(); !ok {
 		return nil, errors.New("ent: missing required edge \"owner\"")
 	}
 	var (

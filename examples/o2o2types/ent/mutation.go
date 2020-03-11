@@ -38,7 +38,7 @@ type CardMutation struct {
 	expired       *time.Time
 	number        *string
 	clearedFields map[string]bool
-	owner         map[int]struct{}
+	owner         *int
 	clearedowner  bool
 }
 
@@ -54,7 +54,7 @@ func newCardMutation(c config, op Op) *CardMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m CardMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -122,10 +122,7 @@ func (m *CardMutation) ResetNumber() {
 
 // SetOwnerID sets the owner edge to User by id.
 func (m *CardMutation) SetOwnerID(id int) {
-	if m.owner == nil {
-		m.owner = make(map[int]struct{})
-	}
-	m.owner[id] = struct{}{}
+	m.owner = &id
 }
 
 // ClearOwner clears the owner edge to User.
@@ -138,10 +135,20 @@ func (m *CardMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
 
+// OwnerID returns the owner id in the mutation.
+func (m *CardMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
 // OwnerIDs returns the owner ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
 func (m *CardMutation) OwnerIDs() (ids []int) {
-	for id := range m.owner {
-		ids = append(ids, id)
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -282,9 +289,8 @@ func (m *CardMutation) AddedEdges() []string {
 func (m *CardMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case card.EdgeOwner:
-		ids := make([]int, 0, len(m.owner))
-		for id := range m.owner {
-			ids = append(ids, id)
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -359,7 +365,7 @@ type UserMutation struct {
 	addage        *int
 	name          *string
 	clearedFields map[string]bool
-	card          map[int]struct{}
+	card          *int
 	clearedcard   bool
 }
 
@@ -375,7 +381,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -463,10 +469,7 @@ func (m *UserMutation) ResetName() {
 
 // SetCardID sets the card edge to Card by id.
 func (m *UserMutation) SetCardID(id int) {
-	if m.card == nil {
-		m.card = make(map[int]struct{})
-	}
-	m.card[id] = struct{}{}
+	m.card = &id
 }
 
 // ClearCard clears the card edge to Card.
@@ -479,10 +482,20 @@ func (m *UserMutation) CardCleared() bool {
 	return m.clearedcard
 }
 
+// CardID returns the card id in the mutation.
+func (m *UserMutation) CardID() (id int, exists bool) {
+	if m.card != nil {
+		return *m.card, true
+	}
+	return
+}
+
 // CardIDs returns the card ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// CardID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) CardIDs() (ids []int) {
-	for id := range m.card {
-		ids = append(ids, id)
+	if id := m.card; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -638,9 +651,8 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCard:
-		ids := make([]int, 0, len(m.card))
-		for id := range m.card {
-			ids = append(ids, id)
+		if id := m.card; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil

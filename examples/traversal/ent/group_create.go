@@ -69,9 +69,6 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	if _, ok := gc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(gc.mutation.AdminIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"admin\"")
-	}
 	var (
 		err  error
 		node *Group

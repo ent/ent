@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -97,9 +96,6 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if len(uc.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
 	var (
 		err  error
 		node *User

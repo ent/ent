@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -102,9 +101,7 @@ func (nu *NodeUpdate) RemoveChildren(n ...*Node) *NodeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-	if len(nu.mutation.ParentIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -346,9 +343,7 @@ func (nuo *NodeUpdateOne) RemoveChildren(n ...*Node) *NodeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	if len(nuo.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
+
 	var (
 		err  error
 		node *Node

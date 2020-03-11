@@ -35,7 +35,7 @@ type NodeMutation struct {
 	value           *int
 	addvalue        *int
 	clearedFields   map[string]bool
-	parent          map[int]struct{}
+	parent          *int
 	clearedparent   bool
 	children        map[int]struct{}
 	removedchildren map[int]struct{}
@@ -53,7 +53,7 @@ func newNodeMutation(c config, op Op) *NodeMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m NodeMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -122,10 +122,7 @@ func (m *NodeMutation) ResetValue() {
 
 // SetParentID sets the parent edge to Node by id.
 func (m *NodeMutation) SetParentID(id int) {
-	if m.parent == nil {
-		m.parent = make(map[int]struct{})
-	}
-	m.parent[id] = struct{}{}
+	m.parent = &id
 }
 
 // ClearParent clears the parent edge to Node.
@@ -138,10 +135,20 @@ func (m *NodeMutation) ParentCleared() bool {
 	return m.clearedparent
 }
 
+// ParentID returns the parent id in the mutation.
+func (m *NodeMutation) ParentID() (id int, exists bool) {
+	if m.parent != nil {
+		return *m.parent, true
+	}
+	return
+}
+
 // ParentIDs returns the parent ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// ParentID instead. It exists only for internal usage by the builders.
 func (m *NodeMutation) ParentIDs() (ids []int) {
-	for id := range m.parent {
-		ids = append(ids, id)
+	if id := m.parent; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -327,15 +334,15 @@ func (m *NodeMutation) AddedEdges() []string {
 func (m *NodeMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case node.EdgeParent:
-		ids := make([]int, 0, len(m.parent))
-		for id := range m.parent {
-			ids = append(ids, id)
+		if id := m.parent; id != nil {
+			return []ent.Value{*id}
 		}
 	case node.EdgeChildren:
-		ids := make([]int, 0, len(m.children))
+		ids := make([]ent.Value, 0, len(m.children))
 		for id := range m.children {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -355,10 +362,11 @@ func (m *NodeMutation) RemovedEdges() []string {
 func (m *NodeMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case node.EdgeChildren:
-		ids := make([]int, 0, len(m.removedchildren))
+		ids := make([]ent.Value, 0, len(m.removedchildren))
 		for id := range m.removedchildren {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

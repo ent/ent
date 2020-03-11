@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -75,9 +74,6 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 	if _, ok := bc.mutation.UUID(); !ok {
 		v := blob.DefaultUUID()
 		bc.mutation.SetUUID(v)
-	}
-	if len(bc.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
 	}
 	var (
 		err  error

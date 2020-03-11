@@ -18,13 +18,22 @@ var (
 		{Name: "number", Type: field.TypeString, Default: "unknown"},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_cards", Type: field.TypeInt, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
-		Name:        "cards",
-		Columns:     CardsColumns,
-		PrimaryKey:  []*schema.Column{CardsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "cards",
+		Columns:    CardsColumns,
+		PrimaryKey: []*schema.Column{CardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "cards_users_cards",
+				Columns: []*schema.Column{CardsColumns[4]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -44,33 +53,6 @@ var (
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// UserCardsColumns holds the columns for the "user_cards" table.
-	UserCardsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt},
-		{Name: "card_id", Type: field.TypeInt},
-	}
-	// UserCardsTable holds the schema information for the "user_cards" table.
-	UserCardsTable = &schema.Table{
-		Name:       "user_cards",
-		Columns:    UserCardsColumns,
-		PrimaryKey: []*schema.Column{UserCardsColumns[0], UserCardsColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "user_cards_user_id",
-				Columns: []*schema.Column{UserCardsColumns[0]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:  "user_cards_card_id",
-				Columns: []*schema.Column{UserCardsColumns[1]},
-
-				RefColumns: []*schema.Column{CardsColumns[0]},
-				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -105,15 +87,13 @@ var (
 	Tables = []*schema.Table{
 		CardsTable,
 		UsersTable,
-		UserCardsTable,
 		UserFriendsTable,
 	}
 )
 
 func init() {
+	CardsTable.ForeignKeys[0].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
-	UserCardsTable.ForeignKeys[0].RefTable = UsersTable
-	UserCardsTable.ForeignKeys[1].RefTable = CardsTable
 	UserFriendsTable.ForeignKeys[0].RefTable = UsersTable
 	UserFriendsTable.ForeignKeys[1].RefTable = UsersTable
 }

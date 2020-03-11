@@ -84,9 +84,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(uc.mutation.BestFriendIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"best_friend\"")
-	}
 	var (
 		err  error
 		node *User
@@ -143,10 +140,10 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	if nodes := uc.mutation.CardsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   user.CardsTable,
-			Columns: user.CardsPrimaryKey,
+			Columns: []string{user.CardsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

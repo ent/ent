@@ -40,7 +40,7 @@ type CarMutation struct {
 	model         *string
 	registered_at *time.Time
 	clearedFields map[string]bool
-	owner         map[int]struct{}
+	owner         *int
 	clearedowner  bool
 }
 
@@ -56,7 +56,7 @@ func newCarMutation(c config, op Op) *CarMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m CarMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -124,10 +124,7 @@ func (m *CarMutation) ResetRegisteredAt() {
 
 // SetOwnerID sets the owner edge to User by id.
 func (m *CarMutation) SetOwnerID(id int) {
-	if m.owner == nil {
-		m.owner = make(map[int]struct{})
-	}
-	m.owner[id] = struct{}{}
+	m.owner = &id
 }
 
 // ClearOwner clears the owner edge to User.
@@ -140,10 +137,20 @@ func (m *CarMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
 
+// OwnerID returns the owner id in the mutation.
+func (m *CarMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
 // OwnerIDs returns the owner ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
 func (m *CarMutation) OwnerIDs() (ids []int) {
-	for id := range m.owner {
-		ids = append(ids, id)
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -284,9 +291,8 @@ func (m *CarMutation) AddedEdges() []string {
 func (m *CarMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case car.EdgeOwner:
-		ids := make([]int, 0, len(m.owner))
-		for id := range m.owner {
-			ids = append(ids, id)
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -375,7 +381,7 @@ func newGroupMutation(c config, op Op) *GroupMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m GroupMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -579,10 +585,11 @@ func (m *GroupMutation) AddedEdges() []string {
 func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case group.EdgeUsers:
-		ids := make([]int, 0, len(m.users))
+		ids := make([]ent.Value, 0, len(m.users))
 		for id := range m.users {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -602,10 +609,11 @@ func (m *GroupMutation) RemovedEdges() []string {
 func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case group.EdgeUsers:
-		ids := make([]int, 0, len(m.removedusers))
+		ids := make([]ent.Value, 0, len(m.removedusers))
 		for id := range m.removedusers {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -674,7 +682,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -992,15 +1000,17 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCars:
-		ids := make([]int, 0, len(m.cars))
+		ids := make([]ent.Value, 0, len(m.cars))
 		for id := range m.cars {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeGroups:
-		ids := make([]int, 0, len(m.groups))
+		ids := make([]ent.Value, 0, len(m.groups))
 		for id := range m.groups {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -1023,15 +1033,17 @@ func (m *UserMutation) RemovedEdges() []string {
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCars:
-		ids := make([]int, 0, len(m.removedcars))
+		ids := make([]ent.Value, 0, len(m.removedcars))
 		for id := range m.removedcars {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeGroups:
-		ids := make([]int, 0, len(m.removedgroups))
+		ids := make([]ent.Value, 0, len(m.removedgroups))
 		for id := range m.removedgroups {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

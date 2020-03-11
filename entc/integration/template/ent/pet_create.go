@@ -69,9 +69,6 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	if _, ok := pc.mutation.Age(); !ok {
 		return nil, errors.New("ent: missing required field \"age\"")
 	}
-	if len(pc.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
 	var (
 		err  error
 		node *Pet

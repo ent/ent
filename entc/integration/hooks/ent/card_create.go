@@ -66,19 +66,23 @@ func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
 	return cc
 }
 
-// AddOwnerIDs adds the owner edge to User by ids.
-func (cc *CardCreate) AddOwnerIDs(ids ...int) *CardCreate {
-	cc.mutation.AddOwnerIDs(ids...)
+// SetOwnerID sets the owner edge to User by id.
+func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
+	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
-// AddOwner adds the owner edges to User.
-func (cc *CardCreate) AddOwner(u ...*User) *CardCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (cc *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
+	if id != nil {
+		cc = cc.SetOwnerID(*id)
 	}
-	return cc.AddOwnerIDs(ids...)
+	return cc
+}
+
+// SetOwner sets the owner edge to User.
+func (cc *CardCreate) SetOwner(u *User) *CardCreate {
+	return cc.SetOwnerID(u.ID)
 }
 
 // Save creates the Card in the database.
@@ -168,10 +172,10 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   card.OwnerTable,
-			Columns: card.OwnerPrimaryKey,
+			Columns: []string{card.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

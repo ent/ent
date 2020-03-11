@@ -8,7 +8,6 @@ package entv1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -60,9 +59,7 @@ func (cu *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	if len(cu.mutation.OwnerIDs()) > 1 {
-		return 0, errors.New("entv1: multiple assignments on a unique edge \"owner\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -209,9 +206,7 @@ func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	if len(cuo.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("entv1: multiple assignments on a unique edge \"owner\"")
-	}
+
 	var (
 		err  error
 		node *Car

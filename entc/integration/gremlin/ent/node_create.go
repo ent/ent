@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -80,12 +79,6 @@ func (nc *NodeCreate) SetNext(n *Node) *NodeCreate {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	if len(nc.mutation.PrevIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"prev\"")
-	}
-	if len(nc.mutation.NextIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
-	}
 	var (
 		err  error
 		node *Node

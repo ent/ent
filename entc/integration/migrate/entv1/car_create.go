@@ -8,7 +8,6 @@ package entv1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -45,9 +44,6 @@ func (cc *CarCreate) SetOwner(u *User) *CarCreate {
 
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
-	if len(cc.mutation.OwnerIDs()) > 1 {
-		return nil, errors.New("entv1: multiple assignments on a unique edge \"owner\"")
-	}
 	var (
 		err  error
 		node *Car

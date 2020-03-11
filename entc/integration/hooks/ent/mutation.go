@@ -39,8 +39,8 @@ type CardMutation struct {
 	name          *string
 	created_at    *time.Time
 	clearedFields map[string]bool
-	owner         map[int]struct{}
-	removedowner  map[int]struct{}
+	owner         *int
+	clearedowner  bool
 }
 
 var _ ent.Mutation = (*CardMutation)(nil)
@@ -55,7 +55,7 @@ func newCardMutation(c config, op Op) *CardMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m CardMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -152,38 +152,35 @@ func (m *CardMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// AddOwnerIDs adds the owner edge to User by ids.
-func (m *CardMutation) AddOwnerIDs(ids ...int) {
-	if m.owner == nil {
-		m.owner = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.owner[ids[i]] = struct{}{}
-	}
+// SetOwnerID sets the owner edge to User by id.
+func (m *CardMutation) SetOwnerID(id int) {
+	m.owner = &id
 }
 
-// RemoveOwnerIDs removes the owner edge to User by ids.
-func (m *CardMutation) RemoveOwnerIDs(ids ...int) {
-	if m.removedowner == nil {
-		m.removedowner = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedowner[ids[i]] = struct{}{}
-	}
+// ClearOwner clears the owner edge to User.
+func (m *CardMutation) ClearOwner() {
+	m.clearedowner = true
 }
 
-// RemovedOwner returns the removed ids of owner.
-func (m *CardMutation) RemovedOwnerIDs() (ids []int) {
-	for id := range m.removedowner {
-		ids = append(ids, id)
+// OwnerCleared returns if the edge owner was cleared.
+func (m *CardMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the owner id in the mutation.
+func (m *CardMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
 	}
 	return
 }
 
 // OwnerIDs returns the owner ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
 func (m *CardMutation) OwnerIDs() (ids []int) {
-	for id := range m.owner {
-		ids = append(ids, id)
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -191,7 +188,7 @@ func (m *CardMutation) OwnerIDs() (ids []int) {
 // ResetOwner reset all changes of the owner edge.
 func (m *CardMutation) ResetOwner() {
 	m.owner = nil
-	m.removedowner = nil
+	m.clearedowner = false
 }
 
 // Op returns the operation name.
@@ -348,9 +345,8 @@ func (m *CardMutation) AddedEdges() []string {
 func (m *CardMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case card.EdgeOwner:
-		ids := make([]int, 0, len(m.owner))
-		for id := range m.owner {
-			ids = append(ids, id)
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -360,9 +356,6 @@ func (m *CardMutation) AddedIDs(name string) []ent.Value {
 // mutation.
 func (m *CardMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedowner != nil {
-		edges = append(edges, card.EdgeOwner)
-	}
 	return edges
 }
 
@@ -370,11 +363,6 @@ func (m *CardMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *CardMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case card.EdgeOwner:
-		ids := make([]int, 0, len(m.removedowner))
-		for id := range m.removedowner {
-			ids = append(ids, id)
-		}
 	}
 	return nil
 }
@@ -383,6 +371,9 @@ func (m *CardMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *CardMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedowner {
+		edges = append(edges, card.EdgeOwner)
+	}
 	return edges
 }
 
@@ -390,6 +381,8 @@ func (m *CardMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *CardMutation) EdgeCleared(name string) bool {
 	switch name {
+	case card.EdgeOwner:
+		return m.clearedowner
 	}
 	return false
 }
@@ -398,6 +391,9 @@ func (m *CardMutation) EdgeCleared(name string) bool {
 // error if the edge name is not defined in the schema.
 func (m *CardMutation) ClearEdge(name string) error {
 	switch name {
+	case card.EdgeOwner:
+		m.ClearOwner()
+		return nil
 	}
 	return fmt.Errorf("unknown Card unique edge %s", name)
 }
@@ -427,7 +423,7 @@ type UserMutation struct {
 	removedcards       map[int]struct{}
 	friends            map[int]struct{}
 	removedfriends     map[int]struct{}
-	best_friend        map[int]struct{}
+	best_friend        *int
 	clearedbest_friend bool
 }
 
@@ -443,7 +439,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -576,10 +572,7 @@ func (m *UserMutation) ResetFriends() {
 
 // SetBestFriendID sets the best_friend edge to User by id.
 func (m *UserMutation) SetBestFriendID(id int) {
-	if m.best_friend == nil {
-		m.best_friend = make(map[int]struct{})
-	}
-	m.best_friend[id] = struct{}{}
+	m.best_friend = &id
 }
 
 // ClearBestFriend clears the best_friend edge to User.
@@ -592,10 +585,20 @@ func (m *UserMutation) BestFriendCleared() bool {
 	return m.clearedbest_friend
 }
 
+// BestFriendID returns the best_friend id in the mutation.
+func (m *UserMutation) BestFriendID() (id int, exists bool) {
+	if m.best_friend != nil {
+		return *m.best_friend, true
+	}
+	return
+}
+
 // BestFriendIDs returns the best_friend ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// BestFriendID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) BestFriendIDs() (ids []int) {
-	for id := range m.best_friend {
-		ids = append(ids, id)
+	if id := m.best_friend; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -727,19 +730,20 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCards:
-		ids := make([]int, 0, len(m.cards))
+		ids := make([]ent.Value, 0, len(m.cards))
 		for id := range m.cards {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeFriends:
-		ids := make([]int, 0, len(m.friends))
+		ids := make([]ent.Value, 0, len(m.friends))
 		for id := range m.friends {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeBestFriend:
-		ids := make([]int, 0, len(m.best_friend))
-		for id := range m.best_friend {
-			ids = append(ids, id)
+		if id := m.best_friend; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -763,15 +767,17 @@ func (m *UserMutation) RemovedEdges() []string {
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCards:
-		ids := make([]int, 0, len(m.removedcards))
+		ids := make([]ent.Value, 0, len(m.removedcards))
 		for id := range m.removedcards {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeFriends:
-		ids := make([]int, 0, len(m.removedfriends))
+		ids := make([]ent.Value, 0, len(m.removedfriends))
 		for id := range m.removedfriends {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

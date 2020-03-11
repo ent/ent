@@ -68,7 +68,7 @@ func (uq *UserQuery) QueryCards() *CardQuery {
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
 		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, user.CardsTable, user.CardsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.CardsTable, user.CardsColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 	return query
@@ -384,64 +384,29 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withCards; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*User, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*User)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   user.CardsTable,
-				Columns: user.CardsPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.CardsPrimaryKey[0], fks...))
-			},
-
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				edgeids = append(edgeids, inValue)
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "cards": %v`, err)
-		}
-		query.Where(card.IDIn(edgeids...))
+		query.withFKs = true
+		query.Where(predicate.Card(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CardsColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			fk := n.user_cards
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_cards" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "cards" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_cards" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Cards = append(nodes[i].Edges.Cards, n)
-			}
+			node.Edges.Cards = append(node.Edges.Cards, n)
 		}
 	}
 

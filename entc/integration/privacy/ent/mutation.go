@@ -52,7 +52,7 @@ func newPlanetMutation(c config, op Op) *PlanetMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m PlanetMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -347,10 +347,11 @@ func (m *PlanetMutation) AddedEdges() []string {
 func (m *PlanetMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case planet.EdgeNeighbors:
-		ids := make([]int, 0, len(m.neighbors))
+		ids := make([]ent.Value, 0, len(m.neighbors))
 		for id := range m.neighbors {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -370,10 +371,11 @@ func (m *PlanetMutation) RemovedEdges() []string {
 func (m *PlanetMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case planet.EdgeNeighbors:
-		ids := make([]int, 0, len(m.removedneighbors))
+		ids := make([]ent.Value, 0, len(m.removedneighbors))
 		for id := range m.removedneighbors {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

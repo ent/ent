@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -493,18 +492,7 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return 0, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
 		}
 	}
-	if len(uu.mutation.CardIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"card\"")
-	}
-	if len(uu.mutation.TeamIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"team\"")
-	}
-	if len(uu.mutation.SpouseIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
-	}
-	if len(uu.mutation.ParentIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -1617,18 +1605,7 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
 		}
 	}
-	if len(uuo.mutation.CardIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
-	}
-	if len(uuo.mutation.TeamIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
-	}
-	if len(uuo.mutation.SpouseIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
-	}
-	if len(uuo.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
+
 	var (
 		err  error
 		node *User

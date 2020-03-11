@@ -175,9 +175,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
 		}
 	}
-	if len(uc.mutation.PetsIDs()) > 1 {
-		return nil, errors.New("entv2: multiple assignments on a unique edge \"pets\"")
-	}
 	var (
 		err  error
 		node *User

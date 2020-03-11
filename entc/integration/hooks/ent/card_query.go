@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -31,6 +30,7 @@ type CardQuery struct {
 	predicates []predicate.Card
 	// eager-loading edges.
 	withOwner *UserQuery
+	withFKs   bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -65,7 +65,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 	step := sqlgraph.NewStep(
 		sqlgraph.From(card.Table, card.FieldID, cq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, card.OwnerTable, card.OwnerPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, card.OwnerTable, card.OwnerColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 	return query
@@ -295,15 +295,25 @@ func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
 		nodes       = []*Card{}
+		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
 			cq.withOwner != nil,
 		}
 	)
+	if cq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Card{config: cq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -322,64 +332,26 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	}
 
 	if query := cq.withOwner; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Card, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Card)
+		for i := range nodes {
+			if fk := nodes[i].user_cards; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*Card)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   card.OwnerTable,
-				Columns: card.OwnerPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(card.OwnerPrimaryKey[1], fks...))
-			},
-
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				edgeids = append(edgeids, inValue)
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "owner": %v`, err)
-		}
-		query.Where(user.IDIn(edgeids...))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "owner" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_cards" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Owner = append(nodes[i].Edges.Owner, n)
+				nodes[i].Edges.Owner = n
 			}
 		}
 	}

@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -96,9 +95,7 @@ func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
-	if len(bu.mutation.ParentIDs()) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
+
 	var (
 		err      error
 		affected int
@@ -326,9 +323,7 @@ func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-	if len(buo.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
+
 	var (
 		err  error
 		node *Blob

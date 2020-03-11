@@ -219,7 +219,7 @@ func HasCards() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(CardsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, CardsTable, CardsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -231,7 +231,7 @@ func HasCardsWith(preds ...predicate.Card) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(CardsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, CardsTable, CardsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

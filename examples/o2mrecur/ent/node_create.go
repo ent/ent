@@ -68,9 +68,6 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	if _, ok := nc.mutation.Value(); !ok {
 		return nil, errors.New("ent: missing required field \"value\"")
 	}
-	if len(nc.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
 	var (
 		err  error
 		node *Node

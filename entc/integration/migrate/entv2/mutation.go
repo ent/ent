@@ -37,7 +37,7 @@ type CarMutation struct {
 	typ           string
 	id            *int
 	clearedFields map[string]bool
-	owner         map[int]struct{}
+	owner         *int
 	clearedowner  bool
 }
 
@@ -53,7 +53,7 @@ func newCarMutation(c config, op Op) *CarMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m CarMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -83,10 +83,7 @@ func (m *CarMutation) ID() (id int, exists bool) {
 
 // SetOwnerID sets the owner edge to User by id.
 func (m *CarMutation) SetOwnerID(id int) {
-	if m.owner == nil {
-		m.owner = make(map[int]struct{})
-	}
-	m.owner[id] = struct{}{}
+	m.owner = &id
 }
 
 // ClearOwner clears the owner edge to User.
@@ -99,10 +96,20 @@ func (m *CarMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
 
+// OwnerID returns the owner id in the mutation.
+func (m *CarMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
 // OwnerIDs returns the owner ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
 func (m *CarMutation) OwnerIDs() (ids []int) {
-	for id := range m.owner {
-		ids = append(ids, id)
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -213,9 +220,8 @@ func (m *CarMutation) AddedEdges() []string {
 func (m *CarMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case car.EdgeOwner:
-		ids := make([]int, 0, len(m.owner))
-		for id := range m.owner {
-			ids = append(ids, id)
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -301,7 +307,7 @@ func newGroupMutation(c config, op Op) *GroupMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m GroupMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -496,7 +502,7 @@ func newPetMutation(c config, op Op) *PetMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m PetMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -689,7 +695,7 @@ type UserMutation struct {
 	clearedFields map[string]bool
 	car           map[int]struct{}
 	removedcar    map[int]struct{}
-	pets          map[int]struct{}
+	pets          *int
 	clearedpets   bool
 }
 
@@ -705,7 +711,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -1022,10 +1028,7 @@ func (m *UserMutation) ResetCar() {
 
 // SetPetsID sets the pets edge to Pet by id.
 func (m *UserMutation) SetPetsID(id int) {
-	if m.pets == nil {
-		m.pets = make(map[int]struct{})
-	}
-	m.pets[id] = struct{}{}
+	m.pets = &id
 }
 
 // ClearPets clears the pets edge to Pet.
@@ -1038,10 +1041,20 @@ func (m *UserMutation) PetsCleared() bool {
 	return m.clearedpets
 }
 
+// PetsID returns the pets id in the mutation.
+func (m *UserMutation) PetsID() (id int, exists bool) {
+	if m.pets != nil {
+		return *m.pets, true
+	}
+	return
+}
+
 // PetsIDs returns the pets ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// PetsID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) PetsIDs() (ids []int) {
-	for id := range m.pets {
-		ids = append(ids, id)
+	if id := m.pets; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -1332,14 +1345,14 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCar:
-		ids := make([]int, 0, len(m.car))
+		ids := make([]ent.Value, 0, len(m.car))
 		for id := range m.car {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgePets:
-		ids := make([]int, 0, len(m.pets))
-		for id := range m.pets {
-			ids = append(ids, id)
+		if id := m.pets; id != nil {
+			return []ent.Value{*id}
 		}
 	}
 	return nil
@@ -1360,10 +1373,11 @@ func (m *UserMutation) RemovedEdges() []string {
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeCar:
-		ids := make([]int, 0, len(m.removedcar))
+		ids := make([]ent.Value, 0, len(m.removedcar))
 		for id := range m.removedcar {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

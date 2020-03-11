@@ -34,7 +34,7 @@ type UserMutation struct {
 	id               *uint64
 	name             *string
 	clearedFields    map[string]bool
-	spouse           map[uint64]struct{}
+	spouse           *uint64
 	clearedspouse    bool
 	followers        map[uint64]struct{}
 	removedfollowers map[uint64]struct{}
@@ -54,7 +54,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -103,10 +103,7 @@ func (m *UserMutation) ResetName() {
 
 // SetSpouseID sets the spouse edge to User by id.
 func (m *UserMutation) SetSpouseID(id uint64) {
-	if m.spouse == nil {
-		m.spouse = make(map[uint64]struct{})
-	}
-	m.spouse[id] = struct{}{}
+	m.spouse = &id
 }
 
 // ClearSpouse clears the spouse edge to User.
@@ -119,10 +116,20 @@ func (m *UserMutation) SpouseCleared() bool {
 	return m.clearedspouse
 }
 
+// SpouseID returns the spouse id in the mutation.
+func (m *UserMutation) SpouseID() (id uint64, exists bool) {
+	if m.spouse != nil {
+		return *m.spouse, true
+	}
+	return
+}
+
 // SpouseIDs returns the spouse ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// SpouseID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) SpouseIDs() (ids []uint64) {
-	for id := range m.spouse {
-		ids = append(ids, id)
+	if id := m.spouse; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -338,20 +345,21 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeSpouse:
-		ids := make([]uint64, 0, len(m.spouse))
-		for id := range m.spouse {
-			ids = append(ids, id)
+		if id := m.spouse; id != nil {
+			return []ent.Value{*id}
 		}
 	case user.EdgeFollowers:
-		ids := make([]uint64, 0, len(m.followers))
+		ids := make([]ent.Value, 0, len(m.followers))
 		for id := range m.followers {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeFollowing:
-		ids := make([]uint64, 0, len(m.following))
+		ids := make([]ent.Value, 0, len(m.following))
 		for id := range m.following {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -374,15 +382,17 @@ func (m *UserMutation) RemovedEdges() []string {
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeFollowers:
-		ids := make([]uint64, 0, len(m.removedfollowers))
+		ids := make([]ent.Value, 0, len(m.removedfollowers))
 		for id := range m.removedfollowers {
 			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeFollowing:
-		ids := make([]uint64, 0, len(m.removedfollowing))
+		ids := make([]ent.Value, 0, len(m.removedfollowing))
 		for id := range m.removedfollowing {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

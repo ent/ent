@@ -80,14 +80,17 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("entv2: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
-	return &Tx{
-		config: cfg,
-		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
-	}, nil
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	txc := &Tx{config: cfg}
+	txc.Car = NewCarClient(cfg)
+	txc.Car.hooks = c.Car.hooks
+	txc.Group = NewGroupClient(cfg)
+	txc.Group.hooks = c.Group.hooks
+	txc.Pet = NewPetClient(cfg)
+	txc.Pet.hooks = c.Pet.hooks
+	txc.User = NewUserClient(cfg)
+	txc.User.hooks = c.User.hooks
+	return txc, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -101,7 +104,7 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
 	client := &Client{config: cfg}
 	client.init()
 	return client

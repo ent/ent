@@ -64,6 +64,7 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
+
 	var (
 		err      error
 		affected int
@@ -186,6 +187,7 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
+
 	var (
 		err  error
 		node *Spec

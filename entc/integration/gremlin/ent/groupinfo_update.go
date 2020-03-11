@@ -93,6 +93,7 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
+
 	var (
 		err      error
 		affected int
@@ -270,6 +271,7 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
+
 	var (
 		err  error
 		node *GroupInfo

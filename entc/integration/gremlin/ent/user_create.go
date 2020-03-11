@@ -329,18 +329,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
 		}
 	}
-	if len(uc.mutation.CardIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
-	}
-	if len(uc.mutation.TeamIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
-	}
-	if len(uc.mutation.SpouseIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
-	}
-	if len(uc.mutation.ParentIDs()) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
 	var (
 		err  error
 		node *User

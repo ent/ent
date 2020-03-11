@@ -90,6 +90,7 @@ func (pu *PlanetUpdate) RemoveNeighbors(p ...*Planet) *PlanetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PlanetUpdate) Save(ctx context.Context) (int, error) {
+
 	var (
 		err      error
 		affected int
@@ -291,6 +292,7 @@ func (puo *PlanetUpdateOne) RemoveNeighbors(p ...*Planet) *PlanetUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (puo *PlanetUpdateOne) Save(ctx context.Context) (*Planet, error) {
+
 	var (
 		err  error
 		node *Planet

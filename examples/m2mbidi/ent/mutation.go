@@ -52,7 +52,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 	}
 }
 
-// Client returns an `ent.Client` from the mutation. If the mutation was
+// Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
@@ -325,10 +325,11 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeFriends:
-		ids := make([]int, 0, len(m.friends))
+		ids := make([]ent.Value, 0, len(m.friends))
 		for id := range m.friends {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -348,10 +349,11 @@ func (m *UserMutation) RemovedEdges() []string {
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeFriends:
-		ids := make([]int, 0, len(m.removedfriends))
+		ids := make([]ent.Value, 0, len(m.removedfriends))
 		for id := range m.removedfriends {
 			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }

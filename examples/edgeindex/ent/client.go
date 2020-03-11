@@ -72,12 +72,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
-	return &Tx{
-		config: cfg,
-		City:   NewCityClient(cfg),
-		Street: NewStreetClient(cfg),
-	}, nil
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	txc := &Tx{config: cfg}
+	txc.City = NewCityClient(cfg)
+	txc.City.hooks = c.City.hooks
+	txc.Street = NewStreetClient(cfg)
+	txc.Street.hooks = c.Street.hooks
+	return txc, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -91,7 +92,7 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
 	client := &Client{config: cfg}
 	client.init()
 	return client

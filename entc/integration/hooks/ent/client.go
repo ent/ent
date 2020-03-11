@@ -72,12 +72,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
-	return &Tx{
-		config: cfg,
-		Card:   NewCardClient(cfg),
-		User:   NewUserClient(cfg),
-	}, nil
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	txc := &Tx{config: cfg}
+	txc.Card = NewCardClient(cfg)
+	txc.Card.hooks = c.Card.hooks
+	txc.User = NewUserClient(cfg)
+	txc.User.hooks = c.User.hooks
+	return txc, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -91,7 +92,7 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -198,7 +199,7 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	step := sqlgraph.NewStep(
 		sqlgraph.From(card.Table, card.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, card.OwnerTable, card.OwnerPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, card.OwnerTable, card.OwnerColumn),
 	)
 	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 
@@ -294,7 +295,7 @@ func (c *UserClient) QueryCards(u *User) *CardQuery {
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, user.CardsTable, user.CardsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, user.CardsTable, user.CardsColumn),
 	)
 	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
