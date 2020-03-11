@@ -31,7 +31,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println}
+	cfg := config{log: log.Println, hooks: &hooks{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -69,10 +69,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
-	txc := &Tx{config: cfg}
-	txc.Node = NewNodeClient(cfg)
-	txc.Node.hooks = c.Node.hooks
-	return txc, nil
+	return &Tx{
+		config: cfg,
+		Node:   NewNodeClient(cfg),
+	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -116,21 +116,19 @@ func NewNodeClient(c config) *NodeClient {
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `node.Hooks(f(g(h())))`.
 func (c *NodeClient) Use(hooks ...Hook) {
-	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+	c.hooks.Node = append(c.hooks.Node, hooks...)
 }
 
 // Create returns a create builder for Node.
 func (c *NodeClient) Create() *NodeCreate {
-	hooks := c.hooks
 	mutation := newNodeMutation(c.config, OpCreate)
-	return &NodeCreate{config: c.config, hooks: hooks, mutation: mutation}
+	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for Node.
 func (c *NodeClient) Update() *NodeUpdate {
-	hooks := c.hooks
 	mutation := newNodeMutation(c.config, OpUpdate)
-	return &NodeUpdate{config: c.config, hooks: hooks, mutation: mutation}
+	return &NodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -140,17 +138,15 @@ func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
-	hooks := c.hooks
 	mutation := newNodeMutation(c.config, OpUpdateOne)
 	mutation.id = &id
-	return &NodeUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
+	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Node.
 func (c *NodeClient) Delete() *NodeDelete {
-	hooks := c.hooks
 	mutation := newNodeMutation(c.config, OpDelete)
-	return &NodeDelete{config: c.config, hooks: hooks, mutation: mutation}
+	return &NodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -211,4 +207,9 @@ func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
 	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
 
 	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NodeClient) Hooks() []Hook {
+	return c.hooks.Node
 }

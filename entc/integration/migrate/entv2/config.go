@@ -23,7 +23,15 @@ type config struct {
 	// log used for logging on debug mode.
 	log func(...interface{})
 	// hooks to execute on mutations.
-	hooks []ent.Hook
+	hooks *hooks
+}
+
+// hooks per client, for fast access.
+type hooks struct {
+	Car   []ent.Hook
+	Group []ent.Hook
+	Pet   []ent.Hook
+	User  []ent.Hook
 }
 
 // Options applies the options on the config object.

@@ -31,7 +31,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println}
+	cfg := config{log: log.Println, hooks: &hooks{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -69,10 +69,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
-	txc := &Tx{config: cfg}
-	txc.Planet = NewPlanetClient(cfg)
-	txc.Planet.hooks = c.Planet.hooks
-	return txc, nil
+	return &Tx{
+		config: cfg,
+		Planet: NewPlanetClient(cfg),
+	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -116,21 +116,19 @@ func NewPlanetClient(c config) *PlanetClient {
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `planet.Hooks(f(g(h())))`.
 func (c *PlanetClient) Use(hooks ...Hook) {
-	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+	c.hooks.Planet = append(c.hooks.Planet, hooks...)
 }
 
 // Create returns a create builder for Planet.
 func (c *PlanetClient) Create() *PlanetCreate {
-	hooks := append(planet.Hooks[:], c.hooks...)
 	mutation := newPlanetMutation(c.config, OpCreate)
-	return &PlanetCreate{config: c.config, hooks: hooks, mutation: mutation}
+	return &PlanetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for Planet.
 func (c *PlanetClient) Update() *PlanetUpdate {
-	hooks := append(planet.Hooks[:], c.hooks...)
 	mutation := newPlanetMutation(c.config, OpUpdate)
-	return &PlanetUpdate{config: c.config, hooks: hooks, mutation: mutation}
+	return &PlanetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -140,17 +138,15 @@ func (c *PlanetClient) UpdateOne(pl *Planet) *PlanetUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *PlanetClient) UpdateOneID(id int) *PlanetUpdateOne {
-	hooks := append(planet.Hooks[:], c.hooks...)
 	mutation := newPlanetMutation(c.config, OpUpdateOne)
 	mutation.id = &id
-	return &PlanetUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
+	return &PlanetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Planet.
 func (c *PlanetClient) Delete() *PlanetDelete {
-	hooks := append(planet.Hooks[:], c.hooks...)
 	mutation := newPlanetMutation(c.config, OpDelete)
-	return &PlanetDelete{config: c.config, hooks: hooks, mutation: mutation}
+	return &PlanetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -197,4 +193,9 @@ func (c *PlanetClient) QueryNeighbors(pl *Planet) *PlanetQuery {
 	query.sql = sqlgraph.Neighbors(pl.driver.Dialect(), step)
 
 	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlanetClient) Hooks() []Hook {
+	return append(planet.Hooks[:], c.hooks.Planet...)
 }

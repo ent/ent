@@ -34,7 +34,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println}
+	cfg := config{log: log.Println, hooks: &hooks{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -73,12 +73,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
-	txc := &Tx{config: cfg}
-	txc.Card = NewCardClient(cfg)
-	txc.Card.hooks = c.Card.hooks
-	txc.User = NewUserClient(cfg)
-	txc.User.hooks = c.User.hooks
-	return txc, nil
+	return &Tx{
+		config: cfg,
+		Card:   NewCardClient(cfg),
+		User:   NewUserClient(cfg),
+	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -123,21 +122,19 @@ func NewCardClient(c config) *CardClient {
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `card.Hooks(f(g(h())))`.
 func (c *CardClient) Use(hooks ...Hook) {
-	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+	c.hooks.Card = append(c.hooks.Card, hooks...)
 }
 
 // Create returns a create builder for Card.
 func (c *CardClient) Create() *CardCreate {
-	hooks := c.hooks
 	mutation := newCardMutation(c.config, OpCreate)
-	return &CardCreate{config: c.config, hooks: hooks, mutation: mutation}
+	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for Card.
 func (c *CardClient) Update() *CardUpdate {
-	hooks := c.hooks
 	mutation := newCardMutation(c.config, OpUpdate)
-	return &CardUpdate{config: c.config, hooks: hooks, mutation: mutation}
+	return &CardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -147,17 +144,15 @@ func (c *CardClient) UpdateOne(ca *Card) *CardUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CardClient) UpdateOneID(id int) *CardUpdateOne {
-	hooks := c.hooks
 	mutation := newCardMutation(c.config, OpUpdateOne)
 	mutation.id = &id
-	return &CardUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
+	return &CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Card.
 func (c *CardClient) Delete() *CardDelete {
-	hooks := c.hooks
 	mutation := newCardMutation(c.config, OpDelete)
-	return &CardDelete{config: c.config, hooks: hooks, mutation: mutation}
+	return &CardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -206,6 +201,11 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	return query
 }
 
+// Hooks returns the client hooks.
+func (c *CardClient) Hooks() []Hook {
+	return c.hooks.Card
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -219,21 +219,19 @@ func NewUserClient(c config) *UserClient {
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+	c.hooks.User = append(c.hooks.User, hooks...)
 }
 
 // Create returns a create builder for User.
 func (c *UserClient) Create() *UserCreate {
-	hooks := c.hooks
 	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: hooks, mutation: mutation}
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
-	hooks := c.hooks
 	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: hooks, mutation: mutation}
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -243,17 +241,15 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	hooks := c.hooks
 	mutation := newUserMutation(c.config, OpUpdateOne)
 	mutation.id = &id
-	return &UserUpdateOne{config: c.config, hooks: hooks, mutation: mutation}
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for User.
 func (c *UserClient) Delete() *UserDelete {
-	hooks := c.hooks
 	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: hooks, mutation: mutation}
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -300,4 +296,9 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
 }

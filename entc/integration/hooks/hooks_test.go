@@ -28,7 +28,7 @@ func TestSchemaHooks(t *testing.T) {
 
 func TestRuntimeHooks(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", ent.Log(t.Log))
 	require.NoError(t, err)
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
@@ -42,6 +42,10 @@ func TestRuntimeHooks(t *testing.T) {
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
 	client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, 2, calls)
+	client = client.Debug()
+	client.Card.Create().SetNumber("1234").SaveX(ctx)
+	client.User.Create().SetName("a8m").SaveX(ctx)
+	require.Equal(t, 4, calls)
 }
 
 func TestMutationClient(t *testing.T) {
@@ -89,5 +93,4 @@ func TestMutationTx(t *testing.T) {
 	require.Nil(t, crd)
 	_, err = tx.Card.Query().All(ctx)
 	require.Error(t, err, "tx already rolled back")
-	// TODO: Transactional (and debug) client with hooks.
 }

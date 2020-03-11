@@ -30,16 +30,16 @@ type Client struct {
 		// Schema is the client for creating, migrating and dropping schema.
 		Schema *migrate.Schema
 	{{- end }}
-	{{ range $_, $n := $.Nodes -}}
+	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
-	{{ end }}
+	{{- end }}
 	{{ template "client/fields/additional" $ }}
 }
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println}
+	cfg := config{log: log.Println, hooks: &hooks{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -50,7 +50,7 @@ func (c *Client) init() {
 	{{- if $.SupportMigrate }}
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
-	{{- range $_, $n := $.Nodes }}
+	{{- range $n := $.Nodes }}
     	c.{{ $n.Name }} =  New{{ $n.Name }}Client(c.config)
 	{{- end }}
 }
@@ -78,12 +78,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		return nil, fmt.Errorf("{{ $pkg }}: starting a transaction: %v", err)
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
-	txc := &Tx{config: cfg}
-	{{- range $_, $n := $.Nodes }}
-		txc.{{ $n.Name }} = New{{ $n.Name }}Client(cfg)
-		txc.{{ $n.Name }}.hooks = c.{{ $n.Name }}.hooks
-    {{- end }}
-	return txc, nil
+	return &Tx{
+		config: cfg,
+		{{ range $_, $n := $.Nodes -}}
+			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
+		{{ end -}}
+	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
@@ -134,21 +134,19 @@ func New{{ $client }}(c config) *{{ $client }} {
 // Use adds a list of mutation hooks to the hooks stack.
 // A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
-	c.hooks = append(c.hooks[:len(c.hooks):len(c.hooks)], hooks...)
+	c.hooks.{{ $n.Name }} = append(c.hooks.{{ $n.Name }}, hooks...)
 }
 
 // Create returns a create builder for {{ $n.Name }}.
 func (c *{{ $client }}) Create() *{{ $n.Name }}Create {
-	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
 	mutation := new{{ $n.MutationName }}(c.config, OpCreate)
-	return &{{ $n.Name }}Create{config: c.config, hooks: hooks, mutation: mutation}
+	return &{{ $n.Name }}Create{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $n.Name }}Update {
-	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdate)
-	return &{{ $n.Name }}Update{config: c.config, hooks: hooks, mutation: mutation}
+	return &{{ $n.Name }}Update{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -158,17 +156,15 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}Updat
 
 // UpdateOneID returns an update builder for the given id.
 func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}UpdateOne {
-	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
 	mutation.id = &id
-	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: hooks, mutation: mutation}
+	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $n.Name }}Delete {
-	hooks := {{ if $n.NumHooks }}append({{ $n.Package }}.Hooks[:], c.hooks...){{ else }}c.hooks{{ end }}
 	mutation := new{{ $n.MutationName }}(c.config, OpDelete)
-	return &{{ $n.Name }}Delete{config: c.config, hooks: hooks, mutation: mutation}
+	return &{{ $n.Name }}Delete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -215,6 +211,15 @@ func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{
 	return query
 }
 {{ end }}
+
+// Hooks returns the client hooks.
+func (c *{{ $client }}) Hooks() []Hook {
+	{{- if or $n.NumHooks $n.HasPolicy }}
+		return append({{ $n.Package }}.Hooks[:], c.hooks.{{ $n.Name }}...)
+	{{- else }}
+		return c.hooks.{{ $n.Name }}
+	{{- end }}
+}
 
 {{ end }}
 {{ end }}
