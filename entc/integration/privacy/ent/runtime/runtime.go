@@ -18,18 +18,18 @@ import (
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
+	planetHooks := schema.Planet{}.Hooks()
+	for i, h := range planetHooks {
+		planet.Hooks[i] = h
+	}
 	policy := schema.Planet{}.Policy()
-	planet.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	planet.Hooks[1] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			if err := policy.EvalWrite(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
-	}
-	planetHooks := schema.Planet{}.Hooks()
-	for i, h := range planetHooks {
-		planet.Hooks[i+1] = h
 	}
 	planetFields := schema.Planet{}.Fields()
 	// planetDescName is the schema descriptor for name field.
