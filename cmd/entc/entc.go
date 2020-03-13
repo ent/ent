@@ -69,12 +69,7 @@ func main() {
 				"entc describe github.com/a8m/x",
 			),
 			Args: cobra.ExactArgs(1),
-			Run: func(cmd *cobra.Command, path []string) {
-				graph, err := entc.LoadGraph(path[0], &gen.Config{})
-				failOnErr(err)
-				p := printer{os.Stdout}
-				p.Print(graph)
-			},
+			Run:  describe,
 		},
 		func() *cobra.Command {
 			var (
@@ -204,6 +199,13 @@ func examples(ex ...string) string {
 	return strings.Join(ex, "\n")
 }
 
+func describe(cmd *cobra.Command, path []string) {
+	graph, err := entc.LoadGraph(path[0], &gen.Config{})
+	failOnErr(err)
+	p := printer{os.Stdout}
+	p.Print(graph)
+}
+
 func clean(cmd *cobra.Command, path []string) {
 	cleanup := make([]string, 0)
 	cleanup = append(cleanup, filepath.Join(path[0], "migrate"))
@@ -222,7 +224,7 @@ func clean(cmd *cobra.Command, path []string) {
 			fnamePathWithoutExt := filepath.Join(path[0], strings.TrimRight(fname, ext))
 			cleanup = append(cleanup, fnamePathWithoutExt)
 			cleanup = append(cleanup, fnamePathWithoutExt+".go")
-			filepath.Walk(path[0], func(walkpath string, info os.FileInfo, err error) error {
+			_ = filepath.Walk(path[0], func(walkpath string, info os.FileInfo, err error) error {
 				match, _ := filepath.Match(fnamePathWithoutExt+"*", walkpath)
 				if match {
 					cleanup = append(cleanup, walkpath)
