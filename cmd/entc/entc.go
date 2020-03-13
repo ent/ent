@@ -222,10 +222,13 @@ func clean(cmd *cobra.Command, path []string) {
 			fnamePathWithoutExt := filepath.Join(path[0], strings.TrimRight(fname, ext))
 			cleanup = append(cleanup, fnamePathWithoutExt)
 			cleanup = append(cleanup, fnamePathWithoutExt+".go")
-			cleanup = append(cleanup, fnamePathWithoutExt+"_create.go")
-			cleanup = append(cleanup, fnamePathWithoutExt+"_delete.go")
-			cleanup = append(cleanup, fnamePathWithoutExt+"_query.go")
-			cleanup = append(cleanup, fnamePathWithoutExt+"_update.go")
+			filepath.Walk(path[0], func(walkpath string, info os.FileInfo, err error) error {
+				match, _ := filepath.Match(fnamePathWithoutExt+"*", walkpath)
+				if match {
+					cleanup = append(cleanup, walkpath)
+				}
+				return nil
+			})
 		}
 	}
 	// remove files and directories
