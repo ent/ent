@@ -115,6 +115,43 @@ func main() {
 			cmd.Flags().StringSliceVarP(&template, "template", "", nil, "external templates to execute")
 			return cmd
 		}(),
+		&cobra.Command{
+			Use:   "clean [flags] path",
+			Short: "delete generated go code",
+			Example: examples(
+				"entc clean ./ent",
+			),
+			Args: cobra.ExactArgs(1),
+			Run: func(cmd *cobra.Command, path []string) {
+				cleanup := make([]string, 0)
+				cleanup = append(cleanup, filepath.Join(path[0], "migrate"))
+				cleanup = append(cleanup, filepath.Join(path[0], "predicate"))
+				cleanup = append(cleanup, filepath.Join(path[0], "client.go"))
+				cleanup = append(cleanup, filepath.Join(path[0], "config.go"))
+				cleanup = append(cleanup, filepath.Join(path[0], "context.go"))
+				cleanup = append(cleanup, filepath.Join(path[0], "ent.go"))
+				cleanup = append(cleanup, filepath.Join(path[0], "tx.go"))
+				schemaDir, err := ioutil.ReadDir(filepath.Join(path[0], "schema"))
+				failOnErr(err)
+				for i := 0; i < len(schemaDir); i++ {
+					fname := schemaDir[i].Name()
+					ext := filepath.Ext(fname)
+					if ext == ".go" {
+						fnamePathWithoutExt := filepath.Join(path[0], strings.TrimRight(fname, ext))
+						cleanup = append(cleanup, fnamePathWithoutExt)
+						cleanup = append(cleanup, fnamePathWithoutExt+".go")
+						cleanup = append(cleanup, fnamePathWithoutExt+"_create.go")
+						cleanup = append(cleanup, fnamePathWithoutExt+"_delete.go")
+						cleanup = append(cleanup, fnamePathWithoutExt+"_query.go")
+						cleanup = append(cleanup, fnamePathWithoutExt+"_update.go")
+					}
+				}
+				// remove files and directories
+				for i := 0; i < len(cleanup); i++ {
+					os.RemoveAll(cleanup[i])
+				}
+			},
+		},
 	)
 	cmd.Execute()
 }
