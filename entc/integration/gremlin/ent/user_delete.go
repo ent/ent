@@ -50,8 +50,8 @@ func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = ud.gremlinExec(ctx)
 			return affected, err
 		})
-		for _, hook := range ud.hooks {
-			mut = hook(mut)
+		for i := len(ud.hooks); i > 0; i-- {
+			mut = ud.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, ud.mutation); err != nil {
 			return 0, err

@@ -107,8 +107,8 @@ func (pu *PlanetUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = pu.sqlSave(ctx)
 			return affected, err
 		})
-		for _, hook := range pu.hooks {
-			mut = hook(mut)
+		for i := len(pu.hooks); i > 0; i-- {
+			mut = pu.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
 			return 0, err
@@ -309,8 +309,8 @@ func (puo *PlanetUpdateOne) Save(ctx context.Context) (*Planet, error) {
 			node, err = puo.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range puo.hooks {
-			mut = hook(mut)
+		for i := len(puo.hooks); i > 0; i-- {
+			mut = puo.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
 			return nil, err

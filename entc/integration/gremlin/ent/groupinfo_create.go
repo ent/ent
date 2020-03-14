@@ -87,8 +87,8 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 			node, err = gic.gremlinSave(ctx)
 			return node, err
 		})
-		for _, hook := range gic.hooks {
-			mut = hook(mut)
+		for i := len(gic.hooks); i > 0; i-- {
+			mut = gic.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
 			return nil, err

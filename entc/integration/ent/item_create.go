@@ -41,8 +41,8 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 			node, err = ic.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range ic.hooks {
-			mut = hook(mut)
+		for i := len(ic.hooks); i > 0; i-- {
+			mut = ic.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
 			return nil, err

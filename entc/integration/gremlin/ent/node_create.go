@@ -95,8 +95,8 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			node, err = nc.gremlinSave(ctx)
 			return node, err
 		})
-		for _, hook := range nc.hooks {
-			mut = hook(mut)
+		for i := len(nc.hooks); i > 0; i-- {
+			mut = nc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
 			return nil, err

@@ -175,8 +175,8 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = fu.sqlSave(ctx)
 			return affected, err
 		})
-		for _, hook := range fu.hooks {
-			mut = hook(mut)
+		for i := len(fu.hooks); i > 0; i-- {
+			mut = fu.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, fu.mutation); err != nil {
 			return 0, err
@@ -509,8 +509,8 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 			node, err = fuo.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range fuo.hooks {
-			mut = hook(mut)
+		for i := len(fuo.hooks); i > 0; i-- {
+			mut = fuo.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, fuo.mutation); err != nil {
 			return nil, err

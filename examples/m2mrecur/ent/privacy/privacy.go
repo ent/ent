@@ -11,14 +11,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent"
-)
-
-type (
-	// Value is an alias to ent.Value.
-	Value = ent.Value
-	// Mutation is an alias to ent.Mutation.
-	Mutation = ent.Mutation
+	"github.com/facebookincubator/ent/examples/m2mrecur/ent"
 )
 
 var (
@@ -56,12 +49,12 @@ type (
 
 	// ReadRule defines the interface deciding whether a read is allowed.
 	ReadRule interface {
-		EvalRead(context.Context, Value) error
+		EvalRead(context.Context, ent.Value) error
 	}
 )
 
 // EvalRead evaluates a load against a read policy.
-func (policy ReadPolicy) EvalRead(ctx context.Context, v Value) error {
+func (policy ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
 	for _, rule := range policy {
 		switch err := rule.EvalRead(ctx, v); {
 		case err == nil || errors.Is(err, Skip):
@@ -76,10 +69,10 @@ func (policy ReadPolicy) EvalRead(ctx context.Context, v Value) error {
 
 // ReadRuleFunc type is an adapter to allow the use of
 // ordinary functions as read rules.
-type ReadRuleFunc func(context.Context, Value) error
+type ReadRuleFunc func(context.Context, ent.Value) error
 
 // Eval calls f(ctx, v).
-func (f ReadRuleFunc) EvalRead(ctx context.Context, v Value) error {
+func (f ReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
 	return f(ctx, v)
 }
 
@@ -89,12 +82,12 @@ type (
 
 	// WriteRule defines the interface deciding whether a write is allowed.
 	WriteRule interface {
-		EvalWrite(context.Context, Mutation) error
+		EvalWrite(context.Context, ent.Mutation) error
 	}
 )
 
 // EvalWrite evaluates a mutation against a write policy.
-func (policy WritePolicy) EvalWrite(ctx context.Context, m Mutation) error {
+func (policy WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
 	for _, rule := range policy {
 		switch err := rule.EvalWrite(ctx, m); {
 		case err == nil || errors.Is(err, Skip):
@@ -109,29 +102,27 @@ func (policy WritePolicy) EvalWrite(ctx context.Context, m Mutation) error {
 
 // WriteRuleFunc type is an adapter to allow the use of
 // ordinary functions as write rules.
-type WriteRuleFunc func(context.Context, Mutation) error
+type WriteRuleFunc func(context.Context, ent.Mutation) error
 
 // Eval calls f(ctx, m).
-func (f WriteRuleFunc) EvalWrite(ctx context.Context, m Mutation) error {
+func (f WriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
 	return f(ctx, m)
 }
 
-// Policy groups ReadPolicy and WritePolicy.
+// Policy groups read and write policies.
 type Policy struct {
-	ReadPolicy
-	WritePolicy
+	Read  ReadPolicy
+	Write WritePolicy
 }
 
-// ReadRules appends a set read of rules to policy.
-func (p *Policy) ReadRules(rules ...ReadRule) *Policy {
-	p.ReadPolicy = append(p.ReadPolicy, rules...)
-	return p
+// EvalRead forwards evaluation to read policy.
+func (policy Policy) EvalRead(ctx context.Context, v ent.Value) error {
+	return policy.Read.EvalRead(ctx, v)
 }
 
-// WriteRules appends a set read of rules to policy.
-func (p *Policy) WriteRules(rules ...WriteRule) *Policy {
-	p.WritePolicy = append(p.WritePolicy, rules...)
-	return p
+// EvalWrite forwards evaluation to write policy.
+func (policy Policy) EvalWrite(ctx context.Context, m ent.Mutation) error {
+	return policy.Write.EvalWrite(ctx, m)
 }
 
 // ReadWriteRule is the interface that groups read and write rules.
@@ -152,15 +143,29 @@ func AlwaysDenyRule() ReadWriteRule {
 
 type fixedDecisionRule struct{ err error }
 
-func (f fixedDecisionRule) EvalRead(context.Context, Value) error     { return f.err }
-func (f fixedDecisionRule) EvalWrite(context.Context, Mutation) error { return f.err }
+func (f fixedDecisionRule) EvalRead(context.Context, ent.Value) error     { return f.err }
+func (f fixedDecisionRule) EvalWrite(context.Context, ent.Mutation) error { return f.err }
 
-// AlwaysAllowReadWrite returns a privacy policy allowing both reads and writes.
-func AlwaysAllowReadWrite() ent.Policy {
-	return alwaysAllowReadWrite{}
+// The UserReadRuleFunc type is an adapter to allow the use of ordinary
+// functions as a read rule.
+type UserReadRuleFunc func(context.Context, *ent.User) error
+
+// EvalRead calls f(ctx, v).
+func (f UserReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
+	if v, ok := v.(*ent.User); ok {
+		return f(ctx, v)
+	}
+	return Denyf("ent/privacy: unexpected value type %T, expect *ent.User", v)
 }
 
-type alwaysAllowReadWrite struct{}
+// The UserWriteRuleFunc type is an adapter to allow the use of ordinary
+// functions as a write rule.
+type UserWriteRuleFunc func(context.Context, *ent.UserMutation) error
 
-func (alwaysAllowReadWrite) EvalRead(context.Context, Value) error     { return nil }
-func (alwaysAllowReadWrite) EvalWrite(context.Context, Mutation) error { return nil }
+// EvalWrite calls f(ctx, m).
+func (f UserWriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.UserMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserMutation", m)
+}

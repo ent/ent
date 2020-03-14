@@ -49,8 +49,8 @@ func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = gid.sqlExec(ctx)
 			return affected, err
 		})
-		for _, hook := range gid.hooks {
-			mut = hook(mut)
+		for i := len(gid.hooks); i > 0; i-- {
+			mut = gid.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {
 			return 0, err

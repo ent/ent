@@ -49,8 +49,8 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = gu.sqlSave(ctx)
 			return affected, err
 		})
-		for _, hook := range gu.hooks {
-			mut = hook(mut)
+		for i := len(gu.hooks); i > 0; i-- {
+			mut = gu.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
 			return 0, err
@@ -135,8 +135,8 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 			node, err = guo.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range guo.hooks {
-			mut = hook(mut)
+		for i := len(guo.hooks); i > 0; i-- {
+			mut = guo.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
 			return nil, err

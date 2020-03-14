@@ -74,8 +74,8 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 			node, err = cc.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range cc.hooks {
-			mut = hook(mut)
+		for i := len(cc.hooks); i > 0; i-- {
+			mut = cc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
 			return nil, err

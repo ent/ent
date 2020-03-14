@@ -50,8 +50,8 @@ func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = fd.gremlinExec(ctx)
 			return affected, err
 		})
-		for _, hook := range fd.hooks {
-			mut = hook(mut)
+		for i := len(fd.hooks); i > 0; i-- {
+			mut = fd.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, fd.mutation); err != nil {
 			return 0, err

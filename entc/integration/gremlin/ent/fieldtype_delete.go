@@ -50,8 +50,8 @@ func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = ftd.gremlinExec(ctx)
 			return affected, err
 		})
-		for _, hook := range ftd.hooks {
-			mut = hook(mut)
+		for i := len(ftd.hooks); i > 0; i-- {
+			mut = ftd.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftd.mutation); err != nil {
 			return 0, err

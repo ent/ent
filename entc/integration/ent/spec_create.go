@@ -57,8 +57,8 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 			node, err = sc.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range sc.hooks {
-			mut = hook(mut)
+		for i := len(sc.hooks); i > 0; i-- {
+			mut = sc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
 			return nil, err

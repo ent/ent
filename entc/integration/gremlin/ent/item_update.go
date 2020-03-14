@@ -49,8 +49,8 @@ func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = iu.gremlinSave(ctx)
 			return affected, err
 		})
-		for _, hook := range iu.hooks {
-			mut = hook(mut)
+		for i := len(iu.hooks); i > 0; i-- {
+			mut = iu.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, iu.mutation); err != nil {
 			return 0, err
@@ -131,8 +131,8 @@ func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 			node, err = iuo.gremlinSave(ctx)
 			return node, err
 		})
-		for _, hook := range iuo.hooks {
-			mut = hook(mut)
+		for i := len(iuo.hooks); i > 0; i-- {
+			mut = iuo.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, iuo.mutation); err != nil {
 			return nil, err

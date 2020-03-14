@@ -506,8 +506,8 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = uu.gremlinSave(ctx)
 			return affected, err
 		})
-		for _, hook := range uu.hooks {
-			mut = hook(mut)
+		for i := len(uu.hooks); i > 0; i-- {
+			mut = uu.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
 			return 0, err
@@ -1220,8 +1220,8 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			node, err = uuo.gremlinSave(ctx)
 			return node, err
 		})
-		for _, hook := range uuo.hooks {
-			mut = hook(mut)
+		for i := len(uuo.hooks); i > 0; i-- {
+			mut = uuo.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
 			return nil, err

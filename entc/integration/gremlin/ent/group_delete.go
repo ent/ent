@@ -50,8 +50,8 @@ func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = gd.gremlinExec(ctx)
 			return affected, err
 		})
-		for _, hook := range gd.hooks {
-			mut = hook(mut)
+		for i := len(gd.hooks); i > 0; i-- {
+			mut = gd.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, gd.mutation); err != nil {
 			return 0, err

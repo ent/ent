@@ -26,7 +26,7 @@ var (
 	Skip = errors.New("ent/privacy: skip rule")
 )
 
-{{- range $_, $decision := list "Allow" "Deny" "Skip" }}
+{{- range $decision := list "Allow" "Deny" "Skip" }}
 	// {{ $decision }}f returns an formatted wrapped {{ $decision }} decision.
 	func {{ $decision }}f(format string, a ...interface{}) error {
 		return fmt.Errorf(format+": %w", append(a, {{ $decision }})...)

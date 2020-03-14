@@ -67,8 +67,8 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 			node, err = ftc.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range ftc.hooks {
-			mut = hook(mut)
+		for i := len(ftc.hooks); i > 0; i-- {
+			mut = ftc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftc.mutation); err != nil {
 			return nil, err

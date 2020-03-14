@@ -142,8 +142,8 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 			node, err = fc.gremlinSave(ctx)
 			return node, err
 		})
-		for _, hook := range fc.hooks {
-			mut = hook(mut)
+		for i := len(fc.hooks); i > 0; i-- {
+			mut = fc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, fc.mutation); err != nil {
 			return nil, err

@@ -92,8 +92,8 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 			node, err = pc.gremlinSave(ctx)
 			return node, err
 		})
-		for _, hook := range pc.hooks {
-			mut = hook(mut)
+		for i := len(pc.hooks); i > 0; i-- {
+			mut = pc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
 			return nil, err

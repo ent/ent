@@ -197,5 +197,6 @@ func (c *PlanetClient) QueryNeighbors(pl *Planet) *PlanetQuery {
 
 // Hooks returns the client hooks.
 func (c *PlanetClient) Hooks() []Hook {
-	return append(planet.Hooks[:], c.hooks.Planet...)
+	hooks := c.hooks.Planet
+	return append(hooks[:len(hooks):len(hooks)], planet.Hooks[:]...)
 }

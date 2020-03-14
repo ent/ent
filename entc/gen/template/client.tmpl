@@ -215,7 +215,8 @@ func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
 	{{- if or $n.NumHooks $n.HasPolicy }}
-		return append({{ $n.Package }}.Hooks[:], c.hooks.{{ $n.Name }}...)
+		hooks := c.hooks.{{ $n.Name }}
+		return append(hooks[:len(hooks):len(hooks)], {{ $n.Package }}.Hooks[:]...)
 	{{- else }}
 		return c.hooks.{{ $n.Name }}
 	{{- end }}

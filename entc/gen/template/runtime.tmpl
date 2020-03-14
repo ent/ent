@@ -85,21 +85,21 @@ func init() {
 {{- range $n := $.Nodes }}
 	{{- $pkg :=  $n.Package }}
 	{{- $schema := base $.Config.Schema }}
-	{{- if $n.NumHooks }}
-		{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
-		for i, h := range {{ print $pkg "Hooks" }} {
-			{{ print $pkg ".Hooks" }}[i] = h
-		}
-	{{- end }}
 	{{- if $n.HasPolicy }}
 		policy := {{ $schema }}.{{ $n.Name }}{}.Policy()
-		{{ print $pkg ".Hooks" }}[{{ $n.NumHooks }}] = func(next ent.Mutator) ent.Mutator {
+		{{ print $pkg ".Hooks" }}[0] = func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 				if err := policy.EvalWrite(ctx, m); err != nil {
 					return nil, err
 				}
 				return next.Mutate(ctx, m)
 			})
+		}
+	{{- end }}
+	{{- if $n.NumHooks }}
+		{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
+		for i, h := range {{ print $pkg "Hooks" }} {
+			{{ print $pkg ".Hooks" }}[i{{ if $n.HasPolicy }}+1{{ end }}] = h
 		}
 	{{- end }}
 	{{- if or $n.HasDefault $n.HasValidators }}

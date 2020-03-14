@@ -91,8 +91,8 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 			node, err = bc.sqlSave(ctx)
 			return node, err
 		})
-		for _, hook := range bc.hooks {
-			mut = hook(mut)
+		for i := len(bc.hooks); i > 0; i-- {
+			mut = bc.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
 			return nil, err

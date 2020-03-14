@@ -49,8 +49,8 @@ func (cd *CarDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = cd.sqlExec(ctx)
 			return affected, err
 		})
-		for _, hook := range cd.hooks {
-			mut = hook(mut)
+		for i := len(cd.hooks); i > 0; i-- {
+			mut = cd.hooks[i-1](mut)
 		}
 		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
 			return 0, err

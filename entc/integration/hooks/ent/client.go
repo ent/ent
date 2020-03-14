@@ -203,7 +203,8 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 
 // Hooks returns the client hooks.
 func (c *CardClient) Hooks() []Hook {
-	return append(card.Hooks[:], c.hooks.Card...)
+	hooks := c.hooks.Card
+	return append(hooks[:len(hooks):len(hooks)], card.Hooks[:]...)
 }
 
 // UserClient is a client for the User schema.
