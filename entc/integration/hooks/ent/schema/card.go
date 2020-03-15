@@ -1,0 +1,76 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+package schema
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+
+	"github.com/facebookincubator/ent"
+	gen "github.com/facebookincubator/ent/entc/integration/hooks/ent"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
+
+	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebookincubator/ent/schema/field"
+)
+
+// Card holds the schema definition for the CreditCard entity.
+type Card struct {
+	ent.Schema
+}
+
+func (Card) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+					num, ok := m.Field(card.FieldNumber)
+					if !ok {
+						return nil, fmt.Errorf("missing card number value")
+					}
+					// Validator in hooks.
+					if len(num.(string)) < 4 {
+						return nil, fmt.Errorf("card number is too short")
+					}
+					return next.Mutate(ctx, m)
+				})
+			},
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+		),
+		func(next ent.Mutator) ent.Mutator {
+			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
+				if _, ok := m.Name(); !ok {
+					m.SetName("unknown")
+				}
+				return next.Mutate(ctx, m)
+			})
+		},
+	}
+}
+
+func (Card) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("number").
+			Immutable().
+			Default("unknown").
+			NotEmpty(),
+		field.String("name").
+			Optional().
+			Comment("Exact name written on card"),
+		field.Time("created_at").
+			Default(time.Now),
+	}
+}
+
+func (Card) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("cards").
+			Unique(),
+	}
+}

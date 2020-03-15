@@ -7,11 +7,6 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -93,7 +88,7 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "fsize", Type: field.TypeInt, Default: file.DefaultSize},
+		{Name: "fsize", Type: field.TypeInt, Default: 2147483647},
 		{Name: "name", Type: field.TypeString},
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
@@ -172,10 +167,10 @@ var (
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "active", Type: field.TypeBool, Default: group.DefaultActive},
+		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "expire", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeString, Nullable: true, Size: 255},
-		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: group.DefaultMaxUsers},
+		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: 10},
 		{Name: "name", Type: field.TypeString},
 		{Name: "group_info", Type: field.TypeInt, Nullable: true},
 	}
@@ -198,7 +193,7 @@ var (
 	GroupInfosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "desc", Type: field.TypeString},
-		{Name: "max_users", Type: field.TypeInt, Default: groupinfo.DefaultMaxUsers},
+		{Name: "max_users", Type: field.TypeInt, Default: 10000},
 	}
 	// GroupInfosTable holds the schema information for the "group_infos" table.
 	GroupInfosTable = &schema.Table{
@@ -292,11 +287,11 @@ var (
 		{Name: "optional_int", Type: field.TypeInt, Nullable: true},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
-		{Name: "last", Type: field.TypeString, Default: user.DefaultLast},
+		{Name: "last", Type: field.TypeString, Default: "unknown"},
 		{Name: "nickname", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin"}, Default: user.DefaultRole},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin"}, Default: "user"},
 		{Name: "group_blocked", Type: field.TypeInt, Nullable: true},
 		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
 		{Name: "user_parent", Type: field.TypeInt, Nullable: true},

@@ -11,11 +11,22 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 	"golang.org/x/xerrors"
+)
+
+// ent aliases to avoid import conflict in user's code.
+type (
+	Op         = ent.Op
+	Hook       = ent.Hook
+	Value      = ent.Value
+	Mutator    = ent.Mutator
+	Mutation   = ent.Mutation
+	MutateFunc = ent.MutateFunc
 )
 
 // Order applies an ordering on either graph traversal or sql selector.

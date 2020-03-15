@@ -8,9 +8,12 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"text/template"
 	"text/template/parse"
 
@@ -22,13 +25,13 @@ import (
 )
 
 type (
-	// Config for global generator configuration that similar for all nodes.
+	// Config for global codegen to be shared between all nodes.
 	Config struct {
-		// Schema is the package path for the schema directory.
+		// Schema is the package path for the schema package.
 		Schema string
-		// Target is the path for the directory that holding the generated code.
+		// Target is the filepath for the directory that holds the generated code.
 		Target string
-		// Package name for the targeted directory that holds the generated code.
+		// Package path for the targeted directory that holds the generated code.
 		Package string
 		// Header is an optional header signature for generated files.
 		Header string
@@ -215,7 +218,7 @@ func resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf("edge is missing for inverse edge: %s.%s", e.Type.Name, e.Name)
+				return fmt.Errorf("edge %q is missing for inverse edge: %s.%s", e.Inverse, e.Type.Name, e.Name)
 			}
 			if !e.Optional && !ref.Optional {
 				return fmt.Errorf("edges cannot be required in both directions: %s.%s <-> %s.%s", t.Name, e.Name, e.Type.Name, ref.Name)
@@ -407,6 +410,43 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 		templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 	}
 	return templates, external
+}
+
+// ModuleInfo returns the entc binary module version.
+func (Config) ModuleInfo() (m debug.Module) {
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		m = info.Main
+	}
+	return
+}
+
+// PrepareEnv makes sure the generated directory (environment)
+// is suitable for loading the `ent` package (avoid cyclic imports).
+func PrepareEnv(c *Config) (undo func() error, err error) {
+	var (
+		nop  = func() error { return nil }
+		path = filepath.Join(c.Target, "runtime.go")
+	)
+	out, err := ioutil.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nop, nil
+		}
+		return nil, err
+	}
+	fi, err := parser.ParseFile(token.NewFileSet(), path, out, parser.ImportsOnly)
+	if err != nil {
+		return nil, err
+	}
+	// Targeted package doesn't import the schema.
+	if len(fi.Imports) == 0 {
+		return nop, nil
+	}
+	if err := ioutil.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+		return nil, err
+	}
+	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
 }
 
 // formatFiles runs "goimports" on given paths.

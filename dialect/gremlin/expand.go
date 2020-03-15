@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 )
 

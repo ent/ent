@@ -10,11 +10,12 @@ const (
 	// Label holds the string label denoting the card type in the database.
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldExpired holds the string denoting the expired vertex property in the database.
-	FieldExpired = "expired"
-	// FieldNumber holds the string denoting the number vertex property in the database.
-	FieldNumber = "number"
+	FieldID      = "id"      // FieldExpired holds the string denoting the expired vertex property in the database.
+	FieldExpired = "expired" // FieldNumber holds the string denoting the number vertex property in the database.
+	FieldNumber  = "number"
+
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 
 	// Table holds the table name of the card in the database.
 	Table = "cards"

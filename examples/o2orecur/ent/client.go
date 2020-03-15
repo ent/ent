@@ -31,13 +31,16 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config: c,
-		Schema: migrate.NewSchema(c.driver),
-		Node:   NewNodeClient(c),
-	}
+	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	c.Schema = migrate.NewSchema(c.driver)
+	c.Node = NewNodeClient(c.config)
 }
 
 // Open opens a connection to the database specified by the driver name and a
@@ -65,7 +68,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config: cfg,
 		Node:   NewNodeClient(cfg),
@@ -83,17 +86,21 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
-		Node:   NewNodeClient(cfg),
-	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
+}
+
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...Hook) {
+	c.Node.Use(hooks...)
 }
 
 // NodeClient is a client for the Node schema.
@@ -106,14 +113,22 @@ func NewNodeClient(c config) *NodeClient {
 	return &NodeClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `node.Hooks(f(g(h())))`.
+func (c *NodeClient) Use(hooks ...Hook) {
+	c.hooks.Node = append(c.hooks.Node, hooks...)
+}
+
 // Create returns a create builder for Node.
 func (c *NodeClient) Create() *NodeCreate {
-	return &NodeCreate{config: c.config}
+	mutation := newNodeMutation(c.config, OpCreate)
+	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for Node.
 func (c *NodeClient) Update() *NodeUpdate {
-	return &NodeUpdate{config: c.config}
+	mutation := newNodeMutation(c.config, OpUpdate)
+	return &NodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -123,12 +138,15 @@ func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
-	return &NodeUpdateOne{config: c.config, id: id}
+	mutation := newNodeMutation(c.config, OpUpdateOne)
+	mutation.id = &id
+	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Node.
 func (c *NodeClient) Delete() *NodeDelete {
-	return &NodeDelete{config: c.config}
+	mutation := newNodeMutation(c.config, OpDelete)
+	return &NodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -138,7 +156,10 @@ func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
-	return &NodeDeleteOne{c.Delete().Where(node.ID(id))}
+	builder := c.Delete().Where(node.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NodeDeleteOne{builder}
 }
 
 // Create returns a query builder for Node.
@@ -186,4 +207,9 @@ func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
 
 	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NodeClient) Hooks() []Hook {
+	return c.hooks.Node
 }

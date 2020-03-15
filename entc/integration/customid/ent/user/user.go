@@ -12,6 +12,15 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
+	// EdgePets holds the string denoting the pets edge name in mutations.
+	EdgePets = "pets"
+
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.

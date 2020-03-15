@@ -35,7 +35,7 @@ var (
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $i, $e := . }}"{{ $e }}",{{ end }} },{{ end }}
-				{{- with $c.Default }} Default: {{ $node.Package }}.{{ . }},{{ end }}},
+				{{- with $c.Default }} Default: {{ . }},{{ end }}},
 			{{- end }}
 		}
 		{{- $table := pascal $t.Name | printf "%sTable" }}

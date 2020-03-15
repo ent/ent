@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
@@ -19,22 +20,19 @@ import (
 // StreetCreate is the builder for creating a Street entity.
 type StreetCreate struct {
 	config
-	name *string
-	city map[int]struct{}
+	mutation *StreetMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (sc *StreetCreate) SetName(s string) *StreetCreate {
-	sc.name = &s
+	sc.mutation.SetName(s)
 	return sc
 }
 
 // SetCityID sets the city edge to City by id.
 func (sc *StreetCreate) SetCityID(id int) *StreetCreate {
-	if sc.city == nil {
-		sc.city = make(map[int]struct{})
-	}
-	sc.city[id] = struct{}{}
+	sc.mutation.SetCityID(id)
 	return sc
 }
 
@@ -53,13 +51,33 @@ func (sc *StreetCreate) SetCity(c *City) *StreetCreate {
 
 // Save creates the Street in the database.
 func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
-	if sc.name == nil {
+	if _, ok := sc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
-	if len(sc.city) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"city\"")
+	var (
+		err  error
+		node *Street
+	)
+	if len(sc.hooks) == 0 {
+		node, err = sc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*StreetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			sc.mutation = mutation
+			node, err = sc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(sc.hooks); i > 0; i-- {
+			mut = sc.hooks[i-1](mut)
+		}
+		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return sc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -82,15 +100,15 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 			},
 		}
 	)
-	if value := sc.name; value != nil {
+	if value, ok := sc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: street.FieldName,
 		})
-		s.Name = *value
+		s.Name = value
 	}
-	if nodes := sc.city; len(nodes) > 0 {
+	if nodes := sc.mutation.CityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -104,7 +122,7 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

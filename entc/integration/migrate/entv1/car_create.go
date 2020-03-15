@@ -8,7 +8,7 @@ package entv1
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
@@ -19,15 +19,13 @@ import (
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	config
-	owner map[int]struct{}
+	mutation *CarMutation
+	hooks    []Hook
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (cc *CarCreate) SetOwnerID(id int) *CarCreate {
-	if cc.owner == nil {
-		cc.owner = make(map[int]struct{})
-	}
-	cc.owner[id] = struct{}{}
+	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
@@ -46,10 +44,30 @@ func (cc *CarCreate) SetOwner(u *User) *CarCreate {
 
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
-	if len(cc.owner) > 1 {
-		return nil, errors.New("entv1: multiple assignments on a unique edge \"owner\"")
+	var (
+		err  error
+		node *Car
+	)
+	if len(cc.hooks) == 0 {
+		node, err = cc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CarMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cc.mutation = mutation
+			node, err = cc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(cc.hooks); i > 0; i-- {
+			mut = cc.hooks[i-1](mut)
+		}
+		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return cc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -72,7 +90,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			},
 		}
 	)
-	if nodes := cc.owner; len(nodes) > 0 {
+	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -86,7 +104,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)

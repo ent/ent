@@ -10,9 +10,13 @@ const (
 	// Label holds the string label denoting the pet type in the database.
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldName holds the string denoting the name vertex property in the database.
+	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+
+	// EdgeTeam holds the string denoting the team edge name in mutations.
+	EdgeTeam = "team"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 
 	// TeamInverseLabel holds the string label denoting the team inverse edge type in the database.
 	TeamInverseLabel = "user_team"

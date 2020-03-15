@@ -75,11 +75,11 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $receiver := $.Scope.Receiver }}
 	gremlin := {{ $receiver }}.gremlinQuery()
 	{{- if $e.Bidi }}
-		query.gremlin = gremlin.Both({{ $.Package }}.{{ $e.Constant }})
+		query.gremlin = gremlin.Both({{ $.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}
-		query.gremlin = gremlin.InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
+		query.gremlin = gremlin.InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
 	{{- else }}
-		query.gremlin = gremlin.OutE({{ $.Package }}.{{ $e.Constant }}).InV()
+		query.gremlin = gremlin.OutE({{ $.Package }}.{{ $e.LabelConstant }}).InV()
 	{{- end }}
 {{ end }}
 
@@ -91,10 +91,10 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $receiver := $.Scope.Receiver }}
 
 	{{- if $e.Bidi }}
-		query.gremlin = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.Constant }})
+		query.gremlin = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}
-		query.gremlin = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.Constant }}).OutV()
+		query.gremlin = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
 	{{- else }}
-		query.gremlin = g.V({{ $receiver }}.ID).OutE({{ $n.Package }}.{{ $e.Constant }}).InV()
+		query.gremlin = g.V({{ $receiver }}.ID).OutE({{ $n.Package }}.{{ $e.LabelConstant }}).InV()
 	{{- end }}
 {{ end }}

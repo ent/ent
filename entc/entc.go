@@ -18,7 +18,7 @@ import (
 )
 
 // LoadGraph loads the schema package from the given schema path,
-// and construct a *gen.Graph.
+// and constructs a *gen.Graph.
 func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 	spec, err := (&load.Config{Path: schemaPath}).Load()
 	if err != nil {
@@ -27,7 +27,7 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 	cfg.Schema = spec.PkgPath
 	if cfg.Package == "" {
 		// default package-path for codegen is one package
-		// above the schema package (`<project>/ent/schema`).
+		// before the schema package (`<project>/ent/schema`).
 		cfg.Package = path.Dir(spec.PkgPath)
 	}
 	return gen.NewGraph(cfg, spec.Schemas...)
@@ -45,7 +45,7 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 //		IDType: &field.TypeInfo{Type: field.TypeInt},
 //	})
 //
-func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
+func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error) {
 	if cfg.Target == "" {
 		abs, err := filepath.Abs(schemaPath)
 		if err != nil {
@@ -67,6 +67,15 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
 		}
 		cfg.Storage = driver
 	}
+	undo, err := gen.PrepareEnv(cfg)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = undo()
+		}
+	}()
 	graph, err := LoadGraph(schemaPath, cfg)
 	if err != nil {
 		return err

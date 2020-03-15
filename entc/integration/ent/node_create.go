@@ -8,7 +8,7 @@ package ent
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -19,14 +19,13 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	value *int
-	prev  map[string]struct{}
-	next  map[string]struct{}
+	mutation *NodeMutation
+	hooks    []Hook
 }
 
 // SetValue sets the value field.
 func (nc *NodeCreate) SetValue(i int) *NodeCreate {
-	nc.value = &i
+	nc.mutation.SetValue(i)
 	return nc
 }
 
@@ -40,10 +39,7 @@ func (nc *NodeCreate) SetNillableValue(i *int) *NodeCreate {
 
 // SetPrevID sets the prev edge to Node by id.
 func (nc *NodeCreate) SetPrevID(id string) *NodeCreate {
-	if nc.prev == nil {
-		nc.prev = make(map[string]struct{})
-	}
-	nc.prev[id] = struct{}{}
+	nc.mutation.SetPrevID(id)
 	return nc
 }
 
@@ -62,10 +58,7 @@ func (nc *NodeCreate) SetPrev(n *Node) *NodeCreate {
 
 // SetNextID sets the next edge to Node by id.
 func (nc *NodeCreate) SetNextID(id string) *NodeCreate {
-	if nc.next == nil {
-		nc.next = make(map[string]struct{})
-	}
-	nc.next[id] = struct{}{}
+	nc.mutation.SetNextID(id)
 	return nc
 }
 
@@ -84,13 +77,30 @@ func (nc *NodeCreate) SetNext(n *Node) *NodeCreate {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	if len(nc.prev) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"prev\"")
+	var (
+		err  error
+		node *Node
+	)
+	if len(nc.hooks) == 0 {
+		node, err = nc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nc.mutation = mutation
+			node, err = nc.sqlSave(ctx)
+			return node, err
+		})
+		for i := len(nc.hooks); i > 0; i-- {
+			mut = nc.hooks[i-1](mut)
+		}
+		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	if len(nc.next) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
-	}
-	return nc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -113,15 +123,15 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 			},
 		}
 	)
-	if value := nc.value; value != nil {
+	if value, ok := nc.mutation.Value(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: node.FieldValue,
 		})
-		n.Value = *value
+		n.Value = value
 	}
-	if nodes := nc.prev; len(nodes) > 0 {
+	if nodes := nc.mutation.PrevIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -135,7 +145,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err
@@ -144,7 +154,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := nc.next; len(nodes) > 0 {
+	if nodes := nc.mutation.NextIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -158,7 +168,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			k, err := strconv.Atoi(k)
 			if err != nil {
 				return nil, err

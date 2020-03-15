@@ -10,7 +10,6 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -54,22 +53,24 @@ func (tx *Tx) Rollback() error {
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config:    tx.config,
-		Schema:    migrate.NewSchema(tx.driver),
-		Card:      NewCardClient(tx.config),
-		Comment:   NewCommentClient(tx.config),
-		FieldType: NewFieldTypeClient(tx.config),
-		File:      NewFileClient(tx.config),
-		FileType:  NewFileTypeClient(tx.config),
-		Group:     NewGroupClient(tx.config),
-		GroupInfo: NewGroupInfoClient(tx.config),
-		Item:      NewItemClient(tx.config),
-		Node:      NewNodeClient(tx.config),
-		Pet:       NewPetClient(tx.config),
-		Spec:      NewSpecClient(tx.config),
-		User:      NewUserClient(tx.config),
-	}
+	client := &Client{config: tx.config}
+	client.init()
+	return client
+}
+
+func (tx *Tx) init() {
+	tx.Card = NewCardClient(tx.config)
+	tx.Comment = NewCommentClient(tx.config)
+	tx.FieldType = NewFieldTypeClient(tx.config)
+	tx.File = NewFileClient(tx.config)
+	tx.FileType = NewFileTypeClient(tx.config)
+	tx.Group = NewGroupClient(tx.config)
+	tx.GroupInfo = NewGroupInfoClient(tx.config)
+	tx.Item = NewItemClient(tx.config)
+	tx.Node = NewNodeClient(tx.config)
+	tx.Pet = NewPetClient(tx.config)
+	tx.Spec = NewSpecClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

@@ -10,9 +10,11 @@ const (
 	// Label holds the string label denoting the filetype type in the database.
 	Label = "file_type"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
-	// FieldName holds the string denoting the name vertex property in the database.
+	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
 	FieldName = "name"
+
+	// EdgeFiles holds the string denoting the files edge name in mutations.
+	EdgeFiles = "files"
 
 	// FilesLabel holds the string label denoting the files edge type in the database.
 	FilesLabel = "file_type_files"

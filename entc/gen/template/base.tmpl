@@ -11,6 +11,16 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+// ent aliases to avoid import conflict in user's code.
+type (
+	Op         = ent.Op
+	Hook       = ent.Hook
+	Value      = ent.Value
+	Mutator    = ent.Mutator
+	Mutation   = ent.Mutation
+	MutateFunc = ent.MutateFunc
+)
+
 // Order applies an ordering on either graph traversal or sql selector.
 type Order func({{ $.Storage.Builder }})
 

@@ -7,6 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/gremlin/create" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
     res := &gremlin.Response{}
@@ -34,23 +35,23 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	{{- end }}
 	v := g.AddV({{ $.Package }}.Label)
 	{{- range $_, $f := $.Fields }}
-		if {{ $receiver }}.{{- $f.BuilderField }} != nil {
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.Unique }}
 				constraints = append(constraints, &constraint{
-					pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.BuilderField }}).Count(),
-					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.BuilderField }})),
+					pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, value).Count(),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, value)),
 				})
 			{{- end }}
-			v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, *{{ $receiver }}.{{ $f.BuilderField }})
+			v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, value)
 		}
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
 		{{- $direction := "In" }}
-		{{- $name := printf "%s.%s" $.Package $e.Constant }}
-		for id := range {{ $receiver }}.{{ $e.BuilderField }} {
+		{{- $name := printf "%s.%s" $.Package $e.LabelConstant }}
+		for _, id := range {{ $mutation }}.{{ $e.StructField }}IDs() {
 			{{- if $e.IsInverse }}
 				{{- $direction = "Out" }}
-				{{- $name = printf "%s.%s" $e.Type.Package $e.Constant }}
+				{{- $name = printf "%s.%s" $e.Type.Package $e.LabelConstant }}
 				v.AddE({{ $name }}).From(g.V(id)).InV()
 			{{- else }}
 				v.AddE({{ $name }}).To(g.V(id)).OutV()

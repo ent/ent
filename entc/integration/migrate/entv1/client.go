@@ -34,14 +34,17 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config: c,
-		Schema: migrate.NewSchema(c.driver),
-		Car:    NewCarClient(c),
-		User:   NewUserClient(c),
-	}
+	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+func (c *Client) init() {
+	c.Schema = migrate.NewSchema(c.driver)
+	c.Car = NewCarClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 // Open opens a connection to the database specified by the driver name and a
@@ -69,7 +72,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("entv1: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config: cfg,
 		Car:    NewCarClient(cfg),
@@ -88,18 +91,22 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
-		Car:    NewCarClient(cfg),
-		User:   NewUserClient(cfg),
-	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
+}
+
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...Hook) {
+	c.Car.Use(hooks...)
+	c.User.Use(hooks...)
 }
 
 // CarClient is a client for the Car schema.
@@ -112,14 +119,22 @@ func NewCarClient(c config) *CarClient {
 	return &CarClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `car.Hooks(f(g(h())))`.
+func (c *CarClient) Use(hooks ...Hook) {
+	c.hooks.Car = append(c.hooks.Car, hooks...)
+}
+
 // Create returns a create builder for Car.
 func (c *CarClient) Create() *CarCreate {
-	return &CarCreate{config: c.config}
+	mutation := newCarMutation(c.config, OpCreate)
+	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for Car.
 func (c *CarClient) Update() *CarUpdate {
-	return &CarUpdate{config: c.config}
+	mutation := newCarMutation(c.config, OpUpdate)
+	return &CarUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -129,12 +144,15 @@ func (c *CarClient) UpdateOne(ca *Car) *CarUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CarClient) UpdateOneID(id int) *CarUpdateOne {
-	return &CarUpdateOne{config: c.config, id: id}
+	mutation := newCarMutation(c.config, OpUpdateOne)
+	mutation.id = &id
+	return &CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Car.
 func (c *CarClient) Delete() *CarDelete {
-	return &CarDelete{config: c.config}
+	mutation := newCarMutation(c.config, OpDelete)
+	return &CarDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -144,7 +162,10 @@ func (c *CarClient) DeleteOne(ca *Car) *CarDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
-	return &CarDeleteOne{c.Delete().Where(car.ID(id))}
+	builder := c.Delete().Where(car.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CarDeleteOne{builder}
 }
 
 // Create returns a query builder for Car.
@@ -180,6 +201,11 @@ func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
 	return query
 }
 
+// Hooks returns the client hooks.
+func (c *CarClient) Hooks() []Hook {
+	return c.hooks.Car
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -190,14 +216,22 @@ func NewUserClient(c config) *UserClient {
 	return &UserClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
 // Create returns a create builder for User.
 func (c *UserClient) Create() *UserCreate {
-	return &UserCreate{config: c.config}
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
-	return &UserUpdate{config: c.config}
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
@@ -207,12 +241,15 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	return &UserUpdateOne{config: c.config, id: id}
+	mutation := newUserMutation(c.config, OpUpdateOne)
+	mutation.id = &id
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for User.
 func (c *UserClient) Delete() *UserDelete {
-	return &UserDelete{config: c.config}
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -222,7 +259,10 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
-	return &UserDeleteOne{c.Delete().Where(user.ID(id))}
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
 }
 
 // Create returns a query builder for User.
@@ -298,4 +338,9 @@ func (c *UserClient) QueryCar(u *User) *CarQuery {
 	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
 
 	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
 }

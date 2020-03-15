@@ -12,6 +12,9 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 
+	// EdgeCard holds the string denoting the card edge name in mutations.
+	EdgeCard = "card"
+
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "spec_card"
 )
