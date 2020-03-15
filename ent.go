@@ -143,7 +143,7 @@ type (
 		Fields() []Field
 	}
 
-	// The Policy type defines the read/write privacy policy of an entity.
+	// The Policy type defines the write privacy policy of an entity.
 	// The usage for the interface is as follows:
 	//
 	// type T struct {
@@ -153,9 +153,13 @@ type (
 	// func(T) Policy() ent.Policy {
 	//     return privacy.AlwaysAllowReadWrite()
 	// }
+	//
+	//
 	Policy interface {
-		EvalRead(context.Context, Value) error
 		EvalWrite(context.Context, Mutation) error
+		// Note that the read policy is under development
+		// and is currently disabled.
+		// EvalRead(context.Context, Value) error
 	}
 
 	// Schema is the default implementation for the schema Interface.
