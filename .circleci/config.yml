@@ -12,7 +12,7 @@ aliases:
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
-  go: circleci/go@0.2.0
+  go: circleci/go@1.1.0
 
 commands:
   getmods:
@@ -33,7 +33,9 @@ jobs:
           command: golangci-lint run --out-format junit-xml > ~/test-results/lint.xml
       - *storetestdir
   unit:
-    executor: go/default
+    executor:
+      name: go/default
+      tag: '1.14'
     steps:
     - checkout
     - *mktestdir
