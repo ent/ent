@@ -113,19 +113,20 @@ func init() {
 		{{- end }}
 		{{- with $n.Fields }}
 			{{ $pkg }}Fields := {{ $schema }}.{{ $n.Name }}{}.Fields()
+			_ = {{ $pkg }}Fields
 		{{- end }}
 		{{- range $i, $f := $n.Fields }}
 			{{- $desc := print $pkg "Desc" $f.StructField }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
 			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators }}
 				{{- if $f.Position.MixedIn }}
-				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
-				{{ $desc }} := {{ $pkg }}MixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
-			{{- else }}
-				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
-				{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
+					// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+					{{ $desc }} := {{ $pkg }}MixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
+				{{- else }}
+					// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
+					{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
+				{{- end }}
 			{{- end }}
-		{{- end }}
 		{{- if and $f.Default (not $f.IsEnum) }}
 			{{- $default := print $pkg "." $f.DefaultName }}
 			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.

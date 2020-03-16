@@ -22,6 +22,7 @@ func init() {
 		card.Hooks[i] = h
 	}
 	cardFields := schema.Card{}.Fields()
+	_ = cardFields
 	// cardDescNumber is the schema descriptor for number field.
 	cardDescNumber := cardFields[0].Descriptor()
 	// card.DefaultNumber holds the default value on creation for the number field.

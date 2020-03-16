@@ -10,42 +10,43 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/customid/ent"
+	"github.com/facebookincubator/ent/entc/integration/ent"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
 )
 
 // The CarFunc type is an adapter to allow the use of ordinary
 // function as Car mutator.
-type CarFunc func(context.Context, *ent.CarMutation) (ent.Value, error)
+type CarFunc func(context.Context, *entv1.CarMutation) (entv1.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.CarMutation)
+func (f CarFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
+	mv, ok := m.(*entv1.CarMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CarMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.CarMutation", m)
 	}
 	return f(ctx, mv)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
-type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
+type UserFunc func(context.Context, *entv1.UserMutation) (entv1.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserMutation)
+func (f UserFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
+	mv, ok := m.(*entv1.UserMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.UserMutation", m)
 	}
 	return f(ctx, mv)
 }
 
 // On executes the given hook only of the given operation.
 //
-//	hook.On(Log, ent.Delete|ent.Create)
+//	hook.On(Log, entv1.Delete|entv1.Create)
 //
-func On(hk ent.Hook, op ent.Op) ent.Hook {
-	return func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+func On(hk entv1.Hook, op entv1.Op) entv1.Hook {
+	return func(next entv1.Mutator) entv1.Mutator {
+		return entv1.MutateFunc(func(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
 			if m.Op().Is(op) {
 				return hk(next).Mutate(ctx, m)
 			}
@@ -56,15 +57,15 @@ func On(hk ent.Hook, op ent.Op) ent.Hook {
 
 // Reject returns a hook that rejects all operations that match op.
 //
-//	func (T) Hooks() []ent.Hook {
-//		return []ent.Hook{
-//			Reject(ent.Delete|ent.Update),
+//	func (T) Hooks() []entv1.Hook {
+//		return []entv1.Hook{
+//			Reject(entv1.Delete|entv1.Update),
 //		}
 //	}
 //
-func Reject(op ent.Op) ent.Hook {
-	return func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+func Reject(op entv1.Op) ent.Hook {
+	return func(next entv1.Mutator) entv1.Mutator {
+		return entv1.MutateFunc(func(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
 			if m.Op().Is(op) {
 				return nil, fmt.Errorf("%s operation is not allowed", m.Op())
 			}

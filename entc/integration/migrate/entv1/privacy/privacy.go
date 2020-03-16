@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/customid/ent"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
 )
 
 var (
@@ -49,12 +49,12 @@ type (
 
 	// ReadRule defines the interface deciding whether a read is allowed.
 	ReadRule interface {
-		EvalRead(context.Context, ent.Value) error
+		EvalRead(context.Context, entv1.Value) error
 	}
 )
 
 // EvalRead evaluates a load against a read policy.
-func (policy ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
+func (policy ReadPolicy) EvalRead(ctx context.Context, v entv1.Value) error {
 	for _, rule := range policy {
 		switch err := rule.EvalRead(ctx, v); {
 		case err == nil || errors.Is(err, Skip):
@@ -69,10 +69,10 @@ func (policy ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
 
 // ReadRuleFunc type is an adapter to allow the use of
 // ordinary functions as read rules.
-type ReadRuleFunc func(context.Context, ent.Value) error
+type ReadRuleFunc func(context.Context, entv1.Value) error
 
 // Eval calls f(ctx, v).
-func (f ReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
+func (f ReadRuleFunc) EvalRead(ctx context.Context, v entv1.Value) error {
 	return f(ctx, v)
 }
 
@@ -82,12 +82,12 @@ type (
 
 	// WriteRule defines the interface deciding whether a write is allowed.
 	WriteRule interface {
-		EvalWrite(context.Context, ent.Mutation) error
+		EvalWrite(context.Context, entv1.Mutation) error
 	}
 )
 
 // EvalWrite evaluates a mutation against a write policy.
-func (policy WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (policy WritePolicy) EvalWrite(ctx context.Context, m entv1.Mutation) error {
 	for _, rule := range policy {
 		switch err := rule.EvalWrite(ctx, m); {
 		case err == nil || errors.Is(err, Skip):
@@ -102,10 +102,10 @@ func (policy WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
 
 // WriteRuleFunc type is an adapter to allow the use of
 // ordinary functions as write rules.
-type WriteRuleFunc func(context.Context, ent.Mutation) error
+type WriteRuleFunc func(context.Context, entv1.Mutation) error
 
 // Eval calls f(ctx, m).
-func (f WriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (f WriteRuleFunc) EvalWrite(ctx context.Context, m entv1.Mutation) error {
 	return f(ctx, m)
 }
 
@@ -116,12 +116,12 @@ type Policy struct {
 }
 
 // EvalRead forwards evaluation to read policy.
-func (policy Policy) EvalRead(ctx context.Context, v ent.Value) error {
+func (policy Policy) EvalRead(ctx context.Context, v entv1.Value) error {
 	return policy.Read.EvalRead(ctx, v)
 }
 
 // EvalWrite forwards evaluation to write policy.
-func (policy Policy) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (policy Policy) EvalWrite(ctx context.Context, m entv1.Mutation) error {
 	return policy.Write.EvalWrite(ctx, m)
 }
 
@@ -143,53 +143,53 @@ func AlwaysDenyRule() ReadWriteRule {
 
 type fixedDecisionRule struct{ err error }
 
-func (f fixedDecisionRule) EvalRead(context.Context, ent.Value) error     { return f.err }
-func (f fixedDecisionRule) EvalWrite(context.Context, ent.Mutation) error { return f.err }
+func (f fixedDecisionRule) EvalRead(context.Context, entv1.Value) error     { return f.err }
+func (f fixedDecisionRule) EvalWrite(context.Context, entv1.Mutation) error { return f.err }
 
 // The CarReadRuleFunc type is an adapter to allow the use of ordinary
 // functions as a read rule.
-type CarReadRuleFunc func(context.Context, *ent.Car) error
+type CarReadRuleFunc func(context.Context, *entv1.Car) error
 
 // EvalRead calls f(ctx, v).
-func (f CarReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
-	if v, ok := v.(*ent.Car); ok {
+func (f CarReadRuleFunc) EvalRead(ctx context.Context, v entv1.Value) error {
+	if v, ok := v.(*entv1.Car); ok {
 		return f(ctx, v)
 	}
-	return Denyf("ent/privacy: unexpected value type %T, expect *ent.Car", v)
+	return Denyf("ent/privacy: unexpected value type %T, expect *entv1.Car", v)
 }
 
 // The CarWriteRuleFunc type is an adapter to allow the use of ordinary
 // functions as a write rule.
-type CarWriteRuleFunc func(context.Context, *ent.CarMutation) error
+type CarWriteRuleFunc func(context.Context, *entv1.CarMutation) error
 
 // EvalWrite calls f(ctx, m).
-func (f CarWriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.CarMutation); ok {
+func (f CarWriteRuleFunc) EvalWrite(ctx context.Context, m entv1.Mutation) error {
+	if m, ok := m.(*entv1.CarMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.CarMutation", m)
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *entv1.CarMutation", m)
 }
 
 // The UserReadRuleFunc type is an adapter to allow the use of ordinary
 // functions as a read rule.
-type UserReadRuleFunc func(context.Context, *ent.User) error
+type UserReadRuleFunc func(context.Context, *entv1.User) error
 
 // EvalRead calls f(ctx, v).
-func (f UserReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
-	if v, ok := v.(*ent.User); ok {
+func (f UserReadRuleFunc) EvalRead(ctx context.Context, v entv1.Value) error {
+	if v, ok := v.(*entv1.User); ok {
 		return f(ctx, v)
 	}
-	return Denyf("ent/privacy: unexpected value type %T, expect *ent.User", v)
+	return Denyf("ent/privacy: unexpected value type %T, expect *entv1.User", v)
 }
 
 // The UserWriteRuleFunc type is an adapter to allow the use of ordinary
 // functions as a write rule.
-type UserWriteRuleFunc func(context.Context, *ent.UserMutation) error
+type UserWriteRuleFunc func(context.Context, *entv1.UserMutation) error
 
 // EvalWrite calls f(ctx, m).
-func (f UserWriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.UserMutation); ok {
+func (f UserWriteRuleFunc) EvalWrite(ctx context.Context, m entv1.Mutation) error {
+	if m, ok := m.(*entv1.UserMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserMutation", m)
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *entv1.UserMutation", m)
 }

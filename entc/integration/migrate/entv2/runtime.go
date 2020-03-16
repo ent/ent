@@ -17,6 +17,7 @@ import (
 // to their package variables.
 func init() {
 	userFields := schema.User{}.Fields()
+	_ = userFields
 	// userDescPhone is the schema descriptor for phone field.
 	userDescPhone := userFields[4].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.
