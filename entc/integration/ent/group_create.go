@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -83,14 +82,14 @@ func (gc *GroupCreate) SetName(s string) *GroupCreate {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (gc *GroupCreate) AddFileIDs(ids ...string) *GroupCreate {
+func (gc *GroupCreate) AddFileIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddFileIDs(ids...)
 	return gc
 }
 
 // AddFiles adds the files edges to File.
 func (gc *GroupCreate) AddFiles(f ...*File) *GroupCreate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -98,14 +97,14 @@ func (gc *GroupCreate) AddFiles(f ...*File) *GroupCreate {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (gc *GroupCreate) AddBlockedIDs(ids ...string) *GroupCreate {
+func (gc *GroupCreate) AddBlockedIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddBlockedIDs(ids...)
 	return gc
 }
 
 // AddBlocked adds the blocked edges to User.
 func (gc *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -113,14 +112,14 @@ func (gc *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (gc *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
+func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
 // AddUsers adds the users edges to User.
 func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -128,7 +127,7 @@ func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (gc *GroupCreate) SetInfoID(id string) *GroupCreate {
+func (gc *GroupCreate) SetInfoID(id int) *GroupCreate {
 	gc.mutation.SetInfoID(id)
 	return gc
 }
@@ -213,7 +212,7 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		}
@@ -267,16 +266,12 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -290,16 +285,12 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -313,16 +304,12 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -336,16 +323,12 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -357,6 +340,6 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	gr.ID = strconv.FormatInt(id, 10)
+	gr.ID = int(id)
 	return gr, nil
 }

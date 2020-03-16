@@ -16,6 +16,10 @@ const (
 	EdgeOwner = "owner"
 	// EdgeCars holds the string denoting the cars edge name in mutations.
 	EdgeCars = "cars"
+	// EdgeFriends holds the string denoting the friends edge name in mutations.
+	EdgeFriends = "friends"
+	// EdgeBestFriend holds the string denoting the best_friend edge name in mutations.
+	EdgeBestFriend = "best_friend"
 
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
@@ -33,6 +37,12 @@ const (
 	CarsInverseTable = "cars"
 	// CarsColumn is the table column denoting the cars relation/edge.
 	CarsColumn = "pet_cars"
+	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	FriendsTable = "pet_friends"
+	// BestFriendTable is the table the holds the best_friend relation/edge.
+	BestFriendTable = "pets"
+	// BestFriendColumn is the table column denoting the best_friend relation/edge.
+	BestFriendColumn = "pet_best_friend"
 )
 
 // Columns holds all SQL columns for pet fields.
@@ -42,5 +52,12 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
 var ForeignKeys = []string{
+	"pet_best_friend",
 	"user_pets",
 }
+
+var (
+	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
+	// primary key for the friends relation (M2M).
+	FriendsPrimaryKey = []string{"pet_id", "friend_id"}
+)

@@ -64,6 +64,40 @@ func (pc *PetCreate) AddCars(c ...*Car) *PetCreate {
 	return pc.AddCarIDs(ids...)
 }
 
+// AddFriendIDs adds the friends edge to Pet by ids.
+func (pc *PetCreate) AddFriendIDs(ids ...string) *PetCreate {
+	pc.mutation.AddFriendIDs(ids...)
+	return pc
+}
+
+// AddFriends adds the friends edges to Pet.
+func (pc *PetCreate) AddFriends(p ...*Pet) *PetCreate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddFriendIDs(ids...)
+}
+
+// SetBestFriendID sets the best_friend edge to Pet by id.
+func (pc *PetCreate) SetBestFriendID(id string) *PetCreate {
+	pc.mutation.SetBestFriendID(id)
+	return pc
+}
+
+// SetNillableBestFriendID sets the best_friend edge to Pet by id if the given value is not nil.
+func (pc *PetCreate) SetNillableBestFriendID(id *string) *PetCreate {
+	if id != nil {
+		pc = pc.SetBestFriendID(*id)
+	}
+	return pc
+}
+
+// SetBestFriend sets the best_friend edge to Pet.
+func (pc *PetCreate) SetBestFriend(p *Pet) *PetCreate {
+	return pc.SetBestFriendID(p.ID)
+}
+
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	var (
@@ -146,6 +180,44 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: car.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.FriendsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   pet.FriendsTable,
+			Columns: pet.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.BestFriendIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   pet.BestFriendTable,
+			Columns: []string{pet.BestFriendColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
 				},
 			},
 		}

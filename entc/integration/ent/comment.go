@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -19,7 +18,7 @@ import (
 type Comment struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// UniqueInt holds the value of the "unique_int" field.
 	UniqueInt int `json:"unique_int,omitempty"`
 	// UniqueFloat holds the value of the "unique_float" field.
@@ -48,7 +47,7 @@ func (c *Comment) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	c.ID = strconv.FormatInt(value.Int64, 10)
+	c.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field unique_int", values[0])
@@ -102,12 +101,6 @@ func (c *Comment) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (c *Comment) id() int {
-	id, _ := strconv.Atoi(c.ID)
-	return id
 }
 
 // Comments is a parsable slice of Comment.

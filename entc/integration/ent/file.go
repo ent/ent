@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -21,7 +20,7 @@ import (
 type File struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int `json:"size,omitempty"`
 	// Name holds the value of the "name" field.
@@ -33,9 +32,9 @@ type File struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges           FileEdges `json:"edges"`
-	file_type_files *string
-	group_files     *string
-	user_files      *string
+	file_type_files *int
+	group_files     *int
+	user_files      *int
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -107,7 +106,7 @@ func (f *File) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	f.ID = strconv.FormatInt(value.Int64, 10)
+	f.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field size", values[0])
@@ -135,20 +134,20 @@ func (f *File) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
 		} else if value.Valid {
-			f.file_type_files = new(string)
-			*f.file_type_files = strconv.FormatInt(value.Int64, 10)
+			f.file_type_files = new(int)
+			*f.file_type_files = int(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field group_files", value)
 		} else if value.Valid {
-			f.group_files = new(string)
-			*f.group_files = strconv.FormatInt(value.Int64, 10)
+			f.group_files = new(int)
+			*f.group_files = int(value.Int64)
 		}
 		if value, ok := values[2].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_files", value)
 		} else if value.Valid {
-			f.user_files = new(string)
-			*f.user_files = strconv.FormatInt(value.Int64, 10)
+			f.user_files = new(int)
+			*f.user_files = int(value.Int64)
 		}
 	}
 	return nil
@@ -199,12 +198,6 @@ func (f *File) String() string {
 	builder.WriteString(f.Group)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (f *File) id() int {
-	id, _ := strconv.Atoi(f.ID)
-	return id
 }
 
 // Files is a parsable slice of File.

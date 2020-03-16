@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -138,12 +137,6 @@ func (c *Card) String() string {
 	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (c *Card) id() int {
-	id, _ := strconv.Atoi(c.ID)
-	return id
 }
 
 // Cards is a parsable slice of Card.

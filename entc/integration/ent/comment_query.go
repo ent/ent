@@ -77,8 +77,8 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 }
 
 // FirstID returns the first Comment id in the query. Returns *NotFoundError when no id was found.
-func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (cq *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -90,7 +90,7 @@ func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (cq *CommentQuery) FirstXID(ctx context.Context) string {
+func (cq *CommentQuery) FirstXID(ctx context.Context) int {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -124,8 +124,8 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 }
 
 // OnlyID returns the only Comment id in the query, returns an error if not exactly one id was returned.
-func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (cq *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
+func (cq *CommentQuery) OnlyXID(ctx context.Context) int {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -164,8 +164,8 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 }
 
 // IDs executes the query and returns a list of Comment ids.
-func (cq *CommentQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (cq *CommentQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (cq *CommentQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CommentQuery) IDsX(ctx context.Context) []string {
+func (cq *CommentQuery) IDsX(ctx context.Context) []int {
 	ids, err := cq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -311,7 +311,7 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   comment.Table,
 			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: comment.FieldID,
 			},
 		},

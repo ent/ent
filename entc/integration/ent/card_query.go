@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -109,8 +108,8 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 }
 
 // FirstID returns the first Card id in the query. Returns *NotFoundError when no id was found.
-func (cq *CardQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (cq *CardQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -122,7 +121,7 @@ func (cq *CardQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (cq *CardQuery) FirstXID(ctx context.Context) string {
+func (cq *CardQuery) FirstXID(ctx context.Context) int {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -156,8 +155,8 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 }
 
 // OnlyID returns the only Card id in the query, returns an error if not exactly one id was returned.
-func (cq *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (cq *CardQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -173,7 +172,7 @@ func (cq *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (cq *CardQuery) OnlyXID(ctx context.Context) string {
+func (cq *CardQuery) OnlyXID(ctx context.Context) int {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -196,8 +195,8 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 }
 
 // IDs executes the query and returns a list of Card ids.
-func (cq *CardQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (cq *CardQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -205,7 +204,7 @@ func (cq *CardQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CardQuery) IDsX(ctx context.Context) []string {
+func (cq *CardQuery) IDsX(ctx context.Context) []int {
 	ids, err := cq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -360,8 +359,8 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	}
 
 	if query := cq.withOwner; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*Card)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Card)
 		for i := range nodes {
 			if fk := nodes[i].user_card; fk != nil {
 				ids = append(ids, *fk)
@@ -386,14 +385,14 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 
 	if query := cq.withSpec; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*Card, len(nodes))
+		ids := make(map[int]*Card, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*Card)
+			edgeids []int
+			edges   = make(map[int][]*Card)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -417,8 +416,8 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -469,7 +468,7 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   card.Table,
 			Columns: card.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: card.FieldID,
 			},
 		},

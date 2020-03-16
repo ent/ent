@@ -44,7 +44,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $.ID.Type }}(value.Int64){{ end }}
+			{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
 		{{- end }}
 		values = values[1:]
 		{{- range $i, $f := $.Fields }}
@@ -66,7 +66,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 						} else if value.Valid {
 							{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
-							*{{ $receiver }}.{{ $f.Name }} = {{ if $f.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $f.Type }}(value.Int64){{ end }}
+							*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
 						}
 					{{- end }}
 				{{- end }}

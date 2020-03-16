@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -111,14 +110,14 @@ func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (gu *GroupUpdate) AddFileIDs(ids ...string) *GroupUpdate {
+func (gu *GroupUpdate) AddFileIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddFileIDs(ids...)
 	return gu
 }
 
 // AddFiles adds the files edges to File.
 func (gu *GroupUpdate) AddFiles(f ...*File) *GroupUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -126,14 +125,14 @@ func (gu *GroupUpdate) AddFiles(f ...*File) *GroupUpdate {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (gu *GroupUpdate) AddBlockedIDs(ids ...string) *GroupUpdate {
+func (gu *GroupUpdate) AddBlockedIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddBlockedIDs(ids...)
 	return gu
 }
 
 // AddBlocked adds the blocked edges to User.
 func (gu *GroupUpdate) AddBlocked(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -141,14 +140,14 @@ func (gu *GroupUpdate) AddBlocked(u ...*User) *GroupUpdate {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (gu *GroupUpdate) AddUserIDs(ids ...string) *GroupUpdate {
+func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddUserIDs(ids...)
 	return gu
 }
 
 // AddUsers adds the users edges to User.
 func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -156,7 +155,7 @@ func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (gu *GroupUpdate) SetInfoID(id string) *GroupUpdate {
+func (gu *GroupUpdate) SetInfoID(id int) *GroupUpdate {
 	gu.mutation.SetInfoID(id)
 	return gu
 }
@@ -167,14 +166,14 @@ func (gu *GroupUpdate) SetInfo(g *GroupInfo) *GroupUpdate {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (gu *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
+func (gu *GroupUpdate) RemoveFileIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveFileIDs(ids...)
 	return gu
 }
 
 // RemoveFiles removes files edges to File.
 func (gu *GroupUpdate) RemoveFiles(f ...*File) *GroupUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -182,14 +181,14 @@ func (gu *GroupUpdate) RemoveFiles(f ...*File) *GroupUpdate {
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
-func (gu *GroupUpdate) RemoveBlockedIDs(ids ...string) *GroupUpdate {
+func (gu *GroupUpdate) RemoveBlockedIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveBlockedIDs(ids...)
 	return gu
 }
 
 // RemoveBlocked removes blocked edges to User.
 func (gu *GroupUpdate) RemoveBlocked(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -197,14 +196,14 @@ func (gu *GroupUpdate) RemoveBlocked(u ...*User) *GroupUpdate {
 }
 
 // RemoveUserIDs removes the users edge to User by ids.
-func (gu *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
+func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
 	return gu
 }
 
 // RemoveUsers removes users edges to User.
 func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -292,7 +291,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
@@ -367,16 +366,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -390,16 +385,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -413,16 +404,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -436,16 +423,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -459,16 +442,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -482,16 +461,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -505,7 +480,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
@@ -521,16 +496,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -627,14 +598,14 @@ func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (guo *GroupUpdateOne) AddFileIDs(ids ...string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) AddFileIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddFileIDs(ids...)
 	return guo
 }
 
 // AddFiles adds the files edges to File.
 func (guo *GroupUpdateOne) AddFiles(f ...*File) *GroupUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -642,14 +613,14 @@ func (guo *GroupUpdateOne) AddFiles(f ...*File) *GroupUpdateOne {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (guo *GroupUpdateOne) AddBlockedIDs(ids ...string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) AddBlockedIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddBlockedIDs(ids...)
 	return guo
 }
 
 // AddBlocked adds the blocked edges to User.
 func (guo *GroupUpdateOne) AddBlocked(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -657,14 +628,14 @@ func (guo *GroupUpdateOne) AddBlocked(u ...*User) *GroupUpdateOne {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (guo *GroupUpdateOne) AddUserIDs(ids ...string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddUserIDs(ids...)
 	return guo
 }
 
 // AddUsers adds the users edges to User.
 func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -672,7 +643,7 @@ func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (guo *GroupUpdateOne) SetInfoID(id string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) SetInfoID(id int) *GroupUpdateOne {
 	guo.mutation.SetInfoID(id)
 	return guo
 }
@@ -683,14 +654,14 @@ func (guo *GroupUpdateOne) SetInfo(g *GroupInfo) *GroupUpdateOne {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (guo *GroupUpdateOne) RemoveFileIDs(ids ...string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) RemoveFileIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveFileIDs(ids...)
 	return guo
 }
 
 // RemoveFiles removes files edges to File.
 func (guo *GroupUpdateOne) RemoveFiles(f ...*File) *GroupUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -698,14 +669,14 @@ func (guo *GroupUpdateOne) RemoveFiles(f ...*File) *GroupUpdateOne {
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
-func (guo *GroupUpdateOne) RemoveBlockedIDs(ids ...string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) RemoveBlockedIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveBlockedIDs(ids...)
 	return guo
 }
 
 // RemoveBlocked removes blocked edges to User.
 func (guo *GroupUpdateOne) RemoveBlocked(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -713,14 +684,14 @@ func (guo *GroupUpdateOne) RemoveBlocked(u ...*User) *GroupUpdateOne {
 }
 
 // RemoveUserIDs removes the users edge to User by ids.
-func (guo *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
+func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
 	return guo
 }
 
 // RemoveUsers removes users edges to User.
 func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -808,7 +779,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
@@ -881,16 +852,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -904,16 +871,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -927,16 +890,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -950,16 +909,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -973,16 +928,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -996,16 +947,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1019,7 +966,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
@@ -1035,16 +982,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

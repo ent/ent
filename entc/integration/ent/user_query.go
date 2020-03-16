@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -228,8 +227,8 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 }
 
 // FirstID returns the first User id in the query. Returns *NotFoundError when no id was found.
-func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -241,7 +240,7 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstXID(ctx context.Context) string {
+func (uq *UserQuery) FirstXID(ctx context.Context) int {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -275,8 +274,8 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 }
 
 // OnlyID returns the only User id in the query, returns an error if not exactly one id was returned.
-func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = uq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -292,7 +291,7 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyXID(ctx context.Context) string {
+func (uq *UserQuery) OnlyXID(ctx context.Context) int {
 	id, err := uq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -315,8 +314,8 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User ids.
-func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -324,7 +323,7 @@ func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (uq *UserQuery) IDsX(ctx context.Context) []string {
+func (uq *UserQuery) IDsX(ctx context.Context) []int {
 	ids, err := uq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -588,13 +587,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withCard; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -620,13 +615,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withPets; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -652,13 +643,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -684,14 +671,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -715,8 +702,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -747,14 +734,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFriends; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -778,8 +765,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -810,14 +797,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFollowers; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -841,8 +828,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -873,14 +860,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFollowing; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -904,8 +891,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -936,13 +923,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withTeam; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -967,8 +950,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withSpouse; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*User)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
 		for i := range nodes {
 			if fk := nodes[i].user_spouse; fk != nil {
 				ids = append(ids, *fk)
@@ -993,13 +976,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withChildren; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -1024,8 +1003,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withParent; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*User)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
 		for i := range nodes {
 			if fk := nodes[i].user_parent; fk != nil {
 				ids = append(ids, *fk)
@@ -1070,7 +1049,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},

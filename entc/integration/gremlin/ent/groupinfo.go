@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -100,12 +99,6 @@ func (gi *GroupInfo) String() string {
 	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (gi *GroupInfo) id() int {
-	id, _ := strconv.Atoi(gi.ID)
-	return id
 }
 
 // GroupInfos is a parsable slice of GroupInfo.

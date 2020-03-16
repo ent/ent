@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -94,8 +93,8 @@ func (ftq *FileTypeQuery) FirstX(ctx context.Context) *FileType {
 }
 
 // FirstID returns the first FileType id in the query. Returns *NotFoundError when no id was found.
-func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -107,7 +106,7 @@ func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (ftq *FileTypeQuery) FirstXID(ctx context.Context) string {
+func (ftq *FileTypeQuery) FirstXID(ctx context.Context) int {
 	id, err := ftq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -141,8 +140,8 @@ func (ftq *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
 }
 
 // OnlyID returns the only FileType id in the query, returns an error if not exactly one id was returned.
-func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = ftq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -158,7 +157,7 @@ func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
+func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) int {
 	id, err := ftq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
 }
 
 // IDs executes the query and returns a list of FileType ids.
-func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := ftq.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
+func (ftq *FileTypeQuery) IDsX(ctx context.Context) []int {
 	ids, err := ftq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -324,13 +323,9 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 
 	if query := ftq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*FileType)
+		nodeids := make(map[int]*FileType)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -376,7 +371,7 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: filetype.FieldID,
 			},
 		},

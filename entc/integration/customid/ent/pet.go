@@ -22,8 +22,9 @@ type Pet struct {
 	ID string `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
-	Edges     PetEdges `json:"edges"`
-	user_pets *int
+	Edges           PetEdges `json:"edges"`
+	pet_best_friend *string
+	user_pets       *int
 }
 
 // PetEdges holds the relations/edges for other nodes in the graph.
@@ -32,9 +33,13 @@ type PetEdges struct {
 	Owner *User
 	// Cars holds the value of the cars edge.
 	Cars []*Car
+	// Friends holds the value of the friends edge.
+	Friends []*Pet
+	// BestFriend holds the value of the best_friend edge.
+	BestFriend *Pet
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -60,6 +65,29 @@ func (e PetEdges) CarsOrErr() ([]*Car, error) {
 	return nil, &NotLoadedError{edge: "cars"}
 }
 
+// FriendsOrErr returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e PetEdges) FriendsOrErr() ([]*Pet, error) {
+	if e.loadedTypes[2] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
+}
+
+// BestFriendOrErr returns the BestFriend value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PetEdges) BestFriendOrErr() (*Pet, error) {
+	if e.loadedTypes[3] {
+		if e.BestFriend == nil {
+			// The edge best_friend was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: pet.Label}
+		}
+		return e.BestFriend, nil
+	}
+	return nil, &NotLoadedError{edge: "best_friend"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Pet) scanValues() []interface{} {
 	return []interface{}{
@@ -70,7 +98,8 @@ func (*Pet) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Pet) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_pets
+		&sql.NullString{}, // pet_best_friend
+		&sql.NullInt64{},  // user_pets
 	}
 }
 
@@ -88,7 +117,13 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 	values = values[1:]
 	values = values[0:]
 	if len(values) == len(pet.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field pet_best_friend", values[0])
+		} else if value.Valid {
+			pe.pet_best_friend = new(string)
+			*pe.pet_best_friend = value.String
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
 		} else if value.Valid {
 			pe.user_pets = new(int)
@@ -106,6 +141,16 @@ func (pe *Pet) QueryOwner() *UserQuery {
 // QueryCars queries the cars edge of the Pet.
 func (pe *Pet) QueryCars() *CarQuery {
 	return (&PetClient{config: pe.config}).QueryCars(pe)
+}
+
+// QueryFriends queries the friends edge of the Pet.
+func (pe *Pet) QueryFriends() *PetQuery {
+	return (&PetClient{config: pe.config}).QueryFriends(pe)
+}
+
+// QueryBestFriend queries the best_friend edge of the Pet.
+func (pe *Pet) QueryBestFriend() *PetQuery {
+	return (&PetClient{config: pe.config}).QueryBestFriend(pe)
 }
 
 // Update returns a builder for updating this Pet.

@@ -10,13 +10,12 @@ import (
 	"context"
 	"errors"
 	"math"
-	"strconv"
 	"strings"
 	"time"
 	{{- /* ignore generting on graph specififc templates */}}
 	{{- if not (eq $.Config.Package $.Package) }}
 		"{{ $.Config.Package }}/predicate"
-		{{- range $_, $f := $.Fields }}
+		{{- range $f := $.Fields }}
 			{{- with $f.Type.PkgPath }}
 				"{{ . }}"
 			{{- end }}
@@ -26,7 +25,7 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 	"golang.org/x/xerrors"
 	{{- with $.Storage }}
-		{{- range $_, $import := .Imports }}
+		{{- range $import := .Imports }}
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}

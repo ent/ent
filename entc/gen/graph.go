@@ -336,10 +336,12 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
+					c1.Size = ref.size()
 				}
 				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: field.TypeInt}
 				if ref := e.Type.ID; ref.UserDefined {
 					c2.Type = ref.Type.Type
+					c2.Size = ref.size()
 				}
 				all = append(all, &schema.Table{
 					Name:       e.Rel.Table,

@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -102,13 +101,13 @@ func (fu *FileUpdate) ClearGroup() *FileUpdate {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
+func (fu *FileUpdate) SetOwnerID(id int) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
 	return fu
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (fu *FileUpdate) SetNillableOwnerID(id *string) *FileUpdate {
+func (fu *FileUpdate) SetNillableOwnerID(id *int) *FileUpdate {
 	if id != nil {
 		fu = fu.SetOwnerID(*id)
 	}
@@ -121,13 +120,13 @@ func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
 }
 
 // SetTypeID sets the type edge to FileType by id.
-func (fu *FileUpdate) SetTypeID(id string) *FileUpdate {
+func (fu *FileUpdate) SetTypeID(id int) *FileUpdate {
 	fu.mutation.SetTypeID(id)
 	return fu
 }
 
 // SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
-func (fu *FileUpdate) SetNillableTypeID(id *string) *FileUpdate {
+func (fu *FileUpdate) SetNillableTypeID(id *int) *FileUpdate {
 	if id != nil {
 		fu = fu.SetTypeID(*id)
 	}
@@ -213,7 +212,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: file.FieldID,
 			},
 		},
@@ -281,7 +280,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -297,16 +296,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -320,7 +315,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: filetype.FieldID,
 				},
 			},
@@ -336,16 +331,12 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: filetype.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -436,13 +427,13 @@ func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (fuo *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
+func (fuo *FileUpdateOne) SetOwnerID(id int) *FileUpdateOne {
 	fuo.mutation.SetOwnerID(id)
 	return fuo
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableOwnerID(id *string) *FileUpdateOne {
+func (fuo *FileUpdateOne) SetNillableOwnerID(id *int) *FileUpdateOne {
 	if id != nil {
 		fuo = fuo.SetOwnerID(*id)
 	}
@@ -455,13 +446,13 @@ func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
 }
 
 // SetTypeID sets the type edge to FileType by id.
-func (fuo *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
+func (fuo *FileUpdateOne) SetTypeID(id int) *FileUpdateOne {
 	fuo.mutation.SetTypeID(id)
 	return fuo
 }
 
 // SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableTypeID(id *string) *FileUpdateOne {
+func (fuo *FileUpdateOne) SetNillableTypeID(id *int) *FileUpdateOne {
 	if id != nil {
 		fuo = fuo.SetTypeID(*id)
 	}
@@ -547,7 +538,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: file.FieldID,
 			},
 		},
@@ -613,7 +604,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -629,16 +620,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -652,7 +639,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: filetype.FieldID,
 				},
 			},
@@ -668,16 +655,12 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: filetype.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

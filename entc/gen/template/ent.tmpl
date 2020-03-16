@@ -133,14 +133,6 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 	return builder.String()
 }
 
-{{- if and $.ID.IsString (not $.ID.UserDefined) }}
-// id returns the int representation of the ID field.
-func ({{ $receiver }} *{{ $.Name }}) id() int {
-	id, _ := strconv.Atoi({{ $receiver }}.ID)
-	return id
-}
-{{- end }}
-
 {{ $slice := plural $.Name }}
 // {{ $slice }} is a parsable slice of {{ $.Name }}.
 type {{ $slice }} []*{{ $.Name }}

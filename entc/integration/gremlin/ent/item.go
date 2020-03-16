@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -62,12 +61,6 @@ func (i *Item) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (i *Item) id() int {
-	id, _ := strconv.Atoi(i.ID)
-	return id
 }
 
 // Items is a parsable slice of Item.

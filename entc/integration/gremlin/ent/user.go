@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -324,12 +323,6 @@ func (u *User) String() string {
 	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (u *User) id() int {
-	id, _ := strconv.Atoi(u.ID)
-	return id
 }
 
 // Users is a parsable slice of User.

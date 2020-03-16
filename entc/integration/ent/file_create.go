@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
@@ -75,13 +74,13 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (fc *FileCreate) SetOwnerID(id string) *FileCreate {
+func (fc *FileCreate) SetOwnerID(id int) *FileCreate {
 	fc.mutation.SetOwnerID(id)
 	return fc
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (fc *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
+func (fc *FileCreate) SetNillableOwnerID(id *int) *FileCreate {
 	if id != nil {
 		fc = fc.SetOwnerID(*id)
 	}
@@ -94,13 +93,13 @@ func (fc *FileCreate) SetOwner(u *User) *FileCreate {
 }
 
 // SetTypeID sets the type edge to FileType by id.
-func (fc *FileCreate) SetTypeID(id string) *FileCreate {
+func (fc *FileCreate) SetTypeID(id int) *FileCreate {
 	fc.mutation.SetTypeID(id)
 	return fc
 }
 
 // SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
-func (fc *FileCreate) SetNillableTypeID(id *string) *FileCreate {
+func (fc *FileCreate) SetNillableTypeID(id *int) *FileCreate {
 	if id != nil {
 		fc = fc.SetTypeID(*id)
 	}
@@ -167,7 +166,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: file.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: file.FieldID,
 			},
 		}
@@ -213,16 +212,12 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -236,16 +231,12 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: filetype.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -257,6 +248,6 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	f.ID = strconv.FormatInt(id, 10)
+	f.ID = int(id)
 	return f, nil
 }

@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -94,8 +93,8 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 }
 
 // FirstID returns the first Spec id in the query. Returns *NotFoundError when no id was found.
-func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -107,7 +106,7 @@ func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (sq *SpecQuery) FirstXID(ctx context.Context) string {
+func (sq *SpecQuery) FirstXID(ctx context.Context) int {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -141,8 +140,8 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 }
 
 // OnlyID returns the only Spec id in the query, returns an error if not exactly one id was returned.
-func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -158,7 +157,7 @@ func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
+func (sq *SpecQuery) OnlyXID(ctx context.Context) int {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 }
 
 // IDs executes the query and returns a list of Spec ids.
-func (sq *SpecQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (sq *SpecQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (sq *SpecQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SpecQuery) IDsX(ctx context.Context) []string {
+func (sq *SpecQuery) IDsX(ctx context.Context) []int {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -300,14 +299,14 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 
 	if query := sq.withCard; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*Spec, len(nodes))
+		ids := make(map[int]*Spec, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*Spec)
+			edgeids []int
+			edges   = make(map[int][]*Spec)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -331,8 +330,8 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -383,7 +382,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   spec.Table,
 			Columns: spec.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: spec.FieldID,
 			},
 		},

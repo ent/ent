@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -40,13 +39,13 @@ func (pu *PetUpdate) SetName(s string) *PetUpdate {
 }
 
 // SetTeamID sets the team edge to User by id.
-func (pu *PetUpdate) SetTeamID(id string) *PetUpdate {
+func (pu *PetUpdate) SetTeamID(id int) *PetUpdate {
 	pu.mutation.SetTeamID(id)
 	return pu
 }
 
 // SetNillableTeamID sets the team edge to User by id if the given value is not nil.
-func (pu *PetUpdate) SetNillableTeamID(id *string) *PetUpdate {
+func (pu *PetUpdate) SetNillableTeamID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetTeamID(*id)
 	}
@@ -59,13 +58,13 @@ func (pu *PetUpdate) SetTeam(u *User) *PetUpdate {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (pu *PetUpdate) SetOwnerID(id string) *PetUpdate {
+func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (pu *PetUpdate) SetNillableOwnerID(id *string) *PetUpdate {
+func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetOwnerID(*id)
 	}
@@ -146,7 +145,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		},
@@ -174,7 +173,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -190,16 +189,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -213,7 +208,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -229,16 +224,12 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -268,13 +259,13 @@ func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 }
 
 // SetTeamID sets the team edge to User by id.
-func (puo *PetUpdateOne) SetTeamID(id string) *PetUpdateOne {
+func (puo *PetUpdateOne) SetTeamID(id int) *PetUpdateOne {
 	puo.mutation.SetTeamID(id)
 	return puo
 }
 
 // SetNillableTeamID sets the team edge to User by id if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableTeamID(id *string) *PetUpdateOne {
+func (puo *PetUpdateOne) SetNillableTeamID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetTeamID(*id)
 	}
@@ -287,13 +278,13 @@ func (puo *PetUpdateOne) SetTeam(u *User) *PetUpdateOne {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (puo *PetUpdateOne) SetOwnerID(id string) *PetUpdateOne {
+func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
 	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableOwnerID(id *string) *PetUpdateOne {
+func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetOwnerID(*id)
 	}
@@ -374,7 +365,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		},
@@ -400,7 +391,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -416,16 +407,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -439,7 +426,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -455,16 +442,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

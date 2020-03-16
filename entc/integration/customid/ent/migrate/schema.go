@@ -68,6 +68,7 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 25},
+		{Name: "pet_best_friend", Type: field.TypeString, Unique: true, Nullable: true, Size: 25},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
@@ -77,8 +78,15 @@ var (
 		PrimaryKey: []*schema.Column{PetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "pets_users_pets",
+				Symbol:  "pets_pets_best_friend",
 				Columns: []*schema.Column{PetsColumns[1]},
+
+				RefColumns: []*schema.Column{PetsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "pets_users_pets",
+				Columns: []*schema.Column{PetsColumns[2]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -159,6 +167,33 @@ var (
 			},
 		},
 	}
+	// PetFriendsColumns holds the columns for the "pet_friends" table.
+	PetFriendsColumns = []*schema.Column{
+		{Name: "pet_id", Type: field.TypeString, Size: 25},
+		{Name: "friend_id", Type: field.TypeString, Size: 25},
+	}
+	// PetFriendsTable holds the schema information for the "pet_friends" table.
+	PetFriendsTable = &schema.Table{
+		Name:       "pet_friends",
+		Columns:    PetFriendsColumns,
+		PrimaryKey: []*schema.Column{PetFriendsColumns[0], PetFriendsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "pet_friends_pet_id",
+				Columns: []*schema.Column{PetFriendsColumns[0]},
+
+				RefColumns: []*schema.Column{PetsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:  "pet_friends_friend_id",
+				Columns: []*schema.Column{PetFriendsColumns[1]},
+
+				RefColumns: []*schema.Column{PetsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BlobsTable,
@@ -168,16 +203,20 @@ var (
 		UsersTable,
 		BlobLinksTable,
 		GroupUsersTable,
+		PetFriendsTable,
 	}
 )
 
 func init() {
 	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
-	PetsTable.ForeignKeys[0].RefTable = UsersTable
+	PetsTable.ForeignKeys[0].RefTable = PetsTable
+	PetsTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
 	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
 	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable
+	PetFriendsTable.ForeignKeys[0].RefTable = PetsTable
+	PetFriendsTable.ForeignKeys[1].RefTable = PetsTable
 }

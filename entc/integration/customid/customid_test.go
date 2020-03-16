@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
 	"github.com/go-sql-driver/mysql"
 
@@ -102,4 +103,28 @@ func CustomID(t *testing.T, client *ent.Client) {
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
 	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyXID(ctx))
 	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyXID(ctx))
+	xabi := client.Pet.Create().SetID("xabi").AddFriends(pedro).SetBestFriend(pedro).SaveX(ctx)
+	require.Equal(t, "xabi", xabi.ID)
+
+	pets := client.Pet.Query().WithFriends().WithBestFriend().Order(ent.Asc(pet.FieldID)).AllX(ctx)
+	require.Len(t, pets, 2)
+
+	require.Equal(t, pedro.ID, pets[0].ID)
+	require.NotNil(t, pets[0].Edges.BestFriend)
+	require.Equal(t, xabi.ID, pets[0].Edges.BestFriend.ID)
+	require.Len(t, pets[0].Edges.Friends, 1)
+	require.Equal(t, xabi.ID, pets[0].Edges.Friends[0].ID)
+
+	require.Equal(t, xabi.ID, pets[1].ID)
+	require.NotNil(t, pets[1].Edges.BestFriend)
+	require.Equal(t, pedro.ID, pets[1].Edges.BestFriend.ID)
+	require.Len(t, pets[1].Edges.Friends, 1)
+	require.Equal(t, pedro.ID, pets[1].Edges.Friends[0].ID)
+
+	bee := client.Car.Create().SetModel("Chevrolet Camaro").SetOwner(pedro).SaveX(ctx)
+	require.NotNil(t, bee)
+	bee = client.Car.Query().WithOwner().OnlyX(ctx)
+	require.Equal(t, "Chevrolet Camaro", bee.Model)
+	require.NotNil(t, bee.Edges.Owner)
+	require.Equal(t, pedro.ID, bee.Edges.Owner.ID)
 }

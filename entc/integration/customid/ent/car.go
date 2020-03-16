@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -63,7 +62,7 @@ func (*Car) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Car) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // pet_cars
+		&sql.NullString{}, // pet_cars
 	}
 }
 
@@ -86,11 +85,11 @@ func (c *Car) assignValues(values ...interface{}) error {
 	}
 	values = values[1:]
 	if len(values) == len(car.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field pet_cars", value)
+		if value, ok := values[0].(*sql.NullString); !ok {
+			return fmt.Errorf("unexpected type %T for field pet_cars", values[0])
 		} else if value.Valid {
 			c.pet_cars = new(string)
-			*c.pet_cars = strconv.FormatInt(value.Int64, 10)
+			*c.pet_cars = value.String
 		}
 	}
 	return nil

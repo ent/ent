@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -60,13 +59,13 @@ func (nu *NodeUpdate) ClearValue() *NodeUpdate {
 }
 
 // SetPrevID sets the prev edge to Node by id.
-func (nu *NodeUpdate) SetPrevID(id string) *NodeUpdate {
+func (nu *NodeUpdate) SetPrevID(id int) *NodeUpdate {
 	nu.mutation.SetPrevID(id)
 	return nu
 }
 
 // SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
-func (nu *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
+func (nu *NodeUpdate) SetNillablePrevID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetPrevID(*id)
 	}
@@ -79,13 +78,13 @@ func (nu *NodeUpdate) SetPrev(n *Node) *NodeUpdate {
 }
 
 // SetNextID sets the next edge to Node by id.
-func (nu *NodeUpdate) SetNextID(id string) *NodeUpdate {
+func (nu *NodeUpdate) SetNextID(id int) *NodeUpdate {
 	nu.mutation.SetNextID(id)
 	return nu
 }
 
 // SetNillableNextID sets the next edge to Node by id if the given value is not nil.
-func (nu *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
+func (nu *NodeUpdate) SetNillableNextID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetNextID(*id)
 	}
@@ -166,7 +165,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   node.Table,
 			Columns: node.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: node.FieldID,
 			},
 		},
@@ -207,7 +206,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
@@ -223,16 +222,12 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -246,7 +241,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
@@ -262,16 +257,12 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -322,13 +313,13 @@ func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
 }
 
 // SetPrevID sets the prev edge to Node by id.
-func (nuo *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
+func (nuo *NodeUpdateOne) SetPrevID(id int) *NodeUpdateOne {
 	nuo.mutation.SetPrevID(id)
 	return nuo
 }
 
 // SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
+func (nuo *NodeUpdateOne) SetNillablePrevID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetPrevID(*id)
 	}
@@ -341,13 +332,13 @@ func (nuo *NodeUpdateOne) SetPrev(n *Node) *NodeUpdateOne {
 }
 
 // SetNextID sets the next edge to Node by id.
-func (nuo *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne {
+func (nuo *NodeUpdateOne) SetNextID(id int) *NodeUpdateOne {
 	nuo.mutation.SetNextID(id)
 	return nuo
 }
 
 // SetNillableNextID sets the next edge to Node by id if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
+func (nuo *NodeUpdateOne) SetNillableNextID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetNextID(*id)
 	}
@@ -428,7 +419,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Table:   node.Table,
 			Columns: node.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: node.FieldID,
 			},
 		},
@@ -467,7 +458,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
@@ -483,16 +474,12 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -506,7 +493,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
@@ -522,16 +509,12 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

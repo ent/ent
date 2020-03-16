@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -34,14 +33,14 @@ func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 }
 
 // AddCardIDs adds the card edge to Card by ids.
-func (su *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
+func (su *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.AddCardIDs(ids...)
 	return su
 }
 
 // AddCard adds the card edges to Card.
 func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
-	ids := make([]string, len(c))
+	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -49,14 +48,14 @@ func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 }
 
 // RemoveCardIDs removes the card edge to Card by ids.
-func (su *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
+func (su *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
 	return su
 }
 
 // RemoveCard removes card edges to Card.
 func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
-	ids := make([]string, len(c))
+	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -120,7 +119,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   spec.Table,
 			Columns: spec.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: spec.FieldID,
 			},
 		},
@@ -141,16 +140,12 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -164,16 +159,12 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -197,14 +188,14 @@ type SpecUpdateOne struct {
 }
 
 // AddCardIDs adds the card edge to Card by ids.
-func (suo *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
+func (suo *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.AddCardIDs(ids...)
 	return suo
 }
 
 // AddCard adds the card edges to Card.
 func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
-	ids := make([]string, len(c))
+	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -212,14 +203,14 @@ func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 }
 
 // RemoveCardIDs removes the card edge to Card by ids.
-func (suo *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
+func (suo *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.RemoveCardIDs(ids...)
 	return suo
 }
 
 // RemoveCard removes card edges to Card.
 func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
-	ids := make([]string, len(c))
+	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -283,7 +274,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 			Table:   spec.Table,
 			Columns: spec.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: spec.FieldID,
 			},
 		},
@@ -302,16 +293,12 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -325,16 +312,12 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

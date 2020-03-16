@@ -77,8 +77,8 @@ func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
 }
 
 // FirstID returns the first FieldType id in the query. Returns *NotFoundError when no id was found.
-func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -90,7 +90,7 @@ func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) FirstXID(ctx context.Context) string {
+func (ftq *FieldTypeQuery) FirstXID(ctx context.Context) int {
 	id, err := ftq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -124,8 +124,8 @@ func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
 }
 
 // OnlyID returns the only FieldType id in the query, returns an error if not exactly one id was returned.
-func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = ftq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
+func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) int {
 	id, err := ftq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -164,8 +164,8 @@ func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
 }
 
 // IDs executes the query and returns a list of FieldType ids.
-func (ftq *FieldTypeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (ftq *FieldTypeQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := ftq.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (ftq *FieldTypeQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []string {
+func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []int {
 	ids, err := ftq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -311,7 +311,7 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   fieldtype.Table,
 			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: fieldtype.FieldID,
 			},
 		},

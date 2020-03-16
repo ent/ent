@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/item"
@@ -66,7 +65,7 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: item.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: item.FieldID,
 			},
 		}
@@ -78,6 +77,6 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	i.ID = strconv.FormatInt(id, 10)
+	i.ID = int(id)
 	return i, nil
 }

@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
@@ -25,14 +24,14 @@ type SpecCreate struct {
 }
 
 // AddCardIDs adds the card edge to Card by ids.
-func (sc *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
+func (sc *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
 	sc.mutation.AddCardIDs(ids...)
 	return sc
 }
 
 // AddCard adds the card edges to Card.
 func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
-	ids := make([]string, len(c))
+	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -82,7 +81,7 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: spec.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: spec.FieldID,
 			},
 		}
@@ -96,16 +95,12 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -117,6 +112,6 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	s.ID = strconv.FormatInt(id, 10)
+	s.ID = int(id)
 	return s, nil
 }

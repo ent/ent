@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
@@ -388,7 +387,7 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: fieldtype.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: fieldtype.FieldID,
 			},
 		}
@@ -592,6 +591,6 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	ft.ID = strconv.FormatInt(id, 10)
+	ft.ID = int(id)
 	return ft, nil
 }
