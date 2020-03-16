@@ -170,6 +170,26 @@ func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 	return uu
 }
 
+// SetSSOCert sets the SSOCert field.
+func (uu *UserUpdate) SetSSOCert(s string) *UserUpdate {
+	uu.mutation.SetSSOCert(s)
+	return uu
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uu *UserUpdate) SetNillableSSOCert(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetSSOCert(*s)
+	}
+	return uu
+}
+
+// ClearSSOCert clears the value of SSOCert.
+func (uu *UserUpdate) ClearSSOCert() *UserUpdate {
+	uu.mutation.ClearSSOCert()
+	return uu
+}
+
 // SetCardID sets the card edge to Card by id.
 func (uu *UserUpdate) SetCardID(id string) *UserUpdate {
 	uu.mutation.SetCardID(id)
@@ -651,6 +671,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uu.mutation.SSOCert(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldSSOCert,
+		})
+	}
+	if uu.mutation.SSOCertCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldSSOCert,
 		})
 	}
 	if uu.mutation.CardCleared() {
@@ -1283,6 +1316,26 @@ func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 	return uuo
 }
 
+// SetSSOCert sets the SSOCert field.
+func (uuo *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
+	uuo.mutation.SetSSOCert(s)
+	return uuo
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableSSOCert(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetSSOCert(*s)
+	}
+	return uuo
+}
+
+// ClearSSOCert clears the value of SSOCert.
+func (uuo *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
+	uuo.mutation.ClearSSOCert()
+	return uuo
+}
+
 // SetCardID sets the card edge to Card by id.
 func (uuo *UserUpdateOne) SetCardID(id string) *UserUpdateOne {
 	uuo.mutation.SetCardID(id)
@@ -1762,6 +1815,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uuo.mutation.SSOCert(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldSSOCert,
+		})
+	}
+	if uuo.mutation.SSOCertCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldSSOCert,
 		})
 	}
 	if uuo.mutation.CardCleared() {

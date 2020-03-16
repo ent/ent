@@ -122,6 +122,20 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	return uc
 }
 
+// SetSSOCert sets the SSOCert field.
+func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
+	uc.mutation.SetSSOCert(s)
+	return uc
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
+	if s != nil {
+		uc.SetSSOCert(*s)
+	}
+	return uc
+}
+
 // SetCardID sets the card edge to Card by id.
 func (uc *UserCreate) SetCardID(id string) *UserCreate {
 	uc.mutation.SetCardID(id)
@@ -418,6 +432,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := uc.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
+	}
+	if value, ok := uc.mutation.SSOCert(); ok {
+		v.Property(dsl.Single, user.FieldSSOCert, value)
 	}
 	for _, id := range uc.mutation.CardIDs() {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()

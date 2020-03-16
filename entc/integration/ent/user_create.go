@@ -124,6 +124,20 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	return uc
 }
 
+// SetSSOCert sets the SSOCert field.
+func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
+	uc.mutation.SetSSOCert(s)
+	return uc
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
+	if s != nil {
+		uc.SetSSOCert(*s)
+	}
+	return uc
+}
+
 // SetCardID sets the card edge to Card by id.
 func (uc *UserCreate) SetCardID(id string) *UserCreate {
 	uc.mutation.SetCardID(id)
@@ -440,6 +454,14 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldRole,
 		})
 		u.Role = value
+	}
+	if value, ok := uc.mutation.SSOCert(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldSSOCert,
+		})
+		u.SSOCert = value
 	}
 	if nodes := uc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

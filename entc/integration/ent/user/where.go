@@ -153,6 +153,13 @@ func Password(v string) predicate.User {
 	})
 }
 
+// SSOCert applies equality check predicate on the "SSOCert" field. It's identical to SSOCertEQ.
+func SSOCert(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSSOCert), v))
+	})
+}
+
 // OptionalIntEQ applies the EQ predicate on the "optional_int" field.
 func OptionalIntEQ(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -961,6 +968,131 @@ func RoleNotIn(vs ...Role) predicate.User {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldRole), v...))
+	})
+}
+
+// SSOCertEQ applies the EQ predicate on the "SSOCert" field.
+func SSOCertEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertNEQ applies the NEQ predicate on the "SSOCert" field.
+func SSOCertNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertIn applies the In predicate on the "SSOCert" field.
+func SSOCertIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSSOCert), v...))
+	})
+}
+
+// SSOCertNotIn applies the NotIn predicate on the "SSOCert" field.
+func SSOCertNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSSOCert), v...))
+	})
+}
+
+// SSOCertGT applies the GT predicate on the "SSOCert" field.
+func SSOCertGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertGTE applies the GTE predicate on the "SSOCert" field.
+func SSOCertGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertLT applies the LT predicate on the "SSOCert" field.
+func SSOCertLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertLTE applies the LTE predicate on the "SSOCert" field.
+func SSOCertLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertContains applies the Contains predicate on the "SSOCert" field.
+func SSOCertContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertHasPrefix applies the HasPrefix predicate on the "SSOCert" field.
+func SSOCertHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertHasSuffix applies the HasSuffix predicate on the "SSOCert" field.
+func SSOCertHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertIsNil applies the IsNil predicate on the "SSOCert" field.
+func SSOCertIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSSOCert)))
+	})
+}
+
+// SSOCertNotNil applies the NotNil predicate on the "SSOCert" field.
+func SSOCertNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSSOCert)))
+	})
+}
+
+// SSOCertEqualFold applies the EqualFold predicate on the "SSOCert" field.
+func SSOCertEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertContainsFold applies the ContainsFold predicate on the "SSOCert" field.
+func SSOCertContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldSSOCert), v))
 	})
 }
 

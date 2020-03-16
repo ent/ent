@@ -22,7 +22,8 @@ const (
 	FieldNickname    = "nickname"     // FieldPhone holds the string denoting the phone vertex property in the database.
 	FieldPhone       = "phone"        // FieldPassword holds the string denoting the password vertex property in the database.
 	FieldPassword    = "password"     // FieldRole holds the string denoting the role vertex property in the database.
-	FieldRole        = "role"
+	FieldRole        = "role"         // FieldSSOCert holds the string denoting the ssocert vertex property in the database.
+	FieldSSOCert     = "sso_cert"
 
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"

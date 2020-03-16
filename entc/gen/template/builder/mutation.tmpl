@@ -106,7 +106,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 }
 
 {{ range $f := $n.Fields }}
-	{{ $p := receiver $f.Type.String }}
+	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	{{ $const := print $n.Package "." $f.Constant }}
 	// {{ $func }} sets the {{ $f.Name }} field.
