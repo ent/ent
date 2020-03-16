@@ -539,6 +539,34 @@ func (c *PetClient) QueryCars(pe *Pet) *CarQuery {
 	return query
 }
 
+// QueryFriends queries the friends edge of a Pet.
+func (c *PetClient) QueryFriends(pe *Pet) *PetQuery {
+	query := &PetQuery{config: c.config}
+	id := pe.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, id),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, pet.FriendsTable, pet.FriendsPrimaryKey...),
+	)
+	query.sql = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryBestFriend queries the best_friend edge of a Pet.
+func (c *PetClient) QueryBestFriend(pe *Pet) *PetQuery {
+	query := &PetQuery{config: c.config}
+	id := pe.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, id),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, pet.BestFriendTable, pet.BestFriendColumn),
+	)
+	query.sql = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet

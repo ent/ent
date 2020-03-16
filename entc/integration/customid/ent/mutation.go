@@ -959,14 +959,18 @@ func (m *GroupMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type PetMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *string
-	clearedFields map[string]bool
-	owner         *int
-	clearedowner  bool
-	cars          map[int]struct{}
-	removedcars   map[int]struct{}
+	op                 Op
+	typ                string
+	id                 *string
+	clearedFields      map[string]bool
+	owner              *int
+	clearedowner       bool
+	cars               map[int]struct{}
+	removedcars        map[int]struct{}
+	friends            map[string]struct{}
+	removedfriends     map[string]struct{}
+	best_friend        *string
+	clearedbest_friend bool
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -1096,6 +1100,87 @@ func (m *PetMutation) ResetCars() {
 	m.removedcars = nil
 }
 
+// AddFriendIDs adds the friends edge to Pet by ids.
+func (m *PetMutation) AddFriendIDs(ids ...string) {
+	if m.friends == nil {
+		m.friends = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.friends[ids[i]] = struct{}{}
+	}
+}
+
+// RemoveFriendIDs removes the friends edge to Pet by ids.
+func (m *PetMutation) RemoveFriendIDs(ids ...string) {
+	if m.removedfriends == nil {
+		m.removedfriends = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.removedfriends[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFriends returns the removed ids of friends.
+func (m *PetMutation) RemovedFriendsIDs() (ids []string) {
+	for id := range m.removedfriends {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FriendsIDs returns the friends ids in the mutation.
+func (m *PetMutation) FriendsIDs() (ids []string) {
+	for id := range m.friends {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFriends reset all changes of the friends edge.
+func (m *PetMutation) ResetFriends() {
+	m.friends = nil
+	m.removedfriends = nil
+}
+
+// SetBestFriendID sets the best_friend edge to Pet by id.
+func (m *PetMutation) SetBestFriendID(id string) {
+	m.best_friend = &id
+}
+
+// ClearBestFriend clears the best_friend edge to Pet.
+func (m *PetMutation) ClearBestFriend() {
+	m.clearedbest_friend = true
+}
+
+// BestFriendCleared returns if the edge best_friend was cleared.
+func (m *PetMutation) BestFriendCleared() bool {
+	return m.clearedbest_friend
+}
+
+// BestFriendID returns the best_friend id in the mutation.
+func (m *PetMutation) BestFriendID() (id string, exists bool) {
+	if m.best_friend != nil {
+		return *m.best_friend, true
+	}
+	return
+}
+
+// BestFriendIDs returns the best_friend ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// BestFriendID instead. It exists only for internal usage by the builders.
+func (m *PetMutation) BestFriendIDs() (ids []string) {
+	if id := m.best_friend; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBestFriend reset all changes of the best_friend edge.
+func (m *PetMutation) ResetBestFriend() {
+	m.best_friend = nil
+	m.clearedbest_friend = false
+}
+
 // Op returns the operation name.
 func (m *PetMutation) Op() Op {
 	return m.op
@@ -1184,12 +1269,18 @@ func (m *PetMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *PetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.owner != nil {
 		edges = append(edges, pet.EdgeOwner)
 	}
 	if m.cars != nil {
 		edges = append(edges, pet.EdgeCars)
+	}
+	if m.friends != nil {
+		edges = append(edges, pet.EdgeFriends)
+	}
+	if m.best_friend != nil {
+		edges = append(edges, pet.EdgeBestFriend)
 	}
 	return edges
 }
@@ -1208,6 +1299,16 @@ func (m *PetMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case pet.EdgeFriends:
+		ids := make([]ent.Value, 0, len(m.friends))
+		for id := range m.friends {
+			ids = append(ids, id)
+		}
+		return ids
+	case pet.EdgeBestFriend:
+		if id := m.best_friend; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
@@ -1215,9 +1316,12 @@ func (m *PetMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *PetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.removedcars != nil {
 		edges = append(edges, pet.EdgeCars)
+	}
+	if m.removedfriends != nil {
+		edges = append(edges, pet.EdgeFriends)
 	}
 	return edges
 }
@@ -1232,6 +1336,12 @@ func (m *PetMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case pet.EdgeFriends:
+		ids := make([]ent.Value, 0, len(m.removedfriends))
+		for id := range m.removedfriends {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -1239,9 +1349,12 @@ func (m *PetMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *PetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedowner {
 		edges = append(edges, pet.EdgeOwner)
+	}
+	if m.clearedbest_friend {
+		edges = append(edges, pet.EdgeBestFriend)
 	}
 	return edges
 }
@@ -1252,6 +1365,8 @@ func (m *PetMutation) EdgeCleared(name string) bool {
 	switch name {
 	case pet.EdgeOwner:
 		return m.clearedowner
+	case pet.EdgeBestFriend:
+		return m.clearedbest_friend
 	}
 	return false
 }
@@ -1262,6 +1377,9 @@ func (m *PetMutation) ClearEdge(name string) error {
 	switch name {
 	case pet.EdgeOwner:
 		m.ClearOwner()
+		return nil
+	case pet.EdgeBestFriend:
+		m.ClearBestFriend()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet unique edge %s", name)
@@ -1277,6 +1395,12 @@ func (m *PetMutation) ResetEdge(name string) error {
 		return nil
 	case pet.EdgeCars:
 		m.ResetCars()
+		return nil
+	case pet.EdgeFriends:
+		m.ResetFriends()
+		return nil
+	case pet.EdgeBestFriend:
+		m.ResetBestFriend()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet edge %s", name)

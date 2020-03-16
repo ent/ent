@@ -429,19 +429,19 @@ func (t *Type) resolveFKs() {
 		if e.IsInverse() || e.M2M() {
 			continue
 		}
-		typ := t.ID.Type
+		refid := t.ID
 		if e.OwnFK() {
-			typ = e.Type.ID.Type
+			refid = e.Type.ID
 		}
 		fk := &ForeignKey{
 			Edge: e,
 			Field: &Field{
 				Name:        e.Rel.Column(),
-				Type:        typ,
+				Type:        refid.Type,
 				Nillable:    true,
 				Optional:    true,
 				Unique:      e.Unique,
-				UserDefined: e.Type.ID.UserDefined,
+				UserDefined: refid.UserDefined,
 			},
 		}
 		if e.OwnFK() {
@@ -633,9 +633,7 @@ func (f Field) Column() *schema.Column {
 		Unique:   f.Unique,
 		Nullable: f.Optional,
 		Enums:    f.Enums(),
-	}
-	if f.def != nil && f.def.Size != nil {
-		c.Size = *f.def.Size
+		Size:     f.size(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
@@ -646,6 +644,14 @@ func (f Field) Column() *schema.Column {
 		}
 	}
 	return c
+}
+
+// size returns the the field size defined in the schema.
+func (f Field) size() int64 {
+	if f.def != nil && f.def.Size != nil {
+		return *f.def.Size
+	}
+	return 0
 }
 
 // PK is like Column, but for table primary key.

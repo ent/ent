@@ -67,6 +67,40 @@ func (pu *PetUpdate) AddCars(c ...*Car) *PetUpdate {
 	return pu.AddCarIDs(ids...)
 }
 
+// AddFriendIDs adds the friends edge to Pet by ids.
+func (pu *PetUpdate) AddFriendIDs(ids ...string) *PetUpdate {
+	pu.mutation.AddFriendIDs(ids...)
+	return pu
+}
+
+// AddFriends adds the friends edges to Pet.
+func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pu.AddFriendIDs(ids...)
+}
+
+// SetBestFriendID sets the best_friend edge to Pet by id.
+func (pu *PetUpdate) SetBestFriendID(id string) *PetUpdate {
+	pu.mutation.SetBestFriendID(id)
+	return pu
+}
+
+// SetNillableBestFriendID sets the best_friend edge to Pet by id if the given value is not nil.
+func (pu *PetUpdate) SetNillableBestFriendID(id *string) *PetUpdate {
+	if id != nil {
+		pu = pu.SetBestFriendID(*id)
+	}
+	return pu
+}
+
+// SetBestFriend sets the best_friend edge to Pet.
+func (pu *PetUpdate) SetBestFriend(p *Pet) *PetUpdate {
+	return pu.SetBestFriendID(p.ID)
+}
+
 // ClearOwner clears the owner edge to User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
@@ -86,6 +120,27 @@ func (pu *PetUpdate) RemoveCars(c ...*Car) *PetUpdate {
 		ids[i] = c[i].ID
 	}
 	return pu.RemoveCarIDs(ids...)
+}
+
+// RemoveFriendIDs removes the friends edge to Pet by ids.
+func (pu *PetUpdate) RemoveFriendIDs(ids ...string) *PetUpdate {
+	pu.mutation.RemoveFriendIDs(ids...)
+	return pu
+}
+
+// RemoveFriends removes friends edges to Pet.
+func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pu.RemoveFriendIDs(ids...)
+}
+
+// ClearBestFriend clears the best_friend edge to Pet.
+func (pu *PetUpdate) ClearBestFriend() *PetUpdate {
+	pu.mutation.ClearBestFriend()
+	return pu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -230,6 +285,79 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if nodes := pu.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   pet.FriendsTable,
+			Columns: pet.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.FriendsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   pet.FriendsTable,
+			Columns: pet.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pu.mutation.BestFriendCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   pet.BestFriendTable,
+			Columns: []string{pet.BestFriendColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.BestFriendIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   pet.BestFriendTable,
+			Columns: []string{pet.BestFriendColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
@@ -282,6 +410,40 @@ func (puo *PetUpdateOne) AddCars(c ...*Car) *PetUpdateOne {
 	return puo.AddCarIDs(ids...)
 }
 
+// AddFriendIDs adds the friends edge to Pet by ids.
+func (puo *PetUpdateOne) AddFriendIDs(ids ...string) *PetUpdateOne {
+	puo.mutation.AddFriendIDs(ids...)
+	return puo
+}
+
+// AddFriends adds the friends edges to Pet.
+func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puo.AddFriendIDs(ids...)
+}
+
+// SetBestFriendID sets the best_friend edge to Pet by id.
+func (puo *PetUpdateOne) SetBestFriendID(id string) *PetUpdateOne {
+	puo.mutation.SetBestFriendID(id)
+	return puo
+}
+
+// SetNillableBestFriendID sets the best_friend edge to Pet by id if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableBestFriendID(id *string) *PetUpdateOne {
+	if id != nil {
+		puo = puo.SetBestFriendID(*id)
+	}
+	return puo
+}
+
+// SetBestFriend sets the best_friend edge to Pet.
+func (puo *PetUpdateOne) SetBestFriend(p *Pet) *PetUpdateOne {
+	return puo.SetBestFriendID(p.ID)
+}
+
 // ClearOwner clears the owner edge to User.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
@@ -301,6 +463,27 @@ func (puo *PetUpdateOne) RemoveCars(c ...*Car) *PetUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return puo.RemoveCarIDs(ids...)
+}
+
+// RemoveFriendIDs removes the friends edge to Pet by ids.
+func (puo *PetUpdateOne) RemoveFriendIDs(ids ...string) *PetUpdateOne {
+	puo.mutation.RemoveFriendIDs(ids...)
+	return puo
+}
+
+// RemoveFriends removes friends edges to Pet.
+func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puo.RemoveFriendIDs(ids...)
+}
+
+// ClearBestFriend clears the best_friend edge to Pet.
+func (puo *PetUpdateOne) ClearBestFriend() *PetUpdateOne {
+	puo.mutation.ClearBestFriend()
+	return puo
 }
 
 // Save executes the query and returns the updated entity.
@@ -435,6 +618,79 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: car.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := puo.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   pet.FriendsTable,
+			Columns: pet.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.FriendsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   pet.FriendsTable,
+			Columns: pet.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.BestFriendCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   pet.BestFriendTable,
+			Columns: []string{pet.BestFriendColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.BestFriendIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   pet.BestFriendTable,
+			Columns: []string{pet.BestFriendColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: pet.FieldID,
 				},
 			},
 		}

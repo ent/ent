@@ -151,6 +151,62 @@ func HasCarsWith(preds ...predicate.Car) predicate.Pet {
 	})
 }
 
+// HasFriends applies the HasEdge predicate on the "friends" edge.
+func HasFriends() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FriendsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
+func HasFriendsWith(preds ...predicate.Pet) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBestFriend applies the HasEdge predicate on the "best_friend" edge.
+func HasBestFriend() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BestFriendTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBestFriendWith applies the HasEdge predicate on the "best_friend" edge with a given conditions (other predicates).
+func HasBestFriendWith(preds ...predicate.Pet) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BestFriendTable, BestFriendColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {

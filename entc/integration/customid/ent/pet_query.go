@@ -31,9 +31,11 @@ type PetQuery struct {
 	unique     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
-	withOwner *UserQuery
-	withCars  *CarQuery
-	withFKs   bool
+	withOwner      *UserQuery
+	withCars       *CarQuery
+	withFriends    *PetQuery
+	withBestFriend *PetQuery
+	withFKs        bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -81,6 +83,30 @@ func (pq *PetQuery) QueryCars() *CarQuery {
 		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
 		sqlgraph.To(car.Table, car.FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, pet.CarsTable, pet.CarsColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+	return query
+}
+
+// QueryFriends chains the current query on the friends edge.
+func (pq *PetQuery) QueryFriends() *PetQuery {
+	query := &PetQuery{config: pq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, pet.FriendsTable, pet.FriendsPrimaryKey...),
+	)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+	return query
+}
+
+// QueryBestFriend chains the current query on the best_friend edge.
+func (pq *PetQuery) QueryBestFriend() *PetQuery {
+	query := &PetQuery{config: pq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+		sqlgraph.To(pet.Table, pet.FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, pet.BestFriendTable, pet.BestFriendColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
@@ -277,6 +303,28 @@ func (pq *PetQuery) WithCars(opts ...func(*CarQuery)) *PetQuery {
 	return pq
 }
 
+//  WithFriends tells the query-builder to eager-loads the nodes that are connected to
+// the "friends" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
+	query := &PetQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withFriends = query
+	return pq
+}
+
+//  WithBestFriend tells the query-builder to eager-loads the nodes that are connected to
+// the "best_friend" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PetQuery) WithBestFriend(opts ...func(*PetQuery)) *PetQuery {
+	query := &PetQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withBestFriend = query
+	return pq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
@@ -299,12 +347,14 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		nodes       = []*Pet{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			pq.withOwner != nil,
 			pq.withCars != nil,
+			pq.withFriends != nil,
+			pq.withBestFriend != nil,
 		}
 	)
-	if pq.withOwner != nil {
+	if pq.withOwner != nil || pq.withBestFriend != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -384,6 +434,94 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "pet_cars" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Cars = append(node.Edges.Cars, n)
+		}
+	}
+
+	if query := pq.withFriends; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[string]*Pet, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+		}
+		var (
+			edgeids []string
+			edges   = make(map[string][]*Pet)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   pet.FriendsTable,
+				Columns: pet.FriendsPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(pet.FriendsPrimaryKey[0], fks...))
+			},
+
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullString{}, &sql.NullString{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullString)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullString)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := eout.String
+				inValue := ein.String
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				edgeids = append(edgeids, inValue)
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, pq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "friends": %v`, err)
+		}
+		query.Where(pet.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Friends = append(nodes[i].Edges.Friends, n)
+			}
+		}
+	}
+
+	if query := pq.withBestFriend; query != nil {
+		ids := make([]string, 0, len(nodes))
+		nodeids := make(map[string][]*Pet)
+		for i := range nodes {
+			if fk := nodes[i].pet_best_friend; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(pet.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "pet_best_friend" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.BestFriend = n
+			}
 		}
 	}
 
