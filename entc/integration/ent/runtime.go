@@ -33,6 +33,7 @@ func init() {
 		cardMixin[0].Fields(),
 	}
 	cardFields := schema.Card{}.Fields()
+	_ = cardFields
 	// cardDescCreateTime is the schema descriptor for create_time field.
 	cardDescCreateTime := cardMixinFields[0][0].Descriptor()
 	// card.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -52,11 +53,13 @@ func init() {
 	// card.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
 	fieldtypeFields := schema.FieldType{}.Fields()
+	_ = fieldtypeFields
 	// fieldtypeDescValidateOptionalInt32 is the schema descriptor for validate_optional_int32 field.
 	fieldtypeDescValidateOptionalInt32 := fieldtypeFields[15].Descriptor()
 	// fieldtype.ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	fieldtype.ValidateOptionalInt32Validator = fieldtypeDescValidateOptionalInt32.Validators[0].(func(int32) error)
 	fileFields := schema.File{}.Fields()
+	_ = fileFields
 	// fileDescSize is the schema descriptor for size field.
 	fileDescSize := fileFields[0].Descriptor()
 	// file.DefaultSize holds the default value on creation for the size field.
@@ -64,6 +67,7 @@ func init() {
 	// file.SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	file.SizeValidator = fileDescSize.Validators[0].(func(int) error)
 	groupFields := schema.Group{}.Fields()
+	_ = groupFields
 	// groupDescActive is the schema descriptor for active field.
 	groupDescActive := groupFields[0].Descriptor()
 	// group.DefaultActive holds the default value on creation for the active field.
@@ -111,6 +115,7 @@ func init() {
 		}
 	}()
 	groupinfoFields := schema.GroupInfo{}.Fields()
+	_ = groupinfoFields
 	// groupinfoDescMaxUsers is the schema descriptor for max_users field.
 	groupinfoDescMaxUsers := groupinfoFields[1].Descriptor()
 	// groupinfo.DefaultMaxUsers holds the default value on creation for the max_users field.
@@ -120,6 +125,7 @@ func init() {
 		userMixin[0].Fields(),
 	}
 	userFields := schema.User{}.Fields()
+	_ = userFields
 	// userDescOptionalInt is the schema descriptor for optional_int field.
 	userDescOptionalInt := userMixinFields[0][0].Descriptor()
 	// user.OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.

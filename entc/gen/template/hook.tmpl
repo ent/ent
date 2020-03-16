@@ -12,16 +12,18 @@ in the LICENSE file in the root directory of this source tree.
 
 import "{{ $.Config.Package }}"
 
+{{ $pkg := base $.Config.Package }}
+
 {{ range $n := $.Nodes }}
 	{{ $name := print $n.Name "Func" }}
-	{{ $type := print "*ent." $n.MutationName }}
+	{{ $type := printf "*%s.%s" $pkg $n.MutationName }}
 
 	// The {{ $name }} type is an adapter to allow the use of ordinary
 	// function as {{ $n.Name }} mutator.
-	type {{ $name }} func(context.Context, {{ $type }}) (ent.Value, error)
+	type {{ $name }} func(context.Context, {{ $type }}) ({{ $pkg }}.Value, error)
 
 	// Mutate calls f(ctx, m).
-	func (f {{ $name }}) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	func (f {{ $name }}) Mutate(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
 		mv, ok := m.({{ $type }})
 		if !ok {
 			return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
@@ -32,11 +34,11 @@ import "{{ $.Config.Package }}"
 
 // On executes the given hook only of the given operation.
 //
-//	hook.On(Log, ent.Delete|ent.Create)
+//	hook.On(Log, {{ $pkg }}.Delete|{{ $pkg }}.Create)
 //
-func On(hk ent.Hook, op ent.Op) ent.Hook {
-	return func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		return {{ $pkg }}.MutateFunc(func(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
 			if m.Op().Is(op) {
 				return hk(next).Mutate(ctx, m)
 			}
@@ -47,15 +49,15 @@ func On(hk ent.Hook, op ent.Op) ent.Hook {
 
 // Reject returns a hook that rejects all operations that match op.
 //
-//	func (T) Hooks() []ent.Hook {
-//		return []ent.Hook{
-//			Reject(ent.Delete|ent.Update),
+//	func (T) Hooks() []{{ $pkg }}.Hook {
+//		return []{{ $pkg }}.Hook{
+//			Reject({{ $pkg }}.Delete|{{ $pkg }}.Update),
 //		}
 //	}
 //
-func Reject(op ent.Op) ent.Hook {
-	return func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+func Reject(op {{ $pkg }}.Op) ent.Hook {
+	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		return {{ $pkg }}.MutateFunc(func(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
 			if m.Op().Is(op) {
 				return nil, fmt.Errorf("%s operation is not allowed", m.Op())
 			}

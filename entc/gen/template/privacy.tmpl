@@ -12,6 +12,8 @@ in the LICENSE file in the root directory of this source tree.
 
 import "{{ $.Config.Package }}"
 
+{{ $pkg := base $.Config.Package }}
+
 var (
 	// Allow may be returned by read/write rules to indicate that the policy
 	// evaluation should terminate with an allow decision.
@@ -39,12 +41,12 @@ type (
 
 	// ReadRule defines the interface deciding whether a read is allowed.
 	ReadRule interface {
-		EvalRead(context.Context, ent.Value) error
+		EvalRead(context.Context, {{ $pkg }}.Value) error
 	}
 )
 
 // EvalRead evaluates a load against a read policy.
-func (policy ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
+func (policy ReadPolicy) EvalRead(ctx context.Context, v {{ $pkg }}.Value) error {
 	for _, rule := range policy {
 		switch err := rule.EvalRead(ctx, v); {
 		case err == nil || errors.Is(err, Skip):
@@ -59,10 +61,10 @@ func (policy ReadPolicy) EvalRead(ctx context.Context, v ent.Value) error {
 
 // ReadRuleFunc type is an adapter to allow the use of
 // ordinary functions as read rules.
-type ReadRuleFunc func(context.Context, ent.Value) error
+type ReadRuleFunc func(context.Context, {{ $pkg }}.Value) error
 
 // Eval calls f(ctx, v).
-func (f ReadRuleFunc) EvalRead(ctx context.Context, v ent.Value) error {
+func (f ReadRuleFunc) EvalRead(ctx context.Context, v {{ $pkg }}.Value) error {
 	return f(ctx, v)
 }
 
@@ -72,12 +74,12 @@ type (
 
 	// WriteRule defines the interface deciding whether a write is allowed.
 	WriteRule interface {
-		EvalWrite(context.Context, ent.Mutation) error
+		EvalWrite(context.Context, {{ $pkg }}.Mutation) error
 	}
 )
 
 // EvalWrite evaluates a mutation against a write policy.
-func (policy WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (policy WritePolicy) EvalWrite(ctx context.Context, m {{ $pkg }}.Mutation) error {
 	for _, rule := range policy {
 		switch err := rule.EvalWrite(ctx, m); {
 		case err == nil || errors.Is(err, Skip):
@@ -92,10 +94,10 @@ func (policy WritePolicy) EvalWrite(ctx context.Context, m ent.Mutation) error {
 
 // WriteRuleFunc type is an adapter to allow the use of
 // ordinary functions as write rules.
-type WriteRuleFunc func(context.Context, ent.Mutation) error
+type WriteRuleFunc func(context.Context, {{ $pkg }}.Mutation) error
 
 // Eval calls f(ctx, m).
-func (f WriteRuleFunc) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (f WriteRuleFunc) EvalWrite(ctx context.Context, m {{ $pkg }}.Mutation) error {
 	return f(ctx, m)
 }
 
@@ -106,12 +108,12 @@ type Policy struct {
 }
 
 // EvalRead forwards evaluation to read policy.
-func (policy Policy) EvalRead(ctx context.Context, v ent.Value) error {
+func (policy Policy) EvalRead(ctx context.Context, v {{ $pkg }}.Value) error {
 	return policy.Read.EvalRead(ctx, v)
 }
 
 // EvalWrite forwards evaluation to write policy.
-func (policy Policy) EvalWrite(ctx context.Context, m ent.Mutation) error {
+func (policy Policy) EvalWrite(ctx context.Context, m {{ $pkg }}.Mutation) error {
 	return policy.Write.EvalWrite(ctx, m)
 }
 
@@ -133,18 +135,18 @@ func AlwaysDenyRule() ReadWriteRule {
 
 type fixedDecisionRule struct { err error }
 
-func (f fixedDecisionRule) EvalRead(context.Context, ent.Value) error { return f.err }
-func (f fixedDecisionRule) EvalWrite(context.Context, ent.Mutation) error { return f.err }
+func (f fixedDecisionRule) EvalRead(context.Context, {{ $pkg }}.Value) error { return f.err }
+func (f fixedDecisionRule) EvalWrite(context.Context, {{ $pkg }}.Mutation) error { return f.err }
 
 {{- range $n := $.Nodes }}
 	{{ $name := print $n.Name "ReadRuleFunc" }}
-	{{ $type := print "*ent." $n.Name }}
+	{{ $type := printf "*%s.%s" $pkg $n.Name }}
 	// The {{ $name }} type is an adapter to allow the use of ordinary
 	// functions as a read rule.
 	type {{ $name }} func(context.Context, {{ $type }}) error
 
 	// EvalRead calls f(ctx, v).
-	func (f {{ $name }}) EvalRead(ctx context.Context, v ent.Value) error {
+	func (f {{ $name }}) EvalRead(ctx context.Context, v {{ $pkg }}.Value) error {
 		if v, ok := v.({{ $type }}); ok {
 			return f(ctx, v)
 		}
@@ -152,13 +154,13 @@ func (f fixedDecisionRule) EvalWrite(context.Context, ent.Mutation) error { retu
 	}
 
 	{{ $name = print $n.Name "WriteRuleFunc" }}
-	{{ $type = print "*ent." $n.MutationName }}
+	{{ $type = printf "*%s.%s" $pkg $n.MutationName }}
 	// The {{ $name }} type is an adapter to allow the use of ordinary
 	// functions as a write rule.
 	type {{ $name }} func(context.Context, {{ $type }}) error
 
 	// EvalWrite calls f(ctx, m).
-	func (f {{ $name }}) EvalWrite(ctx context.Context, m ent.Mutation) error {
+	func (f {{ $name }}) EvalWrite(ctx context.Context, m {{ $pkg }}.Mutation) error {
 		if m, ok := m.({{ $type }}); ok {
 			return f(ctx, m)
 		}

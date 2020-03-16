@@ -17,6 +17,7 @@ import (
 // to their package variables.
 func init() {
 	blobFields := schema.Blob{}.Fields()
+	_ = blobFields
 	// blobDescUUID is the schema descriptor for uuid field.
 	blobDescUUID := blobFields[1].Descriptor()
 	// blob.DefaultUUID holds the default value on creation for the uuid field.
