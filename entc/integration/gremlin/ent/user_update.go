@@ -167,6 +167,26 @@ func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 	return uu
 }
 
+// SetSSOCert sets the SSOCert field.
+func (uu *UserUpdate) SetSSOCert(s string) *UserUpdate {
+	uu.mutation.SetSSOCert(s)
+	return uu
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uu *UserUpdate) SetNillableSSOCert(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetSSOCert(*s)
+	}
+	return uu
+}
+
+// ClearSSOCert clears the value of SSOCert.
+func (uu *UserUpdate) ClearSSOCert() *UserUpdate {
+	uu.mutation.ClearSSOCert()
+	return uu
+}
+
 // SetCardID sets the card edge to Card by id.
 func (uu *UserUpdate) SetCardID(id string) *UserUpdate {
 	uu.mutation.SetCardID(id)
@@ -604,6 +624,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	if value, ok := uu.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
 	}
+	if value, ok := uu.mutation.SSOCert(); ok {
+		v.Property(dsl.Single, user.FieldSSOCert, value)
+	}
 	var properties []interface{}
 	if uu.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
@@ -616,6 +639,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	if uu.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
+	}
+	if uu.mutation.SSOCertCleared() {
+		properties = append(properties, user.FieldSSOCert)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -878,6 +904,26 @@ func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 	if u != nil {
 		uuo.SetRole(*u)
 	}
+	return uuo
+}
+
+// SetSSOCert sets the SSOCert field.
+func (uuo *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
+	uuo.mutation.SetSSOCert(s)
+	return uuo
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableSSOCert(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetSSOCert(*s)
+	}
+	return uuo
+}
+
+// ClearSSOCert clears the value of SSOCert.
+func (uuo *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
+	uuo.mutation.ClearSSOCert()
 	return uuo
 }
 
@@ -1323,6 +1369,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := uuo.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
 	}
+	if value, ok := uuo.mutation.SSOCert(); ok {
+		v.Property(dsl.Single, user.FieldSSOCert, value)
+	}
 	var properties []interface{}
 	if uuo.mutation.OptionalIntCleared() {
 		properties = append(properties, user.FieldOptionalInt)
@@ -1335,6 +1384,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if uuo.mutation.PasswordCleared() {
 		properties = append(properties, user.FieldPassword)
+	}
+	if uuo.mutation.SSOCertCleared() {
+		properties = append(properties, user.FieldSSOCert)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

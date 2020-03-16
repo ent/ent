@@ -838,9 +838,9 @@ func validEnums(f *load.Field) error {
 
 // builderField returns the struct field for the given name
 // and ensures it doesn't conflict with Go keywords and other
-// private fields.
+// builder fields and it's not exported.
 func builderField(name string) string {
-	if token.Lookup(name).IsKeyword() || name == "config" {
+	if token.Lookup(name).IsKeyword() || name == "config" || strings.ToUpper(name[:1]) == name[:1] {
 		return "_" + name
 	}
 	return name

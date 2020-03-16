@@ -133,6 +133,13 @@ func Password(v string) predicate.User {
 	})
 }
 
+// SSOCert applies equality check predicate on the "SSOCert" field. It's identical to SSOCertEQ.
+func SSOCert(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.EQ(v))
+	})
+}
+
 // OptionalIntEQ applies the EQ predicate on the "optional_int" field.
 func OptionalIntEQ(v int) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -775,6 +782,105 @@ func RoleNotIn(vs ...Role) predicate.User {
 	}
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldRole, p.Without(v...))
+	})
+}
+
+// SSOCertEQ applies the EQ predicate on the "SSOCert" field.
+func SSOCertEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.EQ(v))
+	})
+}
+
+// SSOCertNEQ applies the NEQ predicate on the "SSOCert" field.
+func SSOCertNEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.NEQ(v))
+	})
+}
+
+// SSOCertIn applies the In predicate on the "SSOCert" field.
+func SSOCertIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.Within(v...))
+	})
+}
+
+// SSOCertNotIn applies the NotIn predicate on the "SSOCert" field.
+func SSOCertNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.Without(v...))
+	})
+}
+
+// SSOCertGT applies the GT predicate on the "SSOCert" field.
+func SSOCertGT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.GT(v))
+	})
+}
+
+// SSOCertGTE applies the GTE predicate on the "SSOCert" field.
+func SSOCertGTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.GTE(v))
+	})
+}
+
+// SSOCertLT applies the LT predicate on the "SSOCert" field.
+func SSOCertLT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.LT(v))
+	})
+}
+
+// SSOCertLTE applies the LTE predicate on the "SSOCert" field.
+func SSOCertLTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.LTE(v))
+	})
+}
+
+// SSOCertContains applies the Contains predicate on the "SSOCert" field.
+func SSOCertContains(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.Containing(v))
+	})
+}
+
+// SSOCertHasPrefix applies the HasPrefix predicate on the "SSOCert" field.
+func SSOCertHasPrefix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.StartingWith(v))
+	})
+}
+
+// SSOCertHasSuffix applies the HasSuffix predicate on the "SSOCert" field.
+func SSOCertHasSuffix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.EndingWith(v))
+	})
+}
+
+// SSOCertIsNil applies the IsNil predicate on the "SSOCert" field.
+func SSOCertIsNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldSSOCert)
+	})
+}
+
+// SSOCertNotNil applies the NotNil predicate on the "SSOCert" field.
+func SSOCertNotNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldSSOCert)
 	})
 }
 

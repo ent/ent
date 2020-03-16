@@ -38,6 +38,8 @@ type User struct {
 	Password string `graphql:"-" json:"-"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+	// SSOCert holds the value of the "SSOCert" field.
+	SSOCert string `json:"SSOCert,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -207,6 +209,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
+		SSOCert     string    `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -220,6 +223,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
 	u.Role = scanu.Role
+	u.SSOCert = scanu.SSOCert
 	return nil
 }
 
@@ -316,6 +320,8 @@ func (u *User) String() string {
 	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(", SSOCert=")
+	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -345,6 +351,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
+		SSOCert     string    `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -360,6 +367,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Phone:       v.Phone,
 			Password:    v.Password,
 			Role:        v.Role,
+			SSOCert:     v.SSOCert,
 		})
 	}
 	return nil

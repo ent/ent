@@ -42,6 +42,8 @@ func (User) Fields() []ent.Field {
 		field.Enum("role").
 			Values("user", "admin").
 			Default("user"),
+		field.String("SSOCert").
+			Optional(),
 	}
 }
 

@@ -6242,6 +6242,7 @@ type UserMutation struct {
 	phone            *string
 	password         *string
 	role             *user.Role
+	_SSOCert         *string
 	clearedFields    map[string]bool
 	card             *string
 	clearedcard      bool
@@ -6546,6 +6547,37 @@ func (m *UserMutation) Role() (r user.Role, exists bool) {
 // ResetRole reset all changes of the role field.
 func (m *UserMutation) ResetRole() {
 	m.role = nil
+}
+
+// SetSSOCert sets the SSOCert field.
+func (m *UserMutation) SetSSOCert(s string) {
+	m._SSOCert = &s
+}
+
+// SSOCert returns the SSOCert value in the mutation.
+func (m *UserMutation) SSOCert() (r string, exists bool) {
+	v := m._SSOCert
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSSOCert clears the value of SSOCert.
+func (m *UserMutation) ClearSSOCert() {
+	m._SSOCert = nil
+	m.clearedFields[user.FieldSSOCert] = true
+}
+
+// SSOCertCleared returns if the field SSOCert was cleared in this mutation.
+func (m *UserMutation) SSOCertCleared() bool {
+	return m.clearedFields[user.FieldSSOCert]
+}
+
+// ResetSSOCert reset all changes of the SSOCert field.
+func (m *UserMutation) ResetSSOCert() {
+	m._SSOCert = nil
+	delete(m.clearedFields, user.FieldSSOCert)
 }
 
 // SetCardID sets the card edge to Card by id.
@@ -7012,7 +7044,7 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.optional_int != nil {
 		fields = append(fields, user.FieldOptionalInt)
 	}
@@ -7036,6 +7068,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.role != nil {
 		fields = append(fields, user.FieldRole)
+	}
+	if m._SSOCert != nil {
+		fields = append(fields, user.FieldSSOCert)
 	}
 	return fields
 }
@@ -7061,6 +7096,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Password()
 	case user.FieldRole:
 		return m.Role()
+	case user.FieldSSOCert:
+		return m.SSOCert()
 	}
 	return nil, false
 }
@@ -7125,6 +7162,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRole(v)
+		return nil
+	case user.FieldSSOCert:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSSOCert(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -7195,6 +7239,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.clearedFields[user.FieldPassword] {
 		fields = append(fields, user.FieldPassword)
 	}
+	if m.clearedFields[user.FieldSSOCert] {
+		fields = append(fields, user.FieldSSOCert)
+	}
 	return fields
 }
 
@@ -7219,6 +7266,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldPassword:
 		m.ClearPassword()
+		return nil
+	case user.FieldSSOCert:
+		m.ClearSSOCert()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -7252,6 +7302,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldRole:
 		m.ResetRole()
+		return nil
+	case user.FieldSSOCert:
+		m.ResetSSOCert()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
