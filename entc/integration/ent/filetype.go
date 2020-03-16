@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -19,7 +18,7 @@ import (
 type FileType struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -63,7 +62,7 @@ func (ft *FileType) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	ft.ID = strconv.FormatInt(value.Int64, 10)
+	ft.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
@@ -105,12 +104,6 @@ func (ft *FileType) String() string {
 	builder.WriteString(ft.Name)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (ft *FileType) id() int {
-	id, _ := strconv.Atoi(ft.ID)
-	return id
 }
 
 // FileTypes is a parsable slice of FileType.

@@ -203,7 +203,7 @@ func (c *CardClient) UpdateOne(ca *Card) *CardUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CardClient) UpdateOneID(id string) *CardUpdateOne {
+func (c *CardClient) UpdateOneID(id int) *CardUpdateOne {
 	mutation := newCardMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -221,7 +221,7 @@ func (c *CardClient) DeleteOne(ca *Card) *CardDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *CardClient) DeleteOneID(id string) *CardDeleteOne {
+func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	builder := c.Delete().Where(card.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -234,12 +234,12 @@ func (c *CardClient) Query() *CardQuery {
 }
 
 // Get returns a Card entity by its id.
-func (c *CardClient) Get(ctx context.Context, id string) (*Card, error) {
+func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
 	return c.Query().Where(card.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CardClient) GetX(ctx context.Context, id string) *Card {
+func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 	ca, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -250,7 +250,7 @@ func (c *CardClient) GetX(ctx context.Context, id string) *Card {
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := ca.id()
+	id := ca.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(card.Table, card.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -264,7 +264,7 @@ func (c *CardClient) QueryOwner(ca *Card) *UserQuery {
 // QuerySpec queries the spec edge of a Card.
 func (c *CardClient) QuerySpec(ca *Card) *SpecQuery {
 	query := &SpecQuery{config: c.config}
-	id := ca.id()
+	id := ca.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(card.Table, card.FieldID, id),
 		sqlgraph.To(spec.Table, spec.FieldID),
@@ -314,7 +314,7 @@ func (c *CommentClient) UpdateOne(co *Comment) *CommentUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CommentClient) UpdateOneID(id string) *CommentUpdateOne {
+func (c *CommentClient) UpdateOneID(id int) *CommentUpdateOne {
 	mutation := newCommentMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &CommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -332,7 +332,7 @@ func (c *CommentClient) DeleteOne(co *Comment) *CommentDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *CommentClient) DeleteOneID(id string) *CommentDeleteOne {
+func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 	builder := c.Delete().Where(comment.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -345,12 +345,12 @@ func (c *CommentClient) Query() *CommentQuery {
 }
 
 // Get returns a Comment entity by its id.
-func (c *CommentClient) Get(ctx context.Context, id string) (*Comment, error) {
+func (c *CommentClient) Get(ctx context.Context, id int) (*Comment, error) {
 	return c.Query().Where(comment.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CommentClient) GetX(ctx context.Context, id string) *Comment {
+func (c *CommentClient) GetX(ctx context.Context, id int) *Comment {
 	co, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -397,7 +397,7 @@ func (c *FieldTypeClient) UpdateOne(ft *FieldType) *FieldTypeUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *FieldTypeClient) UpdateOneID(id string) *FieldTypeUpdateOne {
+func (c *FieldTypeClient) UpdateOneID(id int) *FieldTypeUpdateOne {
 	mutation := newFieldTypeMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &FieldTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -415,7 +415,7 @@ func (c *FieldTypeClient) DeleteOne(ft *FieldType) *FieldTypeDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *FieldTypeClient) DeleteOneID(id string) *FieldTypeDeleteOne {
+func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 	builder := c.Delete().Where(fieldtype.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -428,12 +428,12 @@ func (c *FieldTypeClient) Query() *FieldTypeQuery {
 }
 
 // Get returns a FieldType entity by its id.
-func (c *FieldTypeClient) Get(ctx context.Context, id string) (*FieldType, error) {
+func (c *FieldTypeClient) Get(ctx context.Context, id int) (*FieldType, error) {
 	return c.Query().Where(fieldtype.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *FieldTypeClient) GetX(ctx context.Context, id string) *FieldType {
+func (c *FieldTypeClient) GetX(ctx context.Context, id int) *FieldType {
 	ft, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -480,7 +480,7 @@ func (c *FileClient) UpdateOne(f *File) *FileUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *FileClient) UpdateOneID(id string) *FileUpdateOne {
+func (c *FileClient) UpdateOneID(id int) *FileUpdateOne {
 	mutation := newFileMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -498,7 +498,7 @@ func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *FileClient) DeleteOneID(id string) *FileDeleteOne {
+func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	builder := c.Delete().Where(file.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -511,12 +511,12 @@ func (c *FileClient) Query() *FileQuery {
 }
 
 // Get returns a File entity by its id.
-func (c *FileClient) Get(ctx context.Context, id string) (*File, error) {
+func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
 	return c.Query().Where(file.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *FileClient) GetX(ctx context.Context, id string) *File {
+func (c *FileClient) GetX(ctx context.Context, id int) *File {
 	f, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -527,7 +527,7 @@ func (c *FileClient) GetX(ctx context.Context, id string) *File {
 // QueryOwner queries the owner edge of a File.
 func (c *FileClient) QueryOwner(f *File) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := f.id()
+	id := f.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(file.Table, file.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -541,7 +541,7 @@ func (c *FileClient) QueryOwner(f *File) *UserQuery {
 // QueryType queries the type edge of a File.
 func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	query := &FileTypeQuery{config: c.config}
-	id := f.id()
+	id := f.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(file.Table, file.FieldID, id),
 		sqlgraph.To(filetype.Table, filetype.FieldID),
@@ -591,7 +591,7 @@ func (c *FileTypeClient) UpdateOne(ft *FileType) *FileTypeUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *FileTypeClient) UpdateOneID(id string) *FileTypeUpdateOne {
+func (c *FileTypeClient) UpdateOneID(id int) *FileTypeUpdateOne {
 	mutation := newFileTypeMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &FileTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -609,7 +609,7 @@ func (c *FileTypeClient) DeleteOne(ft *FileType) *FileTypeDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *FileTypeClient) DeleteOneID(id string) *FileTypeDeleteOne {
+func (c *FileTypeClient) DeleteOneID(id int) *FileTypeDeleteOne {
 	builder := c.Delete().Where(filetype.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -622,12 +622,12 @@ func (c *FileTypeClient) Query() *FileTypeQuery {
 }
 
 // Get returns a FileType entity by its id.
-func (c *FileTypeClient) Get(ctx context.Context, id string) (*FileType, error) {
+func (c *FileTypeClient) Get(ctx context.Context, id int) (*FileType, error) {
 	return c.Query().Where(filetype.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
+func (c *FileTypeClient) GetX(ctx context.Context, id int) *FileType {
 	ft, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -638,7 +638,7 @@ func (c *FileTypeClient) GetX(ctx context.Context, id string) *FileType {
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 	query := &FileQuery{config: c.config}
-	id := ft.id()
+	id := ft.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(filetype.Table, filetype.FieldID, id),
 		sqlgraph.To(file.Table, file.FieldID),
@@ -688,7 +688,7 @@ func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupClient) UpdateOneID(id string) *GroupUpdateOne {
+func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
 	mutation := newGroupMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -706,7 +706,7 @@ func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupClient) DeleteOneID(id string) *GroupDeleteOne {
+func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -719,12 +719,12 @@ func (c *GroupClient) Query() *GroupQuery {
 }
 
 // Get returns a Group entity by its id.
-func (c *GroupClient) Get(ctx context.Context, id string) (*Group, error) {
+func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 	return c.Query().Where(group.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
+func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 	gr, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -735,7 +735,7 @@ func (c *GroupClient) GetX(ctx context.Context, id string) *Group {
 // QueryFiles queries the files edge of a Group.
 func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 	query := &FileQuery{config: c.config}
-	id := gr.id()
+	id := gr.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(group.Table, group.FieldID, id),
 		sqlgraph.To(file.Table, file.FieldID),
@@ -749,7 +749,7 @@ func (c *GroupClient) QueryFiles(gr *Group) *FileQuery {
 // QueryBlocked queries the blocked edge of a Group.
 func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := gr.id()
+	id := gr.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(group.Table, group.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -763,7 +763,7 @@ func (c *GroupClient) QueryBlocked(gr *Group) *UserQuery {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := gr.id()
+	id := gr.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(group.Table, group.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -777,7 +777,7 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 // QueryInfo queries the info edge of a Group.
 func (c *GroupClient) QueryInfo(gr *Group) *GroupInfoQuery {
 	query := &GroupInfoQuery{config: c.config}
-	id := gr.id()
+	id := gr.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(group.Table, group.FieldID, id),
 		sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
@@ -827,7 +827,7 @@ func (c *GroupInfoClient) UpdateOne(gi *GroupInfo) *GroupInfoUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupInfoClient) UpdateOneID(id string) *GroupInfoUpdateOne {
+func (c *GroupInfoClient) UpdateOneID(id int) *GroupInfoUpdateOne {
 	mutation := newGroupInfoMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &GroupInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -845,7 +845,7 @@ func (c *GroupInfoClient) DeleteOne(gi *GroupInfo) *GroupInfoDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupInfoClient) DeleteOneID(id string) *GroupInfoDeleteOne {
+func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 	builder := c.Delete().Where(groupinfo.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -858,12 +858,12 @@ func (c *GroupInfoClient) Query() *GroupInfoQuery {
 }
 
 // Get returns a GroupInfo entity by its id.
-func (c *GroupInfoClient) Get(ctx context.Context, id string) (*GroupInfo, error) {
+func (c *GroupInfoClient) Get(ctx context.Context, id int) (*GroupInfo, error) {
 	return c.Query().Where(groupinfo.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
+func (c *GroupInfoClient) GetX(ctx context.Context, id int) *GroupInfo {
 	gi, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -874,7 +874,7 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id string) *GroupInfo {
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(gi *GroupInfo) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	id := gi.id()
+	id := gi.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(groupinfo.Table, groupinfo.FieldID, id),
 		sqlgraph.To(group.Table, group.FieldID),
@@ -924,7 +924,7 @@ func (c *ItemClient) UpdateOne(i *Item) *ItemUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ItemClient) UpdateOneID(id string) *ItemUpdateOne {
+func (c *ItemClient) UpdateOneID(id int) *ItemUpdateOne {
 	mutation := newItemMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -942,7 +942,7 @@ func (c *ItemClient) DeleteOne(i *Item) *ItemDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ItemClient) DeleteOneID(id string) *ItemDeleteOne {
+func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
 	builder := c.Delete().Where(item.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -955,12 +955,12 @@ func (c *ItemClient) Query() *ItemQuery {
 }
 
 // Get returns a Item entity by its id.
-func (c *ItemClient) Get(ctx context.Context, id string) (*Item, error) {
+func (c *ItemClient) Get(ctx context.Context, id int) (*Item, error) {
 	return c.Query().Where(item.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
+func (c *ItemClient) GetX(ctx context.Context, id int) *Item {
 	i, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1007,7 +1007,7 @@ func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *NodeClient) UpdateOneID(id string) *NodeUpdateOne {
+func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
 	mutation := newNodeMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -1025,7 +1025,7 @@ func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *NodeClient) DeleteOneID(id string) *NodeDeleteOne {
+func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	builder := c.Delete().Where(node.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1038,12 +1038,12 @@ func (c *NodeClient) Query() *NodeQuery {
 }
 
 // Get returns a Node entity by its id.
-func (c *NodeClient) Get(ctx context.Context, id string) (*Node, error) {
+func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
 	return c.Query().Where(node.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
+func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 	n, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1054,7 +1054,7 @@ func (c *NodeClient) GetX(ctx context.Context, id string) *Node {
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	id := n.id()
+	id := n.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(node.Table, node.FieldID, id),
 		sqlgraph.To(node.Table, node.FieldID),
@@ -1068,7 +1068,7 @@ func (c *NodeClient) QueryPrev(n *Node) *NodeQuery {
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	id := n.id()
+	id := n.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(node.Table, node.FieldID, id),
 		sqlgraph.To(node.Table, node.FieldID),
@@ -1118,7 +1118,7 @@ func (c *PetClient) UpdateOne(pe *Pet) *PetUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PetClient) UpdateOneID(id string) *PetUpdateOne {
+func (c *PetClient) UpdateOneID(id int) *PetUpdateOne {
 	mutation := newPetMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -1136,7 +1136,7 @@ func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
+func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	builder := c.Delete().Where(pet.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1149,12 +1149,12 @@ func (c *PetClient) Query() *PetQuery {
 }
 
 // Get returns a Pet entity by its id.
-func (c *PetClient) Get(ctx context.Context, id string) (*Pet, error) {
+func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
 	return c.Query().Where(pet.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
+func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 	pe, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1165,7 +1165,7 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 // QueryTeam queries the team edge of a Pet.
 func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := pe.id()
+	id := pe.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(pet.Table, pet.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1179,7 +1179,7 @@ func (c *PetClient) QueryTeam(pe *Pet) *UserQuery {
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := pe.id()
+	id := pe.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(pet.Table, pet.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1229,7 +1229,7 @@ func (c *SpecClient) UpdateOne(s *Spec) *SpecUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SpecClient) UpdateOneID(id string) *SpecUpdateOne {
+func (c *SpecClient) UpdateOneID(id int) *SpecUpdateOne {
 	mutation := newSpecMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &SpecUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -1247,7 +1247,7 @@ func (c *SpecClient) DeleteOne(s *Spec) *SpecDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *SpecClient) DeleteOneID(id string) *SpecDeleteOne {
+func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 	builder := c.Delete().Where(spec.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1260,12 +1260,12 @@ func (c *SpecClient) Query() *SpecQuery {
 }
 
 // Get returns a Spec entity by its id.
-func (c *SpecClient) Get(ctx context.Context, id string) (*Spec, error) {
+func (c *SpecClient) Get(ctx context.Context, id int) (*Spec, error) {
 	return c.Query().Where(spec.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SpecClient) GetX(ctx context.Context, id string) *Spec {
+func (c *SpecClient) GetX(ctx context.Context, id int) *Spec {
 	s, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1276,7 +1276,7 @@ func (c *SpecClient) GetX(ctx context.Context, id string) *Spec {
 // QueryCard queries the card edge of a Spec.
 func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
 	query := &CardQuery{config: c.config}
-	id := s.id()
+	id := s.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(spec.Table, spec.FieldID, id),
 		sqlgraph.To(card.Table, card.FieldID),
@@ -1326,7 +1326,7 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id string) *UserUpdateOne {
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne)
 	mutation.id = &id
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -1344,7 +1344,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *UserClient) DeleteOneID(id string) *UserDeleteOne {
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1357,12 +1357,12 @@ func (c *UserClient) Query() *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id string) (*User, error) {
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id string) *User {
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	u, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1373,7 +1373,7 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 // QueryCard queries the card edge of a User.
 func (c *UserClient) QueryCard(u *User) *CardQuery {
 	query := &CardQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(card.Table, card.FieldID),
@@ -1387,7 +1387,7 @@ func (c *UserClient) QueryCard(u *User) *CardQuery {
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(pet.Table, pet.FieldID),
@@ -1401,7 +1401,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 // QueryFiles queries the files edge of a User.
 func (c *UserClient) QueryFiles(u *User) *FileQuery {
 	query := &FileQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(file.Table, file.FieldID),
@@ -1415,7 +1415,7 @@ func (c *UserClient) QueryFiles(u *User) *FileQuery {
 // QueryGroups queries the groups edge of a User.
 func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(group.Table, group.FieldID),
@@ -1429,7 +1429,7 @@ func (c *UserClient) QueryGroups(u *User) *GroupQuery {
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1443,7 +1443,7 @@ func (c *UserClient) QueryFriends(u *User) *UserQuery {
 // QueryFollowers queries the followers edge of a User.
 func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1457,7 +1457,7 @@ func (c *UserClient) QueryFollowers(u *User) *UserQuery {
 // QueryFollowing queries the following edge of a User.
 func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1471,7 +1471,7 @@ func (c *UserClient) QueryFollowing(u *User) *UserQuery {
 // QueryTeam queries the team edge of a User.
 func (c *UserClient) QueryTeam(u *User) *PetQuery {
 	query := &PetQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(pet.Table, pet.FieldID),
@@ -1485,7 +1485,7 @@ func (c *UserClient) QueryTeam(u *User) *PetQuery {
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1499,7 +1499,7 @@ func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -1513,7 +1513,7 @@ func (c *UserClient) QueryChildren(u *User) *UserQuery {
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.id()
+	id := u.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, id),
 		sqlgraph.To(user.Table, user.FieldID),

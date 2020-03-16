@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
@@ -32,13 +31,13 @@ func (pc *PetCreate) SetName(s string) *PetCreate {
 }
 
 // SetTeamID sets the team edge to User by id.
-func (pc *PetCreate) SetTeamID(id string) *PetCreate {
+func (pc *PetCreate) SetTeamID(id int) *PetCreate {
 	pc.mutation.SetTeamID(id)
 	return pc
 }
 
 // SetNillableTeamID sets the team edge to User by id if the given value is not nil.
-func (pc *PetCreate) SetNillableTeamID(id *string) *PetCreate {
+func (pc *PetCreate) SetNillableTeamID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetTeamID(*id)
 	}
@@ -51,13 +50,13 @@ func (pc *PetCreate) SetTeam(u *User) *PetCreate {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (pc *PetCreate) SetOwnerID(id string) *PetCreate {
+func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (pc *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
+func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetOwnerID(*id)
 	}
@@ -115,7 +114,7 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: pet.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		}
@@ -137,16 +136,12 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -160,16 +155,12 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -181,6 +172,6 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	pe.ID = strconv.FormatInt(id, 10)
+	pe.ID = int(id)
 	return pe, nil
 }

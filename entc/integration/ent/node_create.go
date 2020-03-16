@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
@@ -38,13 +37,13 @@ func (nc *NodeCreate) SetNillableValue(i *int) *NodeCreate {
 }
 
 // SetPrevID sets the prev edge to Node by id.
-func (nc *NodeCreate) SetPrevID(id string) *NodeCreate {
+func (nc *NodeCreate) SetPrevID(id int) *NodeCreate {
 	nc.mutation.SetPrevID(id)
 	return nc
 }
 
 // SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
-func (nc *NodeCreate) SetNillablePrevID(id *string) *NodeCreate {
+func (nc *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
 	if id != nil {
 		nc = nc.SetPrevID(*id)
 	}
@@ -57,13 +56,13 @@ func (nc *NodeCreate) SetPrev(n *Node) *NodeCreate {
 }
 
 // SetNextID sets the next edge to Node by id.
-func (nc *NodeCreate) SetNextID(id string) *NodeCreate {
+func (nc *NodeCreate) SetNextID(id int) *NodeCreate {
 	nc.mutation.SetNextID(id)
 	return nc
 }
 
 // SetNillableNextID sets the next edge to Node by id if the given value is not nil.
-func (nc *NodeCreate) SetNillableNextID(id *string) *NodeCreate {
+func (nc *NodeCreate) SetNillableNextID(id *int) *NodeCreate {
 	if id != nil {
 		nc = nc.SetNextID(*id)
 	}
@@ -118,7 +117,7 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: node.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: node.FieldID,
 			},
 		}
@@ -140,16 +139,12 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -163,16 +158,12 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -184,6 +175,6 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	n.ID = strconv.FormatInt(id, 10)
+	n.ID = int(id)
 	return n, nil
 }

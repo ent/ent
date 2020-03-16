@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -19,7 +18,7 @@ import (
 type FieldType struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Int holds the value of the "int" field.
 	Int int `json:"int,omitempty"`
 	// Int8 holds the value of the "int8" field.
@@ -111,7 +110,7 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	ft.ID = strconv.FormatInt(value.Int64, 10)
+	ft.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field int", values[0])
@@ -324,12 +323,6 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (ft *FieldType) id() int {
-	id, _ := strconv.Atoi(ft.ID)
-	return id
 }
 
 // FieldTypes is a parsable slice of FieldType.

@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
@@ -32,14 +31,14 @@ func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (ftc *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
+func (ftc *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
 	ftc.mutation.AddFileIDs(ids...)
 	return ftc
 }
 
 // AddFiles adds the files edges to File.
 func (ftc *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -92,7 +91,7 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: filetype.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: filetype.FieldID,
 			},
 		}
@@ -114,16 +113,12 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -135,6 +130,6 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	ft.ID = strconv.FormatInt(id, 10)
+	ft.ID = int(id)
 	return ft, nil
 }

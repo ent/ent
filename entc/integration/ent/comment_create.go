@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
@@ -99,7 +98,7 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: comment.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: comment.FieldID,
 			},
 		}
@@ -135,6 +134,6 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = strconv.FormatInt(id, 10)
+	c.ID = int(id)
 	return c, nil
 }

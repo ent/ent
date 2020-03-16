@@ -87,7 +87,7 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: item.FieldID,
 			},
 		},
@@ -173,7 +173,7 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (i *Item, err error) {
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: item.FieldID,
 			},
 		},

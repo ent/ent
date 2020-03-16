@@ -106,8 +106,8 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 }
 
 // FirstID returns the first Pet id in the query. Returns *NotFoundError when no id was found.
-func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (pq *PetQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -119,7 +119,7 @@ func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (pq *PetQuery) FirstXID(ctx context.Context) string {
+func (pq *PetQuery) FirstXID(ctx context.Context) int {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -153,8 +153,8 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 }
 
 // OnlyID returns the only Pet id in the query, returns an error if not exactly one id was returned.
-func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (pq *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -170,7 +170,7 @@ func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (pq *PetQuery) OnlyXID(ctx context.Context) string {
+func (pq *PetQuery) OnlyXID(ctx context.Context) int {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -193,8 +193,8 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 }
 
 // IDs executes the query and returns a list of Pet ids.
-func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (pq *PetQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *PetQuery) IDsX(ctx context.Context) []string {
+func (pq *PetQuery) IDsX(ctx context.Context) []int {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -357,8 +357,8 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	}
 
 	if query := pq.withTeam; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*Pet)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
 			if fk := nodes[i].user_team; fk != nil {
 				ids = append(ids, *fk)
@@ -382,8 +382,8 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	}
 
 	if query := pq.withOwner; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*Pet)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
 			if fk := nodes[i].user_pets; fk != nil {
 				ids = append(ids, *fk)
@@ -428,7 +428,7 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		},

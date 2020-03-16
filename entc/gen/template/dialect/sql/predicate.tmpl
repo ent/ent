@@ -6,7 +6,6 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/id" -}}
 	func(s *sql.Selector) {
-		{{- if and $.ID.IsString (not $.ID.UserDefined) }}id, _ := strconv.Atoi(id){{- end }}
 		s.Where(sql.EQ(s.C({{ $.ID.Constant }}), id))
 	}
 {{- end }}
@@ -15,7 +14,6 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $op := $.Scope.Op -}}
 	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
-	{{- $convid := and $.ID.IsString (not $.ID.UserDefined) -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
 			// if not arguments were provided, append the FALSE constants,
@@ -26,10 +24,8 @@ in the LICENSE file in the root directory of this source tree.
 			}
 			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
-				{{- if $convid }}v[i], _ = strconv.Atoi({{ $arg }}[i]){{ else }}v[i] = {{ $arg }}[i]{{ end }}
+				v[i] = {{ $arg }}[i]
 			}
-		{{- else if $convid }}
-			id, _ := strconv.Atoi({{ $arg }})
 		{{- end }}
 		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
 	}

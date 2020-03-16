@@ -128,14 +128,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	}
 	{{- with $.Scope.Nodes }}
 		for _, k := range nodes {
-			{{- $id := $e.Type.ID -}}
-			{{- /* Convert string-ids that are stored as int in the database */ -}}
-			{{- if and (not $id.UserDefined) $id.IsString }}
-				k, err := strconv.Atoi(k)
-				if err != nil {
-					return {{ $.Scope.Zero }}, err
-				}
-			{{- end }}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 	{{- end }}

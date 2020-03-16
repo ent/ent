@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -20,14 +19,14 @@ import (
 type Pet struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges     PetEdges `json:"edges"`
-	user_pets *string
-	user_team *string
+	user_pets *int
+	user_team *int
 }
 
 // PetEdges holds the relations/edges for other nodes in the graph.
@@ -95,7 +94,7 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	pe.ID = strconv.FormatInt(value.Int64, 10)
+	pe.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
@@ -107,14 +106,14 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
 		} else if value.Valid {
-			pe.user_pets = new(string)
-			*pe.user_pets = strconv.FormatInt(value.Int64, 10)
+			pe.user_pets = new(int)
+			*pe.user_pets = int(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_team", value)
 		} else if value.Valid {
-			pe.user_team = new(string)
-			*pe.user_team = strconv.FormatInt(value.Int64, 10)
+			pe.user_team = new(int)
+			*pe.user_team = int(value.Int64)
 		}
 	}
 	return nil
@@ -157,12 +156,6 @@ func (pe *Pet) String() string {
 	builder.WriteString(pe.Name)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (pe *Pet) id() int {
-	id, _ := strconv.Atoi(pe.ID)
-	return id
 }
 
 // Pets is a parsable slice of Pet.

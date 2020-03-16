@@ -7,7 +7,6 @@
 package card
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -16,31 +15,28 @@ import (
 )
 
 // ID filters vertices based on their identifier.
-func ID(id string) predicate.Card {
+func ID(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Card {
+func IDEQ(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Card {
+func IDNEQ(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Card {
+func IDIn(ids ...int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -50,14 +46,14 @@ func IDIn(ids ...string) predicate.Card {
 		}
 		v := make([]interface{}, len(ids))
 		for i := range v {
-			v[i], _ = strconv.Atoi(ids[i])
+			v[i] = ids[i]
 		}
 		s.Where(sql.In(s.C(FieldID), v...))
 	})
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Card {
+func IDNotIn(ids ...int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -67,40 +63,36 @@ func IDNotIn(ids ...string) predicate.Card {
 		}
 		v := make([]interface{}, len(ids))
 		for i := range v {
-			v[i], _ = strconv.Atoi(ids[i])
+			v[i] = ids[i]
 		}
 		s.Where(sql.NotIn(s.C(FieldID), v...))
 	})
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Card {
+func IDGT(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Card {
+func IDGTE(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Card {
+func IDLT(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Card {
+func IDLTE(id int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
 }

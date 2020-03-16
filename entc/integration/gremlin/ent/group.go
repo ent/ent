@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -175,12 +174,6 @@ func (gr *Group) String() string {
 	builder.WriteString(gr.Name)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (gr *Group) id() int {
-	id, _ := strconv.Atoi(gr.ID)
-	return id
 }
 
 // Groups is a parsable slice of Group.

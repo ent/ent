@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -107,8 +106,8 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 }
 
 // FirstID returns the first Node id in the query. Returns *NotFoundError when no id was found.
-func (nq *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (nq *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -120,7 +119,7 @@ func (nq *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (nq *NodeQuery) FirstXID(ctx context.Context) string {
+func (nq *NodeQuery) FirstXID(ctx context.Context) int {
 	id, err := nq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -154,8 +153,8 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 }
 
 // OnlyID returns the only Node id in the query, returns an error if not exactly one id was returned.
-func (nq *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (nq *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = nq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -171,7 +170,7 @@ func (nq *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
+func (nq *NodeQuery) OnlyXID(ctx context.Context) int {
 	id, err := nq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -194,8 +193,8 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 }
 
 // IDs executes the query and returns a list of Node ids.
-func (nq *NodeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (nq *NodeQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -203,7 +202,7 @@ func (nq *NodeQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (nq *NodeQuery) IDsX(ctx context.Context) []string {
+func (nq *NodeQuery) IDsX(ctx context.Context) []int {
 	ids, err := nq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -358,8 +357,8 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	}
 
 	if query := nq.withPrev; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*Node)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Node)
 		for i := range nodes {
 			if fk := nodes[i].node_next; fk != nil {
 				ids = append(ids, *fk)
@@ -384,13 +383,9 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 
 	if query := nq.withNext; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*Node)
+		nodeids := make(map[int]*Node)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -436,7 +431,7 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   node.Table,
 			Columns: node.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: node.FieldID,
 			},
 		},

@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
@@ -46,14 +45,14 @@ func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (gic *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
+func (gic *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
 	gic.mutation.AddGroupIDs(ids...)
 	return gic
 }
 
 // AddGroups adds the groups edges to Group.
 func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -110,7 +109,7 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: groupinfo.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: groupinfo.FieldID,
 			},
 		}
@@ -140,16 +139,12 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: group.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -161,6 +156,6 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	gi.ID = strconv.FormatInt(id, 10)
+	gi.ID = int(id)
 	return gi, nil
 }

@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -90,7 +89,7 @@ func (c *Car) assignValues(values ...interface{}) error {
 			return fmt.Errorf("unexpected type %T for edge-field pet_cars", value)
 		} else if value.Valid {
 			c.pet_cars = new(string)
-			*c.pet_cars = strconv.FormatInt(value.Int64, 10)
+			*c.pet_cars = string(value.Int64)
 		}
 	}
 	return nil

@@ -107,8 +107,8 @@ func (fq *FileQuery) FirstX(ctx context.Context) *File {
 }
 
 // FirstID returns the first File id in the query. Returns *NotFoundError when no id was found.
-func (fq *FileQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (fq *FileQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -120,7 +120,7 @@ func (fq *FileQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (fq *FileQuery) FirstXID(ctx context.Context) string {
+func (fq *FileQuery) FirstXID(ctx context.Context) int {
 	id, err := fq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -154,8 +154,8 @@ func (fq *FileQuery) OnlyX(ctx context.Context) *File {
 }
 
 // OnlyID returns the only File id in the query, returns an error if not exactly one id was returned.
-func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (fq *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -171,7 +171,7 @@ func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (fq *FileQuery) OnlyXID(ctx context.Context) string {
+func (fq *FileQuery) OnlyXID(ctx context.Context) int {
 	id, err := fq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -194,8 +194,8 @@ func (fq *FileQuery) AllX(ctx context.Context) []*File {
 }
 
 // IDs executes the query and returns a list of File ids.
-func (fq *FileQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (fq *FileQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -203,7 +203,7 @@ func (fq *FileQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (fq *FileQuery) IDsX(ctx context.Context) []string {
+func (fq *FileQuery) IDsX(ctx context.Context) []int {
 	ids, err := fq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -358,8 +358,8 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	}
 
 	if query := fq.withOwner; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*File)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*File)
 		for i := range nodes {
 			if fk := nodes[i].user_files; fk != nil {
 				ids = append(ids, *fk)
@@ -383,8 +383,8 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	}
 
 	if query := fq.withType; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*File)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*File)
 		for i := range nodes {
 			if fk := nodes[i].file_type_files; fk != nil {
 				ids = append(ids, *fk)
@@ -429,7 +429,7 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: file.FieldID,
 			},
 		},

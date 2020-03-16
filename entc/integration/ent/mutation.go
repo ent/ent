@@ -53,16 +53,16 @@ type CardMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	create_time   *time.Time
 	update_time   *time.Time
 	number        *string
 	name          *string
 	clearedFields map[string]bool
-	owner         *string
+	owner         *int
 	clearedowner  bool
-	spec          map[string]struct{}
-	removedspec   map[string]struct{}
+	spec          map[int]struct{}
+	removedspec   map[int]struct{}
 }
 
 var _ ent.Mutation = (*CardMutation)(nil)
@@ -98,7 +98,7 @@ func (m CardMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *CardMutation) ID() (id string, exists bool) {
+func (m *CardMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -194,7 +194,7 @@ func (m *CardMutation) ResetName() {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (m *CardMutation) SetOwnerID(id string) {
+func (m *CardMutation) SetOwnerID(id int) {
 	m.owner = &id
 }
 
@@ -209,7 +209,7 @@ func (m *CardMutation) OwnerCleared() bool {
 }
 
 // OwnerID returns the owner id in the mutation.
-func (m *CardMutation) OwnerID() (id string, exists bool) {
+func (m *CardMutation) OwnerID() (id int, exists bool) {
 	if m.owner != nil {
 		return *m.owner, true
 	}
@@ -219,7 +219,7 @@ func (m *CardMutation) OwnerID() (id string, exists bool) {
 // OwnerIDs returns the owner ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // OwnerID instead. It exists only for internal usage by the builders.
-func (m *CardMutation) OwnerIDs() (ids []string) {
+func (m *CardMutation) OwnerIDs() (ids []int) {
 	if id := m.owner; id != nil {
 		ids = append(ids, *id)
 	}
@@ -233,9 +233,9 @@ func (m *CardMutation) ResetOwner() {
 }
 
 // AddSpecIDs adds the spec edge to Spec by ids.
-func (m *CardMutation) AddSpecIDs(ids ...string) {
+func (m *CardMutation) AddSpecIDs(ids ...int) {
 	if m.spec == nil {
-		m.spec = make(map[string]struct{})
+		m.spec = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.spec[ids[i]] = struct{}{}
@@ -243,9 +243,9 @@ func (m *CardMutation) AddSpecIDs(ids ...string) {
 }
 
 // RemoveSpecIDs removes the spec edge to Spec by ids.
-func (m *CardMutation) RemoveSpecIDs(ids ...string) {
+func (m *CardMutation) RemoveSpecIDs(ids ...int) {
 	if m.removedspec == nil {
-		m.removedspec = make(map[string]struct{})
+		m.removedspec = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedspec[ids[i]] = struct{}{}
@@ -253,7 +253,7 @@ func (m *CardMutation) RemoveSpecIDs(ids ...string) {
 }
 
 // RemovedSpec returns the removed ids of spec.
-func (m *CardMutation) RemovedSpecIDs() (ids []string) {
+func (m *CardMutation) RemovedSpecIDs() (ids []int) {
 	for id := range m.removedspec {
 		ids = append(ids, id)
 	}
@@ -261,7 +261,7 @@ func (m *CardMutation) RemovedSpecIDs() (ids []string) {
 }
 
 // SpecIDs returns the spec ids in the mutation.
-func (m *CardMutation) SpecIDs() (ids []string) {
+func (m *CardMutation) SpecIDs() (ids []int) {
 	for id := range m.spec {
 		ids = append(ids, id)
 	}
@@ -535,7 +535,7 @@ type CommentMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *string
+	id              *int
 	unique_int      *int
 	addunique_int   *int
 	unique_float    *float64
@@ -578,7 +578,7 @@ func (m CommentMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *CommentMutation) ID() (id string, exists bool) {
+func (m *CommentMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -959,7 +959,7 @@ type FieldTypeMutation struct {
 	config
 	op                         Op
 	typ                        string
-	id                         *string
+	id                         *int
 	int                        *int
 	addint                     *int
 	int8                       *int8
@@ -1043,7 +1043,7 @@ func (m FieldTypeMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *FieldTypeMutation) ID() (id string, exists bool) {
+func (m *FieldTypeMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3119,16 +3119,16 @@ type FileMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	size          *int
 	addsize       *int
 	name          *string
 	user          *string
 	group         *string
 	clearedFields map[string]bool
-	owner         *string
+	owner         *int
 	clearedowner  bool
-	_type         *string
+	_type         *int
 	cleared_type  bool
 }
 
@@ -3165,7 +3165,7 @@ func (m FileMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *FileMutation) ID() (id string, exists bool) {
+func (m *FileMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3293,7 +3293,7 @@ func (m *FileMutation) ResetGroup() {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (m *FileMutation) SetOwnerID(id string) {
+func (m *FileMutation) SetOwnerID(id int) {
 	m.owner = &id
 }
 
@@ -3308,7 +3308,7 @@ func (m *FileMutation) OwnerCleared() bool {
 }
 
 // OwnerID returns the owner id in the mutation.
-func (m *FileMutation) OwnerID() (id string, exists bool) {
+func (m *FileMutation) OwnerID() (id int, exists bool) {
 	if m.owner != nil {
 		return *m.owner, true
 	}
@@ -3318,7 +3318,7 @@ func (m *FileMutation) OwnerID() (id string, exists bool) {
 // OwnerIDs returns the owner ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // OwnerID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) OwnerIDs() (ids []string) {
+func (m *FileMutation) OwnerIDs() (ids []int) {
 	if id := m.owner; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3332,7 +3332,7 @@ func (m *FileMutation) ResetOwner() {
 }
 
 // SetTypeID sets the type edge to FileType by id.
-func (m *FileMutation) SetTypeID(id string) {
+func (m *FileMutation) SetTypeID(id int) {
 	m._type = &id
 }
 
@@ -3347,7 +3347,7 @@ func (m *FileMutation) TypeCleared() bool {
 }
 
 // TypeID returns the type id in the mutation.
-func (m *FileMutation) TypeID() (id string, exists bool) {
+func (m *FileMutation) TypeID() (id int, exists bool) {
 	if m._type != nil {
 		return *m._type, true
 	}
@@ -3357,7 +3357,7 @@ func (m *FileMutation) TypeID() (id string, exists bool) {
 // TypeIDs returns the type ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // TypeID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) TypeIDs() (ids []string) {
+func (m *FileMutation) TypeIDs() (ids []int) {
 	if id := m._type; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3649,11 +3649,11 @@ type FileTypeMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	name          *string
 	clearedFields map[string]bool
-	files         map[string]struct{}
-	removedfiles  map[string]struct{}
+	files         map[int]struct{}
+	removedfiles  map[int]struct{}
 }
 
 var _ ent.Mutation = (*FileTypeMutation)(nil)
@@ -3689,7 +3689,7 @@ func (m FileTypeMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *FileTypeMutation) ID() (id string, exists bool) {
+func (m *FileTypeMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3716,9 +3716,9 @@ func (m *FileTypeMutation) ResetName() {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (m *FileTypeMutation) AddFileIDs(ids ...string) {
+func (m *FileTypeMutation) AddFileIDs(ids ...int) {
 	if m.files == nil {
-		m.files = make(map[string]struct{})
+		m.files = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.files[ids[i]] = struct{}{}
@@ -3726,9 +3726,9 @@ func (m *FileTypeMutation) AddFileIDs(ids ...string) {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (m *FileTypeMutation) RemoveFileIDs(ids ...string) {
+func (m *FileTypeMutation) RemoveFileIDs(ids ...int) {
 	if m.removedfiles == nil {
-		m.removedfiles = make(map[string]struct{})
+		m.removedfiles = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedfiles[ids[i]] = struct{}{}
@@ -3736,7 +3736,7 @@ func (m *FileTypeMutation) RemoveFileIDs(ids ...string) {
 }
 
 // RemovedFiles returns the removed ids of files.
-func (m *FileTypeMutation) RemovedFilesIDs() (ids []string) {
+func (m *FileTypeMutation) RemovedFilesIDs() (ids []int) {
 	for id := range m.removedfiles {
 		ids = append(ids, id)
 	}
@@ -3744,7 +3744,7 @@ func (m *FileTypeMutation) RemovedFilesIDs() (ids []string) {
 }
 
 // FilesIDs returns the files ids in the mutation.
-func (m *FileTypeMutation) FilesIDs() (ids []string) {
+func (m *FileTypeMutation) FilesIDs() (ids []int) {
 	for id := range m.files {
 		ids = append(ids, id)
 	}
@@ -3946,7 +3946,7 @@ type GroupMutation struct {
 	config
 	op             Op
 	typ            string
-	id             *string
+	id             *int
 	active         *bool
 	expire         *time.Time
 	_type          *string
@@ -3954,13 +3954,13 @@ type GroupMutation struct {
 	addmax_users   *int
 	name           *string
 	clearedFields  map[string]bool
-	files          map[string]struct{}
-	removedfiles   map[string]struct{}
-	blocked        map[string]struct{}
-	removedblocked map[string]struct{}
-	users          map[string]struct{}
-	removedusers   map[string]struct{}
-	info           *string
+	files          map[int]struct{}
+	removedfiles   map[int]struct{}
+	blocked        map[int]struct{}
+	removedblocked map[int]struct{}
+	users          map[int]struct{}
+	removedusers   map[int]struct{}
+	info           *int
 	clearedinfo    bool
 }
 
@@ -3997,7 +3997,7 @@ func (m GroupMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *GroupMutation) ID() (id string, exists bool) {
+func (m *GroupMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4145,9 +4145,9 @@ func (m *GroupMutation) ResetName() {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (m *GroupMutation) AddFileIDs(ids ...string) {
+func (m *GroupMutation) AddFileIDs(ids ...int) {
 	if m.files == nil {
-		m.files = make(map[string]struct{})
+		m.files = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.files[ids[i]] = struct{}{}
@@ -4155,9 +4155,9 @@ func (m *GroupMutation) AddFileIDs(ids ...string) {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (m *GroupMutation) RemoveFileIDs(ids ...string) {
+func (m *GroupMutation) RemoveFileIDs(ids ...int) {
 	if m.removedfiles == nil {
-		m.removedfiles = make(map[string]struct{})
+		m.removedfiles = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedfiles[ids[i]] = struct{}{}
@@ -4165,7 +4165,7 @@ func (m *GroupMutation) RemoveFileIDs(ids ...string) {
 }
 
 // RemovedFiles returns the removed ids of files.
-func (m *GroupMutation) RemovedFilesIDs() (ids []string) {
+func (m *GroupMutation) RemovedFilesIDs() (ids []int) {
 	for id := range m.removedfiles {
 		ids = append(ids, id)
 	}
@@ -4173,7 +4173,7 @@ func (m *GroupMutation) RemovedFilesIDs() (ids []string) {
 }
 
 // FilesIDs returns the files ids in the mutation.
-func (m *GroupMutation) FilesIDs() (ids []string) {
+func (m *GroupMutation) FilesIDs() (ids []int) {
 	for id := range m.files {
 		ids = append(ids, id)
 	}
@@ -4187,9 +4187,9 @@ func (m *GroupMutation) ResetFiles() {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (m *GroupMutation) AddBlockedIDs(ids ...string) {
+func (m *GroupMutation) AddBlockedIDs(ids ...int) {
 	if m.blocked == nil {
-		m.blocked = make(map[string]struct{})
+		m.blocked = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.blocked[ids[i]] = struct{}{}
@@ -4197,9 +4197,9 @@ func (m *GroupMutation) AddBlockedIDs(ids ...string) {
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
-func (m *GroupMutation) RemoveBlockedIDs(ids ...string) {
+func (m *GroupMutation) RemoveBlockedIDs(ids ...int) {
 	if m.removedblocked == nil {
-		m.removedblocked = make(map[string]struct{})
+		m.removedblocked = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedblocked[ids[i]] = struct{}{}
@@ -4207,7 +4207,7 @@ func (m *GroupMutation) RemoveBlockedIDs(ids ...string) {
 }
 
 // RemovedBlocked returns the removed ids of blocked.
-func (m *GroupMutation) RemovedBlockedIDs() (ids []string) {
+func (m *GroupMutation) RemovedBlockedIDs() (ids []int) {
 	for id := range m.removedblocked {
 		ids = append(ids, id)
 	}
@@ -4215,7 +4215,7 @@ func (m *GroupMutation) RemovedBlockedIDs() (ids []string) {
 }
 
 // BlockedIDs returns the blocked ids in the mutation.
-func (m *GroupMutation) BlockedIDs() (ids []string) {
+func (m *GroupMutation) BlockedIDs() (ids []int) {
 	for id := range m.blocked {
 		ids = append(ids, id)
 	}
@@ -4229,9 +4229,9 @@ func (m *GroupMutation) ResetBlocked() {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (m *GroupMutation) AddUserIDs(ids ...string) {
+func (m *GroupMutation) AddUserIDs(ids ...int) {
 	if m.users == nil {
-		m.users = make(map[string]struct{})
+		m.users = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.users[ids[i]] = struct{}{}
@@ -4239,9 +4239,9 @@ func (m *GroupMutation) AddUserIDs(ids ...string) {
 }
 
 // RemoveUserIDs removes the users edge to User by ids.
-func (m *GroupMutation) RemoveUserIDs(ids ...string) {
+func (m *GroupMutation) RemoveUserIDs(ids ...int) {
 	if m.removedusers == nil {
-		m.removedusers = make(map[string]struct{})
+		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedusers[ids[i]] = struct{}{}
@@ -4249,7 +4249,7 @@ func (m *GroupMutation) RemoveUserIDs(ids ...string) {
 }
 
 // RemovedUsers returns the removed ids of users.
-func (m *GroupMutation) RemovedUsersIDs() (ids []string) {
+func (m *GroupMutation) RemovedUsersIDs() (ids []int) {
 	for id := range m.removedusers {
 		ids = append(ids, id)
 	}
@@ -4257,7 +4257,7 @@ func (m *GroupMutation) RemovedUsersIDs() (ids []string) {
 }
 
 // UsersIDs returns the users ids in the mutation.
-func (m *GroupMutation) UsersIDs() (ids []string) {
+func (m *GroupMutation) UsersIDs() (ids []int) {
 	for id := range m.users {
 		ids = append(ids, id)
 	}
@@ -4271,7 +4271,7 @@ func (m *GroupMutation) ResetUsers() {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (m *GroupMutation) SetInfoID(id string) {
+func (m *GroupMutation) SetInfoID(id int) {
 	m.info = &id
 }
 
@@ -4286,7 +4286,7 @@ func (m *GroupMutation) InfoCleared() bool {
 }
 
 // InfoID returns the info id in the mutation.
-func (m *GroupMutation) InfoID() (id string, exists bool) {
+func (m *GroupMutation) InfoID() (id int, exists bool) {
 	if m.info != nil {
 		return *m.info, true
 	}
@@ -4296,7 +4296,7 @@ func (m *GroupMutation) InfoID() (id string, exists bool) {
 // InfoIDs returns the info ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // InfoID instead. It exists only for internal usage by the builders.
-func (m *GroupMutation) InfoIDs() (ids []string) {
+func (m *GroupMutation) InfoIDs() (ids []int) {
 	if id := m.info; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4648,13 +4648,13 @@ type GroupInfoMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	desc          *string
 	max_users     *int
 	addmax_users  *int
 	clearedFields map[string]bool
-	groups        map[string]struct{}
-	removedgroups map[string]struct{}
+	groups        map[int]struct{}
+	removedgroups map[int]struct{}
 }
 
 var _ ent.Mutation = (*GroupInfoMutation)(nil)
@@ -4690,7 +4690,7 @@ func (m GroupInfoMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *GroupInfoMutation) ID() (id string, exists bool) {
+func (m *GroupInfoMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4756,9 +4756,9 @@ func (m *GroupInfoMutation) ResetMaxUsers() {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (m *GroupInfoMutation) AddGroupIDs(ids ...string) {
+func (m *GroupInfoMutation) AddGroupIDs(ids ...int) {
 	if m.groups == nil {
-		m.groups = make(map[string]struct{})
+		m.groups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.groups[ids[i]] = struct{}{}
@@ -4766,9 +4766,9 @@ func (m *GroupInfoMutation) AddGroupIDs(ids ...string) {
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
-func (m *GroupInfoMutation) RemoveGroupIDs(ids ...string) {
+func (m *GroupInfoMutation) RemoveGroupIDs(ids ...int) {
 	if m.removedgroups == nil {
-		m.removedgroups = make(map[string]struct{})
+		m.removedgroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedgroups[ids[i]] = struct{}{}
@@ -4776,7 +4776,7 @@ func (m *GroupInfoMutation) RemoveGroupIDs(ids ...string) {
 }
 
 // RemovedGroups returns the removed ids of groups.
-func (m *GroupInfoMutation) RemovedGroupsIDs() (ids []string) {
+func (m *GroupInfoMutation) RemovedGroupsIDs() (ids []int) {
 	for id := range m.removedgroups {
 		ids = append(ids, id)
 	}
@@ -4784,7 +4784,7 @@ func (m *GroupInfoMutation) RemovedGroupsIDs() (ids []string) {
 }
 
 // GroupsIDs returns the groups ids in the mutation.
-func (m *GroupInfoMutation) GroupsIDs() (ids []string) {
+func (m *GroupInfoMutation) GroupsIDs() (ids []int) {
 	for id := range m.groups {
 		ids = append(ids, id)
 	}
@@ -5016,7 +5016,7 @@ type ItemMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	clearedFields map[string]bool
 }
 
@@ -5053,7 +5053,7 @@ func (m ItemMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *ItemMutation) ID() (id string, exists bool) {
+func (m *ItemMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5211,13 +5211,13 @@ type NodeMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	value         *int
 	addvalue      *int
 	clearedFields map[string]bool
-	prev          *string
+	prev          *int
 	clearedprev   bool
-	next          *string
+	next          *int
 	clearednext   bool
 }
 
@@ -5254,7 +5254,7 @@ func (m NodeMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *NodeMutation) ID() (id string, exists bool) {
+func (m *NodeMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5314,7 +5314,7 @@ func (m *NodeMutation) ResetValue() {
 }
 
 // SetPrevID sets the prev edge to Node by id.
-func (m *NodeMutation) SetPrevID(id string) {
+func (m *NodeMutation) SetPrevID(id int) {
 	m.prev = &id
 }
 
@@ -5329,7 +5329,7 @@ func (m *NodeMutation) PrevCleared() bool {
 }
 
 // PrevID returns the prev id in the mutation.
-func (m *NodeMutation) PrevID() (id string, exists bool) {
+func (m *NodeMutation) PrevID() (id int, exists bool) {
 	if m.prev != nil {
 		return *m.prev, true
 	}
@@ -5339,7 +5339,7 @@ func (m *NodeMutation) PrevID() (id string, exists bool) {
 // PrevIDs returns the prev ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // PrevID instead. It exists only for internal usage by the builders.
-func (m *NodeMutation) PrevIDs() (ids []string) {
+func (m *NodeMutation) PrevIDs() (ids []int) {
 	if id := m.prev; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5353,7 +5353,7 @@ func (m *NodeMutation) ResetPrev() {
 }
 
 // SetNextID sets the next edge to Node by id.
-func (m *NodeMutation) SetNextID(id string) {
+func (m *NodeMutation) SetNextID(id int) {
 	m.next = &id
 }
 
@@ -5368,7 +5368,7 @@ func (m *NodeMutation) NextCleared() bool {
 }
 
 // NextID returns the next id in the mutation.
-func (m *NodeMutation) NextID() (id string, exists bool) {
+func (m *NodeMutation) NextID() (id int, exists bool) {
 	if m.next != nil {
 		return *m.next, true
 	}
@@ -5378,7 +5378,7 @@ func (m *NodeMutation) NextID() (id string, exists bool) {
 // NextIDs returns the next ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // NextID instead. It exists only for internal usage by the builders.
-func (m *NodeMutation) NextIDs() (ids []string) {
+func (m *NodeMutation) NextIDs() (ids []int) {
 	if id := m.next; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5619,12 +5619,12 @@ type PetMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	name          *string
 	clearedFields map[string]bool
-	team          *string
+	team          *int
 	clearedteam   bool
-	owner         *string
+	owner         *int
 	clearedowner  bool
 }
 
@@ -5661,7 +5661,7 @@ func (m PetMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *PetMutation) ID() (id string, exists bool) {
+func (m *PetMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5688,7 +5688,7 @@ func (m *PetMutation) ResetName() {
 }
 
 // SetTeamID sets the team edge to User by id.
-func (m *PetMutation) SetTeamID(id string) {
+func (m *PetMutation) SetTeamID(id int) {
 	m.team = &id
 }
 
@@ -5703,7 +5703,7 @@ func (m *PetMutation) TeamCleared() bool {
 }
 
 // TeamID returns the team id in the mutation.
-func (m *PetMutation) TeamID() (id string, exists bool) {
+func (m *PetMutation) TeamID() (id int, exists bool) {
 	if m.team != nil {
 		return *m.team, true
 	}
@@ -5713,7 +5713,7 @@ func (m *PetMutation) TeamID() (id string, exists bool) {
 // TeamIDs returns the team ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // TeamID instead. It exists only for internal usage by the builders.
-func (m *PetMutation) TeamIDs() (ids []string) {
+func (m *PetMutation) TeamIDs() (ids []int) {
 	if id := m.team; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5727,7 +5727,7 @@ func (m *PetMutation) ResetTeam() {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (m *PetMutation) SetOwnerID(id string) {
+func (m *PetMutation) SetOwnerID(id int) {
 	m.owner = &id
 }
 
@@ -5742,7 +5742,7 @@ func (m *PetMutation) OwnerCleared() bool {
 }
 
 // OwnerID returns the owner id in the mutation.
-func (m *PetMutation) OwnerID() (id string, exists bool) {
+func (m *PetMutation) OwnerID() (id int, exists bool) {
 	if m.owner != nil {
 		return *m.owner, true
 	}
@@ -5752,7 +5752,7 @@ func (m *PetMutation) OwnerID() (id string, exists bool) {
 // OwnerIDs returns the owner ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // OwnerID instead. It exists only for internal usage by the builders.
-func (m *PetMutation) OwnerIDs() (ids []string) {
+func (m *PetMutation) OwnerIDs() (ids []int) {
 	if id := m.owner; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5969,10 +5969,10 @@ type SpecMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	clearedFields map[string]bool
-	card          map[string]struct{}
-	removedcard   map[string]struct{}
+	card          map[int]struct{}
+	removedcard   map[int]struct{}
 }
 
 var _ ent.Mutation = (*SpecMutation)(nil)
@@ -6008,7 +6008,7 @@ func (m SpecMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *SpecMutation) ID() (id string, exists bool) {
+func (m *SpecMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -6016,9 +6016,9 @@ func (m *SpecMutation) ID() (id string, exists bool) {
 }
 
 // AddCardIDs adds the card edge to Card by ids.
-func (m *SpecMutation) AddCardIDs(ids ...string) {
+func (m *SpecMutation) AddCardIDs(ids ...int) {
 	if m.card == nil {
-		m.card = make(map[string]struct{})
+		m.card = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.card[ids[i]] = struct{}{}
@@ -6026,9 +6026,9 @@ func (m *SpecMutation) AddCardIDs(ids ...string) {
 }
 
 // RemoveCardIDs removes the card edge to Card by ids.
-func (m *SpecMutation) RemoveCardIDs(ids ...string) {
+func (m *SpecMutation) RemoveCardIDs(ids ...int) {
 	if m.removedcard == nil {
-		m.removedcard = make(map[string]struct{})
+		m.removedcard = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedcard[ids[i]] = struct{}{}
@@ -6036,7 +6036,7 @@ func (m *SpecMutation) RemoveCardIDs(ids ...string) {
 }
 
 // RemovedCard returns the removed ids of card.
-func (m *SpecMutation) RemovedCardIDs() (ids []string) {
+func (m *SpecMutation) RemovedCardIDs() (ids []int) {
 	for id := range m.removedcard {
 		ids = append(ids, id)
 	}
@@ -6044,7 +6044,7 @@ func (m *SpecMutation) RemovedCardIDs() (ids []string) {
 }
 
 // CardIDs returns the card ids in the mutation.
-func (m *SpecMutation) CardIDs() (ids []string) {
+func (m *SpecMutation) CardIDs() (ids []int) {
 	for id := range m.card {
 		ids = append(ids, id)
 	}
@@ -6231,7 +6231,7 @@ type UserMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *string
+	id               *int
 	optional_int     *int
 	addoptional_int  *int
 	age              *int
@@ -6244,27 +6244,27 @@ type UserMutation struct {
 	role             *user.Role
 	_SSOCert         *string
 	clearedFields    map[string]bool
-	card             *string
+	card             *int
 	clearedcard      bool
-	pets             map[string]struct{}
-	removedpets      map[string]struct{}
-	files            map[string]struct{}
-	removedfiles     map[string]struct{}
-	groups           map[string]struct{}
-	removedgroups    map[string]struct{}
-	friends          map[string]struct{}
-	removedfriends   map[string]struct{}
-	followers        map[string]struct{}
-	removedfollowers map[string]struct{}
-	following        map[string]struct{}
-	removedfollowing map[string]struct{}
-	team             *string
+	pets             map[int]struct{}
+	removedpets      map[int]struct{}
+	files            map[int]struct{}
+	removedfiles     map[int]struct{}
+	groups           map[int]struct{}
+	removedgroups    map[int]struct{}
+	friends          map[int]struct{}
+	removedfriends   map[int]struct{}
+	followers        map[int]struct{}
+	removedfollowers map[int]struct{}
+	following        map[int]struct{}
+	removedfollowing map[int]struct{}
+	team             *int
 	clearedteam      bool
-	spouse           *string
+	spouse           *int
 	clearedspouse    bool
-	children         map[string]struct{}
-	removedchildren  map[string]struct{}
-	parent           *string
+	children         map[int]struct{}
+	removedchildren  map[int]struct{}
+	parent           *int
 	clearedparent    bool
 }
 
@@ -6301,7 +6301,7 @@ func (m UserMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *UserMutation) ID() (id string, exists bool) {
+func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -6581,7 +6581,7 @@ func (m *UserMutation) ResetSSOCert() {
 }
 
 // SetCardID sets the card edge to Card by id.
-func (m *UserMutation) SetCardID(id string) {
+func (m *UserMutation) SetCardID(id int) {
 	m.card = &id
 }
 
@@ -6596,7 +6596,7 @@ func (m *UserMutation) CardCleared() bool {
 }
 
 // CardID returns the card id in the mutation.
-func (m *UserMutation) CardID() (id string, exists bool) {
+func (m *UserMutation) CardID() (id int, exists bool) {
 	if m.card != nil {
 		return *m.card, true
 	}
@@ -6606,7 +6606,7 @@ func (m *UserMutation) CardID() (id string, exists bool) {
 // CardIDs returns the card ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // CardID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) CardIDs() (ids []string) {
+func (m *UserMutation) CardIDs() (ids []int) {
 	if id := m.card; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6620,9 +6620,9 @@ func (m *UserMutation) ResetCard() {
 }
 
 // AddPetIDs adds the pets edge to Pet by ids.
-func (m *UserMutation) AddPetIDs(ids ...string) {
+func (m *UserMutation) AddPetIDs(ids ...int) {
 	if m.pets == nil {
-		m.pets = make(map[string]struct{})
+		m.pets = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.pets[ids[i]] = struct{}{}
@@ -6630,9 +6630,9 @@ func (m *UserMutation) AddPetIDs(ids ...string) {
 }
 
 // RemovePetIDs removes the pets edge to Pet by ids.
-func (m *UserMutation) RemovePetIDs(ids ...string) {
+func (m *UserMutation) RemovePetIDs(ids ...int) {
 	if m.removedpets == nil {
-		m.removedpets = make(map[string]struct{})
+		m.removedpets = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedpets[ids[i]] = struct{}{}
@@ -6640,7 +6640,7 @@ func (m *UserMutation) RemovePetIDs(ids ...string) {
 }
 
 // RemovedPets returns the removed ids of pets.
-func (m *UserMutation) RemovedPetsIDs() (ids []string) {
+func (m *UserMutation) RemovedPetsIDs() (ids []int) {
 	for id := range m.removedpets {
 		ids = append(ids, id)
 	}
@@ -6648,7 +6648,7 @@ func (m *UserMutation) RemovedPetsIDs() (ids []string) {
 }
 
 // PetsIDs returns the pets ids in the mutation.
-func (m *UserMutation) PetsIDs() (ids []string) {
+func (m *UserMutation) PetsIDs() (ids []int) {
 	for id := range m.pets {
 		ids = append(ids, id)
 	}
@@ -6662,9 +6662,9 @@ func (m *UserMutation) ResetPets() {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (m *UserMutation) AddFileIDs(ids ...string) {
+func (m *UserMutation) AddFileIDs(ids ...int) {
 	if m.files == nil {
-		m.files = make(map[string]struct{})
+		m.files = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.files[ids[i]] = struct{}{}
@@ -6672,9 +6672,9 @@ func (m *UserMutation) AddFileIDs(ids ...string) {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (m *UserMutation) RemoveFileIDs(ids ...string) {
+func (m *UserMutation) RemoveFileIDs(ids ...int) {
 	if m.removedfiles == nil {
-		m.removedfiles = make(map[string]struct{})
+		m.removedfiles = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedfiles[ids[i]] = struct{}{}
@@ -6682,7 +6682,7 @@ func (m *UserMutation) RemoveFileIDs(ids ...string) {
 }
 
 // RemovedFiles returns the removed ids of files.
-func (m *UserMutation) RemovedFilesIDs() (ids []string) {
+func (m *UserMutation) RemovedFilesIDs() (ids []int) {
 	for id := range m.removedfiles {
 		ids = append(ids, id)
 	}
@@ -6690,7 +6690,7 @@ func (m *UserMutation) RemovedFilesIDs() (ids []string) {
 }
 
 // FilesIDs returns the files ids in the mutation.
-func (m *UserMutation) FilesIDs() (ids []string) {
+func (m *UserMutation) FilesIDs() (ids []int) {
 	for id := range m.files {
 		ids = append(ids, id)
 	}
@@ -6704,9 +6704,9 @@ func (m *UserMutation) ResetFiles() {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (m *UserMutation) AddGroupIDs(ids ...string) {
+func (m *UserMutation) AddGroupIDs(ids ...int) {
 	if m.groups == nil {
-		m.groups = make(map[string]struct{})
+		m.groups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.groups[ids[i]] = struct{}{}
@@ -6714,9 +6714,9 @@ func (m *UserMutation) AddGroupIDs(ids ...string) {
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
-func (m *UserMutation) RemoveGroupIDs(ids ...string) {
+func (m *UserMutation) RemoveGroupIDs(ids ...int) {
 	if m.removedgroups == nil {
-		m.removedgroups = make(map[string]struct{})
+		m.removedgroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedgroups[ids[i]] = struct{}{}
@@ -6724,7 +6724,7 @@ func (m *UserMutation) RemoveGroupIDs(ids ...string) {
 }
 
 // RemovedGroups returns the removed ids of groups.
-func (m *UserMutation) RemovedGroupsIDs() (ids []string) {
+func (m *UserMutation) RemovedGroupsIDs() (ids []int) {
 	for id := range m.removedgroups {
 		ids = append(ids, id)
 	}
@@ -6732,7 +6732,7 @@ func (m *UserMutation) RemovedGroupsIDs() (ids []string) {
 }
 
 // GroupsIDs returns the groups ids in the mutation.
-func (m *UserMutation) GroupsIDs() (ids []string) {
+func (m *UserMutation) GroupsIDs() (ids []int) {
 	for id := range m.groups {
 		ids = append(ids, id)
 	}
@@ -6746,9 +6746,9 @@ func (m *UserMutation) ResetGroups() {
 }
 
 // AddFriendIDs adds the friends edge to User by ids.
-func (m *UserMutation) AddFriendIDs(ids ...string) {
+func (m *UserMutation) AddFriendIDs(ids ...int) {
 	if m.friends == nil {
-		m.friends = make(map[string]struct{})
+		m.friends = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.friends[ids[i]] = struct{}{}
@@ -6756,9 +6756,9 @@ func (m *UserMutation) AddFriendIDs(ids ...string) {
 }
 
 // RemoveFriendIDs removes the friends edge to User by ids.
-func (m *UserMutation) RemoveFriendIDs(ids ...string) {
+func (m *UserMutation) RemoveFriendIDs(ids ...int) {
 	if m.removedfriends == nil {
-		m.removedfriends = make(map[string]struct{})
+		m.removedfriends = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedfriends[ids[i]] = struct{}{}
@@ -6766,7 +6766,7 @@ func (m *UserMutation) RemoveFriendIDs(ids ...string) {
 }
 
 // RemovedFriends returns the removed ids of friends.
-func (m *UserMutation) RemovedFriendsIDs() (ids []string) {
+func (m *UserMutation) RemovedFriendsIDs() (ids []int) {
 	for id := range m.removedfriends {
 		ids = append(ids, id)
 	}
@@ -6774,7 +6774,7 @@ func (m *UserMutation) RemovedFriendsIDs() (ids []string) {
 }
 
 // FriendsIDs returns the friends ids in the mutation.
-func (m *UserMutation) FriendsIDs() (ids []string) {
+func (m *UserMutation) FriendsIDs() (ids []int) {
 	for id := range m.friends {
 		ids = append(ids, id)
 	}
@@ -6788,9 +6788,9 @@ func (m *UserMutation) ResetFriends() {
 }
 
 // AddFollowerIDs adds the followers edge to User by ids.
-func (m *UserMutation) AddFollowerIDs(ids ...string) {
+func (m *UserMutation) AddFollowerIDs(ids ...int) {
 	if m.followers == nil {
-		m.followers = make(map[string]struct{})
+		m.followers = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.followers[ids[i]] = struct{}{}
@@ -6798,9 +6798,9 @@ func (m *UserMutation) AddFollowerIDs(ids ...string) {
 }
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
-func (m *UserMutation) RemoveFollowerIDs(ids ...string) {
+func (m *UserMutation) RemoveFollowerIDs(ids ...int) {
 	if m.removedfollowers == nil {
-		m.removedfollowers = make(map[string]struct{})
+		m.removedfollowers = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedfollowers[ids[i]] = struct{}{}
@@ -6808,7 +6808,7 @@ func (m *UserMutation) RemoveFollowerIDs(ids ...string) {
 }
 
 // RemovedFollowers returns the removed ids of followers.
-func (m *UserMutation) RemovedFollowersIDs() (ids []string) {
+func (m *UserMutation) RemovedFollowersIDs() (ids []int) {
 	for id := range m.removedfollowers {
 		ids = append(ids, id)
 	}
@@ -6816,7 +6816,7 @@ func (m *UserMutation) RemovedFollowersIDs() (ids []string) {
 }
 
 // FollowersIDs returns the followers ids in the mutation.
-func (m *UserMutation) FollowersIDs() (ids []string) {
+func (m *UserMutation) FollowersIDs() (ids []int) {
 	for id := range m.followers {
 		ids = append(ids, id)
 	}
@@ -6830,9 +6830,9 @@ func (m *UserMutation) ResetFollowers() {
 }
 
 // AddFollowingIDs adds the following edge to User by ids.
-func (m *UserMutation) AddFollowingIDs(ids ...string) {
+func (m *UserMutation) AddFollowingIDs(ids ...int) {
 	if m.following == nil {
-		m.following = make(map[string]struct{})
+		m.following = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.following[ids[i]] = struct{}{}
@@ -6840,9 +6840,9 @@ func (m *UserMutation) AddFollowingIDs(ids ...string) {
 }
 
 // RemoveFollowingIDs removes the following edge to User by ids.
-func (m *UserMutation) RemoveFollowingIDs(ids ...string) {
+func (m *UserMutation) RemoveFollowingIDs(ids ...int) {
 	if m.removedfollowing == nil {
-		m.removedfollowing = make(map[string]struct{})
+		m.removedfollowing = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedfollowing[ids[i]] = struct{}{}
@@ -6850,7 +6850,7 @@ func (m *UserMutation) RemoveFollowingIDs(ids ...string) {
 }
 
 // RemovedFollowing returns the removed ids of following.
-func (m *UserMutation) RemovedFollowingIDs() (ids []string) {
+func (m *UserMutation) RemovedFollowingIDs() (ids []int) {
 	for id := range m.removedfollowing {
 		ids = append(ids, id)
 	}
@@ -6858,7 +6858,7 @@ func (m *UserMutation) RemovedFollowingIDs() (ids []string) {
 }
 
 // FollowingIDs returns the following ids in the mutation.
-func (m *UserMutation) FollowingIDs() (ids []string) {
+func (m *UserMutation) FollowingIDs() (ids []int) {
 	for id := range m.following {
 		ids = append(ids, id)
 	}
@@ -6872,7 +6872,7 @@ func (m *UserMutation) ResetFollowing() {
 }
 
 // SetTeamID sets the team edge to Pet by id.
-func (m *UserMutation) SetTeamID(id string) {
+func (m *UserMutation) SetTeamID(id int) {
 	m.team = &id
 }
 
@@ -6887,7 +6887,7 @@ func (m *UserMutation) TeamCleared() bool {
 }
 
 // TeamID returns the team id in the mutation.
-func (m *UserMutation) TeamID() (id string, exists bool) {
+func (m *UserMutation) TeamID() (id int, exists bool) {
 	if m.team != nil {
 		return *m.team, true
 	}
@@ -6897,7 +6897,7 @@ func (m *UserMutation) TeamID() (id string, exists bool) {
 // TeamIDs returns the team ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // TeamID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) TeamIDs() (ids []string) {
+func (m *UserMutation) TeamIDs() (ids []int) {
 	if id := m.team; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6911,7 +6911,7 @@ func (m *UserMutation) ResetTeam() {
 }
 
 // SetSpouseID sets the spouse edge to User by id.
-func (m *UserMutation) SetSpouseID(id string) {
+func (m *UserMutation) SetSpouseID(id int) {
 	m.spouse = &id
 }
 
@@ -6926,7 +6926,7 @@ func (m *UserMutation) SpouseCleared() bool {
 }
 
 // SpouseID returns the spouse id in the mutation.
-func (m *UserMutation) SpouseID() (id string, exists bool) {
+func (m *UserMutation) SpouseID() (id int, exists bool) {
 	if m.spouse != nil {
 		return *m.spouse, true
 	}
@@ -6936,7 +6936,7 @@ func (m *UserMutation) SpouseID() (id string, exists bool) {
 // SpouseIDs returns the spouse ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // SpouseID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) SpouseIDs() (ids []string) {
+func (m *UserMutation) SpouseIDs() (ids []int) {
 	if id := m.spouse; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6950,9 +6950,9 @@ func (m *UserMutation) ResetSpouse() {
 }
 
 // AddChildIDs adds the children edge to User by ids.
-func (m *UserMutation) AddChildIDs(ids ...string) {
+func (m *UserMutation) AddChildIDs(ids ...int) {
 	if m.children == nil {
-		m.children = make(map[string]struct{})
+		m.children = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.children[ids[i]] = struct{}{}
@@ -6960,9 +6960,9 @@ func (m *UserMutation) AddChildIDs(ids ...string) {
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
-func (m *UserMutation) RemoveChildIDs(ids ...string) {
+func (m *UserMutation) RemoveChildIDs(ids ...int) {
 	if m.removedchildren == nil {
-		m.removedchildren = make(map[string]struct{})
+		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removedchildren[ids[i]] = struct{}{}
@@ -6970,7 +6970,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...string) {
 }
 
 // RemovedChildren returns the removed ids of children.
-func (m *UserMutation) RemovedChildrenIDs() (ids []string) {
+func (m *UserMutation) RemovedChildrenIDs() (ids []int) {
 	for id := range m.removedchildren {
 		ids = append(ids, id)
 	}
@@ -6978,7 +6978,7 @@ func (m *UserMutation) RemovedChildrenIDs() (ids []string) {
 }
 
 // ChildrenIDs returns the children ids in the mutation.
-func (m *UserMutation) ChildrenIDs() (ids []string) {
+func (m *UserMutation) ChildrenIDs() (ids []int) {
 	for id := range m.children {
 		ids = append(ids, id)
 	}
@@ -6992,7 +6992,7 @@ func (m *UserMutation) ResetChildren() {
 }
 
 // SetParentID sets the parent edge to User by id.
-func (m *UserMutation) SetParentID(id string) {
+func (m *UserMutation) SetParentID(id int) {
 	m.parent = &id
 }
 
@@ -7007,7 +7007,7 @@ func (m *UserMutation) ParentCleared() bool {
 }
 
 // ParentID returns the parent id in the mutation.
-func (m *UserMutation) ParentID() (id string, exists bool) {
+func (m *UserMutation) ParentID() (id int, exists bool) {
 	if m.parent != nil {
 		return *m.parent, true
 	}
@@ -7017,7 +7017,7 @@ func (m *UserMutation) ParentID() (id string, exists bool) {
 // ParentIDs returns the parent ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // ParentID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) ParentIDs() (ids []string) {
+func (m *UserMutation) ParentIDs() (ids []int) {
 	if id := m.parent; id != nil {
 		ids = append(ids, *id)
 	}

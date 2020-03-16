@@ -668,7 +668,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   fieldtype.Table,
 			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: fieldtype.FieldID,
 			},
 		},
@@ -1778,7 +1778,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			Table:   fieldtype.Table,
 			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: fieldtype.FieldID,
 			},
 		},

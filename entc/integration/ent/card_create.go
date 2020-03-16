@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -76,13 +75,13 @@ func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
 }
 
 // SetOwnerID sets the owner edge to User by id.
-func (cc *CardCreate) SetOwnerID(id string) *CardCreate {
+func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
 // SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
-func (cc *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
+func (cc *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
 	if id != nil {
 		cc = cc.SetOwnerID(*id)
 	}
@@ -95,14 +94,14 @@ func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 }
 
 // AddSpecIDs adds the spec edge to Spec by ids.
-func (cc *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
+func (cc *CardCreate) AddSpecIDs(ids ...int) *CardCreate {
 	cc.mutation.AddSpecIDs(ids...)
 	return cc
 }
 
 // AddSpec adds the spec edges to Spec.
 func (cc *CardCreate) AddSpec(s ...*Spec) *CardCreate {
-	ids := make([]string, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -173,7 +172,7 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: card.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: card.FieldID,
 			},
 		}
@@ -219,16 +218,12 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -242,16 +237,12 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: spec.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
@@ -263,6 +254,6 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = strconv.FormatInt(id, 10)
+	c.ID = int(id)
 	return c, nil
 }

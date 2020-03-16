@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -94,8 +93,8 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 }
 
 // FirstID returns the first GroupInfo id in the query. Returns *NotFoundError when no id was found.
-func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = giq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -107,7 +106,7 @@ func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (giq *GroupInfoQuery) FirstXID(ctx context.Context) string {
+func (giq *GroupInfoQuery) FirstXID(ctx context.Context) int {
 	id, err := giq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -141,8 +140,8 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 }
 
 // OnlyID returns the only GroupInfo id in the query, returns an error if not exactly one id was returned.
-func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = giq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -158,7 +157,7 @@ func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
+func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) int {
 	id, err := giq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 }
 
 // IDs executes the query and returns a list of GroupInfo ids.
-func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
+func (giq *GroupInfoQuery) IDsX(ctx context.Context) []int {
 	ids, err := giq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -324,13 +323,9 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 
 	if query := giq.withGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*GroupInfo)
+		nodeids := make(map[int]*GroupInfo)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -376,7 +371,7 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   groupinfo.Table,
 			Columns: groupinfo.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: groupinfo.FieldID,
 			},
 		},

@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -21,7 +20,7 @@ import (
 type User struct {
 	config `graphql:"-" json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// OptionalInt holds the value of the "optional_int" field.
 	OptionalInt int `json:"optional_int,omitempty"`
 	// Age holds the value of the "age" field.
@@ -43,9 +42,9 @@ type User struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges         UserEdges `json:"edges"`
-	group_blocked *string
-	user_spouse   *string
-	user_parent   *string
+	group_blocked *int
+	user_spouse   *int
+	user_parent   *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -231,7 +230,7 @@ func (u *User) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	u.ID = strconv.FormatInt(value.Int64, 10)
+	u.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field optional_int", values[0])
@@ -283,20 +282,20 @@ func (u *User) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field group_blocked", value)
 		} else if value.Valid {
-			u.group_blocked = new(string)
-			*u.group_blocked = strconv.FormatInt(value.Int64, 10)
+			u.group_blocked = new(int)
+			*u.group_blocked = int(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
 		} else if value.Valid {
-			u.user_spouse = new(string)
-			*u.user_spouse = strconv.FormatInt(value.Int64, 10)
+			u.user_spouse = new(int)
+			*u.user_spouse = int(value.Int64)
 		}
 		if value, ok := values[2].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_parent", value)
 		} else if value.Valid {
-			u.user_parent = new(string)
-			*u.user_parent = strconv.FormatInt(value.Int64, 10)
+			u.user_parent = new(int)
+			*u.user_parent = int(value.Int64)
 		}
 	}
 	return nil
@@ -399,12 +398,6 @@ func (u *User) String() string {
 	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (u *User) id() int {
-	id, _ := strconv.Atoi(u.ID)
-	return id
 }
 
 // Users is a parsable slice of User.

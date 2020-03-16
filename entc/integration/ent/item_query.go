@@ -77,8 +77,8 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 }
 
 // FirstID returns the first Item id in the query. Returns *NotFoundError when no id was found.
-func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (iq *ItemQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -90,7 +90,7 @@ func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (iq *ItemQuery) FirstXID(ctx context.Context) string {
+func (iq *ItemQuery) FirstXID(ctx context.Context) int {
 	id, err := iq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -124,8 +124,8 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 }
 
 // OnlyID returns the only Item id in the query, returns an error if not exactly one id was returned.
-func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (iq *ItemQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyXID is like OnlyID, but panics if an error occurs.
-func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
+func (iq *ItemQuery) OnlyXID(ctx context.Context) int {
 	id, err := iq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -164,8 +164,8 @@ func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 }
 
 // IDs executes the query and returns a list of Item ids.
-func (iq *ItemQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (iq *ItemQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (iq *ItemQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (iq *ItemQuery) IDsX(ctx context.Context) []string {
+func (iq *ItemQuery) IDsX(ctx context.Context) []int {
 	ids, err := iq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -287,7 +287,7 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: item.FieldID,
 			},
 		},

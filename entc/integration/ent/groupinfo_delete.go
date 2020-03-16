@@ -73,7 +73,7 @@ func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: groupinfo.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: groupinfo.FieldID,
 			},
 		},

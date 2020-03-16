@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -40,14 +39,14 @@ func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (ftu *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
+func (ftu *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.AddFileIDs(ids...)
 	return ftu
 }
 
 // AddFiles adds the files edges to File.
 func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -55,14 +54,14 @@ func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
+func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.RemoveFileIDs(ids...)
 	return ftu
 }
 
 // RemoveFiles removes files edges to File.
 func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -126,7 +125,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: filetype.FieldID,
 			},
 		},
@@ -154,16 +153,12 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -177,16 +172,12 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -216,14 +207,14 @@ func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
+func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
 	ftuo.mutation.AddFileIDs(ids...)
 	return ftuo
 }
 
 // AddFiles adds the files edges to File.
 func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -231,14 +222,14 @@ func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (ftuo *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
+func (ftuo *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
 	ftuo.mutation.RemoveFileIDs(ids...)
 	return ftuo
 }
 
 // RemoveFiles removes files edges to File.
 func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -302,7 +293,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: filetype.FieldID,
 			},
 		},
@@ -328,16 +319,12 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -351,16 +338,12 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -191,13 +190,13 @@ func (uu *UserUpdate) ClearSSOCert() *UserUpdate {
 }
 
 // SetCardID sets the card edge to Card by id.
-func (uu *UserUpdate) SetCardID(id string) *UserUpdate {
+func (uu *UserUpdate) SetCardID(id int) *UserUpdate {
 	uu.mutation.SetCardID(id)
 	return uu
 }
 
 // SetNillableCardID sets the card edge to Card by id if the given value is not nil.
-func (uu *UserUpdate) SetNillableCardID(id *string) *UserUpdate {
+func (uu *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetCardID(*id)
 	}
@@ -210,14 +209,14 @@ func (uu *UserUpdate) SetCard(c *Card) *UserUpdate {
 }
 
 // AddPetIDs adds the pets edge to Pet by ids.
-func (uu *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddPetIDs(ids...)
 	return uu
 }
 
 // AddPets adds the pets edges to Pet.
 func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -225,14 +224,14 @@ func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (uu *UserUpdate) AddFileIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddFileIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFileIDs(ids...)
 	return uu
 }
 
 // AddFiles adds the files edges to File.
 func (uu *UserUpdate) AddFiles(f ...*File) *UserUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -240,14 +239,14 @@ func (uu *UserUpdate) AddFiles(f ...*File) *UserUpdate {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (uu *UserUpdate) AddGroupIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddGroupIDs(ids...)
 	return uu
 }
 
 // AddGroups adds the groups edges to Group.
 func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -255,14 +254,14 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 }
 
 // AddFriendIDs adds the friends edge to User by ids.
-func (uu *UserUpdate) AddFriendIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFriendIDs(ids...)
 	return uu
 }
 
 // AddFriends adds the friends edges to User.
 func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -270,14 +269,14 @@ func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 }
 
 // AddFollowerIDs adds the followers edge to User by ids.
-func (uu *UserUpdate) AddFollowerIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFollowerIDs(ids...)
 	return uu
 }
 
 // AddFollowers adds the followers edges to User.
 func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -285,14 +284,14 @@ func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
 }
 
 // AddFollowingIDs adds the following edge to User by ids.
-func (uu *UserUpdate) AddFollowingIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFollowingIDs(ids...)
 	return uu
 }
 
 // AddFollowing adds the following edges to User.
 func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -300,13 +299,13 @@ func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
 }
 
 // SetTeamID sets the team edge to Pet by id.
-func (uu *UserUpdate) SetTeamID(id string) *UserUpdate {
+func (uu *UserUpdate) SetTeamID(id int) *UserUpdate {
 	uu.mutation.SetTeamID(id)
 	return uu
 }
 
 // SetNillableTeamID sets the team edge to Pet by id if the given value is not nil.
-func (uu *UserUpdate) SetNillableTeamID(id *string) *UserUpdate {
+func (uu *UserUpdate) SetNillableTeamID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetTeamID(*id)
 	}
@@ -319,13 +318,13 @@ func (uu *UserUpdate) SetTeam(p *Pet) *UserUpdate {
 }
 
 // SetSpouseID sets the spouse edge to User by id.
-func (uu *UserUpdate) SetSpouseID(id string) *UserUpdate {
+func (uu *UserUpdate) SetSpouseID(id int) *UserUpdate {
 	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
 // SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
-func (uu *UserUpdate) SetNillableSpouseID(id *string) *UserUpdate {
+func (uu *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetSpouseID(*id)
 	}
@@ -338,14 +337,14 @@ func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 }
 
 // AddChildIDs adds the children edge to User by ids.
-func (uu *UserUpdate) AddChildIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChildIDs(ids...)
 	return uu
 }
 
 // AddChildren adds the children edges to User.
 func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -353,13 +352,13 @@ func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 }
 
 // SetParentID sets the parent edge to User by id.
-func (uu *UserUpdate) SetParentID(id string) *UserUpdate {
+func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
 	return uu
 }
 
 // SetNillableParentID sets the parent edge to User by id if the given value is not nil.
-func (uu *UserUpdate) SetNillableParentID(id *string) *UserUpdate {
+func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetParentID(*id)
 	}
@@ -378,14 +377,14 @@ func (uu *UserUpdate) ClearCard() *UserUpdate {
 }
 
 // RemovePetIDs removes the pets edge to Pet by ids.
-func (uu *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemovePetIDs(ids...)
 	return uu
 }
 
 // RemovePets removes pets edges to Pet.
 func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -393,14 +392,14 @@ func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (uu *UserUpdate) RemoveFileIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveFileIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFileIDs(ids...)
 	return uu
 }
 
 // RemoveFiles removes files edges to File.
 func (uu *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -408,14 +407,14 @@ func (uu *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
-func (uu *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveGroupIDs(ids...)
 	return uu
 }
 
 // RemoveGroups removes groups edges to Group.
 func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -423,14 +422,14 @@ func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 }
 
 // RemoveFriendIDs removes the friends edge to User by ids.
-func (uu *UserUpdate) RemoveFriendIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFriendIDs(ids...)
 	return uu
 }
 
 // RemoveFriends removes friends edges to User.
 func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -438,14 +437,14 @@ func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 }
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
-func (uu *UserUpdate) RemoveFollowerIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFollowerIDs(ids...)
 	return uu
 }
 
 // RemoveFollowers removes followers edges to User.
 func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -453,14 +452,14 @@ func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
 }
 
 // RemoveFollowingIDs removes the following edge to User by ids.
-func (uu *UserUpdate) RemoveFollowingIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFollowingIDs(ids...)
 	return uu
 }
 
 // RemoveFollowing removes following edges to User.
 func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -480,14 +479,14 @@ func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
-func (uu *UserUpdate) RemoveChildIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveChildIDs(ids...)
 	return uu
 }
 
 // RemoveChildren removes children edges to User.
 func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -567,7 +566,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -695,7 +694,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
@@ -711,16 +710,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -734,16 +729,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -757,16 +748,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -780,16 +767,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -803,16 +786,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -826,16 +805,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: group.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -849,16 +824,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: group.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -872,16 +843,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -895,16 +862,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -918,16 +881,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -941,16 +900,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -964,16 +919,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -987,16 +938,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1010,7 +957,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
@@ -1026,16 +973,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1049,7 +992,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -1065,16 +1008,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1088,16 +1027,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1111,16 +1046,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1134,7 +1065,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -1150,16 +1081,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1337,13 +1264,13 @@ func (uuo *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
 }
 
 // SetCardID sets the card edge to Card by id.
-func (uuo *UserUpdateOne) SetCardID(id string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
 	uuo.mutation.SetCardID(id)
 	return uuo
 }
 
 // SetNillableCardID sets the card edge to Card by id if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableCardID(id *string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetCardID(*id)
 	}
@@ -1356,14 +1283,14 @@ func (uuo *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
 }
 
 // AddPetIDs adds the pets edge to Pet by ids.
-func (uuo *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddPetIDs(ids...)
 	return uuo
 }
 
 // AddPets adds the pets edges to Pet.
 func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -1371,14 +1298,14 @@ func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (uuo *UserUpdateOne) AddFileIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddFileIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFileIDs(ids...)
 	return uuo
 }
 
 // AddFiles adds the files edges to File.
 func (uuo *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -1386,14 +1313,14 @@ func (uuo *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (uuo *UserUpdateOne) AddGroupIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddGroupIDs(ids...)
 	return uuo
 }
 
 // AddGroups adds the groups edges to Group.
 func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -1401,14 +1328,14 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 }
 
 // AddFriendIDs adds the friends edge to User by ids.
-func (uuo *UserUpdateOne) AddFriendIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFriendIDs(ids...)
 	return uuo
 }
 
 // AddFriends adds the friends edges to User.
 func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1416,14 +1343,14 @@ func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 }
 
 // AddFollowerIDs adds the followers edge to User by ids.
-func (uuo *UserUpdateOne) AddFollowerIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFollowerIDs(ids...)
 	return uuo
 }
 
 // AddFollowers adds the followers edges to User.
 func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1431,14 +1358,14 @@ func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
 }
 
 // AddFollowingIDs adds the following edge to User by ids.
-func (uuo *UserUpdateOne) AddFollowingIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFollowingIDs(ids...)
 	return uuo
 }
 
 // AddFollowing adds the following edges to User.
 func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1446,13 +1373,13 @@ func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
 }
 
 // SetTeamID sets the team edge to Pet by id.
-func (uuo *UserUpdateOne) SetTeamID(id string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetTeamID(id int) *UserUpdateOne {
 	uuo.mutation.SetTeamID(id)
 	return uuo
 }
 
 // SetNillableTeamID sets the team edge to Pet by id if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableTeamID(id *string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableTeamID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetTeamID(*id)
 	}
@@ -1465,13 +1392,13 @@ func (uuo *UserUpdateOne) SetTeam(p *Pet) *UserUpdateOne {
 }
 
 // SetSpouseID sets the spouse edge to User by id.
-func (uuo *UserUpdateOne) SetSpouseID(id string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
 	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
 // SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableSpouseID(id *string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetSpouseID(*id)
 	}
@@ -1484,14 +1411,14 @@ func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 }
 
 // AddChildIDs adds the children edge to User by ids.
-func (uuo *UserUpdateOne) AddChildIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddChildIDs(ids...)
 	return uuo
 }
 
 // AddChildren adds the children edges to User.
 func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1499,13 +1426,13 @@ func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 }
 
 // SetParentID sets the parent edge to User by id.
-func (uuo *UserUpdateOne) SetParentID(id string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
 	uuo.mutation.SetParentID(id)
 	return uuo
 }
 
 // SetNillableParentID sets the parent edge to User by id if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableParentID(id *string) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetParentID(*id)
 	}
@@ -1524,14 +1451,14 @@ func (uuo *UserUpdateOne) ClearCard() *UserUpdateOne {
 }
 
 // RemovePetIDs removes the pets edge to Pet by ids.
-func (uuo *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemovePetIDs(ids...)
 	return uuo
 }
 
 // RemovePets removes pets edges to Pet.
 func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -1539,14 +1466,14 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
-func (uuo *UserUpdateOne) RemoveFileIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveFileIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFileIDs(ids...)
 	return uuo
 }
 
 // RemoveFiles removes files edges to File.
 func (uuo *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -1554,14 +1481,14 @@ func (uuo *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
-func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveGroupIDs(ids...)
 	return uuo
 }
 
 // RemoveGroups removes groups edges to Group.
 func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -1569,14 +1496,14 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 }
 
 // RemoveFriendIDs removes the friends edge to User by ids.
-func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFriendIDs(ids...)
 	return uuo
 }
 
 // RemoveFriends removes friends edges to User.
 func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1584,14 +1511,14 @@ func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 }
 
 // RemoveFollowerIDs removes the followers edge to User by ids.
-func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFollowerIDs(ids...)
 	return uuo
 }
 
 // RemoveFollowers removes followers edges to User.
 func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1599,14 +1526,14 @@ func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
 }
 
 // RemoveFollowingIDs removes the following edge to User by ids.
-func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFollowingIDs(ids...)
 	return uuo
 }
 
 // RemoveFollowing removes following edges to User.
 func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1626,14 +1553,14 @@ func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 }
 
 // RemoveChildIDs removes the children edge to User by ids.
-func (uuo *UserUpdateOne) RemoveChildIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveChildIDs(ids...)
 	return uuo
 }
 
 // RemoveChildren removes children edges to User.
 func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -1713,7 +1640,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -1839,7 +1766,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
@@ -1855,16 +1782,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1878,16 +1801,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1901,16 +1820,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1924,16 +1839,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1947,16 +1858,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -1970,16 +1877,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: group.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1993,16 +1896,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: group.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2016,16 +1915,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2039,16 +1934,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2062,16 +1953,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2085,16 +1972,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2108,16 +1991,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2131,16 +2010,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2154,7 +2029,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
@@ -2170,16 +2045,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2193,7 +2064,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -2209,16 +2080,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2232,16 +2099,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2255,16 +2118,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -2278,7 +2137,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -2294,16 +2153,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)

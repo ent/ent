@@ -7,38 +7,33 @@
 package comment
 
 import (
-	"strconv"
-
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
-func ID(id string) predicate.Comment {
+func ID(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Comment {
+func IDEQ(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Comment {
+func IDNEQ(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Comment {
+func IDIn(ids ...int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -48,14 +43,14 @@ func IDIn(ids ...string) predicate.Comment {
 		}
 		v := make([]interface{}, len(ids))
 		for i := range v {
-			v[i], _ = strconv.Atoi(ids[i])
+			v[i] = ids[i]
 		}
 		s.Where(sql.In(s.C(FieldID), v...))
 	})
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Comment {
+func IDNotIn(ids ...int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -65,40 +60,36 @@ func IDNotIn(ids ...string) predicate.Comment {
 		}
 		v := make([]interface{}, len(ids))
 		for i := range v {
-			v[i], _ = strconv.Atoi(ids[i])
+			v[i] = ids[i]
 		}
 		s.Where(sql.NotIn(s.C(FieldID), v...))
 	})
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Comment {
+func IDGT(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Comment {
+func IDGTE(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Comment {
+func IDLT(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Comment {
+func IDLTE(id int) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
-		id, _ := strconv.Atoi(id)
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
 }
