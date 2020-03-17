@@ -934,9 +934,13 @@ func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(st
 	for _, fi := range fields {
 		value := fi.Value
 		if fi.Type == field.TypeJSON {
-			if value, err = json.Marshal(value); err != nil {
+			buf, err := json.Marshal(value)
+			if err != nil {
 				return fmt.Errorf("marshal value for column %s: %v", fi.Column, err)
 			}
+			// If the underlying driver does not support JSON types,
+			// driver.DefaultParameterConverter will convert it to uint8.
+			value = json.RawMessage(buf)
 		}
 		set(fi.Column, value)
 	}

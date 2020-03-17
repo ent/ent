@@ -12,6 +12,8 @@ github.com/go-openapi/inflect v0.18.0 h1:4TMtuIyNxWl29TYpb1grUCuNy+koT0oN5ZXHb6w
 github.com/go-openapi/inflect v0.18.0/go.mod h1:lHpZVlpIQqLyKwJ4N+YSc9hchQy/i12fJykb83CRBH4=
 github.com/go-sql-driver/mysql v1.4.1-0.20190510102335-877a9775f068 h1:q2kwd9Bcgl2QpSi/Wjcx9jzwyICt3EWTP5to43QhwaA=
 github.com/go-sql-driver/mysql v1.4.1-0.20190510102335-877a9775f068/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
+github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae h1:L6V0ANsMIMdLgXly241UXhXNFWYgXbgjHupTAAURrV0=
+github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
