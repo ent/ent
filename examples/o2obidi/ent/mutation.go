@@ -36,7 +36,7 @@ type UserMutation struct {
 	age           *int
 	addage        *int
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	spouse        *int
 	clearedspouse bool
 }
@@ -49,7 +49,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -284,7 +284,8 @@ func (m *UserMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

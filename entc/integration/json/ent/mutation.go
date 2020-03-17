@@ -42,7 +42,7 @@ type UserMutation struct {
 	ints          *[]int
 	floats        *[]float64
 	strings       *[]string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -53,7 +53,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -102,12 +102,13 @@ func (m *UserMutation) URL() (r *url.URL, exists bool) {
 // ClearURL clears the value of url.
 func (m *UserMutation) ClearURL() {
 	m.url = nil
-	m.clearedFields[user.FieldURL] = true
+	m.clearedFields[user.FieldURL] = struct{}{}
 }
 
 // URLCleared returns if the field url was cleared in this mutation.
 func (m *UserMutation) URLCleared() bool {
-	return m.clearedFields[user.FieldURL]
+	_, ok := m.clearedFields[user.FieldURL]
+	return ok
 }
 
 // ResetURL reset all changes of the url field.
@@ -133,12 +134,13 @@ func (m *UserMutation) Raw() (r json.RawMessage, exists bool) {
 // ClearRaw clears the value of raw.
 func (m *UserMutation) ClearRaw() {
 	m.raw = nil
-	m.clearedFields[user.FieldRaw] = true
+	m.clearedFields[user.FieldRaw] = struct{}{}
 }
 
 // RawCleared returns if the field raw was cleared in this mutation.
 func (m *UserMutation) RawCleared() bool {
-	return m.clearedFields[user.FieldRaw]
+	_, ok := m.clearedFields[user.FieldRaw]
+	return ok
 }
 
 // ResetRaw reset all changes of the raw field.
@@ -164,12 +166,13 @@ func (m *UserMutation) Dirs() (r []http.Dir, exists bool) {
 // ClearDirs clears the value of dirs.
 func (m *UserMutation) ClearDirs() {
 	m.dirs = nil
-	m.clearedFields[user.FieldDirs] = true
+	m.clearedFields[user.FieldDirs] = struct{}{}
 }
 
 // DirsCleared returns if the field dirs was cleared in this mutation.
 func (m *UserMutation) DirsCleared() bool {
-	return m.clearedFields[user.FieldDirs]
+	_, ok := m.clearedFields[user.FieldDirs]
+	return ok
 }
 
 // ResetDirs reset all changes of the dirs field.
@@ -195,12 +198,13 @@ func (m *UserMutation) Ints() (r []int, exists bool) {
 // ClearInts clears the value of ints.
 func (m *UserMutation) ClearInts() {
 	m.ints = nil
-	m.clearedFields[user.FieldInts] = true
+	m.clearedFields[user.FieldInts] = struct{}{}
 }
 
 // IntsCleared returns if the field ints was cleared in this mutation.
 func (m *UserMutation) IntsCleared() bool {
-	return m.clearedFields[user.FieldInts]
+	_, ok := m.clearedFields[user.FieldInts]
+	return ok
 }
 
 // ResetInts reset all changes of the ints field.
@@ -226,12 +230,13 @@ func (m *UserMutation) Floats() (r []float64, exists bool) {
 // ClearFloats clears the value of floats.
 func (m *UserMutation) ClearFloats() {
 	m.floats = nil
-	m.clearedFields[user.FieldFloats] = true
+	m.clearedFields[user.FieldFloats] = struct{}{}
 }
 
 // FloatsCleared returns if the field floats was cleared in this mutation.
 func (m *UserMutation) FloatsCleared() bool {
-	return m.clearedFields[user.FieldFloats]
+	_, ok := m.clearedFields[user.FieldFloats]
+	return ok
 }
 
 // ResetFloats reset all changes of the floats field.
@@ -257,12 +262,13 @@ func (m *UserMutation) Strings() (r []string, exists bool) {
 // ClearStrings clears the value of strings.
 func (m *UserMutation) ClearStrings() {
 	m.strings = nil
-	m.clearedFields[user.FieldStrings] = true
+	m.clearedFields[user.FieldStrings] = struct{}{}
 }
 
 // StringsCleared returns if the field strings was cleared in this mutation.
 func (m *UserMutation) StringsCleared() bool {
-	return m.clearedFields[user.FieldStrings]
+	_, ok := m.clearedFields[user.FieldStrings]
+	return ok
 }
 
 // ResetStrings reset all changes of the strings field.
@@ -405,22 +411,22 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[user.FieldURL] {
+	if m.FieldCleared(user.FieldURL) {
 		fields = append(fields, user.FieldURL)
 	}
-	if m.clearedFields[user.FieldRaw] {
+	if m.FieldCleared(user.FieldRaw) {
 		fields = append(fields, user.FieldRaw)
 	}
-	if m.clearedFields[user.FieldDirs] {
+	if m.FieldCleared(user.FieldDirs) {
 		fields = append(fields, user.FieldDirs)
 	}
-	if m.clearedFields[user.FieldInts] {
+	if m.FieldCleared(user.FieldInts) {
 		fields = append(fields, user.FieldInts)
 	}
-	if m.clearedFields[user.FieldFloats] {
+	if m.FieldCleared(user.FieldFloats) {
 		fields = append(fields, user.FieldFloats)
 	}
-	if m.clearedFields[user.FieldStrings] {
+	if m.FieldCleared(user.FieldStrings) {
 		fields = append(fields, user.FieldStrings)
 	}
 	return fields
@@ -429,7 +435,8 @@ func (m *UserMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

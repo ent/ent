@@ -84,8 +84,8 @@ func (pc *PlanetCreate) Save(ctx context.Context) (*Planet, error) {
 			node, err = pc.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(pc.hooks); i > 0; i-- {
-			mut = pc.hooks[i-1](mut)
+		for i := len(pc.hooks) - 1; i >= 0; i-- {
+			mut = pc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
 			return nil, err

@@ -88,8 +88,8 @@ func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = ftu.gremlinSave(ctx)
 			return affected, err
 		})
-		for i := len(ftu.hooks); i > 0; i-- {
-			mut = ftu.hooks[i-1](mut)
+		for i := len(ftu.hooks) - 1; i >= 0; i-- {
+			mut = ftu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
 			return 0, err
@@ -243,8 +243,8 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 			node, err = ftuo.gremlinSave(ctx)
 			return node, err
 		})
-		for i := len(ftuo.hooks); i > 0; i-- {
-			mut = ftuo.hooks[i-1](mut)
+		for i := len(ftuo.hooks) - 1; i >= 0; i-- {
+			mut = ftuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {
 			return nil, err

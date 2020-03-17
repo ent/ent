@@ -64,8 +64,8 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			affected, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
 			return affected, err
 		})
-		for i := len({{ $receiver }}.hooks); i > 0; i-- {
-			mut = {{ $receiver }}.hooks[i-1](mut)
+		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
+			mut = {{ $receiver }}.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
 			return 0, err
@@ -141,8 +141,8 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
 			return node, err
 		})
-		for i := len({{ $receiver }}.hooks); i > 0; i-- {
-			mut = {{ $receiver }}.hooks[i-1](mut)
+		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
+			mut = {{ $receiver }}.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
 			return nil, err

@@ -113,8 +113,8 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = nu.sqlSave(ctx)
 			return affected, err
 		})
-		for i := len(nu.hooks); i > 0; i-- {
-			mut = nu.hooks[i-1](mut)
+		for i := len(nu.hooks) - 1; i >= 0; i-- {
+			mut = nu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
 			return 0, err
@@ -347,8 +347,8 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 			node, err = nuo.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(nuo.hooks); i > 0; i-- {
-			mut = nuo.hooks[i-1](mut)
+		for i := len(nuo.hooks) - 1; i >= 0; i-- {
+			mut = nuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nuo.mutation); err != nil {
 			return nil, err

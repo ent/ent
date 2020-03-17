@@ -49,8 +49,8 @@ func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = bd.sqlExec(ctx)
 			return affected, err
 		})
-		for i := len(bd.hooks); i > 0; i-- {
-			mut = bd.hooks[i-1](mut)
+		for i := len(bd.hooks) - 1; i >= 0; i-- {
+			mut = bd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bd.mutation); err != nil {
 			return 0, err

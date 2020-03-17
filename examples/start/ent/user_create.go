@@ -105,8 +105,8 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			node, err = uc.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(uc.hooks); i > 0; i-- {
-			mut = uc.hooks[i-1](mut)
+		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
 			return nil, err

@@ -47,7 +47,7 @@ type {{ $mutation }} struct {
 			add{{ $f.BuilderField }} *{{ $f.Type }}
 		{{- end }}
 	{{- end }}
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	{{- range $e := $n.Edges }}
 		{{- if $e.Unique }}
             {{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
@@ -67,7 +67,7 @@ func new{{ $mutation }}(c config, op Op) *{{ $mutation }} {
 		config:        c,
 		op:            op,
 		typ:           Type{{ $n.Name }},
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -158,13 +158,14 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 			{{- if $f.Type.Numeric }}
 				m.add{{ $f.BuilderField }} = nil
 			{{- end }}
-			m.clearedFields[{{ $const }}] = true
+			m.clearedFields[{{ $const }}] = struct{}{}
 		}
 
 		{{ $func = print $f.StructField "Cleared" }}
 		// {{ $func }} returns if the field {{ $f.Name }} was cleared in this mutation.
 		func (m *{{ $mutation }}) {{ $func }}() bool {
-			return m.clearedFields[{{ $const }}]
+			_, ok := m.clearedFields[{{ $const }}]
+			return ok
 		}
 	{{ end }}
 
@@ -401,7 +402,7 @@ func (m *{{ $mutation }}) ClearedFields() []string {
 		{{- range $f := $n.Fields }}
 			{{- if $f.Optional }}
 				{{- $const := print $n.Package "." $f.Constant }}
-				if m.clearedFields[{{ $const }}] {
+				if m.FieldCleared({{ $const }}) {
 					fields = append(fields, {{ $const }})
 				}
 			{{- end }}
@@ -415,7 +416,8 @@ func (m *{{ $mutation }}) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *{{ $mutation }}) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

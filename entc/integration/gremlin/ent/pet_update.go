@@ -109,8 +109,8 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = pu.gremlinSave(ctx)
 			return affected, err
 		})
-		for i := len(pu.hooks); i > 0; i-- {
-			mut = pu.hooks[i-1](mut)
+		for i := len(pu.hooks) - 1; i >= 0; i-- {
+			mut = pu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
 			return 0, err
@@ -287,8 +287,8 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 			node, err = puo.gremlinSave(ctx)
 			return node, err
 		})
-		for i := len(puo.hooks); i > 0; i-- {
-			mut = puo.hooks[i-1](mut)
+		for i := len(puo.hooks) - 1; i >= 0; i-- {
+			mut = puo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
 			return nil, err

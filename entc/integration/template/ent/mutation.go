@@ -40,7 +40,7 @@ type GroupMutation struct {
 	id            *int
 	max_users     *int
 	addmax_users  *int
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -51,7 +51,7 @@ func newGroupMutation(c config, op Op) *GroupMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeGroup,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -216,7 +216,8 @@ func (m *GroupMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *GroupMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -307,7 +308,7 @@ type PetMutation struct {
 	age           *int
 	addage        *int
 	licensed_at   *time.Time
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
 }
@@ -320,7 +321,7 @@ func newPetMutation(c config, op Op) *PetMutation {
 		config:        c,
 		op:            op,
 		typ:           TypePet,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -408,12 +409,13 @@ func (m *PetMutation) LicensedAt() (r time.Time, exists bool) {
 // ClearLicensedAt clears the value of licensed_at.
 func (m *PetMutation) ClearLicensedAt() {
 	m.licensed_at = nil
-	m.clearedFields[pet.FieldLicensedAt] = true
+	m.clearedFields[pet.FieldLicensedAt] = struct{}{}
 }
 
 // LicensedAtCleared returns if the field licensed_at was cleared in this mutation.
 func (m *PetMutation) LicensedAtCleared() bool {
-	return m.clearedFields[pet.FieldLicensedAt]
+	_, ok := m.clearedFields[pet.FieldLicensedAt]
+	return ok
 }
 
 // ResetLicensedAt reset all changes of the licensed_at field.
@@ -562,7 +564,7 @@ func (m *PetMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *PetMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[pet.FieldLicensedAt] {
+	if m.FieldCleared(pet.FieldLicensedAt) {
 		fields = append(fields, pet.FieldLicensedAt)
 	}
 	return fields
@@ -571,7 +573,8 @@ func (m *PetMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *PetMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -688,7 +691,7 @@ type UserMutation struct {
 	typ            string
 	id             *int
 	name           *string
-	clearedFields  map[string]bool
+	clearedFields  map[string]struct{}
 	pets           map[int]struct{}
 	removedpets    map[int]struct{}
 	friends        map[int]struct{}
@@ -703,7 +706,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -917,7 +920,8 @@ func (m *UserMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

@@ -49,8 +49,8 @@ func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = ud.sqlExec(ctx)
 			return affected, err
 		})
-		for i := len(ud.hooks); i > 0; i-- {
-			mut = ud.hooks[i-1](mut)
+		for i := len(ud.hooks) - 1; i >= 0; i-- {
+			mut = ud.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ud.mutation); err != nil {
 			return 0, err

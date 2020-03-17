@@ -68,8 +68,8 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 			node, err = ftc.gremlinSave(ctx)
 			return node, err
 		})
-		for i := len(ftc.hooks); i > 0; i-- {
-			mut = ftc.hooks[i-1](mut)
+		for i := len(ftc.hooks) - 1; i >= 0; i-- {
+			mut = ftc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftc.mutation); err != nil {
 			return nil, err
