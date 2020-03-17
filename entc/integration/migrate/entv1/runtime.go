@@ -8,7 +8,6 @@ package entv1
 
 import (
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/schema"
-
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
 )
 

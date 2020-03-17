@@ -10,18 +10,14 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
-
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
-
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
+	"github.com/facebookincubator/ent/entc/integration/ent/user"
 
 	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime

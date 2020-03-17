@@ -7,10 +7,8 @@
 package ent
 
 import (
-	"github.com/facebookincubator/ent/examples/start/ent/schema"
-
 	"github.com/facebookincubator/ent/examples/start/ent/group"
-
+	"github.com/facebookincubator/ent/examples/start/ent/schema"
 	"github.com/facebookincubator/ent/examples/start/ent/user"
 )
 
