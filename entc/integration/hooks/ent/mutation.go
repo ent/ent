@@ -10,9 +10,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

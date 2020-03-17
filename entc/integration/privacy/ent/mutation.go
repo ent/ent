@@ -9,8 +9,9 @@ package ent
 import (
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (
