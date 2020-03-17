@@ -9,9 +9,10 @@ package ent
 import (
 	"fmt"
 
-	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/group"
 	"github.com/facebookincubator/ent/examples/m2m2types/ent/user"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

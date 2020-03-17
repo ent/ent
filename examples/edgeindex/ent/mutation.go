@@ -9,9 +9,10 @@ package ent
 import (
 	"fmt"
 
-	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

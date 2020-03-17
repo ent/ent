@@ -14,8 +14,9 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
-	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/google/uuid"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

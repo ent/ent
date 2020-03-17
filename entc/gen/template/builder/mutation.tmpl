@@ -13,6 +13,8 @@ import (
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

@@ -12,8 +12,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

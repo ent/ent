@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/integration/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/ent/comment"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
@@ -22,6 +21,8 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/spec"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (

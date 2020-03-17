@@ -9,9 +9,10 @@ package entv2
 import (
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+
+	"github.com/facebookincubator/ent"
 )
 
 const (
