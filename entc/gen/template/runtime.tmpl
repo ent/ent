@@ -69,10 +69,9 @@ import (
 	{{- with $.Config.Schema }}
 		"{{ . }}"
 	{{- end }}
-
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
-	{{ end -}}
+	{{- end }}
 
 	"github.com/facebookincubator/ent"
 )

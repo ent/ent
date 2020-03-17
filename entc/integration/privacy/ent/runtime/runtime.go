@@ -9,9 +9,10 @@ package runtime
 import (
 	"context"
 
-	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/schema"
+
+	"github.com/facebookincubator/ent"
 )
 
 // The init function reads all schema descriptors with runtime

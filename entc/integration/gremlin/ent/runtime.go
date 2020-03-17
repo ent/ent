@@ -11,17 +11,13 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
-
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
 
 	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime
