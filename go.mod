@@ -6,7 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/go-bindata/go-bindata v1.0.1-0.20190711162640-ee3c2418e368
 	github.com/go-openapi/inflect v0.18.0
-	github.com/go-sql-driver/mysql v1.4.1-0.20190510102335-877a9775f068
+	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
