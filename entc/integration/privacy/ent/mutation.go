@@ -36,7 +36,7 @@ type PlanetMutation struct {
 	name             *string
 	age              *uint
 	addage           *uint
-	clearedFields    map[string]bool
+	clearedFields    map[string]struct{}
 	neighbors        map[int]struct{}
 	removedneighbors map[int]struct{}
 }
@@ -49,7 +49,7 @@ func newPlanetMutation(c config, op Op) *PlanetMutation {
 		config:        c,
 		op:            op,
 		typ:           TypePlanet,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -137,12 +137,13 @@ func (m *PlanetMutation) AddedAge() (r uint, exists bool) {
 func (m *PlanetMutation) ClearAge() {
 	m.age = nil
 	m.addage = nil
-	m.clearedFields[planet.FieldAge] = true
+	m.clearedFields[planet.FieldAge] = struct{}{}
 }
 
 // AgeCleared returns if the field age was cleared in this mutation.
 func (m *PlanetMutation) AgeCleared() bool {
-	return m.clearedFields[planet.FieldAge]
+	_, ok := m.clearedFields[planet.FieldAge]
+	return ok
 }
 
 // ResetAge reset all changes of the age field.
@@ -295,7 +296,7 @@ func (m *PlanetMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *PlanetMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[planet.FieldAge] {
+	if m.FieldCleared(planet.FieldAge) {
 		fields = append(fields, planet.FieldAge)
 	}
 	return fields
@@ -304,7 +305,8 @@ func (m *PlanetMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *PlanetMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

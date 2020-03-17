@@ -35,7 +35,7 @@ type NodeMutation struct {
 	id              *int
 	value           *int
 	addvalue        *int
-	clearedFields   map[string]bool
+	clearedFields   map[string]struct{}
 	parent          *int
 	clearedparent   bool
 	children        map[int]struct{}
@@ -50,7 +50,7 @@ func newNodeMutation(c config, op Op) *NodeMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeNode,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -296,7 +296,8 @@ func (m *NodeMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *NodeMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

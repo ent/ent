@@ -36,7 +36,7 @@ type CityMutation struct {
 	typ            string
 	id             *int
 	name           *string
-	clearedFields  map[string]bool
+	clearedFields  map[string]struct{}
 	streets        map[int]struct{}
 	removedstreets map[int]struct{}
 }
@@ -49,7 +49,7 @@ func newCityMutation(c config, op Op) *CityMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeCity,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -221,7 +221,8 @@ func (m *CityMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *CityMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -333,7 +334,7 @@ type StreetMutation struct {
 	typ           string
 	id            *int
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	city          *int
 	clearedcity   bool
 }
@@ -346,7 +347,7 @@ func newStreetMutation(c config, op Op) *StreetMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeStreet,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -515,7 +516,8 @@ func (m *StreetMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *StreetMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

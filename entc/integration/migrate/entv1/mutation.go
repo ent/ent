@@ -35,7 +35,7 @@ type CarMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
 }
@@ -48,7 +48,7 @@ func newCarMutation(c config, op Op) *CarMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeCar,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -186,7 +186,8 @@ func (m *CarMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *CarMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -299,7 +300,7 @@ type UserMutation struct {
 	renamed         *string
 	blob            *[]byte
 	state           *user.State
-	clearedFields   map[string]bool
+	clearedFields   map[string]struct{}
 	parent          *int
 	clearedparent   bool
 	children        map[int]struct{}
@@ -318,7 +319,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -450,12 +451,13 @@ func (m *UserMutation) Address() (r string, exists bool) {
 // ClearAddress clears the value of address.
 func (m *UserMutation) ClearAddress() {
 	m.address = nil
-	m.clearedFields[user.FieldAddress] = true
+	m.clearedFields[user.FieldAddress] = struct{}{}
 }
 
 // AddressCleared returns if the field address was cleared in this mutation.
 func (m *UserMutation) AddressCleared() bool {
-	return m.clearedFields[user.FieldAddress]
+	_, ok := m.clearedFields[user.FieldAddress]
+	return ok
 }
 
 // ResetAddress reset all changes of the address field.
@@ -481,12 +483,13 @@ func (m *UserMutation) Renamed() (r string, exists bool) {
 // ClearRenamed clears the value of renamed.
 func (m *UserMutation) ClearRenamed() {
 	m.renamed = nil
-	m.clearedFields[user.FieldRenamed] = true
+	m.clearedFields[user.FieldRenamed] = struct{}{}
 }
 
 // RenamedCleared returns if the field renamed was cleared in this mutation.
 func (m *UserMutation) RenamedCleared() bool {
-	return m.clearedFields[user.FieldRenamed]
+	_, ok := m.clearedFields[user.FieldRenamed]
+	return ok
 }
 
 // ResetRenamed reset all changes of the renamed field.
@@ -512,12 +515,13 @@ func (m *UserMutation) Blob() (r []byte, exists bool) {
 // ClearBlob clears the value of blob.
 func (m *UserMutation) ClearBlob() {
 	m.blob = nil
-	m.clearedFields[user.FieldBlob] = true
+	m.clearedFields[user.FieldBlob] = struct{}{}
 }
 
 // BlobCleared returns if the field blob was cleared in this mutation.
 func (m *UserMutation) BlobCleared() bool {
-	return m.clearedFields[user.FieldBlob]
+	_, ok := m.clearedFields[user.FieldBlob]
+	return ok
 }
 
 // ResetBlob reset all changes of the blob field.
@@ -543,12 +547,13 @@ func (m *UserMutation) State() (r user.State, exists bool) {
 // ClearState clears the value of state.
 func (m *UserMutation) ClearState() {
 	m.state = nil
-	m.clearedFields[user.FieldState] = true
+	m.clearedFields[user.FieldState] = struct{}{}
 }
 
 // StateCleared returns if the field state was cleared in this mutation.
 func (m *UserMutation) StateCleared() bool {
-	return m.clearedFields[user.FieldState]
+	_, ok := m.clearedFields[user.FieldState]
+	return ok
 }
 
 // ResetState reset all changes of the state field.
@@ -877,16 +882,16 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[user.FieldAddress] {
+	if m.FieldCleared(user.FieldAddress) {
 		fields = append(fields, user.FieldAddress)
 	}
-	if m.clearedFields[user.FieldRenamed] {
+	if m.FieldCleared(user.FieldRenamed) {
 		fields = append(fields, user.FieldRenamed)
 	}
-	if m.clearedFields[user.FieldBlob] {
+	if m.FieldCleared(user.FieldBlob) {
 		fields = append(fields, user.FieldBlob)
 	}
-	if m.clearedFields[user.FieldState] {
+	if m.FieldCleared(user.FieldState) {
 		fields = append(fields, user.FieldState)
 	}
 	return fields
@@ -895,7 +900,8 @@ func (m *UserMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

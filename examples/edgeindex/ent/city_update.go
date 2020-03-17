@@ -87,8 +87,8 @@ func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = cu.sqlSave(ctx)
 			return affected, err
 		})
-		for i := len(cu.hooks); i > 0; i-- {
-			mut = cu.hooks[i-1](mut)
+		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			mut = cu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
 			return 0, err
@@ -255,8 +255,8 @@ func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
 			node, err = cuo.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(cuo.hooks); i > 0; i-- {
-			mut = cuo.hooks[i-1](mut)
+		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			mut = cuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
 			return nil, err

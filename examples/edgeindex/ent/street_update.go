@@ -82,8 +82,8 @@ func (su *StreetUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = su.sqlSave(ctx)
 			return affected, err
 		})
-		for i := len(su.hooks); i > 0; i-- {
-			mut = su.hooks[i-1](mut)
+		for i := len(su.hooks) - 1; i >= 0; i-- {
+			mut = su.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
 			return 0, err
@@ -242,8 +242,8 @@ func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
 			node, err = suo.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(suo.hooks); i > 0; i-- {
-			mut = suo.hooks[i-1](mut)
+		for i := len(suo.hooks) - 1; i >= 0; i-- {
+			mut = suo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, suo.mutation); err != nil {
 			return nil, err

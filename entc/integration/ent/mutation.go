@@ -59,7 +59,7 @@ type CardMutation struct {
 	update_time   *time.Time
 	number        *string
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
 	spec          map[int]struct{}
@@ -74,7 +74,7 @@ func newCardMutation(c config, op Op) *CardMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeCard,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -180,12 +180,13 @@ func (m *CardMutation) Name() (r string, exists bool) {
 // ClearName clears the value of name.
 func (m *CardMutation) ClearName() {
 	m.name = nil
-	m.clearedFields[card.FieldName] = true
+	m.clearedFields[card.FieldName] = struct{}{}
 }
 
 // NameCleared returns if the field name was cleared in this mutation.
 func (m *CardMutation) NameCleared() bool {
-	return m.clearedFields[card.FieldName]
+	_, ok := m.clearedFields[card.FieldName]
+	return ok
 }
 
 // ResetName reset all changes of the name field.
@@ -385,7 +386,7 @@ func (m *CardMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *CardMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[card.FieldName] {
+	if m.FieldCleared(card.FieldName) {
 		fields = append(fields, card.FieldName)
 	}
 	return fields
@@ -394,7 +395,8 @@ func (m *CardMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *CardMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -543,7 +545,7 @@ type CommentMutation struct {
 	addunique_float *float64
 	nillable_int    *int
 	addnillable_int *int
-	clearedFields   map[string]bool
+	clearedFields   map[string]struct{}
 }
 
 var _ ent.Mutation = (*CommentMutation)(nil)
@@ -554,7 +556,7 @@ func newCommentMutation(c config, op Op) *CommentMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeComment,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -701,12 +703,13 @@ func (m *CommentMutation) AddedNillableInt() (r int, exists bool) {
 func (m *CommentMutation) ClearNillableInt() {
 	m.nillable_int = nil
 	m.addnillable_int = nil
-	m.clearedFields[comment.FieldNillableInt] = true
+	m.clearedFields[comment.FieldNillableInt] = struct{}{}
 }
 
 // NillableIntCleared returns if the field nillable_int was cleared in this mutation.
 func (m *CommentMutation) NillableIntCleared() bool {
-	return m.clearedFields[comment.FieldNillableInt]
+	_, ok := m.clearedFields[comment.FieldNillableInt]
+	return ok
 }
 
 // ResetNillableInt reset all changes of the nillable_int field.
@@ -853,7 +856,7 @@ func (m *CommentMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *CommentMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[comment.FieldNillableInt] {
+	if m.FieldCleared(comment.FieldNillableInt) {
 		fields = append(fields, comment.FieldNillableInt)
 	}
 	return fields
@@ -862,7 +865,8 @@ func (m *CommentMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *CommentMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -1008,7 +1012,7 @@ type FieldTypeMutation struct {
 	addoptional_float          *float64
 	optional_float32           *float32
 	addoptional_float32        *float32
-	clearedFields              map[string]bool
+	clearedFields              map[string]struct{}
 }
 
 var _ ent.Mutation = (*FieldTypeMutation)(nil)
@@ -1019,7 +1023,7 @@ func newFieldTypeMutation(c config, op Op) *FieldTypeMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeFieldType,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -1283,12 +1287,13 @@ func (m *FieldTypeMutation) AddedOptionalInt() (r int, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalInt() {
 	m.optional_int = nil
 	m.addoptional_int = nil
-	m.clearedFields[fieldtype.FieldOptionalInt] = true
+	m.clearedFields[fieldtype.FieldOptionalInt] = struct{}{}
 }
 
 // OptionalIntCleared returns if the field optional_int was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalIntCleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalInt]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalInt]
+	return ok
 }
 
 // ResetOptionalInt reset all changes of the optional_int field.
@@ -1335,12 +1340,13 @@ func (m *FieldTypeMutation) AddedOptionalInt8() (r int8, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalInt8() {
 	m.optional_int8 = nil
 	m.addoptional_int8 = nil
-	m.clearedFields[fieldtype.FieldOptionalInt8] = true
+	m.clearedFields[fieldtype.FieldOptionalInt8] = struct{}{}
 }
 
 // OptionalInt8Cleared returns if the field optional_int8 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalInt8Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalInt8]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalInt8]
+	return ok
 }
 
 // ResetOptionalInt8 reset all changes of the optional_int8 field.
@@ -1387,12 +1393,13 @@ func (m *FieldTypeMutation) AddedOptionalInt16() (r int16, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalInt16() {
 	m.optional_int16 = nil
 	m.addoptional_int16 = nil
-	m.clearedFields[fieldtype.FieldOptionalInt16] = true
+	m.clearedFields[fieldtype.FieldOptionalInt16] = struct{}{}
 }
 
 // OptionalInt16Cleared returns if the field optional_int16 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalInt16Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalInt16]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalInt16]
+	return ok
 }
 
 // ResetOptionalInt16 reset all changes of the optional_int16 field.
@@ -1439,12 +1446,13 @@ func (m *FieldTypeMutation) AddedOptionalInt32() (r int32, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalInt32() {
 	m.optional_int32 = nil
 	m.addoptional_int32 = nil
-	m.clearedFields[fieldtype.FieldOptionalInt32] = true
+	m.clearedFields[fieldtype.FieldOptionalInt32] = struct{}{}
 }
 
 // OptionalInt32Cleared returns if the field optional_int32 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalInt32Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalInt32]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalInt32]
+	return ok
 }
 
 // ResetOptionalInt32 reset all changes of the optional_int32 field.
@@ -1491,12 +1499,13 @@ func (m *FieldTypeMutation) AddedOptionalInt64() (r int64, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalInt64() {
 	m.optional_int64 = nil
 	m.addoptional_int64 = nil
-	m.clearedFields[fieldtype.FieldOptionalInt64] = true
+	m.clearedFields[fieldtype.FieldOptionalInt64] = struct{}{}
 }
 
 // OptionalInt64Cleared returns if the field optional_int64 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalInt64Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalInt64]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalInt64]
+	return ok
 }
 
 // ResetOptionalInt64 reset all changes of the optional_int64 field.
@@ -1543,12 +1552,13 @@ func (m *FieldTypeMutation) AddedNillableInt() (r int, exists bool) {
 func (m *FieldTypeMutation) ClearNillableInt() {
 	m.nillable_int = nil
 	m.addnillable_int = nil
-	m.clearedFields[fieldtype.FieldNillableInt] = true
+	m.clearedFields[fieldtype.FieldNillableInt] = struct{}{}
 }
 
 // NillableIntCleared returns if the field nillable_int was cleared in this mutation.
 func (m *FieldTypeMutation) NillableIntCleared() bool {
-	return m.clearedFields[fieldtype.FieldNillableInt]
+	_, ok := m.clearedFields[fieldtype.FieldNillableInt]
+	return ok
 }
 
 // ResetNillableInt reset all changes of the nillable_int field.
@@ -1595,12 +1605,13 @@ func (m *FieldTypeMutation) AddedNillableInt8() (r int8, exists bool) {
 func (m *FieldTypeMutation) ClearNillableInt8() {
 	m.nillable_int8 = nil
 	m.addnillable_int8 = nil
-	m.clearedFields[fieldtype.FieldNillableInt8] = true
+	m.clearedFields[fieldtype.FieldNillableInt8] = struct{}{}
 }
 
 // NillableInt8Cleared returns if the field nillable_int8 was cleared in this mutation.
 func (m *FieldTypeMutation) NillableInt8Cleared() bool {
-	return m.clearedFields[fieldtype.FieldNillableInt8]
+	_, ok := m.clearedFields[fieldtype.FieldNillableInt8]
+	return ok
 }
 
 // ResetNillableInt8 reset all changes of the nillable_int8 field.
@@ -1647,12 +1658,13 @@ func (m *FieldTypeMutation) AddedNillableInt16() (r int16, exists bool) {
 func (m *FieldTypeMutation) ClearNillableInt16() {
 	m.nillable_int16 = nil
 	m.addnillable_int16 = nil
-	m.clearedFields[fieldtype.FieldNillableInt16] = true
+	m.clearedFields[fieldtype.FieldNillableInt16] = struct{}{}
 }
 
 // NillableInt16Cleared returns if the field nillable_int16 was cleared in this mutation.
 func (m *FieldTypeMutation) NillableInt16Cleared() bool {
-	return m.clearedFields[fieldtype.FieldNillableInt16]
+	_, ok := m.clearedFields[fieldtype.FieldNillableInt16]
+	return ok
 }
 
 // ResetNillableInt16 reset all changes of the nillable_int16 field.
@@ -1699,12 +1711,13 @@ func (m *FieldTypeMutation) AddedNillableInt32() (r int32, exists bool) {
 func (m *FieldTypeMutation) ClearNillableInt32() {
 	m.nillable_int32 = nil
 	m.addnillable_int32 = nil
-	m.clearedFields[fieldtype.FieldNillableInt32] = true
+	m.clearedFields[fieldtype.FieldNillableInt32] = struct{}{}
 }
 
 // NillableInt32Cleared returns if the field nillable_int32 was cleared in this mutation.
 func (m *FieldTypeMutation) NillableInt32Cleared() bool {
-	return m.clearedFields[fieldtype.FieldNillableInt32]
+	_, ok := m.clearedFields[fieldtype.FieldNillableInt32]
+	return ok
 }
 
 // ResetNillableInt32 reset all changes of the nillable_int32 field.
@@ -1751,12 +1764,13 @@ func (m *FieldTypeMutation) AddedNillableInt64() (r int64, exists bool) {
 func (m *FieldTypeMutation) ClearNillableInt64() {
 	m.nillable_int64 = nil
 	m.addnillable_int64 = nil
-	m.clearedFields[fieldtype.FieldNillableInt64] = true
+	m.clearedFields[fieldtype.FieldNillableInt64] = struct{}{}
 }
 
 // NillableInt64Cleared returns if the field nillable_int64 was cleared in this mutation.
 func (m *FieldTypeMutation) NillableInt64Cleared() bool {
-	return m.clearedFields[fieldtype.FieldNillableInt64]
+	_, ok := m.clearedFields[fieldtype.FieldNillableInt64]
+	return ok
 }
 
 // ResetNillableInt64 reset all changes of the nillable_int64 field.
@@ -1803,12 +1817,13 @@ func (m *FieldTypeMutation) AddedValidateOptionalInt32() (r int32, exists bool) 
 func (m *FieldTypeMutation) ClearValidateOptionalInt32() {
 	m.validate_optional_int32 = nil
 	m.addvalidate_optional_int32 = nil
-	m.clearedFields[fieldtype.FieldValidateOptionalInt32] = true
+	m.clearedFields[fieldtype.FieldValidateOptionalInt32] = struct{}{}
 }
 
 // ValidateOptionalInt32Cleared returns if the field validate_optional_int32 was cleared in this mutation.
 func (m *FieldTypeMutation) ValidateOptionalInt32Cleared() bool {
-	return m.clearedFields[fieldtype.FieldValidateOptionalInt32]
+	_, ok := m.clearedFields[fieldtype.FieldValidateOptionalInt32]
+	return ok
 }
 
 // ResetValidateOptionalInt32 reset all changes of the validate_optional_int32 field.
@@ -1855,12 +1870,13 @@ func (m *FieldTypeMutation) AddedOptionalUint() (r uint, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalUint() {
 	m.optional_uint = nil
 	m.addoptional_uint = nil
-	m.clearedFields[fieldtype.FieldOptionalUint] = true
+	m.clearedFields[fieldtype.FieldOptionalUint] = struct{}{}
 }
 
 // OptionalUintCleared returns if the field optional_uint was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalUintCleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalUint]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalUint]
+	return ok
 }
 
 // ResetOptionalUint reset all changes of the optional_uint field.
@@ -1907,12 +1923,13 @@ func (m *FieldTypeMutation) AddedOptionalUint8() (r uint8, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalUint8() {
 	m.optional_uint8 = nil
 	m.addoptional_uint8 = nil
-	m.clearedFields[fieldtype.FieldOptionalUint8] = true
+	m.clearedFields[fieldtype.FieldOptionalUint8] = struct{}{}
 }
 
 // OptionalUint8Cleared returns if the field optional_uint8 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalUint8Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalUint8]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalUint8]
+	return ok
 }
 
 // ResetOptionalUint8 reset all changes of the optional_uint8 field.
@@ -1959,12 +1976,13 @@ func (m *FieldTypeMutation) AddedOptionalUint16() (r uint16, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalUint16() {
 	m.optional_uint16 = nil
 	m.addoptional_uint16 = nil
-	m.clearedFields[fieldtype.FieldOptionalUint16] = true
+	m.clearedFields[fieldtype.FieldOptionalUint16] = struct{}{}
 }
 
 // OptionalUint16Cleared returns if the field optional_uint16 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalUint16Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalUint16]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalUint16]
+	return ok
 }
 
 // ResetOptionalUint16 reset all changes of the optional_uint16 field.
@@ -2011,12 +2029,13 @@ func (m *FieldTypeMutation) AddedOptionalUint32() (r uint32, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalUint32() {
 	m.optional_uint32 = nil
 	m.addoptional_uint32 = nil
-	m.clearedFields[fieldtype.FieldOptionalUint32] = true
+	m.clearedFields[fieldtype.FieldOptionalUint32] = struct{}{}
 }
 
 // OptionalUint32Cleared returns if the field optional_uint32 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalUint32Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalUint32]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalUint32]
+	return ok
 }
 
 // ResetOptionalUint32 reset all changes of the optional_uint32 field.
@@ -2063,12 +2082,13 @@ func (m *FieldTypeMutation) AddedOptionalUint64() (r uint64, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalUint64() {
 	m.optional_uint64 = nil
 	m.addoptional_uint64 = nil
-	m.clearedFields[fieldtype.FieldOptionalUint64] = true
+	m.clearedFields[fieldtype.FieldOptionalUint64] = struct{}{}
 }
 
 // OptionalUint64Cleared returns if the field optional_uint64 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalUint64Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalUint64]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalUint64]
+	return ok
 }
 
 // ResetOptionalUint64 reset all changes of the optional_uint64 field.
@@ -2095,12 +2115,13 @@ func (m *FieldTypeMutation) State() (r fieldtype.State, exists bool) {
 // ClearState clears the value of state.
 func (m *FieldTypeMutation) ClearState() {
 	m.state = nil
-	m.clearedFields[fieldtype.FieldState] = true
+	m.clearedFields[fieldtype.FieldState] = struct{}{}
 }
 
 // StateCleared returns if the field state was cleared in this mutation.
 func (m *FieldTypeMutation) StateCleared() bool {
-	return m.clearedFields[fieldtype.FieldState]
+	_, ok := m.clearedFields[fieldtype.FieldState]
+	return ok
 }
 
 // ResetState reset all changes of the state field.
@@ -2146,12 +2167,13 @@ func (m *FieldTypeMutation) AddedOptionalFloat() (r float64, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalFloat() {
 	m.optional_float = nil
 	m.addoptional_float = nil
-	m.clearedFields[fieldtype.FieldOptionalFloat] = true
+	m.clearedFields[fieldtype.FieldOptionalFloat] = struct{}{}
 }
 
 // OptionalFloatCleared returns if the field optional_float was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalFloatCleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalFloat]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalFloat]
+	return ok
 }
 
 // ResetOptionalFloat reset all changes of the optional_float field.
@@ -2198,12 +2220,13 @@ func (m *FieldTypeMutation) AddedOptionalFloat32() (r float32, exists bool) {
 func (m *FieldTypeMutation) ClearOptionalFloat32() {
 	m.optional_float32 = nil
 	m.addoptional_float32 = nil
-	m.clearedFields[fieldtype.FieldOptionalFloat32] = true
+	m.clearedFields[fieldtype.FieldOptionalFloat32] = struct{}{}
 }
 
 // OptionalFloat32Cleared returns if the field optional_float32 was cleared in this mutation.
 func (m *FieldTypeMutation) OptionalFloat32Cleared() bool {
-	return m.clearedFields[fieldtype.FieldOptionalFloat32]
+	_, ok := m.clearedFields[fieldtype.FieldOptionalFloat32]
+	return ok
 }
 
 // ResetOptionalFloat32 reset all changes of the optional_float32 field.
@@ -2842,61 +2865,61 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *FieldTypeMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[fieldtype.FieldOptionalInt] {
+	if m.FieldCleared(fieldtype.FieldOptionalInt) {
 		fields = append(fields, fieldtype.FieldOptionalInt)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalInt8] {
+	if m.FieldCleared(fieldtype.FieldOptionalInt8) {
 		fields = append(fields, fieldtype.FieldOptionalInt8)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalInt16] {
+	if m.FieldCleared(fieldtype.FieldOptionalInt16) {
 		fields = append(fields, fieldtype.FieldOptionalInt16)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalInt32] {
+	if m.FieldCleared(fieldtype.FieldOptionalInt32) {
 		fields = append(fields, fieldtype.FieldOptionalInt32)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalInt64] {
+	if m.FieldCleared(fieldtype.FieldOptionalInt64) {
 		fields = append(fields, fieldtype.FieldOptionalInt64)
 	}
-	if m.clearedFields[fieldtype.FieldNillableInt] {
+	if m.FieldCleared(fieldtype.FieldNillableInt) {
 		fields = append(fields, fieldtype.FieldNillableInt)
 	}
-	if m.clearedFields[fieldtype.FieldNillableInt8] {
+	if m.FieldCleared(fieldtype.FieldNillableInt8) {
 		fields = append(fields, fieldtype.FieldNillableInt8)
 	}
-	if m.clearedFields[fieldtype.FieldNillableInt16] {
+	if m.FieldCleared(fieldtype.FieldNillableInt16) {
 		fields = append(fields, fieldtype.FieldNillableInt16)
 	}
-	if m.clearedFields[fieldtype.FieldNillableInt32] {
+	if m.FieldCleared(fieldtype.FieldNillableInt32) {
 		fields = append(fields, fieldtype.FieldNillableInt32)
 	}
-	if m.clearedFields[fieldtype.FieldNillableInt64] {
+	if m.FieldCleared(fieldtype.FieldNillableInt64) {
 		fields = append(fields, fieldtype.FieldNillableInt64)
 	}
-	if m.clearedFields[fieldtype.FieldValidateOptionalInt32] {
+	if m.FieldCleared(fieldtype.FieldValidateOptionalInt32) {
 		fields = append(fields, fieldtype.FieldValidateOptionalInt32)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalUint] {
+	if m.FieldCleared(fieldtype.FieldOptionalUint) {
 		fields = append(fields, fieldtype.FieldOptionalUint)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalUint8] {
+	if m.FieldCleared(fieldtype.FieldOptionalUint8) {
 		fields = append(fields, fieldtype.FieldOptionalUint8)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalUint16] {
+	if m.FieldCleared(fieldtype.FieldOptionalUint16) {
 		fields = append(fields, fieldtype.FieldOptionalUint16)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalUint32] {
+	if m.FieldCleared(fieldtype.FieldOptionalUint32) {
 		fields = append(fields, fieldtype.FieldOptionalUint32)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalUint64] {
+	if m.FieldCleared(fieldtype.FieldOptionalUint64) {
 		fields = append(fields, fieldtype.FieldOptionalUint64)
 	}
-	if m.clearedFields[fieldtype.FieldState] {
+	if m.FieldCleared(fieldtype.FieldState) {
 		fields = append(fields, fieldtype.FieldState)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalFloat] {
+	if m.FieldCleared(fieldtype.FieldOptionalFloat) {
 		fields = append(fields, fieldtype.FieldOptionalFloat)
 	}
-	if m.clearedFields[fieldtype.FieldOptionalFloat32] {
+	if m.FieldCleared(fieldtype.FieldOptionalFloat32) {
 		fields = append(fields, fieldtype.FieldOptionalFloat32)
 	}
 	return fields
@@ -2905,7 +2928,8 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *FieldTypeMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -3126,7 +3150,7 @@ type FileMutation struct {
 	name          *string
 	user          *string
 	group         *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
 	_type         *int
@@ -3141,7 +3165,7 @@ func newFileMutation(c config, op Op) *FileMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeFile,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -3248,12 +3272,13 @@ func (m *FileMutation) User() (r string, exists bool) {
 // ClearUser clears the value of user.
 func (m *FileMutation) ClearUser() {
 	m.user = nil
-	m.clearedFields[file.FieldUser] = true
+	m.clearedFields[file.FieldUser] = struct{}{}
 }
 
 // UserCleared returns if the field user was cleared in this mutation.
 func (m *FileMutation) UserCleared() bool {
-	return m.clearedFields[file.FieldUser]
+	_, ok := m.clearedFields[file.FieldUser]
+	return ok
 }
 
 // ResetUser reset all changes of the user field.
@@ -3279,12 +3304,13 @@ func (m *FileMutation) Group() (r string, exists bool) {
 // ClearGroup clears the value of group.
 func (m *FileMutation) ClearGroup() {
 	m.group = nil
-	m.clearedFields[file.FieldGroup] = true
+	m.clearedFields[file.FieldGroup] = struct{}{}
 }
 
 // GroupCleared returns if the field group was cleared in this mutation.
 func (m *FileMutation) GroupCleared() bool {
-	return m.clearedFields[file.FieldGroup]
+	_, ok := m.clearedFields[file.FieldGroup]
+	return ok
 }
 
 // ResetGroup reset all changes of the group field.
@@ -3496,10 +3522,10 @@ func (m *FileMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *FileMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[file.FieldUser] {
+	if m.FieldCleared(file.FieldUser) {
 		fields = append(fields, file.FieldUser)
 	}
-	if m.clearedFields[file.FieldGroup] {
+	if m.FieldCleared(file.FieldGroup) {
 		fields = append(fields, file.FieldGroup)
 	}
 	return fields
@@ -3508,7 +3534,8 @@ func (m *FileMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *FileMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -3652,7 +3679,7 @@ type FileTypeMutation struct {
 	typ           string
 	id            *int
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	files         map[int]struct{}
 	removedfiles  map[int]struct{}
 }
@@ -3665,7 +3692,7 @@ func newFileTypeMutation(c config, op Op) *FileTypeMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeFileType,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -3837,7 +3864,8 @@ func (m *FileTypeMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *FileTypeMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -3954,7 +3982,7 @@ type GroupMutation struct {
 	max_users      *int
 	addmax_users   *int
 	name           *string
-	clearedFields  map[string]bool
+	clearedFields  map[string]struct{}
 	files          map[int]struct{}
 	removedfiles   map[int]struct{}
 	blocked        map[int]struct{}
@@ -3973,7 +4001,7 @@ func newGroupMutation(c config, op Op) *GroupMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeGroup,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -4060,12 +4088,13 @@ func (m *GroupMutation) GetType() (r string, exists bool) {
 // ClearType clears the value of type.
 func (m *GroupMutation) ClearType() {
 	m._type = nil
-	m.clearedFields[group.FieldType] = true
+	m.clearedFields[group.FieldType] = struct{}{}
 }
 
 // TypeCleared returns if the field type was cleared in this mutation.
 func (m *GroupMutation) TypeCleared() bool {
-	return m.clearedFields[group.FieldType]
+	_, ok := m.clearedFields[group.FieldType]
+	return ok
 }
 
 // ResetType reset all changes of the type field.
@@ -4111,12 +4140,13 @@ func (m *GroupMutation) AddedMaxUsers() (r int, exists bool) {
 func (m *GroupMutation) ClearMaxUsers() {
 	m.max_users = nil
 	m.addmax_users = nil
-	m.clearedFields[group.FieldMaxUsers] = true
+	m.clearedFields[group.FieldMaxUsers] = struct{}{}
 }
 
 // MaxUsersCleared returns if the field max_users was cleared in this mutation.
 func (m *GroupMutation) MaxUsersCleared() bool {
-	return m.clearedFields[group.FieldMaxUsers]
+	_, ok := m.clearedFields[group.FieldMaxUsers]
+	return ok
 }
 
 // ResetMaxUsers reset all changes of the max_users field.
@@ -4447,10 +4477,10 @@ func (m *GroupMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *GroupMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[group.FieldType] {
+	if m.FieldCleared(group.FieldType) {
 		fields = append(fields, group.FieldType)
 	}
-	if m.clearedFields[group.FieldMaxUsers] {
+	if m.FieldCleared(group.FieldMaxUsers) {
 		fields = append(fields, group.FieldMaxUsers)
 	}
 	return fields
@@ -4459,7 +4489,8 @@ func (m *GroupMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *GroupMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -4653,7 +4684,7 @@ type GroupInfoMutation struct {
 	desc          *string
 	max_users     *int
 	addmax_users  *int
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	groups        map[int]struct{}
 	removedgroups map[int]struct{}
 }
@@ -4666,7 +4697,7 @@ func newGroupInfoMutation(c config, op Op) *GroupInfoMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeGroupInfo,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -4904,7 +4935,8 @@ func (m *GroupInfoMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *GroupInfoMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -5018,7 +5050,7 @@ type ItemMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 }
 
 var _ ent.Mutation = (*ItemMutation)(nil)
@@ -5029,7 +5061,7 @@ func newItemMutation(c config, op Op) *ItemMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeItem,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -5128,7 +5160,8 @@ func (m *ItemMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *ItemMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -5215,7 +5248,7 @@ type NodeMutation struct {
 	id            *int
 	value         *int
 	addvalue      *int
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	prev          *int
 	clearedprev   bool
 	next          *int
@@ -5230,7 +5263,7 @@ func newNodeMutation(c config, op Op) *NodeMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeNode,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -5299,12 +5332,13 @@ func (m *NodeMutation) AddedValue() (r int, exists bool) {
 func (m *NodeMutation) ClearValue() {
 	m.value = nil
 	m.addvalue = nil
-	m.clearedFields[node.FieldValue] = true
+	m.clearedFields[node.FieldValue] = struct{}{}
 }
 
 // ValueCleared returns if the field value was cleared in this mutation.
 func (m *NodeMutation) ValueCleared() bool {
-	return m.clearedFields[node.FieldValue]
+	_, ok := m.clearedFields[node.FieldValue]
+	return ok
 }
 
 // ResetValue reset all changes of the value field.
@@ -5481,7 +5515,7 @@ func (m *NodeMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *NodeMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[node.FieldValue] {
+	if m.FieldCleared(node.FieldValue) {
 		fields = append(fields, node.FieldValue)
 	}
 	return fields
@@ -5490,7 +5524,8 @@ func (m *NodeMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *NodeMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -5622,7 +5657,7 @@ type PetMutation struct {
 	typ           string
 	id            *int
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	team          *int
 	clearedteam   bool
 	owner         *int
@@ -5637,7 +5672,7 @@ func newPetMutation(c config, op Op) *PetMutation {
 		config:        c,
 		op:            op,
 		typ:           TypePet,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -5845,7 +5880,8 @@ func (m *PetMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *PetMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -5971,7 +6007,7 @@ type SpecMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	card          map[int]struct{}
 	removedcard   map[int]struct{}
 }
@@ -5984,7 +6020,7 @@ func newSpecMutation(c config, op Op) *SpecMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeSpec,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -6125,7 +6161,8 @@ func (m *SpecMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *SpecMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -6244,7 +6281,7 @@ type UserMutation struct {
 	password         *string
 	role             *user.Role
 	_SSOCert         *string
-	clearedFields    map[string]bool
+	clearedFields    map[string]struct{}
 	card             *int
 	clearedcard      bool
 	pets             map[int]struct{}
@@ -6277,7 +6314,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -6346,12 +6383,13 @@ func (m *UserMutation) AddedOptionalInt() (r int, exists bool) {
 func (m *UserMutation) ClearOptionalInt() {
 	m.optional_int = nil
 	m.addoptional_int = nil
-	m.clearedFields[user.FieldOptionalInt] = true
+	m.clearedFields[user.FieldOptionalInt] = struct{}{}
 }
 
 // OptionalIntCleared returns if the field optional_int was cleared in this mutation.
 func (m *UserMutation) OptionalIntCleared() bool {
-	return m.clearedFields[user.FieldOptionalInt]
+	_, ok := m.clearedFields[user.FieldOptionalInt]
+	return ok
 }
 
 // ResetOptionalInt reset all changes of the optional_int field.
@@ -6455,12 +6493,13 @@ func (m *UserMutation) Nickname() (r string, exists bool) {
 // ClearNickname clears the value of nickname.
 func (m *UserMutation) ClearNickname() {
 	m.nickname = nil
-	m.clearedFields[user.FieldNickname] = true
+	m.clearedFields[user.FieldNickname] = struct{}{}
 }
 
 // NicknameCleared returns if the field nickname was cleared in this mutation.
 func (m *UserMutation) NicknameCleared() bool {
-	return m.clearedFields[user.FieldNickname]
+	_, ok := m.clearedFields[user.FieldNickname]
+	return ok
 }
 
 // ResetNickname reset all changes of the nickname field.
@@ -6486,12 +6525,13 @@ func (m *UserMutation) Phone() (r string, exists bool) {
 // ClearPhone clears the value of phone.
 func (m *UserMutation) ClearPhone() {
 	m.phone = nil
-	m.clearedFields[user.FieldPhone] = true
+	m.clearedFields[user.FieldPhone] = struct{}{}
 }
 
 // PhoneCleared returns if the field phone was cleared in this mutation.
 func (m *UserMutation) PhoneCleared() bool {
-	return m.clearedFields[user.FieldPhone]
+	_, ok := m.clearedFields[user.FieldPhone]
+	return ok
 }
 
 // ResetPhone reset all changes of the phone field.
@@ -6517,12 +6557,13 @@ func (m *UserMutation) Password() (r string, exists bool) {
 // ClearPassword clears the value of password.
 func (m *UserMutation) ClearPassword() {
 	m.password = nil
-	m.clearedFields[user.FieldPassword] = true
+	m.clearedFields[user.FieldPassword] = struct{}{}
 }
 
 // PasswordCleared returns if the field password was cleared in this mutation.
 func (m *UserMutation) PasswordCleared() bool {
-	return m.clearedFields[user.FieldPassword]
+	_, ok := m.clearedFields[user.FieldPassword]
+	return ok
 }
 
 // ResetPassword reset all changes of the password field.
@@ -6567,12 +6608,13 @@ func (m *UserMutation) SSOCert() (r string, exists bool) {
 // ClearSSOCert clears the value of SSOCert.
 func (m *UserMutation) ClearSSOCert() {
 	m._SSOCert = nil
-	m.clearedFields[user.FieldSSOCert] = true
+	m.clearedFields[user.FieldSSOCert] = struct{}{}
 }
 
 // SSOCertCleared returns if the field SSOCert was cleared in this mutation.
 func (m *UserMutation) SSOCertCleared() bool {
-	return m.clearedFields[user.FieldSSOCert]
+	_, ok := m.clearedFields[user.FieldSSOCert]
+	return ok
 }
 
 // ResetSSOCert reset all changes of the SSOCert field.
@@ -7228,19 +7270,19 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
-	if m.clearedFields[user.FieldOptionalInt] {
+	if m.FieldCleared(user.FieldOptionalInt) {
 		fields = append(fields, user.FieldOptionalInt)
 	}
-	if m.clearedFields[user.FieldNickname] {
+	if m.FieldCleared(user.FieldNickname) {
 		fields = append(fields, user.FieldNickname)
 	}
-	if m.clearedFields[user.FieldPhone] {
+	if m.FieldCleared(user.FieldPhone) {
 		fields = append(fields, user.FieldPhone)
 	}
-	if m.clearedFields[user.FieldPassword] {
+	if m.FieldCleared(user.FieldPassword) {
 		fields = append(fields, user.FieldPassword)
 	}
-	if m.clearedFields[user.FieldSSOCert] {
+	if m.FieldCleared(user.FieldSSOCert) {
 		fields = append(fields, user.FieldSSOCert)
 	}
 	return fields
@@ -7249,7 +7291,8 @@ func (m *UserMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an

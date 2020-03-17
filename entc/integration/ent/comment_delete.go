@@ -49,8 +49,8 @@ func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = cd.sqlExec(ctx)
 			return affected, err
 		})
-		for i := len(cd.hooks); i > 0; i-- {
-			mut = cd.hooks[i-1](mut)
+		for i := len(cd.hooks) - 1; i >= 0; i-- {
+			mut = cd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
 			return 0, err

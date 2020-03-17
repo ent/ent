@@ -108,8 +108,8 @@ func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = giu.sqlSave(ctx)
 			return affected, err
 		})
-		for i := len(giu.hooks); i > 0; i-- {
-			mut = giu.hooks[i-1](mut)
+		for i := len(giu.hooks) - 1; i >= 0; i-- {
+			mut = giu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, giu.mutation); err != nil {
 			return 0, err
@@ -311,8 +311,8 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 			node, err = giuo.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(giuo.hooks); i > 0; i-- {
-			mut = giuo.hooks[i-1](mut)
+		for i := len(giuo.hooks) - 1; i >= 0; i-- {
+			mut = giuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, giuo.mutation); err != nil {
 			return nil, err

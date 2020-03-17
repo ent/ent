@@ -50,8 +50,8 @@ func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = ftd.gremlinExec(ctx)
 			return affected, err
 		})
-		for i := len(ftd.hooks); i > 0; i-- {
-			mut = ftd.hooks[i-1](mut)
+		for i := len(ftd.hooks) - 1; i >= 0; i-- {
+			mut = ftd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftd.mutation); err != nil {
 			return 0, err

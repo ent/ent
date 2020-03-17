@@ -141,8 +141,8 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 			node, err = fc.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(fc.hooks); i > 0; i-- {
-			mut = fc.hooks[i-1](mut)
+		for i := len(fc.hooks) - 1; i >= 0; i-- {
+			mut = fc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, fc.mutation); err != nil {
 			return nil, err

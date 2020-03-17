@@ -84,8 +84,8 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 			node, err = gic.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(gic.hooks); i > 0; i-- {
-			mut = gic.hooks[i-1](mut)
+		for i := len(gic.hooks) - 1; i >= 0; i-- {
+			mut = gic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
 			return nil, err

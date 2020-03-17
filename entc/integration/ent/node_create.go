@@ -92,8 +92,8 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			node, err = nc.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(nc.hooks); i > 0; i-- {
-			mut = nc.hooks[i-1](mut)
+		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
 			return nil, err

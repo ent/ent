@@ -112,8 +112,8 @@ func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
 			affected, err = bu.sqlSave(ctx)
 			return affected, err
 		})
-		for i := len(bu.hooks); i > 0; i-- {
-			mut = bu.hooks[i-1](mut)
+		for i := len(bu.hooks) - 1; i >= 0; i-- {
+			mut = bu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
 			return 0, err
@@ -340,8 +340,8 @@ func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 			node, err = buo.sqlSave(ctx)
 			return node, err
 		})
-		for i := len(buo.hooks); i > 0; i-- {
-			mut = buo.hooks[i-1](mut)
+		for i := len(buo.hooks) - 1; i >= 0; i-- {
+			mut = buo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, buo.mutation); err != nil {
 			return nil, err

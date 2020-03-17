@@ -49,8 +49,8 @@ func (sd *SpecDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = sd.sqlExec(ctx)
 			return affected, err
 		})
-		for i := len(sd.hooks); i > 0; i-- {
-			mut = sd.hooks[i-1](mut)
+		for i := len(sd.hooks) - 1; i >= 0; i-- {
+			mut = sd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sd.mutation); err != nil {
 			return 0, err

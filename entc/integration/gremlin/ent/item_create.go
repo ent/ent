@@ -41,8 +41,8 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 			node, err = ic.gremlinSave(ctx)
 			return node, err
 		})
-		for i := len(ic.hooks); i > 0; i-- {
-			mut = ic.hooks[i-1](mut)
+		for i := len(ic.hooks) - 1; i >= 0; i-- {
+			mut = ic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
 			return nil, err

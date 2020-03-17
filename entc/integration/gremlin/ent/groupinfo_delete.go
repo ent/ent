@@ -50,8 +50,8 @@ func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = gid.gremlinExec(ctx)
 			return affected, err
 		})
-		for i := len(gid.hooks); i > 0; i-- {
-			mut = gid.hooks[i-1](mut)
+		for i := len(gid.hooks) - 1; i >= 0; i-- {
+			mut = gid.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {
 			return 0, err

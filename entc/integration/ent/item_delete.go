@@ -49,8 +49,8 @@ func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 			affected, err = id.sqlExec(ctx)
 			return affected, err
 		})
-		for i := len(id.hooks); i > 0; i-- {
-			mut = id.hooks[i-1](mut)
+		for i := len(id.hooks) - 1; i >= 0; i-- {
+			mut = id.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
 			return 0, err

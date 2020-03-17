@@ -40,7 +40,7 @@ type CarMutation struct {
 	id            *int
 	model         *string
 	registered_at *time.Time
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
 }
@@ -53,7 +53,7 @@ func newCarMutation(c config, op Op) *CarMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeCar,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -253,7 +253,8 @@ func (m *CarMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *CarMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -365,7 +366,7 @@ type GroupMutation struct {
 	typ           string
 	id            *int
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	users         map[int]struct{}
 	removedusers  map[int]struct{}
 }
@@ -378,7 +379,7 @@ func newGroupMutation(c config, op Op) *GroupMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeGroup,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -550,7 +551,8 @@ func (m *GroupMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *GroupMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
@@ -664,7 +666,7 @@ type UserMutation struct {
 	age           *int
 	addage        *int
 	name          *string
-	clearedFields map[string]bool
+	clearedFields map[string]struct{}
 	cars          map[int]struct{}
 	removedcars   map[int]struct{}
 	groups        map[int]struct{}
@@ -679,7 +681,7 @@ func newUserMutation(c config, op Op) *UserMutation {
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
-		clearedFields: make(map[string]bool),
+		clearedFields: make(map[string]struct{}),
 	}
 }
 
@@ -959,7 +961,8 @@ func (m *UserMutation) ClearedFields() []string {
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
-	return m.clearedFields[name]
+	_, ok := m.clearedFields[name]
+	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
