@@ -22,7 +22,7 @@ func init() {
 	policy := schema.Planet{}.Policy()
 	planet.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := policy.EvalWrite(ctx, m); err != nil {
+			if err := policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
