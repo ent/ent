@@ -24,6 +24,7 @@ type (
 	Op         = ent.Op
 	Hook       = ent.Hook
 	Value      = ent.Value
+	Query      = ent.Query
 	Mutator    = ent.Mutator
 	Mutation   = ent.Mutation
 	MutateFunc = ent.MutateFunc

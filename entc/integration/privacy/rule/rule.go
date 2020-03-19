@@ -10,8 +10,8 @@ import (
 )
 
 // DenyUpdateRule is a write rule rule that denies update many operations.
-func DenyUpdateRule() privacy.WriteRule {
-	return privacy.WriteRuleFunc(func(_ context.Context, m ent.Mutation) error {
+func DenyUpdateRule() privacy.MutationRule {
+	return privacy.MutationRuleFunc(func(_ context.Context, m ent.Mutation) error {
 		if m.Op() == ent.OpUpdate {
 			return privacy.Denyf("ent/privacy: update operation not allowed")
 		}
@@ -20,8 +20,8 @@ func DenyUpdateRule() privacy.WriteRule {
 }
 
 // DenyPlanetSelfLinkRule is a write rule rule that prevents rule self link via neighbor edge.
-func DenyPlanetSelfLinkRule() privacy.WriteRule {
-	return privacy.PlanetWriteRuleFunc(func(ctx context.Context, m *ent.PlanetMutation) error {
+func DenyPlanetSelfLinkRule() privacy.MutationRule {
+	return privacy.PlanetMutationRuleFunc(func(ctx context.Context, m *ent.PlanetMutation) error {
 		if !m.Op().Is(ent.OpUpdateOne) {
 			return privacy.Skip
 		}

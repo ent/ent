@@ -38,12 +38,12 @@ func (Planet) Hooks() []ent.Hook {
 
 func (Planet) Policy() ent.Policy {
 	return privacy.Policy{
-		Write: privacy.WritePolicy{
+		Mutation: privacy.MutationPolicy{
 			rule.DenyUpdateRule(),
 			rule.DenyPlanetSelfLinkRule(),
 			privacy.AlwaysAllowRule(),
 		},
-		Read: privacy.ReadPolicy{
+		Query: privacy.QueryPolicy{
 			privacy.AlwaysAllowRule(),
 		},
 	}
