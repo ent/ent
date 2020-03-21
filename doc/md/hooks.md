@@ -3,30 +3,30 @@ id: hooks
 title: Hooks
 ---
 
-Hooks allows adding custom logic before and after operations that mutate the graph.
+The `Hooks` option allows adding custom logic before and after operations that mutate the graph.
 
 ## Mutation
 
-A mutation operation, is an operation that mutate the database. For example, adding
+A mutation operation is an operation that mutate the database. For example, adding
 a new node to the graph, remove an edge between 2 nodes or delete multiple nodes. 
 
 There are 5 types of mutations:
 - `Create` - Create node in the graph.
-- `UpdateOne` - Update a node in the graph. For example, rename its field.
+- `UpdateOne` - Update a node in the graph. For example, increment its field.
 - `Update` - Update multiple nodes in the graph that match a predicate.
 - `DeleteOne` - Delete a node from the graph.
 - `Delete` - Delete all nodes that match a predicate.
 
 <br>
-Each generated node type has its own type of mutation. For example, the [CRUD builders](crud.md#create-an-entity)
-for the `User` entity, share (and use) the generated `UserMutation` object.
+Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
+the same generated `UserMutation` object.
 
-However, all builder types implement the generic [`ent.Mutation`](https://pkg.go.dev/github.com/facebookincubator/ent?tab=doc#Mutation) interface.
+However, all builder types implement the generic <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent#Mutation">`ent.Mutation`<a> interface.
  
 ## Hooks
 
-Hooks are functions that get a mutator and return a mutator back. They function as middleware
-between mutators. It's similar to the popular middleware pattern that is used in HTTP in Go.
+Hooks are functions that get an <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent#Mutator">`ent.Mutator`<a> and return a mutator back.
+They function as middleware between mutators. It's similar to the popular HTTP middleware pattern.
 
 ```go
 type (
@@ -51,17 +51,95 @@ type (
 ```
 
 There are 2 types of mutation hooks - **schema hooks** and **runtime hooks**.
-**Schema hooks** are mainly used for defining custom logic in the type mutations,
+**Schema hooks** are mainly used for defining custom mutation logic in the schema,
 and **runtime hooks** are used for adding things like logging, metrics, tracing, etc.
 Let's go over the 2 versions:
 
+## Runtime hooks
+
+Let's start with a short example that logs all mutation operations of all types:
+
+```go
+func main() {
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	ctx := context.Background()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(ctx); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+    // Add a global hook that runs on all types and all operations.
+	client.Use(func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			start := time.Now()
+			defer func() {
+				log.Printf("Op=%s\tType=%s\tTime=%s\tConcreteType=%T\n", m.Op(), m.Type(), time.Since(start), m)
+			}()
+			return next.Mutate(ctx, m)
+		})
+	})
+    client.User.Create().SetName("a8m").SaveX(ctx)
+    // Output:
+    // 2020/03/21 10:59:10 Op=Create	Type=Card	Time=46.23µs	ConcreteType=*ent.UserMutation
+}
+```
+
+Global hooks are useful for adding traces, metrics, logs and more. But sometimes, users want more granularity:  
+
+```go
+func main() {
+    // <client was defined in the previous block>
+
+    // Add a hook only on user mutations.
+	client.User.Use(func(next ent.Mutator) ent.Mutator {
+        // Use the "<project>/ent/hook" to get the concrete type of the mutation.
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			return next.Mutate(ctx, m)
+		})
+	})
+    
+    // Add a hook only on update operations.
+    client.Use(hook.On(Logger(), ent.OpUpdate|ent.OpUpdateOne))
+    
+    // Reject delete operations.
+    client.Use(hook.Reject(ent.OpDelete|ent.OpDeleteOne))
+}
+```
+
+Assume you want to share a hook that mutate a field between multiple types (e.g. `Group` and `User`).
+There are ~2 ways to do this:
+
+```go
+// Option 1: use type assertion.
+client.Use(func(next ent.Mutator) ent.Mutator {
+	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+		if ns, ok := m.(interface{ SetName(string) }); ok {
+		    ns.SetName("Ariel Mashraki")
+		}
+		return next.Mutate(ctx, m)
+    })
+})
+
+// Option 2: use the generic ent.Mutation interface.
+client.Use(func(next ent.Mutator) ent.Mutator {
+	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+		if err := m.SetField("name", "Ariel Mashraki"); err != nil {
+            // An error is returned, if the field is not defined in
+			// the schema, or if the type mismatch the field type.
+        }
+		return next.Mutate(ctx, m)
+    })
+})
+```
+
 ## Schema hooks
 
-Schema hooks are defined in the schema and applied only on mutations of the schema type.
-The motivation for defining hooks in the schema is to gather all logic regarding the node
-type in one place, which is the schema. 
-
-Let's see an example:
+Schema hooks are defined in the type schema and applied only on mutations that match the
+schema type. The motivation for defining hooks in the schema is to gather all logic
+regarding the node type in one place, which is the schema. 
 
 ```go
 package schema
@@ -69,6 +147,9 @@ package schema
 import (
 	"context"
 	"fmt"
+
+    gen "<project>/ent"
+    "<project>/ent/hook"
 
 	"github.com/facebookincubator/ent"
 )
@@ -78,25 +159,27 @@ type Card struct {
 	ent.Schema
 }
 
+// Hooks of the Card.
 func (Card) Hooks() []ent.Hook {
 	return []ent.Hook{
-		func(next ent.Mutator) ent.Mutator {
-			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				num, ok := m.Field("number")
-				if !ok {
-					return nil, fmt.Errorf("missing card number value")
-				}
-				// Validator in hooks.
-				if len(num.(string)) < 4 {
-					return nil, fmt.Errorf("card number is too short")
-				}
-				return next.Mutate(ctx, m)
-			})
-		},
+		// First hook.
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
+					if num, ok := m.Number(); ok && len(num) < 10 {
+						return nil, fmt.Errorf("card number is too short")
+					}
+					return next.Mutate(ctx, m)
+				})
+			},
+            // Limit the hook only for these operations.
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+		),
+		// Second hook.
 		func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 				if s, ok := m.(interface{ SetName(string) }); ok {
-					s.SetName("boring")
+					s.SetName("Boring")
 				}
 				return next.Mutate(ctx, m)
 			})
@@ -104,42 +187,18 @@ func (Card) Hooks() []ent.Hook {
 	}
 }
 ```
+> **Note that** if you use **schema hooks**, you **MUST** add the following import in the
+> main package, because a circular import is possible.
+>
+> ```go
+> import _ "<project>/ent/runtime"
+> ```
 
-**Note that** if you use **schema hooks**, you must add the following import to your
-main package:
+## Evaluation order
 
-```go
-import _ "<project>/ent/runtime"
-```
+Hooks are called in the order they were registered to the client. Thus, `client.Use(f, g, h)` 
+executes `f(g(h(...)))` on mutations.
 
-After running the first code generation for your schema, you'll be able to use the
-typed-mutations in your hooks:
-
-```go
-package schema
-
-import (
-	"context"
-	"fmt"
-
-	gen "<project>/ent"
-	"<project>/ent/hook"
-
-	"github.com/facebookincubator/ent"
-)
-
-func (Card) Hooks() []ent.Hook {
-	return []ent.Hook{
-        // ...
-		func(next ent.Mutator) ent.Mutator {
-			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
-				if _, ok := m.Name(); !ok {
-					m.SetName("unknown")
-				}
-				return next.Mutate(ctx, m)
-			})
-		},
-	}
-}
-```
-
+Also note, that **runtime hooks** are called before **schema hooks**. That is, if `g`,
+and `h` were defined in the schema, and `f` was registered using `client.Use(...)`,
+they will be executed as follows: `f(g(h(...)))`. 
