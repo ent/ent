@@ -149,4 +149,8 @@ func (d *SQLite) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table
 
 // fkExist returns always true to disable foreign-keys creation after the table was created.
 func (d *SQLite) fkExist(context.Context, dialect.Tx, string) (bool, error) { return true, nil }
-func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) { return nil, nil }
+
+// table returns always error to indicate that SQLite dialect doesn't support incremental migration.
+func (d *SQLite) table(context.Context, dialect.Tx, string) (*Table, error) {
+	return nil, fmt.Errorf("sqlite dialect does not support incremental migration")
+}
