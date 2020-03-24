@@ -86,10 +86,10 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-Run `entc generate` from the root directory of the project:
+Run `entc generate` from the root directory of the project, or use `go generate`:
 
 ```go
-entc generate ./ent/schema
+go generate ./ent
 ```
 
 This produces the following files:
@@ -236,7 +236,7 @@ can **have 1 or more** cars, but a car **has only one** owner (one-to-many relat
 
 ![er-user-cars](https://entgo.io/assets/re_user_cars.png)
 
-Let's add the `"cars"` edge to the `User` schema, and run `entc generate ./ent/schema`:
+Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
 
  ```go
  import (
@@ -331,7 +331,7 @@ The new edge created in the diagram above is translucent, to emphasize that we d
 edge in the database. It's just a back-reference to the real edge (relation).
 
 Let's add an inverse edge named `owner` to the `Car` schema, reference it to the `cars` edge
-in the `User` schema, and run `entc generate ./ent/schema`.
+in the `User` schema, and run `go generate ./ent`.
 
 ```go
 import (
@@ -434,7 +434,7 @@ relationship named `groups`. Let's define this relationship in our schemas:
 
 We run `entc` on the schema directory to re-generate the assets.
 ```console
-entc generate ./ent/schema
+go generate ./ent
 ```
 
 ## Run Your First Graph Traversal

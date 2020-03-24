@@ -27,10 +27,12 @@ is to have an `ent` directory under the root directory of the project.
 ## Generate Assets
 
 After adding a few [fields](schema-fields.md) and [edges](schema-edges.md), you want to generate
-the assets for working with your entities. Run the following command:
+the assets for working with your entities. Run `entc generate` from the root directory of the project,
+or use `go generate`:
+
 
 ```bash
-entc generate ./ent/schema
+go generate ./ent
 ```
 
 The `generate` command generates the following assets for the schemas:
