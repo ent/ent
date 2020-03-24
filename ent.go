@@ -198,7 +198,7 @@ func (Schema) Policy() Policy { return nil }
 type (
 	// Value represents a value returned by ent.
 	Value interface{}
-	// Value represents an ent query builder.
+	// Query represents an ent query builder.
 	Query interface{}
 	// Mutation represents an operation that mutate the graph.
 	// For example, adding a new node, updating many, or dropping
