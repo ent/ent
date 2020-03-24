@@ -27,8 +27,8 @@ func main() {
 	cmd.AddCommand(
 		func() *cobra.Command {
 			var (
-				path string
-				cmd  = &cobra.Command{
+				target string
+				cmd    = &cobra.Command{
 					Use:   "init [flags] [schemas]",
 					Short: "initialize an environment with zero or more schemas",
 					Example: examples(
@@ -44,21 +44,12 @@ func main() {
 						return nil
 					},
 					Run: func(cmd *cobra.Command, names []string) {
-						_, err := os.Stat(path)
-						if os.IsNotExist(err) {
-							err = os.MkdirAll(path, os.ModePerm)
-						}
+						err := initEnv(target, names)
 						failOnErr(err)
-						for _, name := range names {
-							b := bytes.NewBuffer(nil)
-							failOnErr(tmpl.Execute(b, name))
-							target := filepath.Join(path, strings.ToLower(name+".go"))
-							failOnErr(ioutil.WriteFile(target, b.Bytes(), 0644))
-						}
 					},
 				}
 			)
-			cmd.Flags().StringVar(&path, "target", "ent/schema", "target directory for schemas")
+			cmd.Flags().StringVar(&target, "target", defaultSchema, "target directory for schemas")
 			return cmd
 		}(),
 		&cobra.Command{
@@ -119,28 +110,6 @@ func main() {
 	cmd.Execute()
 }
 
-// schema template for the "init" command.
-var tmpl = template.Must(template.New("schema").
-	Parse(`package schema
-
-import "github.com/facebookincubator/ent"
-
-// {{ . }} holds the schema definition for the {{ . }} entity.
-type {{ . }} struct {
-	ent.Schema
-}
-
-// Fields of the {{ . }}.
-func ({{ . }}) Fields() []ent.Field {
-	return nil
-}
-
-// Edges of the {{ . }}.
-func ({{ . }}) Edges() []ent.Edge {
-	return nil
-}
-`))
-
 // custom implementation for pflag.
 type idType field.Type
 
@@ -178,6 +147,69 @@ func (idType) Type() string {
 func (idType) String() string {
 	return field.TypeInt.String()
 }
+
+// initEnv initialize an environment for ent codegen.
+func initEnv(target string, names []string) error {
+	if err := createDir(target); err != nil {
+		return err
+	}
+	for _, name := range names {
+		b := bytes.NewBuffer(nil)
+		failOnErr(tmpl.Execute(b, name))
+		target := filepath.Join(target, strings.ToLower(name+".go"))
+		failOnErr(ioutil.WriteFile(target, b.Bytes(), 0644))
+	}
+	return nil
+}
+
+func createDir(target string) error {
+	_, err := os.Stat(target)
+	if err == nil || !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.MkdirAll(target, os.ModePerm); err != nil {
+		return fmt.Errorf("creating schema directory: %v", err)
+	}
+	if target != defaultSchema {
+		return nil
+	}
+	if err := ioutil.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
+		return fmt.Errorf("creating generate.go file: %v", err)
+	}
+	return nil
+}
+
+// schema template for the "init" command.
+var tmpl = template.Must(template.New("schema").
+	Parse(`package schema
+
+import "github.com/facebookincubator/ent"
+
+// {{ . }} holds the schema definition for the {{ . }} entity.
+type {{ . }} struct {
+	ent.Schema
+}
+
+// Fields of the {{ . }}.
+func ({{ . }}) Fields() []ent.Field {
+	return nil
+}
+
+// Edges of the {{ . }}.
+func ({{ . }}) Edges() []ent.Edge {
+	return nil
+}
+`))
+
+const (
+	// default schema package path.
+	defaultSchema = "ent/schema"
+	// ent/generate.go file used for "go generate" command.
+	genFile = `package ent
+
+//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema
+`
+)
 
 func failOnErr(err error) {
 	if err != nil {
