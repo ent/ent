@@ -24,6 +24,7 @@ import (
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -63,7 +64,10 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
-	query := &UserQuery{config: gq.config}
+	query := &UserQuery{
+		config: gq.config,
+		err:    gq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -75,7 +79,10 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 
 // QueryAdmin chains the current query on the admin edge.
 func (gq *GroupQuery) QueryAdmin() *UserQuery {
-	query := &UserQuery{config: gq.config}
+	query := &UserQuery{
+		config: gq.config,
+		err:    gq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -181,6 +188,9 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+	if gq.err != nil {
+		return nil, gq.err
+	}
 	return gq.sqlAll(ctx)
 }
 
@@ -213,6 +223,9 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
+	if gq.err != nil {
+		return 0, gq.err
+	}
 	return gq.sqlCount(ctx)
 }
 
@@ -227,6 +240,9 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
+	if gq.err != nil {
+		return false, gq.err
+	}
 	return gq.sqlExist(ctx)
 }
 
@@ -244,11 +260,12 @@ func (gq *GroupQuery) ExistX(ctx context.Context) bool {
 func (gq *GroupQuery) Clone() *GroupQuery {
 	return &GroupQuery{
 		config:     gq.config,
+		err:        gq.err,
 		limit:      gq.limit,
 		offset:     gq.offset,
-		order:      append([]Order{}, gq.order...),
-		unique:     append([]string{}, gq.unique...),
-		predicates: append([]predicate.Group{}, gq.predicates...),
+		order:      append([]Order(nil), gq.order...),
+		unique:     append([]string(nil), gq.unique...),
+		predicates: append([]predicate.Group(nil), gq.predicates...),
 		// clone intermediate query.
 		sql: gq.sql.Clone(),
 	}
@@ -257,7 +274,10 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 //  WithUsers tells the query-builder to eager-loads the nodes that are connected to
 // the "users" edge. The optional arguments used to configure the query builder of the edge.
 func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := &UserQuery{
+		config: gq.config,
+		err:    gq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -268,7 +288,10 @@ func (gq *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 //  WithAdmin tells the query-builder to eager-loads the nodes that are connected to
 // the "admin" edge. The optional arguments used to configure the query builder of the edge.
 func (gq *GroupQuery) WithAdmin(opts ...func(*UserQuery)) *GroupQuery {
-	query := &UserQuery{config: gq.config}
+	query := &UserQuery{
+		config: gq.config,
+		err:    gq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -292,8 +315,11 @@ func (gq *GroupQuery) WithAdmin(opts ...func(*UserQuery)) *GroupQuery {
 //		Scan(ctx, &v)
 //
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
-	group := &GroupGroupBy{config: gq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &GroupGroupBy{
+		config: gq.config,
+		err:    gq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = gq.sqlQuery()
 	return group
 }
@@ -311,8 +337,11 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //		Scan(ctx, &v)
 //
 func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
-	selector := &GroupSelect{config: gq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &GroupSelect{
+		config: gq.config,
+		err:    gq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = gq.sqlQuery()
 	return selector
 }
@@ -525,6 +554,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 // GroupGroupBy is the builder for group-by Group entities.
 type GroupGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -539,6 +569,9 @@ func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if ggb.err != nil {
+		return ggb.err
+	}
 	return ggb.sqlScan(ctx, v)
 }
 
@@ -656,6 +689,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 // GroupSelect is the builder for select fields of Group entities.
 type GroupSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -663,6 +697,9 @@ type GroupSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+	if gs.err != nil {
+		return gs.err
+	}
 	return gs.sqlScan(ctx, v)
 }
 

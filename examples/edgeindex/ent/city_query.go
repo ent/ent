@@ -24,6 +24,7 @@ import (
 // CityQuery is the builder for querying City entities.
 type CityQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -61,7 +62,10 @@ func (cq *CityQuery) Order(o ...Order) *CityQuery {
 
 // QueryStreets chains the current query on the streets edge.
 func (cq *CityQuery) QueryStreets() *StreetQuery {
-	query := &StreetQuery{config: cq.config}
+	query := &StreetQuery{
+		config: cq.config,
+		err:    cq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(city.Table, city.FieldID, cq.sqlQuery()),
 		sqlgraph.To(street.Table, street.FieldID),
@@ -167,6 +171,9 @@ func (cq *CityQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Cities.
 func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
+	if cq.err != nil {
+		return nil, cq.err
+	}
 	return cq.sqlAll(ctx)
 }
 
@@ -199,6 +206,9 @@ func (cq *CityQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *CityQuery) Count(ctx context.Context) (int, error) {
+	if cq.err != nil {
+		return 0, cq.err
+	}
 	return cq.sqlCount(ctx)
 }
 
@@ -213,6 +223,9 @@ func (cq *CityQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CityQuery) Exist(ctx context.Context) (bool, error) {
+	if cq.err != nil {
+		return false, cq.err
+	}
 	return cq.sqlExist(ctx)
 }
 
@@ -230,11 +243,12 @@ func (cq *CityQuery) ExistX(ctx context.Context) bool {
 func (cq *CityQuery) Clone() *CityQuery {
 	return &CityQuery{
 		config:     cq.config,
+		err:        cq.err,
 		limit:      cq.limit,
 		offset:     cq.offset,
-		order:      append([]Order{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
-		predicates: append([]predicate.City{}, cq.predicates...),
+		order:      append([]Order(nil), cq.order...),
+		unique:     append([]string(nil), cq.unique...),
+		predicates: append([]predicate.City(nil), cq.predicates...),
 		// clone intermediate query.
 		sql: cq.sql.Clone(),
 	}
@@ -243,7 +257,10 @@ func (cq *CityQuery) Clone() *CityQuery {
 //  WithStreets tells the query-builder to eager-loads the nodes that are connected to
 // the "streets" edge. The optional arguments used to configure the query builder of the edge.
 func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
-	query := &StreetQuery{config: cq.config}
+	query := &StreetQuery{
+		config: cq.config,
+		err:    cq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -267,8 +284,11 @@ func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
 //		Scan(ctx, &v)
 //
 func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
-	group := &CityGroupBy{config: cq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &CityGroupBy{
+		config: cq.config,
+		err:    cq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = cq.sqlQuery()
 	return group
 }
@@ -286,8 +306,11 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 //		Scan(ctx, &v)
 //
 func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
-	selector := &CitySelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &CitySelect{
+		config: cq.config,
+		err:    cq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = cq.sqlQuery()
 	return selector
 }
@@ -429,6 +452,7 @@ func (cq *CityQuery) sqlQuery() *sql.Selector {
 // CityGroupBy is the builder for group-by City entities.
 type CityGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -443,6 +467,9 @@ func (cgb *CityGroupBy) Aggregate(fns ...Aggregate) *CityGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if cgb.err != nil {
+		return cgb.err
+	}
 	return cgb.sqlScan(ctx, v)
 }
 
@@ -560,6 +587,7 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 // CitySelect is the builder for select fields of City entities.
 type CitySelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -567,6 +595,9 @@ type CitySelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
+	if cs.err != nil {
+		return cs.err
+	}
 	return cs.sqlScan(ctx, v)
 }
 

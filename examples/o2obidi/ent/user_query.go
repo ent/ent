@@ -22,6 +22,7 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -60,7 +61,10 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 
 // QuerySpouse chains the current query on the spouse edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
-	query := &UserQuery{config: uq.config}
+	query := &UserQuery{
+		config: uq.config,
+		err:    uq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -166,6 +170,9 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
+	if uq.err != nil {
+		return nil, uq.err
+	}
 	return uq.sqlAll(ctx)
 }
 
@@ -198,6 +205,9 @@ func (uq *UserQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
+	if uq.err != nil {
+		return 0, uq.err
+	}
 	return uq.sqlCount(ctx)
 }
 
@@ -212,6 +222,9 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
+	if uq.err != nil {
+		return false, uq.err
+	}
 	return uq.sqlExist(ctx)
 }
 
@@ -229,11 +242,12 @@ func (uq *UserQuery) ExistX(ctx context.Context) bool {
 func (uq *UserQuery) Clone() *UserQuery {
 	return &UserQuery{
 		config:     uq.config,
+		err:        uq.err,
 		limit:      uq.limit,
 		offset:     uq.offset,
-		order:      append([]Order{}, uq.order...),
-		unique:     append([]string{}, uq.unique...),
-		predicates: append([]predicate.User{}, uq.predicates...),
+		order:      append([]Order(nil), uq.order...),
+		unique:     append([]string(nil), uq.unique...),
+		predicates: append([]predicate.User(nil), uq.predicates...),
 		// clone intermediate query.
 		sql: uq.sql.Clone(),
 	}
@@ -242,7 +256,10 @@ func (uq *UserQuery) Clone() *UserQuery {
 //  WithSpouse tells the query-builder to eager-loads the nodes that are connected to
 // the "spouse" edge. The optional arguments used to configure the query builder of the edge.
 func (uq *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
-	query := &UserQuery{config: uq.config}
+	query := &UserQuery{
+		config: uq.config,
+		err:    uq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -266,8 +283,11 @@ func (uq *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
-	group := &UserGroupBy{config: uq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &UserGroupBy{
+		config: uq.config,
+		err:    uq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = uq.sqlQuery()
 	return group
 }
@@ -285,8 +305,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
-	selector := &UserSelect{config: uq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &UserSelect{
+		config: uq.config,
+		err:    uq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = uq.sqlQuery()
 	return selector
 }
@@ -435,6 +458,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 // UserGroupBy is the builder for group-by User entities.
 type UserGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -449,6 +473,9 @@ func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if ugb.err != nil {
+		return ugb.err
+	}
 	return ugb.sqlScan(ctx, v)
 }
 
@@ -566,6 +593,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 // UserSelect is the builder for select fields of User entities.
 type UserSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -573,6 +601,9 @@ type UserSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+	if us.err != nil {
+		return us.err
+	}
 	return us.sqlScan(ctx, v)
 }
 

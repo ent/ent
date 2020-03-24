@@ -23,6 +23,7 @@ import (
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -62,7 +63,10 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 
 // QueryPrev chains the current query on the prev edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := &NodeQuery{
+		config: nq.config,
+		err:    nq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
 		sqlgraph.To(node.Table, node.FieldID),
@@ -74,7 +78,10 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 
 // QueryNext chains the current query on the next edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := &NodeQuery{
+		config: nq.config,
+		err:    nq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
 		sqlgraph.To(node.Table, node.FieldID),
@@ -180,6 +187,9 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+	if nq.err != nil {
+		return nil, nq.err
+	}
 	return nq.sqlAll(ctx)
 }
 
@@ -212,6 +222,9 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
+	if nq.err != nil {
+		return 0, nq.err
+	}
 	return nq.sqlCount(ctx)
 }
 
@@ -226,6 +239,9 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
+	if nq.err != nil {
+		return false, nq.err
+	}
 	return nq.sqlExist(ctx)
 }
 
@@ -243,11 +259,12 @@ func (nq *NodeQuery) ExistX(ctx context.Context) bool {
 func (nq *NodeQuery) Clone() *NodeQuery {
 	return &NodeQuery{
 		config:     nq.config,
+		err:        nq.err,
 		limit:      nq.limit,
 		offset:     nq.offset,
-		order:      append([]Order{}, nq.order...),
-		unique:     append([]string{}, nq.unique...),
-		predicates: append([]predicate.Node{}, nq.predicates...),
+		order:      append([]Order(nil), nq.order...),
+		unique:     append([]string(nil), nq.unique...),
+		predicates: append([]predicate.Node(nil), nq.predicates...),
 		// clone intermediate query.
 		sql: nq.sql.Clone(),
 	}
@@ -256,7 +273,10 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 //  WithPrev tells the query-builder to eager-loads the nodes that are connected to
 // the "prev" edge. The optional arguments used to configure the query builder of the edge.
 func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := &NodeQuery{
+		config: nq.config,
+		err:    nq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -267,7 +287,10 @@ func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 //  WithNext tells the query-builder to eager-loads the nodes that are connected to
 // the "next" edge. The optional arguments used to configure the query builder of the edge.
 func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
-	query := &NodeQuery{config: nq.config}
+	query := &NodeQuery{
+		config: nq.config,
+		err:    nq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -291,8 +314,11 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		Scan(ctx, &v)
 //
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
-	group := &NodeGroupBy{config: nq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &NodeGroupBy{
+		config: nq.config,
+		err:    nq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = nq.sqlQuery()
 	return group
 }
@@ -310,8 +336,11 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Scan(ctx, &v)
 //
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
-	selector := &NodeSelect{config: nq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &NodeSelect{
+		config: nq.config,
+		err:    nq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = nq.sqlQuery()
 	return selector
 }
@@ -489,6 +518,7 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 // NodeGroupBy is the builder for group-by Node entities.
 type NodeGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -503,6 +533,9 @@ func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if ngb.err != nil {
+		return ngb.err
+	}
 	return ngb.sqlScan(ctx, v)
 }
 
@@ -620,6 +653,7 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 // NodeSelect is the builder for select fields of Node entities.
 type NodeSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -627,6 +661,9 @@ type NodeSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+	if ns.err != nil {
+		return ns.err
+	}
 	return ns.sqlScan(ctx, v)
 }
 

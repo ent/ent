@@ -22,6 +22,7 @@ import (
 // FieldTypeQuery is the builder for querying FieldType entities.
 type FieldTypeQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -151,6 +152,9 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
+	if ftq.err != nil {
+		return nil, ftq.err
+	}
 	return ftq.sqlAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
+	if ftq.err != nil {
+		return 0, ftq.err
+	}
 	return ftq.sqlCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
+	if ftq.err != nil {
+		return false, ftq.err
+	}
 	return ftq.sqlExist(ctx)
 }
 
@@ -214,11 +224,12 @@ func (ftq *FieldTypeQuery) ExistX(ctx context.Context) bool {
 func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 	return &FieldTypeQuery{
 		config:     ftq.config,
+		err:        ftq.err,
 		limit:      ftq.limit,
 		offset:     ftq.offset,
-		order:      append([]Order{}, ftq.order...),
-		unique:     append([]string{}, ftq.unique...),
-		predicates: append([]predicate.FieldType{}, ftq.predicates...),
+		order:      append([]Order(nil), ftq.order...),
+		unique:     append([]string(nil), ftq.unique...),
+		predicates: append([]predicate.FieldType(nil), ftq.predicates...),
 		// clone intermediate query.
 		sql: ftq.sql.Clone(),
 	}
@@ -240,8 +251,11 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 //		Scan(ctx, &v)
 //
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
-	group := &FieldTypeGroupBy{config: ftq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &FieldTypeGroupBy{
+		config: ftq.config,
+		err:    ftq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = ftq.sqlQuery()
 	return group
 }
@@ -259,8 +273,11 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //		Scan(ctx, &v)
 //
 func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
-	selector := &FieldTypeSelect{config: ftq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &FieldTypeSelect{
+		config: ftq.config,
+		err:    ftq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = ftq.sqlQuery()
 	return selector
 }
@@ -369,6 +386,7 @@ func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
 // FieldTypeGroupBy is the builder for group-by FieldType entities.
 type FieldTypeGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -383,6 +401,9 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...Aggregate) *FieldTypeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if ftgb.err != nil {
+		return ftgb.err
+	}
 	return ftgb.sqlScan(ctx, v)
 }
 
@@ -500,6 +521,7 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 // FieldTypeSelect is the builder for select fields of FieldType entities.
 type FieldTypeSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -507,6 +529,9 @@ type FieldTypeSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+	if fts.err != nil {
+		return fts.err
+	}
 	return fts.sqlScan(ctx, v)
 }
 

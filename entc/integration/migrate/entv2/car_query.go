@@ -23,6 +23,7 @@ import (
 // CarQuery is the builder for querying Car entities.
 type CarQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -61,7 +62,10 @@ func (cq *CarQuery) Order(o ...Order) *CarQuery {
 
 // QueryOwner chains the current query on the owner edge.
 func (cq *CarQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: cq.config}
+	query := &UserQuery{
+		config: cq.config,
+		err:    cq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(car.Table, car.FieldID, cq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -167,6 +171,9 @@ func (cq *CarQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Cars.
 func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
+	if cq.err != nil {
+		return nil, cq.err
+	}
 	return cq.sqlAll(ctx)
 }
 
@@ -199,6 +206,9 @@ func (cq *CarQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *CarQuery) Count(ctx context.Context) (int, error) {
+	if cq.err != nil {
+		return 0, cq.err
+	}
 	return cq.sqlCount(ctx)
 }
 
@@ -213,6 +223,9 @@ func (cq *CarQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CarQuery) Exist(ctx context.Context) (bool, error) {
+	if cq.err != nil {
+		return false, cq.err
+	}
 	return cq.sqlExist(ctx)
 }
 
@@ -230,11 +243,12 @@ func (cq *CarQuery) ExistX(ctx context.Context) bool {
 func (cq *CarQuery) Clone() *CarQuery {
 	return &CarQuery{
 		config:     cq.config,
+		err:        cq.err,
 		limit:      cq.limit,
 		offset:     cq.offset,
-		order:      append([]Order{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
-		predicates: append([]predicate.Car{}, cq.predicates...),
+		order:      append([]Order(nil), cq.order...),
+		unique:     append([]string(nil), cq.unique...),
+		predicates: append([]predicate.Car(nil), cq.predicates...),
 		// clone intermediate query.
 		sql: cq.sql.Clone(),
 	}
@@ -243,7 +257,10 @@ func (cq *CarQuery) Clone() *CarQuery {
 //  WithOwner tells the query-builder to eager-loads the nodes that are connected to
 // the "owner" edge. The optional arguments used to configure the query builder of the edge.
 func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
-	query := &UserQuery{config: cq.config}
+	query := &UserQuery{
+		config: cq.config,
+		err:    cq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -254,16 +271,22 @@ func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
-	group := &CarGroupBy{config: cq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &CarGroupBy{
+		config: cq.config,
+		err:    cq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = cq.sqlQuery()
 	return group
 }
 
 // Select one or more fields from the given query.
 func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
-	selector := &CarSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &CarSelect{
+		config: cq.config,
+		err:    cq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = cq.sqlQuery()
 	return selector
 }
@@ -412,6 +435,7 @@ func (cq *CarQuery) sqlQuery() *sql.Selector {
 // CarGroupBy is the builder for group-by Car entities.
 type CarGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -426,6 +450,9 @@ func (cgb *CarGroupBy) Aggregate(fns ...Aggregate) *CarGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CarGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if cgb.err != nil {
+		return cgb.err
+	}
 	return cgb.sqlScan(ctx, v)
 }
 
@@ -543,6 +570,7 @@ func (cgb *CarGroupBy) sqlQuery() *sql.Selector {
 // CarSelect is the builder for select fields of Car entities.
 type CarSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -550,6 +578,9 @@ type CarSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CarSelect) Scan(ctx context.Context, v interface{}) error {
+	if cs.err != nil {
+		return cs.err
+	}
 	return cs.sqlScan(ctx, v)
 }
 

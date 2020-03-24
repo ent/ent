@@ -22,6 +22,7 @@ import (
 // CommentQuery is the builder for querying Comment entities.
 type CommentQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -151,6 +152,9 @@ func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
+	if cq.err != nil {
+		return nil, cq.err
+	}
 	return cq.gremlinAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
+	if cq.err != nil {
+		return 0, cq.err
+	}
 	return cq.gremlinCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
+	if cq.err != nil {
+		return false, cq.err
+	}
 	return cq.gremlinExist(ctx)
 }
 
@@ -214,11 +224,12 @@ func (cq *CommentQuery) ExistX(ctx context.Context) bool {
 func (cq *CommentQuery) Clone() *CommentQuery {
 	return &CommentQuery{
 		config:     cq.config,
+		err:        cq.err,
 		limit:      cq.limit,
 		offset:     cq.offset,
-		order:      append([]Order{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
-		predicates: append([]predicate.Comment{}, cq.predicates...),
+		order:      append([]Order(nil), cq.order...),
+		unique:     append([]string(nil), cq.unique...),
+		predicates: append([]predicate.Comment(nil), cq.predicates...),
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
 	}
@@ -240,8 +251,11 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 //		Scan(ctx, &v)
 //
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
-	group := &CommentGroupBy{config: cq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &CommentGroupBy{
+		config: cq.config,
+		err:    cq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.gremlin = cq.gremlinQuery()
 	return group
 }
@@ -259,8 +273,11 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Scan(ctx, &v)
 //
 func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
-	selector := &CommentSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &CommentSelect{
+		config: cq.config,
+		err:    cq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.gremlin = cq.gremlinQuery()
 	return selector
 }
@@ -328,6 +345,7 @@ func (cq *CommentQuery) gremlinQuery() *dsl.Traversal {
 // CommentGroupBy is the builder for group-by Comment entities.
 type CommentGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -342,6 +360,9 @@ func (cgb *CommentGroupBy) Aggregate(fns ...Aggregate) *CommentGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if cgb.err != nil {
+		return cgb.err
+	}
 	return cgb.gremlinScan(ctx, v)
 }
 
@@ -476,6 +497,7 @@ func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
 // CommentSelect is the builder for select fields of Comment entities.
 type CommentSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	gremlin *dsl.Traversal
@@ -483,6 +505,9 @@ type CommentSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
+	if cs.err != nil {
+		return cs.err
+	}
 	return cs.gremlinScan(ctx, v)
 }
 

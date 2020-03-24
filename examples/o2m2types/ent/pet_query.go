@@ -23,6 +23,7 @@ import (
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -61,7 +62,10 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: pq.config}
+	query := &UserQuery{
+		config: pq.config,
+		err:    pq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -167,6 +171,9 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+	if pq.err != nil {
+		return nil, pq.err
+	}
 	return pq.sqlAll(ctx)
 }
 
@@ -199,6 +206,9 @@ func (pq *PetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
+	if pq.err != nil {
+		return 0, pq.err
+	}
 	return pq.sqlCount(ctx)
 }
 
@@ -213,6 +223,9 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
+	if pq.err != nil {
+		return false, pq.err
+	}
 	return pq.sqlExist(ctx)
 }
 
@@ -230,11 +243,12 @@ func (pq *PetQuery) ExistX(ctx context.Context) bool {
 func (pq *PetQuery) Clone() *PetQuery {
 	return &PetQuery{
 		config:     pq.config,
+		err:        pq.err,
 		limit:      pq.limit,
 		offset:     pq.offset,
-		order:      append([]Order{}, pq.order...),
-		unique:     append([]string{}, pq.unique...),
-		predicates: append([]predicate.Pet{}, pq.predicates...),
+		order:      append([]Order(nil), pq.order...),
+		unique:     append([]string(nil), pq.unique...),
+		predicates: append([]predicate.Pet(nil), pq.predicates...),
 		// clone intermediate query.
 		sql: pq.sql.Clone(),
 	}
@@ -243,7 +257,10 @@ func (pq *PetQuery) Clone() *PetQuery {
 //  WithOwner tells the query-builder to eager-loads the nodes that are connected to
 // the "owner" edge. The optional arguments used to configure the query builder of the edge.
 func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
-	query := &UserQuery{config: pq.config}
+	query := &UserQuery{
+		config: pq.config,
+		err:    pq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -267,8 +284,11 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	group := &PetGroupBy{config: pq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &PetGroupBy{
+		config: pq.config,
+		err:    pq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = pq.sqlQuery()
 	return group
 }
@@ -286,8 +306,11 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	selector := &PetSelect{config: pq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &PetSelect{
+		config: pq.config,
+		err:    pq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = pq.sqlQuery()
 	return selector
 }
@@ -436,6 +459,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 // PetGroupBy is the builder for group-by Pet entities.
 type PetGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -450,6 +474,9 @@ func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if pgb.err != nil {
+		return pgb.err
+	}
 	return pgb.sqlScan(ctx, v)
 }
 
@@ -567,6 +594,7 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 // PetSelect is the builder for select fields of Pet entities.
 type PetSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -574,6 +602,9 @@ type PetSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+	if ps.err != nil {
+		return ps.err
+	}
 	return ps.sqlScan(ctx, v)
 }
 

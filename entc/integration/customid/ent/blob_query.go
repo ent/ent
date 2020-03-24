@@ -24,6 +24,7 @@ import (
 // BlobQuery is the builder for querying Blob entities.
 type BlobQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -63,7 +64,10 @@ func (bq *BlobQuery) Order(o ...Order) *BlobQuery {
 
 // QueryParent chains the current query on the parent edge.
 func (bq *BlobQuery) QueryParent() *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := &BlobQuery{
+		config: bq.config,
+		err:    bq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
 		sqlgraph.To(blob.Table, blob.FieldID),
@@ -75,7 +79,10 @@ func (bq *BlobQuery) QueryParent() *BlobQuery {
 
 // QueryLinks chains the current query on the links edge.
 func (bq *BlobQuery) QueryLinks() *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := &BlobQuery{
+		config: bq.config,
+		err:    bq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
 		sqlgraph.To(blob.Table, blob.FieldID),
@@ -181,6 +188,9 @@ func (bq *BlobQuery) OnlyXID(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Blobs.
 func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
+	if bq.err != nil {
+		return nil, bq.err
+	}
 	return bq.sqlAll(ctx)
 }
 
@@ -213,6 +223,9 @@ func (bq *BlobQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (bq *BlobQuery) Count(ctx context.Context) (int, error) {
+	if bq.err != nil {
+		return 0, bq.err
+	}
 	return bq.sqlCount(ctx)
 }
 
@@ -227,6 +240,9 @@ func (bq *BlobQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bq *BlobQuery) Exist(ctx context.Context) (bool, error) {
+	if bq.err != nil {
+		return false, bq.err
+	}
 	return bq.sqlExist(ctx)
 }
 
@@ -244,11 +260,12 @@ func (bq *BlobQuery) ExistX(ctx context.Context) bool {
 func (bq *BlobQuery) Clone() *BlobQuery {
 	return &BlobQuery{
 		config:     bq.config,
+		err:        bq.err,
 		limit:      bq.limit,
 		offset:     bq.offset,
-		order:      append([]Order{}, bq.order...),
-		unique:     append([]string{}, bq.unique...),
-		predicates: append([]predicate.Blob{}, bq.predicates...),
+		order:      append([]Order(nil), bq.order...),
+		unique:     append([]string(nil), bq.unique...),
+		predicates: append([]predicate.Blob(nil), bq.predicates...),
 		// clone intermediate query.
 		sql: bq.sql.Clone(),
 	}
@@ -257,7 +274,10 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 //  WithParent tells the query-builder to eager-loads the nodes that are connected to
 // the "parent" edge. The optional arguments used to configure the query builder of the edge.
 func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := &BlobQuery{
+		config: bq.config,
+		err:    bq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -268,7 +288,10 @@ func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
 //  WithLinks tells the query-builder to eager-loads the nodes that are connected to
 // the "links" edge. The optional arguments used to configure the query builder of the edge.
 func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
-	query := &BlobQuery{config: bq.config}
+	query := &BlobQuery{
+		config: bq.config,
+		err:    bq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -292,8 +315,11 @@ func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 //		Scan(ctx, &v)
 //
 func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
-	group := &BlobGroupBy{config: bq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &BlobGroupBy{
+		config: bq.config,
+		err:    bq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = bq.sqlQuery()
 	return group
 }
@@ -311,8 +337,11 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //		Scan(ctx, &v)
 //
 func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
-	selector := &BlobSelect{config: bq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &BlobSelect{
+		config: bq.config,
+		err:    bq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = bq.sqlQuery()
 	return selector
 }
@@ -525,6 +554,7 @@ func (bq *BlobQuery) sqlQuery() *sql.Selector {
 // BlobGroupBy is the builder for group-by Blob entities.
 type BlobGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -539,6 +569,9 @@ func (bgb *BlobGroupBy) Aggregate(fns ...Aggregate) *BlobGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if bgb.err != nil {
+		return bgb.err
+	}
 	return bgb.sqlScan(ctx, v)
 }
 
@@ -656,6 +689,7 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 // BlobSelect is the builder for select fields of Blob entities.
 type BlobSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -663,6 +697,9 @@ type BlobSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
+	if bs.err != nil {
+		return bs.err
+	}
 	return bs.sqlScan(ctx, v)
 }
 

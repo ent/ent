@@ -24,11 +24,12 @@ import (
 // {{ $builder }} is the builder for querying {{ pascal $.Name }} entities.
 type {{ $builder }} struct {
 	config
-	limit		*int
-	offset		*int
-	order		[]Order
-	unique		[]string
-	predicates 	[]predicate.{{ $.Name }}
+	err        error
+	limit      *int
+	offset     *int
+	order      []Order
+	unique     []string
+	predicates []predicate.{{ $.Name }}
 	{{- with $.Edges }}
 		// eager-loading edges.
 		{{- range $e := . }}
@@ -73,7 +74,10 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	{{ $edge_builder := print (pascal $e.Type.Name) "Query" }}
 	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
-		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
+		query := &{{ $edge_builder }}{
+			config: {{ $receiver }}.config,
+			err: {{ $receiver }}.err,
+		}
 		{{- with extend $ "Receiver" $receiver "Edge" $e -}}
 			{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
 			{{- xtemplate $tmpl . }}
@@ -178,6 +182,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
+	if {{ $receiver }}.err != nil {
+		return nil, {{ $receiver }}.err
+	}
 	return {{ $receiver }}.{{ $.Storage }}All(ctx)
 }
 
@@ -210,6 +217,9 @@ func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type 
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
+	if {{ $receiver }}.err != nil {
+		return 0, {{ $receiver }}.err
+	}
 	return {{ $receiver }}.{{ $.Storage }}Count(ctx)
 }
 
@@ -224,6 +234,9 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
+	if {{ $receiver }}.err != nil {
+		return false, {{ $receiver }}.err
+	}
 	return {{ $receiver }}.{{ $.Storage }}Exist(ctx)
 }
 
@@ -240,12 +253,13 @@ func ({{ $receiver }} *{{ $builder }}) ExistX(ctx context.Context) bool {
 // used to prepare common query builders and use them differently after the clone is made.
 func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	return &{{ $builder }}{
-		config: 	{{ $receiver }}.config,
-		limit: 		{{ $receiver }}.limit,
-		offset: 	{{ $receiver }}.offset,
-		order: 		append([]Order{}, {{ $receiver }}.order...),
-		unique: 	append([]string{}, {{ $receiver }}.unique...),
-		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
+		config:     {{ $receiver }}.config,
+		err:        {{ $receiver }}.err,
+		limit:      {{ $receiver }}.limit,
+		offset:     {{ $receiver }}.offset,
+		order:      append([]Order(nil), {{ $receiver }}.order...),
+		unique:     append([]string(nil), {{ $receiver }}.unique...),
+		predicates: append([]predicate.{{ $.Name }}(nil), {{ $receiver }}.predicates...),
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 	}
@@ -256,7 +270,10 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	//  With{{ pascal $e.Name }} tells the query-builder to eager-loads the nodes that are connected to
 	// the "{{ $e.Name }}" edge. The optional arguments used to configure the query builder of the edge.
 	func ({{ $receiver }} *{{ $builder }}) With{{ pascal $e.Name }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-		query := &{{ $ebuilder }}{config: {{ $receiver }}.config}
+		query := &{{ $ebuilder }}{
+			config: {{ $receiver }}.config,
+			err:    {{ $receiver }}.err,
+		}
 		for _, opt := range opts {
 			opt(query)
 		}
@@ -286,8 +303,11 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
-	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
-	group.fields = append([]string{field}, fields...)
+	group := &{{ $groupBuilder }}{
+		config: {{ $receiver }}.config,
+		err:    {{ $receiver }}.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.{{ $.Storage }} = {{ $receiver }}.{{ $.Storage }}Query()
 	return group
 }
@@ -310,8 +330,11 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
-	selector := &{{ $selectBuilder }}{config: {{ $receiver }}.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &{{ $selectBuilder }}{
+		config: {{ $receiver }}.config,
+		err:    {{ $receiver }}.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.{{ $.Storage }} = {{ $receiver }}.{{ $.Storage }}Query()
 	return selector
 }
@@ -328,6 +351,7 @@ func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{
 // {{ $groupBuilder }} is the builder for group-by {{ pascal $.Name }} entities.
 type {{ $groupBuilder }} struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -342,6 +366,9 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{
 
 // Scan applies the group-by query and scan the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	if {{ $groupReceiver }}.err != nil {
+		return {{ $groupReceiver }}.err
+	}
 	return {{ $groupReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
@@ -388,6 +415,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 // {{ $selectBuilder }} is the builder for select fields of {{ pascal $.Name }} entities.
 type {{ $selectBuilder }} struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	{{ $.Storage }} {{ $.Storage.Builder}}
@@ -396,6 +424,9 @@ type {{ $selectBuilder }} struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	if {{ $selectReceiver }}.err != nil {
+		return {{ $selectReceiver }}.err
+	}
 	return {{ $selectReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 

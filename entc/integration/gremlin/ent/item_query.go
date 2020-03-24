@@ -22,6 +22,7 @@ import (
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -151,6 +152,9 @@ func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
+	if iq.err != nil {
+		return nil, iq.err
+	}
 	return iq.gremlinAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
+	if iq.err != nil {
+		return 0, iq.err
+	}
 	return iq.gremlinCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
+	if iq.err != nil {
+		return false, iq.err
+	}
 	return iq.gremlinExist(ctx)
 }
 
@@ -214,11 +224,12 @@ func (iq *ItemQuery) ExistX(ctx context.Context) bool {
 func (iq *ItemQuery) Clone() *ItemQuery {
 	return &ItemQuery{
 		config:     iq.config,
+		err:        iq.err,
 		limit:      iq.limit,
 		offset:     iq.offset,
-		order:      append([]Order{}, iq.order...),
-		unique:     append([]string{}, iq.unique...),
-		predicates: append([]predicate.Item{}, iq.predicates...),
+		order:      append([]Order(nil), iq.order...),
+		unique:     append([]string(nil), iq.unique...),
+		predicates: append([]predicate.Item(nil), iq.predicates...),
 		// clone intermediate query.
 		gremlin: iq.gremlin.Clone(),
 	}
@@ -227,16 +238,22 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
-	group := &ItemGroupBy{config: iq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &ItemGroupBy{
+		config: iq.config,
+		err:    iq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.gremlin = iq.gremlinQuery()
 	return group
 }
 
 // Select one or more fields from the given query.
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
-	selector := &ItemSelect{config: iq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &ItemSelect{
+		config: iq.config,
+		err:    iq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.gremlin = iq.gremlinQuery()
 	return selector
 }
@@ -304,6 +321,7 @@ func (iq *ItemQuery) gremlinQuery() *dsl.Traversal {
 // ItemGroupBy is the builder for group-by Item entities.
 type ItemGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -318,6 +336,9 @@ func (igb *ItemGroupBy) Aggregate(fns ...Aggregate) *ItemGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if igb.err != nil {
+		return igb.err
+	}
 	return igb.gremlinScan(ctx, v)
 }
 
@@ -452,6 +473,7 @@ func (igb *ItemGroupBy) gremlinQuery() *dsl.Traversal {
 // ItemSelect is the builder for select fields of Item entities.
 type ItemSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	gremlin *dsl.Traversal
@@ -459,6 +481,9 @@ type ItemSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
+	if is.err != nil {
+		return is.err
+	}
 	return is.gremlinScan(ctx, v)
 }
 

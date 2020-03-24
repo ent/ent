@@ -24,6 +24,7 @@ import (
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -63,7 +64,10 @@ func (fq *FileQuery) Order(o ...Order) *FileQuery {
 
 // QueryOwner chains the current query on the owner edge.
 func (fq *FileQuery) QueryOwner() *UserQuery {
-	query := &UserQuery{config: fq.config}
+	query := &UserQuery{
+		config: fq.config,
+		err:    fq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
 		sqlgraph.To(user.Table, user.FieldID),
@@ -75,7 +79,10 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 
 // QueryType chains the current query on the type edge.
 func (fq *FileQuery) QueryType() *FileTypeQuery {
-	query := &FileTypeQuery{config: fq.config}
+	query := &FileTypeQuery{
+		config: fq.config,
+		err:    fq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
 		sqlgraph.To(filetype.Table, filetype.FieldID),
@@ -181,6 +188,9 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
+	if fq.err != nil {
+		return nil, fq.err
+	}
 	return fq.sqlAll(ctx)
 }
 
@@ -213,6 +223,9 @@ func (fq *FileQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (fq *FileQuery) Count(ctx context.Context) (int, error) {
+	if fq.err != nil {
+		return 0, fq.err
+	}
 	return fq.sqlCount(ctx)
 }
 
@@ -227,6 +240,9 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
+	if fq.err != nil {
+		return false, fq.err
+	}
 	return fq.sqlExist(ctx)
 }
 
@@ -244,11 +260,12 @@ func (fq *FileQuery) ExistX(ctx context.Context) bool {
 func (fq *FileQuery) Clone() *FileQuery {
 	return &FileQuery{
 		config:     fq.config,
+		err:        fq.err,
 		limit:      fq.limit,
 		offset:     fq.offset,
-		order:      append([]Order{}, fq.order...),
-		unique:     append([]string{}, fq.unique...),
-		predicates: append([]predicate.File{}, fq.predicates...),
+		order:      append([]Order(nil), fq.order...),
+		unique:     append([]string(nil), fq.unique...),
+		predicates: append([]predicate.File(nil), fq.predicates...),
 		// clone intermediate query.
 		sql: fq.sql.Clone(),
 	}
@@ -257,7 +274,10 @@ func (fq *FileQuery) Clone() *FileQuery {
 //  WithOwner tells the query-builder to eager-loads the nodes that are connected to
 // the "owner" edge. The optional arguments used to configure the query builder of the edge.
 func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
-	query := &UserQuery{config: fq.config}
+	query := &UserQuery{
+		config: fq.config,
+		err:    fq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -268,7 +288,10 @@ func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
 //  WithType tells the query-builder to eager-loads the nodes that are connected to
 // the "type" edge. The optional arguments used to configure the query builder of the edge.
 func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
-	query := &FileTypeQuery{config: fq.config}
+	query := &FileTypeQuery{
+		config: fq.config,
+		err:    fq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -292,8 +315,11 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
-	group := &FileGroupBy{config: fq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &FileGroupBy{
+		config: fq.config,
+		err:    fq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = fq.sqlQuery()
 	return group
 }
@@ -311,8 +337,11 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
-	selector := &FileSelect{config: fq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &FileSelect{
+		config: fq.config,
+		err:    fq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = fq.sqlQuery()
 	return selector
 }
@@ -487,6 +516,7 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 // FileGroupBy is the builder for group-by File entities.
 type FileGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -501,6 +531,9 @@ func (fgb *FileGroupBy) Aggregate(fns ...Aggregate) *FileGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if fgb.err != nil {
+		return fgb.err
+	}
 	return fgb.sqlScan(ctx, v)
 }
 
@@ -618,6 +651,7 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 // FileSelect is the builder for select fields of File entities.
 type FileSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -625,6 +659,9 @@ type FileSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+	if fs.err != nil {
+		return fs.err
+	}
 	return fs.sqlScan(ctx, v)
 }
 

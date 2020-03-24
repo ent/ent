@@ -23,6 +23,7 @@ import (
 // PlanetQuery is the builder for querying Planet entities.
 type PlanetQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -60,7 +61,10 @@ func (pq *PlanetQuery) Order(o ...Order) *PlanetQuery {
 
 // QueryNeighbors chains the current query on the neighbors edge.
 func (pq *PlanetQuery) QueryNeighbors() *PlanetQuery {
-	query := &PlanetQuery{config: pq.config}
+	query := &PlanetQuery{
+		config: pq.config,
+		err:    pq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(planet.Table, planet.FieldID, pq.sqlQuery()),
 		sqlgraph.To(planet.Table, planet.FieldID),
@@ -166,6 +170,9 @@ func (pq *PlanetQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Planets.
 func (pq *PlanetQuery) All(ctx context.Context) ([]*Planet, error) {
+	if pq.err != nil {
+		return nil, pq.err
+	}
 	return pq.sqlAll(ctx)
 }
 
@@ -198,6 +205,9 @@ func (pq *PlanetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (pq *PlanetQuery) Count(ctx context.Context) (int, error) {
+	if pq.err != nil {
+		return 0, pq.err
+	}
 	return pq.sqlCount(ctx)
 }
 
@@ -212,6 +222,9 @@ func (pq *PlanetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PlanetQuery) Exist(ctx context.Context) (bool, error) {
+	if pq.err != nil {
+		return false, pq.err
+	}
 	return pq.sqlExist(ctx)
 }
 
@@ -229,11 +242,12 @@ func (pq *PlanetQuery) ExistX(ctx context.Context) bool {
 func (pq *PlanetQuery) Clone() *PlanetQuery {
 	return &PlanetQuery{
 		config:     pq.config,
+		err:        pq.err,
 		limit:      pq.limit,
 		offset:     pq.offset,
-		order:      append([]Order{}, pq.order...),
-		unique:     append([]string{}, pq.unique...),
-		predicates: append([]predicate.Planet{}, pq.predicates...),
+		order:      append([]Order(nil), pq.order...),
+		unique:     append([]string(nil), pq.unique...),
+		predicates: append([]predicate.Planet(nil), pq.predicates...),
 		// clone intermediate query.
 		sql: pq.sql.Clone(),
 	}
@@ -242,7 +256,10 @@ func (pq *PlanetQuery) Clone() *PlanetQuery {
 //  WithNeighbors tells the query-builder to eager-loads the nodes that are connected to
 // the "neighbors" edge. The optional arguments used to configure the query builder of the edge.
 func (pq *PlanetQuery) WithNeighbors(opts ...func(*PlanetQuery)) *PlanetQuery {
-	query := &PlanetQuery{config: pq.config}
+	query := &PlanetQuery{
+		config: pq.config,
+		err:    pq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -266,8 +283,11 @@ func (pq *PlanetQuery) WithNeighbors(opts ...func(*PlanetQuery)) *PlanetQuery {
 //		Scan(ctx, &v)
 //
 func (pq *PlanetQuery) GroupBy(field string, fields ...string) *PlanetGroupBy {
-	group := &PlanetGroupBy{config: pq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &PlanetGroupBy{
+		config: pq.config,
+		err:    pq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = pq.sqlQuery()
 	return group
 }
@@ -285,8 +305,11 @@ func (pq *PlanetQuery) GroupBy(field string, fields ...string) *PlanetGroupBy {
 //		Scan(ctx, &v)
 //
 func (pq *PlanetQuery) Select(field string, fields ...string) *PlanetSelect {
-	selector := &PlanetSelect{config: pq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &PlanetSelect{
+		config: pq.config,
+		err:    pq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = pq.sqlQuery()
 	return selector
 }
@@ -463,6 +486,7 @@ func (pq *PlanetQuery) sqlQuery() *sql.Selector {
 // PlanetGroupBy is the builder for group-by Planet entities.
 type PlanetGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -477,6 +501,9 @@ func (pgb *PlanetGroupBy) Aggregate(fns ...Aggregate) *PlanetGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PlanetGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if pgb.err != nil {
+		return pgb.err
+	}
 	return pgb.sqlScan(ctx, v)
 }
 
@@ -594,6 +621,7 @@ func (pgb *PlanetGroupBy) sqlQuery() *sql.Selector {
 // PlanetSelect is the builder for select fields of Planet entities.
 type PlanetSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -601,6 +629,9 @@ type PlanetSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PlanetSelect) Scan(ctx context.Context, v interface{}) error {
+	if ps.err != nil {
+		return ps.err
+	}
 	return ps.sqlScan(ctx, v)
 }
 

@@ -23,6 +23,7 @@ import (
 // StreetQuery is the builder for querying Street entities.
 type StreetQuery struct {
 	config
+	err        error
 	limit      *int
 	offset     *int
 	order      []Order
@@ -61,7 +62,10 @@ func (sq *StreetQuery) Order(o ...Order) *StreetQuery {
 
 // QueryCity chains the current query on the city edge.
 func (sq *StreetQuery) QueryCity() *CityQuery {
-	query := &CityQuery{config: sq.config}
+	query := &CityQuery{
+		config: sq.config,
+		err:    sq.err,
+	}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(street.Table, street.FieldID, sq.sqlQuery()),
 		sqlgraph.To(city.Table, city.FieldID),
@@ -167,6 +171,9 @@ func (sq *StreetQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Streets.
 func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
+	if sq.err != nil {
+		return nil, sq.err
+	}
 	return sq.sqlAll(ctx)
 }
 
@@ -199,6 +206,9 @@ func (sq *StreetQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (sq *StreetQuery) Count(ctx context.Context) (int, error) {
+	if sq.err != nil {
+		return 0, sq.err
+	}
 	return sq.sqlCount(ctx)
 }
 
@@ -213,6 +223,9 @@ func (sq *StreetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *StreetQuery) Exist(ctx context.Context) (bool, error) {
+	if sq.err != nil {
+		return false, sq.err
+	}
 	return sq.sqlExist(ctx)
 }
 
@@ -230,11 +243,12 @@ func (sq *StreetQuery) ExistX(ctx context.Context) bool {
 func (sq *StreetQuery) Clone() *StreetQuery {
 	return &StreetQuery{
 		config:     sq.config,
+		err:        sq.err,
 		limit:      sq.limit,
 		offset:     sq.offset,
-		order:      append([]Order{}, sq.order...),
-		unique:     append([]string{}, sq.unique...),
-		predicates: append([]predicate.Street{}, sq.predicates...),
+		order:      append([]Order(nil), sq.order...),
+		unique:     append([]string(nil), sq.unique...),
+		predicates: append([]predicate.Street(nil), sq.predicates...),
 		// clone intermediate query.
 		sql: sq.sql.Clone(),
 	}
@@ -243,7 +257,10 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 //  WithCity tells the query-builder to eager-loads the nodes that are connected to
 // the "city" edge. The optional arguments used to configure the query builder of the edge.
 func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
-	query := &CityQuery{config: sq.config}
+	query := &CityQuery{
+		config: sq.config,
+		err:    sq.err,
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -267,8 +284,11 @@ func (sq *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
 //		Scan(ctx, &v)
 //
 func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
-	group := &StreetGroupBy{config: sq.config}
-	group.fields = append([]string{field}, fields...)
+	group := &StreetGroupBy{
+		config: sq.config,
+		err:    sq.err,
+		fields: append([]string{field}, fields...),
+	}
 	group.sql = sq.sqlQuery()
 	return group
 }
@@ -286,8 +306,11 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //		Scan(ctx, &v)
 //
 func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
-	selector := &StreetSelect{config: sq.config}
-	selector.fields = append([]string{field}, fields...)
+	selector := &StreetSelect{
+		config: sq.config,
+		err:    sq.err,
+		fields: append([]string{field}, fields...),
+	}
 	selector.sql = sq.sqlQuery()
 	return selector
 }
@@ -436,6 +459,7 @@ func (sq *StreetQuery) sqlQuery() *sql.Selector {
 // StreetGroupBy is the builder for group-by Street entities.
 type StreetGroupBy struct {
 	config
+	err    error
 	fields []string
 	fns    []Aggregate
 	// intermediate query.
@@ -450,6 +474,9 @@ func (sgb *StreetGroupBy) Aggregate(fns ...Aggregate) *StreetGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (sgb *StreetGroupBy) Scan(ctx context.Context, v interface{}) error {
+	if sgb.err != nil {
+		return sgb.err
+	}
 	return sgb.sqlScan(ctx, v)
 }
 
@@ -567,6 +594,7 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 // StreetSelect is the builder for select fields of Street entities.
 type StreetSelect struct {
 	config
+	err    error
 	fields []string
 	// intermediate queries.
 	sql *sql.Selector
@@ -574,6 +602,9 @@ type StreetSelect struct {
 
 // Scan applies the selector query and scan the result into the given value.
 func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
+	if ss.err != nil {
+		return ss.err
+	}
 	return ss.sqlScan(ctx, v)
 }
 
