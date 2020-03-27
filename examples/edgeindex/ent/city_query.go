@@ -31,8 +31,9 @@ type CityQuery struct {
 	predicates []predicate.City
 	// eager-loading edges.
 	withStreets *StreetQuery
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -62,12 +63,18 @@ func (cq *CityQuery) Order(o ...Order) *CityQuery {
 // QueryStreets chains the current query on the streets edge.
 func (cq *CityQuery) QueryStreets() *StreetQuery {
 	query := &StreetQuery{config: cq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(city.Table, city.FieldID, cq.sqlQuery()),
-		sqlgraph.To(street.Table, street.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, city.StreetsTable, city.StreetsColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(city.Table, city.FieldID, cq.sqlQuery()),
+			sqlgraph.To(street.Table, street.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, city.StreetsTable, city.StreetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
@@ -167,6 +174,9 @@ func (cq *CityQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Cities.
 func (cq *CityQuery) All(ctx context.Context) ([]*City, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return cq.sqlAll(ctx)
 }
 
@@ -199,6 +209,9 @@ func (cq *CityQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cq *CityQuery) Count(ctx context.Context) (int, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return cq.sqlCount(ctx)
 }
 
@@ -213,6 +226,9 @@ func (cq *CityQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CityQuery) Exist(ctx context.Context) (bool, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return cq.sqlExist(ctx)
 }
 
@@ -236,7 +252,8 @@ func (cq *CityQuery) Clone() *CityQuery {
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.City{}, cq.predicates...),
 		// clone intermediate query.
-		sql: cq.sql.Clone(),
+		sql:  cq.sql.Clone(),
+		path: cq.path,
 	}
 }
 
@@ -269,7 +286,12 @@ func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
 func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 	group := &CityGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = cq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return cq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -288,8 +310,25 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
 	selector := &CitySelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = cq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return cq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (cq *CityQuery) prepareQuery(ctx context.Context) error {
+	if cq.path != nil {
+		prev, err := cq.path(ctx)
+		if err != nil {
+			return err
+		}
+		cq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
@@ -431,8 +470,9 @@ type CityGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -443,6 +483,11 @@ func (cgb *CityGroupBy) Aggregate(fns ...Aggregate) *CityGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := cgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	cgb.sql = query
 	return cgb.sqlScan(ctx, v)
 }
 
@@ -561,12 +606,18 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 type CitySelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := cs.path(ctx)
+	if err != nil {
+		return err
+	}
+	cs.sql = query
 	return cs.sqlScan(ctx, v)
 }
 

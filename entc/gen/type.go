@@ -15,7 +15,6 @@ import (
 	"unicode"
 
 	"github.com/facebookincubator/ent"
-
 	"github.com/facebookincubator/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent/entc/load"
 	"github.com/facebookincubator/ent/schema/field"

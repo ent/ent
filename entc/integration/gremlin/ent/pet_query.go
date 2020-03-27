@@ -31,8 +31,9 @@ type PetQuery struct {
 	// eager-loading edges.
 	withTeam  *UserQuery
 	withOwner *UserQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -62,16 +63,28 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryTeam chains the current query on the team edge.
 func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	gremlin := pq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.TeamLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := pq.gremlinQuery()
+		fromU = gremlin.InE(user.TeamLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	gremlin := pq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.PetsLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := pq.gremlinQuery()
+		fromU = gremlin.InE(user.PetsLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
@@ -171,6 +184,9 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+	if err := pq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return pq.gremlinAll(ctx)
 }
 
@@ -203,6 +219,9 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
+	if err := pq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return pq.gremlinCount(ctx)
 }
 
@@ -217,6 +236,9 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
+	if err := pq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return pq.gremlinExist(ctx)
 }
 
@@ -241,6 +263,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		// clone intermediate query.
 		gremlin: pq.gremlin.Clone(),
+		path:    pq.path,
 	}
 }
 
@@ -284,7 +307,12 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	group := &PetGroupBy{config: pq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = pq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return pq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -303,8 +331,25 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	selector := &PetSelect{config: pq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = pq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return pq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (pq *PetQuery) prepareQuery(ctx context.Context) error {
+	if pq.path != nil {
+		prev, err := pq.path(ctx)
+		if err != nil {
+			return err
+		}
+		pq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
@@ -372,8 +417,9 @@ type PetGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -384,6 +430,11 @@ func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := pgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	pgb.gremlin = query
 	return pgb.gremlinScan(ctx, v)
 }
 
@@ -519,12 +570,18 @@ func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 type PetSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ps.path(ctx)
+	if err != nil {
+		return err
+	}
+	ps.gremlin = query
 	return ps.gremlinScan(ctx, v)
 }
 

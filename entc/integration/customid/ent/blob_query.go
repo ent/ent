@@ -33,8 +33,9 @@ type BlobQuery struct {
 	withParent *BlobQuery
 	withLinks  *BlobQuery
 	withFKs    bool
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -64,24 +65,36 @@ func (bq *BlobQuery) Order(o ...Order) *BlobQuery {
 // QueryParent chains the current query on the parent edge.
 func (bq *BlobQuery) QueryParent() *BlobQuery {
 	query := &BlobQuery{config: bq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
-		sqlgraph.To(blob.Table, blob.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
+			sqlgraph.To(blob.Table, blob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryLinks chains the current query on the links edge.
 func (bq *BlobQuery) QueryLinks() *BlobQuery {
 	query := &BlobQuery{config: bq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
-		sqlgraph.To(blob.Table, blob.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, bq.sqlQuery()),
+			sqlgraph.To(blob.Table, blob.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
@@ -181,6 +194,9 @@ func (bq *BlobQuery) OnlyXID(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Blobs.
 func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
+	if err := bq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return bq.sqlAll(ctx)
 }
 
@@ -213,6 +229,9 @@ func (bq *BlobQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (bq *BlobQuery) Count(ctx context.Context) (int, error) {
+	if err := bq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return bq.sqlCount(ctx)
 }
 
@@ -227,6 +246,9 @@ func (bq *BlobQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (bq *BlobQuery) Exist(ctx context.Context) (bool, error) {
+	if err := bq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return bq.sqlExist(ctx)
 }
 
@@ -250,7 +272,8 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		unique:     append([]string{}, bq.unique...),
 		predicates: append([]predicate.Blob{}, bq.predicates...),
 		// clone intermediate query.
-		sql: bq.sql.Clone(),
+		sql:  bq.sql.Clone(),
+		path: bq.path,
 	}
 }
 
@@ -294,7 +317,12 @@ func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 	group := &BlobGroupBy{config: bq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = bq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return bq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -313,8 +341,25 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
 	selector := &BlobSelect{config: bq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = bq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return bq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
+	if bq.path != nil {
+		prev, err := bq.path(ctx)
+		if err != nil {
+			return err
+		}
+		bq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
@@ -527,8 +572,9 @@ type BlobGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -539,6 +585,11 @@ func (bgb *BlobGroupBy) Aggregate(fns ...Aggregate) *BlobGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := bgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	bgb.sql = query
 	return bgb.sqlScan(ctx, v)
 }
 
@@ -657,12 +708,18 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 type BlobSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := bs.path(ctx)
+	if err != nil {
+		return err
+	}
+	bs.sql = query
 	return bs.sqlScan(ctx, v)
 }
 

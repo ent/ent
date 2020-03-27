@@ -32,8 +32,9 @@ type CardQuery struct {
 	// eager-loading edges.
 	withOwner *UserQuery
 	withSpec  *SpecQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -63,16 +64,28 @@ func (cq *CardQuery) Order(o ...Order) *CardQuery {
 // QueryOwner chains the current query on the owner edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
-	gremlin := cq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.CardLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := cq.gremlinQuery()
+		fromU = gremlin.InE(user.CardLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QuerySpec chains the current query on the spec edge.
 func (cq *CardQuery) QuerySpec() *SpecQuery {
 	query := &SpecQuery{config: cq.config}
-	gremlin := cq.gremlinQuery()
-	query.gremlin = gremlin.InE(spec.CardLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := cq.gremlinQuery()
+		fromU = gremlin.InE(spec.CardLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
@@ -172,6 +185,9 @@ func (cq *CardQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Cards.
 func (cq *CardQuery) All(ctx context.Context) ([]*Card, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return cq.gremlinAll(ctx)
 }
 
@@ -204,6 +220,9 @@ func (cq *CardQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CardQuery) Count(ctx context.Context) (int, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return cq.gremlinCount(ctx)
 }
 
@@ -218,6 +237,9 @@ func (cq *CardQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CardQuery) Exist(ctx context.Context) (bool, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return cq.gremlinExist(ctx)
 }
 
@@ -242,6 +264,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 		predicates: append([]predicate.Card{}, cq.predicates...),
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
+		path:    cq.path,
 	}
 }
 
@@ -285,7 +308,12 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	group := &CardGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = cq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return cq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -304,8 +332,25 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
 	selector := &CardSelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = cq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return cq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (cq *CardQuery) prepareQuery(ctx context.Context) error {
+	if cq.path != nil {
+		prev, err := cq.path(ctx)
+		if err != nil {
+			return err
+		}
+		cq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
@@ -373,8 +418,9 @@ type CardGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -385,6 +431,11 @@ func (cgb *CardGroupBy) Aggregate(fns ...Aggregate) *CardGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := cgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	cgb.gremlin = query
 	return cgb.gremlinScan(ctx, v)
 }
 
@@ -520,12 +571,18 @@ func (cgb *CardGroupBy) gremlinQuery() *dsl.Traversal {
 type CardSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := cs.path(ctx)
+	if err != nil {
+		return err
+	}
+	cs.gremlin = query
 	return cs.gremlinScan(ctx, v)
 }
 

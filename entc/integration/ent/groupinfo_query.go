@@ -31,8 +31,9 @@ type GroupInfoQuery struct {
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -62,12 +63,18 @@ func (giq *GroupInfoQuery) Order(o ...Order) *GroupInfoQuery {
 // QueryGroups chains the current query on the groups edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
-		sqlgraph.To(group.Table, group.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(giq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := giq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(giq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
@@ -167,6 +174,9 @@ func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
+	if err := giq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return giq.sqlAll(ctx)
 }
 
@@ -199,6 +209,9 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
+	if err := giq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return giq.sqlCount(ctx)
 }
 
@@ -213,6 +226,9 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
+	if err := giq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return giq.sqlExist(ctx)
 }
 
@@ -236,7 +252,8 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		unique:     append([]string{}, giq.unique...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		// clone intermediate query.
-		sql: giq.sql.Clone(),
+		sql:  giq.sql.Clone(),
+		path: giq.path,
 	}
 }
 
@@ -269,7 +286,12 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
 	group := &GroupInfoGroupBy{config: giq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = giq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := giq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return giq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -288,8 +310,25 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
 	selector := &GroupInfoSelect{config: giq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = giq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := giq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return giq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
+	if giq.path != nil {
+		prev, err := giq.path(ctx)
+		if err != nil {
+			return err
+		}
+		giq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
@@ -431,8 +470,9 @@ type GroupInfoGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -443,6 +483,11 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...Aggregate) *GroupInfoGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := gigb.path(ctx)
+	if err != nil {
+		return err
+	}
+	gigb.sql = query
 	return gigb.sqlScan(ctx, v)
 }
 
@@ -561,12 +606,18 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 type GroupInfoSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := gis.path(ctx)
+	if err != nil {
+		return err
+	}
+	gis.sql = query
 	return gis.sqlScan(ctx, v)
 }
 

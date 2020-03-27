@@ -190,14 +190,16 @@ func (c *CarClient) GetX(ctx context.Context, id int) *Car {
 // QueryOwner queries the owner edge of a Car.
 func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := ca.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(car.Table, car.FieldID, id),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, car.OwnerTable, car.OwnerColumn),
-	)
-	query.sql = sqlgraph.Neighbors(ca.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ca.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(car.Table, car.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, car.OwnerTable, car.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
@@ -287,56 +289,64 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryParent queries the parent edge of a User.
 func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, id),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
-	)
-	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
 // QueryChildren queries the children edge of a User.
 func (c *UserClient) QueryChildren(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, id),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
-	)
-	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
 // QuerySpouse queries the spouse edge of a User.
 func (c *UserClient) QuerySpouse(u *User) *UserQuery {
 	query := &UserQuery{config: c.config}
-	id := u.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, id),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
-	)
-	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
 // QueryCar queries the car edge of a User.
 func (c *UserClient) QueryCar(u *User) *CarQuery {
 	query := &CarQuery{config: c.config}
-	id := u.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, id),
-		sqlgraph.To(car.Table, car.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, user.CarTable, user.CarColumn),
-	)
-	query.sql = sqlgraph.Neighbors(u.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(car.Table, car.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.CarTable, user.CarColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 

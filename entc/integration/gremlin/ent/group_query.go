@@ -33,8 +33,9 @@ type GroupQuery struct {
 	withBlocked *UserQuery
 	withUsers   *UserQuery
 	withInfo    *GroupInfoQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -64,32 +65,56 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryFiles chains the current query on the files edge.
 func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.OutE(group.FilesLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.OutE(group.FilesLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryBlocked chains the current query on the blocked edge.
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.OutE(group.BlockedLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.OutE(group.BlockedLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.GroupsLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.InE(user.GroupsLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryInfo chains the current query on the info edge.
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.OutE(group.InfoLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.OutE(group.InfoLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
@@ -189,6 +214,9 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return gq.gremlinAll(ctx)
 }
 
@@ -221,6 +249,9 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return gq.gremlinCount(ctx)
 }
 
@@ -235,6 +266,9 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return gq.gremlinExist(ctx)
 }
 
@@ -259,6 +293,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
+		path:    gq.path,
 	}
 }
 
@@ -324,7 +359,12 @@ func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	group := &GroupGroupBy{config: gq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = gq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return gq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -343,8 +383,25 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 	selector := &GroupSelect{config: gq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = gq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return gq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
+	if gq.path != nil {
+		prev, err := gq.path(ctx)
+		if err != nil {
+			return err
+		}
+		gq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
@@ -412,8 +469,9 @@ type GroupGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -424,6 +482,11 @@ func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ggb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ggb.gremlin = query
 	return ggb.gremlinScan(ctx, v)
 }
 
@@ -559,12 +622,18 @@ func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
 type GroupSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := gs.path(ctx)
+	if err != nil {
+		return err
+	}
+	gs.gremlin = query
 	return gs.gremlinScan(ctx, v)
 }
 

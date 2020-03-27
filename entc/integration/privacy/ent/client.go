@@ -184,14 +184,16 @@ func (c *PlanetClient) GetX(ctx context.Context, id int) *Planet {
 // QueryNeighbors queries the neighbors edge of a Planet.
 func (c *PlanetClient) QueryNeighbors(pl *Planet) *PlanetQuery {
 	query := &PlanetQuery{config: c.config}
-	id := pl.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(planet.Table, planet.FieldID, id),
-		sqlgraph.To(planet.Table, planet.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, planet.NeighborsTable, planet.NeighborsPrimaryKey...),
-	)
-	query.sql = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(planet.Table, planet.FieldID, id),
+			sqlgraph.To(planet.Table, planet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, planet.NeighborsTable, planet.NeighborsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 

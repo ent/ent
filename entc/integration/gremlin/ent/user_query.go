@@ -39,8 +39,9 @@ type UserQuery struct {
 	withSpouse    *UserQuery
 	withChildren  *UserQuery
 	withParent    *UserQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -70,88 +71,154 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryCard chains the current query on the card edge.
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.CardLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.CardLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.PetsLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.PetsLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFiles chains the current query on the files edge.
 func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.FilesLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.FilesLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.GroupsLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.GroupsLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.Both(user.FriendsLabel)
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.Both(user.FriendsLabel)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.FollowingLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.InE(user.FollowingLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.FollowingLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.FollowingLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryTeam chains the current query on the team edge.
 func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.TeamLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.TeamLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QuerySpouse chains the current query on the spouse edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.Both(user.SpouseLabel)
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.Both(user.SpouseLabel)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.ParentLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.InE(user.ParentLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryParent chains the current query on the parent edge.
 func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	gremlin := uq.gremlinQuery()
-	query.gremlin = gremlin.OutE(user.ParentLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.OutE(user.ParentLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
@@ -251,6 +318,9 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
+	if err := uq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return uq.gremlinAll(ctx)
 }
 
@@ -283,6 +353,9 @@ func (uq *UserQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
+	if err := uq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return uq.gremlinCount(ctx)
 }
 
@@ -297,6 +370,9 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
+	if err := uq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return uq.gremlinExist(ctx)
 }
 
@@ -321,6 +397,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
+		path:    uq.path,
 	}
 }
 
@@ -463,7 +540,12 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	group := &UserGroupBy{config: uq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = uq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return uq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -482,8 +564,25 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 	selector := &UserSelect{config: uq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = uq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return uq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (uq *UserQuery) prepareQuery(ctx context.Context) error {
+	if uq.path != nil {
+		prev, err := uq.path(ctx)
+		if err != nil {
+			return err
+		}
+		uq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
@@ -551,8 +650,9 @@ type UserGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -563,6 +663,11 @@ func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ugb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ugb.gremlin = query
 	return ugb.gremlinScan(ctx, v)
 }
 
@@ -698,12 +803,18 @@ func (ugb *UserGroupBy) gremlinQuery() *dsl.Traversal {
 type UserSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := us.path(ctx)
+	if err != nil {
+		return err
+	}
+	us.gremlin = query
 	return us.gremlinScan(ctx, v)
 }
 
