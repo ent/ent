@@ -23,7 +23,6 @@ import (
 	{{- end }}
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect"
-	"golang.org/x/xerrors"
 	{{- with $.Storage }}
 		{{- range $import := .Imports }}
 			"{{ $import }}"
