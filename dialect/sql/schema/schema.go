@@ -170,6 +170,9 @@ func (c *Column) ConvertibleTo(d *Column) bool {
 	case c.UintType() && d.IntType():
 		// uintX can not be converted to intY, when X > Y.
 		return c.Type-field.TypeUint8 <= d.Type-field.TypeInt8
+	// mariadb json == longtext
+	case c.Type == field.TypeString && d.Type == field.TypeJSON:
+		return true
 	}
 	return c.FloatType() && d.FloatType()
 }
