@@ -33,8 +33,9 @@ type FileQuery struct {
 	withOwner *UserQuery
 	withType  *FileTypeQuery
 	withFKs   bool
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -64,24 +65,36 @@ func (fq *FileQuery) Order(o ...Order) *FileQuery {
 // QueryOwner chains the current query on the owner edge.
 func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryType chains the current query on the type edge.
 func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
-		sqlgraph.To(filetype.Table, filetype.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sqlgraph.To(filetype.Table, filetype.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
@@ -181,6 +194,9 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
+	if err := fq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return fq.sqlAll(ctx)
 }
 
@@ -213,6 +229,9 @@ func (fq *FileQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (fq *FileQuery) Count(ctx context.Context) (int, error) {
+	if err := fq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return fq.sqlCount(ctx)
 }
 
@@ -227,6 +246,9 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
+	if err := fq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return fq.sqlExist(ctx)
 }
 
@@ -250,7 +272,8 @@ func (fq *FileQuery) Clone() *FileQuery {
 		unique:     append([]string{}, fq.unique...),
 		predicates: append([]predicate.File{}, fq.predicates...),
 		// clone intermediate query.
-		sql: fq.sql.Clone(),
+		sql:  fq.sql.Clone(),
+		path: fq.path,
 	}
 }
 
@@ -294,7 +317,12 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	group := &FileGroupBy{config: fq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = fq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return fq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -313,8 +341,25 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 	selector := &FileSelect{config: fq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = fq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return fq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (fq *FileQuery) prepareQuery(ctx context.Context) error {
+	if fq.path != nil {
+		prev, err := fq.path(ctx)
+		if err != nil {
+			return err
+		}
+		fq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
@@ -489,8 +534,9 @@ type FileGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -501,6 +547,11 @@ func (fgb *FileGroupBy) Aggregate(fns ...Aggregate) *FileGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := fgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	fgb.sql = query
 	return fgb.sqlScan(ctx, v)
 }
 
@@ -619,12 +670,18 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 type FileSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := fs.path(ctx)
+	if err != nil {
+		return err
+	}
+	fs.sql = query
 	return fs.sqlScan(ctx, v)
 }
 

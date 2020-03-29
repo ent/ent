@@ -205,10 +205,7 @@ const (
 	// default schema package path.
 	defaultSchema = "ent/schema"
 	// ent/generate.go file used for "go generate" command.
-	genFile = `package ent
-
-//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema
-`
+	genFile = "package ent\n\n//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema\n"
 )
 
 func failOnErr(err error) {

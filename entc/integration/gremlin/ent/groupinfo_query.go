@@ -30,8 +30,9 @@ type GroupInfoQuery struct {
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -61,8 +62,14 @@ func (giq *GroupInfoQuery) Order(o ...Order) *GroupInfoQuery {
 // QueryGroups chains the current query on the groups edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
-	gremlin := giq.gremlinQuery()
-	query.gremlin = gremlin.InE(group.InfoLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := giq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := giq.gremlinQuery()
+		fromU = gremlin.InE(group.InfoLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
@@ -162,6 +169,9 @@ func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of GroupInfos.
 func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
+	if err := giq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return giq.gremlinAll(ctx)
 }
 
@@ -194,6 +204,9 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
+	if err := giq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return giq.gremlinCount(ctx)
 }
 
@@ -208,6 +221,9 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
+	if err := giq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return giq.gremlinExist(ctx)
 }
 
@@ -232,6 +248,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		// clone intermediate query.
 		gremlin: giq.gremlin.Clone(),
+		path:    giq.path,
 	}
 }
 
@@ -264,7 +281,12 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
 	group := &GroupInfoGroupBy{config: giq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = giq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := giq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return giq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -283,8 +305,25 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
 	selector := &GroupInfoSelect{config: giq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = giq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := giq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return giq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
+	if giq.path != nil {
+		prev, err := giq.path(ctx)
+		if err != nil {
+			return err
+		}
+		giq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error) {
@@ -352,8 +391,9 @@ type GroupInfoGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -364,6 +404,11 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...Aggregate) *GroupInfoGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := gigb.path(ctx)
+	if err != nil {
+		return err
+	}
+	gigb.gremlin = query
 	return gigb.gremlinScan(ctx, v)
 }
 
@@ -499,12 +544,18 @@ func (gigb *GroupInfoGroupBy) gremlinQuery() *dsl.Traversal {
 type GroupInfoSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := gis.path(ctx)
+	if err != nil {
+		return err
+	}
+	gis.gremlin = query
 	return gis.gremlinScan(ctx, v)
 }
 

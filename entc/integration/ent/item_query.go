@@ -27,8 +27,9 @@ type ItemQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Item
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -151,6 +152,9 @@ func (iq *ItemQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
+	if err := iq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return iq.sqlAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
+	if err := iq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return iq.sqlCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
+	if err := iq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return iq.sqlExist(ctx)
 }
 
@@ -220,7 +230,8 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		unique:     append([]string{}, iq.unique...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
-		sql: iq.sql.Clone(),
+		sql:  iq.sql.Clone(),
+		path: iq.path,
 	}
 }
 
@@ -229,7 +240,12 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = iq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return iq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -237,8 +253,25 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 	selector := &ItemSelect{config: iq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = iq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return iq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
+	if iq.path != nil {
+		prev, err := iq.path(ctx)
+		if err != nil {
+			return err
+		}
+		iq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
@@ -347,8 +380,9 @@ type ItemGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -359,6 +393,11 @@ func (igb *ItemGroupBy) Aggregate(fns ...Aggregate) *ItemGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := igb.path(ctx)
+	if err != nil {
+		return err
+	}
+	igb.sql = query
 	return igb.sqlScan(ctx, v)
 }
 
@@ -477,12 +516,18 @@ func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 type ItemSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := is.path(ctx)
+	if err != nil {
+		return err
+	}
+	is.sql = query
 	return is.sqlScan(ctx, v)
 }
 

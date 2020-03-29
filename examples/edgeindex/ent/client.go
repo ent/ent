@@ -190,14 +190,16 @@ func (c *CityClient) GetX(ctx context.Context, id int) *City {
 // QueryStreets queries the streets edge of a City.
 func (c *CityClient) QueryStreets(ci *City) *StreetQuery {
 	query := &StreetQuery{config: c.config}
-	id := ci.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(city.Table, city.FieldID, id),
-		sqlgraph.To(street.Table, street.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, city.StreetsTable, city.StreetsColumn),
-	)
-	query.sql = sqlgraph.Neighbors(ci.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ci.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(city.Table, city.FieldID, id),
+			sqlgraph.To(street.Table, street.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, city.StreetsTable, city.StreetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ci.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
@@ -287,14 +289,16 @@ func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
 // QueryCity queries the city edge of a Street.
 func (c *StreetClient) QueryCity(s *Street) *CityQuery {
 	query := &CityQuery{config: c.config}
-	id := s.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(street.Table, street.FieldID, id),
-		sqlgraph.To(city.Table, city.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
-	)
-	query.sql = sqlgraph.Neighbors(s.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(street.Table, street.FieldID, id),
+			sqlgraph.To(city.Table, city.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 

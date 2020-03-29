@@ -32,8 +32,9 @@ type NodeQuery struct {
 	withParent   *NodeQuery
 	withChildren *NodeQuery
 	withFKs      bool
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -63,24 +64,36 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryParent chains the current query on the parent edge.
 func (nq *NodeQuery) QueryParent() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
-		sqlgraph.To(node.Table, node.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, node.ParentTable, node.ParentColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, node.ParentTable, node.ParentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (nq *NodeQuery) QueryChildren() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
-		sqlgraph.To(node.Table, node.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, node.ChildrenTable, node.ChildrenColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, node.ChildrenTable, node.ChildrenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
@@ -180,6 +193,9 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return nq.sqlAll(ctx)
 }
 
@@ -212,6 +228,9 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return nq.sqlCount(ctx)
 }
 
@@ -226,6 +245,9 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return nq.sqlExist(ctx)
 }
 
@@ -249,7 +271,8 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
 		// clone intermediate query.
-		sql: nq.sql.Clone(),
+		sql:  nq.sql.Clone(),
+		path: nq.path,
 	}
 }
 
@@ -293,7 +316,12 @@ func (nq *NodeQuery) WithChildren(opts ...func(*NodeQuery)) *NodeQuery {
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	group := &NodeGroupBy{config: nq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = nq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return nq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -312,8 +340,25 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector := &NodeSelect{config: nq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = nq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return nq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
+	if nq.path != nil {
+		prev, err := nq.path(ctx)
+		if err != nil {
+			return err
+		}
+		nq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
@@ -491,8 +536,9 @@ type NodeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -503,6 +549,11 @@ func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ngb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ngb.sql = query
 	return ngb.sqlScan(ctx, v)
 }
 
@@ -621,12 +672,18 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 type NodeSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ns.path(ctx)
+	if err != nil {
+		return err
+	}
+	ns.sql = query
 	return ns.sqlScan(ctx, v)
 }
 

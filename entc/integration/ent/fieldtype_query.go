@@ -27,8 +27,9 @@ type FieldTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FieldType
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -151,6 +152,9 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return ftq.sqlAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return ftq.sqlCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return ftq.sqlExist(ctx)
 }
 
@@ -220,7 +230,8 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
-		sql: ftq.sql.Clone(),
+		sql:  ftq.sql.Clone(),
+		path: ftq.path,
 	}
 }
 
@@ -242,7 +253,12 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
 	group := &FieldTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = ftq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return ftq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -261,8 +277,25 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
 	selector := &FieldTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = ftq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return ftq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
+	if ftq.path != nil {
+		prev, err := ftq.path(ctx)
+		if err != nil {
+			return err
+		}
+		ftq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
@@ -371,8 +404,9 @@ type FieldTypeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -383,6 +417,11 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...Aggregate) *FieldTypeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ftgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ftgb.sql = query
 	return ftgb.sqlScan(ctx, v)
 }
 
@@ -501,12 +540,18 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 type FieldTypeSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := fts.path(ctx)
+	if err != nil {
+		return err
+	}
+	fts.sql = query
 	return fts.sqlScan(ctx, v)
 }
 

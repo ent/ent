@@ -37,8 +37,9 @@ type GroupQuery struct {
 	withUsers   *UserQuery
 	withInfo    *GroupInfoQuery
 	withFKs     bool
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -68,48 +69,72 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryFiles chains the current query on the files edge.
 func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sqlgraph.To(file.Table, file.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryBlocked chains the current query on the blocked edge.
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryInfo chains the current query on the info edge.
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
-		sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
@@ -209,6 +234,9 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) int {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return gq.sqlAll(ctx)
 }
 
@@ -241,6 +269,9 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return gq.sqlCount(ctx)
 }
 
@@ -255,6 +286,9 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return gq.sqlExist(ctx)
 }
 
@@ -278,7 +312,8 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
-		sql: gq.sql.Clone(),
+		sql:  gq.sql.Clone(),
+		path: gq.path,
 	}
 }
 
@@ -344,7 +379,12 @@ func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	group := &GroupGroupBy{config: gq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = gq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return gq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -363,8 +403,25 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 	selector := &GroupSelect{config: gq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = gq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return gq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
+	if gq.path != nil {
+		prev, err := gq.path(ctx)
+		if err != nil {
+			return err
+		}
+		gq.sql = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
@@ -635,8 +692,9 @@ type GroupGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -647,6 +705,11 @@ func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ggb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ggb.sql = query
 	return ggb.sqlScan(ctx, v)
 }
 
@@ -765,12 +828,18 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 type GroupSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := gs.path(ctx)
+	if err != nil {
+		return err
+	}
+	gs.sql = query
 	return gs.sqlScan(ctx, v)
 }
 

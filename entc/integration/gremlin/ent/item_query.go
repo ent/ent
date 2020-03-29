@@ -27,8 +27,9 @@ type ItemQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Item
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -151,6 +152,9 @@ func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Items.
 func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
+	if err := iq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return iq.gremlinAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
+	if err := iq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return iq.gremlinCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
+	if err := iq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return iq.gremlinExist(ctx)
 }
 
@@ -221,6 +231,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
 		gremlin: iq.gremlin.Clone(),
+		path:    iq.path,
 	}
 }
 
@@ -229,7 +240,12 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = iq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return iq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -237,8 +253,25 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 	selector := &ItemSelect{config: iq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = iq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return iq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
+	if iq.path != nil {
+		prev, err := iq.path(ctx)
+		if err != nil {
+			return err
+		}
+		iq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (iq *ItemQuery) gremlinAll(ctx context.Context) ([]*Item, error) {
@@ -306,8 +339,9 @@ type ItemGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -318,6 +352,11 @@ func (igb *ItemGroupBy) Aggregate(fns ...Aggregate) *ItemGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := igb.path(ctx)
+	if err != nil {
+		return err
+	}
+	igb.gremlin = query
 	return igb.gremlinScan(ctx, v)
 }
 
@@ -453,12 +492,18 @@ func (igb *ItemGroupBy) gremlinQuery() *dsl.Traversal {
 type ItemSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := is.path(ctx)
+	if err != nil {
+		return err
+	}
+	is.gremlin = query
 	return is.gremlinScan(ctx, v)
 }
 

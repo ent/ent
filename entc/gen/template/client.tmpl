@@ -204,10 +204,13 @@ func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Na
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
 	query := &{{ $builder }}{config: c.config}
-	{{- with extend $n "Receiver" $rec "Edge" $e }}
-		{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
-		{{- xtemplate $tmpl . -}}
-	{{- end }}
+	query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
+		{{- with extend $n "Receiver" $rec "Edge" $e "Ident" "fromV" }}
+			{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
+			{{- xtemplate $tmpl . -}}
+		{{- end -}}
+		return fromV, nil
+	}
 	return query
 }
 {{ end }}

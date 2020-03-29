@@ -27,8 +27,9 @@ type FieldTypeQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.FieldType
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -151,6 +152,9 @@ func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of FieldTypes.
 func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return ftq.gremlinAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return ftq.gremlinCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return ftq.gremlinExist(ctx)
 }
 
@@ -221,6 +231,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
 		gremlin: ftq.gremlin.Clone(),
+		path:    ftq.path,
 	}
 }
 
@@ -242,7 +253,12 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
 	group := &FieldTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = ftq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return ftq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -261,8 +277,25 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
 	selector := &FieldTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = ftq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return ftq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
+	if ftq.path != nil {
+		prev, err := ftq.path(ctx)
+		if err != nil {
+			return err
+		}
+		ftq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error) {
@@ -330,8 +363,9 @@ type FieldTypeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -342,6 +376,11 @@ func (ftgb *FieldTypeGroupBy) Aggregate(fns ...Aggregate) *FieldTypeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ftgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ftgb.gremlin = query
 	return ftgb.gremlinScan(ctx, v)
 }
 
@@ -477,12 +516,18 @@ func (ftgb *FieldTypeGroupBy) gremlinQuery() *dsl.Traversal {
 type FieldTypeSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := fts.path(ctx)
+	if err != nil {
+		return err
+	}
+	fts.gremlin = query
 	return fts.gremlinScan(ctx, v)
 }
 

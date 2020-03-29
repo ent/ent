@@ -155,6 +155,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 {{ define "dialect/sql/query/path" }}
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
 	step := sqlgraph.NewStep(
 		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, {{ $receiver }}.sqlQuery()),
@@ -167,13 +168,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
-	query.sql = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{/* query/from defines the query generation for an edge query from a given node. */}}
 {{ define "dialect/sql/query/from" }}
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver -}}
 	id := {{ $receiver }}.ID
 	step := sqlgraph.NewStep(
@@ -187,7 +189,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
-	query.sql = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{ define "dialect/sql/query/eagerloading" }}

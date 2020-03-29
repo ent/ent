@@ -40,8 +40,9 @@ type {{ $builder }} struct {
 	{{- if hasTemplate $tmpl }}
 		{{- xtemplate $tmpl . }}
 	{{- end }}
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
+	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -74,10 +75,16 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
 		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
-		{{- with extend $ "Receiver" $receiver "Edge" $e -}}
-			{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
-			{{- xtemplate $tmpl . }}
-		{{- end -}}
+		query.path = func(ctx context.Context) (fromU {{ $.Storage.Builder }}, err error) {
+			if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+				return nil, err
+			}
+			{{- with extend $ "Receiver" $receiver "Edge" $e "Ident" "fromU" -}}
+				{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
+			return fromU, nil
+		}
 		return query
 	}
 {{ end }}
@@ -178,6 +185,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
+	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return {{ $receiver }}.{{ $.Storage }}All(ctx)
 }
 
@@ -210,6 +220,9 @@ func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type 
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
+	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return {{ $receiver }}.{{ $.Storage }}Count(ctx)
 }
 
@@ -224,6 +237,9 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
+	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return {{ $receiver }}.{{ $.Storage }}Exist(ctx)
 }
 
@@ -248,6 +264,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
+		path: {{ $receiver }}.path,
 	}
 }
 
@@ -288,7 +305,12 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
 	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
 	group.fields = append([]string{field}, fields...)
-	group.{{ $.Storage }} = {{ $receiver }}.{{ $.Storage }}Query()
+	group.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
+		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return {{ $receiver }}.{{ $.Storage }}Query(), nil
+	}
 	return group
 }
 
@@ -312,8 +334,25 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
 	selector := &{{ $selectBuilder }}{config: {{ $receiver }}.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.{{ $.Storage }} = {{ $receiver }}.{{ $.Storage }}Query()
+	selector.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
+		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return {{ $receiver }}.{{ $.Storage }}Query(), nil
+	}
 	return selector
+}
+
+func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
+	if {{ $receiver }}.path != nil {
+		prev, err := {{ $receiver }}.path(ctx)
+		if err != nil {
+			return err
+		}
+		{{ $receiver }}.{{ $.Storage }} = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 {{ with extend $ "Builder" $builder "Package" $pkg }}
@@ -330,8 +369,9 @@ type {{ $groupBuilder }} struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
-	{{ $.Storage }} {{ $.Storage.Builder}}
+	// intermediate query (i.e. traversal path).
+	{{ $.Storage }} {{ $.Storage.Builder }}
+	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -342,6 +382,11 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{
 
 // Scan applies the group-by query and scan the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	query, err := {{ $groupReceiver }}.path(ctx)
+	if err != nil {
+		return err
+	}
+	{{ $groupReceiver }}.{{ $.Storage }} = query
 	return {{ $groupReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
@@ -389,13 +434,19 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 type {{ $selectBuilder }} struct {
 	config
 	fields []string
-	// intermediate queries.
-	{{ $.Storage }} {{ $.Storage.Builder}}
+	// intermediate query (i.e. traversal path).
+	{{ $.Storage }} {{ $.Storage.Builder }}
+	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 
 // Scan applies the selector query and scan the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	query, err := {{ $selectReceiver }}.path(ctx)
+	if err != nil {
+		return err
+	}
+	{{ $selectReceiver }}.{{ $.Storage }} = query
 	return {{ $selectReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 

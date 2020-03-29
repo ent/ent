@@ -30,8 +30,9 @@ type NodeQuery struct {
 	// eager-loading edges.
 	withPrev *NodeQuery
 	withNext *NodeQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -61,16 +62,28 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryPrev chains the current query on the prev edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	gremlin := nq.gremlinQuery()
-	query.gremlin = gremlin.InE(node.NextLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := nq.gremlinQuery()
+		fromU = gremlin.InE(node.NextLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryNext chains the current query on the next edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	gremlin := nq.gremlinQuery()
-	query.gremlin = gremlin.OutE(node.NextLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := nq.gremlinQuery()
+		fromU = gremlin.OutE(node.NextLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
@@ -170,6 +183,9 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return nq.gremlinAll(ctx)
 }
 
@@ -202,6 +218,9 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return nq.gremlinCount(ctx)
 }
 
@@ -216,6 +235,9 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return nq.gremlinExist(ctx)
 }
 
@@ -240,6 +262,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		predicates: append([]predicate.Node{}, nq.predicates...),
 		// clone intermediate query.
 		gremlin: nq.gremlin.Clone(),
+		path:    nq.path,
 	}
 }
 
@@ -283,7 +306,12 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	group := &NodeGroupBy{config: nq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = nq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return nq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -302,8 +330,25 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector := &NodeSelect{config: nq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = nq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return nq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
+	if nq.path != nil {
+		prev, err := nq.path(ctx)
+		if err != nil {
+			return err
+		}
+		nq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
@@ -371,8 +416,9 @@ type NodeGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -383,6 +429,11 @@ func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ngb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ngb.gremlin = query
 	return ngb.gremlinScan(ctx, v)
 }
 
@@ -518,12 +569,18 @@ func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 type NodeSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ns.path(ctx)
+	if err != nil {
+		return err
+	}
+	ns.gremlin = query
 	return ns.gremlinScan(ctx, v)
 }
 

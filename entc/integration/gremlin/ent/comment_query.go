@@ -27,8 +27,9 @@ type CommentQuery struct {
 	order      []Order
 	unique     []string
 	predicates []predicate.Comment
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -151,6 +152,9 @@ func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return cq.gremlinAll(ctx)
 }
 
@@ -183,6 +187,9 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return cq.gremlinCount(ctx)
 }
 
@@ -197,6 +204,9 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
+	if err := cq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return cq.gremlinExist(ctx)
 }
 
@@ -221,6 +231,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		predicates: append([]predicate.Comment{}, cq.predicates...),
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
+		path:    cq.path,
 	}
 }
 
@@ -242,7 +253,12 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
 	group := &CommentGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = cq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return cq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -261,8 +277,25 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
 	selector := &CommentSelect{config: cq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = cq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return cq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
+	if cq.path != nil {
+		prev, err := cq.path(ctx)
+		if err != nil {
+			return err
+		}
+		cq.gremlin = prev
+	}
+	// Privacy and query checks go here.
+	return nil
 }
 
 func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
@@ -330,8 +363,9 @@ type CommentGroupBy struct {
 	config
 	fields []string
 	fns    []Aggregate
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -342,6 +376,11 @@ func (cgb *CommentGroupBy) Aggregate(fns ...Aggregate) *CommentGroupBy {
 
 // Scan applies the group-by query and scan the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := cgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	cgb.gremlin = query
 	return cgb.gremlinScan(ctx, v)
 }
 
@@ -477,12 +516,18 @@ func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
 type CommentSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := cs.path(ctx)
+	if err != nil {
+		return err
+	}
+	cs.gremlin = query
 	return cs.gremlinScan(ctx, v)
 }
 

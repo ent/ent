@@ -73,13 +73,14 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 {{ define "dialect/gremlin/query/path" }}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
+	{{- $ident := $.Scope.Ident }}
 	gremlin := {{ $receiver }}.gremlinQuery()
 	{{- if $e.Bidi }}
-		query.gremlin = gremlin.Both({{ $.Package }}.{{ $e.LabelConstant }})
+		{{ $ident }} = gremlin.Both({{ $.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}
-		query.gremlin = gremlin.InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
+		{{ $ident }} = gremlin.InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
 	{{- else }}
-		query.gremlin = gremlin.OutE({{ $.Package }}.{{ $e.LabelConstant }}).InV()
+		{{ $ident }} = gremlin.OutE({{ $.Package }}.{{ $e.LabelConstant }}).InV()
 	{{- end }}
 {{ end }}
 
@@ -89,12 +90,13 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
+	{{- $ident := $.Scope.Ident -}}
 
 	{{- if $e.Bidi }}
-		query.gremlin = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.LabelConstant }})
+		{{ $ident }} = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}
-		query.gremlin = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
+		{{ $ident }} = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
 	{{- else }}
-		query.gremlin = g.V({{ $receiver }}.ID).OutE({{ $n.Package }}.{{ $e.LabelConstant }}).InV()
+		{{ $ident }} = g.V({{ $receiver }}.ID).OutE({{ $n.Package }}.{{ $e.LabelConstant }}).InV()
 	{{- end }}
 {{ end }}
