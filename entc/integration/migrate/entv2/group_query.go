@@ -270,7 +270,6 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 		}
 		gq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

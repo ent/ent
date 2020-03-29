@@ -349,7 +349,6 @@ func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 		}
 		fq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

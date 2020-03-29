@@ -294,7 +294,6 @@ func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 		}
 		cq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

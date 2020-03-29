@@ -327,7 +327,6 @@ func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 		}
 		giq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

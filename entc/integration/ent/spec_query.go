@@ -303,7 +303,6 @@ func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 		}
 		sq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

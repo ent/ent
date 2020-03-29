@@ -418,7 +418,6 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 		}
 		uq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

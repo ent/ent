@@ -270,7 +270,6 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 		}
 		pq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

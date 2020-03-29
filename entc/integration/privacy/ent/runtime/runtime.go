@@ -19,10 +19,10 @@ import (
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
-	policy := schema.Planet{}.Policy()
+	planet.Policy = schema.Planet{}.Policy()
 	planet.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := policy.EvalMutation(ctx, m); err != nil {
+			if err := planet.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)

@@ -270,7 +270,6 @@ func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 		}
 		iq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

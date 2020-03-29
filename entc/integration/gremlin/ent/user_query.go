@@ -581,7 +581,6 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 		}
 		uq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

@@ -157,9 +157,7 @@ type (
 	//
 	Policy interface {
 		EvalMutation(context.Context, Mutation) error
-		// Note that the query policy is under development
-		// and is currently disabled.
-		// EvalQuery(context.Context, Query) error
+		EvalQuery(context.Context, Query) error
 	}
 
 	// Schema is the default implementation for the schema Interface.

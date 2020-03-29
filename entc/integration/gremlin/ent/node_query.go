@@ -347,7 +347,6 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 		}
 		nq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

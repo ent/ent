@@ -294,7 +294,6 @@ func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 		}
 		ftq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

@@ -24,6 +24,7 @@ type (
 	Hook       = ent.Hook
 	Value      = ent.Value
 	Query      = ent.Query
+	Policy     = ent.Policy
 	Mutator    = ent.Mutator
 	Mutation   = ent.Mutation
 	MutateFunc = ent.MutateFunc

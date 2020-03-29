@@ -358,7 +358,6 @@ func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 		}
 		fq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 
