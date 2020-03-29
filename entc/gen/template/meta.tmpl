@@ -54,6 +54,9 @@ const (
 		{{- if $numHooks }}
 			Hooks [{{ $numHooks }}]ent.Hook
 		{{- end }}
+		{{- if $.HasPolicy }}
+			Policy ent.Policy
+		{{- end }}
 		{{- range $f := $.Fields }}
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := $f.DefaultName }}

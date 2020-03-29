@@ -400,7 +400,6 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 		}
 		gq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

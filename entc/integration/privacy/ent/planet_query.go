@@ -326,7 +326,9 @@ func (pq *PlanetQuery) prepareQuery(ctx context.Context) error {
 		}
 		pq.sql = prev
 	}
-	// Privacy and query checks go here.
+	if err := planet.Policy.EvalQuery(ctx, pq); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -348,7 +348,6 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 		}
 		pq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

@@ -44,6 +44,7 @@ func (Planet) Policy() ent.Policy {
 			privacy.AlwaysAllowRule(),
 		},
 		Query: privacy.QueryPolicy{
+			rule.FilterZeroAgePlanetRule(),
 			privacy.AlwaysAllowRule(),
 		},
 	}

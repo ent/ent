@@ -33,9 +33,15 @@ func TestPrivacyRules(t *testing.T) {
 	logf = rule.SetMutationLogFunc(func(string, ...interface{}) {
 		require.FailNow(t, "hook called on privacy deny")
 	})
-	defer rule.SetMutationLogFunc(logf)
 	err = client.Planet.Update().Where(planet.ID(earth.ID)).SetAge(4_600_000_000).Exec(ctx)
 	require.True(t, errors.Is(err, privacy.Deny))
 	err = earth.Update().AddNeighbors(earth).Exec(ctx)
 	require.True(t, errors.Is(err, privacy.Deny))
+	rule.SetMutationLogFunc(logf)
+
+	count := client.Planet.Query().CountX(ctx)
+	require.Equal(t, 1, count)
+	mars.Update().SetAge(6_000_000_000).ExecX(ctx)
+	count = client.Planet.Query().CountX(ctx)
+	require.Equal(t, 2, count)
 }

@@ -358,7 +358,6 @@ func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
 		}
 		bq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

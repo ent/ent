@@ -303,7 +303,6 @@ func (cq *CarQuery) prepareQuery(ctx context.Context) error {
 		}
 		cq.sql = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

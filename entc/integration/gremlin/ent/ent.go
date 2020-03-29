@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -16,7 +17,6 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"golang.org/x/xerrors"
 )
 
 // ent aliases to avoid import conflict in user's code.
@@ -25,6 +25,7 @@ type (
 	Hook       = ent.Hook
 	Value      = ent.Value
 	Query      = ent.Query
+	Policy     = ent.Policy
 	Mutator    = ent.Mutator
 	Mutation   = ent.Mutation
 	MutateFunc = ent.MutateFunc
@@ -164,7 +165,7 @@ func IsNotFound(err error) bool {
 		return false
 	}
 	var e *NotFoundError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // MaskNotFound masks nor found error.
@@ -191,7 +192,7 @@ func IsNotSingular(err error) bool {
 		return false
 	}
 	var e *NotSingularError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // NotLoadedError returns when trying to get a node that was not loaded by the query.
@@ -210,7 +211,7 @@ func IsNotLoaded(err error) bool {
 		return false
 	}
 	var e *NotLoadedError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // ConstraintError returns when trying to create/update one or more entities and
@@ -237,7 +238,7 @@ func IsConstraintError(err error) bool {
 		return false
 	}
 	var e *ConstraintError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // Code implements the dsl.Node interface.

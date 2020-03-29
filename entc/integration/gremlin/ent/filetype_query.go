@@ -321,7 +321,6 @@ func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
 		}
 		ftq.gremlin = prev
 	}
-	// Privacy and query checks go here.
 	return nil
 }
 

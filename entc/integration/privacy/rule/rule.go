@@ -6,10 +6,11 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/hook"
+	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/privacy"
 )
 
-// DenyUpdateRule is a write rule rule that denies update many operations.
+// DenyUpdateRule is a mutation rule that denies update many operations.
 func DenyUpdateRule() privacy.MutationRule {
 	return privacy.MutationRuleFunc(func(_ context.Context, m ent.Mutation) error {
 		if m.Op() == ent.OpUpdate {
@@ -19,7 +20,7 @@ func DenyUpdateRule() privacy.MutationRule {
 	})
 }
 
-// DenyPlanetSelfLinkRule is a write rule rule that prevents rule self link via neighbor edge.
+// DenyPlanetSelfLinkRule is a mutation rule rule that prevents rule self link via neighbor edge.
 func DenyPlanetSelfLinkRule() privacy.MutationRule {
 	return privacy.PlanetMutationRuleFunc(func(ctx context.Context, m *ent.PlanetMutation) error {
 		if !m.Op().Is(ent.OpUpdateOne) {
@@ -34,6 +35,14 @@ func DenyPlanetSelfLinkRule() privacy.MutationRule {
 				return privacy.Denyf("ent/privacy: planet %d cannot have itself as a neighbor", id)
 			}
 		}
+		return privacy.Skip
+	})
+}
+
+// FilterZeroPlanetAgeRule is a query rule that filters out planet with age equal to zero.
+func FilterZeroAgePlanetRule() privacy.QueryRule {
+	return privacy.PlanetQueryRuleFunc(func(ctx context.Context, q *ent.PlanetQuery) error {
+		q.Where(planet.AgeNEQ(0))
 		return privacy.Skip
 	})
 }

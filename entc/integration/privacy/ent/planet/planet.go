@@ -47,7 +47,8 @@ var (
 //	import _ "github.com/facebookincubator/ent/entc/integration/privacy/ent/runtime"
 //
 var (
-	Hooks [2]ent.Hook
+	Hooks  [2]ent.Hook
+	Policy ent.Policy
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 )

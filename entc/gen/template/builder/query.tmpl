@@ -351,7 +351,11 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		}
 		{{ $receiver }}.{{ $.Storage }} = prev
 	}
-	// Privacy and query checks go here.
+	{{- if $.HasPolicy }}
+		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
+			return err
+		}
+	{{- end }}
 	return nil
 }
 
