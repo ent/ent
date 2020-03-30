@@ -207,6 +207,9 @@ func (d *MySQL) cType(c *Column) (t string) {
 			t = fmt.Sprintf("varchar(%d)", size)
 		} else {
 			t = "longtext"
+			if strings.Contains(strings.ToLower(d.version), "mariadb") {
+				t = "json"
+			}
 		}
 	case field.TypeFloat32, field.TypeFloat64:
 		t = "double"
