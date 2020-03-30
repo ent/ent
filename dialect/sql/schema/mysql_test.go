@@ -101,6 +101,34 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "create new table with mariadb 10.5.1",
+			tables: []*Table{
+				{
+					Name: "users",
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "age", Type: field.TypeInt},
+						{Name: "name", Type: field.TypeString, Unique: true},
+						{Name: "doc", Type: field.TypeJSON, Nullable: true},
+					},
+				},
+			},
+			before: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "10.5.1-MariaDB-1:10.5.1+maria~bionic"))
+				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `age` bigint NOT NULL, `name` varchar(191) UNIQUE NOT NULL, `doc` longtext NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "create new table with foreign key",
 			tables: func() []*Table {
 				var (
