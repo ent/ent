@@ -10,5 +10,8 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
+// Galaxy is the predicate function for galaxy builders.
+type Galaxy func(*sql.Selector)
+
 // Planet is the predicate function for planet builders.
 type Planet func(*sql.Selector)

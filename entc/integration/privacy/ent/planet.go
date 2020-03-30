@@ -25,7 +25,8 @@ type Planet struct {
 	Age uint `json:"age,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlanetQuery when eager-loading is set.
-	Edges PlanetEdges `json:"edges"`
+	Edges          PlanetEdges `json:"edges"`
+	galaxy_planets *int
 }
 
 // PlanetEdges holds the relations/edges for other nodes in the graph.
@@ -55,6 +56,13 @@ func (*Planet) scanValues() []interface{} {
 	}
 }
 
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Planet) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // galaxy_planets
+	}
+}
+
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Planet fields.
 func (pl *Planet) assignValues(values ...interface{}) error {
@@ -76,6 +84,15 @@ func (pl *Planet) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field age", values[1])
 	} else if value.Valid {
 		pl.Age = uint(value.Int64)
+	}
+	values = values[2:]
+	if len(values) == len(planet.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field galaxy_planets", value)
+		} else if value.Valid {
+			pl.galaxy_planets = new(int)
+			*pl.galaxy_planets = int(value.Int64)
+		}
 	}
 	return nil
 }

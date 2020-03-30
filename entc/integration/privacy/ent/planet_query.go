@@ -30,6 +30,7 @@ type PlanetQuery struct {
 	predicates []predicate.Planet
 	// eager-loading edges.
 	withNeighbors *PlanetQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -335,15 +336,22 @@ func (pq *PlanetQuery) prepareQuery(ctx context.Context) error {
 func (pq *PlanetQuery) sqlAll(ctx context.Context) ([]*Planet, error) {
 	var (
 		nodes       = []*Planet{}
+		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
 		loadedTypes = [1]bool{
 			pq.withNeighbors != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, planet.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Planet{config: pq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {

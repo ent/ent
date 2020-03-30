@@ -148,6 +148,30 @@ type fixedDecisionRule struct{ err error }
 func (f fixedDecisionRule) EvalQuery(context.Context, ent.Query) error       { return f.err }
 func (f fixedDecisionRule) EvalMutation(context.Context, ent.Mutation) error { return f.err }
 
+// The GalaxyQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type GalaxyQueryRuleFunc func(context.Context, *ent.GalaxyQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f GalaxyQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.GalaxyQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.GalaxyQuery", q)
+}
+
+// The GalaxyMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type GalaxyMutationRuleFunc func(context.Context, *ent.GalaxyMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f GalaxyMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.GalaxyMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.GalaxyMutation", m)
+}
+
 // The PlanetQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type PlanetQueryRuleFunc func(context.Context, *ent.PlanetQuery) error

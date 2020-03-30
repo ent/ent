@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/migrate"
 
+	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
 
 	"github.com/facebookincubator/ent/dialect"
@@ -25,6 +26,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Galaxy is the client for interacting with the Galaxy builders.
+	Galaxy *GalaxyClient
 	// Planet is the client for interacting with the Planet builders.
 	Planet *PlanetClient
 }
@@ -40,6 +43,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Galaxy = NewGalaxyClient(c.config)
 	c.Planet = NewPlanetClient(c.config)
 }
 
@@ -71,6 +75,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config: cfg,
+		Galaxy: NewGalaxyClient(cfg),
 		Planet: NewPlanetClient(cfg),
 	}, nil
 }
@@ -78,7 +83,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Planet.
+//		Galaxy.
 //		Query().
 //		Count(ctx)
 //
@@ -100,7 +105,108 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Galaxy.Use(hooks...)
 	c.Planet.Use(hooks...)
+}
+
+// GalaxyClient is a client for the Galaxy schema.
+type GalaxyClient struct {
+	config
+}
+
+// NewGalaxyClient returns a client for the Galaxy from the given config.
+func NewGalaxyClient(c config) *GalaxyClient {
+	return &GalaxyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `galaxy.Hooks(f(g(h())))`.
+func (c *GalaxyClient) Use(hooks ...Hook) {
+	c.hooks.Galaxy = append(c.hooks.Galaxy, hooks...)
+}
+
+// Create returns a create builder for Galaxy.
+func (c *GalaxyClient) Create() *GalaxyCreate {
+	mutation := newGalaxyMutation(c.config, OpCreate)
+	return &GalaxyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Update returns an update builder for Galaxy.
+func (c *GalaxyClient) Update() *GalaxyUpdate {
+	mutation := newGalaxyMutation(c.config, OpUpdate)
+	return &GalaxyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GalaxyClient) UpdateOne(ga *Galaxy) *GalaxyUpdateOne {
+	return c.UpdateOneID(ga.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GalaxyClient) UpdateOneID(id int) *GalaxyUpdateOne {
+	mutation := newGalaxyMutation(c.config, OpUpdateOne)
+	mutation.id = &id
+	return &GalaxyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Galaxy.
+func (c *GalaxyClient) Delete() *GalaxyDelete {
+	mutation := newGalaxyMutation(c.config, OpDelete)
+	return &GalaxyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GalaxyClient) DeleteOne(ga *Galaxy) *GalaxyDeleteOne {
+	return c.DeleteOneID(ga.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GalaxyClient) DeleteOneID(id int) *GalaxyDeleteOne {
+	builder := c.Delete().Where(galaxy.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GalaxyDeleteOne{builder}
+}
+
+// Create returns a query builder for Galaxy.
+func (c *GalaxyClient) Query() *GalaxyQuery {
+	return &GalaxyQuery{config: c.config}
+}
+
+// Get returns a Galaxy entity by its id.
+func (c *GalaxyClient) Get(ctx context.Context, id int) (*Galaxy, error) {
+	return c.Query().Where(galaxy.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GalaxyClient) GetX(ctx context.Context, id int) *Galaxy {
+	ga, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ga
+}
+
+// QueryPlanets queries the planets edge of a Galaxy.
+func (c *GalaxyClient) QueryPlanets(ga *Galaxy) *PlanetQuery {
+	query := &PlanetQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ga.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(galaxy.Table, galaxy.FieldID, id),
+			sqlgraph.To(planet.Table, planet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, galaxy.PlanetsTable, galaxy.PlanetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ga.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GalaxyClient) Hooks() []Hook {
+	hooks := c.hooks.Galaxy
+	return append(hooks[:len(hooks):len(hooks)], galaxy.Hooks[:]...)
 }
 
 // PlanetClient is a client for the Planet schema.

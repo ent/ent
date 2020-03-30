@@ -6,10 +6,12 @@ import (
 	"testing"
 
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent"
+	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/privacy"
 	_ "github.com/facebookincubator/ent/entc/integration/privacy/ent/runtime"
 	"github.com/facebookincubator/ent/entc/integration/privacy/rule"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
@@ -44,4 +46,9 @@ func TestPrivacyRules(t *testing.T) {
 	mars.Update().SetAge(6_000_000_000).ExecX(ctx)
 	count = client.Planet.Query().CountX(ctx)
 	require.Equal(t, 2, count)
+
+	client.Galaxy.Create().SetName("Milky Way").SetType(galaxy.TypeBarredSpiral).AddPlanets(earth, mars).SaveX(ctx)
+	client.Galaxy.Create().SetName("IC 3583").SetType(galaxy.TypeIrregular).SaveX(ctx)
+	count = client.Galaxy.Query().CountX(ctx)
+	require.Equal(t, 1, count)
 }

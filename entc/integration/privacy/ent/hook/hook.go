@@ -13,6 +13,19 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent"
 )
 
+// The GalaxyFunc type is an adapter to allow the use of ordinary
+// function as Galaxy mutator.
+type GalaxyFunc func(context.Context, *ent.GalaxyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GalaxyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.GalaxyMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GalaxyMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The PlanetFunc type is an adapter to allow the use of ordinary
 // function as Planet mutator.
 type PlanetFunc func(context.Context, *ent.PlanetMutation) (ent.Value, error)

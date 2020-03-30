@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent"
+	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/hook"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
 	"github.com/facebookincubator/ent/entc/integration/privacy/ent/privacy"
@@ -43,6 +44,14 @@ func DenyPlanetSelfLinkRule() privacy.MutationRule {
 func FilterZeroAgePlanetRule() privacy.QueryRule {
 	return privacy.PlanetQueryRuleFunc(func(ctx context.Context, q *ent.PlanetQuery) error {
 		q.Where(planet.AgeNEQ(0))
+		return privacy.Skip
+	})
+}
+
+// FilterIrregularGalaxyRule is a query rule that filters out irregular galaxies.
+func FilterIrregularGalaxyRule() privacy.QueryRule {
+	return privacy.GalaxyQueryRuleFunc(func(ctx context.Context, q *ent.GalaxyQuery) error {
+		q.Where(galaxy.TypeNEQ(galaxy.TypeIrregular))
 		return privacy.Skip
 	})
 }
