@@ -83,7 +83,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("postgres: reading table description %v", err)
 	}
-	// call `Close` in cases of failures (`Close` is idempotent).
+	// Call `Close` in cases of failures (`Close` is idempotent).
 	defer rows.Close()
 	t := NewTable(name)
 	for rows.Next() {

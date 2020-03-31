@@ -62,7 +62,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("mysql: reading table description %v", err)
 	}
-	// call Close in cases of failures (Close is idempotent).
+	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
 	t := NewTable(name)
 	for rows.Next() {
@@ -82,7 +82,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	if err != nil {
 		return nil, err
 	}
-	// add and link indexes to table columns.
+	// Add and link indexes to table columns.
 	for _, idx := range indexes {
 		t.AddIndex(idx.Name, idx.Unique, idx.columns)
 	}
@@ -124,7 +124,7 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return fmt.Errorf("mysql: query auto_increment %v", err)
 	}
-	// call Close in cases of failures (Close is idempotent).
+	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
 	actual := &sql.NullInt64{}
 	if err := sql.ScanOne(rows, actual); err != nil {
@@ -151,7 +151,7 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 	for _, pk := range t.PrimaryKey {
 		b.PrimaryKey(pk.Name)
 	}
-	// default charset / collation on MySQL table.
+	// Default charset / collation on MySQL table.
 	// columns can be override using the Charset / Collate fields.
 	b.Charset("utf8mb4").Collate("utf8mb4_bin")
 	return b
@@ -212,7 +212,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = "double"
 	case field.TypeTime:
 		t = "timestamp"
-		// in MySQL timestamp columns are `NOT NULL by default, and assigning NULL
+		// In MySQL, timestamp columns are `NOT NULL by default, and assigning NULL
 		// assigns the current_timestamp(). We avoid this if not set otherwise.
 		c.Nullable = true
 	case field.TypeEnum:
@@ -416,7 +416,7 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 		if err := rows.Scan(&name, &column, &nonuniq, &seqindex); err != nil {
 			return nil, fmt.Errorf("scanning index description: %v", err)
 		}
-		// ignore primary keys.
+		// Ignore primary keys.
 		if name == "PRIMARY" {
 			continue
 		}

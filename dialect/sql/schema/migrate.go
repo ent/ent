@@ -145,8 +145,8 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			if err := tx.Exec(ctx, query, args, nil); err != nil {
 				return fmt.Errorf("create table %q: %v", t.Name, err)
 			}
-			// if global unique identifier is enabled and it's not a relation table,
-			// allocate a range for the table pk.
+			// If global unique identifier is enabled and it's not
+			// a relation table, allocate a range for the table pk.
 			if m.universalID && len(t.PrimaryKey) == 1 {
 				if err := m.allocPKRange(ctx, tx, t); err != nil {
 					return err
@@ -161,7 +161,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			}
 		}
 	}
-	// create foreign keys after tables were created/altered,
+	// Create foreign keys after tables were created/altered,
 	// because circular foreign-key constraints are possible.
 	for _, t := range tables {
 		if len(t.ForeignKeys) == 0 {
@@ -277,16 +277,16 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
 		}
 	}
-	// add or modify columns.
+	// Add or modify columns.
 	for _, c1 := range new.Columns {
-		// ignore primary keys.
+		// Ignore primary keys.
 		if c1.PrimaryKey() {
 			continue
 		}
 		switch c2, ok := curr.column(c1.Name); {
 		case !ok:
 			change.column.add = append(change.column.add, c1)
-		// modify a non-unique column to unique.
+		// Modify a non-unique column to unique.
 		case c1.Unique && !c2.Unique:
 			change.index.add.append(&Index{
 				Name:    c1.Name,
@@ -294,28 +294,28 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 				Columns: []*Column{c1},
 				columns: []string{c1.Name},
 			})
-		// modify a unique column to non-unique.
+		// Modify a unique column to non-unique.
 		case !c1.Unique && c2.Unique:
 			idx, ok := curr.index(c2.Name)
 			if !ok {
 				return nil, fmt.Errorf("missing index to drop for column %q", c2.Name)
 			}
 			change.index.drop.append(idx)
-		// extending column types.
+		// Extending column types.
 		case m.cType(c1) != m.cType(c2):
 			if !c2.ConvertibleTo(c1) {
 				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, m.cType(c1), m.cType(c2))
 			}
 			fallthrough
-		// change nullability of a column.
+		// Change nullability of a column.
 		case c1.Nullable != c2.Nullable:
 			change.column.modify = append(change.column.modify, c1)
 		}
 	}
 
-	// drop columns.
+	// Drop columns.
 	for _, c1 := range curr.Columns {
-		// if a column was dropped, multi-columns indexes that are associated with this column will
+		// If a column was dropped, multi-columns indexes that are associated with this column will
 		// no longer behave the same. Therefore, these indexes should be dropped too. There's no need
 		// to do it explicitly (here), because entc will remove them from the schema specification,
 		// and they will be dropped in the block below.
@@ -324,19 +324,19 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		}
 	}
 
-	// add or modify indexes.
+	// Add or modify indexes.
 	for _, idx1 := range new.Indexes {
 		switch idx2, ok := curr.index(idx1.Name); {
 		case !ok:
 			change.index.add.append(idx1)
-		// changing index cardinality require drop and create.
+		// Changing index cardinality require drop and create.
 		case idx1.Unique != idx2.Unique:
 			change.index.drop.append(idx2)
 			change.index.add.append(idx1)
 		}
 	}
 
-	// drop indexes.
+	// Drop indexes.
 	for _, idx1 := range curr.Indexes {
 		_, ok1 := new.fk(idx1.Name)
 		_, ok2 := new.index(idx1.Name)
@@ -464,7 +464,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 
 func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) error {
 	id := indexOf(m.typeRanges, t.Name)
-	// if the table re-created, re-use its range from
+	// If the table re-created, re-use its range from
 	// the past. otherwise, allocate a new id-range.
 	if id == -1 {
 		if len(m.typeRanges) > MaxTypes {
@@ -478,7 +478,7 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 		id = len(m.typeRanges)
 		m.typeRanges = append(m.typeRanges, t.Name)
 	}
-	// set the id offset for table.
+	// Set the id offset for table.
 	return m.setRange(ctx, tx, t, id<<32)
 }
 
