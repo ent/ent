@@ -234,7 +234,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 		case bool:
 			attr += strconv.FormatBool(v)
 		case string:
-			// escape single quote by replacing each with 2.
+			// Escape single quote by replacing each with 2.
 			attr += fmt.Sprintf("'%s'", strings.Replace(v, "'", "''", -1))
 		default:
 			attr += fmt.Sprint(v)
