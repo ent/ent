@@ -27,6 +27,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -788,34 +789,50 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	require.Error(err)
 }
 
+type mocker struct{ mock.Mock }
+
+func (m *mocker) onCommit(err error)   { m.Called(err) }
+func (m *mocker) onRollback(err error) { m.Called(err) }
+
 func Tx(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	require := require.New(t)
-
-	tx, err := client.Tx(ctx)
-	require.NoError(err)
-	tx.Node.Create().SaveX(ctx)
-
-	require.NoError(tx.Rollback())
-	require.Zero(client.Node.Query().CountX(ctx), "rollback should discard all changes")
-
-	tx, err = client.Tx(ctx)
-	require.NoError(err)
-
-	nde := tx.Node.Create().SaveX(ctx)
-
-	require.NoError(tx.Commit())
-	require.Error(tx.Commit(), "should return an error on the second call")
-	require.NotZero(client.Node.Query().CountX(ctx), "commit should save all changes")
-	_, err = nde.QueryNext().Count(ctx)
-	require.Error(err, "should not be able to query after tx was closed")
-	require.Zero(nde.Unwrap().QueryNext().CountX(ctx), "should be able to query the entity after wrap")
-
-	tx, err = client.Tx(ctx)
-	require.NoError(err)
-	_, err = tx.Client().Tx(ctx)
-	require.Error(err, "cannot start a transaction within a transaction")
-	require.NoError(tx.Rollback())
+	t.Run("Rollback", func(t *testing.T) {
+		tx, err := client.Tx(ctx)
+		require.NoError(t, err)
+		var m mocker
+		m.On("onRollback", nil).Once()
+		defer m.AssertExpectations(t)
+		tx.OnRollback(m.onRollback)
+		tx.Node.Create().SaveX(ctx)
+		require.NoError(t, tx.Rollback())
+		require.Zero(t, client.Node.Query().CountX(ctx), "rollback should discard all changes")
+	})
+	t.Run("Commit", func(t *testing.T) {
+		tx, err := client.Tx(ctx)
+		require.NoError(t, err)
+		var m mocker
+		m.On("onCommit", mock.Anything).Twice()
+		defer m.AssertExpectations(t)
+		tx.OnCommit(m.onCommit)
+		nde := tx.Node.Create().SaveX(ctx)
+		require.NoError(t, tx.Commit())
+		require.Error(t, tx.Commit(), "should return an error on the second call")
+		require.NotZero(t, client.Node.Query().CountX(ctx), "commit should save all changes")
+		_, err = nde.QueryNext().Count(ctx)
+		require.Error(t, err, "should not be able to query after tx was closed")
+		require.Zero(t, nde.Unwrap().QueryNext().CountX(ctx), "should be able to query the entity after wrap")
+	})
+	t.Run("Nested", func(t *testing.T) {
+		tx, err := client.Tx(ctx)
+		require.NoError(t, err)
+		var m mocker
+		m.On("onRollback", nil).Once()
+		defer m.AssertExpectations(t)
+		tx.OnRollback(m.onRollback)
+		_, err = tx.Client().Tx(ctx)
+		require.Error(t, err, "cannot start a transaction within a transaction")
+		require.NoError(t, tx.Rollback())
+	})
 }
 
 func DefaultValue(t *testing.T, client *ent.Client) {
