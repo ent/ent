@@ -12,18 +12,40 @@ import (
 )
 
 var (
+	// GalaxiesColumns holds the columns for the "galaxies" table.
+	GalaxiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"spiral", "barred_spiral", "elliptical", "irregular"}},
+	}
+	// GalaxiesTable holds the schema information for the "galaxies" table.
+	GalaxiesTable = &schema.Table{
+		Name:        "galaxies",
+		Columns:     GalaxiesColumns,
+		PrimaryKey:  []*schema.Column{GalaxiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// PlanetsColumns holds the columns for the "planets" table.
 	PlanetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "age", Type: field.TypeUint, Nullable: true},
+		{Name: "galaxy_planets", Type: field.TypeInt, Nullable: true},
 	}
 	// PlanetsTable holds the schema information for the "planets" table.
 	PlanetsTable = &schema.Table{
-		Name:        "planets",
-		Columns:     PlanetsColumns,
-		PrimaryKey:  []*schema.Column{PlanetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "planets",
+		Columns:    PlanetsColumns,
+		PrimaryKey: []*schema.Column{PlanetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "planets_galaxies_planets",
+				Columns: []*schema.Column{PlanetsColumns[3]},
+
+				RefColumns: []*schema.Column{GalaxiesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// PlanetNeighborsColumns holds the columns for the "planet_neighbors" table.
 	PlanetNeighborsColumns = []*schema.Column{
@@ -54,12 +76,14 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		GalaxiesTable,
 		PlanetsTable,
 		PlanetNeighborsTable,
 	}
 )
 
 func init() {
+	PlanetsTable.ForeignKeys[0].RefTable = GalaxiesTable
 	PlanetNeighborsTable.ForeignKeys[0].RefTable = PlanetsTable
 	PlanetNeighborsTable.ForeignKeys[1].RefTable = PlanetsTable
 }

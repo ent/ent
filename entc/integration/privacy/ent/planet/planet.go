@@ -34,6 +34,11 @@ var Columns = []string{
 	FieldAge,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the Planet type.
+var ForeignKeys = []string{
+	"galaxy_planets",
+}
+
 var (
 	// NeighborsPrimaryKey and NeighborsColumn2 are the table columns denoting the
 	// primary key for the neighbors relation (M2M).
