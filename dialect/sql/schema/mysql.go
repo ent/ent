@@ -198,6 +198,9 @@ func (d *MySQL) cType(c *Column) (t string) {
 		if compareVersions(d.version, "5.7.8") == -1 {
 			t = "longblob"
 		}
+		if strings.Contains(strings.ToLower(d.version), "mariadb") {
+			t = "longtext"
+		}
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
