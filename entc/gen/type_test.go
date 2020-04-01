@@ -69,6 +69,13 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "empty field name")
+
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Type"})
+	require.EqualError(err, "schema lowercase name conflicts with Go keyword \"type\"")
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Int"})
+	require.EqualError(err, "schema lowercase name conflicts with Go predeclared identifier \"int\"")
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Value"})
+	require.EqualError(err, "schema name conflicts with ent predeclared identifier \"Value\"")
 }
 
 func TestType_Label(t *testing.T) {

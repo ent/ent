@@ -7,6 +7,7 @@ package gen
 import (
 	"fmt"
 	"go/token"
+	"go/types"
 	"path"
 	"reflect"
 	"sort"
@@ -147,7 +148,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		ID: &Field{
 			Name:      "id",
 			Type:      c.IDType,
-			StructTag: `json:"id,omitempty"`,
+			StructTag: structTag("id", ""),
 		},
 		schema:      schema,
 		Name:        schema.Name,
@@ -155,26 +156,12 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),
 	}
+	if err := typ.check(); err != nil {
+		return nil, err
+	}
 	for _, f := range schema.Fields {
-		switch {
-		case f.Name == "":
-			return nil, fmt.Errorf("field name cannot be empty")
-		case f.Info == nil || !f.Info.Valid():
-			return nil, fmt.Errorf("invalid type for field %s", f.Name)
-		case f.Nillable && !f.Optional:
-			return nil, fmt.Errorf("nillable field %q must be optional", f.Name)
-		case f.Unique && f.Default:
-			return nil, fmt.Errorf("unique field %q cannot have default value", f.Name)
-		case typ.fields[f.Name] != nil:
-			return nil, fmt.Errorf("field %q redeclared for type %q", f.Name, typ.Name)
-		case f.Sensitive && f.Tag != "":
-			return nil, fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
-		case f.Info.Type == field.TypeEnum:
-			if err := validEnums(f); err != nil {
-				return nil, err
-			}
-			// Enum types should be named as follows: typepkg.Field.
-			f.Info.Ident = fmt.Sprintf("%s.%s", typ.Package(), pascal(f.Name))
+		if err := typ.checkField(f); err != nil {
+			return nil, err
 		}
 		tf := &Field{
 			def:           f,
@@ -191,7 +178,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Validators:    f.Validators,
 			UserDefined:   true,
 		}
-		// user defined id field.
+		// User defined id field.
 		if tf.Name == typ.ID.Name {
 			typ.ID = tf
 		} else {
@@ -502,6 +489,45 @@ func (t Type) HasPolicy() bool {
 	return false
 }
 
+// check checks the schema type.
+func (t *Type) check() error {
+	pkg := t.Package()
+	if token.Lookup(pkg).IsKeyword() {
+		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", pkg)
+	}
+	if types.Universe.Lookup(pkg) != nil {
+		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", pkg)
+	}
+	if _, ok := globalIdent[t.Name]; ok {
+		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", t.Name)
+	}
+	return nil
+}
+
+// checkField checks the schema field.
+func (t *Type) checkField(f *load.Field) (err error) {
+	switch {
+	case f.Name == "":
+		err = fmt.Errorf("field name cannot be empty")
+	case f.Info == nil || !f.Info.Valid():
+		err = fmt.Errorf("invalid type for field %s", f.Name)
+	case f.Nillable && !f.Optional:
+		err = fmt.Errorf("nillable field %q must be optional", f.Name)
+	case f.Unique && f.Default:
+		err = fmt.Errorf("unique field %q cannot have default value", f.Name)
+	case t.fields[f.Name] != nil:
+		err = fmt.Errorf("field %q redeclared for type %q", f.Name, t.Name)
+	case f.Sensitive && f.Tag != "":
+		err = fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
+	case f.Info.Type == field.TypeEnum:
+		if err = checkEnums(f); err == nil {
+			// Enum types should be named as follows: typepkg.Field.
+			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
+		}
+	}
+	return err
+}
+
 // Constant returns the constant name of the field.
 func (f Field) Constant() string {
 	return "Field" + pascal(f.Name)
@@ -807,18 +833,7 @@ func (r Rel) String() string {
 	return s
 }
 
-func structTag(name, tag string) string {
-	t := fmt.Sprintf(`json:"%s,omitempty"`, name)
-	if tag == "" {
-		return t
-	}
-	if _, ok := reflect.StructTag(tag).Lookup("json"); !ok {
-		tag = t + " " + tag
-	}
-	return tag
-}
-
-func validEnums(f *load.Field) error {
+func checkEnums(f *load.Field) error {
 	if len(f.Enums) == 0 {
 		return fmt.Errorf("missing values for enum field %q", f.Name)
 	}
@@ -829,6 +844,8 @@ func validEnums(f *load.Field) error {
 			return fmt.Errorf("%q field value cannot be empty", f.Name)
 		case values[e]:
 			return fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
+		case strings.IndexFunc(e, unicode.IsSpace) != -1:
+			return fmt.Errorf("enum value %q cannot contain spaces", e)
 		default:
 			values[e] = true
 		}
@@ -841,6 +858,17 @@ func validEnums(f *load.Field) error {
 	return nil
 }
 
+func structTag(name, tag string) string {
+	t := fmt.Sprintf(`json:"%s,omitempty"`, name)
+	if tag == "" {
+		return t
+	}
+	if _, ok := reflect.StructTag(tag).Lookup("json"); !ok {
+		tag = t + " " + tag
+	}
+	return tag
+}
+
 // builderField returns the struct field for the given name
 // and ensures it doesn't conflict with Go keywords and other
 // builder fields and it's not exported.
@@ -849,4 +877,38 @@ func builderField(name string) string {
 		return "_" + name
 	}
 	return name
+}
+
+// global identifiers used by the generated package.
+var globalIdent = names(
+	"Aggregate",
+	"As",
+	"Asc",
+	"Count",
+	"Debug",
+	"Desc",
+	"Driver",
+	"Hook",
+	"Log",
+	"MutateFunc",
+	"Mutation",
+	"Mutator",
+	"Op",
+	"Option",
+	"Order",
+	"Max",
+	"Mean",
+	"Min",
+	"Sum",
+	"Policy",
+	"Query",
+	"Value",
+)
+
+func names(ids ...string) map[string]struct{} {
+	m := make(map[string]struct{})
+	for i := range ids {
+		m[ids[i]] = struct{}{}
+	}
+	return m
 }
