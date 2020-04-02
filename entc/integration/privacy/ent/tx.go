@@ -21,6 +21,10 @@ type Tx struct {
 	// Planet is the client for interacting with the Planet builders.
 	Planet *PlanetClient
 
+	// lazily loaded.
+	client     *Client
+	clientOnce sync.Once
+
 	// completion callbacks.
 	mu         sync.Mutex
 	onCommit   []func(error)
@@ -65,9 +69,11 @@ func (tx *Tx) OnRollback(f func(error)) {
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	client := &Client{config: tx.config}
-	client.init()
-	return client
+	tx.clientOnce.Do(func() {
+		tx.client = &Client{config: tx.config}
+		tx.client.init()
+	})
+	return tx.client
 }
 
 func (tx *Tx) init() {
