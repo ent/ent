@@ -3,6 +3,7 @@ package hooks
 import (
 	"context"
 	"fmt"
+	"sort"
 	"testing"
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent"
@@ -56,6 +57,30 @@ func TestRuntimeHooks(t *testing.T) {
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
 	client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, 4, calls)
+}
+
+func TestRuntimeChain(t *testing.T) {
+	ctx := context.Background()
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", ent.Log(t.Log))
+	require.NoError(t, err)
+	defer client.Close()
+	require.NoError(t, client.Schema.Create(ctx))
+	var (
+		chain  hook.Chain
+		values []int
+	)
+	for value := 0; value < 5; value++ {
+		chain = chain.Append(func(next ent.Mutator) ent.Mutator {
+			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+				values = append(values, value)
+				return next.Mutate(ctx, m)
+			})
+		})
+	}
+	client.User.Use(chain.Hook())
+	client.User.Create().SetName("alexsn").SaveX(ctx)
+	require.Len(t, values, 5)
+	require.True(t, sort.IntsAreSorted(values))
 }
 
 func TestMutationClient(t *testing.T) {

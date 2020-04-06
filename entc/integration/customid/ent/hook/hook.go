@@ -111,3 +111,41 @@ func Reject(op ent.Op) ent.Hook {
 		})
 	}
 }
+
+// Chain acts as a list of hooks and is effectively immutable.
+// Once created, it will always hold the same set of hooks in the same order.
+type Chain struct {
+	hooks []ent.Hook
+}
+
+// NewChain creates a new chain of hooks.
+func NewChain(hooks ...ent.Hook) Chain {
+	return Chain{append([]ent.Hook(nil), hooks...)}
+}
+
+// Hook chains the list of hooks and returns the final hook.
+func (c Chain) Hook() ent.Hook {
+	return func(next ent.Mutator) ent.Mutator {
+		for i := len(c.hooks) - 1; i >= 0; i-- {
+			next = c.hooks[i](next)
+		}
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			return next.Mutate(ctx, m)
+		})
+	}
+}
+
+// Append extends a chain, adding the specified hook
+// as the last ones in the mutation flow.
+func (c Chain) Append(hooks ...ent.Hook) Chain {
+	newHooks := make([]ent.Hook, 0, len(c.hooks)+len(hooks))
+	newHooks = append(newHooks, c.hooks...)
+	newHooks = append(newHooks, hooks...)
+	return Chain{newHooks}
+}
+
+// Extend extends a chain, adding the specified chain
+// as the last ones in the mutation flow.
+func (c Chain) Extend(chain Chain) Chain {
+	return c.Append(chain.hooks...)
+}

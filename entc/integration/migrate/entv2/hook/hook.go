@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2"
 )
 
@@ -89,7 +88,7 @@ func On(hk entv2.Hook, op entv2.Op) entv2.Hook {
 //		}
 //	}
 //
-func Reject(op entv2.Op) ent.Hook {
+func Reject(op entv2.Op) entv2.Hook {
 	return func(next entv2.Mutator) entv2.Mutator {
 		return entv2.MutateFunc(func(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
 			if m.Op().Is(op) {
@@ -98,4 +97,42 @@ func Reject(op entv2.Op) ent.Hook {
 			return next.Mutate(ctx, m)
 		})
 	}
+}
+
+// Chain acts as a list of hooks and is effectively immutable.
+// Once created, it will always hold the same set of hooks in the same order.
+type Chain struct {
+	hooks []entv2.Hook
+}
+
+// NewChain creates a new chain of hooks.
+func NewChain(hooks ...entv2.Hook) Chain {
+	return Chain{append([]entv2.Hook(nil), hooks...)}
+}
+
+// Hook chains the list of hooks and returns the final hook.
+func (c Chain) Hook() entv2.Hook {
+	return func(next entv2.Mutator) entv2.Mutator {
+		for i := len(c.hooks) - 1; i >= 0; i-- {
+			next = c.hooks[i](next)
+		}
+		return entv2.MutateFunc(func(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
+			return next.Mutate(ctx, m)
+		})
+	}
+}
+
+// Append extends a chain, adding the specified hook
+// as the last ones in the mutation flow.
+func (c Chain) Append(hooks ...entv2.Hook) Chain {
+	newHooks := make([]entv2.Hook, 0, len(c.hooks)+len(hooks))
+	newHooks = append(newHooks, c.hooks...)
+	newHooks = append(newHooks, hooks...)
+	return Chain{newHooks}
+}
+
+// Extend extends a chain, adding the specified chain
+// as the last ones in the mutation flow.
+func (c Chain) Extend(chain Chain) Chain {
+	return c.Append(chain.hooks...)
 }
