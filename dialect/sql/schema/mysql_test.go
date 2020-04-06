@@ -23,22 +23,20 @@ func TestMySQL_Create(t *testing.T) {
 		name    string
 		tables  []*Table
 		options []MigrateOption
-		before  func(sqlmock.Sqlmock)
+		before  func(mysqlMock)
 		wantErr bool
 	}{
 		{
 			name: "tx failed",
-			before: func(mock sqlmock.Sqlmock) {
+			before: func(mock mysqlMock) {
 				mock.ExpectBegin().WillReturnError(sqlmock.ErrCancelled)
 			},
 			wantErr: true,
 		},
 		{
 			name: "no tables",
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
 				mock.ExpectCommit()
 			},
 		},
@@ -60,13 +58,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.8"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.8")
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -88,13 +82,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.6.35"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+			before: func(mock mysqlMock) {
+				mock.start("5.6.35")
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `age` bigint NOT NULL, `name` varchar(191) UNIQUE NOT NULL, `doc` longblob NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -136,18 +126,12 @@ func TestMySQL_Create(t *testing.T) {
 				)
 				return []*Table{t1, t2}
 			}(),
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("pets").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` bigint NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `CONSTRAINT_TYPE` = ? AND `CONSTRAINT_NAME` = ?")).
@@ -181,13 +165,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -228,13 +208,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -266,13 +242,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -301,13 +273,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.6.0"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.6.0")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -340,13 +308,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -375,13 +339,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -412,13 +372,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -448,13 +404,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -484,13 +436,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -520,13 +468,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -555,13 +499,9 @@ func TestMySQL_Create(t *testing.T) {
 				},
 			},
 			options: []MigrateOption{WithDropColumn(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -591,13 +531,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -627,13 +563,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -663,13 +595,9 @@ func TestMySQL_Create(t *testing.T) {
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -698,13 +626,9 @@ func TestMySQL_Create(t *testing.T) {
 				},
 			},
 			options: []MigrateOption{WithDropIndex(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -748,13 +672,9 @@ func TestMySQL_Create(t *testing.T) {
 				},
 			},
 			options: []MigrateOption{WithDropIndex(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -796,13 +716,9 @@ func TestMySQL_Create(t *testing.T) {
 				},
 			},
 			options: []MigrateOption{WithDropIndex(true), WithDropColumn(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -843,13 +759,9 @@ func TestMySQL_Create(t *testing.T) {
 				},
 			},
 			options: []MigrateOption{WithDropIndex(true), WithDropColumn(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -899,13 +811,9 @@ func TestMySQL_Create(t *testing.T) {
 				t1.ForeignKeys[0].RefTable = t1
 				return []*Table{t1}
 			}(),
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", true)
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -935,19 +843,13 @@ func TestMySQL_Create(t *testing.T) {
 				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
 			},
 			options: []MigrateOption{WithGlobalUniqueID(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("ent_types").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("ent_types", false)
 				// create ent_types table.
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint AUTO_INCREMENT NOT NULL, `type` varchar(255) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range.
@@ -977,19 +879,13 @@ func TestMySQL_Create(t *testing.T) {
 				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
 			},
 			options: []MigrateOption{WithGlobalUniqueID(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("ent_types").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("ent_types", true)
 				// query ent_types table.
 				mock.ExpectQuery(escape("SELECT `type` FROM `ent_types` ORDER BY `id` ASC")).
 					WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow("users"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.tableExists("users", true)
 				// users table has no changes.
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
@@ -1021,27 +917,19 @@ func TestMySQL_Create(t *testing.T) {
 				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
 			},
 			options: []MigrateOption{WithGlobalUniqueID(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("ent_types").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("ent_types", true)
 				// query ent_types table.
 				mock.ExpectQuery(escape("SELECT `type` FROM `ent_types` ORDER BY `id` ASC")).
 					WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow("users"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range (without inserting to ent_types).
 				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 0")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("groups").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("groups", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `groups`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
@@ -1059,21 +947,15 @@ func TestMySQL_Create(t *testing.T) {
 				NewTable("users").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
 			},
 			options: []MigrateOption{WithGlobalUniqueID(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
-					WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", "5.7.23"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("ent_types").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("ent_types", true)
 				// query ent_types table.
 				mock.ExpectQuery(escape("SELECT `type` FROM `ent_types` ORDER BY `id` ASC")).
 					WillReturnRows(sqlmock.NewRows([]string{"type"}).
 						AddRow("deleted").
 						AddRow("users"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
-					WithArgs("users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.tableExists("users", true)
 				// users table has no changes.
 				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
 					WithArgs("users").
@@ -1099,13 +981,33 @@ func TestMySQL_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
-			tt.before(mock)
+			tt.before(mysqlMock{mock})
 			migrate, err := NewMigrate(sql.OpenDB("mysql", db), tt.options...)
 			require.NoError(t, err)
 			err = migrate.Create(context.Background(), tt.tables...)
 			require.Equal(t, tt.wantErr, err != nil, err)
 		})
 	}
+}
+
+type mysqlMock struct {
+	sqlmock.Sqlmock
+}
+
+func (m mysqlMock) start(version string) {
+	m.ExpectBegin()
+	m.ExpectQuery(escape("SHOW VARIABLES LIKE 'version'")).
+		WillReturnRows(sqlmock.NewRows([]string{"Variable_name", "Value"}).AddRow("version", version))
+}
+
+func (m mysqlMock) tableExists(table string, exists bool) {
+	count := 0
+	if exists {
+		count = 1
+	}
+	m.ExpectQuery(escape("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+		WithArgs(table).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(count))
 }
 
 func escape(query string) string {
