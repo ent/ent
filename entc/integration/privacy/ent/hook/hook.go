@@ -86,13 +86,11 @@ func NewChain(hooks ...ent.Hook) Chain {
 
 // Hook chains the list of hooks and returns the final hook.
 func (c Chain) Hook() ent.Hook {
-	return func(next ent.Mutator) ent.Mutator {
+	return func(mutator ent.Mutator) ent.Mutator {
 		for i := len(c.hooks) - 1; i >= 0; i-- {
-			next = c.hooks[i](next)
+			mutator = c.hooks[i](mutator)
 		}
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			return next.Mutate(ctx, m)
-		})
+		return mutator
 	}
 }
 
