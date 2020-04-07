@@ -11,8 +11,8 @@ aliases:
       path: ~/test-results
 
 orbs:
-  aws-cli: circleci/aws-cli@0.1.13
-  go: circleci/go@1.1.0
+  aws-cli: circleci/aws-cli@1.0.0
+  go: circleci/go@1.1.1
 
 commands:
   getmods:
@@ -184,8 +184,7 @@ jobs:
         name: Build Docs
         working_directory: ~/project/doc/website
         command: yarn build
-    - aws-cli/install
-    - aws-cli/configure
+    - aws-cli/setup
     - run:
         name: Deploy Docs
         working_directory: ~/project/doc/website/build/ent
