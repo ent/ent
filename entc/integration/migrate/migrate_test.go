@@ -78,7 +78,7 @@ func TestSQLite(t *testing.T) {
 
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
-	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)))
+	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), migratev2.WithDropIndex(true))
 
 	SanityV2(t, client)
 	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)

@@ -209,21 +209,14 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 			}
 		}
 	}
-	b := sql.Dialect(m.Dialect()).AlterTable(table)
-	for _, c := range change.column.add {
-		b.AddColumn(m.addColumn(c))
-	}
-	for _, c := range change.column.modify {
-		b.ModifyColumns(m.alterColumn(c)...)
-	}
+	var drop []*Column
 	if m.dropColumns {
-		for _, c := range change.column.drop {
-			b.DropColumn(sql.Dialect(m.Dialect()).Column(c.Name))
-		}
+		drop = change.column.drop
 	}
+	queries := m.alterColumns(table, change.column.add, change.column.modify, drop)
 	// If there's actual action to execute on ALTER TABLE.
-	if len(b.Queries) != 0 {
-		query, args := b.Query()
+	for i := range queries {
+		query, args := queries[i].Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("alter table %q: %v", table, err)
 		}
@@ -337,11 +330,11 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	}
 
 	// Drop indexes.
-	for _, idx1 := range curr.Indexes {
-		_, ok1 := new.fk(idx1.Name)
-		_, ok2 := new.index(idx1.Name)
+	for _, idx := range curr.Indexes {
+		_, ok1 := new.fk(idx.Name)
+		_, ok2 := new.index(idx.Name)
 		if !ok1 && !ok2 {
-			change.index.drop.append(idx1)
+			change.index.drop.append(idx)
 		}
 	}
 	return change, nil
@@ -532,6 +525,9 @@ func (m *Migrate) setupTable(t *Table) {
 	}
 	for _, fk := range t.ForeignKeys {
 		fk.Symbol = m.symbol(fk.Symbol)
+		for i := range fk.Columns {
+			fk.Columns[i].foreign = fk
+		}
 	}
 }
 
@@ -590,9 +586,8 @@ type sqlDialect interface {
 	// table, column and index builder per dialect.
 	cType(*Column) string
 	tBuilder(*Table) *sql.TableBuilder
-	addColumn(*Column) *sql.ColumnBuilder
-	alterColumn(*Column) []*sql.ColumnBuilder
 	addIndex(*Index, string) *sql.IndexBuilder
+	alterColumns(table string, add, modify, drop []*Column) sql.Queries
 }
 
 type preparer interface {

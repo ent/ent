@@ -25,10 +25,11 @@ type Querier interface {
 // ColumnBuilder is a builder for column definition in table creation.
 type ColumnBuilder struct {
 	Builder
-	typ    string // column type.
-	name   string // column name.
-	attr   string // extra attributes.
-	modify bool   // modify existing.
+	typ    string             // column type.
+	name   string             // column name.
+	attr   string             // extra attributes.
+	modify bool               // modify existing.
+	fk     *ForeignKeyBuilder // foreign-key constraint.
 }
 
 // Column returns a new ColumnBuilder with the given name.
@@ -52,6 +53,12 @@ func (c *ColumnBuilder) Attr(attr string) *ColumnBuilder {
 	return c
 }
 
+// Constraint adds the CONSTRAINT clause to the ADD COLUMN statement in SQLite.
+func (c *ColumnBuilder) Constraint(fk *ForeignKeyBuilder) *ColumnBuilder {
+	c.fk = fk
+	return c
+}
+
 // Query returns query representation of a Column.
 func (c *ColumnBuilder) Query() (string, []interface{}) {
 	c.Ident(c.name)
@@ -63,6 +70,13 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 	}
 	if c.attr != "" {
 		c.Pad().WriteString(c.attr)
+	}
+	if c.fk != nil {
+		c.WriteString(" CONSTRAINT " + c.fk.symbol)
+		c.Pad().Join(c.fk.ref)
+		for _, action := range c.fk.actions {
+			c.Pad().WriteString(action)
+		}
 	}
 	return c.String(), c.args
 }

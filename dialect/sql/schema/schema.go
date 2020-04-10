@@ -98,7 +98,6 @@ func (t *Table) column(name string) (*Column, bool) {
 }
 
 // index returns a table index by its name.
-// faster than map lookup for most cases.
 func (t *Table) index(name string) (*Index, bool) {
 	for _, idx := range t.Indexes {
 		if idx.Name == name {
@@ -150,6 +149,7 @@ type Column struct {
 	Default   interface{} // default value.
 	Enums     []string    // enum values.
 	indexes   Indexes     // linked indexes.
+	foreign   *ForeignKey // linked foreign-key.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -186,7 +186,7 @@ func (c Column) FloatType() bool { return c.Type == field.TypeFloat32 || c.Type 
 // ScanDefault scans the default value string to its interface type.
 func (c *Column) ScanDefault(value string) (err error) {
 	switch {
-	case value == Null: // ignore.
+	case strings.ToUpper(value) == Null: // ignore.
 	case c.IntType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {

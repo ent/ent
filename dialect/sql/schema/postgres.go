@@ -382,3 +382,21 @@ func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
 func (d *Postgres) tableSchema() sql.Querier {
 	return sql.Raw("(CURRENT_SCHEMA())")
 }
+
+// alterColumns returns the queries for applying the columns change-set.
+func (d *Postgres) alterColumns(table string, add, modify, drop []*Column) sql.Queries {
+	b := sql.Dialect(dialect.Postgres).AlterTable(table)
+	for _, c := range add {
+		b.AddColumn(d.addColumn(c))
+	}
+	for _, c := range modify {
+		b.ModifyColumns(d.alterColumn(c)...)
+	}
+	for _, c := range drop {
+		b.DropColumn(sql.Dialect(dialect.Postgres).Column(c.Name))
+	}
+	if len(b.Queries) == 0 {
+		return nil
+	}
+	return sql.Queries{b}
+}
