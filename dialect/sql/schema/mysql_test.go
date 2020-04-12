@@ -388,7 +388,7 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "add bool column with default value to table",
+			name: "add bool column with default value",
 			tables: []*Table{
 				{
 					Name: "users",
@@ -420,7 +420,7 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "add string column with default value to table",
+			name: "add string column with default value",
 			tables: []*Table{
 				{
 					Name: "users",
@@ -452,7 +452,7 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "add column with unsupported default value to table",
+			name: "add column with unsupported default value",
 			tables: []*Table{
 				{
 					Name: "users",
@@ -484,7 +484,7 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "drop column to table",
+			name: "drop columns",
 			tables: []*Table{
 				{
 					Name: "users",

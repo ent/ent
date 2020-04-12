@@ -57,9 +57,9 @@ issues:
       text: "SQL string concatenation"
       linters:
         - gosec
-    - path: dialect/sql/schema/migrate.go
-      text: "weak cryptographic primitive"
+    - path: dialect/sql/schema
       linters:
+        - dupl
         - gosec
     - path: entc/load/load.go
       text: "packages.LoadSyntax is deprecated"

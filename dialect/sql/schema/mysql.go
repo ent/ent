@@ -243,11 +243,6 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 	return b
 }
 
-// alterColumn returns the DSL query for modifying the given column.
-func (d *MySQL) alterColumn(c *Column) []*sql.ColumnBuilder {
-	return []*sql.ColumnBuilder{d.addColumn(c)}
-}
-
 // addIndex returns the querying for adding an index to MySQL.
 func (d *MySQL) addIndex(i *Index, table string) *sql.IndexBuilder {
 	return i.Builder(table)
@@ -463,6 +458,24 @@ func (d *MySQL) renameIndex(t *Table, old, new *Index) sql.Querier {
 // tableSchema returns the query for getting the table schema.
 func (d *MySQL) tableSchema() sql.Querier {
 	return sql.Raw("(SELECT DATABASE())")
+}
+
+// alterColumns returns the queries for applying the columns change-set.
+func (d *MySQL) alterColumns(table string, add, modify, drop []*Column) sql.Queries {
+	b := sql.Dialect(dialect.MySQL).AlterTable(table)
+	for _, c := range add {
+		b.AddColumn(d.addColumn(c))
+	}
+	for _, c := range modify {
+		b.ModifyColumn(d.addColumn(c))
+	}
+	for _, c := range drop {
+		b.DropColumn(sql.Dialect(dialect.MySQL).Column(c.Name))
+	}
+	if len(b.Queries) == 0 {
+		return nil
+	}
+	return sql.Queries{b}
 }
 
 // parseColumn returns column parts, size and signedness by mysql type

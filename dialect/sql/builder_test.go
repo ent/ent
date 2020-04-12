@@ -1164,6 +1164,20 @@ func TestBuilder(t *testing.T) {
 			input:     DropIndex("name_index").Table("users"),
 			wantQuery: "DROP INDEX `name_index` ON `users`",
 		},
+		{
+			input: Select().
+				From(Table("pragma_table_info('t1')").Unquote()).
+				OrderBy("pk"),
+			wantQuery: "SELECT * FROM pragma_table_info('t1') ORDER BY `pk`",
+		},
+		{
+			input: AlterTable("users").
+				AddColumn(Column("spouse").Type("integer").
+					Constraint(ForeignKey("user_spouse").
+						Reference(Reference().Table("users").Columns("id")).
+						OnDelete("SET NULL"))),
+			wantQuery: "ALTER TABLE `users` ADD COLUMN `spouse` integer CONSTRAINT user_spouse REFERENCES `users`(`id`) ON DELETE SET NULL",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
