@@ -9,19 +9,36 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
-
 	"github.com/facebookincubator/ent"
 	gen "github.com/facebookincubator/ent/entc/integration/hooks/ent"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
-
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/mixin"
 )
+
+// RejectMany rejects all update operations
+// that are not on a specific entity.
+type RejectUpdate struct {
+	mixin.Schema
+}
+
+func (RejectUpdate) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.Reject(ent.OpUpdate),
+	}
+}
 
 // Card holds the schema definition for the CreditCard entity.
 type Card struct {
 	ent.Schema
+}
+
+func (Card) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		RejectUpdate{},
+	}
 }
 
 func (Card) Hooks() []ent.Hook {

@@ -16,8 +16,6 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
-
-	"github.com/facebookincubator/ent"
 )
 
 // The init function reads all schema descriptors with runtime
@@ -25,17 +23,15 @@ import (
 // to their package variables.
 func init() {
 	cardMixin := schema.Card{}.Mixin()
-	cardMixinFields := [...][]ent.Field{
-		cardMixin[0].Fields(),
-	}
+	cardMixinFields0 := cardMixin[0].Fields()
 	cardFields := schema.Card{}.Fields()
 	_ = cardFields
 	// cardDescCreateTime is the schema descriptor for create_time field.
-	cardDescCreateTime := cardMixinFields[0][0].Descriptor()
+	cardDescCreateTime := cardMixinFields0[0].Descriptor()
 	// card.DefaultCreateTime holds the default value on creation for the create_time field.
 	card.DefaultCreateTime = cardDescCreateTime.Default.(func() time.Time)
 	// cardDescUpdateTime is the schema descriptor for update_time field.
-	cardDescUpdateTime := cardMixinFields[0][1].Descriptor()
+	cardDescUpdateTime := cardMixinFields0[1].Descriptor()
 	// card.DefaultUpdateTime holds the default value on creation for the update_time field.
 	card.DefaultUpdateTime = cardDescUpdateTime.Default.(func() time.Time)
 	// card.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
@@ -117,13 +113,11 @@ func init() {
 	// groupinfo.DefaultMaxUsers holds the default value on creation for the max_users field.
 	groupinfo.DefaultMaxUsers = groupinfoDescMaxUsers.Default.(int)
 	userMixin := schema.User{}.Mixin()
-	userMixinFields := [...][]ent.Field{
-		userMixin[0].Fields(),
-	}
+	userMixinFields0 := userMixin[0].Fields()
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescOptionalInt is the schema descriptor for optional_int field.
-	userDescOptionalInt := userMixinFields[0][0].Descriptor()
+	userDescOptionalInt := userMixinFields0[0].Descriptor()
 	// user.OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.
 	user.OptionalIntValidator = userDescOptionalInt.Validators[0].(func(int) error)
 	// userDescLast is the schema descriptor for last field.

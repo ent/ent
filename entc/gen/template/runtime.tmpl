@@ -84,6 +84,9 @@ func init() {
 {{- range $n := $.Nodes }}
 	{{- $pkg :=  $n.Package }}
 	{{- $schema := base $.Config.Schema }}
+	{{- with $n.RuntimeMixin }}
+		{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
+	{{- end }}
 	{{- if $n.HasPolicy }}
 		{{ print $pkg ".Policy" }} = {{ $schema }}.{{ $n.Name }}{}.Policy()
 		{{ print $pkg ".Hooks" }}[0] = func(next ent.Mutator) ent.Mutator {
@@ -95,20 +98,34 @@ func init() {
 			})
 		}
 	{{- end }}
-	{{- if $n.NumHooks }}
-		{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
-		for i, h := range {{ print $pkg "Hooks" }} {
-			{{ print $pkg ".Hooks" }}[i{{ if $n.HasPolicy }}+1{{ end }}] = h
-		}
+	{{- with $hooks := $n.HookPositions }}
+        {{- /* Hooks defined in schema mixins. */}}
+		{{- with $idx := $n.MixedInHooks }}
+			{{- range $i := $idx }}
+                {{ print $pkg "MixinHooks" $i }} := {{ $pkg }}Mixin[{{ $i }}].(interface{ Hooks() []ent.Hook }).Hooks()
+			{{- end }}
+		{{- end }}
+        {{- /* If there are hooks defined in the schema. */}}
+        {{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
+		{{- if $schemaHooks }}
+			{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
+		{{- end }}
+		{{- range $i, $p := $hooks }}
+            {{- if $n.HasPolicy }}
+				{{ $i = add $i 1 }}
+			{{- end }}
+			{{- if $p.MixedIn }}
+                {{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
+			{{- else }}
+                {{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
+			{{- end }}
+		{{- end }}
 	{{- end }}
 	{{- if or $n.HasDefault $n.HasValidators }}
-		{{- with $n.MixedInWithDefaultOrValidator }}
-			{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
-			{{ $pkg }}MixinFields := [...][]ent.Field{
-				{{- range $i, $_ := xrange $n.NumMixin }}
-					{{ $pkg }}Mixin[{{ $i }}].Fields(),
-				{{- end }}
-			}
+        {{- with $idx := $n.MixedInFields }}
+            {{- range $i := $idx }}
+                {{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
+            {{- end }}
 		{{- end }}
 		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
 		{{- with $fields }}
@@ -119,11 +136,10 @@ func init() {
 			{{- $desc := print $pkg "Desc" $f.StructField }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
 			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators }}
+				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
 				{{- if $f.Position.MixedIn }}
-					// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
-					{{ $desc }} := {{ $pkg }}MixinFields[{{ $f.Position.MixinIndex }}][{{ $f.Position.Index }}].Descriptor()
+					{{ $desc }} := {{ print $pkg "MixinFields" $f.Position.MixinIndex }}[{{ $f.Position.Index }}].Descriptor()
 				{{- else }}
-					// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
 					{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
 				{{- end }}
 			{{- end }}

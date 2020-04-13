@@ -8,7 +8,7 @@ import (
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/schemautil"
+	"github.com/facebookincubator/ent/schema/mixin"
 )
 
 // Card holds the schema definition for the CreditCard entity.
@@ -18,7 +18,7 @@ type Card struct {
 
 func (Card) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		schemautil.TimeMixin{},
+		mixin.Time{},
 	}
 }
 

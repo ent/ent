@@ -55,7 +55,7 @@ var ForeignKeys = []string{
 //	import _ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
 //
 var (
-	Hooks [2]ent.Hook
+	Hooks [3]ent.Hook
 	// DefaultNumber holds the default value on creation for the number field.
 	DefaultNumber string
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.

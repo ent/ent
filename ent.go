@@ -137,9 +137,15 @@ type (
 	// 	}
 	//
 	Mixin interface {
-		// Fields returns a slice of fields to be added
-		// to the schema fields.
+		// Fields returns a slice of fields to add to the schema.
 		Fields() []Field
+		// Edges returns a slice of edges to add to the schema.
+		Edges() []Edge
+		// Indexes returns a slice of indexes to add to the schema.
+		Indexes() []Index
+		// Hooks returns a slice of hooks to add to the schema.
+		// Note that mixin hooks are executed before schema hooks.
+		Hooks() []Hook
 	}
 
 	// The Policy type defines the write privacy policy of an entity.

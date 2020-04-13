@@ -21,12 +21,13 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
+// The following types and their exported methods used by the codegen
+// to generate the assets.
 type (
 	// Type represents one node-type in the graph, its relations and
 	// the information it holds.
 	Type struct {
 		*Config
-		// schema definition.
 		schema *load.Schema
 		// Name holds the type/ent name.
 		Name string
@@ -46,7 +47,6 @@ type (
 
 	// Field holds the information of a type field used for the templates.
 	Field struct {
-		// field definition.
 		def *load.Field
 		// Name is the name of this field in the database schema.
 		Name string
@@ -288,14 +288,35 @@ func (t Type) FKEdges() (edges []*Edge) {
 	return
 }
 
-// MixedInWithDefaultOrValidator returns all mixed-in fields with default values for creation or update.
-func (t Type) MixedInWithDefaultOrValidator() (fields []*Field) {
+// RuntimeMixin returns schema mixin that needs to be loaded at
+// runtime. For example, for default values, validators or hooks.
+func (t Type) RuntimeMixin() bool {
+	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0
+}
+
+// MixedInFields returns the indices of mixin holds runtime code.
+func (t Type) MixedInFields() []int {
+	idx := make(map[int]struct{})
 	for _, f := range t.Fields {
 		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0) {
-			fields = append(fields, f)
+			idx[f.Position.MixinIndex] = struct{}{}
 		}
 	}
-	return
+	return sortedKeys(idx)
+}
+
+// MixedInHooks returns the indices of mixin with hooks.
+func (t Type) MixedInHooks() []int {
+	if t.schema == nil {
+		return nil
+	}
+	idx := make(map[int]struct{})
+	for _, h := range t.schema.Hooks {
+		if h.MixedIn {
+			idx[h.MixinIndex] = struct{}{}
+		}
+	}
+	return sortedKeys(idx)
 }
 
 // NumMixin returns the type's mixin count.
@@ -484,9 +505,17 @@ func (t Type) SiblingImports() []string {
 // NumHooks returns the number of hooks declared in the type schema.
 func (t Type) NumHooks() int {
 	if t.schema != nil {
-		return t.schema.Hooks
+		return len(t.schema.Hooks)
 	}
 	return 0
+}
+
+// HookPositions returns the position information of hooks declared in the type schema.
+func (t Type) HookPositions() []*load.Position {
+	if t.schema != nil {
+		return t.schema.Hooks
+	}
+	return nil
 }
 
 // HasPolicy returns whether a privacy policy was declared in the type schema.
@@ -919,4 +948,13 @@ func names(ids ...string) map[string]struct{} {
 		m[ids[i]] = struct{}{}
 	}
 	return m
+}
+
+func sortedKeys(m map[int]struct{}) []int {
+	s := make([]int, 0, len(m))
+	for k := range m {
+		s = append(s, k)
+	}
+	sort.Ints(s)
+	return s
 }
