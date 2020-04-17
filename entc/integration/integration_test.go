@@ -6,6 +6,7 @@ package integration
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -91,7 +92,7 @@ func TestPostgres(t *testing.T) {
 }
 
 // tests for all drivers to run.
-var tests = []func(*testing.T, *ent.Client){
+var tests = [...]func(*testing.T, *ent.Client){
 	Tx,
 	Indexes,
 	Types,
@@ -831,6 +832,20 @@ func Tx(t *testing.T, client *ent.Client) {
 		tx.OnRollback(m.onRollback)
 		_, err = tx.Client().Tx(ctx)
 		require.Error(t, err, "cannot start a transaction within a transaction")
+		require.NoError(t, tx.Rollback())
+	})
+	t.Run("TxOptions", func(t *testing.T) {
+		if strings.Contains(t.Name(), "SQLite") {
+			t.Skip("SQLite does not support TxOptions.ReadOnly")
+		}
+		tx, err := client.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+		require.NoError(t, err)
+		var m mocker
+		m.On("onRollback", nil).Once()
+		defer m.AssertExpectations(t)
+		tx.OnRollback(m.onRollback)
+		_, err = tx.Item.Create().Save(ctx)
+		require.Error(t, err)
 		require.NoError(t, tx.Rollback())
 	})
 }
