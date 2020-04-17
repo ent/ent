@@ -86,6 +86,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}, nil
 }
 
+{{- /* If the storage driver supports TxOptions (like SQL) */}}
+{{- $tmpl = printf "dialect/%s/txoptions" $.Storage }}
+{{- if hasTemplate $tmpl }}
+    {{- xtemplate $tmpl . }}
+{{- end }}
+
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
@@ -229,5 +235,5 @@ func (c *{{ $client }}) Hooks() []Hook {
 {{ end }}
 
 {{/* A template that can be overrided in order to add additional fields to the client.*/}}
-{{ define "client/fields/additional" }}{{end}}
+{{ define "client/fields/additional" }}{{ end }}
 
