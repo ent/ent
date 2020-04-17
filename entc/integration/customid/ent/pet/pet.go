@@ -61,3 +61,8 @@ var (
 	// primary key for the friends relation (M2M).
 	FriendsPrimaryKey = []string{"pet_id", "friend_id"}
 )
+
+var (
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
+)

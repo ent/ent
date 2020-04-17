@@ -222,7 +222,11 @@ func (t Type) HasAssoc(name string) (*Edge, bool) {
 
 // HasValidators reports if any of the type's field has validators.
 func (t Type) HasValidators() bool {
-	for _, f := range t.Fields {
+	fields := t.Fields
+	if t.ID.UserDefined {
+		fields = append(fields, t.ID)
+	}
+	for _, f := range fields {
 		if f.Validators > 0 {
 			return true
 		}
@@ -232,7 +236,11 @@ func (t Type) HasValidators() bool {
 
 // HasDefault reports if any of this type's fields has default value on creation.
 func (t Type) HasDefault() bool {
-	for _, f := range t.Fields {
+	fields := t.Fields
+	if t.ID.UserDefined {
+		fields = append(fields, t.ID)
+	}
+	for _, f := range fields {
 		if f.Default {
 			return true
 		}

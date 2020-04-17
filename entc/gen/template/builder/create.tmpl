@@ -34,8 +34,9 @@ type {{ $builder }} struct {
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
 	{{- $mutation := print $receiver ".mutation" }}
-	{{- range $_, $f := $.Fields }}
-		{{- if or $f.Default (not $f.Optional) }}
+	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+	{{- range $f := $fields }}
+		{{- if or $f.Default (and (not $f.Optional) (ne $f $.ID)) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
 				{{- if $f.Default }}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
@@ -53,7 +54,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			}
 		{{- end }}
 	{{- end }}
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		{{- if not $e.Optional }}
 			{{- if $e.Unique }}
 				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); !ok {

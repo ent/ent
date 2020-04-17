@@ -100,6 +100,11 @@ func (pc *PetCreate) SetBestFriend(p *Pet) *PetCreate {
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	if v, ok := pc.mutation.ID(); ok {
+		if err := pet.IDValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"id\": %v", err)
+		}
+	}
 	var (
 		err  error
 		node *Pet

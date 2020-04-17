@@ -20,7 +20,8 @@ type Blob struct {
 // Fields of the Blob.
 func (Blob) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New),
 	}
