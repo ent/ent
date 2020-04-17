@@ -93,6 +93,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 
 	blb := client.Blob.Create().SetID(uuid.New()).SaveX(ctx)
 	require.NotEmpty(t, blb.ID)
+	require.NotEmpty(t, blb.UUID)
 	chd := client.Blob.Create().SetID(uuid.New()).SetParent(blb).SaveX(ctx)
 	require.Equal(t, blb.ID, chd.QueryParent().OnlyX(ctx).ID)
 	lnk := client.Blob.Create().SetID(uuid.New()).AddLinks(chd, blb).SaveX(ctx)
