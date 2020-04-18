@@ -75,6 +75,10 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 		v := blob.DefaultUUID()
 		bc.mutation.SetUUID(v)
 	}
+	if _, ok := bc.mutation.ID(); !ok {
+		v := blob.DefaultID()
+		bc.mutation.SetID(v)
+	}
 	var (
 		err  error
 		node *Blob

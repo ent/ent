@@ -8,6 +8,7 @@ package ent
 
 import (
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
 )
@@ -22,4 +23,28 @@ func init() {
 	blobDescUUID := blobFields[1].Descriptor()
 	// blob.DefaultUUID holds the default value on creation for the uuid field.
 	blob.DefaultUUID = blobDescUUID.Default.(func() uuid.UUID)
+	// blobDescID is the schema descriptor for id field.
+	blobDescID := blobFields[0].Descriptor()
+	// blob.DefaultID holds the default value on creation for the id field.
+	blob.DefaultID = blobDescID.Default.(func() uuid.UUID)
+	petFields := schema.Pet{}.Fields()
+	_ = petFields
+	// petDescID is the schema descriptor for id field.
+	petDescID := petFields[0].Descriptor()
+	// pet.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	pet.IDValidator = func() func(string) error {
+		validators := petDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 }

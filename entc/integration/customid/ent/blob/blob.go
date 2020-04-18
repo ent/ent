@@ -52,4 +52,6 @@ var (
 var (
 	// DefaultUUID holds the default value on creation for the uuid field.
 	DefaultUUID func() uuid.UUID
+	// DefaultID holds the default value on creation for the id field.
+	DefaultID func() uuid.UUID
 )

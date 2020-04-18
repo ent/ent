@@ -110,11 +110,12 @@ func init() {
 				{{- end }}
 			}
 		{{- end }}
-		{{- with $n.Fields }}
+		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
+		{{- with $fields }}
 			{{ $pkg }}Fields := {{ $schema }}.{{ $n.Name }}{}.Fields()
 			_ = {{ $pkg }}Fields
 		{{- end }}
-		{{- range $i, $f := $n.Fields }}
+		{{- range $i, $f := $fields }}
 			{{- $desc := print $pkg "Desc" $f.StructField }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
 			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators }}
