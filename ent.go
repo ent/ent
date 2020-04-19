@@ -7,7 +7,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
@@ -319,19 +318,6 @@ const (
 )
 
 // Is reports whether o is match the given operation.
-func (op Op) Is(o Op) bool { return op&o != 0 }
+func (i Op) Is(o Op) bool { return i&o != 0 }
 
-func (op Op) String() string {
-	if op > 0 || op < Op(len(ops)) {
-		return ops[op]
-	}
-	return fmt.Sprintf("op(%d)", op)
-}
-
-var ops = [...]string{
-	OpCreate:    "Create",
-	OpUpdate:    "Update",
-	OpUpdateOne: "UpdateOne",
-	OpDelete:    "Delete",
-	OpDeleteOne: "DeleteOne",
-}
+//go:generate go run golang.org/x/tools/cmd/stringer -type Op
