@@ -1,0 +1,49 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "enttest" }}
+
+{{ $pkg := base $.Config.Package }}
+
+{{ with extend $ "Package" "enttest" -}}
+	{{ template "header" . }}
+{{ end }}
+
+import (
+	"fmt"
+
+	"{{ $.Config.Package }}"
+	_ "{{ $.Config.Package }}/runtime"
+
+	{{ if $.SupportMigrate }}
+		"github.com/facebookincubator/ent/dialect/sql/schema"
+	{{ end }}
+)
+
+// TestingT is the interface that is shared between
+// testing.T and testing.B and used by enttest.
+type TestingT interface {
+	FailNow()
+	Error(...interface{})
+}
+
+// Open calls {{ $pkg }}.Open and auto-run migration.
+func Open(t TestingT, driverName, dataSourceName string, {{ if $.SupportMigrate }}options ...schema.MigrateOption{{ end }}) *{{ $pkg }}.Client {
+	c, err := {{ $pkg }}.Open(driverName, dataSourceName)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	{{- if $.SupportMigrate }}
+		if err := c.Schema.Create(context.Background(), options...); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+	{{- end }}
+	return c
+}
+
+{{ end }}

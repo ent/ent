@@ -121,6 +121,10 @@ var (
 			Format: "runtime.go",
 		},
 		{
+			Name:   "enttest",
+			Format: "enttest/enttest.go",
+		},
+		{
 			Name:   "runtime/pkg",
 			Format: "runtime/runtime.go",
 		},
