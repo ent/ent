@@ -148,8 +148,8 @@ type fixedDecisionRule struct{ err error }
 func (f fixedDecisionRule) EvalQuery(context.Context, ent.Query) error       { return f.err }
 func (f fixedDecisionRule) EvalMutation(context.Context, ent.Mutation) error { return f.err }
 
-// DenyMutationOperation returns a rule denying specifies mutation operation.
-func DenyMutationOperation(op ent.Op) MutationRule {
+// DenyMutationOperationRule returns a rule denying specified mutation operation.
+func DenyMutationOperationRule(op ent.Op) MutationRule {
 	return MutationRuleFunc(func(_ context.Context, m ent.Mutation) error {
 		if m.Op().Is(op) {
 			return Denyf("ent/privacy: operation %s is not allowed", m.Op())
