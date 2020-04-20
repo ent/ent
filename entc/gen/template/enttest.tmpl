@@ -16,12 +16,12 @@ import (
 	"fmt"
 
 	"{{ $.Config.Package }}"
-	{{- if $.SupportMigrate }}
-		"github.com/facebookincubator/ent/dialect/sql/schema"
-	{{- end }}
-
 	// required by schema hooks.
 	_ "{{ $.Config.Package }}/runtime"
+
+	{{ if $.SupportMigrate }}
+		"github.com/facebookincubator/ent/dialect/sql/schema"
+	{{ end }}
 )
 
 type (
