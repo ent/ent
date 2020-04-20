@@ -29,7 +29,7 @@ A common use case for `Mixin` is to mix-in a list of common fields to your schem
 package schema
 
 import (
-    "time"
+	"time"
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/field"
@@ -42,9 +42,9 @@ import (
 // TimeMixin implements the ent.Mixin for sharing
 // time fields with package schemas.
 type TimeMixin struct{
-    // We embed the `mixin.Schema` to avoid
+	// We embed the `mixin.Schema` to avoid
 	// implementing the rest of the methods.
-    mixin.Schema
+	mixin.Schema
 }
 
 func (TimeMixin) Fields() []ent.Field {
@@ -61,9 +61,9 @@ func (TimeMixin) Fields() []ent.Field {
 // DetailsMixin implements the ent.Mixin for sharing
 // entity details fields with package schemas.
 type DetailsMixin struct{
-    // We embed the `mixin.Schema` to avoid
+	// We embed the `mixin.Schema` to avoid
 	// implementing the rest of the methods.
-    mixin.Schema
+	mixin.Schema
 }
 
 func (DetailsMixin) Fields() []ent.Field {
@@ -138,8 +138,8 @@ type Pet struct {
 func (Pet) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.Time{},
-        // Or, mixin.CreateTime only for create_time
-        // and mixin.UpdateTime only for update_time.
+		// Or, mixin.CreateTime only for create_time
+		// and mixin.UpdateTime only for update_time.
 	}
 }
 ```
