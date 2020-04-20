@@ -140,6 +140,16 @@ type fixedDecisionRule struct { err error }
 func (f fixedDecisionRule) EvalQuery(context.Context, {{ $pkg }}.Query) error { return f.err }
 func (f fixedDecisionRule) EvalMutation(context.Context, {{ $pkg }}.Mutation) error { return f.err }
 
+// DenyMutationOperation returns a rule denying specifies mutation operation.
+func DenyMutationOperation(op {{ $pkg }}.Op) MutationRule {
+	return MutationRuleFunc(func(_ context.Context, m {{ $pkg }}.Mutation) error {
+		if m.Op().Is(op) {
+			return Denyf("ent/privacy: operation %s is not allowed", m.Op())
+		}
+		return Skip
+	})
+}
+
 {{- range $n := $.Nodes }}
 	{{ $name := print $n.Name "QueryRuleFunc" }}
 	{{ $type := printf "*%s.%s" $pkg $n.QueryName }}
