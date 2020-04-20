@@ -148,6 +148,16 @@ type fixedDecisionRule struct{ err error }
 func (f fixedDecisionRule) EvalQuery(context.Context, entv1.Query) error       { return f.err }
 func (f fixedDecisionRule) EvalMutation(context.Context, entv1.Mutation) error { return f.err }
 
+// DenyMutationOperation returns a rule denying specifies mutation operation.
+func DenyMutationOperation(op entv1.Op) MutationRule {
+	return MutationRuleFunc(func(_ context.Context, m entv1.Mutation) error {
+		if m.Op().Is(op) {
+			return Denyf("ent/privacy: operation %s is not allowed", m.Op())
+		}
+		return Skip
+	})
+}
+
 // The CarQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type CarQueryRuleFunc func(context.Context, *entv1.CarQuery) error
