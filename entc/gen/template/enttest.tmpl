@@ -16,29 +16,80 @@ import (
 	"fmt"
 
 	"{{ $.Config.Package }}"
-	_ "{{ $.Config.Package }}/runtime"
-
-	{{ if $.SupportMigrate }}
+	{{- if $.SupportMigrate }}
 		"github.com/facebookincubator/ent/dialect/sql/schema"
-	{{ end }}
+	{{- end }}
+
+	// required by schema hooks.
+	_ "{{ $.Config.Package }}/runtime"
 )
 
-// TestingT is the interface that is shared between
-// testing.T and testing.B and used by enttest.
-type TestingT interface {
-	FailNow()
-	Error(...interface{})
+type (
+	// TestingT is the interface that is shared between
+	// testing.T and testing.B and used by enttest.
+	TestingT interface {
+		FailNow()
+		Error(...interface{})
+	}
+
+	// Option configures client creation.
+	Option func(*options)
+
+	options struct {
+		opts []{{ $pkg }}.Option
+		{{- if $.SupportMigrate }}
+			migrateOpts []schema.MigrateOption
+		{{- end }}
+	}
+)
+
+// WithOptions forwards options to client creation.
+func WithOptions(opts ...{{ $pkg }}.Option) Option {
+	return func(o *options) {
+		o.opts = append(o.opts, opts...)
+	}
+}
+
+{{- if $.SupportMigrate }}
+// WithMigrateOptions forwards options to auto migration.
+func WithMigrateOptions(opts ...schema.MigrateOption) Option {
+	return func(o *options) {
+		o.migrateOpts = append(o.migrateOpts, opts...)
+	}
+}
+{{- end }}
+
+func newOptions(opts []Option) *options {
+	o := &options{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	return o
 }
 
 // Open calls {{ $pkg }}.Open and auto-run migration.
-func Open(t TestingT, driverName, dataSourceName string, {{ if $.SupportMigrate }}options ...schema.MigrateOption{{ end }}) *{{ $pkg }}.Client {
-	c, err := {{ $pkg }}.Open(driverName, dataSourceName)
+func Open(t TestingT, driverName, dataSourceName string, opts ...Option) *{{ $pkg }}.Client {
+	o := newOptions(opts)
+	c, err := {{ $pkg }}.Open(driverName, dataSourceName, o.opts...)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	{{- if $.SupportMigrate }}
-		if err := c.Schema.Create(context.Background(), options...); err != nil {
+		if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+	{{- end }}
+	return c
+}
+
+// NewClient calls {{ $pkg }}.NewClient and auto-run migration.
+func NewClient(t TestingT, opts ...Option) *{{ $pkg }}.Client {
+	o := newOptions(opts)
+	c := {{ $pkg }}.NewClient(o.opts...)
+	{{- if $.SupportMigrate }}
+		if err := c.Schema.Create(context.Background(), o.migrateOpts...); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
