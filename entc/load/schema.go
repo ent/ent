@@ -12,17 +12,18 @@ import (
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/index"
 )
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name    string     `json:"name,omitempty"`
-	Config  ent.Config `json:"config,omitempty"`
-	Edges   []*Edge    `json:"edges,omitempty"`
-	Fields  []*Field   `json:"fields,omitempty"`
-	Indexes []*Index   `json:"indexes,omitempty"`
-	Hooks   int        `json:"hooks,omitempty"`
-	Policy  bool       `json:"policy,omitempty"`
+	Name    string      `json:"name,omitempty"`
+	Config  ent.Config  `json:"config,omitempty"`
+	Edges   []*Edge     `json:"edges,omitempty"`
+	Fields  []*Field    `json:"fields,omitempty"`
+	Indexes []*Index    `json:"indexes,omitempty"`
+	Hooks   []*Position `json:"hooks,omitempty"`
+	Policy  bool        `json:"policy,omitempty"`
 }
 
 // Position describes a field position in the schema.
@@ -89,7 +90,7 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 	return ne
 }
 
-// NewField creates an loaded field from edge descriptor.
+// NewField creates an loaded field from field descriptor.
 func NewField(fd *field.Descriptor) (*Field, error) {
 	sf := &Field{
 		Name:          fd.Name,
@@ -126,12 +127,25 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	return sf, nil
 }
 
+// NewIndex creates an loaded index from index descriptor.
+func NewIndex(idx *index.Descriptor) *Index {
+	return &Index{
+		Edges:      idx.Edges,
+		Fields:     idx.Fields,
+		Unique:     idx.Unique,
+		StorageKey: idx.StorageKey,
+	}
+}
+
 // MarshalSchema encode the ent.Schema interface into a JSON
 // that can be decoded into the Schema object object.
 func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	s := &Schema{
 		Config: schema.Config(),
 		Name:   indirect(reflect.TypeOf(schema)).Name(),
+	}
+	if err := s.loadMixin(schema); err != nil {
+		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
 	}
 	if err := s.loadFields(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
@@ -148,13 +162,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
 	}
 	for _, idx := range indexes {
-		idx := idx.Descriptor()
-		s.Indexes = append(s.Indexes, &Index{
-			Edges:      idx.Edges,
-			Fields:     idx.Fields,
-			Unique:     idx.Unique,
-			StorageKey: idx.StorageKey,
-		})
+		s.Indexes = append(s.Indexes, NewIndex(idx.Descriptor()))
 	}
 	if err := s.loadHooks(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
@@ -179,8 +187,8 @@ func UnmarshalSchema(buf []byte) (*Schema, error) {
 	return s, nil
 }
 
-// loadFields loads field to schema from ent.Interface.
-func (s *Schema) loadFields(schema ent.Interface) error {
+// loadMixin loads mixin to schema from ent.Interface.
+func (s *Schema) loadMixin(schema ent.Interface) error {
 	mixin, err := safeMixin(schema)
 	if err != nil {
 		return err
@@ -202,7 +210,37 @@ func (s *Schema) loadFields(schema ent.Interface) error {
 			}
 			s.Fields = append(s.Fields, sf)
 		}
+		edges, err := safeEdges(mx)
+		if err != nil {
+			return err
+		}
+		for _, e := range edges {
+			s.Edges = append(s.Edges, NewEdge(e.Descriptor()))
+		}
+		indexes, err := safeIndexes(mx)
+		if err != nil {
+			return err
+		}
+		for _, idx := range indexes {
+			s.Indexes = append(s.Indexes, NewIndex(idx.Descriptor()))
+		}
+		hooks, err := safeHooks(mx)
+		if err != nil {
+			return err
+		}
+		for j := range hooks {
+			s.Hooks = append(s.Hooks, &Position{
+				Index:      j,
+				MixedIn:    true,
+				MixinIndex: i,
+			})
+		}
 	}
+	return nil
+}
+
+// loadFields loads field to schema from ent.Interface.
+func (s *Schema) loadFields(schema ent.Interface) error {
 	fields, err := safeFields(schema)
 	if err != nil {
 		return err
@@ -223,7 +261,12 @@ func (s *Schema) loadHooks(schema ent.Interface) error {
 	if err != nil {
 		return err
 	}
-	s.Hooks = len(hooks)
+	for i := range hooks {
+		s.Hooks = append(s.Hooks, &Position{
+			Index:   i,
+			MixedIn: false,
+		})
+	}
 	return nil
 }
 
@@ -265,7 +308,7 @@ func safeFields(fd interface{ Fields() []ent.Field }) (fields []ent.Field, err e
 }
 
 // safeEdges wraps the schema.Edges method with recover to ensure no panics in marshaling.
-func safeEdges(schema ent.Interface) (edges []ent.Edge, err error) {
+func safeEdges(schema interface{ Edges() []ent.Edge }) (edges []ent.Edge, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Edges panics: %v", v)
@@ -276,7 +319,7 @@ func safeEdges(schema ent.Interface) (edges []ent.Edge, err error) {
 }
 
 // safeIndexes wraps the schema.Indexes method with recover to ensure no panics in marshaling.
-func safeIndexes(schema ent.Interface) (indexes []ent.Index, err error) {
+func safeIndexes(schema interface{ Indexes() []ent.Index }) (indexes []ent.Index, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Indexes panics: %v", v)
@@ -298,7 +341,7 @@ func safeMixin(schema ent.Interface) (mixin []ent.Mixin, err error) {
 }
 
 // safeHooks wraps the schema.Hooks method with recover to ensure no panics in marshaling.
-func safeHooks(schema ent.Interface) (hooks []ent.Hook, err error) {
+func safeHooks(schema interface{ Hooks() []ent.Hook }) (hooks []ent.Hook, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Hooks panics: %v", v)

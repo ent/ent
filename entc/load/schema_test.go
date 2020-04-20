@@ -14,6 +14,7 @@ import (
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
 	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebookincubator/ent/schema/mixin"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -215,7 +216,9 @@ func TestMarshalDefaults(t *testing.T) {
 	require.True(t, schema.Fields[4].UpdateDefault)
 }
 
-type TimeMixin struct{}
+type TimeMixin struct {
+	mixin.Schema
+}
 
 func (TimeMixin) Fields() []ent.Field {
 	return []ent.Field{
@@ -228,11 +231,34 @@ func (TimeMixin) Fields() []ent.Field {
 	}
 }
 
-type Mixin struct{}
+type HooksMixin struct {
+	mixin.Schema
+}
 
-func (Mixin) Fields() []ent.Field {
+func (HooksMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("boring"),
+	}
+}
+
+func (HooksMixin) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("user", User.Type).
+			Unique(),
+	}
+}
+
+func (HooksMixin) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("boring").
+			Edges("user"),
+	}
+}
+
+func (HooksMixin) Hooks() []ent.Hook {
+	return []ent.Hook{
+		func(ent.Mutator) ent.Mutator { return nil },
+		func(ent.Mutator) ent.Mutator { return nil },
 	}
 }
 
@@ -243,13 +269,33 @@ type WithMixin struct {
 func (WithMixin) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
-		Mixin{},
+		HooksMixin{},
 	}
 }
 
 func (WithMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("field"),
+	}
+}
+
+func (WithMixin) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("owner", User.Type),
+	}
+}
+
+func (WithMixin) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("field").
+			Edges("owner").
+			Unique(),
+	}
+}
+
+func (WithMixin) Hooks() []ent.Hook {
+	return []ent.Hook{
+		func(ent.Mutator) ent.Mutator { return nil },
 	}
 }
 
@@ -262,29 +308,67 @@ func TestMarshalMixin(t *testing.T) {
 	err = json.Unmarshal(buf, schema)
 	require.NoError(t, err)
 
-	require.Equal(t, "WithMixin", schema.Name)
-	require.Equal(t, "created_at", schema.Fields[0].Name)
-	require.True(t, schema.Fields[0].Default)
-	require.True(t, schema.Fields[0].Position.MixedIn)
-	require.Equal(t, 0, schema.Fields[0].Position.MixinIndex)
-	require.Equal(t, 0, schema.Fields[0].Position.Index)
+	t.Run("Fields", func(t *testing.T) {
+		require.Equal(t, "WithMixin", schema.Name)
+		require.Equal(t, "created_at", schema.Fields[0].Name)
+		require.True(t, schema.Fields[0].Default)
+		require.True(t, schema.Fields[0].Position.MixedIn)
+		require.Equal(t, 0, schema.Fields[0].Position.MixinIndex)
+		require.Equal(t, 0, schema.Fields[0].Position.Index)
 
-	require.Equal(t, "updated_at", schema.Fields[1].Name)
-	require.True(t, schema.Fields[1].Default)
-	require.True(t, schema.Fields[1].UpdateDefault)
-	require.True(t, schema.Fields[1].Position.MixedIn)
-	require.Equal(t, 0, schema.Fields[1].Position.MixinIndex)
-	require.Equal(t, 1, schema.Fields[1].Position.Index)
+		require.Equal(t, "updated_at", schema.Fields[1].Name)
+		require.True(t, schema.Fields[1].Default)
+		require.True(t, schema.Fields[1].UpdateDefault)
+		require.True(t, schema.Fields[1].Position.MixedIn)
+		require.Equal(t, 0, schema.Fields[1].Position.MixinIndex)
+		require.Equal(t, 1, schema.Fields[1].Position.Index)
 
-	require.Equal(t, "boring", schema.Fields[2].Name)
-	require.False(t, schema.Fields[2].Default)
-	require.False(t, schema.Fields[2].UpdateDefault)
-	require.True(t, schema.Fields[2].Position.MixedIn)
-	require.Equal(t, 1, schema.Fields[2].Position.MixinIndex)
-	require.Equal(t, 0, schema.Fields[2].Position.Index)
+		require.Equal(t, "boring", schema.Fields[2].Name)
+		require.False(t, schema.Fields[2].Default)
+		require.False(t, schema.Fields[2].UpdateDefault)
+		require.True(t, schema.Fields[2].Position.MixedIn)
+		require.Equal(t, 1, schema.Fields[2].Position.MixinIndex)
+		require.Equal(t, 0, schema.Fields[2].Position.Index)
 
-	require.Equal(t, "field", schema.Fields[3].Name)
-	require.False(t, schema.Fields[3].Default)
-	require.False(t, schema.Fields[3].Position.MixedIn)
-	require.Equal(t, 0, schema.Fields[3].Position.Index)
+		require.Equal(t, "field", schema.Fields[3].Name)
+		require.False(t, schema.Fields[3].Default)
+		require.False(t, schema.Fields[3].Position.MixedIn)
+		require.Equal(t, 0, schema.Fields[3].Position.Index)
+	})
+
+	t.Run("Hooks", func(t *testing.T) {
+		require.True(t, schema.Hooks[0].MixedIn)
+		require.True(t, schema.Hooks[1].MixedIn)
+
+		require.Equal(t, 1, schema.Hooks[0].MixinIndex)
+		require.Equal(t, 1, schema.Hooks[1].MixinIndex)
+		require.Equal(t, 0, schema.Hooks[0].Index)
+		require.Equal(t, 1, schema.Hooks[1].Index)
+
+		require.False(t, schema.Hooks[2].MixedIn)
+		require.Equal(t, 0, schema.Hooks[2].Index)
+		require.Equal(t, 0, schema.Hooks[2].MixinIndex)
+	})
+
+	t.Run("Edges", func(t *testing.T) {
+		require.Len(t, schema.Edges, 2)
+		require.Equal(t, "user", schema.Edges[0].Name)
+		require.Equal(t, "User", schema.Edges[0].Type)
+		require.True(t, schema.Edges[0].Unique)
+
+		require.Equal(t, "owner", schema.Edges[1].Name)
+		require.Equal(t, "User", schema.Edges[1].Type)
+		require.False(t, schema.Edges[1].Unique)
+	})
+
+	t.Run("Indexes", func(t *testing.T) {
+		require.Len(t, schema.Indexes, 2)
+		require.Equal(t, []string{"boring"}, schema.Indexes[0].Fields)
+		require.Equal(t, []string{"user"}, schema.Indexes[0].Edges)
+		require.False(t, schema.Indexes[0].Unique)
+
+		require.Equal(t, []string{"field"}, schema.Indexes[1].Fields)
+		require.Equal(t, []string{"owner"}, schema.Indexes[1].Edges)
+		require.True(t, schema.Indexes[1].Unique)
+	})
 }

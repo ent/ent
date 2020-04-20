@@ -45,9 +45,8 @@ func init() {
 		})
 	}
 	planetHooks := schema.Planet{}.Hooks()
-	for i, h := range planetHooks {
-		planet.Hooks[i+1] = h
-	}
+
+	planet.Hooks[1] = planetHooks[0]
 	planetFields := schema.Planet{}.Fields()
 	_ = planetFields
 	// planetDescName is the schema descriptor for name field.

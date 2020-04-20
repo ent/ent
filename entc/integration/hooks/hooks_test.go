@@ -35,6 +35,8 @@ func TestSchemaHooks(t *testing.T) {
 		})
 	})
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
+	_, err = client.Card.Update().Save(ctx)
+	require.EqualError(t, err, "OpUpdate operation is not allowed")
 }
 
 func TestRuntimeHooks(t *testing.T) {

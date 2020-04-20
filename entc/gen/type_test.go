@@ -134,10 +134,8 @@ func TestType_Receiver(t *testing.T) {
 	}
 }
 
-func TestType_MixedInWithDefaultOrValidator(t *testing.T) {
-	position := &load.Position{
-		MixedIn: true,
-	}
+func TestType_WithRuntimeMixin(t *testing.T) {
+	position := &load.Position{MixedIn: true}
 	typ := &Type{
 		Fields: []*Field{
 			{Default: true, Position: position},
@@ -145,8 +143,7 @@ func TestType_MixedInWithDefaultOrValidator(t *testing.T) {
 			{Validators: 1, Position: position},
 		},
 	}
-	fields := typ.MixedInWithDefaultOrValidator()
-	require.Equal(t, 3, len(fields))
+	require.True(t, typ.RuntimeMixin())
 }
 
 func TestType_TagTypes(t *testing.T) {

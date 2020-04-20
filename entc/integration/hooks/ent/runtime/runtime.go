@@ -11,16 +11,20 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/schema"
+
+	"github.com/facebookincubator/ent"
 )
 
 // The init function reads all schema descriptors with runtime
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
+	cardMixin := schema.Card{}.Mixin()
+	cardMixinHooks0 := cardMixin[0].(interface{ Hooks() []ent.Hook }).Hooks()
 	cardHooks := schema.Card{}.Hooks()
-	for i, h := range cardHooks {
-		card.Hooks[i] = h
-	}
+	card.Hooks[0] = cardMixinHooks0[0]
+	card.Hooks[1] = cardHooks[0]
+	card.Hooks[2] = cardHooks[1]
 	cardFields := schema.Card{}.Fields()
 	_ = cardFields
 	// cardDescNumber is the schema descriptor for number field.
