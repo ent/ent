@@ -8,7 +8,6 @@ package enttest
 
 import (
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent"
-
 	// required by schema hooks.
 	_ "github.com/facebookincubator/ent/entc/integration/gremlin/ent/runtime"
 )
