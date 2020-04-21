@@ -36,7 +36,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 	{{- $mutation := print $receiver ".mutation" }}
 	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
 	{{- range $f := $fields }}
-		{{- if or $f.Default (and (not $f.Optional) (ne $f $.ID)) }}
+		{{- if or $f.Default (and (not $f.Optional) (ne $f.Name $.ID.Name)) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
 				{{- if $f.Default }}
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
