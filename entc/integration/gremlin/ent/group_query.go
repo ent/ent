@@ -25,7 +25,7 @@ type GroupQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Group
 	// eager-loading edges.
@@ -57,7 +57,7 @@ func (gq *GroupQuery) Offset(offset int) *GroupQuery {
 }
 
 // Order adds an order step to the query.
-func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
+func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -288,7 +288,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		config:     gq.config,
 		limit:      gq.limit,
 		offset:     gq.offset,
-		order:      append([]Order{}, gq.order...),
+		order:      append([]OrderFunc{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
@@ -467,14 +467,14 @@ func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
 type GroupGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
+func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 	ggb.fns = append(ggb.fns, fns...)
 	return ggb
 }

@@ -918,7 +918,7 @@ func builderField(name string) string {
 
 // global identifiers used by the generated package.
 var globalIdent = names(
-	"Aggregate",
+	"AggregateFunc",
 	"As",
 	"Asc",
 	"Count",
@@ -932,7 +932,7 @@ var globalIdent = names(
 	"Mutator",
 	"Op",
 	"Option",
-	"Order",
+	"OrderFunc",
 	"Max",
 	"Mean",
 	"Min",

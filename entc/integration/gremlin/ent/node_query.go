@@ -24,7 +24,7 @@ type NodeQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Node
 	// eager-loading edges.
@@ -54,7 +54,7 @@ func (nq *NodeQuery) Offset(offset int) *NodeQuery {
 }
 
 // Order adds an order step to the query.
-func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
+func (nq *NodeQuery) Order(o ...OrderFunc) *NodeQuery {
 	nq.order = append(nq.order, o...)
 	return nq
 }
@@ -257,7 +257,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		config:     nq.config,
 		limit:      nq.limit,
 		offset:     nq.offset,
-		order:      append([]Order{}, nq.order...),
+		order:      append([]OrderFunc{}, nq.order...),
 		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
 		// clone intermediate query.
@@ -414,14 +414,14 @@ func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
 type NodeGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
+func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 	ngb.fns = append(ngb.fns, fns...)
 	return ngb
 }

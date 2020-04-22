@@ -24,7 +24,7 @@ type FileTypeQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.FileType
 	// eager-loading edges.
@@ -53,7 +53,7 @@ func (ftq *FileTypeQuery) Offset(offset int) *FileTypeQuery {
 }
 
 // Order adds an order step to the query.
-func (ftq *FileTypeQuery) Order(o ...Order) *FileTypeQuery {
+func (ftq *FileTypeQuery) Order(o ...OrderFunc) *FileTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
 }
@@ -242,7 +242,7 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		config:     ftq.config,
 		limit:      ftq.limit,
 		offset:     ftq.offset,
-		order:      append([]Order{}, ftq.order...),
+		order:      append([]OrderFunc{}, ftq.order...),
 		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FileType{}, ftq.predicates...),
 		// clone intermediate query.
@@ -388,14 +388,14 @@ func (ftq *FileTypeQuery) gremlinQuery() *dsl.Traversal {
 type FileTypeGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ftgb *FileTypeGroupBy) Aggregate(fns ...Aggregate) *FileTypeGroupBy {
+func (ftgb *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
 	ftgb.fns = append(ftgb.fns, fns...)
 	return ftgb
 }

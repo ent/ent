@@ -24,7 +24,7 @@ type UserQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.User
 	// intermediate query (i.e. traversal path).
@@ -51,7 +51,7 @@ func (uq *UserQuery) Offset(offset int) *UserQuery {
 }
 
 // Order adds an order step to the query.
-func (uq *UserQuery) Order(o ...Order) *UserQuery {
+func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
@@ -226,7 +226,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		config:     uq.config,
 		limit:      uq.limit,
 		offset:     uq.offset,
-		order:      append([]Order{}, uq.order...),
+		order:      append([]OrderFunc{}, uq.order...),
 		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate query.
@@ -402,14 +402,14 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 type UserGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
+func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 	ugb.fns = append(ugb.fns, fns...)
 	return ugb
 }

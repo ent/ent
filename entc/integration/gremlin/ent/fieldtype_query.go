@@ -24,7 +24,7 @@ type FieldTypeQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.FieldType
 	// intermediate query (i.e. traversal path).
@@ -51,7 +51,7 @@ func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
 }
 
 // Order adds an order step to the query.
-func (ftq *FieldTypeQuery) Order(o ...Order) *FieldTypeQuery {
+func (ftq *FieldTypeQuery) Order(o ...OrderFunc) *FieldTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
 }
@@ -226,7 +226,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		config:     ftq.config,
 		limit:      ftq.limit,
 		offset:     ftq.offset,
-		order:      append([]Order{}, ftq.order...),
+		order:      append([]OrderFunc{}, ftq.order...),
 		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
@@ -361,14 +361,14 @@ func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
 type FieldTypeGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ftgb *FieldTypeGroupBy) Aggregate(fns ...Aggregate) *FieldTypeGroupBy {
+func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy {
 	ftgb.fns = append(ftgb.fns, fns...)
 	return ftgb
 }

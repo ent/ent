@@ -26,7 +26,7 @@ type GroupQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Group
 	// eager-loading edges.
@@ -55,7 +55,7 @@ func (gq *GroupQuery) Offset(offset int) *GroupQuery {
 }
 
 // Order adds an order step to the query.
-func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
+func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -248,7 +248,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		config:     gq.config,
 		limit:      gq.limit,
 		offset:     gq.offset,
-		order:      append([]Order{}, gq.order...),
+		order:      append([]OrderFunc{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
@@ -503,14 +503,14 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 type GroupGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
+func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 	ggb.fns = append(ggb.fns, fns...)
 	return ggb
 }

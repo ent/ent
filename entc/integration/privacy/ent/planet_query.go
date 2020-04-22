@@ -25,7 +25,7 @@ type PlanetQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Planet
 	// eager-loading edges.
@@ -55,7 +55,7 @@ func (pq *PlanetQuery) Offset(offset int) *PlanetQuery {
 }
 
 // Order adds an order step to the query.
-func (pq *PlanetQuery) Order(o ...Order) *PlanetQuery {
+func (pq *PlanetQuery) Order(o ...OrderFunc) *PlanetQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -248,7 +248,7 @@ func (pq *PlanetQuery) Clone() *PlanetQuery {
 		config:     pq.config,
 		limit:      pq.limit,
 		offset:     pq.offset,
-		order:      append([]Order{}, pq.order...),
+		order:      append([]OrderFunc{}, pq.order...),
 		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Planet{}, pq.predicates...),
 		// clone intermediate query.
@@ -513,14 +513,14 @@ func (pq *PlanetQuery) sqlQuery() *sql.Selector {
 type PlanetGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *PlanetGroupBy) Aggregate(fns ...Aggregate) *PlanetGroupBy {
+func (pgb *PlanetGroupBy) Aggregate(fns ...AggregateFunc) *PlanetGroupBy {
 	pgb.fns = append(pgb.fns, fns...)
 	return pgb
 }

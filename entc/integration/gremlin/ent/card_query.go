@@ -26,7 +26,7 @@ type CardQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Card
 	// eager-loading edges.
@@ -56,7 +56,7 @@ func (cq *CardQuery) Offset(offset int) *CardQuery {
 }
 
 // Order adds an order step to the query.
-func (cq *CardQuery) Order(o ...Order) *CardQuery {
+func (cq *CardQuery) Order(o ...OrderFunc) *CardQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -259,7 +259,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 		config:     cq.config,
 		limit:      cq.limit,
 		offset:     cq.offset,
-		order:      append([]Order{}, cq.order...),
+		order:      append([]OrderFunc{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
 		// clone intermediate query.
@@ -416,14 +416,14 @@ func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
 type CardGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cgb *CardGroupBy) Aggregate(fns ...Aggregate) *CardGroupBy {
+func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 	cgb.fns = append(cgb.fns, fns...)
 	return cgb
 }

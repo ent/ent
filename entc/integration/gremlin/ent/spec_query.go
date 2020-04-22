@@ -24,7 +24,7 @@ type SpecQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
@@ -53,7 +53,7 @@ func (sq *SpecQuery) Offset(offset int) *SpecQuery {
 }
 
 // Order adds an order step to the query.
-func (sq *SpecQuery) Order(o ...Order) *SpecQuery {
+func (sq *SpecQuery) Order(o ...OrderFunc) *SpecQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -242,7 +242,7 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		config:     sq.config,
 		limit:      sq.limit,
 		offset:     sq.offset,
-		order:      append([]Order{}, sq.order...),
+		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		// clone intermediate query.
@@ -364,14 +364,14 @@ func (sq *SpecQuery) gremlinQuery() *dsl.Traversal {
 type SpecGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sgb *SpecGroupBy) Aggregate(fns ...Aggregate) *SpecGroupBy {
+func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 	sgb.fns = append(sgb.fns, fns...)
 	return sgb
 }
