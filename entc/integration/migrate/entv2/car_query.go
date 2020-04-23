@@ -25,7 +25,7 @@ type CarQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Car
 	// eager-loading edges.
@@ -55,7 +55,7 @@ func (cq *CarQuery) Offset(offset int) *CarQuery {
 }
 
 // Order adds an order step to the query.
-func (cq *CarQuery) Order(o ...Order) *CarQuery {
+func (cq *CarQuery) Order(o ...OrderFunc) *CarQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -248,7 +248,7 @@ func (cq *CarQuery) Clone() *CarQuery {
 		config:     cq.config,
 		limit:      cq.limit,
 		offset:     cq.offset,
-		order:      append([]Order{}, cq.order...),
+		order:      append([]OrderFunc{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Car{}, cq.predicates...),
 		// clone intermediate query.
@@ -451,14 +451,14 @@ func (cq *CarQuery) sqlQuery() *sql.Selector {
 type CarGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cgb *CarGroupBy) Aggregate(fns ...Aggregate) *CarGroupBy {
+func (cgb *CarGroupBy) Aggregate(fns ...AggregateFunc) *CarGroupBy {
 	cgb.fns = append(cgb.fns, fns...)
 	return cgb
 }

@@ -23,13 +23,13 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// Order applies an ordering on either graph traversal or sql selector.
-type Order func({{ $.Storage.Builder }})
+// OrderFunc applies an ordering on either graph traversal or sql selector.
+type OrderFunc func({{ $.Storage.Builder }})
 
 {{ range $f, $order := order }}
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
-	func {{ $f }}(fields ...string) Order {
+	func {{ $f }}(fields ...string) OrderFunc {
 		{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
 			{{ $tmpl := printf "dialect/%s/order" $.Storage }}
 			return {{ xtemplate $tmpl . }}
@@ -38,7 +38,7 @@ type Order func({{ $.Storage.Builder }})
 {{ end }}
 
 {{ $tmpl := printf "dialect/%s/group/signature" $.Storage }}
-// Aggregate applies an aggregation step on the group-by traversal/selector.
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
 {{ xtemplate $tmpl . }}
 
 
@@ -48,7 +48,7 @@ type Order func({{ $.Storage.Builder }})
 //	Aggregate({{ $pkg }}.As({{ $pkg }}.Sum(field1), "sum_field1"), ({{ $pkg }}.As({{ $pkg }}.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn Aggregate, end string) Aggregate {
+func As(fn AggregateFunc, end string) AggregateFunc {
 	{{- $tmpl = printf "dialect/%s/group/as" $.Storage }}
 	return {{ xtemplate $tmpl . }}
 }
@@ -63,7 +63,7 @@ func As(fn Aggregate, end string) Aggregate {
 	{{ end }}
 
 	// {{ $fn }} applies the {{ quote $name }} aggregation function on {{ if $withField }}the given field of {{ end }}each group.
-	func {{ $fn }}({{ if $withField }}field string{{ end }}) Aggregate {
+	func {{ $fn }}({{ if $withField }}field string{{ end }}) AggregateFunc {
 		{{- with extend (index $.Nodes 0) "Func" $fn "WithField" $withField -}}
 			{{ $tmpl := printf "dialect/%s/group/func" $.Storage }}
 			return {{ xtemplate $tmpl . }}

@@ -15,7 +15,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* custom signature for group-by function */}}
 {{ define "dialect/sql/group/signature" -}}
-	type Aggregate func(*sql.Selector) string
+	type AggregateFunc func(*sql.Selector) string
 {{- end }}
 
 {{ define "dialect/sql/group/as" -}}

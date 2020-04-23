@@ -30,11 +30,11 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// Order applies an ordering on either graph traversal or sql selector.
-type Order func(*sql.Selector)
+// OrderFunc applies an ordering on either graph traversal or sql selector.
+type OrderFunc func(*sql.Selector)
 
 // Asc applies the given fields in ASC order.
-func Asc(fields ...string) Order {
+func Asc(fields ...string) OrderFunc {
 	return func(s *sql.Selector) {
 		for _, f := range fields {
 			s.OrderBy(sql.Asc(f))
@@ -43,7 +43,7 @@ func Asc(fields ...string) Order {
 }
 
 // Desc applies the given fields in DESC order.
-func Desc(fields ...string) Order {
+func Desc(fields ...string) OrderFunc {
 	return func(s *sql.Selector) {
 		for _, f := range fields {
 			s.OrderBy(sql.Desc(f))
@@ -51,8 +51,8 @@ func Desc(fields ...string) Order {
 	}
 }
 
-// Aggregate applies an aggregation step on the group-by traversal/selector.
-type Aggregate func(*sql.Selector) string
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
+type AggregateFunc func(*sql.Selector) string
 
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
@@ -60,42 +60,42 @@ type Aggregate func(*sql.Selector) string
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn Aggregate, end string) Aggregate {
+func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.As(fn(s), end)
 	}
 }
 
 // Count applies the "count" aggregation function on each group.
-func Count() Aggregate {
+func Count() AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.Count("*")
 	}
 }
 
 // Max applies the "max" aggregation function on the given field of each group.
-func Max(field string) Aggregate {
+func Max(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.Max(s.C(field))
 	}
 }
 
 // Mean applies the "mean" aggregation function on the given field of each group.
-func Mean(field string) Aggregate {
+func Mean(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.Avg(s.C(field))
 	}
 }
 
 // Min applies the "min" aggregation function on the given field of each group.
-func Min(field string) Aggregate {
+func Min(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.Min(s.C(field))
 	}
 }
 
 // Sum applies the "sum" aggregation function on the given field of each group.
-func Sum(field string) Aggregate {
+func Sum(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.Sum(s.C(field))
 	}

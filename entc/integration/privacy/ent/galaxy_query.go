@@ -26,7 +26,7 @@ type GalaxyQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Galaxy
 	// eager-loading edges.
@@ -55,7 +55,7 @@ func (gq *GalaxyQuery) Offset(offset int) *GalaxyQuery {
 }
 
 // Order adds an order step to the query.
-func (gq *GalaxyQuery) Order(o ...Order) *GalaxyQuery {
+func (gq *GalaxyQuery) Order(o ...OrderFunc) *GalaxyQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -248,7 +248,7 @@ func (gq *GalaxyQuery) Clone() *GalaxyQuery {
 		config:     gq.config,
 		limit:      gq.limit,
 		offset:     gq.offset,
-		order:      append([]Order{}, gq.order...),
+		order:      append([]OrderFunc{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Galaxy{}, gq.predicates...),
 		// clone intermediate query.
@@ -471,14 +471,14 @@ func (gq *GalaxyQuery) sqlQuery() *sql.Selector {
 type GalaxyGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ggb *GalaxyGroupBy) Aggregate(fns ...Aggregate) *GalaxyGroupBy {
+func (ggb *GalaxyGroupBy) Aggregate(fns ...AggregateFunc) *GalaxyGroupBy {
 	ggb.fns = append(ggb.fns, fns...)
 	return ggb
 }

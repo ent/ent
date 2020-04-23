@@ -25,7 +25,7 @@ type PetQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
@@ -55,7 +55,7 @@ func (pq *PetQuery) Offset(offset int) *PetQuery {
 }
 
 // Order adds an order step to the query.
-func (pq *PetQuery) Order(o ...Order) *PetQuery {
+func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -258,7 +258,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		config:     pq.config,
 		limit:      pq.limit,
 		offset:     pq.offset,
-		order:      append([]Order{}, pq.order...),
+		order:      append([]OrderFunc{}, pq.order...),
 		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		// clone intermediate query.
@@ -415,14 +415,14 @@ func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
 type PetGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
+func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 	pgb.fns = append(pgb.fns, fns...)
 	return pgb
 }

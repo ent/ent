@@ -31,11 +31,11 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// Order applies an ordering on either graph traversal or sql selector.
-type Order func(*dsl.Traversal)
+// OrderFunc applies an ordering on either graph traversal or sql selector.
+type OrderFunc func(*dsl.Traversal)
 
 // Asc applies the given fields in ASC order.
-func Asc(fields ...string) Order {
+func Asc(fields ...string) OrderFunc {
 	return func(tr *dsl.Traversal) {
 		for _, f := range fields {
 			tr.By(f, dsl.Incr)
@@ -44,7 +44,7 @@ func Asc(fields ...string) Order {
 }
 
 // Desc applies the given fields in DESC order.
-func Desc(fields ...string) Order {
+func Desc(fields ...string) OrderFunc {
 	return func(tr *dsl.Traversal) {
 		for _, f := range fields {
 			tr.By(f, dsl.Decr)
@@ -52,10 +52,10 @@ func Desc(fields ...string) Order {
 	}
 }
 
-// Aggregate applies an aggregation step on the group-by traversal/selector.
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
 // It gets two labels as parameters. The first used in the `As` step for the predicate,
 // and the second is an optional name for the next predicates (or for later usage).
-type Aggregate func(string, string) (string, *dsl.Traversal)
+type AggregateFunc func(string, string) (string, *dsl.Traversal)
 
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
@@ -63,7 +63,7 @@ type Aggregate func(string, string) (string, *dsl.Traversal)
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn Aggregate, end string) Aggregate {
+func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(start, _ string) (string, *dsl.Traversal) {
 		return fn(start, end)
 	}
@@ -76,7 +76,7 @@ func As(fn Aggregate, end string) Aggregate {
 const DefaultCountLabel = "count"
 
 // Count applies the "count" aggregation function on each group.
-func Count() Aggregate {
+func Count() AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultCountLabel
@@ -92,7 +92,7 @@ func Count() Aggregate {
 const DefaultMaxLabel = "max"
 
 // Max applies the "max" aggregation function on the given field of each group.
-func Max(field string) Aggregate {
+func Max(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultMaxLabel
@@ -108,7 +108,7 @@ func Max(field string) Aggregate {
 const DefaultMeanLabel = "mean"
 
 // Mean applies the "mean" aggregation function on the given field of each group.
-func Mean(field string) Aggregate {
+func Mean(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultMeanLabel
@@ -124,7 +124,7 @@ func Mean(field string) Aggregate {
 const DefaultMinLabel = "min"
 
 // Min applies the "min" aggregation function on the given field of each group.
-func Min(field string) Aggregate {
+func Min(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultMinLabel
@@ -140,7 +140,7 @@ func Min(field string) Aggregate {
 const DefaultSumLabel = "sum"
 
 // Sum applies the "sum" aggregation function on the given field of each group.
-func Sum(field string) Aggregate {
+func Sum(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultSumLabel

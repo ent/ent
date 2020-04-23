@@ -25,7 +25,7 @@ type StreetQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Street
 	// eager-loading edges.
@@ -55,7 +55,7 @@ func (sq *StreetQuery) Offset(offset int) *StreetQuery {
 }
 
 // Order adds an order step to the query.
-func (sq *StreetQuery) Order(o ...Order) *StreetQuery {
+func (sq *StreetQuery) Order(o ...OrderFunc) *StreetQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -248,7 +248,7 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		config:     sq.config,
 		limit:      sq.limit,
 		offset:     sq.offset,
-		order:      append([]Order{}, sq.order...),
+		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
 		// clone intermediate query.
@@ -475,14 +475,14 @@ func (sq *StreetQuery) sqlQuery() *sql.Selector {
 type StreetGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sgb *StreetGroupBy) Aggregate(fns ...Aggregate) *StreetGroupBy {
+func (sgb *StreetGroupBy) Aggregate(fns ...AggregateFunc) *StreetGroupBy {
 	sgb.fns = append(sgb.fns, fns...)
 	return sgb
 }

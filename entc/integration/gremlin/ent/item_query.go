@@ -24,7 +24,7 @@ type ItemQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Item
 	// intermediate query (i.e. traversal path).
@@ -51,7 +51,7 @@ func (iq *ItemQuery) Offset(offset int) *ItemQuery {
 }
 
 // Order adds an order step to the query.
-func (iq *ItemQuery) Order(o ...Order) *ItemQuery {
+func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 	iq.order = append(iq.order, o...)
 	return iq
 }
@@ -226,7 +226,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		config:     iq.config,
 		limit:      iq.limit,
 		offset:     iq.offset,
-		order:      append([]Order{}, iq.order...),
+		order:      append([]OrderFunc{}, iq.order...),
 		unique:     append([]string{}, iq.unique...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
@@ -337,14 +337,14 @@ func (iq *ItemQuery) gremlinQuery() *dsl.Traversal {
 type ItemGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (igb *ItemGroupBy) Aggregate(fns ...Aggregate) *ItemGroupBy {
+func (igb *ItemGroupBy) Aggregate(fns ...AggregateFunc) *ItemGroupBy {
 	igb.fns = append(igb.fns, fns...)
 	return igb
 }

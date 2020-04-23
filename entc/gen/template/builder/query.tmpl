@@ -26,7 +26,7 @@ type {{ $builder }} struct {
 	config
 	limit		*int
 	offset		*int
-	order		[]Order
+	order		[]OrderFunc
 	unique		[]string
 	predicates 	[]predicate.{{ $.Name }}
 	{{- with $.Edges }}
@@ -64,7 +64,7 @@ func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
 }
 
 // Order adds an order step to the query.
-func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
+func ({{ $receiver }} *{{ $builder }}) Order(o ...OrderFunc) *{{ $builder }} {
 	{{ $receiver }}.order = append({{ $receiver }}.order, o...)
 	return {{ $receiver }}
 }
@@ -259,7 +259,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		config: 	{{ $receiver }}.config,
 		limit: 		{{ $receiver }}.limit,
 		offset: 	{{ $receiver }}.offset,
-		order: 		append([]Order{}, {{ $receiver }}.order...),
+		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
 		unique: 	append([]string{}, {{ $receiver }}.unique...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		// clone intermediate query.
@@ -372,14 +372,14 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 type {{ $groupBuilder }} struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{ $groupBuilder }} {
+func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc) *{{ $groupBuilder }} {
 	{{ $groupReceiver }}.fns = append({{ $groupReceiver }}.fns, fns...)
 	return {{ $groupReceiver }}
 }

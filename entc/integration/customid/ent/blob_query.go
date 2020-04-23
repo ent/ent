@@ -26,7 +26,7 @@ type BlobQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Blob
 	// eager-loading edges.
@@ -57,7 +57,7 @@ func (bq *BlobQuery) Offset(offset int) *BlobQuery {
 }
 
 // Order adds an order step to the query.
-func (bq *BlobQuery) Order(o ...Order) *BlobQuery {
+func (bq *BlobQuery) Order(o ...OrderFunc) *BlobQuery {
 	bq.order = append(bq.order, o...)
 	return bq
 }
@@ -268,7 +268,7 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		config:     bq.config,
 		limit:      bq.limit,
 		offset:     bq.offset,
-		order:      append([]Order{}, bq.order...),
+		order:      append([]OrderFunc{}, bq.order...),
 		unique:     append([]string{}, bq.unique...),
 		predicates: append([]predicate.Blob{}, bq.predicates...),
 		// clone intermediate query.
@@ -570,14 +570,14 @@ func (bq *BlobQuery) sqlQuery() *sql.Selector {
 type BlobGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
+	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (bgb *BlobGroupBy) Aggregate(fns ...Aggregate) *BlobGroupBy {
+func (bgb *BlobGroupBy) Aggregate(fns ...AggregateFunc) *BlobGroupBy {
 	bgb.fns = append(bgb.fns, fns...)
 	return bgb
 }
