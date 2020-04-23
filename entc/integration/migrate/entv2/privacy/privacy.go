@@ -57,7 +57,11 @@ type (
 // EvalQuery evaluates a query against a query policy.
 func (policy QueryPolicy) EvalQuery(ctx context.Context, q entv2.Query) error {
 	for _, rule := range policy {
-		if err := rule.EvalQuery(ctx, q); err != nil && !errors.Is(err, Skip) {
+		switch err := rule.EvalQuery(ctx, q); {
+		case err == nil || errors.Is(err, Skip):
+		case errors.Is(err, Allow):
+			return nil
+		default:
 			return err
 		}
 	}
@@ -87,7 +91,11 @@ type (
 // EvalMutation evaluates a mutation against a mutation policy.
 func (policy MutationPolicy) EvalMutation(ctx context.Context, m entv2.Mutation) error {
 	for _, rule := range policy {
-		if err := rule.EvalMutation(ctx, m); err != nil && !errors.Is(err, Skip) {
+		switch err := rule.EvalMutation(ctx, m); {
+		case err == nil || errors.Is(err, Skip):
+		case errors.Is(err, Allow):
+			return nil
+		default:
 			return err
 		}
 	}
@@ -111,20 +119,12 @@ type Policy struct {
 
 // EvalQuery forwards evaluation to query policy.
 func (policy Policy) EvalQuery(ctx context.Context, q entv2.Query) error {
-	err := policy.Query.EvalQuery(ctx, q)
-	if errors.Is(err, Allow) {
-		err = nil
-	}
-	return err
+	return policy.Query.EvalQuery(ctx, q)
 }
 
 // EvalMutation forwards evaluation to mutation policy.
 func (policy Policy) EvalMutation(ctx context.Context, m entv2.Mutation) error {
-	err := policy.Mutation.EvalMutation(ctx, m)
-	if errors.Is(err, Allow) {
-		err = nil
-	}
-	return err
+	return policy.Mutation.EvalMutation(ctx, m)
 }
 
 // QueryMutationRule is the interface that groups query and mutation rules.
