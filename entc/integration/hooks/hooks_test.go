@@ -8,9 +8,9 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/enttest"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/migrate"
-	_ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -19,11 +19,10 @@ import (
 
 func TestSchemaHooks(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	require.NoError(t, err)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
-	_, err = client.Card.Create().SetNumber("123").Save(ctx)
+	_, err := client.Card.Create().SetNumber("123").Save(ctx)
 	require.EqualError(t, err, "card number is too short", "error is returned from hook")
 	crd := client.Card.Create().SetNumber("1234").SaveX(ctx)
 	require.Equal(t, "unknown", crd.Name, "name was set by hook")
@@ -41,10 +40,8 @@ func TestSchemaHooks(t *testing.T) {
 
 func TestRuntimeHooks(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", ent.Log(t.Log))
-	require.NoError(t, err)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithOptions(ent.Log(t.Log)), enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
-	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 	var calls int
 	client.Use(func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
@@ -58,13 +55,12 @@ func TestRuntimeHooks(t *testing.T) {
 	client = client.Debug()
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
 	client.User.Create().SetName("a8m").SaveX(ctx)
-	require.Equal(t, 4, calls)
+	require.Equal(t, 4, calls, "debug client should keep thr same hooks")
 }
 
 func TestRuntimeChain(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", ent.Log(t.Log))
-	require.NoError(t, err)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(ctx))
 	var (
@@ -87,8 +83,7 @@ func TestRuntimeChain(t *testing.T) {
 
 func TestMutationClient(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	require.NoError(t, err)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
@@ -106,8 +101,7 @@ func TestMutationClient(t *testing.T) {
 
 func TestMutationTx(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	require.NoError(t, err)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
@@ -134,8 +128,7 @@ func TestMutationTx(t *testing.T) {
 
 func TestDeletion(t *testing.T) {
 	ctx := context.Background()
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	require.NoError(t, err)
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 	client.User.Use(func(next ent.Mutator) ent.Mutator {
