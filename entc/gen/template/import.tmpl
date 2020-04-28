@@ -16,8 +16,8 @@ import (
 	{{- if not (eq $.Config.Package $.Package) }}
 		"{{ $.Config.Package }}/predicate"
 		{{- range $f := $.Fields }}
-			{{- with $f.Type.PkgPath }}
-				"{{ . }}"
+			{{- with $f.Type.Import }}
+				{{ . }}
 			{{- end }}
 		{{- end }}
 	{{- end }}
