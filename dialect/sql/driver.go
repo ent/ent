@@ -40,8 +40,8 @@ func (d Driver) DB() *sql.DB {
 
 // Dialect implements the dialect.Dialect method.
 func (d Driver) Dialect() string {
-	// if the underlying driver is wrapped with opencensus driver.
-	for _, name := range []string{dialect.MySQL, dialect.SQLite} {
+	// If the underlying driver is wrapped with opencensus driver.
+	for _, name := range []string{dialect.MySQL, dialect.SQLite, dialect.Postgres} {
 		if strings.HasPrefix(d.dialect, name) {
 			return name
 		}
@@ -144,6 +144,8 @@ type (
 	NullString = sql.NullString
 	// NullFloat64 is an alias to sql.NullFloat64.
 	NullFloat64 = sql.NullFloat64
+	// NullTime represents a time.Time that may be null.
+	NullTime = sql.NullTime
 	// TxOptions holds the transaction options to be used in DB.BeginTx.
 	TxOptions = sql.TxOptions
 )
