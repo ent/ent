@@ -14,7 +14,7 @@ import (
 	"github.com/facebookincubator/ent/dialect"
 )
 
-// Querier wraps the basic Query method implemented
+// Querier wraps the basic Query method that is implemented
 // by the different builders in this file.
 type Querier interface {
 	// Query returns the query representation of the element
