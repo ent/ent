@@ -4,11 +4,7 @@
 
 package field
 
-import (
-	"fmt"
-	"path"
-	"strings"
-)
+import "strings"
 
 // A Type represents a field type.
 type Type uint8
@@ -76,22 +72,6 @@ type TypeInfo struct {
 	Ident    string
 	PkgPath  string
 	Nillable bool // slices or pointers.
-}
-
-// Import returns the import for the type.
-// The import has an alias if needed. The package path is wrapped in quotes.
-func (t TypeInfo) Import() string {
-	switch {
-	case t.PkgPath == "":
-		return ""
-	case t.Ident != "":
-		if idx := strings.IndexByte(t.Ident, '.'); idx != -1 {
-			if pkgIdent := t.Ident[:idx]; pkgIdent != path.Base(t.PkgPath) {
-				return fmt.Sprintf(`%s %q`, pkgIdent, t.PkgPath)
-			}
-		}
-	}
-	return fmt.Sprintf(`%q`, t.PkgPath)
 }
 
 // String returns the string representation of a type.

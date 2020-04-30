@@ -15,12 +15,12 @@ import (
 	{{- /* ignore generting on graph specififc templates */}}
 	{{- if not (eq $.Config.Package $.Package) }}
 		"{{ $.Config.Package }}/predicate"
-		{{- with $.ID.Type.Import }}
-			{{ . }}
+		{{- with $.ID.Type.PkgPath }}
+			"{{ . }}"
 		{{- end }}
 		{{- range $f := $.Fields }}
-			{{- with $f.Type.Import }}
-				{{ . }}
+			{{- with $f.Type.PkgPath }}
+				"{{ . }}"
 			{{- end }}
 		{{- end }}
 	{{- end }}
