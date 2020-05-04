@@ -159,6 +159,9 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 
 // cType returns the MySQL string type for the given column.
 func (d *MySQL) cType(c *Column) (t string) {
+	if c.SchemaType != nil && c.SchemaType[dialect.MySQL] != "" {
+		return c.SchemaType[dialect.MySQL]
+	}
 	switch c.Type {
 	case field.TypeBool:
 		t = "boolean"
