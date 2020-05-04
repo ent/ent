@@ -10,6 +10,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/schema/field"
 
@@ -63,13 +64,14 @@ func TestSQLite_Create(t *testing.T) {
 						{Name: "age", Type: field.TypeInt},
 						{Name: "doc", Type: field.TypeJSON, Nullable: true},
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+						{Name: "decimal", Type: field.TypeFloat32, SchemaType: map[string]string{dialect.SQLite: "decimal(6,2)"}},
 					},
 				},
 			},
 			before: func(mock sqliteMock) {
 				mock.start()
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL, `doc` json NULL, `uuid` uuid NULL)")).
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL, `doc` json NULL, `uuid` uuid NULL, `decimal` decimal(6,2) NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

@@ -256,6 +256,9 @@ func (d *Postgres) tBuilder(t *Table) *sql.TableBuilder {
 
 // cType returns the PostgreSQL string type for this column.
 func (d *Postgres) cType(c *Column) (t string) {
+	if c.SchemaType != nil && c.SchemaType[dialect.Postgres] != "" {
+		return c.SchemaType[dialect.Postgres]
+	}
 	switch c.Type {
 	case field.TypeBool:
 		t = "boolean"

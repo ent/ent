@@ -89,6 +89,9 @@ func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder {
 
 // cType returns the SQLite string type for the given column.
 func (*SQLite) cType(c *Column) (t string) {
+	if c.SchemaType != nil && c.SchemaType[dialect.SQLite] != "" {
+		return c.SchemaType[dialect.SQLite]
+	}
 	switch c.Type {
 	case field.TypeBool:
 		t = "bool"
