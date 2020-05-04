@@ -15,20 +15,21 @@ import (
 
 // A Descriptor for field configuration.
 type Descriptor struct {
-	Tag           string        // struct tag.
-	Size          int           // varchar size.
-	Name          string        // field name.
-	Info          *TypeInfo     // field type info.
-	Unique        bool          // unique index of field.
-	Nillable      bool          // nillable struct field.
-	Optional      bool          // nullable field in database.
-	Immutable     bool          // create-only field.
-	Default       interface{}   // default value on create.
-	UpdateDefault interface{}   // default value on update.
-	Validators    []interface{} // validator functions.
-	StorageKey    string        // sql column or gremlin property.
-	Enums         []string      // enum values.
-	Sensitive     bool          // sensitive info string field.
+	Tag           string            // struct tag.
+	Size          int               // varchar size.
+	Name          string            // field name.
+	Info          *TypeInfo         // field type info.
+	Unique        bool              // unique index of field.
+	Nillable      bool              // nillable struct field.
+	Optional      bool              // nullable field in database.
+	Immutable     bool              // create-only field.
+	Default       interface{}       // default value on create.
+	UpdateDefault interface{}       // default value on update.
+	Validators    []interface{}     // validator functions.
+	StorageKey    string            // sql column or gremlin property.
+	Enums         []string          // enum values.
+	Sensitive     bool              // sensitive info string field.
+	SchemaType    map[string]string // override the schema type.
 }
 
 // String returns a new Field with type string.
