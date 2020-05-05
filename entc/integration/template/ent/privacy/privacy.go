@@ -43,6 +43,24 @@ func Skipf(format string, a ...interface{}) error {
 	return fmt.Errorf(format+": %w", append(a, Skip)...)
 }
 
+type decisionCtxKey struct{}
+
+// DecisionContext creates a decision context.
+func DecisionContext(parent context.Context, decision error) context.Context {
+	if decision == nil || errors.Is(decision, Skip) {
+		return parent
+	}
+	return context.WithValue(parent, decisionCtxKey{}, decision)
+}
+
+func decisionFromContext(ctx context.Context) (error, bool) {
+	err, ok := ctx.Value(decisionCtxKey{}).(error)
+	if ok && errors.Is(err, Allow) {
+		err = nil
+	}
+	return err, ok
+}
+
 type (
 	// QueryPolicy combines multiple query rules into a single policy.
 	QueryPolicy []QueryRule
@@ -56,6 +74,9 @@ type (
 
 // EvalQuery evaluates a query against a query policy.
 func (policy QueryPolicy) EvalQuery(ctx context.Context, q ent.Query) error {
+	if err, ok := decisionFromContext(ctx); ok {
+		return err
+	}
 	for _, rule := range policy {
 		switch err := rule.EvalQuery(ctx, q); {
 		case err == nil || errors.Is(err, Skip):
@@ -90,6 +111,9 @@ type (
 
 // EvalMutation evaluates a mutation against a mutation policy.
 func (policy MutationPolicy) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if err, ok := decisionFromContext(ctx); ok {
+		return err
+	}
 	for _, rule := range policy {
 		switch err := rule.EvalMutation(ctx, m); {
 		case err == nil || errors.Is(err, Skip):
