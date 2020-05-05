@@ -174,7 +174,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 	case field.TypeUint16:
 		t = "smallint unsigned"
 	case field.TypeInt32:
-		t = "int"
+		t = c.scanTypeOr("int") // Or mediumint.
 	case field.TypeUint32:
 		t = "int unsigned"
 	case field.TypeInt, field.TypeInt64:
@@ -214,7 +214,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 	case field.TypeFloat32, field.TypeFloat64:
 		t = "double"
 	case field.TypeTime:
-		t = "timestamp"
+		t = c.scanTypeOr("timestamp")
 		// In MySQL, timestamp columns are `NOT NULL by default, and assigning NULL
 		// assigns the current_timestamp(). We avoid this if not set otherwise.
 		c.Nullable = true
@@ -324,7 +324,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		return err
 	}
 	switch parts[0] {
-	case "int":
+	case "mediumint", "int":
 		c.Type = field.TypeInt32
 		if unsigned {
 			c.Type = field.TypeUint32
@@ -350,7 +350,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		}
 	case "double":
 		c.Type = field.TypeFloat64
-	case "timestamp", "datetime":
+	case "time", "timestamp", "date", "datetime":
 		c.Type = field.TypeTime
 	case "tinyblob":
 		c.Size = math.MaxUint8
@@ -481,12 +481,12 @@ func (d *MySQL) alterColumns(table string, add, modify, drop []*Column) sql.Quer
 	return sql.Queries{b}
 }
 
-// parseColumn returns column parts, size and signedness by mysql type
+// parseColumn returns column parts, size and signed-info from a MySQL type.
 func parseColumn(typ string) (parts []string, size int64, unsigned bool, err error) {
 	switch parts = strings.FieldsFunc(typ, func(r rune) bool {
 		return r == '(' || r == ')' || r == ' ' || r == ','
 	}); parts[0] {
-	case "int", "smallint", "bigint", "tinyint":
+	case "tinyint", "smallint", "mediumint", "int", "bigint":
 		switch {
 		case len(parts) == 2 && parts[1] == "unsigned": // int unsigned
 			unsigned = true
