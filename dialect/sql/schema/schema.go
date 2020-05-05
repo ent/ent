@@ -291,6 +291,14 @@ func (c *Column) defaultSize(version string) int64 {
 	return size
 }
 
+// scanTypeOr returns the scanning type or the given value.
+func (c *Column) scanTypeOr(t string) string {
+	if c.typ != "" {
+		return strings.ToLower(c.typ)
+	}
+	return t
+}
+
 // ForeignKey definition for creation.
 type ForeignKey struct {
 	Symbol     string          // foreign-key name. Generated if empty.
