@@ -18,6 +18,7 @@ const (
 	MySQL    = "mysql"
 	SQLite   = "sqlite3"
 	Postgres = "postgres"
+	MSSQL    = "sqlserver"
 	Gremlin  = "gremlin"
 )
 

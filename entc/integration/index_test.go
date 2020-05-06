@@ -6,6 +6,7 @@ package integration
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/facebookincubator/ent/entc/integration/ent"
@@ -32,6 +33,12 @@ func Indexes(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.Equal("foo", f3.Name)
 	require.Equal("bar", *f3.User)
+
+	// TODO:fix
+	// MSSQL nulls are not unique
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
 
 	t.Log("allow inserting 2 files the same name, type and NULL user (optional field)")
 	png := client.FileType.Create().SetName("png").SaveX(ctx)

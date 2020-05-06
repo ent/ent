@@ -1,0 +1,4 @@
+CREATE DATABASE test;
+GO
+USE test;
+GO

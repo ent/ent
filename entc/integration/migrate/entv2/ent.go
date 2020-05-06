@@ -200,6 +200,8 @@ func isSQLConstraintError(err error) (*ConstraintError, bool) {
 			"Error 1062",               // MySQL 1062 error (ER_DUP_ENTRY).
 			"UNIQUE constraint failed", // SQLite.
 			"duplicate key value violates unique constraint", // PostgreSQL.
+			"Cannot insert duplicate key row in object",      // MSSQL
+			"Violation of UNIQUE KEY constraint",             // MSSQL
 		}
 	)
 	if _, ok := err.(*sqlgraph.ConstraintError); ok {

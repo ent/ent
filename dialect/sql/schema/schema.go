@@ -7,6 +7,7 @@ package schema
 
 import (
 	"fmt"
+	"github.com/facebookincubator/ent/dialect"
 	"strconv"
 	"strings"
 
@@ -233,7 +234,15 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 		attr := "DEFAULT "
 		switch v := c.Default.(type) {
 		case bool:
-			attr += strconv.FormatBool(v)
+			if b.Dialect() == dialect.MSSQL {
+				if v {
+					attr += "1"
+				} else {
+					attr += "0"
+				}
+			} else {
+				attr += strconv.FormatBool(v)
+			}
 		case string:
 			// Escape single quote by replacing each with 2.
 			attr += fmt.Sprintf("'%s'", strings.Replace(v, "'", "''", -1))

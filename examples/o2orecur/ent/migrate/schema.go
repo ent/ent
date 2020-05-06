@@ -29,7 +29,6 @@ var (
 				Columns: []*schema.Column{NodesColumns[2]},
 
 				RefColumns: []*schema.Column{NodesColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 	}

@@ -72,3 +72,12 @@ services:
     restart: on-failure
     ports:
       - 8182:8182
+
+  mssql:
+    # build: ./mssql
+    image: mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: 'yourStrong(!)Password'
+    ports:
+      - 1433:1433

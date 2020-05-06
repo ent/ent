@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
+	github.com/denisenkom/go-mssqldb v0.0.0-20200428022330-06a60b6afbbc
 	github.com/go-bindata/go-bindata v1.0.1-0.20190711162640-ee3c2418e368
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae

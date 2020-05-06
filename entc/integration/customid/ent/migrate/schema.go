@@ -29,7 +29,6 @@ var (
 				Columns: []*schema.Column{BlobsColumns[2]},
 
 				RefColumns: []*schema.Column{BlobsColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -82,7 +81,6 @@ var (
 				Columns: []*schema.Column{PetsColumns[1]},
 
 				RefColumns: []*schema.Column{PetsColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "pets_users_pets",
@@ -109,7 +107,6 @@ var (
 				Columns: []*schema.Column{UsersColumns[1]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 	}

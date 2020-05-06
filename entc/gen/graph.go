@@ -312,9 +312,17 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				pk := ref.PrimaryKey[0]
 				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
 				owner.AddColumn(column)
+
+				onDelete := schema.SetNull
+
+				if owner == ref {
+					// MSSQL disallows cascade delete on self-referential foreign key
+					onDelete = schema.NoAction
+				}
+
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   schema.SetNull,
+					OnDelete:   onDelete,
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),

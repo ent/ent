@@ -144,10 +144,10 @@ func (t *TableBuilder) ForeignKeys(fks ...*ForeignKeyBuilder) *TableBuilder {
 }
 
 // Constraints adds a list of foreign-key constraints to the statement.
-func (t *TableBuilder) Constraints(fks ...*ForeignKeyBuilder) *TableBuilder {
-	queries := make([]Querier, len(fks))
-	for i := range fks {
-		queries[i] = &Wrapper{"CONSTRAINT %s", fks[i]}
+func (t *TableBuilder) Constraints(constraints ...*TableConstraintBuilder) *TableBuilder {
+	queries := make([]Querier, len(constraints))
+	for i := range constraints {
+		queries[i] = &Wrapper{"CONSTRAINT %s", constraints[i]}
 	}
 	t.constraints = append(t.constraints, queries...)
 	return t
@@ -173,9 +173,14 @@ func (t *TableBuilder) Collate(s string) *TableBuilder {
 //
 func (t *TableBuilder) Query() (string, []interface{}) {
 	t.WriteString("CREATE TABLE ")
-	if t.exists {
-		t.WriteString("IF NOT EXISTS ")
+
+	// TODO: mssql does not support if not exists, at least not in a single query
+	if !t.mssql() {
+		if t.exists {
+			t.WriteString("IF NOT EXISTS ")
+		}
 	}
+
 	t.Ident(t.name)
 	t.Nested(func(b *Builder) {
 		b.JoinComma(t.columns...)
@@ -243,7 +248,7 @@ func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
 // ModifyColumn appends the `MODIFY/ALTER COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 	switch {
-	case t.postgres():
+	case t.postgres(), t.mssql():
 		c.modify = true
 		t.Queries = append(t.Queries, &Wrapper{"ALTER COLUMN %s", c})
 	default:
@@ -369,6 +374,66 @@ func (i *IndexAlter) Query() (string, []interface{}) {
 	i.Pad()
 	i.JoinComma(i.Queries...)
 	return i.String(), i.args
+}
+
+// TableConstraintBuilder is the builder for the foreign-key constraint clause.
+type TableConstraintBuilder struct {
+	Builder
+	symbol  string
+	columns []string
+	typ     string
+}
+
+// TableConstraint returns a builder for the constraint clause in create/alter table statements.
+//
+// 	TableConstraint().
+// 		Columns("group_id").
+//		Reference(Reference().Table("groups").Columns("id")).
+//		Unique()
+//
+func TableConstraint(symbol ...string) *TableConstraintBuilder {
+	c := &TableConstraintBuilder{}
+	if len(symbol) != 0 {
+		c.symbol = symbol[0]
+	}
+	return c
+}
+
+// Columns sets the columns of the foreign key in the source table.
+func (c *TableConstraintBuilder) Columns(s ...string) *TableConstraintBuilder {
+	c.columns = append(c.columns, s...)
+	return c
+}
+
+// Unique constraint
+func (c *TableConstraintBuilder) Unique() *TableConstraintBuilder {
+	c.typ = "UNIQUE"
+	return c
+}
+
+// Primary constraint
+func (c *TableConstraintBuilder) Primary() *TableConstraintBuilder {
+	c.typ = "PRIMARY KEY"
+	return c
+}
+
+// Query returns query representation of a table constraint.
+func (c *TableConstraintBuilder) Query() (string, []interface{}) {
+	if c.symbol != "" {
+		c.Ident(c.symbol).Pad()
+	}
+
+	// TODO error when type not populated?
+	if c.typ != "" {
+		c.WriteString(c.typ)
+	}
+	// c.WriteString("FOREIGN KEY")
+
+	c.Nested(func(b *Builder) {
+		b.IdentComma(c.columns...)
+	})
+
+	return c.String(), c.args
 }
 
 // ForeignKeyBuilder is the builder for the foreign-key constraint clause.
@@ -632,7 +697,7 @@ func (i *InsertBuilder) Default() *InsertBuilder {
 	switch i.Dialect() {
 	case dialect.MySQL:
 		i.defaults = "VALUES ()"
-	case dialect.SQLite, dialect.Postgres:
+	case dialect.SQLite, dialect.Postgres, dialect.MSSQL:
 		i.defaults = "DEFAULT VALUES"
 	}
 	return i
@@ -644,16 +709,33 @@ func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
 	return i
 }
 
+func (i *InsertBuilder) buildOutputs() {
+	if len(i.returning) > 0 && i.mssql() {
+		i.WriteString(" OUTPUT ")
+		for idx, r := range i.returning {
+			if idx > 0 {
+				i.Comma()
+			}
+			i.WriteString("INSERTED.")
+			i.Ident(r)
+		}
+		i.Pad()
+	}
+}
+
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []interface{}) {
 	i.WriteString("INSERT INTO ")
 	i.Ident(i.table).Pad()
+
 	if i.defaults != "" && len(i.columns) == 0 {
+		i.buildOutputs()
 		i.WriteString(i.defaults)
 	} else {
 		i.Nested(func(b *Builder) {
 			b.IdentComma(i.columns...)
 		})
+		i.buildOutputs()
 		i.WriteString(" VALUES ")
 		for j, v := range i.values {
 			if j > 0 {
@@ -1648,6 +1730,13 @@ func (s *Selector) Query() (string, []interface{}) {
 	if s.distinct {
 		b.WriteString("DISTINCT ")
 	}
+	if b.mssql() {
+		if s.offset == nil && s.limit != nil {
+			b.WriteString(" TOP(")
+			b.Arg(s.limit)
+			b.WriteString(") ")
+		}
+	}
 	if len(s.columns) > 0 {
 		b.IdentComma(s.columns...)
 	} else {
@@ -1701,14 +1790,29 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" ORDER BY ")
 		b.IdentComma(s.order...)
 	}
-	if s.limit != nil {
-		b.WriteString(" LIMIT ")
-		b.Arg(*s.limit)
+
+	// https://docs.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-2017#Offset
+	if b.mssql() {
+		if s.offset != nil && s.limit != nil {
+			b.WriteString(" OFFSET ")
+			b.Arg(*s.offset)
+			b.WriteString(" ROWS ")
+
+			b.WriteString(" FETCH NEXT ")
+			b.Arg(*s.limit)
+			b.WriteString(" ROWS ONLY ")
+		}
+	} else {
+		if s.limit != nil {
+			b.WriteString(" LIMIT ")
+			b.Arg(*s.limit)
+		}
+		if s.offset != nil {
+			b.WriteString(" OFFSET ")
+			b.Arg(*s.offset)
+		}
 	}
-	if s.offset != nil {
-		b.WriteString(" OFFSET ")
-		b.Arg(*s.offset)
-	}
+
 	s.total = b.total
 	return b.String(), b.args
 }
@@ -1840,6 +1944,8 @@ func (b *Builder) Quote(ident string) string {
 			return strings.Replace(ident, "`", `"`, -1)
 		}
 		return strconv.Quote(ident)
+	case b.mssql():
+		return fmt.Sprintf("[%s]", ident)
 	// an identifier for unknown dialect.
 	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
 		return ident
@@ -1853,6 +1959,8 @@ func (b *Builder) isIdent(s string) bool {
 	switch {
 	case b.postgres():
 		return strings.Contains(s, `"`)
+	case b.mssql():
+		return strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]")
 	default:
 		return strings.Contains(s, "`")
 	}
@@ -1898,6 +2006,10 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		// PostgreSQL arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		b.WriteString("$" + strconv.Itoa(b.total))
+	case b.mssql():
+		// MSSQL arguments are referenced using the syntax @pN.
+		// @p1 refers to the 1st argument, @p2 to the 2nd, and so on.
+		b.WriteString("@p" + strconv.Itoa(b.total))
 	default:
 		b.WriteString("?")
 	}
@@ -2012,10 +2124,17 @@ func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
 }
 
+// mssql reports if the builder dialect is mssql.
+func (b Builder) mssql() bool {
+	return b.Dialect() == dialect.MSSQL
+}
+
 // fromIdent sets the builder dialect from the identifier format.
 func (b *Builder) fromIdent(ident string) {
 	if strings.Contains(ident, `"`) {
 		b.SetDialect(dialect.Postgres)
+	} else if strings.HasPrefix(ident, "[") && strings.HasSuffix(ident, "]") {
+		b.SetDialect(dialect.MSSQL)
 	}
 	// otherwise, use the default.
 }

@@ -963,7 +963,7 @@ func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.Inser
 	query, args := insert.Query()
 	// PostgreSQL does not support the LastInsertId() method of sql.Result
 	// on Exec, and should be extracted manually using the `RETURNING` clause.
-	if insert.Dialect() == dialect.Postgres {
+	if insert.Dialect() == dialect.Postgres || insert.Dialect() == dialect.MSSQL {
 		rows := &sql.Rows{}
 		if err := tx.Query(ctx, query, args, rows); err != nil {
 			return 0, err

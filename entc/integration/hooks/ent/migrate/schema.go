@@ -52,7 +52,6 @@ var (
 				Columns: []*schema.Column{UsersColumns[2]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 	}

@@ -30,7 +30,6 @@ var (
 				Columns: []*schema.Column{UsersColumns[3]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 	}

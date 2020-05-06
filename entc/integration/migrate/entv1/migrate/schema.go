@@ -56,14 +56,12 @@ var (
 				Columns: []*schema.Column{UsersColumns[8]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "users_users_spouse",
 				Columns: []*schema.Column{UsersColumns[9]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
