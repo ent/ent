@@ -152,7 +152,7 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL").
 						AddRow("name", "character varying", "YES", "NULL").
 						AddRow("uuid", "uuid", "YES", "NULL").
-						AddRow("date", "date", "NO", "NULL").
+						AddRow("date", "date", "NO", "CURRENT_DATE").
 						AddRow("text", "text", "YES", "NULL"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).

@@ -230,7 +230,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeUUID
 	}
 	switch {
-	case !defaults.Valid:
+	case !defaults.Valid || c.Type == field.TypeTime:
 		return nil
 	case strings.Contains(defaults.String, "::"):
 		parts := strings.Split(defaults.String, "::")

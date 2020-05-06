@@ -185,7 +185,7 @@ func (c Column) UintType() bool { return c.Type >= field.TypeUint8 && c.Type <= 
 func (c Column) FloatType() bool { return c.Type == field.TypeFloat32 || c.Type == field.TypeFloat64 }
 
 // ScanDefault scans the default value string to its interface type.
-func (c *Column) ScanDefault(value string) (err error) {
+func (c *Column) ScanDefault(value string) error {
 	switch {
 	case strings.ToUpper(value) == Null: // ignore.
 	case c.IntType():
