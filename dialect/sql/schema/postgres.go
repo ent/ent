@@ -220,7 +220,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Size = maxCharSize + 1
 	case "character", "character varying":
 		c.Type = field.TypeString
-	case "timestamp with time zone":
+	case "date", "time", "timestamp", "timestamp with time zone":
 		c.Type = field.TypeTime
 	case "bytea":
 		c.Type = field.TypeBytes
@@ -284,7 +284,7 @@ func (d *Postgres) cType(c *Column) (t string) {
 			t = "text"
 		}
 	case field.TypeTime:
-		t = "timestamp with time zone"
+		t = c.scanTypeOr("timestamp with time zone")
 	case field.TypeEnum:
 		// Currently, the support for enums is weak (application level only.
 		// like SQLite). Dialect needs to create and maintain its enum type.

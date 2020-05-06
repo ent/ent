@@ -136,6 +136,7 @@ func TestPostgres_Create(t *testing.T) {
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
 						{Name: "age", Type: field.TypeInt},
+						{Name: "date", Type: field.TypeTime, SchemaType: map[string]string{dialect.Postgres: "date"}},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -151,6 +152,7 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL").
 						AddRow("name", "character varying", "YES", "NULL").
 						AddRow("uuid", "uuid", "YES", "NULL").
+						AddRow("date", "date", "NO", "NULL").
 						AddRow("text", "text", "YES", "NULL"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
