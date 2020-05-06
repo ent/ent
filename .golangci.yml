@@ -65,3 +65,6 @@ issues:
       text: "packages.LoadSyntax is deprecated"
       linters:
         - staticcheck
+    - text: "Expect WriteFile permissions to be 0600 or less"
+      linters:
+        - gosec

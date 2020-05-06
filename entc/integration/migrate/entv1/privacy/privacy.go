@@ -54,11 +54,11 @@ func DecisionContext(parent context.Context, decision error) context.Context {
 }
 
 func decisionFromContext(ctx context.Context) (error, bool) {
-	err, ok := ctx.Value(decisionCtxKey{}).(error)
-	if ok && errors.Is(err, Allow) {
-		err = nil
+	decision, ok := ctx.Value(decisionCtxKey{}).(error)
+	if ok && errors.Is(decision, Allow) {
+		decision = nil
 	}
-	return err, ok
+	return decision, ok
 }
 
 type (
@@ -74,16 +74,16 @@ type (
 
 // EvalQuery evaluates a query against a query policy.
 func (policy QueryPolicy) EvalQuery(ctx context.Context, q entv1.Query) error {
-	if err, ok := decisionFromContext(ctx); ok {
-		return err
+	if decision, ok := decisionFromContext(ctx); ok {
+		return decision
 	}
 	for _, rule := range policy {
-		switch err := rule.EvalQuery(ctx, q); {
-		case err == nil || errors.Is(err, Skip):
-		case errors.Is(err, Allow):
+		switch decision := rule.EvalQuery(ctx, q); {
+		case decision == nil || errors.Is(decision, Skip):
+		case errors.Is(decision, Allow):
 			return nil
 		default:
-			return err
+			return decision
 		}
 	}
 	return nil
@@ -111,16 +111,16 @@ type (
 
 // EvalMutation evaluates a mutation against a mutation policy.
 func (policy MutationPolicy) EvalMutation(ctx context.Context, m entv1.Mutation) error {
-	if err, ok := decisionFromContext(ctx); ok {
-		return err
+	if decision, ok := decisionFromContext(ctx); ok {
+		return decision
 	}
 	for _, rule := range policy {
-		switch err := rule.EvalMutation(ctx, m); {
-		case err == nil || errors.Is(err, Skip):
-		case errors.Is(err, Allow):
+		switch decision := rule.EvalMutation(ctx, m); {
+		case decision == nil || errors.Is(decision, Skip):
+		case errors.Is(decision, Allow):
 			return nil
 		default:
-			return err
+			return decision
 		}
 	}
 	return nil
@@ -159,27 +159,42 @@ type QueryMutationRule interface {
 
 // AlwaysAllowRule returns a rule that returns an allow decision.
 func AlwaysAllowRule() QueryMutationRule {
-	return fixedDecisionRule{Allow}
+	return fixedDecision{Allow}
 }
 
 // AlwaysDenyRule returns a rule that returns a deny decision.
 func AlwaysDenyRule() QueryMutationRule {
-	return fixedDecisionRule{Deny}
+	return fixedDecision{Deny}
 }
 
-type fixedDecisionRule struct{ err error }
+type fixedDecision struct {
+	decision error
+}
 
-func (f fixedDecisionRule) EvalQuery(context.Context, entv1.Query) error       { return f.err }
-func (f fixedDecisionRule) EvalMutation(context.Context, entv1.Mutation) error { return f.err }
+func (f fixedDecision) EvalQuery(context.Context, entv1.Query) error {
+	return f.decision
+}
 
-// DenyMutationOperationRule returns a rule denying specified mutation operation.
-func DenyMutationOperationRule(op entv1.Op) MutationRule {
-	return MutationRuleFunc(func(_ context.Context, m entv1.Mutation) error {
+func (f fixedDecision) EvalMutation(context.Context, entv1.Mutation) error {
+	return f.decision
+}
+
+// OnMutationOperation evaluates the given rule only on a given mutation operation.
+func OnMutationOperation(rule MutationRule, op entv1.Op) MutationRule {
+	return MutationRuleFunc(func(ctx context.Context, m entv1.Mutation) error {
 		if m.Op().Is(op) {
-			return Denyf("ent/privacy: operation %s is not allowed", m.Op())
+			return rule.EvalMutation(ctx, m)
 		}
 		return Skip
 	})
+}
+
+// DenyMutationOperationRule returns a rule denying specified mutation operation.
+func DenyMutationOperationRule(op entv1.Op) MutationRule {
+	rule := MutationRuleFunc(func(_ context.Context, m entv1.Mutation) error {
+		return Denyf("ent/privacy: operation %s is not allowed", m.Op())
+	})
+	return OnMutationOperation(rule, op)
 }
 
 // The CarQueryRuleFunc type is an adapter to allow the use of ordinary
