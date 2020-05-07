@@ -89,6 +89,7 @@ var (
 		migrate.WithDropColumn(true),
 	)
 	tests = [...]func(*testing.T, *ent.Client){
+		NoSchemaChanges,
 		Tx,
 		Indexes,
 		Types,
@@ -1045,6 +1046,23 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 			require.Equal(typ.Name, f.Edges.Type.Name)
 		}
 	})
+}
+
+// writerFunc is an io.Writer implemented by the underlying func.
+type writerFunc func(p []byte) (int, error)
+
+func (f writerFunc) Write(p []byte) (int, error) { return f(p) }
+
+func NoSchemaChanges(t *testing.T, client *ent.Client) {
+	w := writerFunc(func(p []byte) (int, error) {
+		stmt := strings.Trim(string(p), "\n;")
+		if stmt != "BEGIN" && stmt != "COMMIT" {
+			t.Errorf("expect no statement to execute. got: %q", stmt)
+		}
+		return 0, nil
+	})
+	err := client.Schema.WriteTo(context.Background(), w, migrate.WithDropIndex(true), migrate.WithDropColumn(true))
+	require.NoError(t, err)
 }
 
 func drop(t *testing.T, client *ent.Client) {
