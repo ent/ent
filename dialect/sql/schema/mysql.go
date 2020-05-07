@@ -174,7 +174,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 	case field.TypeUint16:
 		t = "smallint unsigned"
 	case field.TypeInt32:
-		t = c.scanTypeOr("int") // Or mediumint.
+		t = "int"
 	case field.TypeUint32:
 		t = "int unsigned"
 	case field.TypeInt, field.TypeInt64:
