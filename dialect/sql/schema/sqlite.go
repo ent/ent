@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -176,7 +177,20 @@ func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table,
 	}
 	// Add and link indexes to table columns.
 	for _, idx := range indexes {
-		t.AddIndex(idx.Name, idx.Unique, idx.columns)
+		switch {
+		case idx.primary:
+		case idx.Unique && len(idx.columns) == 1:
+			name := idx.columns[0]
+			c, ok := t.column(name)
+			if !ok {
+				return nil, fmt.Errorf("index %q column %q was not found in table %q", idx.Name, name, t.Name)
+			}
+			c.Key = UniqueKey
+			c.Unique = true
+			fallthrough
+		default:
+			t.addIndex(idx)
+		}
 	}
 	return t, nil
 }
@@ -184,7 +198,7 @@ func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table,
 // table loads the table indexes from the database.
 func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Indexes, error) {
 	rows := &sql.Rows{}
-	query, args := sql.Select("name", "unique").
+	query, args := sql.Select("name", "unique", "origin").
 		From(sql.Table(fmt.Sprintf("pragma_index_list('%s')", name)).Unquote()).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -194,9 +208,11 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 	var idx Indexes
 	for rows.Next() {
 		i := &Index{}
-		if err := rows.Scan(&i.Name, &i.Unique); err != nil {
+		origin := sql.NullString{}
+		if err := rows.Scan(&i.Name, &i.Unique, &origin); err != nil {
 			return nil, fmt.Errorf("scanning index description %v", err)
 		}
+		i.primary = origin.String == "pk"
 		idx = append(idx, i)
 	}
 	if err := rows.Close(); err != nil {
@@ -208,6 +224,11 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 			return nil, err
 		}
 		idx[i].columns = columns
+		// Normalize implicit index names to ent naming convention. See:
+		// https://github.com/sqlite/sqlite/blob/e937df8/src/build.c#L3583
+		if len(columns) == 1 && strings.HasPrefix(idx[i].Name, "sqlite_autoindex_"+name) {
+			idx[i].Name = columns[0]
+		}
 	}
 	return idx, nil
 }
