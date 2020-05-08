@@ -1059,7 +1059,7 @@ func NoSchemaChanges(t *testing.T, client *ent.Client) {
 		if stmt != "BEGIN" && stmt != "COMMIT" {
 			t.Errorf("expect no statement to execute. got: %q", stmt)
 		}
-		return 0, nil
+		return len(p), nil
 	})
 	err := client.Schema.WriteTo(context.Background(), w, migrate.WithDropIndex(true), migrate.WithDropColumn(true))
 	require.NoError(t, err)
