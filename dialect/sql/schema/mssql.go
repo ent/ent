@@ -277,7 +277,10 @@ func (d *MSSQL) cType(c *Column) (t string) {
 // The syntax/order is: datatype [Charset] [Unique|Increment] [Collation] [Nullable].
 func (d *MSSQL) addColumn(c *Column) *sql.ColumnBuilder {
 	b := sql.Dialect(dialect.MSSQL).Column(c.Name).Type(d.cType(c)).Attr(c.Attr)
-	c.unique(b)
+
+	// Unique is handled by indexes
+	// c.unique(b)
+
 	if c.Increment {
 		b.Attr("IDENTITY(1,1)")
 	}
@@ -294,6 +297,17 @@ func (d *MSSQL) addIndex(i *Index, table string) *sql.IndexBuilder {
 		CreateIndex(i.Name).Table(table)
 	if i.Unique {
 		idx.Unique()
+
+		// Exclude nulls by default
+		if len(i.Columns) == 1 {
+			b := sql.Builder{}
+			b.SetDialect(d.Dialect())
+
+			b.Ident(i.Columns[0].Name)
+			b.WriteString(" is not NULL")
+
+			idx.Filter(b.String())
+		}
 	}
 	for _, c := range i.Columns {
 		idx.Column(c.Name)

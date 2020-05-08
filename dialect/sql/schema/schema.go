@@ -368,6 +368,7 @@ type Index struct {
 	columns  []string  // columns loaded from query scan.
 	primary  bool      // primary key index.
 	realname string    // real name in the database (Postgres only).
+	filter   string
 }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.

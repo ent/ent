@@ -154,6 +154,32 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 					return err
 				}
 			}
+
+			if m.Dialect() == dialect.MSSQL {
+				// Convert unique column into an index including where <col> is not null
+				for _, col := range t.Columns {
+					if col.Unique {
+						b := sql.Builder{}
+						b.SetDialect(m.Dialect())
+
+						b.Ident(col.Name)
+						b.WriteString(" is not NULL")
+
+						name := fmt.Sprintf("%s_%s_uq", t.Name, col.Name)
+
+						query, args := m.addIndex(&Index{
+							Name:    name,
+							Unique:  true,
+							Columns: []*Column{col},
+							filter:  b.String(),
+						}, t.Name).Query()
+						if err := tx.Exec(ctx, query, args, nil); err != nil {
+							return fmt.Errorf("create index %q: %v", name, err)
+						}
+					}
+				}
+			}
+
 			// indexes.
 			for _, idx := range t.Indexes {
 				query, args := m.addIndex(idx, t.Name).Query()

@@ -548,6 +548,7 @@ type IndexBuilder struct {
 	unique  bool
 	table   string
 	columns []string
+	filter  string
 }
 
 // CreateIndex creates a builder for the `CREATE INDEX` statement.
@@ -571,6 +572,12 @@ func CreateIndex(name string) *IndexBuilder {
 // Unique sets the index to be a unique index.
 func (i *IndexBuilder) Unique() *IndexBuilder {
 	i.unique = true
+	return i
+}
+
+// Filter
+func (i *IndexBuilder) Filter(filter string) *IndexBuilder {
+	i.filter = filter
 	return i
 }
 
@@ -604,6 +611,12 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 	i.Ident(i.table).Nested(func(b *Builder) {
 		b.IdentComma(i.columns...)
 	})
+
+	if i.mssql() && i.filter != "" {
+		i.WriteString(" WHERE ")
+		i.WriteString(i.filter)
+	}
+
 	return i.String(), nil
 }
 

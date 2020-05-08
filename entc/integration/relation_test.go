@@ -64,12 +64,6 @@ func O2OTwoTypes(t *testing.T, client *ent.Client) {
 	require.Equal(crd.Number, client.Card.Query().Where(card.HasOwner()).OnlyX(ctx).Number)
 	require.Equal(ocrd.Number, client.Card.Query().Where(card.Not(card.HasOwner())).OnlyX(ctx).Number)
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("query with side lookup on assoc")
 	ousr := client.User.Create().SetAge(10).SetName("user without card").SaveX(ctx)
 	require.Equal(usr.Name, client.User.Query().Where(user.HasCard()).OnlyX(ctx).Name)
@@ -164,12 +158,6 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 	require.Zero(head.QueryNext().CountX(ctx))
 	require.Equal(1, client.Node.Query().CountX(ctx), "linked-list should have 1 node")
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("add node to the linked-list by updating the head (the owner of the edge)")
 	sec = client.Node.Create().SetValue(2).SaveX(ctx)
 	head.Update().SetNext(sec).ExecX(ctx)
@@ -177,6 +165,12 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 	require.Equal(head.ID, sec.QueryPrev().OnlyX(ctx).ID, "head should point to the second node")
 	require.Equal(sec.ID, head.QueryNext().OnlyX(ctx).ID)
 	require.Equal(2, client.Node.Query().CountX(ctx), "linked-list should have 2 nodes")
+
+	// TODO:fix
+	// The DELETE statement conflicted with the SAME TABLE REFERENCE constraint
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
 
 	t.Log("delete assoc should delete inverse edge")
 	client.Node.DeleteOne(head).ExecX(ctx)
@@ -287,17 +281,17 @@ func O2OSelfRef(t *testing.T, client *ent.Client) {
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
 	require.False(foo.QuerySpouse().ExistX(ctx))
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("sets spouse on user creation (inverse creation)")
 	bar := client.User.Create().SetAge(10).SetName("bar").SetSpouse(foo).SaveX(ctx)
 	require.True(foo.QuerySpouse().ExistX(ctx))
 	require.True(bar.QuerySpouse().ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasSpouse()).CountX(ctx))
+
+	// TODO:fix
+	// The DELETE statement conflicted with the SAME TABLE REFERENCE constraint
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(bar).ExecX(ctx)
@@ -448,12 +442,6 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 	require.Equal(usr.Name, pedro.QueryOwner().OnlyX(ctx).Name)
 	require.Equal(pedro.Name, usr.QueryPets().OnlyX(ctx).Name)
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("add another pet to user")
 	xabi := client.Pet.Create().SetName("xabi").SetOwner(usr).SaveX(ctx)
 	require.Equal(2, usr.QueryPets().CountX(ctx))
@@ -597,12 +585,6 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 	prt := client.User.Create().SetAge(30).SetName("a8m").SaveX(ctx)
 	require.Zero(prt.QueryChildren().CountX(ctx))
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("add child to parent on child creation (inverse creation)")
 	chd := client.User.Create().SetAge(1).SetName("child").SetParent(prt).SaveX(ctx)
 	require.Equal(prt.Name, chd.QueryParent().OnlyX(ctx).Name)
@@ -617,6 +599,12 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 	prt.Update().AddChildIDs(chd.ID).ExecX(ctx)
 	require.Equal(prt.Name, chd.QueryParent().OnlyX(ctx).Name)
 	require.Equal(chd.Name, prt.QueryChildren().OnlyX(ctx).Name)
+
+	// TODO:fix
+	// The DELETE statement conflicted with the SAME TABLE REFERENCE constraint
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
 
 	t.Log("delete assoc (owner of the edge) should delete inverse edge")
 	client.User.DeleteOne(prt).ExecX(ctx)
@@ -811,17 +799,17 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
 	require.False(foo.QueryFriends().ExistX(ctx))
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("sets friendship on user creation (inverse creation)")
 	bar := client.User.Create().SetAge(10).SetName("bar").AddFriends(foo).SaveX(ctx)
 	require.True(foo.QueryFriends().ExistX(ctx))
 	require.True(bar.QueryFriends().ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasFriends()).CountX(ctx))
+
+	// TODO:fix
+	// The DELETE statement conflicted with the SAME TABLE REFERENCE constraint
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(bar).ExecX(ctx)
@@ -956,18 +944,18 @@ func M2MSameType(t *testing.T, client *ent.Client) {
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
 	require.False(foo.QueryFollowers().ExistX(ctx))
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("adds followers on user creation (inverse creation)")
 	bar := client.User.Create().SetAge(10).SetName("bar").AddFollowing(foo).SaveX(ctx)
 	require.Equal(foo.Name, bar.QueryFollowing().OnlyX(ctx).Name)
 	require.Equal(bar.Name, foo.QueryFollowers().OnlyX(ctx).Name)
 	require.Equal(1, client.User.Query().Where(user.HasFollowers()).CountX(ctx))
 	require.Equal(1, client.User.Query().Where(user.HasFollowing()).CountX(ctx))
+
+	// TODO:fix
+	// The DELETE statement conflicted with the SAME TABLE REFERENCE constraint
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(bar).ExecX(ctx)
@@ -1146,12 +1134,6 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 	// add back the user.
 	hub.Update().AddUsers(foo).ExecX(ctx)
 
-	// TODO:fix
-	// MSSQL nulls are not unique
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	t.Log("multiple groups and users")
 	lab := client.Group.Create().SetName("Gitlab").SetExpire(time.Now()).SetInfo(inf).SaveX(ctx)
 	bar := client.User.Create().SetAge(10).SetName("bar").SaveX(ctx)
@@ -1169,6 +1151,13 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 	bar.Update().AddGroups(hub).ExecX(ctx)
 	require.Equal(2, hub.QueryUsers().CountX(ctx))
 	require.Equal(1, lab.QueryUsers().CountX(ctx))
+
+	// TODO:fix
+	// Order by broken MSSQL
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
+
 	require.Equal([]string{bar.Name, foo.Name}, hub.QueryUsers().Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
 	require.Equal([]string{hub.Name, lab.Name}, bar.QueryGroups().Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
 
