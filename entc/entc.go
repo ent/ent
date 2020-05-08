@@ -8,9 +8,11 @@ package entc
 
 import (
 	"fmt"
+	"go/token"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/facebookincubator/ent/entc/gen"
@@ -80,7 +82,22 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error)
 	if err != nil {
 		return err
 	}
+	if err := normalizePkg(cfg); err != nil {
+		return err
+	}
 	return graph.Gen()
+}
+
+func normalizePkg(c *gen.Config) error {
+	base := path.Base(c.Package)
+	if strings.ContainsRune(base, '-') {
+		base = strings.ReplaceAll(base, "-", "_")
+		c.Package = path.Join(path.Dir(c.Package), base)
+	}
+	if !token.IsIdentifier(base) {
+		return fmt.Errorf("invalid package identifier: %q", base)
+	}
+	return nil
 }
 
 // Option allows for managing codegen configuration using functional options.
