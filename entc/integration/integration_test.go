@@ -272,12 +272,6 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.True(client.User.Query().Where(user.HasPetsWith(pet.NameHasPrefix("ped"))).ExistX(ctx))
 	require.False(client.User.Query().Where(user.HasPetsWith(pet.NameHasPrefix("pan"))).ExistX(ctx))
 
-	// TODO:fix
-	// Order by broken MSSQL
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	require.Equal(child.Name, client.User.Query().Order(ent.Asc("name")).FirstX(ctx).Name)
 	require.Equal(usr2.Name, client.User.Query().Order(ent.Desc("name")).FirstX(ctx).Name)
 	// update fields.
@@ -314,6 +308,13 @@ func Sanity(t *testing.T, client *ent.Client) {
 		Sum   int    `json:"sum"`
 		Count int    `json:"count"`
 	}
+
+	// TODO:fix
+	// Incorrect syntax near '`'. [recovered]
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
+
 	client.User.Query().
 		GroupBy(user.FieldName, user.FieldAge).
 		Aggregate(ent.Count(), ent.Sum(user.FieldAge)).
@@ -392,12 +393,6 @@ func Select(t *testing.T, client *ent.Client) {
 		StringsX(ctx)
 	require.Equal([]string{"foo"}, names)
 
-	// TODO:fix
-	// Order by broken MSSQL
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	client.User.Create().SetName("bar").SetAge(30).SaveX(ctx)
 	t.Log("select one field with ordering")
 	names = client.User.
@@ -441,12 +436,6 @@ func Predicate(t *testing.T, client *ent.Client) {
 	f2 := client.File.Create().SetName("2").SetSize(20).SaveX(ctx)
 	f3 := client.File.Create().SetName("3").SetSize(30).SaveX(ctx)
 	f4 := client.File.Create().SetName("4").SetSize(40).SaveX(ctx)
-
-	// TODO:fix
-	// Order by broken MSSQL
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
 
 	files := client.File.Query().
 		Where(
@@ -739,12 +728,6 @@ func Relation(t *testing.T, client *ent.Client) {
 
 	t.Log("query with ordering")
 
-	// TODO:fix
-	// Order by broken MSSQL
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	u1 := client.User.Query().Order(ent.Asc(user.FieldName)).FirstXID(ctx)
 	u2 := client.User.Query().Order(ent.Desc(user.FieldName)).FirstXID(ctx)
 	require.NotEqual(u1, u2)
@@ -790,6 +773,13 @@ func Relation(t *testing.T, client *ent.Client) {
 		Sum   int    `json:"sum"`
 		Count int    `json:"count"`
 	}
+
+	// TODO:fix
+	// Incorrect syntax near '`'. [recovered]
+	if strings.Contains(t.Name(), "MSSQL") {
+		t.Skip("MSSQL Nulls are not unique")
+	}
+
 	client.User.Query().
 		GroupBy(user.FieldName, user.FieldAge).
 		Aggregate(ent.Count(), ent.Sum(user.FieldAge)).
@@ -1148,12 +1138,6 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		a8m := client.User.Query().Where(user.ID(a8m.ID)).OnlyX(ctx)
 		require.Empty(a8m.Edges.Pets)
 
-		// TODO:fix
-		// Order by broken MSSQL
-		if strings.Contains(t.Name(), "MSSQL") {
-			t.Skip("MSSQL Nulls are not unique")
-		}
-
 		a8m = client.User.
 			Query().
 			Where(user.ID(a8m.ID)).
@@ -1167,12 +1151,6 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	})
 
 	t.Run("M2M", func(t *testing.T) {
-		// TODO:fix
-		// Order by broken MSSQL
-		if strings.Contains(t.Name(), "MSSQL") {
-			t.Skip("MSSQL Nulls are not unique")
-		}
-
 		users := client.User.
 			Query().
 			WithFriends().
@@ -1191,12 +1169,6 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	})
 
 	t.Run("Graph", func(t *testing.T) {
-		// TODO:fix
-		// Order by broken MSSQL
-		if strings.Contains(t.Name(), "MSSQL") {
-			t.Skip("MSSQL Nulls are not unique")
-		}
-
 		users := client.User.
 			Query().
 			WithSpouse().

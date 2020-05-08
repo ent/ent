@@ -1958,6 +1958,11 @@ func (b *Builder) Quote(ident string) string {
 		}
 		return strconv.Quote(ident)
 	case b.mssql():
+		// if it was quoted with the wrong
+		// identifier character.
+		if strings.Contains(ident, "`") {
+			return b.fixMssqlQuote(ident)
+		}
 		return fmt.Sprintf("[%s]", ident)
 	// an identifier for unknown dialect.
 	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
@@ -1965,6 +1970,13 @@ func (b *Builder) Quote(ident string) string {
 	default:
 		return fmt.Sprintf("`%s`", ident)
 	}
+}
+
+func (b *Builder) fixMssqlQuote(ident string) string {
+	// TODO: handle nesting
+	ident = strings.Replace(ident, "`", "[", 1)
+	return strings.Replace(ident, "`", "]", 1)
+	// return fmt.Sprintf("[%s]", ident[1:len(ident) - 2])
 }
 
 // isIdent reports if the given string is a dialect identifier.
@@ -1989,6 +2001,10 @@ func (b *Builder) Ident(s string) *Builder {
 		// modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.Replace(s, "`", `"`, -1))
+	case (isFunc(s) || isModifier(s)) && b.mssql():
+		// modifiers and aggregation functions that
+		// were called without dialect information.
+		b.WriteString(b.fixMssqlQuote(s))
 	default:
 		b.WriteString(s)
 	}

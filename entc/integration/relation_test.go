@@ -1152,12 +1152,6 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 	require.Equal(2, hub.QueryUsers().CountX(ctx))
 	require.Equal(1, lab.QueryUsers().CountX(ctx))
 
-	// TODO:fix
-	// Order by broken MSSQL
-	if strings.Contains(t.Name(), "MSSQL") {
-		t.Skip("MSSQL Nulls are not unique")
-	}
-
 	require.Equal([]string{bar.Name, foo.Name}, hub.QueryUsers().Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
 	require.Equal([]string{hub.Name, lab.Name}, bar.QueryGroups().Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
 
