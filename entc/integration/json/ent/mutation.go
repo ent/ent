@@ -111,7 +111,7 @@ func (m *UserMutation) URLCleared() bool {
 	return ok
 }
 
-// ResetURL reset all changes of the url field.
+// ResetURL reset all changes of the "url" field.
 func (m *UserMutation) ResetURL() {
 	m.url = nil
 	delete(m.clearedFields, user.FieldURL)
@@ -143,7 +143,7 @@ func (m *UserMutation) RawCleared() bool {
 	return ok
 }
 
-// ResetRaw reset all changes of the raw field.
+// ResetRaw reset all changes of the "raw" field.
 func (m *UserMutation) ResetRaw() {
 	m.raw = nil
 	delete(m.clearedFields, user.FieldRaw)
@@ -175,7 +175,7 @@ func (m *UserMutation) DirsCleared() bool {
 	return ok
 }
 
-// ResetDirs reset all changes of the dirs field.
+// ResetDirs reset all changes of the "dirs" field.
 func (m *UserMutation) ResetDirs() {
 	m.dirs = nil
 	delete(m.clearedFields, user.FieldDirs)
@@ -207,7 +207,7 @@ func (m *UserMutation) IntsCleared() bool {
 	return ok
 }
 
-// ResetInts reset all changes of the ints field.
+// ResetInts reset all changes of the "ints" field.
 func (m *UserMutation) ResetInts() {
 	m.ints = nil
 	delete(m.clearedFields, user.FieldInts)
@@ -239,7 +239,7 @@ func (m *UserMutation) FloatsCleared() bool {
 	return ok
 }
 
-// ResetFloats reset all changes of the floats field.
+// ResetFloats reset all changes of the "floats" field.
 func (m *UserMutation) ResetFloats() {
 	m.floats = nil
 	delete(m.clearedFields, user.FieldFloats)
@@ -271,7 +271,7 @@ func (m *UserMutation) StringsCleared() bool {
 	return ok
 }
 
-// ResetStrings reset all changes of the strings field.
+// ResetStrings reset all changes of the "strings" field.
 func (m *UserMutation) ResetStrings() {
 	m.strings = nil
 	delete(m.clearedFields, user.FieldStrings)

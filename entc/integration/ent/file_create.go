@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/user"
@@ -109,6 +110,21 @@ func (fc *FileCreate) SetNillableTypeID(id *int) *FileCreate {
 // SetType sets the type edge to FileType.
 func (fc *FileCreate) SetType(f *FileType) *FileCreate {
 	return fc.SetTypeID(f.ID)
+}
+
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fc *FileCreate) AddFieldIDs(ids ...int) *FileCreate {
+	fc.mutation.AddFieldIDs(ids...)
+	return fc
+}
+
+// AddField adds the field edges to FieldType.
+func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fc.AddFieldIDs(ids...)
 }
 
 // Save creates the File in the database.
@@ -233,6 +249,25 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: filetype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fc.mutation.FieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
 				},
 			},
 		}

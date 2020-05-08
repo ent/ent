@@ -8,12 +8,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -32,6 +34,7 @@ type FileQuery struct {
 	// eager-loading edges.
 	withOwner *UserQuery
 	withType  *FileTypeQuery
+	withField *FieldTypeQuery
 	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -91,6 +94,24 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
 			sqlgraph.To(filetype.Table, filetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryField chains the current query on the field edge.
+func (fq *FileQuery) QueryField() *FieldTypeQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -299,6 +320,17 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 	return fq
 }
 
+//  WithField tells the query-builder to eager-loads the nodes that are connected to
+// the "field" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withField = query
+	return fq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -366,9 +398,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		nodes       = []*File{}
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			fq.withOwner != nil,
 			fq.withType != nil,
+			fq.withField != nil,
 		}
 	)
 	if fq.withOwner != nil || fq.withType != nil {
@@ -448,6 +481,34 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 			for i := range nodes {
 				nodes[i].Edges.Type = n
 			}
+		}
+	}
+
+	if query := fq.withField; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*File)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.FieldType(func(s *sql.Selector) {
+			s.Where(sql.InValues(file.FieldColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.file_field
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Field = append(node.Edges.Field, n)
 		}
 	}
 

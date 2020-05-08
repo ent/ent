@@ -110,7 +110,7 @@ func (m *BlobMutation) UUID() (r uuid.UUID, exists bool) {
 	return *v, true
 }
 
-// ResetUUID reset all changes of the uuid field.
+// ResetUUID reset all changes of the "uuid" field.
 func (m *BlobMutation) ResetUUID() {
 	m.uuid = nil
 }
@@ -148,7 +148,7 @@ func (m *BlobMutation) ParentIDs() (ids []uuid.UUID) {
 	return
 }
 
-// ResetParent reset all changes of the parent edge.
+// ResetParent reset all changes of the "parent" edge.
 func (m *BlobMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
@@ -190,7 +190,7 @@ func (m *BlobMutation) LinksIDs() (ids []uuid.UUID) {
 	return
 }
 
-// ResetLinks reset all changes of the links edge.
+// ResetLinks reset all changes of the "links" edge.
 func (m *BlobMutation) ResetLinks() {
 	m.links = nil
 	m.removedlinks = nil
@@ -465,7 +465,7 @@ func (m *CarMutation) Model() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetModel reset all changes of the model field.
+// ResetModel reset all changes of the "model" field.
 func (m *CarMutation) ResetModel() {
 	m.model = nil
 }
@@ -503,7 +503,7 @@ func (m *CarMutation) OwnerIDs() (ids []string) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *CarMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -784,7 +784,7 @@ func (m *GroupMutation) UsersIDs() (ids []int) {
 	return
 }
 
-// ResetUsers reset all changes of the users edge.
+// ResetUsers reset all changes of the "users" edge.
 func (m *GroupMutation) ResetUsers() {
 	m.users = nil
 	m.removedusers = nil
@@ -1056,7 +1056,7 @@ func (m *PetMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -1098,7 +1098,7 @@ func (m *PetMutation) CarsIDs() (ids []int) {
 	return
 }
 
-// ResetCars reset all changes of the cars edge.
+// ResetCars reset all changes of the "cars" edge.
 func (m *PetMutation) ResetCars() {
 	m.cars = nil
 	m.removedcars = nil
@@ -1140,7 +1140,7 @@ func (m *PetMutation) FriendsIDs() (ids []string) {
 	return
 }
 
-// ResetFriends reset all changes of the friends edge.
+// ResetFriends reset all changes of the "friends" edge.
 func (m *PetMutation) ResetFriends() {
 	m.friends = nil
 	m.removedfriends = nil
@@ -1179,7 +1179,7 @@ func (m *PetMutation) BestFriendIDs() (ids []string) {
 	return
 }
 
-// ResetBestFriend reset all changes of the best_friend edge.
+// ResetBestFriend reset all changes of the "best_friend" edge.
 func (m *PetMutation) ResetBestFriend() {
 	m.best_friend = nil
 	m.clearedbest_friend = false
@@ -1511,7 +1511,7 @@ func (m *UserMutation) GroupsIDs() (ids []int) {
 	return
 }
 
-// ResetGroups reset all changes of the groups edge.
+// ResetGroups reset all changes of the "groups" edge.
 func (m *UserMutation) ResetGroups() {
 	m.groups = nil
 	m.removedgroups = nil
@@ -1550,7 +1550,7 @@ func (m *UserMutation) ParentIDs() (ids []int) {
 	return
 }
 
-// ResetParent reset all changes of the parent edge.
+// ResetParent reset all changes of the "parent" edge.
 func (m *UserMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
@@ -1592,7 +1592,7 @@ func (m *UserMutation) ChildrenIDs() (ids []int) {
 	return
 }
 
-// ResetChildren reset all changes of the children edge.
+// ResetChildren reset all changes of the "children" edge.
 func (m *UserMutation) ResetChildren() {
 	m.children = nil
 	m.removedchildren = nil
@@ -1634,7 +1634,7 @@ func (m *UserMutation) PetsIDs() (ids []string) {
 	return
 }
 
-// ResetPets reset all changes of the pets edge.
+// ResetPets reset all changes of the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.removedpets = nil

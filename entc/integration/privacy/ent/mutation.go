@@ -96,7 +96,7 @@ func (m *GalaxyMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *GalaxyMutation) ResetName() {
 	m.name = nil
 }
@@ -115,7 +115,7 @@ func (m *GalaxyMutation) GetType() (r galaxy.Type, exists bool) {
 	return *v, true
 }
 
-// ResetType reset all changes of the type field.
+// ResetType reset all changes of the "type" field.
 func (m *GalaxyMutation) ResetType() {
 	m._type = nil
 }
@@ -156,7 +156,7 @@ func (m *GalaxyMutation) PlanetsIDs() (ids []int) {
 	return
 }
 
-// ResetPlanets reset all changes of the planets edge.
+// ResetPlanets reset all changes of the "planets" edge.
 func (m *GalaxyMutation) ResetPlanets() {
 	m.planets = nil
 	m.removedplanets = nil
@@ -430,7 +430,7 @@ func (m *PlanetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *PlanetMutation) ResetName() {
 	m.name = nil
 }
@@ -481,7 +481,7 @@ func (m *PlanetMutation) AgeCleared() bool {
 	return ok
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *PlanetMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -524,7 +524,7 @@ func (m *PlanetMutation) NeighborsIDs() (ids []int) {
 	return
 }
 
-// ResetNeighbors reset all changes of the neighbors edge.
+// ResetNeighbors reset all changes of the "neighbors" edge.
 func (m *PlanetMutation) ResetNeighbors() {
 	m.neighbors = nil
 	m.removedneighbors = nil

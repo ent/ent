@@ -546,6 +546,17 @@ func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	return query
 }
 
+// QueryField queries the field edge of a File.
+func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
+	query := &FieldTypeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+
+		fromV = g.V(f.ID).OutE(file.FieldLabel).InV()
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FileClient) Hooks() []Hook {
 	return c.hooks.File

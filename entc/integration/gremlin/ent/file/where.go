@@ -495,6 +495,24 @@ func HasTypeWith(preds ...predicate.FileType) predicate.File {
 	})
 }
 
+// HasField applies the HasEdge predicate on the "field" edge.
+func HasField() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.OutE(FieldLabel).OutV()
+	})
+}
+
+// HasFieldWith applies the HasEdge predicate on the "field" edge with a given conditions (other predicates).
+func HasFieldWith(preds ...predicate.FieldType) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		tr := __.InV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.OutE(FieldLabel).Where(tr).OutV()
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(tr *dsl.Traversal) {

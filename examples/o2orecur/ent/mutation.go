@@ -115,7 +115,7 @@ func (m *NodeMutation) AddedValue() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetValue reset all changes of the value field.
+// ResetValue reset all changes of the "value" field.
 func (m *NodeMutation) ResetValue() {
 	m.value = nil
 	m.addvalue = nil
@@ -154,7 +154,7 @@ func (m *NodeMutation) PrevIDs() (ids []int) {
 	return
 }
 
-// ResetPrev reset all changes of the prev edge.
+// ResetPrev reset all changes of the "prev" edge.
 func (m *NodeMutation) ResetPrev() {
 	m.prev = nil
 	m.clearedprev = false
@@ -193,7 +193,7 @@ func (m *NodeMutation) NextIDs() (ids []int) {
 	return
 }
 
-// ResetNext reset all changes of the next edge.
+// ResetNext reset all changes of the "next" edge.
 func (m *NodeMutation) ResetNext() {
 	m.next = nil
 	m.clearednext = false

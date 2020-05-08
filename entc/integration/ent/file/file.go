@@ -20,6 +20,8 @@ const (
 	EdgeOwner = "owner"
 	// EdgeType holds the string denoting the type edge name in mutations.
 	EdgeType = "type"
+	// EdgeField holds the string denoting the field edge name in mutations.
+	EdgeField = "field"
 
 	// Table holds the table name of the file in the database.
 	Table = "files"
@@ -37,6 +39,13 @@ const (
 	TypeInverseTable = "file_types"
 	// TypeColumn is the table column denoting the type relation/edge.
 	TypeColumn = "file_type_files"
+	// FieldTable is the table the holds the field relation/edge.
+	FieldTable = "field_types"
+	// FieldInverseTable is the table name for the FieldType entity.
+	// It exists in this package in order to avoid circular dependency with the "fieldtype" package.
+	FieldInverseTable = "field_types"
+	// FieldColumn is the table column denoting the field relation/edge.
+	FieldColumn = "file_field"
 )
 
 // Columns holds all SQL columns for file fields.

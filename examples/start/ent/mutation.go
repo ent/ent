@@ -99,7 +99,7 @@ func (m *CarMutation) Model() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetModel reset all changes of the model field.
+// ResetModel reset all changes of the "model" field.
 func (m *CarMutation) ResetModel() {
 	m.model = nil
 }
@@ -118,7 +118,7 @@ func (m *CarMutation) RegisteredAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// ResetRegisteredAt reset all changes of the registered_at field.
+// ResetRegisteredAt reset all changes of the "registered_at" field.
 func (m *CarMutation) ResetRegisteredAt() {
 	m.registered_at = nil
 }
@@ -156,7 +156,7 @@ func (m *CarMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *CarMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -425,7 +425,7 @@ func (m *GroupMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *GroupMutation) ResetName() {
 	m.name = nil
 }
@@ -466,7 +466,7 @@ func (m *GroupMutation) UsersIDs() (ids []int) {
 	return
 }
 
-// ResetUsers reset all changes of the users edge.
+// ResetUsers reset all changes of the "users" edge.
 func (m *GroupMutation) ResetUsers() {
 	m.users = nil
 	m.removedusers = nil
@@ -746,7 +746,7 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -766,7 +766,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -807,7 +807,7 @@ func (m *UserMutation) CarsIDs() (ids []int) {
 	return
 }
 
-// ResetCars reset all changes of the cars edge.
+// ResetCars reset all changes of the "cars" edge.
 func (m *UserMutation) ResetCars() {
 	m.cars = nil
 	m.removedcars = nil
@@ -849,7 +849,7 @@ func (m *UserMutation) GroupsIDs() (ids []int) {
 	return
 }
 
-// ResetGroups reset all changes of the groups edge.
+// ResetGroups reset all changes of the "groups" edge.
 func (m *UserMutation) ResetGroups() {
 	m.groups = nil
 	m.removedgroups = nil

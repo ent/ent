@@ -27,6 +27,7 @@ type FieldTypeQuery struct {
 	order      []OrderFunc
 	unique     []string
 	predicates []predicate.FieldType
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -299,13 +300,20 @@ func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	var (
-		nodes = []*FieldType{}
-		_spec = ftq.querySpec()
+		nodes   = []*FieldType{}
+		withFKs = ftq.withFKs
+		_spec   = ftq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &FieldType{config: ftq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {

@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
@@ -138,6 +139,21 @@ func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
 	return fu.SetTypeID(f.ID)
 }
 
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fu *FileUpdate) AddFieldIDs(ids ...int) *FileUpdate {
+	fu.mutation.AddFieldIDs(ids...)
+	return fu
+}
+
+// AddField adds the field edges to FieldType.
+func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.AddFieldIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
@@ -148,6 +164,21 @@ func (fu *FileUpdate) ClearOwner() *FileUpdate {
 func (fu *FileUpdate) ClearType() *FileUpdate {
 	fu.mutation.ClearType()
 	return fu
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (fu *FileUpdate) RemoveFieldIDs(ids ...int) *FileUpdate {
+	fu.mutation.RemoveFieldIDs(ids...)
+	return fu
+}
+
+// RemoveField removes field edges to FieldType.
+func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -341,6 +372,44 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if nodes := fu.mutation.RemovedFieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.FieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -464,6 +533,21 @@ func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
 	return fuo.SetTypeID(f.ID)
 }
 
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fuo *FileUpdateOne) AddFieldIDs(ids ...int) *FileUpdateOne {
+	fuo.mutation.AddFieldIDs(ids...)
+	return fuo
+}
+
+// AddField adds the field edges to FieldType.
+func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.AddFieldIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.mutation.ClearOwner()
@@ -474,6 +558,21 @@ func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
 	fuo.mutation.ClearType()
 	return fuo
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (fuo *FileUpdateOne) RemoveFieldIDs(ids ...int) *FileUpdateOne {
+	fuo.mutation.RemoveFieldIDs(ids...)
+	return fuo
+}
+
+// RemoveField removes field edges to FieldType.
+func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -657,6 +756,44 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: filetype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := fuo.mutation.RemovedFieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.FieldIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
 				},
 			},
 		}

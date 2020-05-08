@@ -32,6 +32,7 @@ type FileQuery struct {
 	// eager-loading edges.
 	withOwner *UserQuery
 	withType  *FileTypeQuery
+	withField *FieldTypeQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
@@ -84,6 +85,20 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 		}
 		gremlin := fq.gremlinQuery()
 		fromU = gremlin.InE(filetype.FilesLabel).OutV()
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryField chains the current query on the field edge.
+func (fq *FileQuery) QueryField() *FieldTypeQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := fq.gremlinQuery()
+		fromU = gremlin.OutE(file.FieldLabel).InV()
 		return fromU, nil
 	}
 	return query
@@ -287,6 +302,17 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 		opt(query)
 	}
 	fq.withType = query
+	return fq
+}
+
+//  WithField tells the query-builder to eager-loads the nodes that are connected to
+// the "field" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withField = query
 	return fq
 }
 

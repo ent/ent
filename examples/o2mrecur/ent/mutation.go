@@ -115,7 +115,7 @@ func (m *NodeMutation) AddedValue() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetValue reset all changes of the value field.
+// ResetValue reset all changes of the "value" field.
 func (m *NodeMutation) ResetValue() {
 	m.value = nil
 	m.addvalue = nil
@@ -154,7 +154,7 @@ func (m *NodeMutation) ParentIDs() (ids []int) {
 	return
 }
 
-// ResetParent reset all changes of the parent edge.
+// ResetParent reset all changes of the "parent" edge.
 func (m *NodeMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
@@ -196,7 +196,7 @@ func (m *NodeMutation) ChildrenIDs() (ids []int) {
 	return
 }
 
-// ResetChildren reset all changes of the children edge.
+// ResetChildren reset all changes of the "children" edge.
 func (m *NodeMutation) ResetChildren() {
 	m.children = nil
 	m.removedchildren = nil

@@ -73,6 +73,11 @@ var Columns = []string{
 	FieldOptionalFloat32,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.
+var ForeignKeys = []string{
+	"file_field",
+}
+
 var (
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
