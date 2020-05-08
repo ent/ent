@@ -715,6 +715,9 @@ func (f Field) Column() *schema.Column {
 			c.Default = strconv.Quote(s)
 		}
 	}
+	if f.def != nil {
+		c.SchemaType = f.def.SchemaType
+	}
 	return c
 }
 
@@ -742,6 +745,9 @@ func (f Field) PK() *schema.Column {
 		if f.def != nil && f.def.Size != nil {
 			c.Size = *f.def.Size
 		}
+	}
+	if f.def != nil {
+		c.SchemaType = f.def.SchemaType
 	}
 	return c
 }

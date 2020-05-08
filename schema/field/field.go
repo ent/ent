@@ -242,7 +242,7 @@ func (b *stringBuilder) Immutable() *stringBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *stringBuilder) Comment(c string) *stringBuilder {
+func (b *stringBuilder) Comment(string) *stringBuilder {
 	return b
 }
 
@@ -256,6 +256,20 @@ func (b *stringBuilder) StructTag(s string) *stringBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *stringBuilder) StorageKey(key string) *stringBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for string.
+//
+//	field.String("name").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		})
+//
+func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -333,6 +347,20 @@ func (b *timeBuilder) StorageKey(key string) *timeBuilder {
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for time.
+//
+//	field.Time("created_at").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "datetime",
+//			dialect.Postgres: "time with time zone",
+//		})
+//
+func (b *timeBuilder) SchemaType(types map[string]string) *timeBuilder {
+	b.desc.SchemaType = types
+	return b
 }
 
 // boolBuilder is the builder for boolean fields.
@@ -451,6 +479,20 @@ func (b *bytesBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for bytes.
+//
+//	field.Bytes("blob").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:	"tinyblob",
+//			dialect.SQLite:	"tinyblob",
+//		})
+//
+func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // jsonBuilder is the builder for json fields.
 type jsonBuilder struct {
 	desc *Descriptor
@@ -484,6 +526,20 @@ func (b *jsonBuilder) Comment(c string) *jsonBuilder {
 // StructTag sets the struct tag of the field.
 func (b *jsonBuilder) StructTag(s string) *jsonBuilder {
 	b.desc.Tag = s
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for json.
+//
+//	field.JSON("json").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"json",
+//			dialect.Postgres:	"jsonb",
+//		})
+//
+func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -547,6 +603,19 @@ func (b *enumBuilder) StructTag(s string) *enumBuilder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for enum.
+//
+//	field.Enum("enum").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "EnumType",
+//		})
+//
+func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -597,6 +666,19 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 //
 func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
 	b.desc.Default = fn
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uuid.
+//
+//	field.UUID("id", uuid.New()).
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomUUID",
+//		})
+//
+func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
+	b.desc.SchemaType = types
 	return b
 }
 

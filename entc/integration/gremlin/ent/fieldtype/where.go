@@ -7,6 +7,8 @@
 package fieldtype
 
 import (
+	"time"
+
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
@@ -242,6 +244,13 @@ func OptionalFloat(v float64) predicate.FieldType {
 func OptionalFloat32(v float32) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalFloat32, p.EQ(v))
+	})
+}
+
+// Datetime applies equality check predicate on the "datetime" field. It's identical to DatetimeEQ.
+func Datetime(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.EQ(v))
 	})
 }
 
@@ -2016,6 +2025,84 @@ func OptionalFloat32IsNil() predicate.FieldType {
 func OptionalFloat32NotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldOptionalFloat32)
+	})
+}
+
+// DatetimeEQ applies the EQ predicate on the "datetime" field.
+func DatetimeEQ(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.EQ(v))
+	})
+}
+
+// DatetimeNEQ applies the NEQ predicate on the "datetime" field.
+func DatetimeNEQ(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.NEQ(v))
+	})
+}
+
+// DatetimeIn applies the In predicate on the "datetime" field.
+func DatetimeIn(vs ...time.Time) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.Within(v...))
+	})
+}
+
+// DatetimeNotIn applies the NotIn predicate on the "datetime" field.
+func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.Without(v...))
+	})
+}
+
+// DatetimeGT applies the GT predicate on the "datetime" field.
+func DatetimeGT(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.GT(v))
+	})
+}
+
+// DatetimeGTE applies the GTE predicate on the "datetime" field.
+func DatetimeGTE(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.GTE(v))
+	})
+}
+
+// DatetimeLT applies the LT predicate on the "datetime" field.
+func DatetimeLT(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.LT(v))
+	})
+}
+
+// DatetimeLTE applies the LTE predicate on the "datetime" field.
+func DatetimeLTE(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDatetime, p.LTE(v))
+	})
+}
+
+// DatetimeIsNil applies the IsNil predicate on the "datetime" field.
+func DatetimeIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldDatetime)
+	})
+}
+
+// DatetimeNotNil applies the NotNil predicate on the "datetime" field.
+func DatetimeNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldDatetime)
 	})
 }
 

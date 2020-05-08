@@ -218,7 +218,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 			t = "longtext"
 		}
 	case field.TypeFloat32, field.TypeFloat64:
-		t = "double"
+		t = c.scanTypeOr("double")
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp")
 		// In MySQL, timestamp columns are `NOT NULL by default, and assigning NULL
@@ -354,7 +354,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		default:
 			c.Type = field.TypeInt8
 		}
-	case "double":
+	case "numeric", "decimal", "double":
 		c.Type = field.TypeFloat64
 	case "time", "timestamp", "date", "datetime":
 		c.Type = field.TypeTime

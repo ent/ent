@@ -7,6 +7,8 @@
 package fieldtype
 
 import (
+	"time"
+
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
 )
@@ -252,6 +254,20 @@ func OptionalFloat(v float64) predicate.FieldType {
 func OptionalFloat32(v float32) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOptionalFloat32), v))
+	})
+}
+
+// Datetime applies equality check predicate on the "datetime" field. It's identical to DatetimeEQ.
+func Datetime(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDatetime), v))
+	})
+}
+
+// Decimal applies equality check predicate on the "decimal" field. It's identical to DecimalEQ.
+func Decimal(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDecimal), v))
 	})
 }
 
@@ -2314,6 +2330,186 @@ func OptionalFloat32IsNil() predicate.FieldType {
 func OptionalFloat32NotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldOptionalFloat32)))
+	})
+}
+
+// DatetimeEQ applies the EQ predicate on the "datetime" field.
+func DatetimeEQ(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDatetime), v))
+	})
+}
+
+// DatetimeNEQ applies the NEQ predicate on the "datetime" field.
+func DatetimeNEQ(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDatetime), v))
+	})
+}
+
+// DatetimeIn applies the In predicate on the "datetime" field.
+func DatetimeIn(vs ...time.Time) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDatetime), v...))
+	})
+}
+
+// DatetimeNotIn applies the NotIn predicate on the "datetime" field.
+func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDatetime), v...))
+	})
+}
+
+// DatetimeGT applies the GT predicate on the "datetime" field.
+func DatetimeGT(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDatetime), v))
+	})
+}
+
+// DatetimeGTE applies the GTE predicate on the "datetime" field.
+func DatetimeGTE(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDatetime), v))
+	})
+}
+
+// DatetimeLT applies the LT predicate on the "datetime" field.
+func DatetimeLT(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDatetime), v))
+	})
+}
+
+// DatetimeLTE applies the LTE predicate on the "datetime" field.
+func DatetimeLTE(v time.Time) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDatetime), v))
+	})
+}
+
+// DatetimeIsNil applies the IsNil predicate on the "datetime" field.
+func DatetimeIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDatetime)))
+	})
+}
+
+// DatetimeNotNil applies the NotNil predicate on the "datetime" field.
+func DatetimeNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDatetime)))
+	})
+}
+
+// DecimalEQ applies the EQ predicate on the "decimal" field.
+func DecimalEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDecimal), v))
+	})
+}
+
+// DecimalNEQ applies the NEQ predicate on the "decimal" field.
+func DecimalNEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDecimal), v))
+	})
+}
+
+// DecimalIn applies the In predicate on the "decimal" field.
+func DecimalIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDecimal), v...))
+	})
+}
+
+// DecimalNotIn applies the NotIn predicate on the "decimal" field.
+func DecimalNotIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(vs) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDecimal), v...))
+	})
+}
+
+// DecimalGT applies the GT predicate on the "decimal" field.
+func DecimalGT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDecimal), v))
+	})
+}
+
+// DecimalGTE applies the GTE predicate on the "decimal" field.
+func DecimalGTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDecimal), v))
+	})
+}
+
+// DecimalLT applies the LT predicate on the "decimal" field.
+func DecimalLT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDecimal), v))
+	})
+}
+
+// DecimalLTE applies the LTE predicate on the "decimal" field.
+func DecimalLTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDecimal), v))
+	})
+}
+
+// DecimalIsNil applies the IsNil predicate on the "decimal" field.
+func DecimalIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDecimal)))
+	})
+}
+
+// DecimalNotNil applies the NotNil predicate on the "decimal" field.
+func DecimalNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDecimal)))
 	})
 }
 

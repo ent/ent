@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
@@ -67,7 +68,11 @@ type FieldType struct {
 	OptionalFloat float64 `json:"optional_float,omitempty"`
 	// OptionalFloat32 holds the value of the "optional_float32" field.
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
-	file_field      *int
+	// Datetime holds the value of the "datetime" field.
+	Datetime time.Time `json:"datetime,omitempty"`
+	// Decimal holds the value of the "decimal" field.
+	Decimal    float64 `json:"decimal,omitempty"`
+	file_field *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -98,6 +103,8 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullString{},  // state
 		&sql.NullFloat64{}, // optional_float
 		&sql.NullFloat64{}, // optional_float32
+		&sql.NullTime{},    // datetime
+		&sql.NullFloat64{}, // decimal
 	}
 }
 
@@ -245,7 +252,17 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ft.OptionalFloat32 = float32(value.Float64)
 	}
-	values = values[24:]
+	if value, ok := values[24].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field datetime", values[24])
+	} else if value.Valid {
+		ft.Datetime = value.Time
+	}
+	if value, ok := values[25].(*sql.NullFloat64); !ok {
+		return fmt.Errorf("unexpected type %T for field decimal", values[25])
+	} else if value.Valid {
+		ft.Decimal = value.Float64
+	}
+	values = values[26:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -338,6 +355,10 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
 	builder.WriteString(", optional_float32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(", datetime=")
+	builder.WriteString(ft.Datetime.Format(time.ANSIC))
+	builder.WriteString(", decimal=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteByte(')')
 	return builder.String()
 }

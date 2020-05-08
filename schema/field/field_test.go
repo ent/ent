@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/schema/field"
 
 	"github.com/google/uuid"
@@ -17,24 +18,36 @@ import (
 )
 
 func TestInt(t *testing.T) {
-	f := field.Int("age").Positive()
-	fd := f.Descriptor()
+	fd := field.Int("age").
+		Positive().
+		Descriptor()
 	assert.Equal(t, "age", fd.Name)
 	assert.Equal(t, field.TypeInt, fd.Info.Type)
 	assert.Len(t, fd.Validators, 1)
 
-	f = field.Int("age").Default(10).Min(10).Max(20)
-	fd = f.Descriptor()
+	fd = field.Int("age").
+		Default(10).
+		Min(10).
+		Max(20).
+		Descriptor()
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, 10, fd.Default)
 	assert.Len(t, fd.Validators, 2)
 
-	f = field.Int("age").Range(20, 40).Nillable()
-	fd = f.Descriptor()
+	fd = field.Int("age").
+		Range(20, 40).
+		Nillable().
+		SchemaType(map[string]string{
+			dialect.SQLite:   "numeric",
+			dialect.Postgres: "int_type",
+		}).
+		Descriptor()
 	assert.Nil(t, fd.Default)
 	assert.True(t, fd.Nillable)
 	assert.False(t, fd.Immutable)
 	assert.Len(t, fd.Validators, 1)
+	assert.Equal(t, "numeric", fd.SchemaType[dialect.SQLite])
+	assert.Equal(t, "int_type", fd.SchemaType[dialect.Postgres])
 
 	assert.Equal(t, field.TypeInt8, field.Int8("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeInt16, field.Int16("age").Descriptor().Info.Type)

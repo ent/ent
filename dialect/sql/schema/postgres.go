@@ -222,7 +222,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeInt64
 	case "real":
 		c.Type = field.TypeFloat32
-	case "double precision":
+	case "numeric", "decimal", "double precision":
 		c.Type = field.TypeFloat64
 	case "text":
 		c.Type = field.TypeString
@@ -278,9 +278,9 @@ func (d *Postgres) cType(c *Column) (t string) {
 	case field.TypeInt, field.TypeUint, field.TypeInt64, field.TypeUint64:
 		t = "bigint"
 	case field.TypeFloat32:
-		t = "real"
+		t = c.scanTypeOr("real")
 	case field.TypeFloat64:
-		t = "double precision"
+		t = c.scanTypeOr("double precision")
 	case field.TypeBytes:
 		t = "bytea"
 	case field.TypeJSON:
