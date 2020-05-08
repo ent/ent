@@ -95,7 +95,7 @@ func (m *CityMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *CityMutation) ResetName() {
 	m.name = nil
 }
@@ -136,7 +136,7 @@ func (m *CityMutation) StreetsIDs() (ids []int) {
 	return
 }
 
-// ResetStreets reset all changes of the streets edge.
+// ResetStreets reset all changes of the "streets" edge.
 func (m *CityMutation) ResetStreets() {
 	m.streets = nil
 	m.removedstreets = nil
@@ -393,7 +393,7 @@ func (m *StreetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *StreetMutation) ResetName() {
 	m.name = nil
 }
@@ -431,7 +431,7 @@ func (m *StreetMutation) CityIDs() (ids []int) {
 	return
 }
 
-// ResetCity reset all changes of the city edge.
+// ResetCity reset all changes of the "city" edge.
 func (m *StreetMutation) ResetCity() {
 	m.city = nil
 	m.clearedcity = false

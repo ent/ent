@@ -115,7 +115,7 @@ func (m *CarMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *CarMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -782,7 +782,7 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -802,7 +802,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -821,7 +821,7 @@ func (m *UserMutation) Nickname() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetNickname reset all changes of the nickname field.
+// ResetNickname reset all changes of the "nickname" field.
 func (m *UserMutation) ResetNickname() {
 	m.nickname = nil
 }
@@ -840,7 +840,7 @@ func (m *UserMutation) Phone() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetPhone reset all changes of the phone field.
+// ResetPhone reset all changes of the "phone" field.
 func (m *UserMutation) ResetPhone() {
 	m.phone = nil
 }
@@ -871,7 +871,7 @@ func (m *UserMutation) BufferCleared() bool {
 	return ok
 }
 
-// ResetBuffer reset all changes of the buffer field.
+// ResetBuffer reset all changes of the "buffer" field.
 func (m *UserMutation) ResetBuffer() {
 	m.buffer = nil
 	delete(m.clearedFields, user.FieldBuffer)
@@ -891,7 +891,7 @@ func (m *UserMutation) Title() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetTitle reset all changes of the title field.
+// ResetTitle reset all changes of the "title" field.
 func (m *UserMutation) ResetTitle() {
 	m.title = nil
 }
@@ -922,7 +922,7 @@ func (m *UserMutation) NewNameCleared() bool {
 	return ok
 }
 
-// ResetNewName reset all changes of the new_name field.
+// ResetNewName reset all changes of the "new_name" field.
 func (m *UserMutation) ResetNewName() {
 	m.new_name = nil
 	delete(m.clearedFields, user.FieldNewName)
@@ -954,7 +954,7 @@ func (m *UserMutation) BlobCleared() bool {
 	return ok
 }
 
-// ResetBlob reset all changes of the blob field.
+// ResetBlob reset all changes of the "blob" field.
 func (m *UserMutation) ResetBlob() {
 	m.blob = nil
 	delete(m.clearedFields, user.FieldBlob)
@@ -986,7 +986,7 @@ func (m *UserMutation) StateCleared() bool {
 	return ok
 }
 
-// ResetState reset all changes of the state field.
+// ResetState reset all changes of the "state" field.
 func (m *UserMutation) ResetState() {
 	m.state = nil
 	delete(m.clearedFields, user.FieldState)
@@ -1028,7 +1028,7 @@ func (m *UserMutation) CarIDs() (ids []int) {
 	return
 }
 
-// ResetCar reset all changes of the car edge.
+// ResetCar reset all changes of the "car" edge.
 func (m *UserMutation) ResetCar() {
 	m.car = nil
 	m.removedcar = nil
@@ -1067,7 +1067,7 @@ func (m *UserMutation) PetsIDs() (ids []int) {
 	return
 }
 
-// ResetPets reset all changes of the pets edge.
+// ResetPets reset all changes of the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.clearedpets = false

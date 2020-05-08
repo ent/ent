@@ -626,6 +626,17 @@ func (f Field) MutationGet() string {
 	return name
 }
 
+// MutationReset returns the method name for resetting the field value.
+// The default name is "Reset<FieldName>". If the the method conflicts
+// with the mutation methods, suffix the method with "Field".
+func (f Field) MutationReset() string {
+	name := "Reset" + pascal(f.Name)
+	if _, ok := mutMethods[name]; ok {
+		name += "Field"
+	}
+	return name
+}
+
 // IsTime returns true if the field is a timestamp field.
 func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.TypeTime }
 
@@ -832,6 +843,17 @@ func (e Edge) OwnFK() bool {
 		return true
 	}
 	return false
+}
+
+// MutationReset returns the method name for resetting the edge value.
+// The default name is "Reset<EdgeName>". If the the method conflicts
+// with the mutation methods, suffix the method with "Edge".
+func (e Edge) MutationReset() string {
+	name := "Reset" + pascal(e.Name)
+	if _, ok := mutMethods[name]; ok {
+		name += "Edge"
+	}
+	return name
 }
 
 // Column returns the first element from the columns slice.

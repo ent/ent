@@ -95,7 +95,7 @@ func (m *GroupMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *GroupMutation) ResetName() {
 	m.name = nil
 }
@@ -136,7 +136,7 @@ func (m *GroupMutation) UsersIDs() (ids []int) {
 	return
 }
 
-// ResetUsers reset all changes of the users edge.
+// ResetUsers reset all changes of the "users" edge.
 func (m *GroupMutation) ResetUsers() {
 	m.users = nil
 	m.removedusers = nil
@@ -414,7 +414,7 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -434,7 +434,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -475,7 +475,7 @@ func (m *UserMutation) GroupsIDs() (ids []int) {
 	return
 }
 
-// ResetGroups reset all changes of the groups edge.
+// ResetGroups reset all changes of the "groups" edge.
 func (m *UserMutation) ResetGroups() {
 	m.groups = nil
 	m.removedgroups = nil

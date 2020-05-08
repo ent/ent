@@ -97,7 +97,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -135,7 +135,7 @@ func (m *UserMutation) SpouseIDs() (ids []uint64) {
 	return
 }
 
-// ResetSpouse reset all changes of the spouse edge.
+// ResetSpouse reset all changes of the "spouse" edge.
 func (m *UserMutation) ResetSpouse() {
 	m.spouse = nil
 	m.clearedspouse = false
@@ -177,7 +177,7 @@ func (m *UserMutation) FollowersIDs() (ids []uint64) {
 	return
 }
 
-// ResetFollowers reset all changes of the followers edge.
+// ResetFollowers reset all changes of the "followers" edge.
 func (m *UserMutation) ResetFollowers() {
 	m.followers = nil
 	m.removedfollowers = nil
@@ -219,7 +219,7 @@ func (m *UserMutation) FollowingIDs() (ids []uint64) {
 	return
 }
 
-// ResetFollowing reset all changes of the following edge.
+// ResetFollowing reset all changes of the "following" edge.
 func (m *UserMutation) ResetFollowing() {
 	m.following = nil
 	m.removedfollowing = nil

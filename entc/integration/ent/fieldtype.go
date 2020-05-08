@@ -67,6 +67,7 @@ type FieldType struct {
 	OptionalFloat float64 `json:"optional_float,omitempty"`
 	// OptionalFloat32 holds the value of the "optional_float32" field.
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
+	file_field      *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -97,6 +98,13 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullString{},  // state
 		&sql.NullFloat64{}, // optional_float
 		&sql.NullFloat64{}, // optional_float32
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*FieldType) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // file_field
 	}
 }
 
@@ -236,6 +244,15 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field optional_float32", values[23])
 	} else if value.Valid {
 		ft.OptionalFloat32 = float32(value.Float64)
+	}
+	values = values[24:]
+	if len(values) == len(fieldtype.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
+		} else if value.Valid {
+			ft.file_field = new(int)
+			*ft.file_field = int(value.Int64)
+		}
 	}
 	return nil
 }

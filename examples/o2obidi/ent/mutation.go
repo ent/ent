@@ -114,7 +114,7 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -134,7 +134,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -172,7 +172,7 @@ func (m *UserMutation) SpouseIDs() (ids []int) {
 	return
 }
 
-// ResetSpouse reset all changes of the spouse edge.
+// ResetSpouse reset all changes of the "spouse" edge.
 func (m *UserMutation) ResetSpouse() {
 	m.spouse = nil
 	m.clearedspouse = false

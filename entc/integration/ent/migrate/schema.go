@@ -77,13 +77,22 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
 		{Name: "optional_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "optional_float32", Type: field.TypeFloat32, Nullable: true},
+		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
 	FieldTypesTable = &schema.Table{
-		Name:        "field_types",
-		Columns:     FieldTypesColumns,
-		PrimaryKey:  []*schema.Column{FieldTypesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "field_types",
+		Columns:    FieldTypesColumns,
+		PrimaryKey: []*schema.Column{FieldTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "field_types_files_field",
+				Columns: []*schema.Column{FieldTypesColumns[25]},
+
+				RefColumns: []*schema.Column{FilesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
@@ -457,6 +466,7 @@ var (
 
 func init() {
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
+	FieldTypesTable.ForeignKeys[0].RefTable = FilesTable
 	FilesTable.ForeignKeys[0].RefTable = FileTypesTable
 	FilesTable.ForeignKeys[1].RefTable = GroupsTable
 	FilesTable.ForeignKeys[2].RefTable = UsersTable

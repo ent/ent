@@ -13,7 +13,9 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
@@ -112,6 +114,21 @@ func (fc *FileCreate) SetType(f *FileType) *FileCreate {
 	return fc.SetTypeID(f.ID)
 }
 
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fc *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
+	fc.mutation.AddFieldIDs(ids...)
+	return fc
+}
+
+// AddField adds the field edges to FieldType.
+func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fc.AddFieldIDs(ids...)
+}
+
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if _, ok := fc.mutation.Size(); !ok {
@@ -178,6 +195,11 @@ func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
 }
 
 func (fc *FileCreate) gremlin() *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(file.Label)
 	if value, ok := fc.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
@@ -197,5 +219,19 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	for _, id := range fc.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
-	return v.ValueMap(true)
+	for _, id := range fc.mutation.FieldIDs() {
+		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
+		})
+	}
+	if len(constraints) == 0 {
+		return v.ValueMap(true)
+	}
+	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
+	for _, cr := range constraints[1:] {
+		tr = cr.pred.Coalesce(cr.test, tr)
+	}
+	return tr
 }

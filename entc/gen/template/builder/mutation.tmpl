@@ -169,8 +169,8 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		}
 	{{ end }}
 
-	{{ $func = print "Reset" $f.StructField }}
-	// {{ $func }} reset all changes of the {{ $f.Name }} field.
+	{{ $func = $f.MutationReset }}
+	// {{ $func }} reset all changes of the "{{ $f.Name }}" field.
 	func (m *{{ $mutation }}) {{ $func }}() {
 		m.{{ $f.BuilderField }} = nil
 		{{- if $f.Type.Numeric }}
@@ -265,8 +265,8 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	}
 
 
-	{{ $func := print "Reset" $e.StructField }}
-	// {{ $func }} reset all changes of the {{ $e.Name }} edge.
+	{{ $func := $e.MutationReset }}
+	// {{ $func }} reset all changes of the "{{ $e.Name }}" edge.
 	func (m *{{ $mutation }}) {{ $func }}() {
 		m.{{ $e.BuilderField }} = nil
 		{{- if $e.Unique }}
@@ -447,7 +447,7 @@ func (m *{{ $mutation }}) ResetField(name string) error {
 	{{- range $f := $n.Fields }}
 		{{- $const := print $n.Package "." $f.Constant }}
 		case {{ $const }}:
-			m.Reset{{ $f.StructField }}()
+			m.{{ $f.MutationReset }}()
 			return nil
 	{{- end }}
 	}
@@ -580,7 +580,7 @@ func (m *{{ $mutation }}) ResetEdge(name string) error {
 	{{- range $e := $n.Edges }}
 		{{- $const := print $n.Package "." $e.Constant }}
 		case {{ $const }}:
-			m.Reset{{ $e.StructField }}()
+			m.{{ $e.MutationReset }}()
 			return nil
 	{{- end }}
 	}

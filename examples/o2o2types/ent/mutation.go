@@ -97,7 +97,7 @@ func (m *CardMutation) Expired() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// ResetExpired reset all changes of the expired field.
+// ResetExpired reset all changes of the "expired" field.
 func (m *CardMutation) ResetExpired() {
 	m.expired = nil
 }
@@ -116,7 +116,7 @@ func (m *CardMutation) Number() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetNumber reset all changes of the number field.
+// ResetNumber reset all changes of the "number" field.
 func (m *CardMutation) ResetNumber() {
 	m.number = nil
 }
@@ -154,7 +154,7 @@ func (m *CardMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *CardMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -444,7 +444,7 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -464,7 +464,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -502,7 +502,7 @@ func (m *UserMutation) CardIDs() (ids []int) {
 	return
 }
 
-// ResetCard reset all changes of the card edge.
+// ResetCard reset all changes of the "card" edge.
 func (m *UserMutation) ResetCard() {
 	m.card = nil
 	m.clearedcard = false

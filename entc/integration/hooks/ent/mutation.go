@@ -98,7 +98,7 @@ func (m *CardMutation) Number() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetNumber reset all changes of the number field.
+// ResetNumber reset all changes of the "number" field.
 func (m *CardMutation) ResetNumber() {
 	m.number = nil
 }
@@ -129,7 +129,7 @@ func (m *CardMutation) NameCleared() bool {
 	return ok
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *CardMutation) ResetName() {
 	m.name = nil
 	delete(m.clearedFields, card.FieldName)
@@ -149,7 +149,7 @@ func (m *CardMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// ResetCreatedAt reset all changes of the created_at field.
+// ResetCreatedAt reset all changes of the "created_at" field.
 func (m *CardMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
@@ -187,7 +187,7 @@ func (m *CardMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *CardMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -484,7 +484,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -525,7 +525,7 @@ func (m *UserMutation) CardsIDs() (ids []int) {
 	return
 }
 
-// ResetCards reset all changes of the cards edge.
+// ResetCards reset all changes of the "cards" edge.
 func (m *UserMutation) ResetCards() {
 	m.cards = nil
 	m.removedcards = nil
@@ -567,7 +567,7 @@ func (m *UserMutation) FriendsIDs() (ids []int) {
 	return
 }
 
-// ResetFriends reset all changes of the friends edge.
+// ResetFriends reset all changes of the "friends" edge.
 func (m *UserMutation) ResetFriends() {
 	m.friends = nil
 	m.removedfriends = nil
@@ -606,7 +606,7 @@ func (m *UserMutation) BestFriendIDs() (ids []int) {
 	return
 }
 
-// ResetBestFriend reset all changes of the best_friend edge.
+// ResetBestFriend reset all changes of the "best_friend" edge.
 func (m *UserMutation) ResetBestFriend() {
 	m.best_friend = nil
 	m.clearedbest_friend = false

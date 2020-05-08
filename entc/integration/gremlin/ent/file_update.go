@@ -14,6 +14,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
@@ -139,6 +140,21 @@ func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
 	return fu.SetTypeID(f.ID)
 }
 
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fu *FileUpdate) AddFieldIDs(ids ...string) *FileUpdate {
+	fu.mutation.AddFieldIDs(ids...)
+	return fu
+}
+
+// AddField adds the field edges to FieldType.
+func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.AddFieldIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
@@ -149,6 +165,21 @@ func (fu *FileUpdate) ClearOwner() *FileUpdate {
 func (fu *FileUpdate) ClearType() *FileUpdate {
 	fu.mutation.ClearType()
 	return fu
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (fu *FileUpdate) RemoveFieldIDs(ids ...string) *FileUpdate {
+	fu.mutation.RemoveFieldIDs(ids...)
+	return fu
+}
+
+// RemoveField removes field edges to FieldType.
+func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -220,6 +251,11 @@ func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
 }
 
 func (fu *FileUpdate) gremlin() *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(file.Label)
 	for _, p := range fu.predicates {
 		p(v)
@@ -269,7 +305,28 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 	for _, id := range fu.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
+	for _, id := range fu.mutation.RemovedFieldIDs() {
+		tr := rv.Clone().OutE(file.FieldLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range fu.mutation.FieldIDs() {
+		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
+		})
+	}
 	v.Count()
+	if len(constraints) > 0 {
+		constraints = append(constraints, &constraint{
+			pred: rv.Count(),
+			test: __.Is(p.GT(1)).Constant(&ConstraintError{msg: "update traversal contains more than one vertex"}),
+		})
+		v = constraints[0].pred.Coalesce(constraints[0].test, v)
+		for _, cr := range constraints[1:] {
+			v = cr.pred.Coalesce(cr.test, v)
+		}
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }
@@ -386,6 +443,21 @@ func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
 	return fuo.SetTypeID(f.ID)
 }
 
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fuo *FileUpdateOne) AddFieldIDs(ids ...string) *FileUpdateOne {
+	fuo.mutation.AddFieldIDs(ids...)
+	return fuo
+}
+
+// AddField adds the field edges to FieldType.
+func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.AddFieldIDs(ids...)
+}
+
 // ClearOwner clears the owner edge to User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.mutation.ClearOwner()
@@ -396,6 +468,21 @@ func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
 	fuo.mutation.ClearType()
 	return fuo
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (fuo *FileUpdateOne) RemoveFieldIDs(ids ...string) *FileUpdateOne {
+	fuo.mutation.RemoveFieldIDs(ids...)
+	return fuo
+}
+
+// RemoveField removes field edges to FieldType.
+func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -475,6 +562,11 @@ func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 }
 
 func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -521,7 +613,24 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range fuo.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
+	for _, id := range fuo.mutation.RemovedFieldIDs() {
+		tr := rv.Clone().OutE(file.FieldLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range fuo.mutation.FieldIDs() {
+		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
+		})
+	}
 	v.ValueMap(true)
+	if len(constraints) > 0 {
+		v = constraints[0].pred.Coalesce(constraints[0].test, v)
+		for _, cr := range constraints[1:] {
+			v = cr.pred.Coalesce(cr.test, v)
+		}
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

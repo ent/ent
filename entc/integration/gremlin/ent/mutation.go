@@ -120,7 +120,7 @@ func (m *CardMutation) CreateTime() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// ResetCreateTime reset all changes of the create_time field.
+// ResetCreateTime reset all changes of the "create_time" field.
 func (m *CardMutation) ResetCreateTime() {
 	m.create_time = nil
 }
@@ -139,7 +139,7 @@ func (m *CardMutation) UpdateTime() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// ResetUpdateTime reset all changes of the update_time field.
+// ResetUpdateTime reset all changes of the "update_time" field.
 func (m *CardMutation) ResetUpdateTime() {
 	m.update_time = nil
 }
@@ -158,7 +158,7 @@ func (m *CardMutation) Number() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetNumber reset all changes of the number field.
+// ResetNumber reset all changes of the "number" field.
 func (m *CardMutation) ResetNumber() {
 	m.number = nil
 }
@@ -189,7 +189,7 @@ func (m *CardMutation) NameCleared() bool {
 	return ok
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *CardMutation) ResetName() {
 	m.name = nil
 	delete(m.clearedFields, card.FieldName)
@@ -228,7 +228,7 @@ func (m *CardMutation) OwnerIDs() (ids []string) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *CardMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -270,7 +270,7 @@ func (m *CardMutation) SpecIDs() (ids []string) {
 	return
 }
 
-// ResetSpec reset all changes of the spec edge.
+// ResetSpec reset all changes of the "spec" edge.
 func (m *CardMutation) ResetSpec() {
 	m.spec = nil
 	m.removedspec = nil
@@ -621,7 +621,7 @@ func (m *CommentMutation) AddedUniqueInt() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetUniqueInt reset all changes of the unique_int field.
+// ResetUniqueInt reset all changes of the "unique_int" field.
 func (m *CommentMutation) ResetUniqueInt() {
 	m.unique_int = nil
 	m.addunique_int = nil
@@ -660,7 +660,7 @@ func (m *CommentMutation) AddedUniqueFloat() (r float64, exists bool) {
 	return *v, true
 }
 
-// ResetUniqueFloat reset all changes of the unique_float field.
+// ResetUniqueFloat reset all changes of the "unique_float" field.
 func (m *CommentMutation) ResetUniqueFloat() {
 	m.unique_float = nil
 	m.addunique_float = nil
@@ -712,7 +712,7 @@ func (m *CommentMutation) NillableIntCleared() bool {
 	return ok
 }
 
-// ResetNillableInt reset all changes of the nillable_int field.
+// ResetNillableInt reset all changes of the "nillable_int" field.
 func (m *CommentMutation) ResetNillableInt() {
 	m.nillable_int = nil
 	m.addnillable_int = nil
@@ -1088,7 +1088,7 @@ func (m *FieldTypeMutation) AddedInt() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetInt reset all changes of the int field.
+// ResetInt reset all changes of the "int" field.
 func (m *FieldTypeMutation) ResetInt() {
 	m.int = nil
 	m.addint = nil
@@ -1127,7 +1127,7 @@ func (m *FieldTypeMutation) AddedInt8() (r int8, exists bool) {
 	return *v, true
 }
 
-// ResetInt8 reset all changes of the int8 field.
+// ResetInt8 reset all changes of the "int8" field.
 func (m *FieldTypeMutation) ResetInt8() {
 	m.int8 = nil
 	m.addint8 = nil
@@ -1166,7 +1166,7 @@ func (m *FieldTypeMutation) AddedInt16() (r int16, exists bool) {
 	return *v, true
 }
 
-// ResetInt16 reset all changes of the int16 field.
+// ResetInt16 reset all changes of the "int16" field.
 func (m *FieldTypeMutation) ResetInt16() {
 	m.int16 = nil
 	m.addint16 = nil
@@ -1205,7 +1205,7 @@ func (m *FieldTypeMutation) AddedInt32() (r int32, exists bool) {
 	return *v, true
 }
 
-// ResetInt32 reset all changes of the int32 field.
+// ResetInt32 reset all changes of the "int32" field.
 func (m *FieldTypeMutation) ResetInt32() {
 	m.int32 = nil
 	m.addint32 = nil
@@ -1244,7 +1244,7 @@ func (m *FieldTypeMutation) AddedInt64() (r int64, exists bool) {
 	return *v, true
 }
 
-// ResetInt64 reset all changes of the int64 field.
+// ResetInt64 reset all changes of the "int64" field.
 func (m *FieldTypeMutation) ResetInt64() {
 	m.int64 = nil
 	m.addint64 = nil
@@ -1296,7 +1296,7 @@ func (m *FieldTypeMutation) OptionalIntCleared() bool {
 	return ok
 }
 
-// ResetOptionalInt reset all changes of the optional_int field.
+// ResetOptionalInt reset all changes of the "optional_int" field.
 func (m *FieldTypeMutation) ResetOptionalInt() {
 	m.optional_int = nil
 	m.addoptional_int = nil
@@ -1349,7 +1349,7 @@ func (m *FieldTypeMutation) OptionalInt8Cleared() bool {
 	return ok
 }
 
-// ResetOptionalInt8 reset all changes of the optional_int8 field.
+// ResetOptionalInt8 reset all changes of the "optional_int8" field.
 func (m *FieldTypeMutation) ResetOptionalInt8() {
 	m.optional_int8 = nil
 	m.addoptional_int8 = nil
@@ -1402,7 +1402,7 @@ func (m *FieldTypeMutation) OptionalInt16Cleared() bool {
 	return ok
 }
 
-// ResetOptionalInt16 reset all changes of the optional_int16 field.
+// ResetOptionalInt16 reset all changes of the "optional_int16" field.
 func (m *FieldTypeMutation) ResetOptionalInt16() {
 	m.optional_int16 = nil
 	m.addoptional_int16 = nil
@@ -1455,7 +1455,7 @@ func (m *FieldTypeMutation) OptionalInt32Cleared() bool {
 	return ok
 }
 
-// ResetOptionalInt32 reset all changes of the optional_int32 field.
+// ResetOptionalInt32 reset all changes of the "optional_int32" field.
 func (m *FieldTypeMutation) ResetOptionalInt32() {
 	m.optional_int32 = nil
 	m.addoptional_int32 = nil
@@ -1508,7 +1508,7 @@ func (m *FieldTypeMutation) OptionalInt64Cleared() bool {
 	return ok
 }
 
-// ResetOptionalInt64 reset all changes of the optional_int64 field.
+// ResetOptionalInt64 reset all changes of the "optional_int64" field.
 func (m *FieldTypeMutation) ResetOptionalInt64() {
 	m.optional_int64 = nil
 	m.addoptional_int64 = nil
@@ -1561,7 +1561,7 @@ func (m *FieldTypeMutation) NillableIntCleared() bool {
 	return ok
 }
 
-// ResetNillableInt reset all changes of the nillable_int field.
+// ResetNillableInt reset all changes of the "nillable_int" field.
 func (m *FieldTypeMutation) ResetNillableInt() {
 	m.nillable_int = nil
 	m.addnillable_int = nil
@@ -1614,7 +1614,7 @@ func (m *FieldTypeMutation) NillableInt8Cleared() bool {
 	return ok
 }
 
-// ResetNillableInt8 reset all changes of the nillable_int8 field.
+// ResetNillableInt8 reset all changes of the "nillable_int8" field.
 func (m *FieldTypeMutation) ResetNillableInt8() {
 	m.nillable_int8 = nil
 	m.addnillable_int8 = nil
@@ -1667,7 +1667,7 @@ func (m *FieldTypeMutation) NillableInt16Cleared() bool {
 	return ok
 }
 
-// ResetNillableInt16 reset all changes of the nillable_int16 field.
+// ResetNillableInt16 reset all changes of the "nillable_int16" field.
 func (m *FieldTypeMutation) ResetNillableInt16() {
 	m.nillable_int16 = nil
 	m.addnillable_int16 = nil
@@ -1720,7 +1720,7 @@ func (m *FieldTypeMutation) NillableInt32Cleared() bool {
 	return ok
 }
 
-// ResetNillableInt32 reset all changes of the nillable_int32 field.
+// ResetNillableInt32 reset all changes of the "nillable_int32" field.
 func (m *FieldTypeMutation) ResetNillableInt32() {
 	m.nillable_int32 = nil
 	m.addnillable_int32 = nil
@@ -1773,7 +1773,7 @@ func (m *FieldTypeMutation) NillableInt64Cleared() bool {
 	return ok
 }
 
-// ResetNillableInt64 reset all changes of the nillable_int64 field.
+// ResetNillableInt64 reset all changes of the "nillable_int64" field.
 func (m *FieldTypeMutation) ResetNillableInt64() {
 	m.nillable_int64 = nil
 	m.addnillable_int64 = nil
@@ -1826,7 +1826,7 @@ func (m *FieldTypeMutation) ValidateOptionalInt32Cleared() bool {
 	return ok
 }
 
-// ResetValidateOptionalInt32 reset all changes of the validate_optional_int32 field.
+// ResetValidateOptionalInt32 reset all changes of the "validate_optional_int32" field.
 func (m *FieldTypeMutation) ResetValidateOptionalInt32() {
 	m.validate_optional_int32 = nil
 	m.addvalidate_optional_int32 = nil
@@ -1879,7 +1879,7 @@ func (m *FieldTypeMutation) OptionalUintCleared() bool {
 	return ok
 }
 
-// ResetOptionalUint reset all changes of the optional_uint field.
+// ResetOptionalUint reset all changes of the "optional_uint" field.
 func (m *FieldTypeMutation) ResetOptionalUint() {
 	m.optional_uint = nil
 	m.addoptional_uint = nil
@@ -1932,7 +1932,7 @@ func (m *FieldTypeMutation) OptionalUint8Cleared() bool {
 	return ok
 }
 
-// ResetOptionalUint8 reset all changes of the optional_uint8 field.
+// ResetOptionalUint8 reset all changes of the "optional_uint8" field.
 func (m *FieldTypeMutation) ResetOptionalUint8() {
 	m.optional_uint8 = nil
 	m.addoptional_uint8 = nil
@@ -1985,7 +1985,7 @@ func (m *FieldTypeMutation) OptionalUint16Cleared() bool {
 	return ok
 }
 
-// ResetOptionalUint16 reset all changes of the optional_uint16 field.
+// ResetOptionalUint16 reset all changes of the "optional_uint16" field.
 func (m *FieldTypeMutation) ResetOptionalUint16() {
 	m.optional_uint16 = nil
 	m.addoptional_uint16 = nil
@@ -2038,7 +2038,7 @@ func (m *FieldTypeMutation) OptionalUint32Cleared() bool {
 	return ok
 }
 
-// ResetOptionalUint32 reset all changes of the optional_uint32 field.
+// ResetOptionalUint32 reset all changes of the "optional_uint32" field.
 func (m *FieldTypeMutation) ResetOptionalUint32() {
 	m.optional_uint32 = nil
 	m.addoptional_uint32 = nil
@@ -2091,7 +2091,7 @@ func (m *FieldTypeMutation) OptionalUint64Cleared() bool {
 	return ok
 }
 
-// ResetOptionalUint64 reset all changes of the optional_uint64 field.
+// ResetOptionalUint64 reset all changes of the "optional_uint64" field.
 func (m *FieldTypeMutation) ResetOptionalUint64() {
 	m.optional_uint64 = nil
 	m.addoptional_uint64 = nil
@@ -2124,7 +2124,7 @@ func (m *FieldTypeMutation) StateCleared() bool {
 	return ok
 }
 
-// ResetState reset all changes of the state field.
+// ResetState reset all changes of the "state" field.
 func (m *FieldTypeMutation) ResetState() {
 	m.state = nil
 	delete(m.clearedFields, fieldtype.FieldState)
@@ -2176,7 +2176,7 @@ func (m *FieldTypeMutation) OptionalFloatCleared() bool {
 	return ok
 }
 
-// ResetOptionalFloat reset all changes of the optional_float field.
+// ResetOptionalFloat reset all changes of the "optional_float" field.
 func (m *FieldTypeMutation) ResetOptionalFloat() {
 	m.optional_float = nil
 	m.addoptional_float = nil
@@ -2229,7 +2229,7 @@ func (m *FieldTypeMutation) OptionalFloat32Cleared() bool {
 	return ok
 }
 
-// ResetOptionalFloat32 reset all changes of the optional_float32 field.
+// ResetOptionalFloat32 reset all changes of the "optional_float32" field.
 func (m *FieldTypeMutation) ResetOptionalFloat32() {
 	m.optional_float32 = nil
 	m.addoptional_float32 = nil
@@ -3155,6 +3155,8 @@ type FileMutation struct {
 	clearedowner  bool
 	_type         *string
 	cleared_type  bool
+	field         map[string]struct{}
+	removedfield  map[string]struct{}
 }
 
 var _ ent.Mutation = (*FileMutation)(nil)
@@ -3230,7 +3232,7 @@ func (m *FileMutation) AddedSize() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetSize reset all changes of the size field.
+// ResetSize reset all changes of the "size" field.
 func (m *FileMutation) ResetSize() {
 	m.size = nil
 	m.addsize = nil
@@ -3250,7 +3252,7 @@ func (m *FileMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *FileMutation) ResetName() {
 	m.name = nil
 }
@@ -3281,7 +3283,7 @@ func (m *FileMutation) UserCleared() bool {
 	return ok
 }
 
-// ResetUser reset all changes of the user field.
+// ResetUser reset all changes of the "user" field.
 func (m *FileMutation) ResetUser() {
 	m.user = nil
 	delete(m.clearedFields, file.FieldUser)
@@ -3313,7 +3315,7 @@ func (m *FileMutation) GroupCleared() bool {
 	return ok
 }
 
-// ResetGroup reset all changes of the group field.
+// ResetGroup reset all changes of the "group" field.
 func (m *FileMutation) ResetGroup() {
 	m.group = nil
 	delete(m.clearedFields, file.FieldGroup)
@@ -3352,7 +3354,7 @@ func (m *FileMutation) OwnerIDs() (ids []string) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *FileMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -3391,10 +3393,52 @@ func (m *FileMutation) TypeIDs() (ids []string) {
 	return
 }
 
-// ResetType reset all changes of the type edge.
+// ResetType reset all changes of the "type" edge.
 func (m *FileMutation) ResetType() {
 	m._type = nil
 	m.cleared_type = false
+}
+
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (m *FileMutation) AddFieldIDs(ids ...string) {
+	if m.field == nil {
+		m.field = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.field[ids[i]] = struct{}{}
+	}
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (m *FileMutation) RemoveFieldIDs(ids ...string) {
+	if m.removedfield == nil {
+		m.removedfield = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.removedfield[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedField returns the removed ids of field.
+func (m *FileMutation) RemovedFieldIDs() (ids []string) {
+	for id := range m.removedfield {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FieldIDs returns the field ids in the mutation.
+func (m *FileMutation) FieldIDs() (ids []string) {
+	for id := range m.field {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFieldEdge reset all changes of the "field" edge.
+func (m *FileMutation) ResetFieldEdge() {
+	m.field = nil
+	m.removedfield = nil
 }
 
 // Op returns the operation name.
@@ -3576,12 +3620,15 @@ func (m *FileMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *FileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.owner != nil {
 		edges = append(edges, file.EdgeOwner)
 	}
 	if m._type != nil {
 		edges = append(edges, file.EdgeType)
+	}
+	if m.field != nil {
+		edges = append(edges, file.EdgeField)
 	}
 	return edges
 }
@@ -3598,6 +3645,12 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 		if id := m._type; id != nil {
 			return []ent.Value{*id}
 		}
+	case file.EdgeField:
+		ids := make([]ent.Value, 0, len(m.field))
+		for id := range m.field {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -3605,7 +3658,10 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *FileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
+	if m.removedfield != nil {
+		edges = append(edges, file.EdgeField)
+	}
 	return edges
 }
 
@@ -3613,6 +3669,12 @@ func (m *FileMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case file.EdgeField:
+		ids := make([]ent.Value, 0, len(m.removedfield))
+		for id := range m.removedfield {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -3620,7 +3682,7 @@ func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *FileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedowner {
 		edges = append(edges, file.EdgeOwner)
 	}
@@ -3666,6 +3728,9 @@ func (m *FileMutation) ResetEdge(name string) error {
 		return nil
 	case file.EdgeType:
 		m.ResetType()
+		return nil
+	case file.EdgeField:
+		m.ResetFieldEdge()
 		return nil
 	}
 	return fmt.Errorf("unknown File edge %s", name)
@@ -3738,7 +3803,7 @@ func (m *FileTypeMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *FileTypeMutation) ResetName() {
 	m.name = nil
 }
@@ -3779,7 +3844,7 @@ func (m *FileTypeMutation) FilesIDs() (ids []string) {
 	return
 }
 
-// ResetFiles reset all changes of the files edge.
+// ResetFiles reset all changes of the "files" edge.
 func (m *FileTypeMutation) ResetFiles() {
 	m.files = nil
 	m.removedfiles = nil
@@ -4047,7 +4112,7 @@ func (m *GroupMutation) Active() (r bool, exists bool) {
 	return *v, true
 }
 
-// ResetActive reset all changes of the active field.
+// ResetActive reset all changes of the "active" field.
 func (m *GroupMutation) ResetActive() {
 	m.active = nil
 }
@@ -4066,7 +4131,7 @@ func (m *GroupMutation) Expire() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// ResetExpire reset all changes of the expire field.
+// ResetExpire reset all changes of the "expire" field.
 func (m *GroupMutation) ResetExpire() {
 	m.expire = nil
 }
@@ -4097,7 +4162,7 @@ func (m *GroupMutation) TypeCleared() bool {
 	return ok
 }
 
-// ResetType reset all changes of the type field.
+// ResetType reset all changes of the "type" field.
 func (m *GroupMutation) ResetType() {
 	m._type = nil
 	delete(m.clearedFields, group.FieldType)
@@ -4149,7 +4214,7 @@ func (m *GroupMutation) MaxUsersCleared() bool {
 	return ok
 }
 
-// ResetMaxUsers reset all changes of the max_users field.
+// ResetMaxUsers reset all changes of the "max_users" field.
 func (m *GroupMutation) ResetMaxUsers() {
 	m.max_users = nil
 	m.addmax_users = nil
@@ -4170,7 +4235,7 @@ func (m *GroupMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *GroupMutation) ResetName() {
 	m.name = nil
 }
@@ -4211,7 +4276,7 @@ func (m *GroupMutation) FilesIDs() (ids []string) {
 	return
 }
 
-// ResetFiles reset all changes of the files edge.
+// ResetFiles reset all changes of the "files" edge.
 func (m *GroupMutation) ResetFiles() {
 	m.files = nil
 	m.removedfiles = nil
@@ -4253,7 +4318,7 @@ func (m *GroupMutation) BlockedIDs() (ids []string) {
 	return
 }
 
-// ResetBlocked reset all changes of the blocked edge.
+// ResetBlocked reset all changes of the "blocked" edge.
 func (m *GroupMutation) ResetBlocked() {
 	m.blocked = nil
 	m.removedblocked = nil
@@ -4295,7 +4360,7 @@ func (m *GroupMutation) UsersIDs() (ids []string) {
 	return
 }
 
-// ResetUsers reset all changes of the users edge.
+// ResetUsers reset all changes of the "users" edge.
 func (m *GroupMutation) ResetUsers() {
 	m.users = nil
 	m.removedusers = nil
@@ -4334,7 +4399,7 @@ func (m *GroupMutation) InfoIDs() (ids []string) {
 	return
 }
 
-// ResetInfo reset all changes of the info edge.
+// ResetInfo reset all changes of the "info" edge.
 func (m *GroupMutation) ResetInfo() {
 	m.info = nil
 	m.clearedinfo = false
@@ -4743,7 +4808,7 @@ func (m *GroupInfoMutation) Desc() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetDesc reset all changes of the desc field.
+// ResetDesc reset all changes of the "desc" field.
 func (m *GroupInfoMutation) ResetDesc() {
 	m.desc = nil
 }
@@ -4781,7 +4846,7 @@ func (m *GroupInfoMutation) AddedMaxUsers() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetMaxUsers reset all changes of the max_users field.
+// ResetMaxUsers reset all changes of the "max_users" field.
 func (m *GroupInfoMutation) ResetMaxUsers() {
 	m.max_users = nil
 	m.addmax_users = nil
@@ -4823,7 +4888,7 @@ func (m *GroupInfoMutation) GroupsIDs() (ids []string) {
 	return
 }
 
-// ResetGroups reset all changes of the groups edge.
+// ResetGroups reset all changes of the "groups" edge.
 func (m *GroupInfoMutation) ResetGroups() {
 	m.groups = nil
 	m.removedgroups = nil
@@ -5341,7 +5406,7 @@ func (m *NodeMutation) ValueCleared() bool {
 	return ok
 }
 
-// ResetValue reset all changes of the value field.
+// ResetValue reset all changes of the "value" field.
 func (m *NodeMutation) ResetValue() {
 	m.value = nil
 	m.addvalue = nil
@@ -5381,7 +5446,7 @@ func (m *NodeMutation) PrevIDs() (ids []string) {
 	return
 }
 
-// ResetPrev reset all changes of the prev edge.
+// ResetPrev reset all changes of the "prev" edge.
 func (m *NodeMutation) ResetPrev() {
 	m.prev = nil
 	m.clearedprev = false
@@ -5420,7 +5485,7 @@ func (m *NodeMutation) NextIDs() (ids []string) {
 	return
 }
 
-// ResetNext reset all changes of the next edge.
+// ResetNext reset all changes of the "next" edge.
 func (m *NodeMutation) ResetNext() {
 	m.next = nil
 	m.clearednext = false
@@ -5718,7 +5783,7 @@ func (m *PetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *PetMutation) ResetName() {
 	m.name = nil
 }
@@ -5756,7 +5821,7 @@ func (m *PetMutation) TeamIDs() (ids []string) {
 	return
 }
 
-// ResetTeam reset all changes of the team edge.
+// ResetTeam reset all changes of the "team" edge.
 func (m *PetMutation) ResetTeam() {
 	m.team = nil
 	m.clearedteam = false
@@ -5795,7 +5860,7 @@ func (m *PetMutation) OwnerIDs() (ids []string) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -6088,7 +6153,7 @@ func (m *SpecMutation) CardIDs() (ids []string) {
 	return
 }
 
-// ResetCard reset all changes of the card edge.
+// ResetCard reset all changes of the "card" edge.
 func (m *SpecMutation) ResetCard() {
 	m.card = nil
 	m.removedcard = nil
@@ -6392,7 +6457,7 @@ func (m *UserMutation) OptionalIntCleared() bool {
 	return ok
 }
 
-// ResetOptionalInt reset all changes of the optional_int field.
+// ResetOptionalInt reset all changes of the "optional_int" field.
 func (m *UserMutation) ResetOptionalInt() {
 	m.optional_int = nil
 	m.addoptional_int = nil
@@ -6432,7 +6497,7 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -6452,7 +6517,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -6471,7 +6536,7 @@ func (m *UserMutation) Last() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetLast reset all changes of the last field.
+// ResetLast reset all changes of the "last" field.
 func (m *UserMutation) ResetLast() {
 	m.last = nil
 }
@@ -6502,7 +6567,7 @@ func (m *UserMutation) NicknameCleared() bool {
 	return ok
 }
 
-// ResetNickname reset all changes of the nickname field.
+// ResetNickname reset all changes of the "nickname" field.
 func (m *UserMutation) ResetNickname() {
 	m.nickname = nil
 	delete(m.clearedFields, user.FieldNickname)
@@ -6534,7 +6599,7 @@ func (m *UserMutation) PhoneCleared() bool {
 	return ok
 }
 
-// ResetPhone reset all changes of the phone field.
+// ResetPhone reset all changes of the "phone" field.
 func (m *UserMutation) ResetPhone() {
 	m.phone = nil
 	delete(m.clearedFields, user.FieldPhone)
@@ -6566,7 +6631,7 @@ func (m *UserMutation) PasswordCleared() bool {
 	return ok
 }
 
-// ResetPassword reset all changes of the password field.
+// ResetPassword reset all changes of the "password" field.
 func (m *UserMutation) ResetPassword() {
 	m.password = nil
 	delete(m.clearedFields, user.FieldPassword)
@@ -6586,7 +6651,7 @@ func (m *UserMutation) Role() (r user.Role, exists bool) {
 	return *v, true
 }
 
-// ResetRole reset all changes of the role field.
+// ResetRole reset all changes of the "role" field.
 func (m *UserMutation) ResetRole() {
 	m.role = nil
 }
@@ -6617,7 +6682,7 @@ func (m *UserMutation) SSOCertCleared() bool {
 	return ok
 }
 
-// ResetSSOCert reset all changes of the SSOCert field.
+// ResetSSOCert reset all changes of the "SSOCert" field.
 func (m *UserMutation) ResetSSOCert() {
 	m._SSOCert = nil
 	delete(m.clearedFields, user.FieldSSOCert)
@@ -6656,7 +6721,7 @@ func (m *UserMutation) CardIDs() (ids []string) {
 	return
 }
 
-// ResetCard reset all changes of the card edge.
+// ResetCard reset all changes of the "card" edge.
 func (m *UserMutation) ResetCard() {
 	m.card = nil
 	m.clearedcard = false
@@ -6698,7 +6763,7 @@ func (m *UserMutation) PetsIDs() (ids []string) {
 	return
 }
 
-// ResetPets reset all changes of the pets edge.
+// ResetPets reset all changes of the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.removedpets = nil
@@ -6740,7 +6805,7 @@ func (m *UserMutation) FilesIDs() (ids []string) {
 	return
 }
 
-// ResetFiles reset all changes of the files edge.
+// ResetFiles reset all changes of the "files" edge.
 func (m *UserMutation) ResetFiles() {
 	m.files = nil
 	m.removedfiles = nil
@@ -6782,7 +6847,7 @@ func (m *UserMutation) GroupsIDs() (ids []string) {
 	return
 }
 
-// ResetGroups reset all changes of the groups edge.
+// ResetGroups reset all changes of the "groups" edge.
 func (m *UserMutation) ResetGroups() {
 	m.groups = nil
 	m.removedgroups = nil
@@ -6824,7 +6889,7 @@ func (m *UserMutation) FriendsIDs() (ids []string) {
 	return
 }
 
-// ResetFriends reset all changes of the friends edge.
+// ResetFriends reset all changes of the "friends" edge.
 func (m *UserMutation) ResetFriends() {
 	m.friends = nil
 	m.removedfriends = nil
@@ -6866,7 +6931,7 @@ func (m *UserMutation) FollowersIDs() (ids []string) {
 	return
 }
 
-// ResetFollowers reset all changes of the followers edge.
+// ResetFollowers reset all changes of the "followers" edge.
 func (m *UserMutation) ResetFollowers() {
 	m.followers = nil
 	m.removedfollowers = nil
@@ -6908,7 +6973,7 @@ func (m *UserMutation) FollowingIDs() (ids []string) {
 	return
 }
 
-// ResetFollowing reset all changes of the following edge.
+// ResetFollowing reset all changes of the "following" edge.
 func (m *UserMutation) ResetFollowing() {
 	m.following = nil
 	m.removedfollowing = nil
@@ -6947,7 +7012,7 @@ func (m *UserMutation) TeamIDs() (ids []string) {
 	return
 }
 
-// ResetTeam reset all changes of the team edge.
+// ResetTeam reset all changes of the "team" edge.
 func (m *UserMutation) ResetTeam() {
 	m.team = nil
 	m.clearedteam = false
@@ -6986,7 +7051,7 @@ func (m *UserMutation) SpouseIDs() (ids []string) {
 	return
 }
 
-// ResetSpouse reset all changes of the spouse edge.
+// ResetSpouse reset all changes of the "spouse" edge.
 func (m *UserMutation) ResetSpouse() {
 	m.spouse = nil
 	m.clearedspouse = false
@@ -7028,7 +7093,7 @@ func (m *UserMutation) ChildrenIDs() (ids []string) {
 	return
 }
 
-// ResetChildren reset all changes of the children edge.
+// ResetChildren reset all changes of the "children" edge.
 func (m *UserMutation) ResetChildren() {
 	m.children = nil
 	m.removedchildren = nil
@@ -7067,7 +7132,7 @@ func (m *UserMutation) ParentIDs() (ids []string) {
 	return
 }
 
-// ResetParent reset all changes of the parent edge.
+// ResetParent reset all changes of the "parent" edge.
 func (m *UserMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false

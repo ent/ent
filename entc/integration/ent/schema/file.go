@@ -43,6 +43,7 @@ func (File) Edges() []ent.Edge {
 		edge.From("type", FileType.Type).
 			Ref("files").
 			Unique(),
+		edge.To("field", FieldType.Type),
 	}
 }
 

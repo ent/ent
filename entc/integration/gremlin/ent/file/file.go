@@ -20,11 +20,15 @@ const (
 	EdgeOwner = "owner"
 	// EdgeType holds the string denoting the type edge name in mutations.
 	EdgeType = "type"
+	// EdgeField holds the string denoting the field edge name in mutations.
+	EdgeField = "field"
 
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
 	OwnerInverseLabel = "user_files"
 	// TypeInverseLabel holds the string label denoting the type inverse edge type in the database.
 	TypeInverseLabel = "file_type_files"
+	// FieldLabel holds the string label denoting the field edge type in the database.
+	FieldLabel = "file_field"
 )
 
 var (

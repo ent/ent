@@ -116,7 +116,7 @@ func (m *GroupMutation) AddedMaxUsers() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetMaxUsers reset all changes of the max_users field.
+// ResetMaxUsers reset all changes of the "max_users" field.
 func (m *GroupMutation) ResetMaxUsers() {
 	m.max_users = nil
 	m.addmax_users = nil
@@ -386,7 +386,7 @@ func (m *PetMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge reset all changes of the age field.
+// ResetAge reset all changes of the "age" field.
 func (m *PetMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
@@ -418,7 +418,7 @@ func (m *PetMutation) LicensedAtCleared() bool {
 	return ok
 }
 
-// ResetLicensedAt reset all changes of the licensed_at field.
+// ResetLicensedAt reset all changes of the "licensed_at" field.
 func (m *PetMutation) ResetLicensedAt() {
 	m.licensed_at = nil
 	delete(m.clearedFields, pet.FieldLicensedAt)
@@ -457,7 +457,7 @@ func (m *PetMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner reset all changes of the owner edge.
+// ResetOwner reset all changes of the "owner" edge.
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -752,7 +752,7 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// ResetName reset all changes of the name field.
+// ResetName reset all changes of the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 }
@@ -793,7 +793,7 @@ func (m *UserMutation) PetsIDs() (ids []int) {
 	return
 }
 
-// ResetPets reset all changes of the pets edge.
+// ResetPets reset all changes of the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.removedpets = nil
@@ -835,7 +835,7 @@ func (m *UserMutation) FriendsIDs() (ids []int) {
 	return
 }
 
-// ResetFriends reset all changes of the friends edge.
+// ResetFriends reset all changes of the "friends" edge.
 func (m *UserMutation) ResetFriends() {
 	m.friends = nil
 	m.removedfriends = nil

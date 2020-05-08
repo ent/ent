@@ -616,6 +616,34 @@ func HasTypeWith(preds ...predicate.FileType) predicate.File {
 	})
 }
 
+// HasField applies the HasEdge predicate on the "field" edge.
+func HasField() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FieldTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FieldTable, FieldColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFieldWith applies the HasEdge predicate on the "field" edge with a given conditions (other predicates).
+func HasFieldWith(preds ...predicate.FieldType) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FieldInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FieldTable, FieldColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(s *sql.Selector) {

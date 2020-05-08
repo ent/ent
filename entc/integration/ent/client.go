@@ -587,6 +587,22 @@ func (c *FileClient) QueryType(f *File) *FileTypeQuery {
 	return query
 }
 
+// QueryField queries the field edge of a File.
+func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
+	query := &FieldTypeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FileClient) Hooks() []Hook {
 	return c.hooks.File

@@ -43,9 +43,11 @@ type FileEdges struct {
 	Owner *User
 	// Type holds the value of the type edge.
 	Type *FileType
+	// Field holds the value of the field edge.
+	Field []*FieldType
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -74,6 +76,15 @@ func (e FileEdges) TypeOrErr() (*FileType, error) {
 		return e.Type, nil
 	}
 	return nil, &NotLoadedError{edge: "type"}
+}
+
+// FieldOrErr returns the Field value or an error if the edge
+// was not loaded in eager-loading.
+func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
+	if e.loadedTypes[2] {
+		return e.Field, nil
+	}
+	return nil, &NotLoadedError{edge: "field"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -161,6 +172,11 @@ func (f *File) QueryOwner() *UserQuery {
 // QueryType queries the type edge of the File.
 func (f *File) QueryType() *FileTypeQuery {
 	return (&FileClient{config: f.config}).QueryType(f)
+}
+
+// QueryField queries the field edge of the File.
+func (f *File) QueryField() *FieldTypeQuery {
+	return (&FileClient{config: f.config}).QueryField(f)
 }
 
 // Update returns a builder for updating this File.
