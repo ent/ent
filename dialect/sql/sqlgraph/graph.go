@@ -516,7 +516,7 @@ func QueryEdges(ctx context.Context, drv dialect.Driver, spec *EdgeQuerySpec) er
 			return err
 		}
 	}
-	return nil
+	return rows.Err()
 }
 
 type query struct {
@@ -540,7 +540,7 @@ func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 			return err
 		}
 	}
-	return nil
+	return rows.Err()
 }
 
 func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
@@ -723,6 +723,9 @@ func (u *updater) setTableColumns(update *sql.UpdateBuilder, addEdges, clearEdge
 func (u *updater) scan(rows *sql.Rows) error {
 	defer rows.Close()
 	if !rows.Next() {
+		if rows.Err() != nil {
+			return rows.Err()
+		}
 		return &NotFoundError{table: u.Node.Table, id: u.Node.ID.Value}
 	}
 	if err := rows.Scan(u.ScanValues...); err != nil {
