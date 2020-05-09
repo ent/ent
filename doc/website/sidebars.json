@@ -28,7 +28,8 @@
     ],
     "Misc": [
       "sql-integration",
-      "testing"
+      "testing",
+      "templates"
     ]
   }
 }
