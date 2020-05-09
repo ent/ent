@@ -29,6 +29,9 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 	}
 	defer rows.Close()
 	if !rows.Next() {
+		if rows.Err() != nil {
+			return rows.Err()
+		}
 		return fmt.Errorf("server_version_num variable was not found")
 	}
 	var version string
@@ -92,6 +95,9 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 			return nil, err
 		}
 		t.AddColumn(c)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
 	}
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("closing rows %v", err)
@@ -183,6 +189,9 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 			names[short] = idx
 		}
 		idx.columns = append(idx.columns, column)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
 	}
 	return idxs, nil
 }

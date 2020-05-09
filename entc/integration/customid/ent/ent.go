@@ -238,6 +238,9 @@ func insertLastID(ctx context.Context, tx dialect.Tx, insert *sql.InsertBuilder)
 		}
 		defer rows.Close()
 		if !rows.Next() {
+			if rows.Err() != nil {
+				return 0, rows.Err()
+			}
 			return 0, fmt.Errorf("no rows found for query: %v", query)
 		}
 		var id int64

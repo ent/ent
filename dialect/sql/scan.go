@@ -17,6 +17,7 @@ type ColumnScanner interface {
 	Next() bool
 	Scan(...interface{}) error
 	Columns() ([]string, error)
+	Err() error
 }
 
 // ScanOne scans one row to the given value. It fails if the rows holds more than 1 row.
@@ -29,6 +30,10 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
 	}
 	if !rows.Next() {
+		if rows.Err() != nil {
+			return rows.Err()
+		}
+
 		return sql.ErrNoRows
 	}
 	if err := rows.Scan(v); err != nil {
@@ -37,7 +42,7 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 	if rows.Next() {
 		return fmt.Errorf("sql/scan: expect exactly one row in result set")
 	}
-	return nil
+	return rows.Err()
 }
 
 // ScanInt64 scans and returns an int64 from the rows columns.
@@ -92,7 +97,7 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 		vv := reflect.Append(rv, scan.value(values...))
 		rv.Set(vv)
 	}
-	return nil
+	return rows.Err()
 }
 
 // rowScan is the configuration for scanning one sql.Row.
