@@ -33,7 +33,6 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 		if rows.Err() != nil {
 			return rows.Err()
 		}
-
 		return sql.ErrNoRows
 	}
 	if err := rows.Scan(v); err != nil {
