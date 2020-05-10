@@ -699,7 +699,6 @@ func (f Field) NullTypeField(rec string) string {
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
 func (f Field) Column() *schema.Column {
-	f.Enums()
 	c := &schema.Column{
 		Name:     f.StorageKey(),
 		Type:     f.Type.Type,
