@@ -31,8 +31,8 @@ func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		if rows.Err() != nil {
-			return rows.Err()
+		if err := rows.Err(); err != nil {
+			return err
 		}
 		return fmt.Errorf("mysql: version variable was not found")
 	}
@@ -78,8 +78,8 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 		}
 		t.AddColumn(c)
 	}
-	if rows.Err() != nil {
-		return nil, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("mysql: closing rows %v", err)
@@ -432,8 +432,8 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 		}
 		idx.columns = append(idx.columns, column)
 	}
-	if rows.Err() != nil {
-		return nil, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	return i, nil
 }

@@ -168,8 +168,8 @@ func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table,
 		}
 		t.AddColumn(c)
 	}
-	if rows.Err() != nil {
-		return nil, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("sqlite: closing rows %v", err)
@@ -218,8 +218,8 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 		i.primary = origin.String == "pk"
 		idx = append(idx, i)
 	}
-	if rows.Err() != nil {
-		return nil, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("closing rows %v", err)

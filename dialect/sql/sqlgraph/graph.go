@@ -723,8 +723,8 @@ func (u *updater) setTableColumns(update *sql.UpdateBuilder, addEdges, clearEdge
 func (u *updater) scan(rows *sql.Rows) error {
 	defer rows.Close()
 	if !rows.Next() {
-		if rows.Err() != nil {
-			return rows.Err()
+		if err := rows.Err(); err != nil {
+			return err
 		}
 		return &NotFoundError{table: u.Node.Table, id: u.Node.ID.Value}
 	}

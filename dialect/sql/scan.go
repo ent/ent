@@ -30,8 +30,8 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
 	}
 	if !rows.Next() {
-		if rows.Err() != nil {
-			return rows.Err()
+		if err := rows.Err(); err != nil {
+			return err
 		}
 		return sql.ErrNoRows
 	}
