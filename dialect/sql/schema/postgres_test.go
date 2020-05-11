@@ -136,7 +136,9 @@ func TestPostgres_Create(t *testing.T) {
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
 						{Name: "age", Type: field.TypeInt},
-						{Name: "date", Type: field.TypeTime, SchemaType: map[string]string{dialect.Postgres: "date"}},
+						{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.Postgres: "date"}},
+						{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "date"}, Nullable: true},
+						{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -152,12 +154,14 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL").
 						AddRow("name", "character varying", "YES", "NULL").
 						AddRow("uuid", "uuid", "YES", "NULL").
-						AddRow("date", "date", "NO", "CURRENT_DATE").
+						AddRow("created_at", "date", "NO", "CURRENT_DATE").
+						AddRow("updated_at", "timestamp", "YES", "NULL").
+						AddRow("deleted_at", "date", "YES", "NULL").
 						AddRow("text", "text", "YES", "NULL"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
-				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL`)).
+				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL, ALTER COLUMN "updated_at" TYPE timestamp with time zone, ALTER COLUMN "updated_at" DROP NOT NULL, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

@@ -239,6 +239,8 @@ func TestMySQL_Create(t *testing.T) {
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "datetime"}, Nullable: true},
+						{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "datetime"}, Nullable: true},
+						{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -252,11 +254,15 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
-						AddRow("created_at", "datetime", "NO", "YES", "NULL", "", "", ""))
+						AddRow("created_at", "datetime", "NO", "YES", "NULL", "", "", "").
+						AddRow("updated_at", "timestamp", "NO", "YES", "NULL", "", "", "").
+						AddRow("deleted_at", "datetime", "NO", "YES", "NULL", "", "", ""))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `updated_at` datetime NULL, MODIFY COLUMN `deleted_at` timestamp NULL")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
 		},
