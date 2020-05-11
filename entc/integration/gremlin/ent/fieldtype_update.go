@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -603,6 +604,26 @@ func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDatetime sets the datetime field.
+func (ftu *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
+	ftu.mutation.SetDatetime(t)
+	return ftu
+}
+
+// SetNillableDatetime sets the datetime field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDatetime(t *time.Time) *FieldTypeUpdate {
+	if t != nil {
+		ftu.SetDatetime(*t)
+	}
+	return ftu
+}
+
+// ClearDatetime clears the value of datetime.
+func (ftu *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
+	ftu.mutation.ClearDatetime()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -824,6 +845,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedOptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.Datetime(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -881,6 +905,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.OptionalFloat32Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalFloat32)
+	}
+	if ftu.mutation.DatetimeCleared() {
+		properties = append(properties, fieldtype.FieldDatetime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1468,6 +1495,26 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetDatetime sets the datetime field.
+func (ftuo *FieldTypeUpdateOne) SetDatetime(t time.Time) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDatetime(t)
+	return ftuo
+}
+
+// SetNillableDatetime sets the datetime field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDatetime(t *time.Time) *FieldTypeUpdateOne {
+	if t != nil {
+		ftuo.SetDatetime(*t)
+	}
+	return ftuo
+}
+
+// ClearDatetime clears the value of datetime.
+func (ftuo *FieldTypeUpdateOne) ClearDatetime() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDatetime()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -1694,6 +1741,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedOptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.Datetime(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1751,6 +1801,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.OptionalFloat32Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalFloat32)
+	}
+	if ftuo.mutation.DatetimeCleared() {
+		properties = append(properties, fieldtype.FieldDatetime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

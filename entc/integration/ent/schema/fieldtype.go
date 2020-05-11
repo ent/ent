@@ -6,6 +6,7 @@ package schema
 
 import (
 	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -46,5 +47,17 @@ func (FieldType) Fields() []ent.Field {
 			Optional(),
 		field.Float("optional_float").Optional(),
 		field.Float32("optional_float32").Optional(),
+		field.Time("datetime").
+			Optional().
+			SchemaType(map[string]string{
+				dialect.MySQL:    "datetime",
+				dialect.Postgres: "date",
+			}),
+		field.Float("decimal").
+			Optional().
+			SchemaType(map[string]string{
+				dialect.MySQL:    "decimal(6,2)",
+				dialect.Postgres: "numeric",
+			}),
 	}
 }

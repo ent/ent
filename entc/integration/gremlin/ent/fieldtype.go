@@ -9,6 +9,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
@@ -67,6 +68,8 @@ type FieldType struct {
 	OptionalFloat float64 `json:"optional_float,omitempty"`
 	// OptionalFloat32 holds the value of the "optional_float32" field.
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
+	// Datetime holds the value of the "datetime" field.
+	Datetime time.Time `json:"datetime,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -101,6 +104,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		State                 fieldtype.State `json:"state,omitempty"`
 		OptionalFloat         float64         `json:"optional_float,omitempty"`
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
+		Datetime              int64           `json:"datetime,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -130,6 +134,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.State = scanft.State
 	ft.OptionalFloat = scanft.OptionalFloat
 	ft.OptionalFloat32 = scanft.OptionalFloat32
+	ft.Datetime = time.Unix(0, scanft.Datetime)
 	return nil
 }
 
@@ -214,6 +219,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
 	builder.WriteString(", optional_float32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(", datetime=")
+	builder.WriteString(ft.Datetime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -253,6 +260,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		State                 fieldtype.State `json:"state,omitempty"`
 		OptionalFloat         float64         `json:"optional_float,omitempty"`
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
+		Datetime              int64           `json:"datetime,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -284,6 +292,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			State:                 v.State,
 			OptionalFloat:         v.OptionalFloat,
 			OptionalFloat32:       v.OptionalFloat32,
+			Datetime:              time.Unix(0, v.Datetime),
 		})
 	}
 	return nil

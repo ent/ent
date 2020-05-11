@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
@@ -320,6 +321,20 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 	return ftc
 }
 
+// SetDatetime sets the datetime field.
+func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
+	ftc.mutation.SetDatetime(t)
+	return ftc
+}
+
+// SetNillableDatetime sets the datetime field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
+	if t != nil {
+		ftc.SetDatetime(*t)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -471,6 +486,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.OptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, value)
+	}
+	if value, ok := ftc.mutation.Datetime(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
 	return v.ValueMap(true)
 }

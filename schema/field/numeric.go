@@ -213,6 +213,19 @@ func (b *intBuilder) StorageKey(key string) *intBuilder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int.
+//
+//	field.Int("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -314,6 +327,19 @@ func (b *uintBuilder) Validate(fn func(uint) error) *uintBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uintBuilder) StorageKey(key string) *uintBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint.
+//
+//	field.Uint("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -431,6 +457,19 @@ func (b *int8Builder) StorageKey(key string) *int8Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int8.
+//
+//	field.Int8("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -542,6 +581,19 @@ func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *int16Builder) StorageKey(key string) *int16Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int16.
+//
+//	field.Int16("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -659,6 +711,19 @@ func (b *int32Builder) StorageKey(key string) *int32Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int32.
+//
+//	field.Int32("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -773,6 +838,19 @@ func (b *int64Builder) StorageKey(key string) *int64Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int64.
+//
+//	field.Int64("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -874,6 +952,19 @@ func (b *uint8Builder) Validate(fn func(uint8) error) *uint8Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint8Builder) StorageKey(key string) *uint8Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint8.
+//
+//	field.Uint8("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -981,6 +1072,19 @@ func (b *uint16Builder) StorageKey(key string) *uint16Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint16.
+//
+//	field.Uint16("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1085,6 +1189,19 @@ func (b *uint32Builder) StorageKey(key string) *uint32Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint32.
+//
+//	field.Uint32("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1186,6 +1303,19 @@ func (b *uint64Builder) Validate(fn func(uint64) error) *uint64Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint64Builder) StorageKey(key string) *uint64Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint64.
+//
+//	field.Uint64("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -1298,6 +1428,20 @@ func (b *float64Builder) StorageKey(key string) *float64Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for float64.
+//
+//	field.Float64("amount").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"decimal(5, 2)",
+//			dialect.Postgres: 	"numeric(5, 2)",
+//		})
+//
+func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1404,6 +1548,20 @@ func (b *float32Builder) Validate(fn func(float32) error) *float32Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *float32Builder) StorageKey(key string) *float32Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for float32.
+//
+//	field.Float32("amount").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"decimal(5, 2)",
+//			dialect.Postgres: 	"numeric(5, 2)",
+//		})
+//
+func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
+	b.desc.SchemaType = types
 	return b
 }
 

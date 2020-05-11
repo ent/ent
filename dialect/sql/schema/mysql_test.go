@@ -161,6 +161,7 @@ func TestMySQL_Create(t *testing.T) {
 						{Name: "small_unsigned", Type: field.TypeUint16},
 						{Name: "big", Type: field.TypeInt64},
 						{Name: "big_unsigned", Type: field.TypeUint64},
+						{Name: "decimal", Type: field.TypeFloat64, SchemaType: map[string]string{dialect.MySQL: "decimal(6,2)"}},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -184,7 +185,8 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("small", "smallint", "NO", "YES", "NULL", "", "", "").
 						AddRow("small_unsigned", "smallint unsigned", "NO", "YES", "NULL", "", "", "").
 						AddRow("big", "bigint", "NO", "YES", "NULL", "", "", "").
-						AddRow("big_unsigned", "bigint unsigned", "NO", "YES", "NULL", "", "", ""))
+						AddRow("big_unsigned", "bigint unsigned", "NO", "YES", "NULL", "", "", "").
+						AddRow("decimal", "decimal(6,2)", "NO", "YES", "NULL", "", "", ""))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).

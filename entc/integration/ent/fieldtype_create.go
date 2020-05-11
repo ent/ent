@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
@@ -319,6 +320,34 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 	return ftc
 }
 
+// SetDatetime sets the datetime field.
+func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
+	ftc.mutation.SetDatetime(t)
+	return ftc
+}
+
+// SetNillableDatetime sets the datetime field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
+	if t != nil {
+		ftc.SetDatetime(*t)
+	}
+	return ftc
+}
+
+// SetDecimal sets the decimal field.
+func (ftc *FieldTypeCreate) SetDecimal(f float64) *FieldTypeCreate {
+	ftc.mutation.SetDecimal(f)
+	return ftc
+}
+
+// SetNillableDecimal sets the decimal field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
+	if f != nil {
+		ftc.SetDecimal(*f)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -583,6 +612,22 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldOptionalFloat32,
 		})
 		ft.OptionalFloat32 = value
+	}
+	if value, ok := ftc.mutation.Datetime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: fieldtype.FieldDatetime,
+		})
+		ft.Datetime = value
+	}
+	if value, ok := ftc.mutation.Decimal(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldDecimal,
+		})
+		ft.Decimal = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -602,6 +603,53 @@ func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDatetime sets the datetime field.
+func (ftu *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
+	ftu.mutation.SetDatetime(t)
+	return ftu
+}
+
+// SetNillableDatetime sets the datetime field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDatetime(t *time.Time) *FieldTypeUpdate {
+	if t != nil {
+		ftu.SetDatetime(*t)
+	}
+	return ftu
+}
+
+// ClearDatetime clears the value of datetime.
+func (ftu *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
+	ftu.mutation.ClearDatetime()
+	return ftu
+}
+
+// SetDecimal sets the decimal field.
+func (ftu *FieldTypeUpdate) SetDecimal(f float64) *FieldTypeUpdate {
+	ftu.mutation.ResetDecimal()
+	ftu.mutation.SetDecimal(f)
+	return ftu
+}
+
+// SetNillableDecimal sets the decimal field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDecimal(f *float64) *FieldTypeUpdate {
+	if f != nil {
+		ftu.SetDecimal(*f)
+	}
+	return ftu
+}
+
+// AddDecimal adds f to decimal.
+func (ftu *FieldTypeUpdate) AddDecimal(f float64) *FieldTypeUpdate {
+	ftu.mutation.AddDecimal(f)
+	return ftu
+}
+
+// ClearDecimal clears the value of decimal.
+func (ftu *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
+	ftu.mutation.ClearDecimal()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1121,6 +1169,39 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat32,
 			Column: fieldtype.FieldOptionalFloat32,
+		})
+	}
+	if value, ok := ftu.mutation.Datetime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: fieldtype.FieldDatetime,
+		})
+	}
+	if ftu.mutation.DatetimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: fieldtype.FieldDatetime,
+		})
+	}
+	if value, ok := ftu.mutation.Decimal(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldDecimal,
+		})
+	}
+	if value, ok := ftu.mutation.AddedDecimal(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldDecimal,
+		})
+	}
+	if ftu.mutation.DecimalCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: fieldtype.FieldDecimal,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -1712,6 +1793,53 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetDatetime sets the datetime field.
+func (ftuo *FieldTypeUpdateOne) SetDatetime(t time.Time) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDatetime(t)
+	return ftuo
+}
+
+// SetNillableDatetime sets the datetime field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDatetime(t *time.Time) *FieldTypeUpdateOne {
+	if t != nil {
+		ftuo.SetDatetime(*t)
+	}
+	return ftuo
+}
+
+// ClearDatetime clears the value of datetime.
+func (ftuo *FieldTypeUpdateOne) ClearDatetime() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDatetime()
+	return ftuo
+}
+
+// SetDecimal sets the decimal field.
+func (ftuo *FieldTypeUpdateOne) SetDecimal(f float64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetDecimal()
+	ftuo.mutation.SetDecimal(f)
+	return ftuo
+}
+
+// SetNillableDecimal sets the decimal field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDecimal(f *float64) *FieldTypeUpdateOne {
+	if f != nil {
+		ftuo.SetDecimal(*f)
+	}
+	return ftuo
+}
+
+// AddDecimal adds f to decimal.
+func (ftuo *FieldTypeUpdateOne) AddDecimal(f float64) *FieldTypeUpdateOne {
+	ftuo.mutation.AddDecimal(f)
+	return ftuo
+}
+
+// ClearDecimal clears the value of decimal.
+func (ftuo *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDecimal()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2229,6 +2357,39 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat32,
 			Column: fieldtype.FieldOptionalFloat32,
+		})
+	}
+	if value, ok := ftuo.mutation.Datetime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: fieldtype.FieldDatetime,
+		})
+	}
+	if ftuo.mutation.DatetimeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: fieldtype.FieldDatetime,
+		})
+	}
+	if value, ok := ftuo.mutation.Decimal(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldDecimal,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedDecimal(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldDecimal,
+		})
+	}
+	if ftuo.mutation.DecimalCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: fieldtype.FieldDecimal,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

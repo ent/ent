@@ -8,6 +8,7 @@ import (
 	"context"
 	"math"
 	"testing"
+	"time"
 
 	"github.com/facebookincubator/ent/entc/integration/ent"
 
@@ -72,6 +73,8 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNillableInt16(math.MaxInt16).
 		SetNillableInt32(math.MaxInt32).
 		SetNillableInt64(math.MaxInt64).
+		SetDatetime(time.Now()).
+		SetDecimal(10.20).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -82,4 +85,6 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int16(math.MaxInt16), *ft.NillableInt16)
 	require.Equal(int32(math.MaxInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
+	require.Equal(10.20, ft.Decimal)
+	require.False(ft.Datetime.IsZero())
 }
