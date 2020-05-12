@@ -24,6 +24,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(0)
 	cmd := &cobra.Command{Use: "entc"}
 	cmd.AddCommand(
 		func() *cobra.Command {
