@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,14 +39,15 @@ func main() {
 					Args: func(_ *cobra.Command, names []string) error {
 						for _, name := range names {
 							if !unicode.IsUpper(rune(name[0])) {
-								return fmt.Errorf("schema names must begin with uppercase")
+								return errors.New("schema names must begin with uppercase")
 							}
 						}
 						return nil
 					},
 					Run: func(cmd *cobra.Command, names []string) {
-						err := initEnv(target, names)
-						failOnErr(err)
+						if err := initEnv(target, names); err != nil {
+							log.Fatalln(err)
+						}
 					},
 				}
 			)
@@ -62,18 +64,19 @@ func main() {
 			Args: cobra.ExactArgs(1),
 			Run: func(cmd *cobra.Command, path []string) {
 				graph, err := entc.LoadGraph(path[0], &gen.Config{})
-				failOnErr(err)
-				p := printer{os.Stdout}
-				p.Print(graph)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				printer{os.Stdout}.Print(graph)
 			},
 		},
 		func() *cobra.Command {
 			var (
-				cfg      gen.Config
-				storage  string
-				template []string
-				idtype   = idType(field.TypeInt)
-				cmd      = &cobra.Command{
+				cfg       gen.Config
+				storage   string
+				templates []string
+				idtype    = idType(field.TypeInt)
+				cmd       = &cobra.Command{
 					Use:   "generate [flags] path",
 					Short: "generate go code for the schema directory",
 					Example: examples(
@@ -83,19 +86,35 @@ func main() {
 					Args: cobra.ExactArgs(1),
 					Run: func(cmd *cobra.Command, path []string) {
 						opts := []entc.Option{entc.Storage(storage)}
-						for _, tmpl := range template {
-							opts = append(opts, entc.TemplateDir(tmpl))
+						for _, tmpl := range templates {
+							typ := "dir"
+							if parts := strings.SplitN(tmpl, "=", 2); len(parts) > 1 {
+								typ, tmpl = parts[0], parts[1]
+							}
+							switch typ {
+							case "dir":
+								opts = append(opts, entc.TemplateDir(tmpl))
+							case "file":
+								opts = append(opts, entc.TemplateFiles(tmpl))
+							case "glob":
+								opts = append(opts, entc.TemplateGlob(tmpl))
+							default:
+								log.Fatalln("unsupported template type", typ)
+							}
 						}
 						// If the target directory is not inferred from
 						// the schema path, resolve its package path.
 						if cfg.Target != "" {
 							pkgPath, err := PkgPath(DefaultConfig, cfg.Target)
-							failOnErr(err)
+							if err != nil {
+								log.Fatalln(err)
+							}
 							cfg.Package = pkgPath
 						}
 						cfg.IDType = &field.TypeInfo{Type: field.Type(idtype)}
-						err := entc.Generate(path[0], &cfg, opts...)
-						failOnErr(err)
+						if err := entc.Generate(path[0], &cfg, opts...); err != nil {
+							log.Fatalln(err)
+						}
 					},
 				}
 			)
@@ -103,11 +122,11 @@ func main() {
 			cmd.Flags().StringVar(&storage, "storage", "sql", "storage driver to support in codegen")
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
-			cmd.Flags().StringSliceVarP(&template, "template", "", nil, "external templates to execute")
+			cmd.Flags().StringSliceVarP(&templates, "template", "", nil, "external templates to execute")
 			return cmd
 		}(),
 	)
-	cmd.Execute()
+	_ = cmd.Execute()
 }
 
 // custom implementation for pflag.
@@ -155,9 +174,13 @@ func initEnv(target string, names []string) error {
 	}
 	for _, name := range names {
 		b := bytes.NewBuffer(nil)
-		failOnErr(tmpl.Execute(b, name))
+		if err := tmpl.Execute(b, name); err != nil {
+			log.Fatalln(err)
+		}
 		target := filepath.Join(target, strings.ToLower(name+".go"))
-		failOnErr(ioutil.WriteFile(target, b.Bytes(), 0644))
+		if err := ioutil.WriteFile(target, b.Bytes(), 0644); err != nil {
+			log.Fatalln(err)
+		}
 	}
 	return nil
 }
@@ -168,13 +191,13 @@ func createDir(target string) error {
 		return err
 	}
 	if err := os.MkdirAll(target, os.ModePerm); err != nil {
-		return fmt.Errorf("creating schema directory: %v", err)
+		return fmt.Errorf("creating schema directory: %w", err)
 	}
 	if target != defaultSchema {
 		return nil
 	}
 	if err := ioutil.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
-		return fmt.Errorf("creating generate.go file: %v", err)
+		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil
 }
@@ -207,14 +230,6 @@ const (
 	// ent/generate.go file used for "go generate" command.
 	genFile = "package ent\n\n//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema\n"
 )
-
-func failOnErr(err error) {
-	if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
-		fmt.Fprint(os.Stderr, "\n")
-		os.Exit(1)
-	}
-}
 
 // examples formats the given examples to the cli.
 func examples(ex ...string) string {

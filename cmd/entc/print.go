@@ -22,7 +22,7 @@ type printer struct {
 }
 
 // Print prints a table description of the graph to the given writer.
-func (p *printer) Print(g *gen.Graph) {
+func (p printer) Print(g *gen.Graph) {
 	for _, n := range g.Nodes {
 		p.node(n)
 	}
@@ -35,7 +35,7 @@ func (p *printer) Print(g *gen.Graph) {
 //
 //			<Edges Table>
 //
-func (p *printer) node(t *gen.Type) {
+func (p printer) node(t *gen.Type) {
 	var (
 		b      strings.Builder
 		table  = tablewriter.NewWriter(&b)
