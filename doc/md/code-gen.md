@@ -104,7 +104,12 @@ Flags:
 
 `entc` accepts external Go templates to execute. If the template name is already defined by
 `entc`, it will override the existing one. Otherwise, it will write the execution output to
-a file with the same name as the template.
+a file with the same name as the template. The flag format supports  `file`, `dir` and `glob`
+as follows:
+
+```console
+entc generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
+```
 
 Example of a custom template provides a `Node` API for GraphQL - 
 [Github](https://github.com/facebookincubator/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
