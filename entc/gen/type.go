@@ -190,7 +190,9 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 }
 
 // Label returns Gremlin label name of the node/type.
-func (t Type) Label() string { return snake(t.Name) }
+func (t Type) Label() string {
+	return snake(t.Name)
+}
 
 // Table returns SQL table name of the node/type.
 func (t Type) Table() string {
@@ -201,7 +203,9 @@ func (t Type) Table() string {
 }
 
 // Package returns the package name of this node.
-func (t Type) Package() string { return strings.ToLower(t.Name) }
+func (t Type) Package() string {
+	return strings.ToLower(t.Name)
+}
 
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
@@ -620,6 +624,15 @@ var mutMethods = func() map[string]struct{} {
 // with the mutation methods, prefix the method with "Get".
 func (f Field) MutationGet() string {
 	name := pascal(f.Name)
+	if _, ok := mutMethods[name]; ok {
+		name = "Get" + name
+	}
+	return name
+}
+
+// MutationGetOld returns the method name for getting the old value of a field.
+func (f Field) MutationGetOld() string {
+	name := "Old" + pascal(f.Name)
 	if _, ok := mutMethods[name]; ok {
 		name = "Get" + name
 	}

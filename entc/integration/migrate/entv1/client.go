@@ -156,13 +156,13 @@ func (c *CarClient) Update() *CarUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *CarClient) UpdateOne(ca *Car) *CarUpdateOne {
-	return c.UpdateOneID(ca.ID)
+	mutation := newCarMutation(c.config, OpUpdateOne, withCar(ca))
+	return &CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CarClient) UpdateOneID(id int) *CarUpdateOne {
-	mutation := newCarMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newCarMutation(c.config, OpUpdateOne, withCarID(id))
 	return &CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -255,13 +255,13 @@ func (c *UserClient) Update() *UserUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	return c.UpdateOneID(u.ID)
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

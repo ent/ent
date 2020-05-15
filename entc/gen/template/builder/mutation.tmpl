@@ -10,6 +10,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "header" $ }}
 
 import (
+	"sync"
+
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
@@ -57,17 +59,56 @@ type {{ $mutation }} struct {
 			removed{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 		{{- end }}
 	{{- end }}
+	oldValue func(context.Context) (*{{ $n.Name }}, error)
 }
 
 var _ ent.Mutation = (*{{ $mutation }})(nil)
 
+{{ $mutationOption := print (camel $n.Name) "Option" }}
+// {{ $mutationOption }} allows to manage the mutation configuration using functional options.
+type {{ $mutationOption }} func(*{{ $mutation }})
+
 // new{{ $mutation }} creates new mutation for $n.Name.
-func new{{ $mutation }}(c config, op Op) *{{ $mutation }} {
-	return &{{ $mutation }}{
+func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
+	m := &{{ $mutation }}{
 		config:        c,
 		op:            op,
 		typ:           Type{{ $n.Name }},
 		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+{{ $opt := print "with" $n.Name "ID" }}
+// {{ $opt }} sets the id field of the mutation.
+func {{ $opt }}(id {{ $n.ID.Type }}) {{ $mutationOption }} {
+	return func(m *{{ $mutation }}) {
+		var (
+			err error
+			once sync.Once
+			value *{{ $n.Name }}
+		)
+		m.oldValue = func(ctx context.Context) (*{{ $n.Name }}, error) {
+			once.Do(func() {
+				value, err = m.Client().{{ $n.Name }}.Get(ctx, id)
+			})
+			return value, err
+		}
+		m.{{ $n.ID.BuilderField }} = &id
+	}
+}
+
+{{ $opt = print "with" $n.Name }}
+// {{ $opt }} sets the old {{ $n.Name }} of the mutation.
+func {{ $opt }}(node *{{ $n.Name }}) {{ $mutationOption }} {
+	return func(m *{{ $mutation }}) {
+		m.oldValue = func(context.Context) (*{{ $n.Name }}, error) {
+			return node, nil
+		}
+		m.{{ $n.ID.BuilderField }} = &node.ID
 	}
 }
 
@@ -127,6 +168,22 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 			return
 		}
 		return *v, true
+	}
+
+	// {{ $f.MutationGetOld }} returns the old {{ $f.Name }} value, if exists.
+	// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+	func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}, err error) {
+		if !m.op.Is(OpUpdateOne) {
+			return v, fmt.Errorf("{{ $f.MutationGetOld }} is allowed only on UpdateOne operations")
+		}
+		if m.{{ $n.ID.BuilderField }} == nil || m.oldValue == nil {
+			return v, fmt.Errorf("{{ $f.MutationGetOld }} requires an ID field in the mutation")
+		}
+		oldValue, err := m.oldValue(ctx)
+		if err != nil {
+			return v, fmt.Errorf("querying old value for {{ $f.MutationGetOld }}: %w", err)
+		}
+		return oldValue.{{ $f.StructField }}, nil
 	}
 
 	{{ if and $f.Type.Numeric }}
@@ -314,6 +371,21 @@ func (m *{{ $mutation }}) Field(name string) (ent.Value, bool) {
 	{{- end }}
 	}
 	return nil, false
+}
+
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *{{ $mutation }}) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	{{- range $f := $n.Fields }}
+		{{- $const := print $n.Package "." $f.Constant }}
+		case {{ $const }}:
+			return  m.{{ $f.MutationGetOld }}(ctx)
+	{{- end }}
+	}
+	return nil, fmt.Errorf("unknown {{ $n.Name }} field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an

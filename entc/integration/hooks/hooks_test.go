@@ -151,3 +151,43 @@ func TestDeletion(t *testing.T) {
 	require.Zero(t, client.User.Query().CountX(ctx))
 	require.Zero(t, client.Card.Query().CountX(ctx))
 }
+
+func TestOldValues(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	defer client.Close()
+	// A typed hook.
+	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			name, err := m.OldName(ctx)
+			if err != nil {
+				return nil, err
+			}
+			require.Equal(t, "a8m", name)
+			return next.Mutate(ctx, m)
+		})
+	}, ent.OpUpdateOne))
+	// A generic hook (executed on all types).
+	client.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			namer, ok := m.(interface {
+				OldName(context.Context) (string, error)
+			})
+			if !ok {
+				// Skip if the mutation does not have
+				// a method for getting the old name.
+				return next.Mutate(ctx, m)
+			}
+			name, err := namer.OldName(ctx)
+			if err != nil {
+				return nil, err
+			}
+			require.Equal(t, "a8m", name)
+			return next.Mutate(ctx, m)
+		})
+	}, ent.OpUpdateOne))
+	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	require.Equal(t, "a8m", a8m.Name)
+	a8m = client.User.UpdateOne(a8m).SetName("Ariel").SaveX(ctx)
+	require.Equal(t, "Ariel", a8m.Name)
+}

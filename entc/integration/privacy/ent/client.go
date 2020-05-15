@@ -156,13 +156,13 @@ func (c *GalaxyClient) Update() *GalaxyUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *GalaxyClient) UpdateOne(ga *Galaxy) *GalaxyUpdateOne {
-	return c.UpdateOneID(ga.ID)
+	mutation := newGalaxyMutation(c.config, OpUpdateOne, withGalaxy(ga))
+	return &GalaxyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *GalaxyClient) UpdateOneID(id int) *GalaxyUpdateOne {
-	mutation := newGalaxyMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newGalaxyMutation(c.config, OpUpdateOne, withGalaxyID(id))
 	return &GalaxyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -256,13 +256,13 @@ func (c *PlanetClient) Update() *PlanetUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *PlanetClient) UpdateOne(pl *Planet) *PlanetUpdateOne {
-	return c.UpdateOneID(pl.ID)
+	mutation := newPlanetMutation(c.config, OpUpdateOne, withPlanet(pl))
+	return &PlanetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *PlanetClient) UpdateOneID(id int) *PlanetUpdateOne {
-	mutation := newPlanetMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newPlanetMutation(c.config, OpUpdateOne, withPlanetID(id))
 	return &PlanetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

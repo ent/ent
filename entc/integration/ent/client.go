@@ -226,13 +226,13 @@ func (c *CardClient) Update() *CardUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *CardClient) UpdateOne(ca *Card) *CardUpdateOne {
-	return c.UpdateOneID(ca.ID)
+	mutation := newCardMutation(c.config, OpUpdateOne, withCard(ca))
+	return &CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CardClient) UpdateOneID(id int) *CardUpdateOne {
-	mutation := newCardMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newCardMutation(c.config, OpUpdateOne, withCardID(id))
 	return &CardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -341,13 +341,13 @@ func (c *CommentClient) Update() *CommentUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *CommentClient) UpdateOne(co *Comment) *CommentUpdateOne {
-	return c.UpdateOneID(co.ID)
+	mutation := newCommentMutation(c.config, OpUpdateOne, withComment(co))
+	return &CommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CommentClient) UpdateOneID(id int) *CommentUpdateOne {
-	mutation := newCommentMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newCommentMutation(c.config, OpUpdateOne, withCommentID(id))
 	return &CommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -424,13 +424,13 @@ func (c *FieldTypeClient) Update() *FieldTypeUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *FieldTypeClient) UpdateOne(ft *FieldType) *FieldTypeUpdateOne {
-	return c.UpdateOneID(ft.ID)
+	mutation := newFieldTypeMutation(c.config, OpUpdateOne, withFieldType(ft))
+	return &FieldTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *FieldTypeClient) UpdateOneID(id int) *FieldTypeUpdateOne {
-	mutation := newFieldTypeMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newFieldTypeMutation(c.config, OpUpdateOne, withFieldTypeID(id))
 	return &FieldTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -507,13 +507,13 @@ func (c *FileClient) Update() *FileUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *FileClient) UpdateOne(f *File) *FileUpdateOne {
-	return c.UpdateOneID(f.ID)
+	mutation := newFileMutation(c.config, OpUpdateOne, withFile(f))
+	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *FileClient) UpdateOneID(id int) *FileUpdateOne {
-	mutation := newFileMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newFileMutation(c.config, OpUpdateOne, withFileID(id))
 	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -638,13 +638,13 @@ func (c *FileTypeClient) Update() *FileTypeUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *FileTypeClient) UpdateOne(ft *FileType) *FileTypeUpdateOne {
-	return c.UpdateOneID(ft.ID)
+	mutation := newFileTypeMutation(c.config, OpUpdateOne, withFileType(ft))
+	return &FileTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *FileTypeClient) UpdateOneID(id int) *FileTypeUpdateOne {
-	mutation := newFileTypeMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newFileTypeMutation(c.config, OpUpdateOne, withFileTypeID(id))
 	return &FileTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -737,13 +737,13 @@ func (c *GroupClient) Update() *GroupUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
-	return c.UpdateOneID(gr.ID)
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroup(gr))
+	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
-	mutation := newGroupMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
 	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -884,13 +884,13 @@ func (c *GroupInfoClient) Update() *GroupInfoUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *GroupInfoClient) UpdateOne(gi *GroupInfo) *GroupInfoUpdateOne {
-	return c.UpdateOneID(gi.ID)
+	mutation := newGroupInfoMutation(c.config, OpUpdateOne, withGroupInfo(gi))
+	return &GroupInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *GroupInfoClient) UpdateOneID(id int) *GroupInfoUpdateOne {
-	mutation := newGroupInfoMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newGroupInfoMutation(c.config, OpUpdateOne, withGroupInfoID(id))
 	return &GroupInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -983,13 +983,13 @@ func (c *ItemClient) Update() *ItemUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *ItemClient) UpdateOne(i *Item) *ItemUpdateOne {
-	return c.UpdateOneID(i.ID)
+	mutation := newItemMutation(c.config, OpUpdateOne, withItem(i))
+	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *ItemClient) UpdateOneID(id int) *ItemUpdateOne {
-	mutation := newItemMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newItemMutation(c.config, OpUpdateOne, withItemID(id))
 	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1066,13 +1066,13 @@ func (c *NodeClient) Update() *NodeUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
-	return c.UpdateOneID(n.ID)
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNode(n))
+	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
-	mutation := newNodeMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNodeID(id))
 	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1181,13 +1181,13 @@ func (c *PetClient) Update() *PetUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *PetClient) UpdateOne(pe *Pet) *PetUpdateOne {
-	return c.UpdateOneID(pe.ID)
+	mutation := newPetMutation(c.config, OpUpdateOne, withPet(pe))
+	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *PetClient) UpdateOneID(id int) *PetUpdateOne {
-	mutation := newPetMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newPetMutation(c.config, OpUpdateOne, withPetID(id))
 	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1296,13 +1296,13 @@ func (c *SpecClient) Update() *SpecUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *SpecClient) UpdateOne(s *Spec) *SpecUpdateOne {
-	return c.UpdateOneID(s.ID)
+	mutation := newSpecMutation(c.config, OpUpdateOne, withSpec(s))
+	return &SpecUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *SpecClient) UpdateOneID(id int) *SpecUpdateOne {
-	mutation := newSpecMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newSpecMutation(c.config, OpUpdateOne, withSpecID(id))
 	return &SpecUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1395,13 +1395,13 @@ func (c *UserClient) Update() *UserUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	return c.UpdateOneID(u.ID)
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

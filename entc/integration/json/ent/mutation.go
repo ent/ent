@@ -7,10 +7,12 @@
 package ent
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 
 	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
 
@@ -43,17 +45,53 @@ type UserMutation struct {
 	floats        *[]float64
 	strings       *[]string
 	clearedFields map[string]struct{}
+	oldValue      func(context.Context) (*User, error)
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
 
+// userOption allows to manage the mutation configuration using functional options.
+type userOption func(*UserMutation)
+
 // newUserMutation creates new mutation for $n.Name.
-func newUserMutation(c config, op Op) *UserMutation {
-	return &UserMutation{
+func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
+	m := &UserMutation{
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
 		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUserID sets the id field of the mutation.
+func withUserID(id int) userOption {
+	return func(m *UserMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *User
+		)
+		m.oldValue = func(ctx context.Context) (*User, error) {
+			once.Do(func() {
+				value, err = m.Client().User.Get(ctx, id)
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUser sets the old User of the mutation.
+func withUser(node *User) userOption {
+	return func(m *UserMutation) {
+		m.oldValue = func(context.Context) (*User, error) {
+			return node, nil
+		}
+		m.id = &node.ID
 	}
 }
 
@@ -99,6 +137,22 @@ func (m *UserMutation) URL() (r *url.URL, exists bool) {
 	return *v, true
 }
 
+// OldURL returns the old url value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldURL(ctx context.Context) (v *url.URL, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldURL is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
 // ClearURL clears the value of url.
 func (m *UserMutation) ClearURL() {
 	m.url = nil
@@ -129,6 +183,22 @@ func (m *UserMutation) Raw() (r json.RawMessage, exists bool) {
 		return
 	}
 	return *v, true
+}
+
+// OldRaw returns the old raw value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldRaw(ctx context.Context) (v json.RawMessage, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRaw is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRaw requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRaw: %w", err)
+	}
+	return oldValue.Raw, nil
 }
 
 // ClearRaw clears the value of raw.
@@ -163,6 +233,22 @@ func (m *UserMutation) Dirs() (r []http.Dir, exists bool) {
 	return *v, true
 }
 
+// OldDirs returns the old dirs value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldDirs(ctx context.Context) (v []http.Dir, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDirs is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDirs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDirs: %w", err)
+	}
+	return oldValue.Dirs, nil
+}
+
 // ClearDirs clears the value of dirs.
 func (m *UserMutation) ClearDirs() {
 	m.dirs = nil
@@ -193,6 +279,22 @@ func (m *UserMutation) Ints() (r []int, exists bool) {
 		return
 	}
 	return *v, true
+}
+
+// OldInts returns the old ints value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldInts(ctx context.Context) (v []int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInts is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInts: %w", err)
+	}
+	return oldValue.Ints, nil
 }
 
 // ClearInts clears the value of ints.
@@ -227,6 +329,22 @@ func (m *UserMutation) Floats() (r []float64, exists bool) {
 	return *v, true
 }
 
+// OldFloats returns the old floats value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldFloats(ctx context.Context) (v []float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldFloats is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldFloats requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFloats: %w", err)
+	}
+	return oldValue.Floats, nil
+}
+
 // ClearFloats clears the value of floats.
 func (m *UserMutation) ClearFloats() {
 	m.floats = nil
@@ -257,6 +375,22 @@ func (m *UserMutation) Strings() (r []string, exists bool) {
 		return
 	}
 	return *v, true
+}
+
+// OldStrings returns the old strings value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldStrings(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStrings is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStrings requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStrings: %w", err)
+	}
+	return oldValue.Strings, nil
 }
 
 // ClearStrings clears the value of strings.
@@ -332,6 +466,27 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Strings()
 	}
 	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case user.FieldURL:
+		return m.OldURL(ctx)
+	case user.FieldRaw:
+		return m.OldRaw(ctx)
+	case user.FieldDirs:
+		return m.OldDirs(ctx)
+	case user.FieldInts:
+		return m.OldInts(ctx)
+	case user.FieldFloats:
+		return m.OldFloats(ctx)
+	case user.FieldStrings:
+		return m.OldStrings(ctx)
+	}
+	return nil, fmt.Errorf("unknown User field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an
