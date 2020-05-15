@@ -254,6 +254,13 @@ func Datetime(v time.Time) predicate.FieldType {
 	})
 }
 
+// Decimal applies equality check predicate on the "decimal" field. It's identical to DecimalEQ.
+func Decimal(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.EQ(v))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -2103,6 +2110,84 @@ func DatetimeIsNil() predicate.FieldType {
 func DatetimeNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldDatetime)
+	})
+}
+
+// DecimalEQ applies the EQ predicate on the "decimal" field.
+func DecimalEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.EQ(v))
+	})
+}
+
+// DecimalNEQ applies the NEQ predicate on the "decimal" field.
+func DecimalNEQ(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.NEQ(v))
+	})
+}
+
+// DecimalIn applies the In predicate on the "decimal" field.
+func DecimalIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.Within(v...))
+	})
+}
+
+// DecimalNotIn applies the NotIn predicate on the "decimal" field.
+func DecimalNotIn(vs ...float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.Without(v...))
+	})
+}
+
+// DecimalGT applies the GT predicate on the "decimal" field.
+func DecimalGT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.GT(v))
+	})
+}
+
+// DecimalGTE applies the GTE predicate on the "decimal" field.
+func DecimalGTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.GTE(v))
+	})
+}
+
+// DecimalLT applies the LT predicate on the "decimal" field.
+func DecimalLT(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.LT(v))
+	})
+}
+
+// DecimalLTE applies the LTE predicate on the "decimal" field.
+func DecimalLTE(v float64) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDecimal, p.LTE(v))
+	})
+}
+
+// DecimalIsNil applies the IsNil predicate on the "decimal" field.
+func DecimalIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldDecimal)
+	})
+}
+
+// DecimalNotNil applies the NotNil predicate on the "decimal" field.
+func DecimalNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldDecimal)
 	})
 }
 

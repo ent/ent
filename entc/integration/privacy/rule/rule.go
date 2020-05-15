@@ -17,20 +17,12 @@ import (
 
 // DenyUpdateRule is a mutation rule that denies update many operations.
 func DenyUpdateRule() privacy.MutationRule {
-	return privacy.MutationRuleFunc(func(_ context.Context, m ent.Mutation) error {
-		if m.Op() == ent.OpUpdate {
-			return privacy.Denyf("ent/privacy: update operation not allowed")
-		}
-		return privacy.Skip
-	})
+	return privacy.DenyMutationOperationRule(ent.OpUpdate)
 }
 
 // DenyPlanetSelfLinkRule is a mutation rule rule that prevents rule self link via neighbor edge.
 func DenyPlanetSelfLinkRule() privacy.MutationRule {
-	return privacy.PlanetMutationRuleFunc(func(ctx context.Context, m *ent.PlanetMutation) error {
-		if !m.Op().Is(ent.OpUpdateOne) {
-			return privacy.Skip
-		}
+	rule := privacy.PlanetMutationRuleFunc(func(ctx context.Context, m *ent.PlanetMutation) error {
 		id, exists := m.ID()
 		if !exists {
 			return privacy.Denyf("ent/privacy: rule id not provided")
@@ -42,6 +34,7 @@ func DenyPlanetSelfLinkRule() privacy.MutationRule {
 		}
 		return privacy.Skip
 	})
+	return privacy.OnMutationOperation(rule, ent.OpUpdateOne)
 }
 
 // FilterZeroPlanetAgeRule is a query rule that filters out planet with age equal to zero.

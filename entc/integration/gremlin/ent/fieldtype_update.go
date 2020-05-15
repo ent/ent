@@ -624,6 +624,33 @@ func (ftu *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDecimal sets the decimal field.
+func (ftu *FieldTypeUpdate) SetDecimal(f float64) *FieldTypeUpdate {
+	ftu.mutation.ResetDecimal()
+	ftu.mutation.SetDecimal(f)
+	return ftu
+}
+
+// SetNillableDecimal sets the decimal field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDecimal(f *float64) *FieldTypeUpdate {
+	if f != nil {
+		ftu.SetDecimal(*f)
+	}
+	return ftu
+}
+
+// AddDecimal adds f to decimal.
+func (ftu *FieldTypeUpdate) AddDecimal(f float64) *FieldTypeUpdate {
+	ftu.mutation.AddDecimal(f)
+	return ftu
+}
+
+// ClearDecimal clears the value of decimal.
+func (ftu *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
+	ftu.mutation.ClearDecimal()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -848,6 +875,12 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
+	if value, ok := ftu.mutation.Decimal(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDecimal, value)
+	}
+	if value, ok := ftu.mutation.AddedDecimal(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDecimal, __.Union(__.Values(fieldtype.FieldDecimal), __.Constant(value)).Sum())
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -908,6 +941,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.DatetimeCleared() {
 		properties = append(properties, fieldtype.FieldDatetime)
+	}
+	if ftu.mutation.DecimalCleared() {
+		properties = append(properties, fieldtype.FieldDecimal)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1515,6 +1551,33 @@ func (ftuo *FieldTypeUpdateOne) ClearDatetime() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetDecimal sets the decimal field.
+func (ftuo *FieldTypeUpdateOne) SetDecimal(f float64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetDecimal()
+	ftuo.mutation.SetDecimal(f)
+	return ftuo
+}
+
+// SetNillableDecimal sets the decimal field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDecimal(f *float64) *FieldTypeUpdateOne {
+	if f != nil {
+		ftuo.SetDecimal(*f)
+	}
+	return ftuo
+}
+
+// AddDecimal adds f to decimal.
+func (ftuo *FieldTypeUpdateOne) AddDecimal(f float64) *FieldTypeUpdateOne {
+	ftuo.mutation.AddDecimal(f)
+	return ftuo
+}
+
+// ClearDecimal clears the value of decimal.
+func (ftuo *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDecimal()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -1744,6 +1807,12 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
+	if value, ok := ftuo.mutation.Decimal(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDecimal, value)
+	}
+	if value, ok := ftuo.mutation.AddedDecimal(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDecimal, __.Union(__.Values(fieldtype.FieldDecimal), __.Constant(value)).Sum())
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1804,6 +1873,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.DatetimeCleared() {
 		properties = append(properties, fieldtype.FieldDatetime)
+	}
+	if ftuo.mutation.DecimalCleared() {
+		properties = append(properties, fieldtype.FieldDecimal)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

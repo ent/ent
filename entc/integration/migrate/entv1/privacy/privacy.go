@@ -179,6 +179,23 @@ func (f fixedDecision) EvalMutation(context.Context, entv1.Mutation) error {
 	return f.decision
 }
 
+type contextDecision struct {
+	eval func(context.Context) error
+}
+
+// ContextQueryMutationRule creates a query/mutation rule from a context eval func.
+func ContextQueryMutationRule(eval func(context.Context) error) QueryMutationRule {
+	return contextDecision{eval}
+}
+
+func (c contextDecision) EvalQuery(ctx context.Context, _ entv1.Query) error {
+	return c.eval(ctx)
+}
+
+func (c contextDecision) EvalMutation(ctx context.Context, _ entv1.Mutation) error {
+	return c.eval(ctx)
+}
+
 // OnMutationOperation evaluates the given rule only on a given mutation operation.
 func OnMutationOperation(rule MutationRule, op entv1.Op) MutationRule {
 	return MutationRuleFunc(func(ctx context.Context, m entv1.Mutation) error {

@@ -335,6 +335,20 @@ func (ftc *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
 	return ftc
 }
 
+// SetDecimal sets the decimal field.
+func (ftc *FieldTypeCreate) SetDecimal(f float64) *FieldTypeCreate {
+	ftc.mutation.SetDecimal(f)
+	return ftc
+}
+
+// SetNillableDecimal sets the decimal field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
+	if f != nil {
+		ftc.SetDecimal(*f)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -489,6 +503,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
+	}
+	if value, ok := ftc.mutation.Decimal(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDecimal, value)
 	}
 	return v.ValueMap(true)
 }

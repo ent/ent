@@ -70,6 +70,8 @@ type FieldType struct {
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
 	// Datetime holds the value of the "datetime" field.
 	Datetime time.Time `json:"datetime,omitempty"`
+	// Decimal holds the value of the "decimal" field.
+	Decimal float64 `json:"decimal,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -105,6 +107,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		OptionalFloat         float64         `json:"optional_float,omitempty"`
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
 		Datetime              int64           `json:"datetime,omitempty"`
+		Decimal               float64         `json:"decimal,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -135,6 +138,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.OptionalFloat = scanft.OptionalFloat
 	ft.OptionalFloat32 = scanft.OptionalFloat32
 	ft.Datetime = time.Unix(0, scanft.Datetime)
+	ft.Decimal = scanft.Decimal
 	return nil
 }
 
@@ -221,6 +225,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
 	builder.WriteString(", datetime=")
 	builder.WriteString(ft.Datetime.Format(time.ANSIC))
+	builder.WriteString(", decimal=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -261,6 +267,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		OptionalFloat         float64         `json:"optional_float,omitempty"`
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
 		Datetime              int64           `json:"datetime,omitempty"`
+		Decimal               float64         `json:"decimal,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -293,6 +300,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			OptionalFloat:         v.OptionalFloat,
 			OptionalFloat32:       v.OptionalFloat32,
 			Datetime:              time.Unix(0, v.Datetime),
+			Decimal:               v.Decimal,
 		})
 	}
 	return nil
