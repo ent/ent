@@ -1126,8 +1126,6 @@ func (m *CommentMutation) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *CommentMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -1141,8 +1139,6 @@ func (m *CommentMutation) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -1156,8 +1152,6 @@ func (m *CommentMutation) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *CommentMutation) EdgeCleared(name string) bool {
-	switch name {
-	}
 	return false
 }
 
@@ -1171,8 +1165,6 @@ func (m *CommentMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *CommentMutation) ResetEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Comment edge %s", name)
 }
 
@@ -3961,8 +3953,6 @@ func (m *FieldTypeMutation) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *FieldTypeMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -3976,8 +3966,6 @@ func (m *FieldTypeMutation) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *FieldTypeMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -3991,8 +3979,6 @@ func (m *FieldTypeMutation) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *FieldTypeMutation) EdgeCleared(name string) bool {
-	switch name {
-	}
 	return false
 }
 
@@ -4006,8 +3992,6 @@ func (m *FieldTypeMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *FieldTypeMutation) ResetEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown FieldType edge %s", name)
 }
 
@@ -6560,8 +6544,6 @@ func (m *ItemMutation) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *ItemMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -6575,8 +6557,6 @@ func (m *ItemMutation) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *ItemMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -6590,8 +6570,6 @@ func (m *ItemMutation) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *ItemMutation) EdgeCleared(name string) bool {
-	switch name {
-	}
 	return false
 }
 
@@ -6605,8 +6583,6 @@ func (m *ItemMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *ItemMutation) ResetEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Item edge %s", name)
 }
 

@@ -550,23 +550,25 @@ func (m *{{ $mutation }}) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *{{ $mutation }}) AddedIDs(name string) []ent.Value {
-	switch name {
-	{{- range $e := $n.Edges }}
-		{{- $const := print $n.Package "." $e.Constant }}
-		case {{ $const }}:
-			{{- if $e.Unique }}
-				if id := m.{{ $e.BuilderField }}; id != nil {
-					return []ent.Value{*id}
-				}
-			{{- else }}
-				ids := make([]ent.Value, 0, len(m.{{ $e.BuilderField }}))
-				for id := range m.{{ $e.BuilderField }} {
-					ids = append(ids, id)
-				}
-				return ids
-			{{- end }}
+	{{- with $n.Edges }}
+		switch name {
+		{{- range $e := $n.Edges }}
+			{{- $const := print $n.Package "." $e.Constant }}
+			case {{ $const }}:
+				{{- if $e.Unique }}
+					if id := m.{{ $e.BuilderField }}; id != nil {
+						return []ent.Value{*id}
+					}
+				{{- else }}
+					ids := make([]ent.Value, 0, len(m.{{ $e.BuilderField }}))
+					for id := range m.{{ $e.BuilderField }} {
+						ids = append(ids, id)
+					}
+					return ids
+				{{- end }}
+		{{- end }}
+		}
 	{{- end }}
-	}
 	return nil
 }
 
@@ -588,19 +590,21 @@ func (m *{{ $mutation }}) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *{{ $mutation }}) RemovedIDs(name string) []ent.Value {
-	switch name {
-	{{- range $e := $n.Edges }}
-		{{- if not $e.Unique }}
-			{{- $const := print $n.Package "." $e.Constant }}
-			case {{ $const }}:
-				ids := make([]ent.Value, 0, len(m.removed{{ $e.BuilderField }}))
-				for id := range m.removed{{ $e.BuilderField }} {
-					ids = append(ids, id)
-				}
-				return ids
+	{{- with $n.Edges }}
+		switch name {
+		{{- range $e := $n.Edges }}
+			{{- if not $e.Unique }}
+				{{- $const := print $n.Package "." $e.Constant }}
+				case {{ $const }}:
+					ids := make([]ent.Value, 0, len(m.removed{{ $e.BuilderField }}))
+					for id := range m.removed{{ $e.BuilderField }} {
+						ids = append(ids, id)
+					}
+					return ids
+			{{- end }}
 		{{- end }}
+		}
 	{{- end }}
-	}
 	return nil
 }
 
@@ -622,22 +626,24 @@ func (m *{{ $mutation }}) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *{{ $mutation }}) EdgeCleared(name string) bool {
-	switch name {
-	{{- range $e := $n.Edges }}
-		{{- if $e.Unique }}
-			{{- $const := print $n.Package "." $e.Constant }}
-			case {{ $const }}:
-				return m.cleared{{ $e.BuilderField }}
+	{{- with $n.Edges }}
+		switch name {
+		{{- range $e := $n.Edges }}
+			{{- if $e.Unique }}
+				{{- $const := print $n.Package "." $e.Constant }}
+				case {{ $const }}:
+					return m.cleared{{ $e.BuilderField }}
+			{{- end }}
 		{{- end }}
+		}
 	{{- end }}
-	}
 	return false
 }
 
 // ClearEdge clears the value for the given name. It returns an
 // error if the edge name is not defined in the schema.
 func (m *{{ $mutation }}) ClearEdge(name string) error {
-	{{- if $n.Edges }}
+	{{- with $n.Edges }}
 		switch name {
 		{{- range $e := $n.Edges }}
 			{{- if $e.Unique }}
@@ -656,14 +662,16 @@ func (m *{{ $mutation }}) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *{{ $mutation }}) ResetEdge(name string) error {
-	switch name {
-	{{- range $e := $n.Edges }}
-		{{- $const := print $n.Package "." $e.Constant }}
-		case {{ $const }}:
-			m.{{ $e.MutationReset }}()
-			return nil
+	{{- with $n.Edges }}
+		switch name {
+		{{- range $e := $n.Edges }}
+			{{- $const := print $n.Package "." $e.Constant }}
+			case {{ $const }}:
+				m.{{ $e.MutationReset }}()
+				return nil
+		{{- end }}
+		}
 	{{- end }}
-	}
 	return fmt.Errorf("unknown {{ $n.Name }} edge %s", name)
 }
 {{ end }}

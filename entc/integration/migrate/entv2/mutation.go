@@ -509,8 +509,6 @@ func (m *GroupMutation) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *GroupMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -524,8 +522,6 @@ func (m *GroupMutation) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -539,8 +535,6 @@ func (m *GroupMutation) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *GroupMutation) EdgeCleared(name string) bool {
-	switch name {
-	}
 	return false
 }
 
@@ -554,8 +548,6 @@ func (m *GroupMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *GroupMutation) ResetEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Group edge %s", name)
 }
 
@@ -742,8 +734,6 @@ func (m *PetMutation) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *PetMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -757,8 +747,6 @@ func (m *PetMutation) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *PetMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -772,8 +760,6 @@ func (m *PetMutation) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *PetMutation) EdgeCleared(name string) bool {
-	switch name {
-	}
 	return false
 }
 
@@ -787,8 +773,6 @@ func (m *PetMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *PetMutation) ResetEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Pet edge %s", name)
 }
 
