@@ -209,8 +209,6 @@ func (m *UserMutation) AddedEdges() []string {
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -224,8 +222,6 @@ func (m *UserMutation) RemovedEdges() []string {
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -239,8 +235,6 @@ func (m *UserMutation) ClearedEdges() []string {
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
-	switch name {
-	}
 	return false
 }
 
@@ -254,7 +248,5 @@ func (m *UserMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
