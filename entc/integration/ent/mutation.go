@@ -6485,8 +6485,6 @@ func (m *ItemMutation) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *ItemMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -6494,8 +6492,6 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	}
 	return nil, fmt.Errorf("unknown Item field %s", name)
 }
 
@@ -6525,8 +6521,6 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *ItemMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
 
@@ -6553,8 +6547,6 @@ func (m *ItemMutation) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *ItemMutation) ResetField(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
 
@@ -7657,8 +7649,6 @@ func (m *SpecMutation) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *SpecMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -7666,8 +7656,6 @@ func (m *SpecMutation) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *SpecMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	}
 	return nil, fmt.Errorf("unknown Spec field %s", name)
 }
 
@@ -7697,8 +7685,6 @@ func (m *SpecMutation) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *SpecMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Spec numeric field %s", name)
 }
 
@@ -7725,8 +7711,6 @@ func (m *SpecMutation) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *SpecMutation) ResetField(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Spec field %s", name)
 }
 

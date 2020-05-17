@@ -363,13 +363,15 @@ func (m *{{ $mutation }}) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *{{ $mutation }}) Field(name string) (ent.Value, bool) {
-	switch name {
-	{{- range $f := $n.Fields }}
-		{{- $const := print $n.Package "." $f.Constant }}
-		case {{ $const }}:
-			return  m.{{ $f.MutationGet }}()
+	{{- with $n.Fields }}
+		switch name {
+		{{- range $f := $n.Fields }}
+			{{- $const := print $n.Package "." $f.Constant }}
+			case {{ $const }}:
+				return  m.{{ $f.MutationGet }}()
+		{{- end }}
+		}
 	{{- end }}
-	}
 	return nil, false
 }
 
@@ -378,13 +380,15 @@ func (m *{{ $mutation }}) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *{{ $mutation }}) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	{{- range $f := $n.Fields }}
-		{{- $const := print $n.Package "." $f.Constant }}
-		case {{ $const }}:
-			return  m.{{ $f.MutationGetOld }}(ctx)
+	{{- with $n.Fields }}
+		switch name {
+		{{- range $f := . }}
+			{{- $const := print $n.Package "." $f.Constant }}
+			case {{ $const }}:
+				return  m.{{ $f.MutationGetOld }}(ctx)
+		{{- end }}
+		}
 	{{- end }}
-	}
 	return nil, fmt.Errorf("unknown {{ $n.Name }} field %s", name)
 }
 
@@ -448,20 +452,22 @@ func (m *{{ $mutation }}) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
-	switch name {
-	{{- range $f := $n.Fields }}
-		{{- if $f.Type.Numeric }}
-			{{- $const := print $n.Package "." $f.Constant }}
-			case {{ $const }}:
-				v, ok := value.({{ $f.Type }})
-				if !ok {
-					return fmt.Errorf("unexpected type %T for field %s", value, name)
-				}
-				m.Add{{ $f.StructField }}(v)
-				return nil
+	{{- with $n.Fields }}
+		switch name {
+		{{- range $f := $n.Fields }}
+			{{- if $f.Type.Numeric }}
+				{{- $const := print $n.Package "." $f.Constant }}
+				case {{ $const }}:
+					v, ok := value.({{ $f.Type }})
+					if !ok {
+						return fmt.Errorf("unexpected type %T for field %s", value, name)
+					}
+					m.Add{{ $f.StructField }}(v)
+					return nil
+			{{- end }}
 		{{- end }}
+		}
 	{{- end }}
-	}
 	return fmt.Errorf("unknown {{ $n.Name }} numeric field %s", name)
 }
 
@@ -515,14 +521,16 @@ func (m *{{ $mutation }}) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *{{ $mutation }}) ResetField(name string) error {
-	switch name {
-	{{- range $f := $n.Fields }}
-		{{- $const := print $n.Package "." $f.Constant }}
-		case {{ $const }}:
-			m.{{ $f.MutationReset }}()
-			return nil
+	{{- with $n.Fields }}
+		switch name {
+		{{- range $f := $n.Fields }}
+			{{- $const := print $n.Package "." $f.Constant }}
+			case {{ $const }}:
+				m.{{ $f.MutationReset }}()
+				return nil
+		{{- end }}
+		}
 	{{- end }}
-	}
 	return fmt.Errorf("unknown {{ $n.Name }} field %s", name)
 }
 

@@ -134,8 +134,6 @@ func (m *UserMutation) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -143,8 +141,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
 
@@ -174,8 +170,6 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
 
@@ -202,8 +196,6 @@ func (m *UserMutation) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown User field %s", name)
 }
 

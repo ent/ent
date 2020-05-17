@@ -181,8 +181,6 @@ func (m *CarMutation) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *CarMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -190,8 +188,6 @@ func (m *CarMutation) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *CarMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	}
 	return nil, fmt.Errorf("unknown Car field %s", name)
 }
 
@@ -221,8 +217,6 @@ func (m *CarMutation) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *CarMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Car numeric field %s", name)
 }
 
@@ -249,8 +243,6 @@ func (m *CarMutation) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *CarMutation) ResetField(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Car field %s", name)
 }
 
@@ -442,8 +434,6 @@ func (m *GroupMutation) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *GroupMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -451,8 +441,6 @@ func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	}
 	return nil, fmt.Errorf("unknown Group field %s", name)
 }
 
@@ -482,8 +470,6 @@ func (m *GroupMutation) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *GroupMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Group numeric field %s", name)
 }
 
@@ -510,8 +496,6 @@ func (m *GroupMutation) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *GroupMutation) ResetField(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Group field %s", name)
 }
 
@@ -683,8 +667,6 @@ func (m *PetMutation) Fields() []string {
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
 func (m *PetMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -692,8 +674,6 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
 func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
 
@@ -723,8 +703,6 @@ func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
 func (m *PetMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Pet numeric field %s", name)
 }
 
@@ -751,8 +729,6 @@ func (m *PetMutation) ClearField(name string) error {
 // given field name. It returns an error if the field is not
 // defined in the schema.
 func (m *PetMutation) ResetField(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Pet field %s", name)
 }
 
