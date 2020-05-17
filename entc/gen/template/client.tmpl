@@ -157,13 +157,13 @@ func (c *{{ $client }}) Update() *{{ $n.Name }}Update {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}UpdateOne {
-	return c.UpdateOneID({{ $rec }}.ID)
+	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
+	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}UpdateOne {
-	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
 	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

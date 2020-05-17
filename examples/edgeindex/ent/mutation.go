@@ -7,7 +7,9 @@
 package ent
 
 import (
+	"context"
 	"fmt"
+	"sync"
 
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
 	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
@@ -39,17 +41,53 @@ type CityMutation struct {
 	clearedFields  map[string]struct{}
 	streets        map[int]struct{}
 	removedstreets map[int]struct{}
+	oldValue       func(context.Context) (*City, error)
 }
 
 var _ ent.Mutation = (*CityMutation)(nil)
 
+// cityOption allows to manage the mutation configuration using functional options.
+type cityOption func(*CityMutation)
+
 // newCityMutation creates new mutation for $n.Name.
-func newCityMutation(c config, op Op) *CityMutation {
-	return &CityMutation{
+func newCityMutation(c config, op Op, opts ...cityOption) *CityMutation {
+	m := &CityMutation{
 		config:        c,
 		op:            op,
 		typ:           TypeCity,
 		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCityID sets the id field of the mutation.
+func withCityID(id int) cityOption {
+	return func(m *CityMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *City
+		)
+		m.oldValue = func(ctx context.Context) (*City, error) {
+			once.Do(func() {
+				value, err = m.Client().City.Get(ctx, id)
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCity sets the old City of the mutation.
+func withCity(node *City) cityOption {
+	return func(m *CityMutation) {
+		m.oldValue = func(context.Context) (*City, error) {
+			return node, nil
+		}
+		m.id = &node.ID
 	}
 }
 
@@ -93,6 +131,22 @@ func (m *CityMutation) Name() (r string, exists bool) {
 		return
 	}
 	return *v, true
+}
+
+// OldName returns the old name value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *CityMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
 }
 
 // ResetName reset all changes of the "name" field.
@@ -172,6 +226,17 @@ func (m *CityMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	}
 	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *CityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case city.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown City field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an
@@ -337,17 +402,53 @@ type StreetMutation struct {
 	clearedFields map[string]struct{}
 	city          *int
 	clearedcity   bool
+	oldValue      func(context.Context) (*Street, error)
 }
 
 var _ ent.Mutation = (*StreetMutation)(nil)
 
+// streetOption allows to manage the mutation configuration using functional options.
+type streetOption func(*StreetMutation)
+
 // newStreetMutation creates new mutation for $n.Name.
-func newStreetMutation(c config, op Op) *StreetMutation {
-	return &StreetMutation{
+func newStreetMutation(c config, op Op, opts ...streetOption) *StreetMutation {
+	m := &StreetMutation{
 		config:        c,
 		op:            op,
 		typ:           TypeStreet,
 		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStreetID sets the id field of the mutation.
+func withStreetID(id int) streetOption {
+	return func(m *StreetMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Street
+		)
+		m.oldValue = func(ctx context.Context) (*Street, error) {
+			once.Do(func() {
+				value, err = m.Client().Street.Get(ctx, id)
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStreet sets the old Street of the mutation.
+func withStreet(node *Street) streetOption {
+	return func(m *StreetMutation) {
+		m.oldValue = func(context.Context) (*Street, error) {
+			return node, nil
+		}
+		m.id = &node.ID
 	}
 }
 
@@ -391,6 +492,22 @@ func (m *StreetMutation) Name() (r string, exists bool) {
 		return
 	}
 	return *v, true
+}
+
+// OldName returns the old name value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *StreetMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
 }
 
 // ResetName reset all changes of the "name" field.
@@ -467,6 +584,17 @@ func (m *StreetMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	}
 	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *StreetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case street.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Street field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an

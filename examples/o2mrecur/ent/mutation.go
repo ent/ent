@@ -7,7 +7,9 @@
 package ent
 
 import (
+	"context"
 	"fmt"
+	"sync"
 
 	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
 
@@ -40,17 +42,53 @@ type NodeMutation struct {
 	clearedparent   bool
 	children        map[int]struct{}
 	removedchildren map[int]struct{}
+	oldValue        func(context.Context) (*Node, error)
 }
 
 var _ ent.Mutation = (*NodeMutation)(nil)
 
+// nodeOption allows to manage the mutation configuration using functional options.
+type nodeOption func(*NodeMutation)
+
 // newNodeMutation creates new mutation for $n.Name.
-func newNodeMutation(c config, op Op) *NodeMutation {
-	return &NodeMutation{
+func newNodeMutation(c config, op Op, opts ...nodeOption) *NodeMutation {
+	m := &NodeMutation{
 		config:        c,
 		op:            op,
 		typ:           TypeNode,
 		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withNodeID sets the id field of the mutation.
+func withNodeID(id int) nodeOption {
+	return func(m *NodeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Node
+		)
+		m.oldValue = func(ctx context.Context) (*Node, error) {
+			once.Do(func() {
+				value, err = m.Client().Node.Get(ctx, id)
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withNode sets the old Node of the mutation.
+func withNode(node *Node) nodeOption {
+	return func(m *NodeMutation) {
+		m.oldValue = func(context.Context) (*Node, error) {
+			return node, nil
+		}
+		m.id = &node.ID
 	}
 }
 
@@ -95,6 +133,22 @@ func (m *NodeMutation) Value() (r int, exists bool) {
 		return
 	}
 	return *v, true
+}
+
+// OldValue returns the old value value, if exists.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NodeMutation) OldValue(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldValue is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
 }
 
 // AddValue adds i to value.
@@ -232,6 +286,17 @@ func (m *NodeMutation) Field(name string) (ent.Value, bool) {
 		return m.Value()
 	}
 	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *NodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case node.FieldValue:
+		return m.OldValue(ctx)
+	}
+	return nil, fmt.Errorf("unknown Node field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an

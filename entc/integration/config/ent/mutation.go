@@ -7,7 +7,9 @@
 package ent
 
 import (
+	"context"
 	"fmt"
+	"sync"
 
 	"github.com/facebookincubator/ent"
 )
@@ -32,17 +34,53 @@ type UserMutation struct {
 	typ           string
 	id            *int
 	clearedFields map[string]struct{}
+	oldValue      func(context.Context) (*User, error)
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
 
+// userOption allows to manage the mutation configuration using functional options.
+type userOption func(*UserMutation)
+
 // newUserMutation creates new mutation for $n.Name.
-func newUserMutation(c config, op Op) *UserMutation {
-	return &UserMutation{
+func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
+	m := &UserMutation{
 		config:        c,
 		op:            op,
 		typ:           TypeUser,
 		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUserID sets the id field of the mutation.
+func withUserID(id int) userOption {
+	return func(m *UserMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *User
+		)
+		m.oldValue = func(ctx context.Context) (*User, error) {
+			once.Do(func() {
+				value, err = m.Client().User.Get(ctx, id)
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUser sets the old User of the mutation.
+func withUser(node *User) userOption {
+	return func(m *UserMutation) {
+		m.oldValue = func(context.Context) (*User, error) {
+			return node, nil
+		}
+		m.id = &node.ID
 	}
 }
 
@@ -99,6 +137,15 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	}
 	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	}
+	return nil, fmt.Errorf("unknown User field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an

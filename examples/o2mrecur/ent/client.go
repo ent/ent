@@ -149,13 +149,13 @@ func (c *NodeClient) Update() *NodeUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
-	return c.UpdateOneID(n.ID)
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNode(n))
+	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
-	mutation := newNodeMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNodeID(id))
 	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

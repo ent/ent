@@ -166,13 +166,13 @@ func (c *GroupClient) Update() *GroupUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
-	return c.UpdateOneID(gr.ID)
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroup(gr))
+	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
-	mutation := newGroupMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
 	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -249,13 +249,13 @@ func (c *PetClient) Update() *PetUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *PetClient) UpdateOne(pe *Pet) *PetUpdateOne {
-	return c.UpdateOneID(pe.ID)
+	mutation := newPetMutation(c.config, OpUpdateOne, withPet(pe))
+	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *PetClient) UpdateOneID(id int) *PetUpdateOne {
-	mutation := newPetMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newPetMutation(c.config, OpUpdateOne, withPetID(id))
 	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -348,13 +348,13 @@ func (c *UserClient) Update() *UserUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	return c.UpdateOneID(u.ID)
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

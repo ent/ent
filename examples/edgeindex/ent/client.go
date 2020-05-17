@@ -156,13 +156,13 @@ func (c *CityClient) Update() *CityUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *CityClient) UpdateOne(ci *City) *CityUpdateOne {
-	return c.UpdateOneID(ci.ID)
+	mutation := newCityMutation(c.config, OpUpdateOne, withCity(ci))
+	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *CityClient) UpdateOneID(id int) *CityUpdateOne {
-	mutation := newCityMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newCityMutation(c.config, OpUpdateOne, withCityID(id))
 	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -255,13 +255,13 @@ func (c *StreetClient) Update() *StreetUpdate {
 
 // UpdateOne returns an update builder for the given entity.
 func (c *StreetClient) UpdateOne(s *Street) *StreetUpdateOne {
-	return c.UpdateOneID(s.ID)
+	mutation := newStreetMutation(c.config, OpUpdateOne, withStreet(s))
+	return &StreetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *StreetClient) UpdateOneID(id int) *StreetUpdateOne {
-	mutation := newStreetMutation(c.config, OpUpdateOne)
-	mutation.id = &id
+	mutation := newStreetMutation(c.config, OpUpdateOne, withStreetID(id))
 	return &StreetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 

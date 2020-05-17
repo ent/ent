@@ -218,7 +218,7 @@ type (
 		Fields() []string
 		// Field returns the value of a field with the given name.
 		// The second boolean value indicates that this field was
-		// not set, or was not define in the schema.
+		// not set, or was not defined in the schema.
 		Field(name string) (Value, bool)
 		// SetField sets the value for the given name. It returns an
 		// error if the field is not defined in the schema, or if the
@@ -280,6 +280,15 @@ type (
 		// given edge name. It returns an error if the edge is not
 		// defined in the schema.
 		ResetEdge(name string) error
+
+		// In order to not break users code, we release the codegen part
+		// first, and uncomment the new method after a minor version release.
+		//
+		// OldField returns the old value of the field from the database.
+		// An error is returned if the mutation operation is not UpdateOne,
+		// or the query to the database was failed.
+		//
+		// OldField(ctx context.Context, name string) (Value, error)
 	}
 
 	// Mutator is the interface that wraps the Mutate method.
