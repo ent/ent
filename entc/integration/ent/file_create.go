@@ -155,6 +155,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 			}
 			fc.mutation = mutation
 			node, err = fc.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(fc.hooks) - 1; i >= 0; i-- {

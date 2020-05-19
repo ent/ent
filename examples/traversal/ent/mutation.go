@@ -45,6 +45,7 @@ type GroupMutation struct {
 	removedusers  map[int]struct{}
 	admin         *int
 	clearedadmin  bool
+	done          bool
 	oldValue      func(context.Context) (*Group, error)
 }
 
@@ -77,7 +78,11 @@ func withGroupID(id int) groupOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Group, error) {
 			once.Do(func() {
-				value, err = m.Client().Group.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Group.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -465,6 +470,7 @@ type PetMutation struct {
 	removedfriends map[int]struct{}
 	owner          *int
 	clearedowner   bool
+	done           bool
 	oldValue       func(context.Context) (*Pet, error)
 }
 
@@ -497,7 +503,11 @@ func withPetID(id int) petOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Pet, error) {
 			once.Do(func() {
-				value, err = m.Client().Pet.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Pet.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -891,6 +901,7 @@ type UserMutation struct {
 	removedgroups  map[int]struct{}
 	manage         map[int]struct{}
 	removedmanage  map[int]struct{}
+	done           bool
 	oldValue       func(context.Context) (*User, error)
 }
 
@@ -923,7 +934,11 @@ func withUserID(id int) userOption {
 		)
 		m.oldValue = func(ctx context.Context) (*User, error) {
 			once.Do(func() {
-				value, err = m.Client().User.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().User.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

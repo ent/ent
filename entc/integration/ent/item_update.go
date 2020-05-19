@@ -47,6 +47,7 @@ func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 			}
 			iu.mutation = mutation
 			affected, err = iu.sqlSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(iu.hooks) - 1; i >= 0; i-- {
@@ -133,6 +134,7 @@ func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 			}
 			iuo.mutation = mutation
 			node, err = iuo.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(iuo.hooks) - 1; i >= 0; i-- {

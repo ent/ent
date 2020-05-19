@@ -156,6 +156,20 @@ func TestOldValues(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
+
+	// Querying old fields post mutation should fail.
+	client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+			value, err := next.Mutate(ctx, m)
+			require.NoError(t, err)
+			_, err = m.OldNumber(ctx)
+			require.Error(t, err)
+			return value, nil
+		})
+	}, ent.OpUpdateOne))
+	crd := client.Card.Create().SetNumber("1234").SetName("a8m").SaveX(ctx)
+	client.Card.UpdateOneID(crd.ID).SetName("a8m").SaveX(ctx)
+
 	// A typed hook.
 	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
@@ -183,7 +197,34 @@ func TestOldValues(t *testing.T) {
 				return nil, err
 			}
 			require.Equal(t, "a8m", name)
-			return next.Mutate(ctx, m)
+			value, err := next.Mutate(ctx, m)
+			require.NoError(t, err)
+			_, err = namer.OldName(ctx)
+			require.NoError(t, err)
+			return value, nil
+		})
+	}, ent.OpUpdateOne))
+	// A generic hook (executed on all types).
+	client.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			namer, ok := m.(interface {
+				OldName(context.Context) (string, error)
+			})
+			if !ok {
+				// Skip if the mutation does not have
+				// a method for getting the old name.
+				return next.Mutate(ctx, m)
+			}
+			name, err := namer.OldName(ctx)
+			if err != nil {
+				return nil, err
+			}
+			require.Equal(t, "a8m", name)
+			value, err := next.Mutate(ctx, m)
+			require.NoError(t, err)
+			_, err = namer.OldName(ctx)
+			require.NoError(t, err)
+			return value, nil
 		})
 	}, ent.OpUpdateOne))
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)

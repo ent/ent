@@ -125,6 +125,7 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 			}
 			nu.mutation = mutation
 			affected, err = nu.sqlSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(nu.hooks) - 1; i >= 0; i-- {
@@ -379,6 +380,7 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 			}
 			nuo.mutation = mutation
 			node, err = nuo.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(nuo.hooks) - 1; i >= 0; i-- {

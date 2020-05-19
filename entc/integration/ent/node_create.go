@@ -90,6 +90,7 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			}
 			nc.mutation = mutation
 			node, err = nc.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {

@@ -83,6 +83,7 @@ func (gc *GalaxyCreate) Save(ctx context.Context) (*Galaxy, error) {
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {

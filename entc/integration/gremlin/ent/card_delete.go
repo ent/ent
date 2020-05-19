@@ -48,6 +48,7 @@ func (cd *CardDelete) Exec(ctx context.Context) (int, error) {
 			}
 			cd.mutation = mutation
 			affected, err = cd.gremlinExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(cd.hooks) - 1; i >= 0; i-- {

@@ -48,6 +48,7 @@ func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 			}
 			gid.mutation = mutation
 			affected, err = gid.gremlinExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(gid.hooks) - 1; i >= 0; i-- {

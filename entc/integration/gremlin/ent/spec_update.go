@@ -79,6 +79,7 @@ func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
 			}
 			su.mutation = mutation
 			affected, err = su.gremlinSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(su.hooks) - 1; i >= 0; i-- {
@@ -202,6 +203,7 @@ func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 			}
 			suo.mutation = mutation
 			node, err = suo.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(suo.hooks) - 1; i >= 0; i-- {

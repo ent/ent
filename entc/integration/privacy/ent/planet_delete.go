@@ -47,6 +47,7 @@ func (pd *PlanetDelete) Exec(ctx context.Context) (int, error) {
 			}
 			pd.mutation = mutation
 			affected, err = pd.sqlExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(pd.hooks) - 1; i >= 0; i-- {

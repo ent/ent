@@ -48,6 +48,7 @@ func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
 			}
 			ftd.mutation = mutation
 			affected, err = ftd.gremlinExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(ftd.hooks) - 1; i >= 0; i-- {

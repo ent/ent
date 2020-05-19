@@ -54,6 +54,7 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 			}
 			sc.mutation = mutation
 			node, err = sc.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {

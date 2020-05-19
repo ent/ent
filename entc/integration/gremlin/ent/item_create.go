@@ -39,6 +39,7 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 			}
 			ic.mutation = mutation
 			node, err = ic.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(ic.hooks) - 1; i >= 0; i-- {

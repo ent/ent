@@ -204,6 +204,7 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 			}
 			fu.mutation = mutation
 			affected, err = fu.gremlinSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(fu.hooks) - 1; i >= 0; i-- {
@@ -507,6 +508,7 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 			}
 			fuo.mutation = mutation
 			node, err = fuo.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(fuo.hooks) - 1; i >= 0; i-- {

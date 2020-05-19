@@ -47,6 +47,7 @@ func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
 			}
 			bd.mutation = mutation
 			affected, err = bd.sqlExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(bd.hooks) - 1; i >= 0; i-- {

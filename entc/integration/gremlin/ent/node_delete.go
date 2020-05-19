@@ -48,6 +48,7 @@ func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
 			}
 			nd.mutation = mutation
 			affected, err = nd.gremlinExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(nd.hooks) - 1; i >= 0; i-- {

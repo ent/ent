@@ -93,6 +93,7 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 			}
 			bc.mutation = mutation
 			node, err = bc.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(bc.hooks) - 1; i >= 0; i-- {

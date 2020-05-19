@@ -357,6 +357,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			}
 			uc.mutation = mutation
 			node, err = uc.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
