@@ -69,6 +69,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {

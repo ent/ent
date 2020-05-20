@@ -47,6 +47,7 @@ func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
 			}
 			fd.mutation = mutation
 			affected, err = fd.sqlExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(fd.hooks) - 1; i >= 0; i-- {

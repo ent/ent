@@ -42,6 +42,7 @@ type NodeMutation struct {
 	clearedprev   bool
 	next          *int
 	clearednext   bool
+	done          bool
 	oldValue      func(context.Context) (*Node, error)
 }
 
@@ -74,7 +75,11 @@ func withNodeID(id int) nodeOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Node, error) {
 			once.Do(func() {
-				value, err = m.Client().Node.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Node.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

@@ -41,6 +41,7 @@ type CityMutation struct {
 	clearedFields  map[string]struct{}
 	streets        map[int]struct{}
 	removedstreets map[int]struct{}
+	done           bool
 	oldValue       func(context.Context) (*City, error)
 }
 
@@ -73,7 +74,11 @@ func withCityID(id int) cityOption {
 		)
 		m.oldValue = func(ctx context.Context) (*City, error) {
 			once.Do(func() {
-				value, err = m.Client().City.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().City.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -402,6 +407,7 @@ type StreetMutation struct {
 	clearedFields map[string]struct{}
 	city          *int
 	clearedcity   bool
+	done          bool
 	oldValue      func(context.Context) (*Street, error)
 }
 
@@ -434,7 +440,11 @@ func withStreetID(id int) streetOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Street, error) {
 			once.Do(func() {
-				value, err = m.Client().Street.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Street.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

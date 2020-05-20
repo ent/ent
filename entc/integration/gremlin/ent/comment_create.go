@@ -74,6 +74,7 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 			}
 			cc.mutation = mutation
 			node, err = cc.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {

@@ -42,6 +42,7 @@ type CarMutation struct {
 	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
+	done          bool
 	oldValue      func(context.Context) (*Car, error)
 }
 
@@ -74,7 +75,11 @@ func withCarID(id int) carOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Car, error) {
 			once.Do(func() {
-				value, err = m.Client().Car.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Car.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -334,6 +339,7 @@ type GroupMutation struct {
 	typ           string
 	id            *int
 	clearedFields map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*Group, error)
 }
 
@@ -366,7 +372,11 @@ func withGroupID(id int) groupOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Group, error) {
 			once.Do(func() {
-				value, err = m.Client().Group.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Group.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -559,6 +569,7 @@ type PetMutation struct {
 	typ           string
 	id            *int
 	clearedFields map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*Pet, error)
 }
 
@@ -591,7 +602,11 @@ func withPetID(id int) petOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Pet, error) {
 			once.Do(func() {
-				value, err = m.Client().Pet.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Pet.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -798,6 +813,7 @@ type UserMutation struct {
 	removedcar    map[int]struct{}
 	pets          *int
 	clearedpets   bool
+	done          bool
 	oldValue      func(context.Context) (*User, error)
 }
 
@@ -830,7 +846,11 @@ func withUserID(id int) userOption {
 		)
 		m.oldValue = func(ctx context.Context) (*User, error) {
 			once.Do(func() {
-				value, err = m.Client().User.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().User.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

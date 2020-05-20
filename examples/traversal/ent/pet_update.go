@@ -110,6 +110,7 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 			}
 			pu.mutation = mutation
 			affected, err = pu.sqlSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(pu.hooks) - 1; i >= 0; i-- {
@@ -338,6 +339,7 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 			}
 			puo.mutation = mutation
 			node, err = puo.sqlSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(puo.hooks) - 1; i >= 0; i-- {

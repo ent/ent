@@ -677,6 +677,7 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 			}
 			ftu.mutation = mutation
 			affected, err = ftu.gremlinSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(ftu.hooks) - 1; i >= 0; i-- {
@@ -1604,6 +1605,7 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 			}
 			ftuo.mutation = mutation
 			node, err = ftuo.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(ftuo.hooks) - 1; i >= 0; i-- {

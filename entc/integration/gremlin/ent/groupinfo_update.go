@@ -108,6 +108,7 @@ func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 			}
 			giu.mutation = mutation
 			affected, err = giu.gremlinSave(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(giu.hooks) - 1; i >= 0; i-- {
@@ -286,6 +287,7 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 			}
 			giuo.mutation = mutation
 			node, err = giuo.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(giuo.hooks) - 1; i >= 0; i-- {

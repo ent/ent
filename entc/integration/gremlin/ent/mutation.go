@@ -66,6 +66,7 @@ type CardMutation struct {
 	clearedowner  bool
 	spec          map[string]struct{}
 	removedspec   map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*Card, error)
 }
 
@@ -98,7 +99,11 @@ func withCardID(id string) cardOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Card, error) {
 			once.Do(func() {
-				value, err = m.Client().Card.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Card.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -665,6 +670,7 @@ type CommentMutation struct {
 	nillable_int    *int
 	addnillable_int *int
 	clearedFields   map[string]struct{}
+	done            bool
 	oldValue        func(context.Context) (*Comment, error)
 }
 
@@ -697,7 +703,11 @@ func withCommentID(id string) commentOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Comment, error) {
 			once.Do(func() {
-				value, err = m.Client().Comment.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Comment.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -1226,6 +1236,7 @@ type FieldTypeMutation struct {
 	decimal                    *float64
 	adddecimal                 *float64
 	clearedFields              map[string]struct{}
+	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
 }
 
@@ -1258,7 +1269,11 @@ func withFieldTypeID(id string) fieldtypeOption {
 		)
 		m.oldValue = func(ctx context.Context) (*FieldType, error) {
 			once.Do(func() {
-				value, err = m.Client().FieldType.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FieldType.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -4014,6 +4029,7 @@ type FileMutation struct {
 	cleared_type  bool
 	field         map[string]struct{}
 	removedfield  map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*File, error)
 }
 
@@ -4046,7 +4062,11 @@ func withFileID(id string) fileOption {
 		)
 		m.oldValue = func(ctx context.Context) (*File, error) {
 			once.Do(func() {
-				value, err = m.Client().File.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().File.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -4721,6 +4741,7 @@ type FileTypeMutation struct {
 	clearedFields map[string]struct{}
 	files         map[string]struct{}
 	removedfiles  map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*FileType, error)
 }
 
@@ -4753,7 +4774,11 @@ func withFileTypeID(id string) filetypeOption {
 		)
 		m.oldValue = func(ctx context.Context) (*FileType, error) {
 			once.Do(func() {
-				value, err = m.Client().FileType.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FileType.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -5093,6 +5118,7 @@ type GroupMutation struct {
 	removedusers   map[string]struct{}
 	info           *string
 	clearedinfo    bool
+	done           bool
 	oldValue       func(context.Context) (*Group, error)
 }
 
@@ -5125,7 +5151,11 @@ func withGroupID(id string) groupOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Group, error) {
 			once.Do(func() {
-				value, err = m.Client().Group.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Group.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -5924,6 +5954,7 @@ type GroupInfoMutation struct {
 	clearedFields map[string]struct{}
 	groups        map[string]struct{}
 	removedgroups map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*GroupInfo, error)
 }
 
@@ -5956,7 +5987,11 @@ func withGroupInfoID(id string) groupinfoOption {
 		)
 		m.oldValue = func(ctx context.Context) (*GroupInfo, error) {
 			once.Do(func() {
-				value, err = m.Client().GroupInfo.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GroupInfo.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -6369,6 +6404,7 @@ type ItemMutation struct {
 	typ           string
 	id            *string
 	clearedFields map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*Item, error)
 }
 
@@ -6401,7 +6437,11 @@ func withItemID(id string) itemOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Item, error) {
 			once.Do(func() {
-				value, err = m.Client().Item.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Item.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -6600,6 +6640,7 @@ type NodeMutation struct {
 	clearedprev   bool
 	next          *string
 	clearednext   bool
+	done          bool
 	oldValue      func(context.Context) (*Node, error)
 }
 
@@ -6632,7 +6673,11 @@ func withNodeID(id string) nodeOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Node, error) {
 			once.Do(func() {
-				value, err = m.Client().Node.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Node.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -7072,6 +7117,7 @@ type PetMutation struct {
 	clearedteam   bool
 	owner         *string
 	clearedowner  bool
+	done          bool
 	oldValue      func(context.Context) (*Pet, error)
 }
 
@@ -7104,7 +7150,11 @@ func withPetID(id string) petOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Pet, error) {
 			once.Do(func() {
-				value, err = m.Client().Pet.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Pet.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -7483,6 +7533,7 @@ type SpecMutation struct {
 	clearedFields map[string]struct{}
 	card          map[string]struct{}
 	removedcard   map[string]struct{}
+	done          bool
 	oldValue      func(context.Context) (*Spec, error)
 }
 
@@ -7515,7 +7566,11 @@ func withSpecID(id string) specOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Spec, error) {
 			once.Do(func() {
-				value, err = m.Client().Spec.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Spec.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -7814,6 +7869,7 @@ type UserMutation struct {
 	removedchildren  map[string]struct{}
 	parent           *string
 	clearedparent    bool
+	done             bool
 	oldValue         func(context.Context) (*User, error)
 }
 
@@ -7846,7 +7902,11 @@ func withUserID(id string) userOption {
 		)
 		m.oldValue = func(ctx context.Context) (*User, error) {
 			once.Do(func() {
-				value, err = m.Client().User.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().User.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

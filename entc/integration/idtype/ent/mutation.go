@@ -43,6 +43,7 @@ type UserMutation struct {
 	removedfollowers map[uint64]struct{}
 	following        map[uint64]struct{}
 	removedfollowing map[uint64]struct{}
+	done             bool
 	oldValue         func(context.Context) (*User, error)
 }
 
@@ -75,7 +76,11 @@ func withUserID(id uint64) userOption {
 		)
 		m.oldValue = func(ctx context.Context) (*User, error) {
 			once.Do(func() {
-				value, err = m.Client().User.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().User.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

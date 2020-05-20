@@ -42,6 +42,7 @@ type GalaxyMutation struct {
 	clearedFields  map[string]struct{}
 	planets        map[int]struct{}
 	removedplanets map[int]struct{}
+	done           bool
 	oldValue       func(context.Context) (*Galaxy, error)
 }
 
@@ -74,7 +75,11 @@ func withGalaxyID(id int) galaxyOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Galaxy, error) {
 			once.Do(func() {
-				value, err = m.Client().Galaxy.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Galaxy.Get(ctx, id)
+				}
 			})
 			return value, err
 		}
@@ -457,6 +462,7 @@ type PlanetMutation struct {
 	clearedFields    map[string]struct{}
 	neighbors        map[int]struct{}
 	removedneighbors map[int]struct{}
+	done             bool
 	oldValue         func(context.Context) (*Planet, error)
 }
 
@@ -489,7 +495,11 @@ func withPlanetID(id int) planetOption {
 		)
 		m.oldValue = func(ctx context.Context) (*Planet, error) {
 			once.Do(func() {
-				value, err = m.Client().Planet.Get(ctx, id)
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Planet.Get(ctx, id)
+				}
 			})
 			return value, err
 		}

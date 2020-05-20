@@ -47,6 +47,7 @@ func (sd *StreetDelete) Exec(ctx context.Context) (int, error) {
 			}
 			sd.mutation = mutation
 			affected, err = sd.sqlExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(sd.hooks) - 1; i >= 0; i-- {

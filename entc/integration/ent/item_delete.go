@@ -47,6 +47,7 @@ func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 			}
 			id.mutation = mutation
 			affected, err = id.sqlExec(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len(id.hooks) - 1; i >= 0; i-- {

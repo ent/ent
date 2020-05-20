@@ -57,7 +57,7 @@ func (Card) Hooks() []ent.Hook {
 					return next.Mutate(ctx, m)
 				})
 			},
-			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+			ent.OpCreate,
 		),
 		func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {

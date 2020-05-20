@@ -62,6 +62,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			}
 			{{ $mutation }} = mutation
 			affected, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+			mutation.done = true
 			return affected, err
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
@@ -139,6 +140,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			}
 			{{ $mutation }} = mutation
 			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {

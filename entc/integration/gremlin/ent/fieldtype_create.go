@@ -390,6 +390,7 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 			}
 			ftc.mutation = mutation
 			node, err = ftc.gremlinSave(ctx)
+			mutation.done = true
 			return node, err
 		})
 		for i := len(ftc.hooks) - 1; i >= 0; i-- {
