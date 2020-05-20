@@ -163,7 +163,9 @@ func (m *CardMutation) CreateTime() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreateTime returns the old create_time value, if exists.
+// OldCreateTime returns the old create_time value of the Card.
+// If the Card object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CardMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -198,7 +200,9 @@ func (m *CardMutation) UpdateTime() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdateTime returns the old update_time value, if exists.
+// OldUpdateTime returns the old update_time value of the Card.
+// If the Card object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CardMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -233,7 +237,9 @@ func (m *CardMutation) Number() (r string, exists bool) {
 	return *v, true
 }
 
-// OldNumber returns the old number value, if exists.
+// OldNumber returns the old number value of the Card.
+// If the Card object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CardMutation) OldNumber(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -268,7 +274,9 @@ func (m *CardMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Card.
+// If the Card object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CardMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -768,7 +776,9 @@ func (m *CommentMutation) UniqueInt() (r int, exists bool) {
 	return *v, true
 }
 
-// OldUniqueInt returns the old unique_int value, if exists.
+// OldUniqueInt returns the old unique_int value of the Comment.
+// If the Comment object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CommentMutation) OldUniqueInt(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -823,7 +833,9 @@ func (m *CommentMutation) UniqueFloat() (r float64, exists bool) {
 	return *v, true
 }
 
-// OldUniqueFloat returns the old unique_float value, if exists.
+// OldUniqueFloat returns the old unique_float value of the Comment.
+// If the Comment object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CommentMutation) OldUniqueFloat(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -878,7 +890,9 @@ func (m *CommentMutation) NillableInt() (r int, exists bool) {
 	return *v, true
 }
 
-// OldNillableInt returns the old nillable_int value, if exists.
+// OldNillableInt returns the old nillable_int value of the Comment.
+// If the Comment object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CommentMutation) OldNillableInt(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1334,7 +1348,9 @@ func (m *FieldTypeMutation) Int() (r int, exists bool) {
 	return *v, true
 }
 
-// OldInt returns the old int value, if exists.
+// OldInt returns the old int value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldInt(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1389,7 +1405,9 @@ func (m *FieldTypeMutation) Int8() (r int8, exists bool) {
 	return *v, true
 }
 
-// OldInt8 returns the old int8 value, if exists.
+// OldInt8 returns the old int8 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldInt8(ctx context.Context) (v int8, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1444,7 +1462,9 @@ func (m *FieldTypeMutation) Int16() (r int16, exists bool) {
 	return *v, true
 }
 
-// OldInt16 returns the old int16 value, if exists.
+// OldInt16 returns the old int16 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldInt16(ctx context.Context) (v int16, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1499,7 +1519,9 @@ func (m *FieldTypeMutation) Int32() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldInt32 returns the old int32 value, if exists.
+// OldInt32 returns the old int32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldInt32(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1554,7 +1576,9 @@ func (m *FieldTypeMutation) Int64() (r int64, exists bool) {
 	return *v, true
 }
 
-// OldInt64 returns the old int64 value, if exists.
+// OldInt64 returns the old int64 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldInt64(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1609,7 +1633,9 @@ func (m *FieldTypeMutation) OptionalInt() (r int, exists bool) {
 	return *v, true
 }
 
-// OldOptionalInt returns the old optional_int value, if exists.
+// OldOptionalInt returns the old optional_int value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalInt(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1678,7 +1704,9 @@ func (m *FieldTypeMutation) OptionalInt8() (r int8, exists bool) {
 	return *v, true
 }
 
-// OldOptionalInt8 returns the old optional_int8 value, if exists.
+// OldOptionalInt8 returns the old optional_int8 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalInt8(ctx context.Context) (v int8, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1747,7 +1775,9 @@ func (m *FieldTypeMutation) OptionalInt16() (r int16, exists bool) {
 	return *v, true
 }
 
-// OldOptionalInt16 returns the old optional_int16 value, if exists.
+// OldOptionalInt16 returns the old optional_int16 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalInt16(ctx context.Context) (v int16, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1816,7 +1846,9 @@ func (m *FieldTypeMutation) OptionalInt32() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldOptionalInt32 returns the old optional_int32 value, if exists.
+// OldOptionalInt32 returns the old optional_int32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalInt32(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1885,7 +1917,9 @@ func (m *FieldTypeMutation) OptionalInt64() (r int64, exists bool) {
 	return *v, true
 }
 
-// OldOptionalInt64 returns the old optional_int64 value, if exists.
+// OldOptionalInt64 returns the old optional_int64 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalInt64(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1954,7 +1988,9 @@ func (m *FieldTypeMutation) NillableInt() (r int, exists bool) {
 	return *v, true
 }
 
-// OldNillableInt returns the old nillable_int value, if exists.
+// OldNillableInt returns the old nillable_int value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldNillableInt(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2023,7 +2059,9 @@ func (m *FieldTypeMutation) NillableInt8() (r int8, exists bool) {
 	return *v, true
 }
 
-// OldNillableInt8 returns the old nillable_int8 value, if exists.
+// OldNillableInt8 returns the old nillable_int8 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldNillableInt8(ctx context.Context) (v *int8, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2092,7 +2130,9 @@ func (m *FieldTypeMutation) NillableInt16() (r int16, exists bool) {
 	return *v, true
 }
 
-// OldNillableInt16 returns the old nillable_int16 value, if exists.
+// OldNillableInt16 returns the old nillable_int16 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldNillableInt16(ctx context.Context) (v *int16, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2161,7 +2201,9 @@ func (m *FieldTypeMutation) NillableInt32() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldNillableInt32 returns the old nillable_int32 value, if exists.
+// OldNillableInt32 returns the old nillable_int32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldNillableInt32(ctx context.Context) (v *int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2230,7 +2272,9 @@ func (m *FieldTypeMutation) NillableInt64() (r int64, exists bool) {
 	return *v, true
 }
 
-// OldNillableInt64 returns the old nillable_int64 value, if exists.
+// OldNillableInt64 returns the old nillable_int64 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldNillableInt64(ctx context.Context) (v *int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2299,7 +2343,9 @@ func (m *FieldTypeMutation) ValidateOptionalInt32() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldValidateOptionalInt32 returns the old validate_optional_int32 value, if exists.
+// OldValidateOptionalInt32 returns the old validate_optional_int32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldValidateOptionalInt32(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2368,7 +2414,9 @@ func (m *FieldTypeMutation) OptionalUint() (r uint, exists bool) {
 	return *v, true
 }
 
-// OldOptionalUint returns the old optional_uint value, if exists.
+// OldOptionalUint returns the old optional_uint value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalUint(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2437,7 +2485,9 @@ func (m *FieldTypeMutation) OptionalUint8() (r uint8, exists bool) {
 	return *v, true
 }
 
-// OldOptionalUint8 returns the old optional_uint8 value, if exists.
+// OldOptionalUint8 returns the old optional_uint8 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalUint8(ctx context.Context) (v uint8, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2506,7 +2556,9 @@ func (m *FieldTypeMutation) OptionalUint16() (r uint16, exists bool) {
 	return *v, true
 }
 
-// OldOptionalUint16 returns the old optional_uint16 value, if exists.
+// OldOptionalUint16 returns the old optional_uint16 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalUint16(ctx context.Context) (v uint16, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2575,7 +2627,9 @@ func (m *FieldTypeMutation) OptionalUint32() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldOptionalUint32 returns the old optional_uint32 value, if exists.
+// OldOptionalUint32 returns the old optional_uint32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalUint32(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2644,7 +2698,9 @@ func (m *FieldTypeMutation) OptionalUint64() (r uint64, exists bool) {
 	return *v, true
 }
 
-// OldOptionalUint64 returns the old optional_uint64 value, if exists.
+// OldOptionalUint64 returns the old optional_uint64 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalUint64(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2712,7 +2768,9 @@ func (m *FieldTypeMutation) State() (r fieldtype.State, exists bool) {
 	return *v, true
 }
 
-// OldState returns the old state value, if exists.
+// OldState returns the old state value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldState(ctx context.Context) (v fieldtype.State, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2761,7 +2819,9 @@ func (m *FieldTypeMutation) OptionalFloat() (r float64, exists bool) {
 	return *v, true
 }
 
-// OldOptionalFloat returns the old optional_float value, if exists.
+// OldOptionalFloat returns the old optional_float value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalFloat(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2830,7 +2890,9 @@ func (m *FieldTypeMutation) OptionalFloat32() (r float32, exists bool) {
 	return *v, true
 }
 
-// OldOptionalFloat32 returns the old optional_float32 value, if exists.
+// OldOptionalFloat32 returns the old optional_float32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldOptionalFloat32(ctx context.Context) (v float32, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2898,7 +2960,9 @@ func (m *FieldTypeMutation) Datetime() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldDatetime returns the old datetime value, if exists.
+// OldDatetime returns the old datetime value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldDatetime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -2947,7 +3011,9 @@ func (m *FieldTypeMutation) Decimal() (r float64, exists bool) {
 	return *v, true
 }
 
-// OldDecimal returns the old decimal value, if exists.
+// OldDecimal returns the old decimal value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FieldTypeMutation) OldDecimal(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -4127,7 +4193,9 @@ func (m *FileMutation) Size() (r int, exists bool) {
 	return *v, true
 }
 
-// OldSize returns the old size value, if exists.
+// OldSize returns the old size value of the File.
+// If the File object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FileMutation) OldSize(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -4181,7 +4249,9 @@ func (m *FileMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the File.
+// If the File object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FileMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -4216,7 +4286,9 @@ func (m *FileMutation) User() (r string, exists bool) {
 	return *v, true
 }
 
-// OldUser returns the old user value, if exists.
+// OldUser returns the old user value of the File.
+// If the File object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FileMutation) OldUser(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -4264,7 +4336,9 @@ func (m *FileMutation) Group() (r string, exists bool) {
 	return *v, true
 }
 
-// OldGroup returns the old group value, if exists.
+// OldGroup returns the old group value of the File.
+// If the File object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FileMutation) OldGroup(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -4838,7 +4912,9 @@ func (m *FileTypeMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the FileType.
+// If the FileType object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *FileTypeMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -5215,7 +5291,9 @@ func (m *GroupMutation) Active() (r bool, exists bool) {
 	return *v, true
 }
 
-// OldActive returns the old active value, if exists.
+// OldActive returns the old active value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldActive(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -5250,7 +5328,9 @@ func (m *GroupMutation) Expire() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldExpire returns the old expire value, if exists.
+// OldExpire returns the old expire value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldExpire(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -5285,7 +5365,9 @@ func (m *GroupMutation) GetType() (r string, exists bool) {
 	return *v, true
 }
 
-// OldType returns the old type value, if exists.
+// OldType returns the old type value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldType(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -5334,7 +5416,9 @@ func (m *GroupMutation) MaxUsers() (r int, exists bool) {
 	return *v, true
 }
 
-// OldMaxUsers returns the old max_users value, if exists.
+// OldMaxUsers returns the old max_users value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldMaxUsers(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -5402,7 +5486,9 @@ func (m *GroupMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -6051,7 +6137,9 @@ func (m *GroupInfoMutation) Desc() (r string, exists bool) {
 	return *v, true
 }
 
-// OldDesc returns the old desc value, if exists.
+// OldDesc returns the old desc value of the GroupInfo.
+// If the GroupInfo object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupInfoMutation) OldDesc(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -6087,7 +6175,9 @@ func (m *GroupInfoMutation) MaxUsers() (r int, exists bool) {
 	return *v, true
 }
 
-// OldMaxUsers returns the old max_users value, if exists.
+// OldMaxUsers returns the old max_users value of the GroupInfo.
+// If the GroupInfo object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupInfoMutation) OldMaxUsers(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -6738,7 +6828,9 @@ func (m *NodeMutation) Value() (r int, exists bool) {
 	return *v, true
 }
 
-// OldValue returns the old value value, if exists.
+// OldValue returns the old value value of the Node.
+// If the Node object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *NodeMutation) OldValue(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -7214,7 +7306,9 @@ func (m *PetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Pet.
+// If the Pet object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -7967,7 +8061,9 @@ func (m *UserMutation) OptionalInt() (r int, exists bool) {
 	return *v, true
 }
 
-// OldOptionalInt returns the old optional_int value, if exists.
+// OldOptionalInt returns the old optional_int value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldOptionalInt(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8036,7 +8132,9 @@ func (m *UserMutation) Age() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old age value, if exists.
+// OldAge returns the old age value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldAge(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8090,7 +8188,9 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8125,7 +8225,9 @@ func (m *UserMutation) Last() (r string, exists bool) {
 	return *v, true
 }
 
-// OldLast returns the old last value, if exists.
+// OldLast returns the old last value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldLast(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8160,7 +8262,9 @@ func (m *UserMutation) Nickname() (r string, exists bool) {
 	return *v, true
 }
 
-// OldNickname returns the old nickname value, if exists.
+// OldNickname returns the old nickname value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldNickname(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8208,7 +8312,9 @@ func (m *UserMutation) Phone() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPhone returns the old phone value, if exists.
+// OldPhone returns the old phone value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldPhone(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8256,7 +8362,9 @@ func (m *UserMutation) Password() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPassword returns the old password value, if exists.
+// OldPassword returns the old password value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldPassword(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8304,7 +8412,9 @@ func (m *UserMutation) Role() (r user.Role, exists bool) {
 	return *v, true
 }
 
-// OldRole returns the old role value, if exists.
+// OldRole returns the old role value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldRole(ctx context.Context) (v user.Role, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -8339,7 +8449,9 @@ func (m *UserMutation) SSOCert() (r string, exists bool) {
 	return *v, true
 }
 
-// OldSSOCert returns the old SSOCert value, if exists.
+// OldSSOCert returns the old SSOCert value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldSSOCert(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {

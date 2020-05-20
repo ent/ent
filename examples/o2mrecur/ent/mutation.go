@@ -140,7 +140,9 @@ func (m *NodeMutation) Value() (r int, exists bool) {
 	return *v, true
 }
 
-// OldValue returns the old value value, if exists.
+// OldValue returns the old value value of the Node.
+// If the Node object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *NodeMutation) OldValue(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {

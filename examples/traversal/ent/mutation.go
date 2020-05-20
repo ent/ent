@@ -142,7 +142,9 @@ func (m *GroupMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -567,7 +569,9 @@ func (m *PetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Pet.
+// If the Pet object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -999,7 +1003,9 @@ func (m *UserMutation) Age() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old age value, if exists.
+// OldAge returns the old age value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldAge(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1053,7 +1059,9 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {

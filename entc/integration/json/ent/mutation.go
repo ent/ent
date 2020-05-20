@@ -142,7 +142,9 @@ func (m *UserMutation) URL() (r *url.URL, exists bool) {
 	return *v, true
 }
 
-// OldURL returns the old url value, if exists.
+// OldURL returns the old url value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldURL(ctx context.Context) (v *url.URL, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -190,7 +192,9 @@ func (m *UserMutation) Raw() (r json.RawMessage, exists bool) {
 	return *v, true
 }
 
-// OldRaw returns the old raw value, if exists.
+// OldRaw returns the old raw value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldRaw(ctx context.Context) (v json.RawMessage, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -238,7 +242,9 @@ func (m *UserMutation) Dirs() (r []http.Dir, exists bool) {
 	return *v, true
 }
 
-// OldDirs returns the old dirs value, if exists.
+// OldDirs returns the old dirs value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldDirs(ctx context.Context) (v []http.Dir, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -286,7 +292,9 @@ func (m *UserMutation) Ints() (r []int, exists bool) {
 	return *v, true
 }
 
-// OldInts returns the old ints value, if exists.
+// OldInts returns the old ints value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldInts(ctx context.Context) (v []int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -334,7 +342,9 @@ func (m *UserMutation) Floats() (r []float64, exists bool) {
 	return *v, true
 }
 
-// OldFloats returns the old floats value, if exists.
+// OldFloats returns the old floats value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldFloats(ctx context.Context) (v []float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -382,7 +392,9 @@ func (m *UserMutation) Strings() (r []string, exists bool) {
 	return *v, true
 }
 
-// OldStrings returns the old strings value, if exists.
+// OldStrings returns the old strings value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldStrings(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
