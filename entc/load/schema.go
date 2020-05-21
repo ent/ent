@@ -93,6 +93,9 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 
 // NewField creates an loaded field from field descriptor.
 func NewField(fd *field.Descriptor) (*Field, error) {
+	if err := fd.Err(); err != nil {
+		return nil, fmt.Errorf("field %q: %v", fd.Name, err)
+	}
 	sf := &Field{
 		Name:          fd.Name,
 		Info:          fd.Info,
@@ -119,12 +122,6 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	// For example, not a function like time.Now.
 	if _, err := json.Marshal(fd.Default); err == nil {
 		sf.DefaultValue = fd.Default
-	}
-	if fd.Info.Type == field.TypeUUID && fd.Default != nil {
-		typ := reflect.TypeOf(fd.Default)
-		if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != fd.Info.String() {
-			return nil, fmt.Errorf("expect type (func() %s) for uuid default value", fd.Info.String())
-		}
 	}
 	return sf, nil
 }

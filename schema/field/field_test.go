@@ -184,6 +184,11 @@ func TestField_UUID(t *testing.T) {
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)
 	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
+
+	fd = field.UUID("id", uuid.UUID{}).
+		Default(uuid.UUID{}).
+		Descriptor()
+	assert.EqualError(t, fd.Err(), "expect type (func() uuid.UUID) for uuid default value")
 }
 
 func TestTypeString(t *testing.T) {

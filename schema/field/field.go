@@ -7,6 +7,7 @@ package field
 import (
 	"database/sql/driver"
 	"errors"
+	"fmt"
 	"math"
 	"reflect"
 	"regexp"
@@ -30,6 +31,12 @@ type Descriptor struct {
 	Enums         []string          // enum values.
 	Sensitive     bool              // sensitive info string field.
 	SchemaType    map[string]string // override the schema type.
+	err           error
+}
+
+// Err returns the error, if any, that was added by the field builder.
+func (d *Descriptor) Err() error {
+	return d.err
 }
 
 // String returns a new Field with type string.
@@ -665,6 +672,10 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 //		Default(uuid.New)
 //
 func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
+	typ := reflect.TypeOf(fn)
+	if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String() {
+		b.desc.err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
+	}
 	b.desc.Default = fn
 	return b
 }
