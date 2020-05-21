@@ -6,12 +6,17 @@
 
 package user
 
+import (
+	"github.com/facebookincubator/ent"
+)
+
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name"
+	FieldID      = "id"      // FieldVersion holds the string denoting the version vertex property in the database.
+	FieldVersion = "version" // FieldName holds the string denoting the name vertex property in the database.
+	FieldName    = "name"
 
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"
@@ -40,6 +45,7 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldVersion,
 	FieldName,
 }
 
@@ -52,4 +58,16 @@ var (
 	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
 	// primary key for the friends relation (M2M).
 	FriendsPrimaryKey = []string{"user_id", "friend_id"}
+)
+
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
+//
+var (
+	Hooks [1]ent.Hook
+	// DefaultVersion holds the default value on creation for the version field.
+	DefaultVersion int
 )

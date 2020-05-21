@@ -198,7 +198,9 @@ func TestOldValues(t *testing.T) {
 			}
 			require.Equal(t, "a8m", name)
 			value, err := next.Mutate(ctx, m)
-			require.NoError(t, err)
+			if err != nil {
+				return nil, err
+			}
 			_, err = namer.OldName(ctx)
 			require.NoError(t, err)
 			return value, nil
@@ -221,7 +223,9 @@ func TestOldValues(t *testing.T) {
 			}
 			require.Equal(t, "a8m", name)
 			value, err := next.Mutate(ctx, m)
-			require.NoError(t, err)
+			if err != nil {
+				return nil, err
+			}
 			_, err = namer.OldName(ctx)
 			require.NoError(t, err)
 			return value, nil
@@ -229,6 +233,8 @@ func TestOldValues(t *testing.T) {
 	}, ent.OpUpdateOne))
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
-	a8m = client.User.UpdateOne(a8m).SetName("Ariel").SaveX(ctx)
+	_, err := client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version).Save(ctx)
+	require.EqualError(t, err, "version field must be incremented by 1")
+	a8m = client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version + 1).SaveX(ctx)
 	require.Equal(t, "Ariel", a8m.Name)
 }

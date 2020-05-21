@@ -11,6 +11,7 @@ import (
 
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/hooks/ent/schema"
+	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
 
 	"github.com/facebookincubator/ent"
 )
@@ -37,6 +38,16 @@ func init() {
 	cardDescCreatedAt := cardFields[2].Descriptor()
 	// card.DefaultCreatedAt holds the default value on creation for the created_at field.
 	card.DefaultCreatedAt = cardDescCreatedAt.Default.(func() time.Time)
+	userMixin := schema.User{}.Mixin()
+	userMixinHooks0 := userMixin[0].(interface{ Hooks() []ent.Hook }).Hooks()
+	user.Hooks[0] = userMixinHooks0[0]
+	userMixinFields0 := userMixin[0].Fields()
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescVersion is the schema descriptor for version field.
+	userDescVersion := userMixinFields0[0].Descriptor()
+	// user.DefaultVersion holds the default value on creation for the version field.
+	user.DefaultVersion = userDescVersion.Default.(int)
 }
 
 const (
