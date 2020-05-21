@@ -168,7 +168,7 @@ func TestMarshalFails(t *testing.T) {
 	i2 := InvalidUUID{}
 	buf, err = MarshalSchema(i2)
 	require.Nil(t, buf)
-	require.EqualError(t, err, `schema "InvalidUUID": expect type (func() uuid.UUID) for uuid default value`)
+	require.EqualError(t, err, `schema "InvalidUUID": field "invalid": expect type (func() uuid.UUID) for uuid default value`)
 }
 
 type WithDefaults struct {
