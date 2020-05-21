@@ -153,7 +153,9 @@ func (m *BlobMutation) UUID() (r uuid.UUID, exists bool) {
 	return *v, true
 }
 
-// OldUUID returns the old uuid value, if exists.
+// OldUUID returns the old uuid value of the Blob.
+// If the Blob object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *BlobMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -576,7 +578,9 @@ func (m *CarMutation) Model() (r string, exists bool) {
 	return *v, true
 }
 
-// OldModel returns the old model value, if exists.
+// OldModel returns the old model value of the Car.
+// If the Car object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *CarMutation) OldModel(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {

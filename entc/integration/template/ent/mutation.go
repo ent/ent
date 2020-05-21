@@ -141,7 +141,9 @@ func (m *GroupMutation) MaxUsers() (r int, exists bool) {
 	return *v, true
 }
 
-// OldMaxUsers returns the old max_users value, if exists.
+// OldMaxUsers returns the old max_users value of the Group.
+// If the Group object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GroupMutation) OldMaxUsers(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -471,7 +473,9 @@ func (m *PetMutation) Age() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old age value, if exists.
+// OldAge returns the old age value of the Pet.
+// If the Pet object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *PetMutation) OldAge(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -525,7 +529,9 @@ func (m *PetMutation) LicensedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldLicensedAt returns the old licensed_at value, if exists.
+// OldLicensedAt returns the old licensed_at value of the Pet.
+// If the Pet object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *PetMutation) OldLicensedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -941,7 +947,9 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {

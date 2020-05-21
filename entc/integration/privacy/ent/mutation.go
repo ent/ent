@@ -139,7 +139,9 @@ func (m *GalaxyMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Galaxy.
+// If the Galaxy object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GalaxyMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -174,7 +176,9 @@ func (m *GalaxyMutation) GetType() (r galaxy.Type, exists bool) {
 	return *v, true
 }
 
-// OldType returns the old type value, if exists.
+// OldType returns the old type value of the Galaxy.
+// If the Galaxy object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *GalaxyMutation) OldType(ctx context.Context) (v galaxy.Type, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -559,7 +563,9 @@ func (m *PlanetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the Planet.
+// If the Planet object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *PlanetMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -595,7 +601,9 @@ func (m *PlanetMutation) Age() (r uint, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old age value, if exists.
+// OldAge returns the old age value of the Planet.
+// If the Planet object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *PlanetMutation) OldAge(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {

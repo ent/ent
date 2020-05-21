@@ -175,7 +175,9 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		return *v, true
 	}
 
-	// {{ $f.MutationGetOld }} returns the old {{ $f.Name }} value, if exists.
+	// {{ $f.MutationGetOld }} returns the old {{ $f.Name }} value of the {{ $n.Name }}.
+	// If the {{ $n.Name }} object wasn't provided to the builder, the object is fetched
+	// from the database.
 	// An error is returned if the mutation operation is not UpdateOne, or database query fails.
 	func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}, err error) {
 		if !m.op.Is(OpUpdateOne) {

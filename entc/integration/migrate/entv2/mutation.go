@@ -917,7 +917,9 @@ func (m *UserMutation) Age() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old age value, if exists.
+// OldAge returns the old age value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldAge(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -971,7 +973,9 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value, if exists.
+// OldName returns the old name value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1006,7 +1010,9 @@ func (m *UserMutation) Nickname() (r string, exists bool) {
 	return *v, true
 }
 
-// OldNickname returns the old nickname value, if exists.
+// OldNickname returns the old nickname value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldNickname(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1041,7 +1047,9 @@ func (m *UserMutation) Phone() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPhone returns the old phone value, if exists.
+// OldPhone returns the old phone value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldPhone(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1076,7 +1084,9 @@ func (m *UserMutation) Buffer() (r []byte, exists bool) {
 	return *v, true
 }
 
-// OldBuffer returns the old buffer value, if exists.
+// OldBuffer returns the old buffer value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldBuffer(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1124,7 +1134,9 @@ func (m *UserMutation) Title() (r string, exists bool) {
 	return *v, true
 }
 
-// OldTitle returns the old title value, if exists.
+// OldTitle returns the old title value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldTitle(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1159,7 +1171,9 @@ func (m *UserMutation) NewName() (r string, exists bool) {
 	return *v, true
 }
 
-// OldNewName returns the old new_name value, if exists.
+// OldNewName returns the old new_name value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldNewName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1207,7 +1221,9 @@ func (m *UserMutation) Blob() (r []byte, exists bool) {
 	return *v, true
 }
 
-// OldBlob returns the old blob value, if exists.
+// OldBlob returns the old blob value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldBlob(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
@@ -1255,7 +1271,9 @@ func (m *UserMutation) State() (r user.State, exists bool) {
 	return *v, true
 }
 
-// OldState returns the old state value, if exists.
+// OldState returns the old state value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
 func (m *UserMutation) OldState(ctx context.Context) (v user.State, err error) {
 	if !m.op.Is(OpUpdateOne) {
