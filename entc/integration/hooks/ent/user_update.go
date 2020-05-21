@@ -32,6 +32,27 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
+// SetVersion sets the version field.
+func (uu *UserUpdate) SetVersion(i int) *UserUpdate {
+	uu.mutation.ResetVersion()
+	uu.mutation.SetVersion(i)
+	return uu
+}
+
+// SetNillableVersion sets the version field if the given value is not nil.
+func (uu *UserUpdate) SetNillableVersion(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetVersion(*i)
+	}
+	return uu
+}
+
+// AddVersion adds i to version.
+func (uu *UserUpdate) AddVersion(i int) *UserUpdate {
+	uu.mutation.AddVersion(i)
+	return uu
+}
+
 // SetName sets the name field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
@@ -193,6 +214,20 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := uu.mutation.Version(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldVersion,
+		})
+	}
+	if value, ok := uu.mutation.AddedVersion(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldVersion,
+		})
+	}
 	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -327,6 +362,27 @@ type UserUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *UserMutation
+}
+
+// SetVersion sets the version field.
+func (uuo *UserUpdateOne) SetVersion(i int) *UserUpdateOne {
+	uuo.mutation.ResetVersion()
+	uuo.mutation.SetVersion(i)
+	return uuo
+}
+
+// SetNillableVersion sets the version field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableVersion(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetVersion(*i)
+	}
+	return uuo
+}
+
+// AddVersion adds i to version.
+func (uuo *UserUpdateOne) AddVersion(i int) *UserUpdateOne {
+	uuo.mutation.AddVersion(i)
+	return uuo
 }
 
 // SetName sets the name field.
@@ -488,6 +544,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, fmt.Errorf("missing User.ID for update")
 	}
 	_spec.Node.ID.Value = id
+	if value, ok := uuo.mutation.Version(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldVersion,
+		})
+	}
+	if value, ok := uuo.mutation.AddedVersion(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldVersion,
+		})
+	}
 	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

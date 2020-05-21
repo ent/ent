@@ -24,6 +24,20 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
+// SetVersion sets the version field.
+func (uc *UserCreate) SetVersion(i int) *UserCreate {
+	uc.mutation.SetVersion(i)
+	return uc
+}
+
+// SetNillableVersion sets the version field if the given value is not nil.
+func (uc *UserCreate) SetNillableVersion(i *int) *UserCreate {
+	if i != nil {
+		uc.SetVersion(*i)
+	}
+	return uc
+}
+
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
@@ -81,6 +95,10 @@ func (uc *UserCreate) SetBestFriend(u *User) *UserCreate {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _, ok := uc.mutation.Version(); !ok {
+		v := user.DefaultVersion
+		uc.mutation.SetVersion(v)
+	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return nil, errors.New("ent: missing required field \"name\"")
 	}
@@ -131,6 +149,14 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			},
 		}
 	)
+	if value, ok := uc.mutation.Version(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldVersion,
+		})
+		u.Version = value
+	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

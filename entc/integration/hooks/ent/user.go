@@ -19,6 +19,8 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Version holds the value of the "version" field.
+	Version int `json:"version,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -76,6 +78,7 @@ func (e UserEdges) BestFriendOrErr() (*User, error) {
 func (*User) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
+		&sql.NullInt64{},  // version
 		&sql.NullString{}, // name
 	}
 }
@@ -99,12 +102,17 @@ func (u *User) assignValues(values ...interface{}) error {
 	}
 	u.ID = int(value.Int64)
 	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
+	if value, ok := values[0].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field version", values[0])
+	} else if value.Valid {
+		u.Version = int(value.Int64)
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[1])
 	} else if value.Valid {
 		u.Name = value.String
 	}
-	values = values[1:]
+	values = values[2:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_best_friend", value)
@@ -154,6 +162,8 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", version=")
+	builder.WriteString(fmt.Sprintf("%v", u.Version))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
 	builder.WriteByte(')')
