@@ -122,10 +122,11 @@ func NameIn(vs ...string) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -139,10 +140,11 @@ func NameNotIn(vs ...string) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -233,10 +235,11 @@ func TypeIn(vs ...Type) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -250,10 +253,11 @@ func TypeNotIn(vs ...Type) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

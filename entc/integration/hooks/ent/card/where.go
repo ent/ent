@@ -138,10 +138,11 @@ func NumberIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -155,10 +156,11 @@ func NumberNotIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -249,10 +251,11 @@ func NameIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -266,10 +269,11 @@ func NameNotIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -374,10 +378,11 @@ func CreatedAtIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -391,10 +396,11 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

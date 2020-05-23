@@ -131,10 +131,11 @@ func ModelIn(vs ...string) predicate.Car {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Car(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -148,10 +149,11 @@ func ModelNotIn(vs ...string) predicate.Car {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Car(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -242,10 +244,11 @@ func RegisteredAtIn(vs ...time.Time) predicate.Car {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Car(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -259,10 +262,11 @@ func RegisteredAtNotIn(vs ...time.Time) predicate.Car {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Car(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

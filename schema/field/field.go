@@ -5,6 +5,7 @@
 package field
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
@@ -13,31 +14,6 @@ import (
 	"regexp"
 	"time"
 )
-
-// A Descriptor for field configuration.
-type Descriptor struct {
-	Tag           string            // struct tag.
-	Size          int               // varchar size.
-	Name          string            // field name.
-	Info          *TypeInfo         // field type info.
-	Unique        bool              // unique index of field.
-	Nillable      bool              // nillable struct field.
-	Optional      bool              // nullable field in database.
-	Immutable     bool              // create-only field.
-	Default       interface{}       // default value on create.
-	UpdateDefault interface{}       // default value on update.
-	Validators    []interface{}     // validator functions.
-	StorageKey    string            // sql column or gremlin property.
-	Enums         []string          // enum values.
-	Sensitive     bool              // sensitive info string field.
-	SchemaType    map[string]string // override the schema type.
-	err           error
-}
-
-// Err returns the error, if any, that was added by the field builder.
-func (d *Descriptor) Err() error {
-	return d.err
-}
 
 // String returns a new Field with type string.
 func String(name string) *stringBuilder {
@@ -277,6 +253,16 @@ func (b *stringBuilder) StorageKey(key string) *stringBuilder {
 //
 func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.String("dir").
+//		GoType(http.Dir("dir"))
+//
+func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
+	b.desc.goType(typ, reflect.String)
 	return b
 }
 
@@ -696,4 +682,87 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+// A Descriptor for field configuration.
+type Descriptor struct {
+	Tag           string            // struct tag.
+	Size          int               // varchar size.
+	Name          string            // field name.
+	Info          *TypeInfo         // field type info.
+	Unique        bool              // unique index of field.
+	Nillable      bool              // nillable struct field.
+	Optional      bool              // nullable field in database.
+	Immutable     bool              // create-only field.
+	Default       interface{}       // default value on create.
+	UpdateDefault interface{}       // default value on update.
+	Validators    []interface{}     // validator functions.
+	StorageKey    string            // sql column or gremlin property.
+	Enums         []string          // enum values.
+	Sensitive     bool              // sensitive info string field.
+	SchemaType    map[string]string // override the schema type.
+	err           error
+}
+
+// Err returns the error, if any, that was added by the field builder.
+func (d *Descriptor) Err() error {
+	return d.err
+}
+
+func (d *Descriptor) goType(typ interface{}, expectKind reflect.Kind) {
+	t := reflect.TypeOf(typ)
+	tv := indirect(t)
+	info := &TypeInfo{
+		Type:    TypeString,
+		Ident:   t.String(),
+		PkgPath: tv.PkgPath(),
+		RType: &RType{
+			Name:    tv.Name(),
+			Kind:    tv.Kind(),
+			PkgPath: tv.PkgPath(),
+			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
+		},
+	}
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		info.Nillable = true
+	}
+	switch {
+	case tv.Kind() == expectKind:
+	case t.Implements(valueScannerType):
+		n := t.NumMethod()
+		for i := 0; i < n; i++ {
+			m := t.Method(i)
+			in := make([]*RType, m.Type.NumIn()-1)
+			for j := range in {
+				arg := m.Type.In(j + 1)
+				in[j] = &RType{Name: arg.Name(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
+			}
+			out := make([]*RType, m.Type.NumOut())
+			for j := range out {
+				ret := m.Type.Out(j)
+				out[j] = &RType{Name: ret.Name(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
+			}
+			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
+		}
+	default:
+		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectKind)
+	}
+	d.Info = info
+}
+
+var valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
+
+// ValueScanner is the interface that groups the Value and the Scan methods.
+type ValueScanner interface {
+	driver.Valuer
+	sql.Scanner
+}
+
+// indirect returns the type at the end of indirection.
+func indirect(t reflect.Type) reflect.Type {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
 }

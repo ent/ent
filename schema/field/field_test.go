@@ -5,7 +5,10 @@
 package field_test
 
 import (
+	"database/sql"
 	"net/http"
+	"net/url"
+	"reflect"
 	"regexp"
 	"testing"
 	"time"
@@ -101,6 +104,48 @@ func TestString(t *testing.T) {
 	assert.True(t, fd.Unique)
 	assert.Len(t, fd.Validators, 2)
 	assert.True(t, fd.Sensitive)
+
+	fd = field.String("name").GoType(http.Dir("dir")).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "http.Dir", fd.Info.Ident)
+	assert.Equal(t, "net/http", fd.Info.PkgPath)
+	assert.Equal(t, "http.Dir", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+
+	fd = field.String("name").GoType(http.MethodOptions).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "string", fd.Info.Ident)
+	assert.Equal(t, "", fd.Info.PkgPath)
+	assert.Equal(t, "string", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+
+	fd = field.String("nullable_name").GoType(&sql.NullString{}).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "*sql.NullString", fd.Info.Ident)
+	assert.Equal(t, "database/sql", fd.Info.PkgPath)
+	assert.Equal(t, "*sql.NullString", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+	assert.False(t, fd.Info.Stringer())
+	assert.True(t, fd.Info.RType.TypeEqual(reflect.TypeOf(sql.NullString{})))
+	assert.True(t, fd.Info.RType.TypeEqual(reflect.TypeOf(&sql.NullString{})))
+
+	type tURL struct {
+		field.ValueScanner
+		*url.URL
+	}
+	fd = field.String("nullable_url").GoType(&tURL{}).Descriptor()
+	assert.Equal(t, "*field_test.tURL", fd.Info.Ident)
+	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "*field_test.tURL", fd.Info.String())
+	assert.True(t, fd.Info.ValueScanner())
+	assert.True(t, fd.Info.Stringer())
+
+	fd = field.String("name").GoType(1).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.String("name").GoType(struct{}{}).Descriptor()
+	assert.Error(t, fd.Err())
 }
 
 func TestTime(t *testing.T) {

@@ -5,6 +5,7 @@
 package gen
 
 import (
+	"database/sql"
 	"fmt"
 	"go/token"
 	"go/types"
@@ -698,7 +699,7 @@ func (f Field) NullTypeField(rec string) string {
 	case field.TypeEnum:
 		return fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
-		return fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.String()))
+		return fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String()))
 	case field.TypeTime:
 		return fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
@@ -766,12 +767,56 @@ func (f Field) PK() *schema.Column {
 }
 
 // StorageKey returns the storage name of the field.
-// SQL columns or Gremlin property.
+// SQL column or Gremlin property.
 func (f Field) StorageKey() string {
 	if f.def != nil && f.def.StorageKey != "" {
 		return f.def.StorageKey
 	}
 	return snake(f.Name)
+}
+
+// HasGoType indicate if a basic field (like string or bool)
+// has a custom GoType.
+func (f Field) HasGoType() bool {
+	return f.Type != nil && f.Type.RType != nil
+}
+
+var (
+	nullInt64Type  = reflect.TypeOf(sql.NullInt64{})
+	nullStringType = reflect.TypeOf(sql.NullString{})
+)
+
+// BasicType returns a Go expression for the given identifier
+// to convert it to a basic type. For example:
+//
+//	v (http.Dir)			=> string(v)
+//	v (fmt.Stringer)		=> v.String()
+//	v (database/sql.NullString)	=> v.String
+//
+func (f Field) BasicType(ident string) (expr string) {
+	if !f.HasGoType() {
+		return ident
+	}
+	t, rt := f.Type, f.Type.RType
+	switch t.Type {
+	case field.TypeInt64:
+		switch {
+		case rt.Kind == reflect.Int64:
+			expr = fmt.Sprintf("int64(%s)", ident)
+		case rt.TypeEqual(nullInt64Type):
+			expr = fmt.Sprintf("%s.Int64", ident)
+		}
+	case field.TypeString:
+		switch {
+		case rt.Kind == reflect.String:
+			expr = fmt.Sprintf("string(%s)", ident)
+		case t.Stringer():
+			expr = fmt.Sprintf("%s.String()", ident)
+		case rt.TypeEqual(nullStringType):
+			expr = fmt.Sprintf("%s.String", ident)
+		}
+	}
+	return
 }
 
 // Label returns the Gremlin label name of the edge.

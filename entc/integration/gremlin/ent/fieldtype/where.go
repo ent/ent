@@ -281,6 +281,7 @@ func IntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt, p.Within(v...))
 	})
@@ -292,6 +293,7 @@ func IntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt, p.Without(v...))
 	})
@@ -345,6 +347,7 @@ func Int8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt8, p.Within(v...))
 	})
@@ -356,6 +359,7 @@ func Int8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt8, p.Without(v...))
 	})
@@ -409,6 +413,7 @@ func Int16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt16, p.Within(v...))
 	})
@@ -420,6 +425,7 @@ func Int16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt16, p.Without(v...))
 	})
@@ -473,6 +479,7 @@ func Int32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt32, p.Within(v...))
 	})
@@ -484,6 +491,7 @@ func Int32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt32, p.Without(v...))
 	})
@@ -537,6 +545,7 @@ func Int64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt64, p.Within(v...))
 	})
@@ -548,6 +557,7 @@ func Int64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldInt64, p.Without(v...))
 	})
@@ -601,6 +611,7 @@ func OptionalIntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt, p.Within(v...))
 	})
@@ -612,6 +623,7 @@ func OptionalIntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt, p.Without(v...))
 	})
@@ -679,6 +691,7 @@ func OptionalInt8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt8, p.Within(v...))
 	})
@@ -690,6 +703,7 @@ func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt8, p.Without(v...))
 	})
@@ -757,6 +771,7 @@ func OptionalInt16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt16, p.Within(v...))
 	})
@@ -768,6 +783,7 @@ func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt16, p.Without(v...))
 	})
@@ -835,6 +851,7 @@ func OptionalInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt32, p.Within(v...))
 	})
@@ -846,6 +863,7 @@ func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt32, p.Without(v...))
 	})
@@ -913,6 +931,7 @@ func OptionalInt64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt64, p.Within(v...))
 	})
@@ -924,6 +943,7 @@ func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt64, p.Without(v...))
 	})
@@ -991,6 +1011,7 @@ func NillableIntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt, p.Within(v...))
 	})
@@ -1002,6 +1023,7 @@ func NillableIntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt, p.Without(v...))
 	})
@@ -1069,6 +1091,7 @@ func NillableInt8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt8, p.Within(v...))
 	})
@@ -1080,6 +1103,7 @@ func NillableInt8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt8, p.Without(v...))
 	})
@@ -1147,6 +1171,7 @@ func NillableInt16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt16, p.Within(v...))
 	})
@@ -1158,6 +1183,7 @@ func NillableInt16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt16, p.Without(v...))
 	})
@@ -1225,6 +1251,7 @@ func NillableInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt32, p.Within(v...))
 	})
@@ -1236,6 +1263,7 @@ func NillableInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt32, p.Without(v...))
 	})
@@ -1303,6 +1331,7 @@ func NillableInt64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt64, p.Within(v...))
 	})
@@ -1314,6 +1343,7 @@ func NillableInt64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt64, p.Without(v...))
 	})
@@ -1381,6 +1411,7 @@ func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldValidateOptionalInt32, p.Within(v...))
 	})
@@ -1392,6 +1423,7 @@ func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldValidateOptionalInt32, p.Without(v...))
 	})
@@ -1459,6 +1491,7 @@ func OptionalUintIn(vs ...uint) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint, p.Within(v...))
 	})
@@ -1470,6 +1503,7 @@ func OptionalUintNotIn(vs ...uint) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint, p.Without(v...))
 	})
@@ -1537,6 +1571,7 @@ func OptionalUint8In(vs ...uint8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint8, p.Within(v...))
 	})
@@ -1548,6 +1583,7 @@ func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint8, p.Without(v...))
 	})
@@ -1615,6 +1651,7 @@ func OptionalUint16In(vs ...uint16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint16, p.Within(v...))
 	})
@@ -1626,6 +1663,7 @@ func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint16, p.Without(v...))
 	})
@@ -1693,6 +1731,7 @@ func OptionalUint32In(vs ...uint32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint32, p.Within(v...))
 	})
@@ -1704,6 +1743,7 @@ func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint32, p.Without(v...))
 	})
@@ -1771,6 +1811,7 @@ func OptionalUint64In(vs ...uint64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint64, p.Within(v...))
 	})
@@ -1782,6 +1823,7 @@ func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalUint64, p.Without(v...))
 	})
@@ -1849,6 +1891,7 @@ func StateIn(vs ...State) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldState, p.Within(v...))
 	})
@@ -1860,6 +1903,7 @@ func StateNotIn(vs ...State) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldState, p.Without(v...))
 	})
@@ -1899,6 +1943,7 @@ func OptionalFloatIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalFloat, p.Within(v...))
 	})
@@ -1910,6 +1955,7 @@ func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalFloat, p.Without(v...))
 	})
@@ -1977,6 +2023,7 @@ func OptionalFloat32In(vs ...float32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalFloat32, p.Within(v...))
 	})
@@ -1988,6 +2035,7 @@ func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalFloat32, p.Without(v...))
 	})
@@ -2055,6 +2103,7 @@ func DatetimeIn(vs ...time.Time) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDatetime, p.Within(v...))
 	})
@@ -2066,6 +2115,7 @@ func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDatetime, p.Without(v...))
 	})
@@ -2133,6 +2183,7 @@ func DecimalIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDecimal, p.Within(v...))
 	})
@@ -2144,6 +2195,7 @@ func DecimalNotIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDecimal, p.Without(v...))
 	})
