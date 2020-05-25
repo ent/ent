@@ -40,7 +40,8 @@ const (
 	FieldOptionalFloat         = "optional_float"          // FieldOptionalFloat32 holds the string denoting the optional_float32 vertex property in the database.
 	FieldOptionalFloat32       = "optional_float32"        // FieldDatetime holds the string denoting the datetime vertex property in the database.
 	FieldDatetime              = "datetime"                // FieldDecimal holds the string denoting the decimal vertex property in the database.
-	FieldDecimal               = "decimal"
+	FieldDecimal               = "decimal"                 // FieldDir holds the string denoting the dir vertex property in the database.
+	FieldDir                   = "dir"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -75,6 +76,7 @@ var Columns = []string{
 	FieldOptionalFloat32,
 	FieldDatetime,
 	FieldDecimal,
+	FieldDir,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.

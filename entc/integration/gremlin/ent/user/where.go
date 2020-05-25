@@ -160,7 +160,6 @@ func OptionalIntIn(vs ...int) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt, p.Within(v...))
 	})
@@ -172,7 +171,6 @@ func OptionalIntNotIn(vs ...int) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOptionalInt, p.Without(v...))
 	})
@@ -240,7 +238,6 @@ func AgeIn(vs ...int) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldAge, p.Within(v...))
 	})
@@ -252,7 +249,6 @@ func AgeNotIn(vs ...int) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldAge, p.Without(v...))
 	})
@@ -306,7 +302,6 @@ func NameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Within(v...))
 	})
@@ -318,7 +313,6 @@ func NameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Without(v...))
 	})
@@ -393,7 +387,6 @@ func LastIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldLast, p.Within(v...))
 	})
@@ -405,7 +398,6 @@ func LastNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldLast, p.Without(v...))
 	})
@@ -480,7 +472,6 @@ func NicknameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.Within(v...))
 	})
@@ -492,7 +483,6 @@ func NicknameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.Without(v...))
 	})
@@ -581,7 +571,6 @@ func PhoneIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPhone, p.Within(v...))
 	})
@@ -593,7 +582,6 @@ func PhoneNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPhone, p.Without(v...))
 	})
@@ -682,7 +670,6 @@ func PasswordIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPassword, p.Within(v...))
 	})
@@ -694,7 +681,6 @@ func PasswordNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPassword, p.Without(v...))
 	})
@@ -783,7 +769,6 @@ func RoleIn(vs ...Role) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldRole, p.Within(v...))
 	})
@@ -795,7 +780,6 @@ func RoleNotIn(vs ...Role) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldRole, p.Without(v...))
 	})
@@ -821,7 +805,6 @@ func SSOCertIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldSSOCert, p.Within(v...))
 	})
@@ -833,7 +816,6 @@ func SSOCertNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldSSOCert, p.Without(v...))
 	})

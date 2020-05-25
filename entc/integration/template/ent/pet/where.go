@@ -131,7 +131,6 @@ func AgeIn(vs ...int) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -149,7 +148,6 @@ func AgeNotIn(vs ...int) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -209,7 +207,6 @@ func LicensedAtIn(vs ...time.Time) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -227,7 +224,6 @@ func LicensedAtNotIn(vs ...time.Time) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

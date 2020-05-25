@@ -45,7 +45,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
 			{{- if $f.HasGoType }}
 				vc := {{ $f.BasicType "v" }}
-                {{ $arg = "vc" }}
+                {{- $arg = "vc" }}
             {{- end }}
 			return predicate.{{ $.Name }}(
 				{{- with extend $ "Arg" $arg "Field" $f -}}
@@ -73,10 +73,10 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 			for i := range v {
 				v[i] = {{ $arg }}[i]
 			}
-			{{ $arg = "v" }}
+			{{- $arg = "v" }}
 		{{- else if and (not $op.Niladic) $f.HasGoType }}
 			vc := {{ $f.BasicType "v" }}
-			{{ $arg = "vc" }}
+			{{- $arg = "vc" }}
 		{{- end }}
 		return predicate.{{ $.Name }}(
 			{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}

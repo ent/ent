@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -650,6 +651,26 @@ func (ftu *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDir sets the dir field.
+func (ftu *FieldTypeUpdate) SetDir(h http.Dir) *FieldTypeUpdate {
+	ftu.mutation.SetDir(h)
+	return ftu
+}
+
+// SetNillableDir sets the dir field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDir(h *http.Dir) *FieldTypeUpdate {
+	if h != nil {
+		ftu.SetDir(*h)
+	}
+	return ftu
+}
+
+// ClearDir clears the value of dir.
+func (ftu *FieldTypeUpdate) ClearDir() *FieldTypeUpdate {
+	ftu.mutation.ClearDir()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1203,6 +1224,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Column: fieldtype.FieldDecimal,
+		})
+	}
+	if value, ok := ftu.mutation.Dir(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldDir,
+		})
+	}
+	if ftu.mutation.DirCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldDir,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -1841,6 +1875,26 @@ func (ftuo *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetDir sets the dir field.
+func (ftuo *FieldTypeUpdateOne) SetDir(h http.Dir) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDir(h)
+	return ftuo
+}
+
+// SetNillableDir sets the dir field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDir(h *http.Dir) *FieldTypeUpdateOne {
+	if h != nil {
+		ftuo.SetDir(*h)
+	}
+	return ftuo
+}
+
+// ClearDir clears the value of dir.
+func (ftuo *FieldTypeUpdateOne) ClearDir() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDir()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2392,6 +2446,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Column: fieldtype.FieldDecimal,
+		})
+	}
+	if value, ok := ftuo.mutation.Dir(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldDir,
+		})
+	}
+	if ftuo.mutation.DirCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldDir,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

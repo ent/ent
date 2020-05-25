@@ -122,7 +122,6 @@ func NameIn(vs ...string) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -140,7 +139,6 @@ func NameNotIn(vs ...string) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -235,7 +233,6 @@ func TypeIn(vs ...Type) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -253,7 +250,6 @@ func TypeNotIn(vs ...Type) predicate.Galaxy {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Galaxy(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

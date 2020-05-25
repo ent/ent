@@ -135,7 +135,6 @@ func UniqueIntIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -153,7 +152,6 @@ func UniqueIntNotIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -213,7 +211,6 @@ func UniqueFloatIn(vs ...float64) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -231,7 +228,6 @@ func UniqueFloatNotIn(vs ...float64) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -291,7 +287,6 @@ func NillableIntIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -309,7 +304,6 @@ func NillableIntNotIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

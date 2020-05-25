@@ -145,7 +145,6 @@ func CreateTimeIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -163,7 +162,6 @@ func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -223,7 +221,6 @@ func UpdateTimeIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -241,7 +238,6 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -301,7 +297,6 @@ func NumberIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -319,7 +314,6 @@ func NumberNotIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -414,7 +408,6 @@ func NameIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -432,7 +425,6 @@ func NameNotIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Card(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

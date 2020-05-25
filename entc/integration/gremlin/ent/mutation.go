@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
@@ -1249,6 +1250,7 @@ type FieldTypeMutation struct {
 	datetime                   *time.Time
 	decimal                    *float64
 	adddecimal                 *float64
+	dir                        *http.Dir
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -3067,6 +3069,56 @@ func (m *FieldTypeMutation) ResetDecimal() {
 	delete(m.clearedFields, fieldtype.FieldDecimal)
 }
 
+// SetDir sets the dir field.
+func (m *FieldTypeMutation) SetDir(h http.Dir) {
+	m.dir = &h
+}
+
+// Dir returns the dir value in the mutation.
+func (m *FieldTypeMutation) Dir() (r http.Dir, exists bool) {
+	v := m.dir
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDir returns the old dir value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldDir(ctx context.Context) (v http.Dir, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDir is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDir requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDir: %w", err)
+	}
+	return oldValue.Dir, nil
+}
+
+// ClearDir clears the value of dir.
+func (m *FieldTypeMutation) ClearDir() {
+	m.dir = nil
+	m.clearedFields[fieldtype.FieldDir] = struct{}{}
+}
+
+// DirCleared returns if the field dir was cleared in this mutation.
+func (m *FieldTypeMutation) DirCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldDir]
+	return ok
+}
+
+// ResetDir reset all changes of the "dir" field.
+func (m *FieldTypeMutation) ResetDir() {
+	m.dir = nil
+	delete(m.clearedFields, fieldtype.FieldDir)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -3081,7 +3133,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 26)
+	fields := make([]string, 0, 27)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -3160,6 +3212,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.decimal != nil {
 		fields = append(fields, fieldtype.FieldDecimal)
 	}
+	if m.dir != nil {
+		fields = append(fields, fieldtype.FieldDir)
+	}
 	return fields
 }
 
@@ -3220,6 +3275,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Datetime()
 	case fieldtype.FieldDecimal:
 		return m.Decimal()
+	case fieldtype.FieldDir:
+		return m.Dir()
 	}
 	return nil, false
 }
@@ -3281,6 +3338,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDatetime(ctx)
 	case fieldtype.FieldDecimal:
 		return m.OldDecimal(ctx)
+	case fieldtype.FieldDir:
+		return m.OldDir(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -3471,6 +3530,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDecimal(v)
+		return nil
+	case fieldtype.FieldDir:
+		v, ok := value.(http.Dir)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDir(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -3856,6 +3922,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldDecimal) {
 		fields = append(fields, fieldtype.FieldDecimal)
 	}
+	if m.FieldCleared(fieldtype.FieldDir) {
+		fields = append(fields, fieldtype.FieldDir)
+	}
 	return fields
 }
 
@@ -3932,6 +4001,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldDecimal:
 		m.ClearDecimal()
+		return nil
+	case fieldtype.FieldDir:
+		m.ClearDir()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -4019,6 +4091,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldDecimal:
 		m.ResetDecimal()
+		return nil
+	case fieldtype.FieldDir:
+		m.ResetDir()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

@@ -125,7 +125,6 @@ func UniqueIntIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUniqueInt, p.Within(v...))
 	})
@@ -137,7 +136,6 @@ func UniqueIntNotIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUniqueInt, p.Without(v...))
 	})
@@ -191,7 +189,6 @@ func UniqueFloatIn(vs ...float64) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUniqueFloat, p.Within(v...))
 	})
@@ -203,7 +200,6 @@ func UniqueFloatNotIn(vs ...float64) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUniqueFloat, p.Without(v...))
 	})
@@ -257,7 +253,6 @@ func NillableIntIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt, p.Within(v...))
 	})
@@ -269,7 +264,6 @@ func NillableIntNotIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNillableInt, p.Without(v...))
 	})

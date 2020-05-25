@@ -111,7 +111,6 @@ func ValueIn(vs ...int) predicate.Node {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Node(func(t *dsl.Traversal) {
 		t.Has(Label, FieldValue, p.Within(v...))
 	})
@@ -123,7 +122,6 @@ func ValueNotIn(vs ...int) predicate.Node {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Node(func(t *dsl.Traversal) {
 		t.Has(Label, FieldValue, p.Without(v...))
 	})

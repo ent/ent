@@ -695,20 +695,21 @@ func (f Field) NullType() string {
 // NullTypeField extracts the nullable type field (if exists) from the given receiver.
 // It also does the type conversion if needed.
 func (f Field) NullTypeField(rec string) string {
+	expr := rec
 	switch f.Type.Type {
 	case field.TypeEnum:
-		return fmt.Sprintf("%s(%s.String)", f.Type, rec)
+		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
-		return fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String()))
+		expr = fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String()))
 	case field.TypeTime:
-		return fmt.Sprintf("%s.Time", rec)
+		expr = fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
-		return fmt.Sprintf("%s(%s.Float64)", f.Type, rec)
+		expr = fmt.Sprintf("%s(%s.Float64)", f.Type, rec)
 	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32,
 		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
-		return fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
+		expr = fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
 	}
-	return rec
+	return f.goType(expr)
 }
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
@@ -816,7 +817,16 @@ func (f Field) BasicType(ident string) (expr string) {
 			expr = fmt.Sprintf("%s.String", ident)
 		}
 	}
-	return
+	return expr
+}
+
+// goType returns the Go expression for the given basic-type
+// identifier to covert it to the custom Go type.
+func (f Field) goType(ident string) string {
+	if !f.HasGoType() {
+		return ident
+	}
+	return fmt.Sprintf("%s(%s)", f.Type, ident)
 }
 
 // Label returns the Gremlin label name of the edge.

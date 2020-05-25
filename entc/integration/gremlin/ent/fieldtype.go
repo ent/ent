@@ -8,6 +8,7 @@ package ent
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -72,6 +73,8 @@ type FieldType struct {
 	Datetime time.Time `json:"datetime,omitempty"`
 	// Decimal holds the value of the "decimal" field.
 	Decimal float64 `json:"decimal,omitempty"`
+	// Dir holds the value of the "dir" field.
+	Dir http.Dir `json:"dir,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -108,6 +111,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
 		Datetime              int64           `json:"datetime,omitempty"`
 		Decimal               float64         `json:"decimal,omitempty"`
+		Dir                   http.Dir        `json:"dir,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -139,6 +143,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.OptionalFloat32 = scanft.OptionalFloat32
 	ft.Datetime = time.Unix(0, scanft.Datetime)
 	ft.Decimal = scanft.Decimal
+	ft.Dir = scanft.Dir
 	return nil
 }
 
@@ -227,6 +232,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(ft.Datetime.Format(time.ANSIC))
 	builder.WriteString(", decimal=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
+	builder.WriteString(", dir=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -268,6 +275,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
 		Datetime              int64           `json:"datetime,omitempty"`
 		Decimal               float64         `json:"decimal,omitempty"`
+		Dir                   http.Dir        `json:"dir,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -301,6 +309,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			OptionalFloat32:       v.OptionalFloat32,
 			Datetime:              time.Unix(0, v.Datetime),
 			Decimal:               v.Decimal,
+			Dir:                   v.Dir,
 		})
 	}
 	return nil

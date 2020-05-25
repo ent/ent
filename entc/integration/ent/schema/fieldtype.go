@@ -5,6 +5,8 @@
 package schema
 
 import (
+	"net/http"
+
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/schema/field"
@@ -59,5 +61,8 @@ func (FieldType) Fields() []ent.Field {
 				dialect.MySQL:    "decimal(6,2)",
 				dialect.Postgres: "numeric",
 			}),
+		field.String("dir").
+			Optional().
+			GoType(http.Dir("dir")),
 	}
 }

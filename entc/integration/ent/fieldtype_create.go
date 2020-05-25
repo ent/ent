@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
@@ -348,6 +349,20 @@ func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetDir sets the dir field.
+func (ftc *FieldTypeCreate) SetDir(h http.Dir) *FieldTypeCreate {
+	ftc.mutation.SetDir(h)
+	return ftc
+}
+
+// SetNillableDir sets the dir field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
+	if h != nil {
+		ftc.SetDir(*h)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -629,6 +644,14 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldDecimal,
 		})
 		ft.Decimal = value
+	}
+	if value, ok := ftc.mutation.Dir(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldDir,
+		})
+		ft.Dir = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
