@@ -7,6 +7,7 @@ package integration
 import (
 	"context"
 	"math"
+	"net/http"
 	"testing"
 	"time"
 
@@ -75,6 +76,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNillableInt64(math.MaxInt64).
 		SetDatetime(time.Now()).
 		SetDecimal(10.20).
+		SetDir("dir").
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -86,5 +88,6 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int32(math.MaxInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
 	require.Equal(10.20, ft.Decimal)
+	require.Equal(http.Dir("dir"), ft.Dir)
 	require.False(ft.Datetime.IsZero())
 }

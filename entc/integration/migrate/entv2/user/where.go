@@ -171,7 +171,6 @@ func AgeIn(vs ...int) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -189,7 +188,6 @@ func AgeNotIn(vs ...int) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -249,7 +247,6 @@ func NameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -267,7 +264,6 @@ func NameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -362,7 +358,6 @@ func NicknameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -380,7 +375,6 @@ func NicknameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -475,7 +469,6 @@ func PhoneIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -493,7 +486,6 @@ func PhoneNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -588,7 +580,6 @@ func BufferIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -606,7 +597,6 @@ func BufferNotIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -680,7 +670,6 @@ func TitleIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -698,7 +687,6 @@ func TitleNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -793,7 +781,6 @@ func NewNameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -811,7 +798,6 @@ func NewNameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -920,7 +906,6 @@ func BlobIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -938,7 +923,6 @@ func BlobNotIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1012,7 +996,6 @@ func StateIn(vs ...State) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1030,7 +1013,6 @@ func StateNotIn(vs ...State) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

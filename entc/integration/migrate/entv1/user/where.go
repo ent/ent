@@ -157,7 +157,6 @@ func AgeIn(vs ...int32) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -175,7 +174,6 @@ func AgeNotIn(vs ...int32) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -235,7 +233,6 @@ func NameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -253,7 +250,6 @@ func NameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -348,7 +344,6 @@ func NicknameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -366,7 +361,6 @@ func NicknameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -461,7 +455,6 @@ func AddressIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -479,7 +472,6 @@ func AddressNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -588,7 +580,6 @@ func RenamedIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -606,7 +597,6 @@ func RenamedNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -715,7 +705,6 @@ func BlobIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -733,7 +722,6 @@ func BlobNotIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -807,7 +795,6 @@ func StateIn(vs ...State) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -825,7 +812,6 @@ func StateNotIn(vs ...State) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

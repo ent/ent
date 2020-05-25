@@ -129,7 +129,6 @@ func DescIn(vs ...string) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.GroupInfo(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -147,7 +146,6 @@ func DescNotIn(vs ...string) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.GroupInfo(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -242,7 +240,6 @@ func MaxUsersIn(vs ...int) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.GroupInfo(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -260,7 +257,6 @@ func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.GroupInfo(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

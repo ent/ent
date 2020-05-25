@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -651,6 +652,26 @@ func (ftu *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDir sets the dir field.
+func (ftu *FieldTypeUpdate) SetDir(h http.Dir) *FieldTypeUpdate {
+	ftu.mutation.SetDir(h)
+	return ftu
+}
+
+// SetNillableDir sets the dir field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDir(h *http.Dir) *FieldTypeUpdate {
+	if h != nil {
+		ftu.SetDir(*h)
+	}
+	return ftu
+}
+
+// ClearDir clears the value of dir.
+func (ftu *FieldTypeUpdate) ClearDir() *FieldTypeUpdate {
+	ftu.mutation.ClearDir()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -882,6 +903,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedDecimal(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDecimal, __.Union(__.Values(fieldtype.FieldDecimal), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.Dir(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDir, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -945,6 +969,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.DecimalCleared() {
 		properties = append(properties, fieldtype.FieldDecimal)
+	}
+	if ftu.mutation.DirCleared() {
+		properties = append(properties, fieldtype.FieldDir)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1579,6 +1606,26 @@ func (ftuo *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetDir sets the dir field.
+func (ftuo *FieldTypeUpdateOne) SetDir(h http.Dir) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDir(h)
+	return ftuo
+}
+
+// SetNillableDir sets the dir field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDir(h *http.Dir) *FieldTypeUpdateOne {
+	if h != nil {
+		ftuo.SetDir(*h)
+	}
+	return ftuo
+}
+
+// ClearDir clears the value of dir.
+func (ftuo *FieldTypeUpdateOne) ClearDir() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDir()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -1815,6 +1862,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedDecimal(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDecimal, __.Union(__.Values(fieldtype.FieldDecimal), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.Dir(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDir, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1878,6 +1928,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.DecimalCleared() {
 		properties = append(properties, fieldtype.FieldDecimal)
+	}
+	if ftuo.mutation.DirCleared() {
+		properties = append(properties, fieldtype.FieldDir)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

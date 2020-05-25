@@ -129,7 +129,6 @@ func NameIn(vs ...string) predicate.Planet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Planet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -147,7 +146,6 @@ func NameNotIn(vs ...string) predicate.Planet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Planet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -242,7 +240,6 @@ func AgeIn(vs ...uint) predicate.Planet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Planet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -260,7 +257,6 @@ func AgeNotIn(vs ...uint) predicate.Planet {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Planet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

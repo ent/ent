@@ -122,7 +122,6 @@ func ModelIn(vs ...string) predicate.Car {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Car(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -140,7 +139,6 @@ func ModelNotIn(vs ...string) predicate.Car {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Car(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

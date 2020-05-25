@@ -132,7 +132,6 @@ func SizeIn(vs ...int) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldSize, p.Within(v...))
 	})
@@ -144,7 +143,6 @@ func SizeNotIn(vs ...int) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldSize, p.Without(v...))
 	})
@@ -198,7 +196,6 @@ func NameIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Within(v...))
 	})
@@ -210,7 +207,6 @@ func NameNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Without(v...))
 	})
@@ -285,7 +281,6 @@ func UserIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUser, p.Within(v...))
 	})
@@ -297,7 +292,6 @@ func UserNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUser, p.Without(v...))
 	})
@@ -386,7 +380,6 @@ func GroupIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldGroup, p.Within(v...))
 	})
@@ -398,7 +391,6 @@ func GroupNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldGroup, p.Without(v...))
 	})

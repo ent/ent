@@ -7,6 +7,7 @@
 package fieldtype
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -271,6 +272,14 @@ func Decimal(v float64) predicate.FieldType {
 	})
 }
 
+// Dir applies equality check predicate on the "dir" field. It's identical to DirEQ.
+func Dir(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDir), vc))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -291,7 +300,6 @@ func IntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -309,7 +317,6 @@ func IntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -369,7 +376,6 @@ func Int8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -387,7 +393,6 @@ func Int8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -447,7 +452,6 @@ func Int16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -465,7 +469,6 @@ func Int16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -525,7 +528,6 @@ func Int32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -543,7 +545,6 @@ func Int32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -603,7 +604,6 @@ func Int64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -621,7 +621,6 @@ func Int64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -681,7 +680,6 @@ func OptionalIntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -699,7 +697,6 @@ func OptionalIntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -773,7 +770,6 @@ func OptionalInt8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -791,7 +787,6 @@ func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -865,7 +860,6 @@ func OptionalInt16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -883,7 +877,6 @@ func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -957,7 +950,6 @@ func OptionalInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -975,7 +967,6 @@ func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1049,7 +1040,6 @@ func OptionalInt64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1067,7 +1057,6 @@ func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1141,7 +1130,6 @@ func NillableIntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1159,7 +1147,6 @@ func NillableIntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1233,7 +1220,6 @@ func NillableInt8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1251,7 +1237,6 @@ func NillableInt8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1325,7 +1310,6 @@ func NillableInt16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1343,7 +1327,6 @@ func NillableInt16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1417,7 +1400,6 @@ func NillableInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1435,7 +1417,6 @@ func NillableInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1509,7 +1490,6 @@ func NillableInt64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1527,7 +1507,6 @@ func NillableInt64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1601,7 +1580,6 @@ func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1619,7 +1597,6 @@ func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1693,7 +1670,6 @@ func OptionalUintIn(vs ...uint) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1711,7 +1687,6 @@ func OptionalUintNotIn(vs ...uint) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1785,7 +1760,6 @@ func OptionalUint8In(vs ...uint8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1803,7 +1777,6 @@ func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1877,7 +1850,6 @@ func OptionalUint16In(vs ...uint16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1895,7 +1867,6 @@ func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1969,7 +1940,6 @@ func OptionalUint32In(vs ...uint32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -1987,7 +1957,6 @@ func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2061,7 +2030,6 @@ func OptionalUint64In(vs ...uint64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2079,7 +2047,6 @@ func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2153,7 +2120,6 @@ func StateIn(vs ...State) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2171,7 +2137,6 @@ func StateNotIn(vs ...State) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2217,7 +2182,6 @@ func OptionalFloatIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2235,7 +2199,6 @@ func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2309,7 +2272,6 @@ func OptionalFloat32In(vs ...float32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2327,7 +2289,6 @@ func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2401,7 +2362,6 @@ func DatetimeIn(vs ...time.Time) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2419,7 +2379,6 @@ func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2493,7 +2452,6 @@ func DecimalIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2511,7 +2469,6 @@ func DecimalNotIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -2562,6 +2519,142 @@ func DecimalIsNil() predicate.FieldType {
 func DecimalNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldDecimal)))
+	})
+}
+
+// DirEQ applies the EQ predicate on the "dir" field.
+func DirEQ(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDir), vc))
+	})
+}
+
+// DirNEQ applies the NEQ predicate on the "dir" field.
+func DirNEQ(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDir), vc))
+	})
+}
+
+// DirIn applies the In predicate on the "dir" field.
+func DirIn(vs ...http.Dir) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDir), v...))
+	})
+}
+
+// DirNotIn applies the NotIn predicate on the "dir" field.
+func DirNotIn(vs ...http.Dir) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDir), v...))
+	})
+}
+
+// DirGT applies the GT predicate on the "dir" field.
+func DirGT(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDir), vc))
+	})
+}
+
+// DirGTE applies the GTE predicate on the "dir" field.
+func DirGTE(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDir), vc))
+	})
+}
+
+// DirLT applies the LT predicate on the "dir" field.
+func DirLT(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDir), vc))
+	})
+}
+
+// DirLTE applies the LTE predicate on the "dir" field.
+func DirLTE(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDir), vc))
+	})
+}
+
+// DirContains applies the Contains predicate on the "dir" field.
+func DirContains(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDir), vc))
+	})
+}
+
+// DirHasPrefix applies the HasPrefix predicate on the "dir" field.
+func DirHasPrefix(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDir), vc))
+	})
+}
+
+// DirHasSuffix applies the HasSuffix predicate on the "dir" field.
+func DirHasSuffix(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDir), vc))
+	})
+}
+
+// DirIsNil applies the IsNil predicate on the "dir" field.
+func DirIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDir)))
+	})
+}
+
+// DirNotNil applies the NotNil predicate on the "dir" field.
+func DirNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDir)))
+	})
+}
+
+// DirEqualFold applies the EqualFold predicate on the "dir" field.
+func DirEqualFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDir), vc))
+	})
+}
+
+// DirContainsFold applies the ContainsFold predicate on the "dir" field.
+func DirContainsFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDir), vc))
 	})
 }
 

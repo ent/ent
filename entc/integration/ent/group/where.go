@@ -166,7 +166,6 @@ func ExpireIn(vs ...time.Time) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -184,7 +183,6 @@ func ExpireNotIn(vs ...time.Time) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -244,7 +242,6 @@ func TypeIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -262,7 +259,6 @@ func TypeNotIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -371,7 +367,6 @@ func MaxUsersIn(vs ...int) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -389,7 +384,6 @@ func MaxUsersNotIn(vs ...int) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -463,7 +457,6 @@ func NameIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -481,7 +474,6 @@ func NameNotIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
-
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.

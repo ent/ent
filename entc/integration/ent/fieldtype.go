@@ -8,6 +8,7 @@ package ent
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -71,7 +72,9 @@ type FieldType struct {
 	// Datetime holds the value of the "datetime" field.
 	Datetime time.Time `json:"datetime,omitempty"`
 	// Decimal holds the value of the "decimal" field.
-	Decimal    float64 `json:"decimal,omitempty"`
+	Decimal float64 `json:"decimal,omitempty"`
+	// Dir holds the value of the "dir" field.
+	Dir        http.Dir `json:"dir,omitempty"`
 	file_field *int
 }
 
@@ -105,6 +108,7 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullFloat64{}, // optional_float32
 		&sql.NullTime{},    // datetime
 		&sql.NullFloat64{}, // decimal
+		&sql.NullString{},  // dir
 	}
 }
 
@@ -262,7 +266,12 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ft.Decimal = value.Float64
 	}
-	values = values[26:]
+	if value, ok := values[26].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field dir", values[26])
+	} else if value.Valid {
+		ft.Dir = http.Dir(value.String)
+	}
+	values = values[27:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -359,6 +368,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(ft.Datetime.Format(time.ANSIC))
 	builder.WriteString(", decimal=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
+	builder.WriteString(", dir=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
 	builder.WriteByte(')')
 	return builder.String()
 }

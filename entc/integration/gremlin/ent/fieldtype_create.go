@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -349,6 +350,20 @@ func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetDir sets the dir field.
+func (ftc *FieldTypeCreate) SetDir(h http.Dir) *FieldTypeCreate {
+	ftc.mutation.SetDir(h)
+	return ftc
+}
+
+// SetNillableDir sets the dir field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
+	if h != nil {
+		ftc.SetDir(*h)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -507,6 +522,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Decimal(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDecimal, value)
+	}
+	if value, ok := ftc.mutation.Dir(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDir, value)
 	}
 	return v.ValueMap(true)
 }
