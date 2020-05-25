@@ -118,6 +118,7 @@ func DescIn(vs ...string) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDesc, p.Within(v...))
 	})
@@ -129,6 +130,7 @@ func DescNotIn(vs ...string) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
 		t.Has(Label, FieldDesc, p.Without(v...))
 	})
@@ -203,6 +205,7 @@ func MaxUsersIn(vs ...int) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
 		t.Has(Label, FieldMaxUsers, p.Within(v...))
 	})
@@ -214,6 +217,7 @@ func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
 		t.Has(Label, FieldMaxUsers, p.Without(v...))
 	})

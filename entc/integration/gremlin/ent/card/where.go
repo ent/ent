@@ -134,6 +134,7 @@ func CreateTimeIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldCreateTime, p.Within(v...))
 	})
@@ -145,6 +146,7 @@ func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldCreateTime, p.Without(v...))
 	})
@@ -198,6 +200,7 @@ func UpdateTimeIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUpdateTime, p.Within(v...))
 	})
@@ -209,6 +212,7 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUpdateTime, p.Without(v...))
 	})
@@ -262,6 +266,7 @@ func NumberIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNumber, p.Within(v...))
 	})
@@ -273,6 +278,7 @@ func NumberNotIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNumber, p.Without(v...))
 	})
@@ -347,6 +353,7 @@ func NameIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Within(v...))
 	})
@@ -358,6 +365,7 @@ func NameNotIn(vs ...string) predicate.Card {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Without(v...))
 	})

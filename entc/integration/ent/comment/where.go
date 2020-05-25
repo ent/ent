@@ -135,10 +135,11 @@ func UniqueIntIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -152,10 +153,11 @@ func UniqueIntNotIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -211,10 +213,11 @@ func UniqueFloatIn(vs ...float64) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -228,10 +231,11 @@ func UniqueFloatNotIn(vs ...float64) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -287,10 +291,11 @@ func NillableIntIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -304,10 +309,11 @@ func NillableIntNotIn(vs ...int) predicate.Comment {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

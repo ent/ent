@@ -155,6 +155,7 @@ func ExpireIn(vs ...time.Time) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldExpire, p.Within(v...))
 	})
@@ -166,6 +167,7 @@ func ExpireNotIn(vs ...time.Time) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldExpire, p.Without(v...))
 	})
@@ -219,6 +221,7 @@ func TypeIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldType, p.Within(v...))
 	})
@@ -230,6 +233,7 @@ func TypeNotIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldType, p.Without(v...))
 	})
@@ -318,6 +322,7 @@ func MaxUsersIn(vs ...int) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldMaxUsers, p.Within(v...))
 	})
@@ -329,6 +334,7 @@ func MaxUsersNotIn(vs ...int) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldMaxUsers, p.Without(v...))
 	})
@@ -396,6 +402,7 @@ func NameIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Within(v...))
 	})
@@ -407,6 +414,7 @@ func NameNotIn(vs ...string) predicate.Group {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Without(v...))
 	})

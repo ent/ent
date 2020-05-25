@@ -157,10 +157,11 @@ func AgeIn(vs ...int32) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -174,10 +175,11 @@ func AgeNotIn(vs ...int32) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -233,10 +235,11 @@ func NameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -250,10 +253,11 @@ func NameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -344,10 +348,11 @@ func NicknameIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -361,10 +366,11 @@ func NicknameNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -455,10 +461,11 @@ func AddressIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -472,10 +479,11 @@ func AddressNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -580,10 +588,11 @@ func RenamedIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -597,10 +606,11 @@ func RenamedNotIn(vs ...string) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -705,10 +715,11 @@ func BlobIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -722,10 +733,11 @@ func BlobNotIn(vs ...[]byte) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -795,10 +807,11 @@ func StateIn(vs ...State) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -812,10 +825,11 @@ func StateNotIn(vs ...State) predicate.User {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.User(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

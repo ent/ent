@@ -111,6 +111,7 @@ func NameIn(vs ...string) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Within(v...))
 	})
@@ -122,6 +123,7 @@ func NameNotIn(vs ...string) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.Without(v...))
 	})

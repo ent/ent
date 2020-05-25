@@ -143,10 +143,11 @@ func SizeIn(vs ...int) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -160,10 +161,11 @@ func SizeNotIn(vs ...int) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -219,10 +221,11 @@ func NameIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -236,10 +239,11 @@ func NameNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -330,10 +334,11 @@ func UserIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -347,10 +352,11 @@ func UserNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -455,10 +461,11 @@ func GroupIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -472,10 +479,11 @@ func GroupNotIn(vs ...string) predicate.File {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.File(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

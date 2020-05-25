@@ -131,10 +131,11 @@ func AgeIn(vs ...int) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -148,10 +149,11 @@ func AgeNotIn(vs ...int) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -207,10 +209,11 @@ func LicensedAtIn(vs ...time.Time) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -224,10 +227,11 @@ func LicensedAtNotIn(vs ...time.Time) predicate.Pet {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.Pet(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

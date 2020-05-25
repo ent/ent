@@ -291,10 +291,11 @@ func IntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -308,10 +309,11 @@ func IntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -367,10 +369,11 @@ func Int8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -384,10 +387,11 @@ func Int8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -443,10 +447,11 @@ func Int16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -460,10 +465,11 @@ func Int16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -519,10 +525,11 @@ func Int32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -536,10 +543,11 @@ func Int32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -595,10 +603,11 @@ func Int64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -612,10 +621,11 @@ func Int64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -671,10 +681,11 @@ func OptionalIntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -688,10 +699,11 @@ func OptionalIntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -761,10 +773,11 @@ func OptionalInt8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -778,10 +791,11 @@ func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -851,10 +865,11 @@ func OptionalInt16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -868,10 +883,11 @@ func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -941,10 +957,11 @@ func OptionalInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -958,10 +975,11 @@ func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1031,10 +1049,11 @@ func OptionalInt64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1048,10 +1067,11 @@ func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1121,10 +1141,11 @@ func NillableIntIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1138,10 +1159,11 @@ func NillableIntNotIn(vs ...int) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1211,10 +1233,11 @@ func NillableInt8In(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1228,10 +1251,11 @@ func NillableInt8NotIn(vs ...int8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1301,10 +1325,11 @@ func NillableInt16In(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1318,10 +1343,11 @@ func NillableInt16NotIn(vs ...int16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1391,10 +1417,11 @@ func NillableInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1408,10 +1435,11 @@ func NillableInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1481,10 +1509,11 @@ func NillableInt64In(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1498,10 +1527,11 @@ func NillableInt64NotIn(vs ...int64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1571,10 +1601,11 @@ func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1588,10 +1619,11 @@ func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1661,10 +1693,11 @@ func OptionalUintIn(vs ...uint) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1678,10 +1711,11 @@ func OptionalUintNotIn(vs ...uint) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1751,10 +1785,11 @@ func OptionalUint8In(vs ...uint8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1768,10 +1803,11 @@ func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1841,10 +1877,11 @@ func OptionalUint16In(vs ...uint16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1858,10 +1895,11 @@ func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1931,10 +1969,11 @@ func OptionalUint32In(vs ...uint32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -1948,10 +1987,11 @@ func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2021,10 +2061,11 @@ func OptionalUint64In(vs ...uint64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2038,10 +2079,11 @@ func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2111,10 +2153,11 @@ func StateIn(vs ...State) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2128,10 +2171,11 @@ func StateNotIn(vs ...State) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2173,10 +2217,11 @@ func OptionalFloatIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2190,10 +2235,11 @@ func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2263,10 +2309,11 @@ func OptionalFloat32In(vs ...float32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2280,10 +2327,11 @@ func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2353,10 +2401,11 @@ func DatetimeIn(vs ...time.Time) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2370,10 +2419,11 @@ func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2443,10 +2493,11 @@ func DecimalIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}
@@ -2460,10 +2511,11 @@ func DecimalNotIn(vs ...float64) predicate.FieldType {
 	for i := range v {
 		v[i] = vs[i]
 	}
+
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
+		if len(v) == 0 {
 			s.Where(sql.False())
 			return
 		}

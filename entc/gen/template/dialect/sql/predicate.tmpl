@@ -33,8 +33,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/field" -}}
 	{{- $f := $.Scope.Field -}}
+	{{- $arg := $.Scope.Arg -}}
 	func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C({{ $f.Constant }}), v))
+		s.Where(sql.EQ(s.C({{ $f.Constant }}), {{ $arg }}))
 	}
 {{- end }}
 
@@ -52,7 +53,7 @@ in the LICENSE file in the root directory of this source tree.
 				return
 			}
 		{{- end }}
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, v{{ if $op.Variadic }}...{{ end }}{{ end }}))
+		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }}))
 	}
 {{- end }}
 
