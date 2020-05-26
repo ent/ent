@@ -280,6 +280,14 @@ func Dir(v http.Dir) predicate.FieldType {
 	})
 }
 
+// Ndir applies equality check predicate on the "ndir" field. It's identical to NdirEQ.
+func Ndir(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNdir), vc))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -2655,6 +2663,142 @@ func DirContainsFold(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDir), vc))
+	})
+}
+
+// NdirEQ applies the EQ predicate on the "ndir" field.
+func NdirEQ(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirNEQ applies the NEQ predicate on the "ndir" field.
+func NdirNEQ(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirIn applies the In predicate on the "ndir" field.
+func NdirIn(vs ...http.Dir) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNdir), v...))
+	})
+}
+
+// NdirNotIn applies the NotIn predicate on the "ndir" field.
+func NdirNotIn(vs ...http.Dir) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNdir), v...))
+	})
+}
+
+// NdirGT applies the GT predicate on the "ndir" field.
+func NdirGT(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirGTE applies the GTE predicate on the "ndir" field.
+func NdirGTE(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirLT applies the LT predicate on the "ndir" field.
+func NdirLT(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirLTE applies the LTE predicate on the "ndir" field.
+func NdirLTE(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirContains applies the Contains predicate on the "ndir" field.
+func NdirContains(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirHasPrefix applies the HasPrefix predicate on the "ndir" field.
+func NdirHasPrefix(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirHasSuffix applies the HasSuffix predicate on the "ndir" field.
+func NdirHasSuffix(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirIsNil applies the IsNil predicate on the "ndir" field.
+func NdirIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNdir)))
+	})
+}
+
+// NdirNotNil applies the NotNil predicate on the "ndir" field.
+func NdirNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNdir)))
+	})
+}
+
+// NdirEqualFold applies the EqualFold predicate on the "ndir" field.
+func NdirEqualFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirContainsFold applies the ContainsFold predicate on the "ndir" field.
+func NdirContainsFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNdir), vc))
 	})
 }
 

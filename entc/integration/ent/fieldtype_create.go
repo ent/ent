@@ -363,6 +363,20 @@ func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNdir sets the ndir field.
+func (ftc *FieldTypeCreate) SetNdir(h http.Dir) *FieldTypeCreate {
+	ftc.mutation.SetNdir(h)
+	return ftc
+}
+
+// SetNillableNdir sets the ndir field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
+	if h != nil {
+		ftc.SetNdir(*h)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -652,6 +666,14 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldDir,
 		})
 		ft.Dir = value
+	}
+	if value, ok := ftc.mutation.Ndir(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNdir,
+		})
+		ft.Ndir = &value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

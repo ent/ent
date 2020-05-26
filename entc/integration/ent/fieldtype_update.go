@@ -671,6 +671,26 @@ func (ftu *FieldTypeUpdate) ClearDir() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNdir sets the ndir field.
+func (ftu *FieldTypeUpdate) SetNdir(h http.Dir) *FieldTypeUpdate {
+	ftu.mutation.SetNdir(h)
+	return ftu
+}
+
+// SetNillableNdir sets the ndir field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNdir(h *http.Dir) *FieldTypeUpdate {
+	if h != nil {
+		ftu.SetNdir(*h)
+	}
+	return ftu
+}
+
+// ClearNdir clears the value of ndir.
+func (ftu *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
+	ftu.mutation.ClearNdir()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1237,6 +1257,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldDir,
+		})
+	}
+	if value, ok := ftu.mutation.Ndir(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNdir,
+		})
+	}
+	if ftu.mutation.NdirCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldNdir,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -1895,6 +1928,26 @@ func (ftuo *FieldTypeUpdateOne) ClearDir() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetNdir sets the ndir field.
+func (ftuo *FieldTypeUpdateOne) SetNdir(h http.Dir) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNdir(h)
+	return ftuo
+}
+
+// SetNillableNdir sets the ndir field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNdir(h *http.Dir) *FieldTypeUpdateOne {
+	if h != nil {
+		ftuo.SetNdir(*h)
+	}
+	return ftuo
+}
+
+// ClearNdir clears the value of ndir.
+func (ftuo *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNdir()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2459,6 +2512,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldDir,
+		})
+	}
+	if value, ok := ftuo.mutation.Ndir(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNdir,
+		})
+	}
+	if ftuo.mutation.NdirCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldNdir,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

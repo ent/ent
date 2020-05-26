@@ -77,6 +77,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetDatetime(time.Now()).
 		SetDecimal(10.20).
 		SetDir("dir").
+		SetNdir("ndir").
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -89,5 +90,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
 	require.Equal(10.20, ft.Decimal)
 	require.Equal(http.Dir("dir"), ft.Dir)
+	require.NotNil(*ft.Ndir)
+	require.Equal(http.Dir("ndir"), *ft.Ndir)
 	require.False(ft.Datetime.IsZero())
 }

@@ -111,7 +111,7 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 					builder.WriteString(", {{ $f.Name }}=")
 					{{- if $f.IsTime }}
 						builder.WriteString(v.Format(time.ANSIC))
-					{{- else if $f.IsString }}
+					{{- else if and $f.IsString (not $f.HasGoType) }}
 						builder.WriteString(*v)
 					{{- else }}
 						builder.WriteString(fmt.Sprintf("%v", *v))
