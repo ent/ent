@@ -146,6 +146,8 @@ func TestString(t *testing.T) {
 	assert.Error(t, fd.Err())
 	fd = field.String("name").GoType(struct{}{}).Descriptor()
 	assert.Error(t, fd.Err())
+	fd = field.String("name").GoType(new(http.Dir)).Descriptor()
+	assert.Error(t, fd.Err())
 }
 
 func TestTime(t *testing.T) {

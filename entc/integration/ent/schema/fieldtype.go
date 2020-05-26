@@ -64,5 +64,9 @@ func (FieldType) Fields() []ent.Field {
 		field.String("dir").
 			Optional().
 			GoType(http.Dir("dir")),
+		field.String("ndir").
+			Optional().
+			Nillable().
+			GoType(http.Dir("ndir")),
 	}
 }

@@ -74,7 +74,9 @@ type FieldType struct {
 	// Decimal holds the value of the "decimal" field.
 	Decimal float64 `json:"decimal,omitempty"`
 	// Dir holds the value of the "dir" field.
-	Dir        http.Dir `json:"dir,omitempty"`
+	Dir http.Dir `json:"dir,omitempty"`
+	// Ndir holds the value of the "ndir" field.
+	Ndir       *http.Dir `json:"ndir,omitempty"`
 	file_field *int
 }
 
@@ -109,6 +111,7 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullTime{},    // datetime
 		&sql.NullFloat64{}, // decimal
 		&sql.NullString{},  // dir
+		&sql.NullString{},  // ndir
 	}
 }
 
@@ -271,7 +274,13 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ft.Dir = http.Dir(value.String)
 	}
-	values = values[27:]
+	if value, ok := values[27].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field ndir", values[27])
+	} else if value.Valid {
+		ft.Ndir = new(http.Dir)
+		*ft.Ndir = http.Dir(value.String)
+	}
+	values = values[28:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -370,6 +379,10 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteString(", dir=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
+	if v := ft.Ndir; v != nil {
+		builder.WriteString(", ndir=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

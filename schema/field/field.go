@@ -728,7 +728,7 @@ func (d *Descriptor) goType(typ interface{}, expectKind reflect.Kind) {
 		info.Nillable = true
 	}
 	switch {
-	case tv.Kind() == expectKind:
+	case t.Kind() == expectKind:
 	case t.Implements(valueScannerType):
 		n := t.NumMethod()
 		for i := 0; i < n; i++ {
