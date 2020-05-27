@@ -46,6 +46,7 @@ var (
 		"lower":       strings.ToLower,
 		"upper":       strings.ToUpper,
 		"hasField":    hasField,
+		"hasImport":   hasImport,
 		"indirect":    indirect,
 		"hasPrefix":   strings.HasPrefix,
 		"hasSuffix":   strings.HasSuffix,
@@ -69,6 +70,7 @@ var (
 // ops returns all operations for given field.
 func ops(f *Field) (op []Op) {
 	switch t := f.Type.Type; {
+	case f.HasGoType() && !f.ConvertedToBasic():
 	case t == field.TypeJSON:
 	case t == field.TypeBool:
 		op = boolOps
@@ -322,6 +324,12 @@ func hasTemplate(name string) bool {
 func hasField(v interface{}, name string) bool {
 	vr := reflect.Indirect(reflect.ValueOf(v))
 	return vr.FieldByName(name).IsValid()
+}
+
+// hasImport reports if the package name exists in the predefined import packages.
+func hasImport(name string) bool {
+	_, ok := importPkg[name]
+	return ok
 }
 
 // trimPackage trims the package name from the given identifier.

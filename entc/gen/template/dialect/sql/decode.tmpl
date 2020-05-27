@@ -93,7 +93,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 		{{- $nulltype := $f.NullType -}}
 		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
-		{{- if hasPrefix $nulltype "sql" }}
+		{{- if and (not $f.Type.ValueScanner) (hasPrefix $nulltype "sql") }}
 			} else if value.Valid {
 				{{- if $f.Nillable }}
 					{{ $ret }}.{{ $field }} = new({{ $f.Type }})

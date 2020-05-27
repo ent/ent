@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
 )
@@ -672,6 +674,74 @@ func (ftu *FieldTypeUpdate) ClearDir() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNdir sets the ndir field.
+func (ftu *FieldTypeUpdate) SetNdir(h http.Dir) *FieldTypeUpdate {
+	ftu.mutation.SetNdir(h)
+	return ftu
+}
+
+// SetNillableNdir sets the ndir field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNdir(h *http.Dir) *FieldTypeUpdate {
+	if h != nil {
+		ftu.SetNdir(*h)
+	}
+	return ftu
+}
+
+// ClearNdir clears the value of ndir.
+func (ftu *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
+	ftu.mutation.ClearNdir()
+	return ftu
+}
+
+// SetStr sets the str field.
+func (ftu *FieldTypeUpdate) SetStr(ss sql.NullString) *FieldTypeUpdate {
+	ftu.mutation.SetStr(ss)
+	return ftu
+}
+
+// ClearStr clears the value of str.
+func (ftu *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
+	ftu.mutation.ClearStr()
+	return ftu
+}
+
+// SetNullStr sets the null_str field.
+func (ftu *FieldTypeUpdate) SetNullStr(ss sql.NullString) *FieldTypeUpdate {
+	ftu.mutation.SetNullStr(ss)
+	return ftu
+}
+
+// ClearNullStr clears the value of null_str.
+func (ftu *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate {
+	ftu.mutation.ClearNullStr()
+	return ftu
+}
+
+// SetLink sets the link field.
+func (ftu *FieldTypeUpdate) SetLink(s schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLink(s)
+	return ftu
+}
+
+// ClearLink clears the value of link.
+func (ftu *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
+	ftu.mutation.ClearLink()
+	return ftu
+}
+
+// SetNullLink sets the null_link field.
+func (ftu *FieldTypeUpdate) SetNullLink(s schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetNullLink(s)
+	return ftu
+}
+
+// ClearNullLink clears the value of null_link.
+func (ftu *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
+	ftu.mutation.ClearNullLink()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -906,6 +976,21 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Dir(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDir, value)
 	}
+	if value, ok := ftu.mutation.Ndir(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNdir, value)
+	}
+	if value, ok := ftu.mutation.Str(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStr, value)
+	}
+	if value, ok := ftu.mutation.NullStr(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullStr, value)
+	}
+	if value, ok := ftu.mutation.Link(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLink, value)
+	}
+	if value, ok := ftu.mutation.NullLink(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -972,6 +1057,21 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.DirCleared() {
 		properties = append(properties, fieldtype.FieldDir)
+	}
+	if ftu.mutation.NdirCleared() {
+		properties = append(properties, fieldtype.FieldNdir)
+	}
+	if ftu.mutation.StrCleared() {
+		properties = append(properties, fieldtype.FieldStr)
+	}
+	if ftu.mutation.NullStrCleared() {
+		properties = append(properties, fieldtype.FieldNullStr)
+	}
+	if ftu.mutation.LinkCleared() {
+		properties = append(properties, fieldtype.FieldLink)
+	}
+	if ftu.mutation.NullLinkCleared() {
+		properties = append(properties, fieldtype.FieldNullLink)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1626,6 +1726,74 @@ func (ftuo *FieldTypeUpdateOne) ClearDir() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetNdir sets the ndir field.
+func (ftuo *FieldTypeUpdateOne) SetNdir(h http.Dir) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNdir(h)
+	return ftuo
+}
+
+// SetNillableNdir sets the ndir field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNdir(h *http.Dir) *FieldTypeUpdateOne {
+	if h != nil {
+		ftuo.SetNdir(*h)
+	}
+	return ftuo
+}
+
+// ClearNdir clears the value of ndir.
+func (ftuo *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNdir()
+	return ftuo
+}
+
+// SetStr sets the str field.
+func (ftuo *FieldTypeUpdateOne) SetStr(ss sql.NullString) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStr(ss)
+	return ftuo
+}
+
+// ClearStr clears the value of str.
+func (ftuo *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStr()
+	return ftuo
+}
+
+// SetNullStr sets the null_str field.
+func (ftuo *FieldTypeUpdateOne) SetNullStr(ss sql.NullString) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNullStr(ss)
+	return ftuo
+}
+
+// ClearNullStr clears the value of null_str.
+func (ftuo *FieldTypeUpdateOne) ClearNullStr() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullStr()
+	return ftuo
+}
+
+// SetLink sets the link field.
+func (ftuo *FieldTypeUpdateOne) SetLink(s schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLink(s)
+	return ftuo
+}
+
+// ClearLink clears the value of link.
+func (ftuo *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLink()
+	return ftuo
+}
+
+// SetNullLink sets the null_link field.
+func (ftuo *FieldTypeUpdateOne) SetNullLink(s schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNullLink(s)
+	return ftuo
+}
+
+// ClearNullLink clears the value of null_link.
+func (ftuo *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullLink()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -1865,6 +2033,21 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Dir(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDir, value)
 	}
+	if value, ok := ftuo.mutation.Ndir(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNdir, value)
+	}
+	if value, ok := ftuo.mutation.Str(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStr, value)
+	}
+	if value, ok := ftuo.mutation.NullStr(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullStr, value)
+	}
+	if value, ok := ftuo.mutation.Link(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLink, value)
+	}
+	if value, ok := ftuo.mutation.NullLink(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1931,6 +2114,21 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.DirCleared() {
 		properties = append(properties, fieldtype.FieldDir)
+	}
+	if ftuo.mutation.NdirCleared() {
+		properties = append(properties, fieldtype.FieldNdir)
+	}
+	if ftuo.mutation.StrCleared() {
+		properties = append(properties, fieldtype.FieldStr)
+	}
+	if ftuo.mutation.NullStrCleared() {
+		properties = append(properties, fieldtype.FieldNullStr)
+	}
+	if ftuo.mutation.LinkCleared() {
+		properties = append(properties, fieldtype.FieldLink)
+	}
+	if ftuo.mutation.NullLinkCleared() {
+		properties = append(properties, fieldtype.FieldNullLink)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

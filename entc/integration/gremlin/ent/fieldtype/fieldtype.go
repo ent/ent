@@ -41,7 +41,12 @@ const (
 	FieldOptionalFloat32       = "optional_float32"        // FieldDatetime holds the string denoting the datetime vertex property in the database.
 	FieldDatetime              = "datetime"                // FieldDecimal holds the string denoting the decimal vertex property in the database.
 	FieldDecimal               = "decimal"                 // FieldDir holds the string denoting the dir vertex property in the database.
-	FieldDir                   = "dir"
+	FieldDir                   = "dir"                     // FieldNdir holds the string denoting the ndir vertex property in the database.
+	FieldNdir                  = "ndir"                    // FieldStr holds the string denoting the str vertex property in the database.
+	FieldStr                   = "str"                     // FieldNullStr holds the string denoting the null_str vertex property in the database.
+	FieldNullStr               = "null_str"                // FieldLink holds the string denoting the link vertex property in the database.
+	FieldLink                  = "link"                    // FieldNullLink holds the string denoting the null_link vertex property in the database.
+	FieldNullLink              = "null_link"
 )
 
 var (

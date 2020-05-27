@@ -16,6 +16,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -691,6 +692,54 @@ func (ftu *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStr sets the str field.
+func (ftu *FieldTypeUpdate) SetStr(ss sql.NullString) *FieldTypeUpdate {
+	ftu.mutation.SetStr(ss)
+	return ftu
+}
+
+// ClearStr clears the value of str.
+func (ftu *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
+	ftu.mutation.ClearStr()
+	return ftu
+}
+
+// SetNullStr sets the null_str field.
+func (ftu *FieldTypeUpdate) SetNullStr(ss sql.NullString) *FieldTypeUpdate {
+	ftu.mutation.SetNullStr(ss)
+	return ftu
+}
+
+// ClearNullStr clears the value of null_str.
+func (ftu *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate {
+	ftu.mutation.ClearNullStr()
+	return ftu
+}
+
+// SetLink sets the link field.
+func (ftu *FieldTypeUpdate) SetLink(s schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLink(s)
+	return ftu
+}
+
+// ClearLink clears the value of link.
+func (ftu *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
+	ftu.mutation.ClearLink()
+	return ftu
+}
+
+// SetNullLink sets the null_link field.
+func (ftu *FieldTypeUpdate) SetNullLink(s schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetNullLink(s)
+	return ftu
+}
+
+// ClearNullLink clears the value of null_link.
+func (ftu *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
+	ftu.mutation.ClearNullLink()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1270,6 +1319,58 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldNdir,
+		})
+	}
+	if value, ok := ftu.mutation.Str(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldStr,
+		})
+	}
+	if ftu.mutation.StrCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldStr,
+		})
+	}
+	if value, ok := ftu.mutation.NullStr(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNullStr,
+		})
+	}
+	if ftu.mutation.NullStrCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldNullStr,
+		})
+	}
+	if value, ok := ftu.mutation.Link(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldLink,
+		})
+	}
+	if ftu.mutation.LinkCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldLink,
+		})
+	}
+	if value, ok := ftu.mutation.NullLink(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNullLink,
+		})
+	}
+	if ftu.mutation.NullLinkCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldNullLink,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -1948,6 +2049,54 @@ func (ftuo *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetStr sets the str field.
+func (ftuo *FieldTypeUpdateOne) SetStr(ss sql.NullString) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStr(ss)
+	return ftuo
+}
+
+// ClearStr clears the value of str.
+func (ftuo *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStr()
+	return ftuo
+}
+
+// SetNullStr sets the null_str field.
+func (ftuo *FieldTypeUpdateOne) SetNullStr(ss sql.NullString) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNullStr(ss)
+	return ftuo
+}
+
+// ClearNullStr clears the value of null_str.
+func (ftuo *FieldTypeUpdateOne) ClearNullStr() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullStr()
+	return ftuo
+}
+
+// SetLink sets the link field.
+func (ftuo *FieldTypeUpdateOne) SetLink(s schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLink(s)
+	return ftuo
+}
+
+// ClearLink clears the value of link.
+func (ftuo *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLink()
+	return ftuo
+}
+
+// SetNullLink sets the null_link field.
+func (ftuo *FieldTypeUpdateOne) SetNullLink(s schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNullLink(s)
+	return ftuo
+}
+
+// ClearNullLink clears the value of null_link.
+func (ftuo *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullLink()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2525,6 +2674,58 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldNdir,
+		})
+	}
+	if value, ok := ftuo.mutation.Str(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldStr,
+		})
+	}
+	if ftuo.mutation.StrCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldStr,
+		})
+	}
+	if value, ok := ftuo.mutation.NullStr(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNullStr,
+		})
+	}
+	if ftuo.mutation.NullStrCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldNullStr,
+		})
+	}
+	if value, ok := ftuo.mutation.Link(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldLink,
+		})
+	}
+	if ftuo.mutation.LinkCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldLink,
+		})
+	}
+	if value, ok := ftuo.mutation.NullLink(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNullLink,
+		})
+	}
+	if ftuo.mutation.NullLinkCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldNullLink,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

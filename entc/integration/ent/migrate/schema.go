@@ -81,6 +81,10 @@ var (
 		{Name: "decimal", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(6,2)", "postgres": "numeric"}},
 		{Name: "dir", Type: field.TypeString, Nullable: true},
 		{Name: "ndir", Type: field.TypeString, Nullable: true},
+		{Name: "str", Type: field.TypeString, Nullable: true},
+		{Name: "null_str", Type: field.TypeString, Nullable: true},
+		{Name: "link", Type: field.TypeString, Nullable: true},
+		{Name: "null_link", Type: field.TypeString, Nullable: true},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -91,7 +95,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[29]},
+				Columns: []*schema.Column{FieldTypesColumns[33]},
 
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,

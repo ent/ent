@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -76,7 +77,15 @@ type FieldType struct {
 	// Dir holds the value of the "dir" field.
 	Dir http.Dir `json:"dir,omitempty"`
 	// Ndir holds the value of the "ndir" field.
-	Ndir       *http.Dir `json:"ndir,omitempty"`
+	Ndir *http.Dir `json:"ndir,omitempty"`
+	// Str holds the value of the "str" field.
+	Str sql.NullString `json:"str,omitempty"`
+	// NullStr holds the value of the "null_str" field.
+	NullStr *sql.NullString `json:"null_str,omitempty"`
+	// Link holds the value of the "link" field.
+	Link schema.Link `json:"link,omitempty"`
+	// NullLink holds the value of the "null_link" field.
+	NullLink   *schema.Link `json:"null_link,omitempty"`
 	file_field *int
 }
 
@@ -112,6 +121,10 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullFloat64{}, // decimal
 		&sql.NullString{},  // dir
 		&sql.NullString{},  // ndir
+		&sql.NullString{},  // str
+		&sql.NullString{},  // null_str
+		&schema.Link{},     // link
+		&schema.Link{},     // null_link
 	}
 }
 
@@ -280,7 +293,27 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 		ft.Ndir = new(http.Dir)
 		*ft.Ndir = http.Dir(value.String)
 	}
-	values = values[28:]
+	if value, ok := values[28].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field str", values[28])
+	} else if value != nil {
+		ft.Str = *value
+	}
+	if value, ok := values[29].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field null_str", values[29])
+	} else if value != nil {
+		ft.NullStr = value
+	}
+	if value, ok := values[30].(*schema.Link); !ok {
+		return fmt.Errorf("unexpected type %T for field link", values[30])
+	} else if value != nil {
+		ft.Link = *value
+	}
+	if value, ok := values[31].(*schema.Link); !ok {
+		return fmt.Errorf("unexpected type %T for field null_link", values[31])
+	} else if value != nil {
+		ft.NullLink = value
+	}
+	values = values[32:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -381,6 +414,18 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
 	if v := ft.Ndir; v != nil {
 		builder.WriteString(", ndir=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", str=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Str))
+	if v := ft.NullStr; v != nil {
+		builder.WriteString(", null_str=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", link=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Link))
+	if v := ft.NullLink; v != nil {
+		builder.WriteString(", null_link=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

@@ -13,8 +13,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -377,6 +379,30 @@ func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStr sets the str field.
+func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
+	ftc.mutation.SetStr(ss)
+	return ftc
+}
+
+// SetNullStr sets the null_str field.
+func (ftc *FieldTypeCreate) SetNullStr(ss sql.NullString) *FieldTypeCreate {
+	ftc.mutation.SetNullStr(ss)
+	return ftc
+}
+
+// SetLink sets the link field.
+func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLink(s)
+	return ftc
+}
+
+// SetNullLink sets the null_link field.
+func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetNullLink(s)
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -674,6 +700,38 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldNdir,
 		})
 		ft.Ndir = &value
+	}
+	if value, ok := ftc.mutation.Str(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldStr,
+		})
+		ft.Str = value
+	}
+	if value, ok := ftc.mutation.NullStr(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNullStr,
+		})
+		ft.NullStr = &value
+	}
+	if value, ok := ftc.mutation.Link(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldLink,
+		})
+		ft.Link = value
+	}
+	if value, ok := ftc.mutation.NullLink(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldNullLink,
+		})
+		ft.NullLink = &value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
