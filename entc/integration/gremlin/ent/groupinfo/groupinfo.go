@@ -10,8 +10,10 @@ const (
 	// Label holds the string label denoting the groupinfo type in the database.
 	Label = "group_info"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID       = "id"   // FieldDesc holds the string denoting the desc vertex property in the database.
-	FieldDesc     = "desc" // FieldMaxUsers holds the string denoting the max_users vertex property in the database.
+	FieldID = "id"
+	// FieldDesc holds the string denoting the desc field in the database.
+	FieldDesc = "desc"
+	// FieldMaxUsers holds the string denoting the max_users field in the database.
 	FieldMaxUsers = "max_users"
 
 	// EdgeGroups holds the string denoting the groups edge name in mutations.

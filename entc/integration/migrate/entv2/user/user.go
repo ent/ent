@@ -14,16 +14,25 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID       = "oid"      // FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge      = "age"      // FieldName holds the string denoting the name vertex property in the database.
-	FieldName     = "name"     // FieldNickname holds the string denoting the nickname vertex property in the database.
-	FieldNickname = "nickname" // FieldPhone holds the string denoting the phone vertex property in the database.
-	FieldPhone    = "phone"    // FieldBuffer holds the string denoting the buffer vertex property in the database.
-	FieldBuffer   = "buffer"   // FieldTitle holds the string denoting the title vertex property in the database.
-	FieldTitle    = "title"    // FieldNewName holds the string denoting the new_name vertex property in the database.
-	FieldNewName  = "renamed"  // FieldBlob holds the string denoting the blob vertex property in the database.
-	FieldBlob     = "blob"     // FieldState holds the string denoting the state vertex property in the database.
-	FieldState    = "state"
+	FieldID = "oid"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldNickname holds the string denoting the nickname field in the database.
+	FieldNickname = "nickname"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
+	// FieldBuffer holds the string denoting the buffer field in the database.
+	FieldBuffer = "buffer"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldNewName holds the string denoting the new_name field in the database.
+	FieldNewName = "renamed"
+	// FieldBlob holds the string denoting the blob field in the database.
+	FieldBlob = "blob"
+	// FieldState holds the string denoting the state field in the database.
+	FieldState = "state"
 
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"

@@ -16,8 +16,10 @@ const (
 	// Label holds the string label denoting the galaxy type in the database.
 	Label = "galaxy"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID   = "id"   // FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name" // FieldType holds the string denoting the type vertex property in the database.
+	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 
 	// EdgePlanets holds the string denoting the planets edge name in mutations.

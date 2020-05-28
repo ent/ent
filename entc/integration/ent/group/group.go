@@ -10,12 +10,17 @@ const (
 	// Label holds the string label denoting the group type in the database.
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID       = "id"        // FieldActive holds the string denoting the active vertex property in the database.
-	FieldActive   = "active"    // FieldExpire holds the string denoting the expire vertex property in the database.
-	FieldExpire   = "expire"    // FieldType holds the string denoting the type vertex property in the database.
-	FieldType     = "type"      // FieldMaxUsers holds the string denoting the max_users vertex property in the database.
-	FieldMaxUsers = "max_users" // FieldName holds the string denoting the name vertex property in the database.
-	FieldName     = "name"
+	FieldID = "id"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
+	// FieldExpire holds the string denoting the expire field in the database.
+	FieldExpire = "expire"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldMaxUsers holds the string denoting the max_users field in the database.
+	FieldMaxUsers = "max_users"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"

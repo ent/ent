@@ -14,16 +14,25 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID          = "id"           // FieldOptionalInt holds the string denoting the optional_int vertex property in the database.
-	FieldOptionalInt = "optional_int" // FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge         = "age"          // FieldName holds the string denoting the name vertex property in the database.
-	FieldName        = "name"         // FieldLast holds the string denoting the last vertex property in the database.
-	FieldLast        = "last"         // FieldNickname holds the string denoting the nickname vertex property in the database.
-	FieldNickname    = "nickname"     // FieldPhone holds the string denoting the phone vertex property in the database.
-	FieldPhone       = "phone"        // FieldPassword holds the string denoting the password vertex property in the database.
-	FieldPassword    = "password"     // FieldRole holds the string denoting the role vertex property in the database.
-	FieldRole        = "role"         // FieldSSOCert holds the string denoting the ssocert vertex property in the database.
-	FieldSSOCert     = "sso_cert"
+	FieldID = "id"
+	// FieldOptionalInt holds the string denoting the optional_int field in the database.
+	FieldOptionalInt = "optional_int"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldLast holds the string denoting the last field in the database.
+	FieldLast = "last"
+	// FieldNickname holds the string denoting the nickname field in the database.
+	FieldNickname = "nickname"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
+	// FieldSSOCert holds the string denoting the ssocert field in the database.
+	FieldSSOCert = "sso_cert"
 
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"

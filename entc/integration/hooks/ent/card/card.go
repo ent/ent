@@ -16,9 +16,12 @@ const (
 	// Label holds the string label denoting the card type in the database.
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID        = "id"     // FieldNumber holds the string denoting the number vertex property in the database.
-	FieldNumber    = "number" // FieldName holds the string denoting the name vertex property in the database.
-	FieldName      = "name"   // FieldCreatedAt holds the string denoting the created_at vertex property in the database.
+	FieldID = "id"
+	// FieldNumber holds the string denoting the number field in the database.
+	FieldNumber = "number"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
