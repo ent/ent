@@ -10,8 +10,10 @@ const (
 	// Label holds the string label denoting the car type in the database.
 	Label = "car"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID           = "id"    // FieldModel holds the string denoting the model vertex property in the database.
-	FieldModel        = "model" // FieldRegisteredAt holds the string denoting the registered_at vertex property in the database.
+	FieldID = "id"
+	// FieldModel holds the string denoting the model field in the database.
+	FieldModel = "model"
+	// FieldRegisteredAt holds the string denoting the registered_at field in the database.
 	FieldRegisteredAt = "registered_at"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.

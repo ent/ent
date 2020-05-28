@@ -10,8 +10,10 @@ const (
 	// Label holds the string label denoting the pet type in the database.
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID         = "id"  // FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge        = "age" // FieldLicensedAt holds the string denoting the licensed_at vertex property in the database.
+	FieldID = "id"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldLicensedAt holds the string denoting the licensed_at field in the database.
 	FieldLicensedAt = "licensed_at"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.

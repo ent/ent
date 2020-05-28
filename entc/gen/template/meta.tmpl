@@ -17,8 +17,9 @@ const (
 	Label = "{{ $.Label }}"
 	// {{ $.ID.Constant }} holds the string denoting the id field in the database.
 	{{ $.ID.Constant }} = "{{ $.ID.StorageKey }}"
-	{{- range $f := $.Fields -}}{{ $field := $f.Constant -}}
-		// {{ $field }} holds the string denoting the {{ lower $f.Name }} vertex property in the database.
+	{{- range $f := $.Fields }}
+		{{- $field := $f.Constant }}
+		// {{ $field }} holds the string denoting the {{ lower $f.Name }} field in the database.
 		{{ $field }} = "{{ $f.StorageKey }}"
 	{{- end }}
 

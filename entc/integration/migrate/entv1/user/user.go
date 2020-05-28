@@ -14,14 +14,21 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID       = "oid"      // FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge      = "age"      // FieldName holds the string denoting the name vertex property in the database.
-	FieldName     = "name"     // FieldNickname holds the string denoting the nickname vertex property in the database.
-	FieldNickname = "nickname" // FieldAddress holds the string denoting the address vertex property in the database.
-	FieldAddress  = "address"  // FieldRenamed holds the string denoting the renamed vertex property in the database.
-	FieldRenamed  = "renamed"  // FieldBlob holds the string denoting the blob vertex property in the database.
-	FieldBlob     = "blob"     // FieldState holds the string denoting the state vertex property in the database.
-	FieldState    = "state"
+	FieldID = "oid"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldNickname holds the string denoting the nickname field in the database.
+	FieldNickname = "nickname"
+	// FieldAddress holds the string denoting the address field in the database.
+	FieldAddress = "address"
+	// FieldRenamed holds the string denoting the renamed field in the database.
+	FieldRenamed = "renamed"
+	// FieldBlob holds the string denoting the blob field in the database.
+	FieldBlob = "blob"
+	// FieldState holds the string denoting the state field in the database.
+	FieldState = "state"
 
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"

@@ -12,11 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-
 	"github.com/facebookincubator/ent/dialect/sql"
-
 	"github.com/facebookincubator/ent/entc/integration/ent"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 
 	"github.com/stretchr/testify/require"
 )

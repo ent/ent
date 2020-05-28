@@ -14,9 +14,11 @@ const (
 	// Label holds the string label denoting the planet type in the database.
 	Label = "planet"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID   = "id"   // FieldName holds the string denoting the name vertex property in the database.
-	FieldName = "name" // FieldAge holds the string denoting the age vertex property in the database.
-	FieldAge  = "age"
+	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
 
 	// EdgeNeighbors holds the string denoting the neighbors edge name in mutations.
 	EdgeNeighbors = "neighbors"

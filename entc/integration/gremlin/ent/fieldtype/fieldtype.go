@@ -14,39 +14,71 @@ const (
 	// Label holds the string label denoting the fieldtype type in the database.
 	Label = "field_type"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID                    = "id"                      // FieldInt holds the string denoting the int vertex property in the database.
-	FieldInt                   = "int"                     // FieldInt8 holds the string denoting the int8 vertex property in the database.
-	FieldInt8                  = "int8"                    // FieldInt16 holds the string denoting the int16 vertex property in the database.
-	FieldInt16                 = "int16"                   // FieldInt32 holds the string denoting the int32 vertex property in the database.
-	FieldInt32                 = "int32"                   // FieldInt64 holds the string denoting the int64 vertex property in the database.
-	FieldInt64                 = "int64"                   // FieldOptionalInt holds the string denoting the optional_int vertex property in the database.
-	FieldOptionalInt           = "optional_int"            // FieldOptionalInt8 holds the string denoting the optional_int8 vertex property in the database.
-	FieldOptionalInt8          = "optional_int8"           // FieldOptionalInt16 holds the string denoting the optional_int16 vertex property in the database.
-	FieldOptionalInt16         = "optional_int16"          // FieldOptionalInt32 holds the string denoting the optional_int32 vertex property in the database.
-	FieldOptionalInt32         = "optional_int32"          // FieldOptionalInt64 holds the string denoting the optional_int64 vertex property in the database.
-	FieldOptionalInt64         = "optional_int64"          // FieldNillableInt holds the string denoting the nillable_int vertex property in the database.
-	FieldNillableInt           = "nillable_int"            // FieldNillableInt8 holds the string denoting the nillable_int8 vertex property in the database.
-	FieldNillableInt8          = "nillable_int8"           // FieldNillableInt16 holds the string denoting the nillable_int16 vertex property in the database.
-	FieldNillableInt16         = "nillable_int16"          // FieldNillableInt32 holds the string denoting the nillable_int32 vertex property in the database.
-	FieldNillableInt32         = "nillable_int32"          // FieldNillableInt64 holds the string denoting the nillable_int64 vertex property in the database.
-	FieldNillableInt64         = "nillable_int64"          // FieldValidateOptionalInt32 holds the string denoting the validate_optional_int32 vertex property in the database.
-	FieldValidateOptionalInt32 = "validate_optional_int32" // FieldOptionalUint holds the string denoting the optional_uint vertex property in the database.
-	FieldOptionalUint          = "optional_uint"           // FieldOptionalUint8 holds the string denoting the optional_uint8 vertex property in the database.
-	FieldOptionalUint8         = "optional_uint8"          // FieldOptionalUint16 holds the string denoting the optional_uint16 vertex property in the database.
-	FieldOptionalUint16        = "optional_uint16"         // FieldOptionalUint32 holds the string denoting the optional_uint32 vertex property in the database.
-	FieldOptionalUint32        = "optional_uint32"         // FieldOptionalUint64 holds the string denoting the optional_uint64 vertex property in the database.
-	FieldOptionalUint64        = "optional_uint64"         // FieldState holds the string denoting the state vertex property in the database.
-	FieldState                 = "state"                   // FieldOptionalFloat holds the string denoting the optional_float vertex property in the database.
-	FieldOptionalFloat         = "optional_float"          // FieldOptionalFloat32 holds the string denoting the optional_float32 vertex property in the database.
-	FieldOptionalFloat32       = "optional_float32"        // FieldDatetime holds the string denoting the datetime vertex property in the database.
-	FieldDatetime              = "datetime"                // FieldDecimal holds the string denoting the decimal vertex property in the database.
-	FieldDecimal               = "decimal"                 // FieldDir holds the string denoting the dir vertex property in the database.
-	FieldDir                   = "dir"                     // FieldNdir holds the string denoting the ndir vertex property in the database.
-	FieldNdir                  = "ndir"                    // FieldStr holds the string denoting the str vertex property in the database.
-	FieldStr                   = "str"                     // FieldNullStr holds the string denoting the null_str vertex property in the database.
-	FieldNullStr               = "null_str"                // FieldLink holds the string denoting the link vertex property in the database.
-	FieldLink                  = "link"                    // FieldNullLink holds the string denoting the null_link vertex property in the database.
-	FieldNullLink              = "null_link"
+	FieldID = "id"
+	// FieldInt holds the string denoting the int field in the database.
+	FieldInt = "int"
+	// FieldInt8 holds the string denoting the int8 field in the database.
+	FieldInt8 = "int8"
+	// FieldInt16 holds the string denoting the int16 field in the database.
+	FieldInt16 = "int16"
+	// FieldInt32 holds the string denoting the int32 field in the database.
+	FieldInt32 = "int32"
+	// FieldInt64 holds the string denoting the int64 field in the database.
+	FieldInt64 = "int64"
+	// FieldOptionalInt holds the string denoting the optional_int field in the database.
+	FieldOptionalInt = "optional_int"
+	// FieldOptionalInt8 holds the string denoting the optional_int8 field in the database.
+	FieldOptionalInt8 = "optional_int8"
+	// FieldOptionalInt16 holds the string denoting the optional_int16 field in the database.
+	FieldOptionalInt16 = "optional_int16"
+	// FieldOptionalInt32 holds the string denoting the optional_int32 field in the database.
+	FieldOptionalInt32 = "optional_int32"
+	// FieldOptionalInt64 holds the string denoting the optional_int64 field in the database.
+	FieldOptionalInt64 = "optional_int64"
+	// FieldNillableInt holds the string denoting the nillable_int field in the database.
+	FieldNillableInt = "nillable_int"
+	// FieldNillableInt8 holds the string denoting the nillable_int8 field in the database.
+	FieldNillableInt8 = "nillable_int8"
+	// FieldNillableInt16 holds the string denoting the nillable_int16 field in the database.
+	FieldNillableInt16 = "nillable_int16"
+	// FieldNillableInt32 holds the string denoting the nillable_int32 field in the database.
+	FieldNillableInt32 = "nillable_int32"
+	// FieldNillableInt64 holds the string denoting the nillable_int64 field in the database.
+	FieldNillableInt64 = "nillable_int64"
+	// FieldValidateOptionalInt32 holds the string denoting the validate_optional_int32 field in the database.
+	FieldValidateOptionalInt32 = "validate_optional_int32"
+	// FieldOptionalUint holds the string denoting the optional_uint field in the database.
+	FieldOptionalUint = "optional_uint"
+	// FieldOptionalUint8 holds the string denoting the optional_uint8 field in the database.
+	FieldOptionalUint8 = "optional_uint8"
+	// FieldOptionalUint16 holds the string denoting the optional_uint16 field in the database.
+	FieldOptionalUint16 = "optional_uint16"
+	// FieldOptionalUint32 holds the string denoting the optional_uint32 field in the database.
+	FieldOptionalUint32 = "optional_uint32"
+	// FieldOptionalUint64 holds the string denoting the optional_uint64 field in the database.
+	FieldOptionalUint64 = "optional_uint64"
+	// FieldState holds the string denoting the state field in the database.
+	FieldState = "state"
+	// FieldOptionalFloat holds the string denoting the optional_float field in the database.
+	FieldOptionalFloat = "optional_float"
+	// FieldOptionalFloat32 holds the string denoting the optional_float32 field in the database.
+	FieldOptionalFloat32 = "optional_float32"
+	// FieldDatetime holds the string denoting the datetime field in the database.
+	FieldDatetime = "datetime"
+	// FieldDecimal holds the string denoting the decimal field in the database.
+	FieldDecimal = "decimal"
+	// FieldDir holds the string denoting the dir field in the database.
+	FieldDir = "dir"
+	// FieldNdir holds the string denoting the ndir field in the database.
+	FieldNdir = "ndir"
+	// FieldStr holds the string denoting the str field in the database.
+	FieldStr = "str"
+	// FieldNullStr holds the string denoting the null_str field in the database.
+	FieldNullStr = "null_str"
+	// FieldLink holds the string denoting the link field in the database.
+	FieldLink = "link"
+	// FieldNullLink holds the string denoting the null_link field in the database.
+	FieldNullLink = "null_link"
 )
 
 var (

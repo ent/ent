@@ -14,9 +14,11 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID      = "id"      // FieldVersion holds the string denoting the version vertex property in the database.
-	FieldVersion = "version" // FieldName holds the string denoting the name vertex property in the database.
-	FieldName    = "name"
+	FieldID = "id"
+	// FieldVersion holds the string denoting the version field in the database.
+	FieldVersion = "version"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"

@@ -10,7 +10,8 @@ const (
 	// Label holds the string label denoting the street type in the database.
 	Label = "street"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID   = "id" // FieldName holds the string denoting the name vertex property in the database.
+	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 
 	// EdgeCity holds the string denoting the city edge name in mutations.

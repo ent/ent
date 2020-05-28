@@ -10,10 +10,14 @@ const (
 	// Label holds the string label denoting the file type in the database.
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID    = "id"    // FieldSize holds the string denoting the size vertex property in the database.
-	FieldSize  = "fsize" // FieldName holds the string denoting the name vertex property in the database.
-	FieldName  = "name"  // FieldUser holds the string denoting the user vertex property in the database.
-	FieldUser  = "user"  // FieldGroup holds the string denoting the group vertex property in the database.
+	FieldID = "id"
+	// FieldSize holds the string denoting the size field in the database.
+	FieldSize = "fsize"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldUser holds the string denoting the user field in the database.
+	FieldUser = "user"
+	// FieldGroup holds the string denoting the group field in the database.
 	FieldGroup = "group"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
