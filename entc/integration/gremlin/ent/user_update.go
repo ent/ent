@@ -501,12 +501,12 @@ func (uu *UserUpdate) ClearParent() *UserUpdate {
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := uu.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+			return 0, fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)
 		}
 	}
 	if v, ok := uu.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+			return 0, fmt.Errorf("ent: validator failed for field \"role\": %w", err)
 		}
 	}
 
@@ -1242,12 +1242,12 @@ func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	if v, ok := uuo.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)
 		}
 	}
 	if v, ok := uuo.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"role\": %w", err)
 		}
 	}
 

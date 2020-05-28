@@ -322,7 +322,7 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if v, ok := uc.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)
 		}
 	}
 	if _, ok := uc.mutation.Age(); !ok {
@@ -341,7 +341,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	}
 	if v, ok := uc.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"role\": %w", err)
 		}
 	}
 	var (

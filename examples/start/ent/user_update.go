@@ -124,7 +124,7 @@ func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := uu.mutation.Age(); ok {
 		if err := user.AgeValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"age\": %v", err)
+			return 0, fmt.Errorf("ent: validator failed for field \"age\": %w", err)
 		}
 	}
 
@@ -401,7 +401,7 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	if v, ok := uuo.mutation.Age(); ok {
 		if err := user.AgeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"age\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"age\": %w", err)
 		}
 	}
 

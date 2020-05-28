@@ -65,7 +65,7 @@ func (pc *PlanetCreate) Save(ctx context.Context) (*Planet, error) {
 	}
 	if v, ok := pc.mutation.Name(); ok {
 		if err := planet.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
 		}
 	}
 	var (

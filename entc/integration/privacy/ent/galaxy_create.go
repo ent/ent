@@ -58,7 +58,7 @@ func (gc *GalaxyCreate) Save(ctx context.Context) (*Galaxy, error) {
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := galaxy.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
 		}
 	}
 	if _, ok := gc.mutation.GetType(); !ok {
@@ -66,7 +66,7 @@ func (gc *GalaxyCreate) Save(ctx context.Context) (*Galaxy, error) {
 	}
 	if v, ok := gc.mutation.GetType(); ok {
 		if err := galaxy.TypeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
 		}
 	}
 	var (

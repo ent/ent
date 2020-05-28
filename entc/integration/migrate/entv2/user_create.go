@@ -172,7 +172,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	}
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
+			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %w", err)
 		}
 	}
 	var (

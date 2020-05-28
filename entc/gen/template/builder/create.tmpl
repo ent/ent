@@ -49,7 +49,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		{{- with or $f.Validators $f.IsEnum }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				if err := {{ $.Package }}.{{ $f.Validator }}(v); err != nil {
-					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %v", err)
+					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)
 				}
 			}
 		{{- end }}
