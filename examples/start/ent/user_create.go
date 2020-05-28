@@ -82,7 +82,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	}
 	if v, ok := uc.mutation.Age(); ok {
 		if err := user.AgeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"age\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"age\": %w", err)
 		}
 	}
 	if _, ok := uc.mutation.Name(); !ok {

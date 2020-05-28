@@ -746,12 +746,12 @@ func (ftu *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
 		}
 	}
 	if v, ok := ftu.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
+			return 0, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
 		}
 	}
 	var (
@@ -1798,12 +1798,12 @@ func (ftuo *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
 		}
 	}
 	if v, ok := ftuo.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
 		}
 	}
 	var (

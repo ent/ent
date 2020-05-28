@@ -52,7 +52,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
 		}
 	}
 	var (

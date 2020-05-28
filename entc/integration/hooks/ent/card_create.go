@@ -93,7 +93,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"number\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"number\": %w", err)
 		}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {

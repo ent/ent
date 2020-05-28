@@ -238,12 +238,12 @@ func (uu *UserUpdate) ClearCar() *UserUpdate {
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := uu.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
-			return 0, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
+			return 0, fmt.Errorf("entv1: validator failed for field \"name\": %w", err)
 		}
 	}
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return 0, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
+			return 0, fmt.Errorf("entv1: validator failed for field \"state\": %w", err)
 		}
 	}
 
@@ -761,12 +761,12 @@ func (uuo *UserUpdateOne) ClearCar() *UserUpdateOne {
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	if v, ok := uuo.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("entv1: validator failed for field \"name\": %v", err)
+			return nil, fmt.Errorf("entv1: validator failed for field \"name\": %w", err)
 		}
 	}
 	if v, ok := uuo.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %v", err)
+			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %w", err)
 		}
 	}
 

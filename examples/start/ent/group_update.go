@@ -72,7 +72,7 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := gu.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+			return 0, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
 		}
 	}
 
@@ -246,7 +246,7 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	if v, ok := guo.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
 		}
 	}
 

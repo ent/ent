@@ -209,7 +209,7 @@ func (uu *UserUpdate) ClearPets() *UserUpdate {
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return 0, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
+			return 0, fmt.Errorf("entv2: validator failed for field \"state\": %w", err)
 		}
 	}
 
@@ -641,7 +641,7 @@ func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	if v, ok := uuo.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %v", err)
+			return nil, fmt.Errorf("entv2: validator failed for field \"state\": %w", err)
 		}
 	}
 

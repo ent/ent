@@ -137,7 +137,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	}
 	if v, ok := fc.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"size\": %w", err)
 		}
 	}
 	if _, ok := fc.mutation.Name(); !ok {

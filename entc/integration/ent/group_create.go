@@ -148,7 +148,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	}
 	if v, ok := gc.mutation.GetType(); ok {
 		if err := group.TypeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
 		}
 	}
 	if _, ok := gc.mutation.MaxUsers(); !ok {
@@ -157,7 +157,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	}
 	if v, ok := gc.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"max_users\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)
 		}
 	}
 	if _, ok := gc.mutation.Name(); !ok {
@@ -165,7 +165,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
 		}
 	}
 	if _, ok := gc.mutation.InfoID(); !ok {

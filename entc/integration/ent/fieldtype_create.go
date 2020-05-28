@@ -422,12 +422,12 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	}
 	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
 		}
 	}
 	if v, ok := ftc.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"state\": %v", err)
+			return nil, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
 		}
 	}
 	var (
