@@ -7,12 +7,14 @@
 package ent
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
@@ -75,6 +77,16 @@ type FieldType struct {
 	Decimal float64 `json:"decimal,omitempty"`
 	// Dir holds the value of the "dir" field.
 	Dir http.Dir `json:"dir,omitempty"`
+	// Ndir holds the value of the "ndir" field.
+	Ndir *http.Dir `json:"ndir,omitempty"`
+	// Str holds the value of the "str" field.
+	Str sql.NullString `json:"str,omitempty"`
+	// NullStr holds the value of the "null_str" field.
+	NullStr *sql.NullString `json:"null_str,omitempty"`
+	// Link holds the value of the "link" field.
+	Link schema.Link `json:"link,omitempty"`
+	// NullLink holds the value of the "null_link" field.
+	NullLink *schema.Link `json:"null_link,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -112,6 +124,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Datetime              int64           `json:"datetime,omitempty"`
 		Decimal               float64         `json:"decimal,omitempty"`
 		Dir                   http.Dir        `json:"dir,omitempty"`
+		Ndir                  *http.Dir       `json:"ndir,omitempty"`
+		Str                   sql.NullString  `json:"str,omitempty"`
+		NullStr               *sql.NullString `json:"null_str,omitempty"`
+		Link                  schema.Link     `json:"link,omitempty"`
+		NullLink              *schema.Link    `json:"null_link,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -144,6 +161,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Datetime = time.Unix(0, scanft.Datetime)
 	ft.Decimal = scanft.Decimal
 	ft.Dir = scanft.Dir
+	ft.Ndir = scanft.Ndir
+	ft.Str = scanft.Str
+	ft.NullStr = scanft.NullStr
+	ft.Link = scanft.Link
+	ft.NullLink = scanft.NullLink
 	return nil
 }
 
@@ -234,6 +256,22 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteString(", dir=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
+	if v := ft.Ndir; v != nil {
+		builder.WriteString(", ndir=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", str=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Str))
+	if v := ft.NullStr; v != nil {
+		builder.WriteString(", null_str=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", link=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Link))
+	if v := ft.NullLink; v != nil {
+		builder.WriteString(", null_link=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -276,6 +314,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Datetime              int64           `json:"datetime,omitempty"`
 		Decimal               float64         `json:"decimal,omitempty"`
 		Dir                   http.Dir        `json:"dir,omitempty"`
+		Ndir                  *http.Dir       `json:"ndir,omitempty"`
+		Str                   sql.NullString  `json:"str,omitempty"`
+		NullStr               *sql.NullString `json:"null_str,omitempty"`
+		Link                  schema.Link     `json:"link,omitempty"`
+		NullLink              *schema.Link    `json:"null_link,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -310,6 +353,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Datetime:              time.Unix(0, v.Datetime),
 			Decimal:               v.Decimal,
 			Dir:                   v.Dir,
+			Ndir:                  v.Ndir,
+			Str:                   v.Str,
+			NullStr:               v.NullStr,
+			Link:                  v.Link,
+			NullLink:              v.NullLink,
 		})
 	}
 	return nil

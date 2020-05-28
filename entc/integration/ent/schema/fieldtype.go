@@ -5,10 +5,14 @@
 package schema
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -68,5 +72,45 @@ func (FieldType) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			GoType(http.Dir("ndir")),
+		field.String("str").
+			Optional().
+			GoType(&sql.NullString{}),
+		field.String("null_str").
+			Optional().
+			Nillable().
+			GoType(&sql.NullString{}),
+		field.String("link").
+			Optional().
+			GoType(&Link{}),
+		field.String("null_link").
+			Optional().
+			Nillable().
+			GoType(&Link{}),
 	}
+}
+
+type Link struct {
+	*url.URL
+}
+
+// Scan implements the Scanner interface.
+func (l *Link) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case []byte:
+		l.URL, err = url.Parse(string(v))
+	case string:
+		l.URL, err = url.Parse(v)
+	default:
+		err = fmt.Errorf("unexpcted type %T", v)
+	}
+	return
+}
+
+// Value implements the driver Valuer interface.
+func (l Link) Value() (driver.Value, error) {
+	if l.URL == nil {
+		return nil, nil
+	}
+	return l.String(), nil
 }

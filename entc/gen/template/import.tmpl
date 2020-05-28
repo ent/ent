@@ -19,8 +19,9 @@ import (
 			"{{ . }}"
 		{{- end }}
 		{{- range $f := $.Fields }}
-			{{- with $f.Type.PkgPath }}
-				"{{ . }}"
+			{{- $pkg := $f.Type.PkgPath }}
+			{{- if and $pkg (not (hasImport (base $pkg ))) }}
+				"{{ $pkg }}"
 			{{- end }}
 		{{- end }}
 	{{- end }}

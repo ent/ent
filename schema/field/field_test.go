@@ -122,9 +122,9 @@ func TestString(t *testing.T) {
 
 	fd = field.String("nullable_name").GoType(&sql.NullString{}).Descriptor()
 	assert.NoError(t, fd.Err())
-	assert.Equal(t, "*sql.NullString", fd.Info.Ident)
+	assert.Equal(t, "sql.NullString", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
-	assert.Equal(t, "*sql.NullString", fd.Info.String())
+	assert.Equal(t, "sql.NullString", fd.Info.String())
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 	assert.False(t, fd.Info.Stringer())
@@ -136,9 +136,9 @@ func TestString(t *testing.T) {
 		*url.URL
 	}
 	fd = field.String("nullable_url").GoType(&tURL{}).Descriptor()
-	assert.Equal(t, "*field_test.tURL", fd.Info.Ident)
+	assert.Equal(t, "field_test.tURL", fd.Info.Ident)
 	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
-	assert.Equal(t, "*field_test.tURL", fd.Info.String())
+	assert.Equal(t, "field_test.tURL", fd.Info.String())
 	assert.True(t, fd.Info.ValueScanner())
 	assert.True(t, fd.Info.Stringer())
 

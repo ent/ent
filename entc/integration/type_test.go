@@ -8,8 +8,13 @@ import (
 	"context"
 	"math"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
+
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
+
+	"github.com/facebookincubator/ent/dialect/sql"
 
 	"github.com/facebookincubator/ent/entc/integration/ent"
 
@@ -19,6 +24,9 @@ import (
 func Types(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	require := require.New(t)
+
+	link, err := url.Parse("localhost")
+	require.NoError(err)
 
 	ft := client.FieldType.Create().
 		SetInt(1).
@@ -49,6 +57,12 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNillableInt16(math.MinInt16).
 		SetNillableInt32(math.MinInt32).
 		SetNillableInt64(math.MinInt64).
+		SetDir("dir").
+		SetNdir("ndir").
+		SetStr(sql.NullString{String: "str", Valid: true}).
+		SetNullStr(sql.NullString{String: "str", Valid: true}).
+		SetLink(schema.Link{URL: link}).
+		SetNullLink(schema.Link{URL: link}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -59,6 +73,13 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int16(math.MinInt16), *ft.NillableInt16)
 	require.Equal(int32(math.MinInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MinInt64), *ft.NillableInt64)
+	require.Equal(http.Dir("dir"), ft.Dir)
+	require.NotNil(*ft.Ndir)
+	require.Equal(http.Dir("ndir"), *ft.Ndir)
+	require.Equal("str", ft.Str.String)
+	require.Equal("str", ft.NullStr.String)
+	require.Equal("localhost", ft.Link.String())
+	require.Equal("localhost", ft.NullLink.String())
 
 	ft = ft.Update().
 		SetInt(1).
@@ -78,6 +99,10 @@ func Types(t *testing.T, client *ent.Client) {
 		SetDecimal(10.20).
 		SetDir("dir").
 		SetNdir("ndir").
+		SetStr(sql.NullString{String: "str", Valid: true}).
+		SetNullStr(sql.NullString{String: "str", Valid: true}).
+		SetLink(schema.Link{URL: link}).
+		SetNullLink(schema.Link{URL: link}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -89,8 +114,12 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int32(math.MaxInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
 	require.Equal(10.20, ft.Decimal)
+	require.False(ft.Datetime.IsZero())
 	require.Equal(http.Dir("dir"), ft.Dir)
 	require.NotNil(*ft.Ndir)
 	require.Equal(http.Dir("ndir"), *ft.Ndir)
-	require.False(ft.Datetime.IsZero())
+	require.Equal("str", ft.Str.String)
+	require.Equal("str", ft.NullStr.String)
+	require.Equal("localhost", ft.Link.String())
+	require.Equal("localhost", ft.NullLink.String())
 }

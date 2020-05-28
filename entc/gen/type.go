@@ -674,6 +674,9 @@ func (f Field) Sensitive() bool { return f.def != nil && f.def.Sensitive }
 
 // NullType returns the sql null-type for optional and nullable fields.
 func (f Field) NullType() string {
+	if f.Type.ValueScanner() {
+		return f.Type.String()
+	}
 	switch f.Type.Type {
 	case field.TypeJSON:
 		return "[]byte"
@@ -780,6 +783,12 @@ func (f Field) StorageKey() string {
 // has a custom GoType.
 func (f Field) HasGoType() bool {
 	return f.Type != nil && f.Type.RType != nil
+}
+
+// ConvertedToBasic indicates if the Go type of the field
+// can be converted to basic type (string, int, etc).
+func (f Field) ConvertedToBasic() bool {
+	return !f.HasGoType() || f.BasicType("") != ""
 }
 
 var (

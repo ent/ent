@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
@@ -364,6 +366,44 @@ func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNdir sets the ndir field.
+func (ftc *FieldTypeCreate) SetNdir(h http.Dir) *FieldTypeCreate {
+	ftc.mutation.SetNdir(h)
+	return ftc
+}
+
+// SetNillableNdir sets the ndir field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
+	if h != nil {
+		ftc.SetNdir(*h)
+	}
+	return ftc
+}
+
+// SetStr sets the str field.
+func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
+	ftc.mutation.SetStr(ss)
+	return ftc
+}
+
+// SetNullStr sets the null_str field.
+func (ftc *FieldTypeCreate) SetNullStr(ss sql.NullString) *FieldTypeCreate {
+	ftc.mutation.SetNullStr(ss)
+	return ftc
+}
+
+// SetLink sets the link field.
+func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLink(s)
+	return ftc
+}
+
+// SetNullLink sets the null_link field.
+func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetNullLink(s)
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -525,6 +565,21 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Dir(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDir, value)
+	}
+	if value, ok := ftc.mutation.Ndir(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNdir, value)
+	}
+	if value, ok := ftc.mutation.Str(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStr, value)
+	}
+	if value, ok := ftc.mutation.NullStr(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullStr, value)
+	}
+	if value, ok := ftc.mutation.Link(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLink, value)
+	}
+	if value, ok := ftc.mutation.NullLink(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
 	}
 	return v.ValueMap(true)
 }

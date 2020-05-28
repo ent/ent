@@ -8,11 +8,13 @@ package ent
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/comment"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
@@ -1251,6 +1253,11 @@ type FieldTypeMutation struct {
 	decimal                    *float64
 	adddecimal                 *float64
 	dir                        *http.Dir
+	ndir                       *http.Dir
+	str                        *sql.NullString
+	null_str                   *sql.NullString
+	link                       *schema.Link
+	null_link                  *schema.Link
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -3119,6 +3126,256 @@ func (m *FieldTypeMutation) ResetDir() {
 	delete(m.clearedFields, fieldtype.FieldDir)
 }
 
+// SetNdir sets the ndir field.
+func (m *FieldTypeMutation) SetNdir(h http.Dir) {
+	m.ndir = &h
+}
+
+// Ndir returns the ndir value in the mutation.
+func (m *FieldTypeMutation) Ndir() (r http.Dir, exists bool) {
+	v := m.ndir
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNdir returns the old ndir value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldNdir(ctx context.Context) (v *http.Dir, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNdir is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNdir requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNdir: %w", err)
+	}
+	return oldValue.Ndir, nil
+}
+
+// ClearNdir clears the value of ndir.
+func (m *FieldTypeMutation) ClearNdir() {
+	m.ndir = nil
+	m.clearedFields[fieldtype.FieldNdir] = struct{}{}
+}
+
+// NdirCleared returns if the field ndir was cleared in this mutation.
+func (m *FieldTypeMutation) NdirCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldNdir]
+	return ok
+}
+
+// ResetNdir reset all changes of the "ndir" field.
+func (m *FieldTypeMutation) ResetNdir() {
+	m.ndir = nil
+	delete(m.clearedFields, fieldtype.FieldNdir)
+}
+
+// SetStr sets the str field.
+func (m *FieldTypeMutation) SetStr(ss sql.NullString) {
+	m.str = &ss
+}
+
+// Str returns the str value in the mutation.
+func (m *FieldTypeMutation) Str() (r sql.NullString, exists bool) {
+	v := m.str
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStr returns the old str value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldStr(ctx context.Context) (v sql.NullString, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStr is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStr: %w", err)
+	}
+	return oldValue.Str, nil
+}
+
+// ClearStr clears the value of str.
+func (m *FieldTypeMutation) ClearStr() {
+	m.str = nil
+	m.clearedFields[fieldtype.FieldStr] = struct{}{}
+}
+
+// StrCleared returns if the field str was cleared in this mutation.
+func (m *FieldTypeMutation) StrCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldStr]
+	return ok
+}
+
+// ResetStr reset all changes of the "str" field.
+func (m *FieldTypeMutation) ResetStr() {
+	m.str = nil
+	delete(m.clearedFields, fieldtype.FieldStr)
+}
+
+// SetNullStr sets the null_str field.
+func (m *FieldTypeMutation) SetNullStr(ss sql.NullString) {
+	m.null_str = &ss
+}
+
+// NullStr returns the null_str value in the mutation.
+func (m *FieldTypeMutation) NullStr() (r sql.NullString, exists bool) {
+	v := m.null_str
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNullStr returns the old null_str value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldNullStr(ctx context.Context) (v *sql.NullString, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNullStr is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNullStr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNullStr: %w", err)
+	}
+	return oldValue.NullStr, nil
+}
+
+// ClearNullStr clears the value of null_str.
+func (m *FieldTypeMutation) ClearNullStr() {
+	m.null_str = nil
+	m.clearedFields[fieldtype.FieldNullStr] = struct{}{}
+}
+
+// NullStrCleared returns if the field null_str was cleared in this mutation.
+func (m *FieldTypeMutation) NullStrCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldNullStr]
+	return ok
+}
+
+// ResetNullStr reset all changes of the "null_str" field.
+func (m *FieldTypeMutation) ResetNullStr() {
+	m.null_str = nil
+	delete(m.clearedFields, fieldtype.FieldNullStr)
+}
+
+// SetLink sets the link field.
+func (m *FieldTypeMutation) SetLink(s schema.Link) {
+	m.link = &s
+}
+
+// Link returns the link value in the mutation.
+func (m *FieldTypeMutation) Link() (r schema.Link, exists bool) {
+	v := m.link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLink returns the old link value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldLink(ctx context.Context) (v schema.Link, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLink is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLink requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLink: %w", err)
+	}
+	return oldValue.Link, nil
+}
+
+// ClearLink clears the value of link.
+func (m *FieldTypeMutation) ClearLink() {
+	m.link = nil
+	m.clearedFields[fieldtype.FieldLink] = struct{}{}
+}
+
+// LinkCleared returns if the field link was cleared in this mutation.
+func (m *FieldTypeMutation) LinkCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldLink]
+	return ok
+}
+
+// ResetLink reset all changes of the "link" field.
+func (m *FieldTypeMutation) ResetLink() {
+	m.link = nil
+	delete(m.clearedFields, fieldtype.FieldLink)
+}
+
+// SetNullLink sets the null_link field.
+func (m *FieldTypeMutation) SetNullLink(s schema.Link) {
+	m.null_link = &s
+}
+
+// NullLink returns the null_link value in the mutation.
+func (m *FieldTypeMutation) NullLink() (r schema.Link, exists bool) {
+	v := m.null_link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNullLink returns the old null_link value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldNullLink(ctx context.Context) (v *schema.Link, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNullLink is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNullLink requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNullLink: %w", err)
+	}
+	return oldValue.NullLink, nil
+}
+
+// ClearNullLink clears the value of null_link.
+func (m *FieldTypeMutation) ClearNullLink() {
+	m.null_link = nil
+	m.clearedFields[fieldtype.FieldNullLink] = struct{}{}
+}
+
+// NullLinkCleared returns if the field null_link was cleared in this mutation.
+func (m *FieldTypeMutation) NullLinkCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldNullLink]
+	return ok
+}
+
+// ResetNullLink reset all changes of the "null_link" field.
+func (m *FieldTypeMutation) ResetNullLink() {
+	m.null_link = nil
+	delete(m.clearedFields, fieldtype.FieldNullLink)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -3133,7 +3390,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 27)
+	fields := make([]string, 0, 32)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -3215,6 +3472,21 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.dir != nil {
 		fields = append(fields, fieldtype.FieldDir)
 	}
+	if m.ndir != nil {
+		fields = append(fields, fieldtype.FieldNdir)
+	}
+	if m.str != nil {
+		fields = append(fields, fieldtype.FieldStr)
+	}
+	if m.null_str != nil {
+		fields = append(fields, fieldtype.FieldNullStr)
+	}
+	if m.link != nil {
+		fields = append(fields, fieldtype.FieldLink)
+	}
+	if m.null_link != nil {
+		fields = append(fields, fieldtype.FieldNullLink)
+	}
 	return fields
 }
 
@@ -3277,6 +3549,16 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Decimal()
 	case fieldtype.FieldDir:
 		return m.Dir()
+	case fieldtype.FieldNdir:
+		return m.Ndir()
+	case fieldtype.FieldStr:
+		return m.Str()
+	case fieldtype.FieldNullStr:
+		return m.NullStr()
+	case fieldtype.FieldLink:
+		return m.Link()
+	case fieldtype.FieldNullLink:
+		return m.NullLink()
 	}
 	return nil, false
 }
@@ -3340,6 +3622,16 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDecimal(ctx)
 	case fieldtype.FieldDir:
 		return m.OldDir(ctx)
+	case fieldtype.FieldNdir:
+		return m.OldNdir(ctx)
+	case fieldtype.FieldStr:
+		return m.OldStr(ctx)
+	case fieldtype.FieldNullStr:
+		return m.OldNullStr(ctx)
+	case fieldtype.FieldLink:
+		return m.OldLink(ctx)
+	case fieldtype.FieldNullLink:
+		return m.OldNullLink(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -3537,6 +3829,41 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDir(v)
+		return nil
+	case fieldtype.FieldNdir:
+		v, ok := value.(http.Dir)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNdir(v)
+		return nil
+	case fieldtype.FieldStr:
+		v, ok := value.(sql.NullString)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStr(v)
+		return nil
+	case fieldtype.FieldNullStr:
+		v, ok := value.(sql.NullString)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNullStr(v)
+		return nil
+	case fieldtype.FieldLink:
+		v, ok := value.(schema.Link)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLink(v)
+		return nil
+	case fieldtype.FieldNullLink:
+		v, ok := value.(schema.Link)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNullLink(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -3925,6 +4252,21 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldDir) {
 		fields = append(fields, fieldtype.FieldDir)
 	}
+	if m.FieldCleared(fieldtype.FieldNdir) {
+		fields = append(fields, fieldtype.FieldNdir)
+	}
+	if m.FieldCleared(fieldtype.FieldStr) {
+		fields = append(fields, fieldtype.FieldStr)
+	}
+	if m.FieldCleared(fieldtype.FieldNullStr) {
+		fields = append(fields, fieldtype.FieldNullStr)
+	}
+	if m.FieldCleared(fieldtype.FieldLink) {
+		fields = append(fields, fieldtype.FieldLink)
+	}
+	if m.FieldCleared(fieldtype.FieldNullLink) {
+		fields = append(fields, fieldtype.FieldNullLink)
+	}
 	return fields
 }
 
@@ -4004,6 +4346,21 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldDir:
 		m.ClearDir()
+		return nil
+	case fieldtype.FieldNdir:
+		m.ClearNdir()
+		return nil
+	case fieldtype.FieldStr:
+		m.ClearStr()
+		return nil
+	case fieldtype.FieldNullStr:
+		m.ClearNullStr()
+		return nil
+	case fieldtype.FieldLink:
+		m.ClearLink()
+		return nil
+	case fieldtype.FieldNullLink:
+		m.ClearNullLink()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -4094,6 +4451,21 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldDir:
 		m.ResetDir()
+		return nil
+	case fieldtype.FieldNdir:
+		m.ResetNdir()
+		return nil
+	case fieldtype.FieldStr:
+		m.ResetStr()
+		return nil
+	case fieldtype.FieldNullStr:
+		m.ResetNullStr()
+		return nil
+	case fieldtype.FieldLink:
+		m.ResetLink()
+		return nil
+	case fieldtype.FieldNullLink:
+		m.ResetNullLink()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

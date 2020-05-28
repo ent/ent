@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
+	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
 // ID filters vertices based on their identifier.
@@ -285,6 +286,38 @@ func Ndir(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldNdir), vc))
+	})
+}
+
+// Str applies equality check predicate on the "str" field. It's identical to StrEQ.
+func Str(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStr), vc))
+	})
+}
+
+// NullStr applies equality check predicate on the "null_str" field. It's identical to NullStrEQ.
+func NullStr(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullStr), vc))
+	})
+}
+
+// Link applies equality check predicate on the "link" field. It's identical to LinkEQ.
+func Link(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLink), vc))
+	})
+}
+
+// NullLink applies equality check predicate on the "null_link" field. It's identical to NullLinkEQ.
+func NullLink(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullLink), vc))
 	})
 }
 
@@ -2550,7 +2583,7 @@ func DirNEQ(v http.Dir) predicate.FieldType {
 func DirIn(vs ...http.Dir) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
-		v[i] = vs[i]
+		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
@@ -2567,7 +2600,7 @@ func DirIn(vs ...http.Dir) predicate.FieldType {
 func DirNotIn(vs ...http.Dir) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
-		v[i] = vs[i]
+		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
@@ -2686,7 +2719,7 @@ func NdirNEQ(v http.Dir) predicate.FieldType {
 func NdirIn(vs ...http.Dir) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
-		v[i] = vs[i]
+		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
@@ -2703,7 +2736,7 @@ func NdirIn(vs ...http.Dir) predicate.FieldType {
 func NdirNotIn(vs ...http.Dir) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
-		v[i] = vs[i]
+		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
@@ -2799,6 +2832,550 @@ func NdirContainsFold(v http.Dir) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldNdir), vc))
+	})
+}
+
+// StrEQ applies the EQ predicate on the "str" field.
+func StrEQ(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStr), vc))
+	})
+}
+
+// StrNEQ applies the NEQ predicate on the "str" field.
+func StrNEQ(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStr), vc))
+	})
+}
+
+// StrIn applies the In predicate on the "str" field.
+func StrIn(vs ...sql.NullString) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStr), v...))
+	})
+}
+
+// StrNotIn applies the NotIn predicate on the "str" field.
+func StrNotIn(vs ...sql.NullString) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStr), v...))
+	})
+}
+
+// StrGT applies the GT predicate on the "str" field.
+func StrGT(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStr), vc))
+	})
+}
+
+// StrGTE applies the GTE predicate on the "str" field.
+func StrGTE(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStr), vc))
+	})
+}
+
+// StrLT applies the LT predicate on the "str" field.
+func StrLT(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStr), vc))
+	})
+}
+
+// StrLTE applies the LTE predicate on the "str" field.
+func StrLTE(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStr), vc))
+	})
+}
+
+// StrContains applies the Contains predicate on the "str" field.
+func StrContains(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldStr), vc))
+	})
+}
+
+// StrHasPrefix applies the HasPrefix predicate on the "str" field.
+func StrHasPrefix(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldStr), vc))
+	})
+}
+
+// StrHasSuffix applies the HasSuffix predicate on the "str" field.
+func StrHasSuffix(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldStr), vc))
+	})
+}
+
+// StrIsNil applies the IsNil predicate on the "str" field.
+func StrIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStr)))
+	})
+}
+
+// StrNotNil applies the NotNil predicate on the "str" field.
+func StrNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStr)))
+	})
+}
+
+// StrEqualFold applies the EqualFold predicate on the "str" field.
+func StrEqualFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldStr), vc))
+	})
+}
+
+// StrContainsFold applies the ContainsFold predicate on the "str" field.
+func StrContainsFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldStr), vc))
+	})
+}
+
+// NullStrEQ applies the EQ predicate on the "null_str" field.
+func NullStrEQ(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrNEQ applies the NEQ predicate on the "null_str" field.
+func NullStrNEQ(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrIn applies the In predicate on the "null_str" field.
+func NullStrIn(vs ...sql.NullString) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNullStr), v...))
+	})
+}
+
+// NullStrNotIn applies the NotIn predicate on the "null_str" field.
+func NullStrNotIn(vs ...sql.NullString) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNullStr), v...))
+	})
+}
+
+// NullStrGT applies the GT predicate on the "null_str" field.
+func NullStrGT(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrGTE applies the GTE predicate on the "null_str" field.
+func NullStrGTE(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrLT applies the LT predicate on the "null_str" field.
+func NullStrLT(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrLTE applies the LTE predicate on the "null_str" field.
+func NullStrLTE(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrContains applies the Contains predicate on the "null_str" field.
+func NullStrContains(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrHasPrefix applies the HasPrefix predicate on the "null_str" field.
+func NullStrHasPrefix(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrHasSuffix applies the HasSuffix predicate on the "null_str" field.
+func NullStrHasSuffix(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrIsNil applies the IsNil predicate on the "null_str" field.
+func NullStrIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNullStr)))
+	})
+}
+
+// NullStrNotNil applies the NotNil predicate on the "null_str" field.
+func NullStrNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNullStr)))
+	})
+}
+
+// NullStrEqualFold applies the EqualFold predicate on the "null_str" field.
+func NullStrEqualFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrContainsFold applies the ContainsFold predicate on the "null_str" field.
+func NullStrContainsFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNullStr), vc))
+	})
+}
+
+// LinkEQ applies the EQ predicate on the "link" field.
+func LinkEQ(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLink), vc))
+	})
+}
+
+// LinkNEQ applies the NEQ predicate on the "link" field.
+func LinkNEQ(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLink), vc))
+	})
+}
+
+// LinkIn applies the In predicate on the "link" field.
+func LinkIn(vs ...schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String()
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldLink), v...))
+	})
+}
+
+// LinkNotIn applies the NotIn predicate on the "link" field.
+func LinkNotIn(vs ...schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String()
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldLink), v...))
+	})
+}
+
+// LinkGT applies the GT predicate on the "link" field.
+func LinkGT(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLink), vc))
+	})
+}
+
+// LinkGTE applies the GTE predicate on the "link" field.
+func LinkGTE(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLink), vc))
+	})
+}
+
+// LinkLT applies the LT predicate on the "link" field.
+func LinkLT(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLink), vc))
+	})
+}
+
+// LinkLTE applies the LTE predicate on the "link" field.
+func LinkLTE(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLink), vc))
+	})
+}
+
+// LinkContains applies the Contains predicate on the "link" field.
+func LinkContains(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldLink), vc))
+	})
+}
+
+// LinkHasPrefix applies the HasPrefix predicate on the "link" field.
+func LinkHasPrefix(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldLink), vc))
+	})
+}
+
+// LinkHasSuffix applies the HasSuffix predicate on the "link" field.
+func LinkHasSuffix(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldLink), vc))
+	})
+}
+
+// LinkIsNil applies the IsNil predicate on the "link" field.
+func LinkIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLink)))
+	})
+}
+
+// LinkNotNil applies the NotNil predicate on the "link" field.
+func LinkNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLink)))
+	})
+}
+
+// LinkEqualFold applies the EqualFold predicate on the "link" field.
+func LinkEqualFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldLink), vc))
+	})
+}
+
+// LinkContainsFold applies the ContainsFold predicate on the "link" field.
+func LinkContainsFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldLink), vc))
+	})
+}
+
+// NullLinkEQ applies the EQ predicate on the "null_link" field.
+func NullLinkEQ(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkNEQ applies the NEQ predicate on the "null_link" field.
+func NullLinkNEQ(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkIn applies the In predicate on the "null_link" field.
+func NullLinkIn(vs ...schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String()
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNullLink), v...))
+	})
+}
+
+// NullLinkNotIn applies the NotIn predicate on the "null_link" field.
+func NullLinkNotIn(vs ...schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].String()
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNullLink), v...))
+	})
+}
+
+// NullLinkGT applies the GT predicate on the "null_link" field.
+func NullLinkGT(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkGTE applies the GTE predicate on the "null_link" field.
+func NullLinkGTE(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkLT applies the LT predicate on the "null_link" field.
+func NullLinkLT(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkLTE applies the LTE predicate on the "null_link" field.
+func NullLinkLTE(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkContains applies the Contains predicate on the "null_link" field.
+func NullLinkContains(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkHasPrefix applies the HasPrefix predicate on the "null_link" field.
+func NullLinkHasPrefix(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkHasSuffix applies the HasSuffix predicate on the "null_link" field.
+func NullLinkHasSuffix(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkIsNil applies the IsNil predicate on the "null_link" field.
+func NullLinkIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNullLink)))
+	})
+}
+
+// NullLinkNotNil applies the NotNil predicate on the "null_link" field.
+func NullLinkNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNullLink)))
+	})
+}
+
+// NullLinkEqualFold applies the EqualFold predicate on the "null_link" field.
+func NullLinkEqualFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkContainsFold applies the ContainsFold predicate on the "null_link" field.
+func NullLinkContainsFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNullLink), vc))
 	})
 }
 

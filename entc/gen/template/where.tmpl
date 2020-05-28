@@ -37,7 +37,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ range $f := $.Fields }}
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
-	{{ $comparable := or (not $f.HasGoType) ($f.BasicType "v") }}
+	{{ $comparable := or (not $f.HasGoType) $f.ConvertedToBasic }}
 	{{- if and $hasP $comparable }}
         {{ $arg := "v" }}
 		{{ $func := $f.StructField }}
@@ -71,7 +71,11 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		{{- if $op.Variadic }}
 			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
-				v[i] = {{ $arg }}[i]
+            			{{- with $f.BasicType (printf "%s[i]" $arg) }}
+					v[i] = {{ . }}
+				{{- else }}
+					v[i] = {{ $arg }}[i]
+				{{- end }}
 			}
 			{{- $arg = "v" }}
 		{{- else if and (not $op.Niladic) $f.HasGoType }}
@@ -88,7 +92,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ end }}
 {{ end }}
 
-{{ range $_, $e := $.Edges }}
+{{ range $e := $.Edges }}
 	{{ $func := print "Has" $e.StructField }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
 	func {{ $func }}() predicate.{{ $.Name }} {
