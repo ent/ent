@@ -8,6 +8,7 @@ package ent
 
 import (
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
+	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
 	"github.com/facebookincubator/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
@@ -27,6 +28,22 @@ func init() {
 	blobDescID := blobFields[0].Descriptor()
 	// blob.DefaultID holds the default value on creation for the id field.
 	blob.DefaultID = blobDescID.Default.(func() uuid.UUID)
+	carMixin := schema.Car{}.Mixin()
+	carMixinFields0 := carMixin[0].Fields()
+	carFields := schema.Car{}.Fields()
+	_ = carFields
+	// carDescBeforeID is the schema descriptor for before_id field.
+	carDescBeforeID := carMixinFields0[0].Descriptor()
+	// car.BeforeIDValidator is a validator for the "before_id" field. It is called by the builders before save.
+	car.BeforeIDValidator = carDescBeforeID.Validators[0].(func(float64) error)
+	// carDescAfterID is the schema descriptor for after_id field.
+	carDescAfterID := carMixinFields0[2].Descriptor()
+	// car.AfterIDValidator is a validator for the "after_id" field. It is called by the builders before save.
+	car.AfterIDValidator = carDescAfterID.Validators[0].(func(float64) error)
+	// carDescID is the schema descriptor for id field.
+	carDescID := carMixinFields0[1].Descriptor()
+	// car.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	car.IDValidator = carDescID.Validators[0].(func(int) error)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescID is the schema descriptor for id field.

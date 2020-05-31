@@ -137,6 +137,7 @@ func TestType_Receiver(t *testing.T) {
 func TestType_WithRuntimeMixin(t *testing.T) {
 	position := &load.Position{MixedIn: true}
 	typ := &Type{
+		ID: &Field{},
 		Fields: []*Field{
 			{Default: true, Position: position},
 			{UpdateDefault: true, Position: position},

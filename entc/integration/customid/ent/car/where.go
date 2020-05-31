@@ -95,10 +95,204 @@ func IDLTE(id int) predicate.Car {
 	})
 }
 
+// BeforeID applies equality check predicate on the "before_id" field. It's identical to BeforeIDEQ.
+func BeforeID(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBeforeID), v))
+	})
+}
+
+// AfterID applies equality check predicate on the "after_id" field. It's identical to AfterIDEQ.
+func AfterID(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAfterID), v))
+	})
+}
+
 // Model applies equality check predicate on the "model" field. It's identical to ModelEQ.
 func Model(v string) predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldModel), v))
+	})
+}
+
+// BeforeIDEQ applies the EQ predicate on the "before_id" field.
+func BeforeIDEQ(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBeforeID), v))
+	})
+}
+
+// BeforeIDNEQ applies the NEQ predicate on the "before_id" field.
+func BeforeIDNEQ(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBeforeID), v))
+	})
+}
+
+// BeforeIDIn applies the In predicate on the "before_id" field.
+func BeforeIDIn(vs ...float64) predicate.Car {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Car(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBeforeID), v...))
+	})
+}
+
+// BeforeIDNotIn applies the NotIn predicate on the "before_id" field.
+func BeforeIDNotIn(vs ...float64) predicate.Car {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Car(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBeforeID), v...))
+	})
+}
+
+// BeforeIDGT applies the GT predicate on the "before_id" field.
+func BeforeIDGT(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBeforeID), v))
+	})
+}
+
+// BeforeIDGTE applies the GTE predicate on the "before_id" field.
+func BeforeIDGTE(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBeforeID), v))
+	})
+}
+
+// BeforeIDLT applies the LT predicate on the "before_id" field.
+func BeforeIDLT(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBeforeID), v))
+	})
+}
+
+// BeforeIDLTE applies the LTE predicate on the "before_id" field.
+func BeforeIDLTE(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBeforeID), v))
+	})
+}
+
+// BeforeIDIsNil applies the IsNil predicate on the "before_id" field.
+func BeforeIDIsNil() predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldBeforeID)))
+	})
+}
+
+// BeforeIDNotNil applies the NotNil predicate on the "before_id" field.
+func BeforeIDNotNil() predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldBeforeID)))
+	})
+}
+
+// AfterIDEQ applies the EQ predicate on the "after_id" field.
+func AfterIDEQ(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAfterID), v))
+	})
+}
+
+// AfterIDNEQ applies the NEQ predicate on the "after_id" field.
+func AfterIDNEQ(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAfterID), v))
+	})
+}
+
+// AfterIDIn applies the In predicate on the "after_id" field.
+func AfterIDIn(vs ...float64) predicate.Car {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Car(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAfterID), v...))
+	})
+}
+
+// AfterIDNotIn applies the NotIn predicate on the "after_id" field.
+func AfterIDNotIn(vs ...float64) predicate.Car {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Car(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAfterID), v...))
+	})
+}
+
+// AfterIDGT applies the GT predicate on the "after_id" field.
+func AfterIDGT(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAfterID), v))
+	})
+}
+
+// AfterIDGTE applies the GTE predicate on the "after_id" field.
+func AfterIDGTE(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAfterID), v))
+	})
+}
+
+// AfterIDLT applies the LT predicate on the "after_id" field.
+func AfterIDLT(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAfterID), v))
+	})
+}
+
+// AfterIDLTE applies the LTE predicate on the "after_id" field.
+func AfterIDLTE(v float64) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAfterID), v))
+	})
+}
+
+// AfterIDIsNil applies the IsNil predicate on the "after_id" field.
+func AfterIDIsNil() predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAfterID)))
+	})
+}
+
+// AfterIDNotNil applies the NotNil predicate on the "after_id" field.
+func AfterIDNotNil() predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAfterID)))
 	})
 }
 

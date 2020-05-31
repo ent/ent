@@ -36,6 +36,8 @@ var (
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "before_id", Type: field.TypeFloat64, Nullable: true},
+		{Name: "after_id", Type: field.TypeFloat64, Nullable: true},
 		{Name: "model", Type: field.TypeString},
 		{Name: "pet_cars", Type: field.TypeString, Nullable: true, Size: 25},
 	}
@@ -47,7 +49,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "cars_pets_cars",
-				Columns: []*schema.Column{CarsColumns[2]},
+				Columns: []*schema.Column{CarsColumns[4]},
 
 				RefColumns: []*schema.Column{PetsColumns[0]},
 				OnDelete:   schema.SetNull,

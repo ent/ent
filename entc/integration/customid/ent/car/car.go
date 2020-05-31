@@ -11,6 +11,10 @@ const (
 	Label = "car"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldBeforeID holds the string denoting the before_id field in the database.
+	FieldBeforeID = "before_id"
+	// FieldAfterID holds the string denoting the after_id field in the database.
+	FieldAfterID = "after_id"
 	// FieldModel holds the string denoting the model field in the database.
 	FieldModel = "model"
 
@@ -31,6 +35,8 @@ const (
 // Columns holds all SQL columns for car fields.
 var Columns = []string{
 	FieldID,
+	FieldBeforeID,
+	FieldAfterID,
 	FieldModel,
 }
 
@@ -38,3 +44,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"pet_cars",
 }
+
+var (
+	// BeforeIDValidator is a validator for the "before_id" field. It is called by the builders before save.
+	BeforeIDValidator func(float64) error
+	// AfterIDValidator is a validator for the "after_id" field. It is called by the builders before save.
+	AfterIDValidator func(float64) error
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(int) error
+)
