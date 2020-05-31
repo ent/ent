@@ -51,8 +51,8 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 }
 
-// Open opens a connection to the database specified by the driver name and a
-// driver-specific data source name, and returns a new client attached to it.
+// Open opens a database/sql.DB specified by the driver name and
+// the data source name, and returns a new client attached to it.
 // Optional parameters can be added for configuring the client.
 func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
 	switch driverName {
