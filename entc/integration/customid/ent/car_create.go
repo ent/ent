@@ -24,9 +24,43 @@ type CarCreate struct {
 	hooks    []Hook
 }
 
+// SetBeforeID sets the before_id field.
+func (cc *CarCreate) SetBeforeID(f float64) *CarCreate {
+	cc.mutation.SetBeforeID(f)
+	return cc
+}
+
+// SetNillableBeforeID sets the before_id field if the given value is not nil.
+func (cc *CarCreate) SetNillableBeforeID(f *float64) *CarCreate {
+	if f != nil {
+		cc.SetBeforeID(*f)
+	}
+	return cc
+}
+
+// SetAfterID sets the after_id field.
+func (cc *CarCreate) SetAfterID(f float64) *CarCreate {
+	cc.mutation.SetAfterID(f)
+	return cc
+}
+
+// SetNillableAfterID sets the after_id field if the given value is not nil.
+func (cc *CarCreate) SetNillableAfterID(f *float64) *CarCreate {
+	if f != nil {
+		cc.SetAfterID(*f)
+	}
+	return cc
+}
+
 // SetModel sets the model field.
 func (cc *CarCreate) SetModel(s string) *CarCreate {
 	cc.mutation.SetModel(s)
+	return cc
+}
+
+// SetID sets the id field.
+func (cc *CarCreate) SetID(i int) *CarCreate {
+	cc.mutation.SetID(i)
 	return cc
 }
 
@@ -51,8 +85,23 @@ func (cc *CarCreate) SetOwner(p *Pet) *CarCreate {
 
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
+	if v, ok := cc.mutation.BeforeID(); ok {
+		if err := car.BeforeIDValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)
+		}
+	}
+	if v, ok := cc.mutation.AfterID(); ok {
+		if err := car.AfterIDValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)
+		}
+	}
 	if _, ok := cc.mutation.Model(); !ok {
 		return nil, errors.New("ent: missing required field \"model\"")
+	}
+	if v, ok := cc.mutation.ID(); ok {
+		if err := car.IDValidator(v); err != nil {
+			return nil, fmt.Errorf("ent: validator failed for field \"id\": %w", err)
+		}
 	}
 	var (
 		err  error
@@ -101,6 +150,26 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			},
 		}
 	)
+	if id, ok := cc.mutation.ID(); ok {
+		c.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := cc.mutation.BeforeID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: car.FieldBeforeID,
+		})
+		c.BeforeID = value
+	}
+	if value, ok := cc.mutation.AfterID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: car.FieldAfterID,
+		})
+		c.AfterID = value
+	}
 	if value, ok := cc.mutation.Model(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -134,7 +203,9 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
+	if c.ID == 0 {
+		id := _spec.ID.Value.(int64)
+		c.ID = int(id)
+	}
 	return c, nil
 }

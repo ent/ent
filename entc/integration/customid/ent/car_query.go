@@ -274,12 +274,12 @@ func (cq *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
 // Example:
 //
 //	var v []struct {
-//		Model string `json:"model,omitempty"`
+//		BeforeID float64 `json:"before_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Car.Query().
-//		GroupBy(car.FieldModel).
+//		GroupBy(car.FieldBeforeID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -300,11 +300,11 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Model string `json:"model,omitempty"`
+//		BeforeID float64 `json:"before_id,omitempty"`
 //	}
 //
 //	client.Car.Query().
-//		Select(car.FieldModel).
+//		Select(car.FieldBeforeID).
 //		Scan(ctx, &v)
 //
 func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {

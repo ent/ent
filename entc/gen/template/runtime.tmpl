@@ -82,7 +82,7 @@ import (
 // to their package variables.
 func init() {
 {{- range $n := $.Nodes }}
-	{{- $pkg :=  $n.Package }}
+	{{- $pkg := $n.Package }}
 	{{- $schema := base $.Config.Schema }}
 	{{- with $n.RuntimeMixin }}
 		{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()

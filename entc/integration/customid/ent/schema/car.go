@@ -8,11 +8,37 @@ import (
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebookincubator/ent/schema/mixin"
 )
+
+type IDMixin struct {
+	mixin.Schema
+}
+
+func (IDMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Float("before_id").
+			Optional().
+			Positive(),
+		field.Int("id").
+			Positive().
+			Immutable(),
+		field.Float("after_id").
+			Optional().
+			Negative(),
+	}
+}
 
 // Car holds the schema definition for the Car entity.
 type Car struct {
 	ent.Schema
+}
+
+// Mixin of the Car.
+func (Car) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		IDMixin{},
+	}
 }
 
 // Fields of the Car.

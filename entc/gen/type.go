@@ -302,7 +302,11 @@ func (t Type) RuntimeMixin() bool {
 // MixedInFields returns the indices of mixin holds runtime code.
 func (t Type) MixedInFields() []int {
 	idx := make(map[int]struct{})
-	for _, f := range t.Fields {
+	fields := t.Fields
+	if t.ID.UserDefined {
+		fields = append(fields, t.ID)
+	}
+	for _, f := range fields {
 		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0) {
 			idx[f.Position.MixinIndex] = struct{}{}
 		}
