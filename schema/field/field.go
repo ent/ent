@@ -405,6 +405,16 @@ func (b *boolBuilder) StorageKey(key string) *boolBuilder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Bool("deleted").
+//		GoType(&sql.NullBool{})
+//
+func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
+	b.desc.goType(typ, reflect.Bool)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *boolBuilder) Descriptor() *Descriptor {
 	return b.desc
