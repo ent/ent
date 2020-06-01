@@ -79,6 +79,12 @@ const (
 	FieldLink = "link"
 	// FieldNullLink holds the string denoting the null_link field in the database.
 	FieldNullLink = "null_link"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
+	// FieldNullActive holds the string denoting the null_active field in the database.
+	FieldNullActive = "null_active"
+	// FieldDeleted holds the string denoting the deleted field in the database.
+	FieldDeleted = "deleted"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -119,6 +125,9 @@ var Columns = []string{
 	FieldNullStr,
 	FieldLink,
 	FieldNullLink,
+	FieldActive,
+	FieldNullActive,
+	FieldDeleted,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.

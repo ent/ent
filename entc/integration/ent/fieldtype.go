@@ -85,7 +85,13 @@ type FieldType struct {
 	// Link holds the value of the "link" field.
 	Link schema.Link `json:"link,omitempty"`
 	// NullLink holds the value of the "null_link" field.
-	NullLink   *schema.Link `json:"null_link,omitempty"`
+	NullLink *schema.Link `json:"null_link,omitempty"`
+	// Active holds the value of the "active" field.
+	Active schema.Status `json:"active,omitempty"`
+	// NullActive holds the value of the "null_active" field.
+	NullActive *schema.Status `json:"null_active,omitempty"`
+	// Deleted holds the value of the "deleted" field.
+	Deleted    sql.NullBool `json:"deleted,omitempty"`
 	file_field *int
 }
 
@@ -125,6 +131,9 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullString{},  // null_str
 		&schema.Link{},     // link
 		&schema.Link{},     // null_link
+		&sql.NullBool{},    // active
+		&sql.NullBool{},    // null_active
+		&sql.NullBool{},    // deleted
 	}
 }
 
@@ -313,7 +322,23 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value != nil {
 		ft.NullLink = value
 	}
-	values = values[32:]
+	if value, ok := values[32].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field active", values[32])
+	} else if value.Valid {
+		ft.Active = schema.Status(value.Bool)
+	}
+	if value, ok := values[33].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field null_active", values[33])
+	} else if value.Valid {
+		ft.NullActive = new(schema.Status)
+		*ft.NullActive = schema.Status(value.Bool)
+	}
+	if value, ok := values[34].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field deleted", values[34])
+	} else if value != nil {
+		ft.Deleted = *value
+	}
+	values = values[35:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -428,6 +453,14 @@ func (ft *FieldType) String() string {
 		builder.WriteString(", null_link=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", active=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Active))
+	if v := ft.NullActive; v != nil {
+		builder.WriteString(", null_active=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", deleted=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -796,6 +796,7 @@ func (f Field) ConvertedToBasic() bool {
 }
 
 var (
+	nullBoolType   = reflect.TypeOf(sql.NullBool{})
 	nullInt64Type  = reflect.TypeOf(sql.NullInt64{})
 	nullStringType = reflect.TypeOf(sql.NullString{})
 )
@@ -813,6 +814,13 @@ func (f Field) BasicType(ident string) (expr string) {
 	}
 	t, rt := f.Type, f.Type.RType
 	switch t.Type {
+	case field.TypeBool:
+		switch {
+		case rt.Kind == reflect.Bool:
+			expr = fmt.Sprintf("bool(%s)", ident)
+		case rt.TypeEqual(nullBoolType):
+			expr = fmt.Sprintf("%s.Bool", ident)
+		}
 	case field.TypeInt64:
 		switch {
 		case rt.Kind == reflect.Int64:

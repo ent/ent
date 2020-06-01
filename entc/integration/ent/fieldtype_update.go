@@ -740,6 +740,58 @@ func (ftu *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetActive sets the active field.
+func (ftu *FieldTypeUpdate) SetActive(s schema.Status) *FieldTypeUpdate {
+	ftu.mutation.SetActive(s)
+	return ftu
+}
+
+// SetNillableActive sets the active field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableActive(s *schema.Status) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetActive(*s)
+	}
+	return ftu
+}
+
+// ClearActive clears the value of active.
+func (ftu *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
+	ftu.mutation.ClearActive()
+	return ftu
+}
+
+// SetNullActive sets the null_active field.
+func (ftu *FieldTypeUpdate) SetNullActive(s schema.Status) *FieldTypeUpdate {
+	ftu.mutation.SetNullActive(s)
+	return ftu
+}
+
+// SetNillableNullActive sets the null_active field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNullActive(s *schema.Status) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetNullActive(*s)
+	}
+	return ftu
+}
+
+// ClearNullActive clears the value of null_active.
+func (ftu *FieldTypeUpdate) ClearNullActive() *FieldTypeUpdate {
+	ftu.mutation.ClearNullActive()
+	return ftu
+}
+
+// SetDeleted sets the deleted field.
+func (ftu *FieldTypeUpdate) SetDeleted(sb sql.NullBool) *FieldTypeUpdate {
+	ftu.mutation.SetDeleted(sb)
+	return ftu
+}
+
+// ClearDeleted clears the value of deleted.
+func (ftu *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
+	ftu.mutation.ClearDeleted()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1371,6 +1423,45 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldNullLink,
+		})
+	}
+	if value, ok := ftu.mutation.Active(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldActive,
+		})
+	}
+	if ftu.mutation.ActiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: fieldtype.FieldActive,
+		})
+	}
+	if value, ok := ftu.mutation.NullActive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldNullActive,
+		})
+	}
+	if ftu.mutation.NullActiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: fieldtype.FieldNullActive,
+		})
+	}
+	if value, ok := ftu.mutation.Deleted(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldDeleted,
+		})
+	}
+	if ftu.mutation.DeletedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: fieldtype.FieldDeleted,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2097,6 +2188,58 @@ func (ftuo *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetActive sets the active field.
+func (ftuo *FieldTypeUpdateOne) SetActive(s schema.Status) *FieldTypeUpdateOne {
+	ftuo.mutation.SetActive(s)
+	return ftuo
+}
+
+// SetNillableActive sets the active field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableActive(s *schema.Status) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetActive(*s)
+	}
+	return ftuo
+}
+
+// ClearActive clears the value of active.
+func (ftuo *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearActive()
+	return ftuo
+}
+
+// SetNullActive sets the null_active field.
+func (ftuo *FieldTypeUpdateOne) SetNullActive(s schema.Status) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNullActive(s)
+	return ftuo
+}
+
+// SetNillableNullActive sets the null_active field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNullActive(s *schema.Status) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetNullActive(*s)
+	}
+	return ftuo
+}
+
+// ClearNullActive clears the value of null_active.
+func (ftuo *FieldTypeUpdateOne) ClearNullActive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullActive()
+	return ftuo
+}
+
+// SetDeleted sets the deleted field.
+func (ftuo *FieldTypeUpdateOne) SetDeleted(sb sql.NullBool) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDeleted(sb)
+	return ftuo
+}
+
+// ClearDeleted clears the value of deleted.
+func (ftuo *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDeleted()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2726,6 +2869,45 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldNullLink,
+		})
+	}
+	if value, ok := ftuo.mutation.Active(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldActive,
+		})
+	}
+	if ftuo.mutation.ActiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: fieldtype.FieldActive,
+		})
+	}
+	if value, ok := ftuo.mutation.NullActive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldNullActive,
+		})
+	}
+	if ftuo.mutation.NullActiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: fieldtype.FieldNullActive,
+		})
+	}
+	if value, ok := ftuo.mutation.Deleted(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldDeleted,
+		})
+	}
+	if ftuo.mutation.DeletedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: fieldtype.FieldDeleted,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}
