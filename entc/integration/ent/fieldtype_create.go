@@ -403,6 +403,40 @@ func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
+// SetActive sets the active field.
+func (ftc *FieldTypeCreate) SetActive(s schema.Status) *FieldTypeCreate {
+	ftc.mutation.SetActive(s)
+	return ftc
+}
+
+// SetNillableActive sets the active field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetActive(*s)
+	}
+	return ftc
+}
+
+// SetNullActive sets the null_active field.
+func (ftc *FieldTypeCreate) SetNullActive(s schema.Status) *FieldTypeCreate {
+	ftc.mutation.SetNullActive(s)
+	return ftc
+}
+
+// SetNillableNullActive sets the null_active field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetNullActive(*s)
+	}
+	return ftc
+}
+
+// SetDeleted sets the deleted field.
+func (ftc *FieldTypeCreate) SetDeleted(sb sql.NullBool) *FieldTypeCreate {
+	ftc.mutation.SetDeleted(sb)
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -732,6 +766,30 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldNullLink,
 		})
 		ft.NullLink = &value
+	}
+	if value, ok := ftc.mutation.Active(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldActive,
+		})
+		ft.Active = value
+	}
+	if value, ok := ftc.mutation.NullActive(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldNullActive,
+		})
+		ft.NullActive = &value
+	}
+	if value, ok := ftc.mutation.Deleted(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: fieldtype.FieldDeleted,
+		})
+		ft.Deleted = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

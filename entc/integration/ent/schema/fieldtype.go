@@ -86,8 +86,20 @@ func (FieldType) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			GoType(&Link{}),
+		field.Bool("active").
+			Optional().
+			GoType(Status(false)),
+		field.Bool("null_active").
+			Optional().
+			Nillable().
+			GoType(Status(false)),
+		field.Bool("deleted").
+			Optional().
+			GoType(&sql.NullBool{}),
 	}
 }
+
+type Status bool
 
 type Link struct {
 	*url.URL

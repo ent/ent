@@ -96,7 +96,7 @@ jobs:
       - run: &integration-wait
           name: Wait for databases
           command: >-
-            dockerize -timeout 1m
+            dockerize -timeout 2m
             -wait tcp://localhost:3306
             -wait tcp://localhost:3307
             -wait tcp://localhost:3308

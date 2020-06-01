@@ -723,7 +723,7 @@ func (d *Descriptor) goType(typ interface{}, expectKind reflect.Kind) {
 	t := reflect.TypeOf(typ)
 	tv := indirect(t)
 	info := &TypeInfo{
-		Type:    TypeString,
+		Type:    d.Info.Type,
 		Ident:   tv.String(),
 		PkgPath: tv.PkgPath(),
 		RType: &RType{

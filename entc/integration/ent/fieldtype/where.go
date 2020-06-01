@@ -321,6 +321,30 @@ func NullLink(v schema.Link) predicate.FieldType {
 	})
 }
 
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldActive), vc))
+	})
+}
+
+// NullActive applies equality check predicate on the "null_active" field. It's identical to NullActiveEQ.
+func NullActive(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullActive), vc))
+	})
+}
+
+// Deleted applies equality check predicate on the "deleted" field. It's identical to DeletedEQ.
+func Deleted(v sql.NullBool) predicate.FieldType {
+	vc := v.Bool
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDeleted), vc))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -3376,6 +3400,96 @@ func NullLinkContainsFold(v schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldNullLink), vc))
+	})
+}
+
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldActive), vc))
+	})
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldActive), vc))
+	})
+}
+
+// ActiveIsNil applies the IsNil predicate on the "active" field.
+func ActiveIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldActive)))
+	})
+}
+
+// ActiveNotNil applies the NotNil predicate on the "active" field.
+func ActiveNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldActive)))
+	})
+}
+
+// NullActiveEQ applies the EQ predicate on the "null_active" field.
+func NullActiveEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNullActive), vc))
+	})
+}
+
+// NullActiveNEQ applies the NEQ predicate on the "null_active" field.
+func NullActiveNEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNullActive), vc))
+	})
+}
+
+// NullActiveIsNil applies the IsNil predicate on the "null_active" field.
+func NullActiveIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNullActive)))
+	})
+}
+
+// NullActiveNotNil applies the NotNil predicate on the "null_active" field.
+func NullActiveNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNullActive)))
+	})
+}
+
+// DeletedEQ applies the EQ predicate on the "deleted" field.
+func DeletedEQ(v sql.NullBool) predicate.FieldType {
+	vc := v.Bool
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDeleted), vc))
+	})
+}
+
+// DeletedNEQ applies the NEQ predicate on the "deleted" field.
+func DeletedNEQ(v sql.NullBool) predicate.FieldType {
+	vc := v.Bool
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDeleted), vc))
+	})
+}
+
+// DeletedIsNil applies the IsNil predicate on the "deleted" field.
+func DeletedIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDeleted)))
+	})
+}
+
+// DeletedNotNil applies the NotNil predicate on the "deleted" field.
+func DeletedNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDeleted)))
 	})
 }
 
