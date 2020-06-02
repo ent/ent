@@ -63,8 +63,8 @@ var (
 		"hasKey":      hasKey,
 		"list":        list,
 	}
-	rules   = ruleset()
-	acronym = make(map[string]bool)
+	rules    = ruleset()
+	acronyms = make(map[string]bool)
 )
 
 // ops returns all operations for given field.
@@ -108,13 +108,13 @@ func plural(name string) string {
 //
 //	user_info => UserInfo
 //	full_name => FullName
-//  user_id   => UserID
+//	user_id   => UserID
 //
 func pascal(s string) string {
 	words := strings.Split(s, "_")
 	for i, w := range words {
 		upper := strings.ToUpper(w)
-		if acronym[upper] {
+		if acronyms[upper] {
 			words[i] = upper
 		} else {
 			words[i] = rules.Capitalize(w)
@@ -245,14 +245,15 @@ func add(xs ...int) (n int) {
 
 func ruleset() *inflect.Ruleset {
 	rules := inflect.NewDefaultRuleset()
-	// add common initialisms. copied from golint.
+	// Add common initialisms from golint and more.
 	for _, w := range []string{
-		"API", "ASCII", "CPU", "CSS", "DNS", "GUID", "UID", "UI",
-		"RHS", "RPC", "SLA", "SMTP", "SSH", "TLS", "TTL", "HTML",
-		"HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM",
-		"UUID", "URI", "URL", "UTF8", "VM", "XML", "XSRF", "XSS",
+		"ACL", "API", "ASCII", "AWS", "CPU", "CSS", "DNS", "EOF", "GB", "GUID",
+		"HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "KB", "LHS", "MAC", "MB",
+		"QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "SSO", "TCP",
+		"TLS", "TTL", "UDP", "UI", "UID", "URI", "URL", "UTF8", "UUID", "VM",
+		"XML", "XMPP", "XSRF", "XSS",
 	} {
-		acronym[w] = true
+		acronyms[w] = true
 		rules.AddAcronym(w)
 	}
 	return rules
