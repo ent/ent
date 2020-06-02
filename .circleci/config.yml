@@ -83,7 +83,7 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         command: -p 5431
-      - image: circleci/postgres:12.1
+      - image: circleci/postgres:12.3
         environment:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
