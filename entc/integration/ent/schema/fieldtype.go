@@ -96,6 +96,9 @@ func (FieldType) Fields() []ent.Field {
 		field.Bool("deleted").
 			Optional().
 			GoType(&sql.NullBool{}),
+		field.Time("deleted_at").
+			Optional().
+			GoType(&sql.NullTime{}),
 	}
 }
 

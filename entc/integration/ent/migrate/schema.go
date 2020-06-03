@@ -88,6 +88,7 @@ var (
 		{Name: "active", Type: field.TypeBool, Nullable: true},
 		{Name: "null_active", Type: field.TypeBool, Nullable: true},
 		{Name: "deleted", Type: field.TypeBool, Nullable: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -98,7 +99,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[36]},
+				Columns: []*schema.Column{FieldTypesColumns[37]},
 
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
