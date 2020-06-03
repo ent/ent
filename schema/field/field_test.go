@@ -193,6 +193,30 @@ func TestTime(t *testing.T) {
 		Descriptor()
 	assert.Equal(t, "updated_at", fd.Name)
 	assert.Equal(t, now, fd.UpdateDefault.(func() time.Time)())
+
+	type Time time.Time
+	fd = field.Time("deleted_at").GoType(Time{}).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "field_test.Time", fd.Info.Ident)
+	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.Time", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+
+	fd = field.Time("deleted_at").GoType(&sql.NullTime{}).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "sql.NullTime", fd.Info.Ident)
+	assert.Equal(t, "database/sql", fd.Info.PkgPath)
+	assert.Equal(t, "sql.NullTime", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+
+	fd = field.Time("active").GoType(1).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Time("active").GoType(struct{}{}).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Time("active").GoType(new(Time)).Descriptor()
+	assert.Error(t, fd.Err())
 }
 
 func TestJSON(t *testing.T) {
