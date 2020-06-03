@@ -262,7 +262,7 @@ func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
 //		GoType(http.Dir("dir"))
 //
 func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
-	b.desc.goType(typ, reflect.String)
+	b.desc.goType(typ, stringType)
 	return b
 }
 
@@ -334,6 +334,16 @@ func (b *timeBuilder) UpdateDefault(f func() time.Time) *timeBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *timeBuilder) StorageKey(key string) *timeBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Time("deleted_at").
+//		GoType(&sql.NullTime{})
+//
+func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
+	b.desc.goType(typ, timeType)
 	return b
 }
 
@@ -411,7 +421,7 @@ func (b *boolBuilder) StorageKey(key string) *boolBuilder {
 //		GoType(&sql.NullBool{})
 //
 func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
-	b.desc.goType(typ, reflect.Bool)
+	b.desc.goType(typ, boolType)
 	return b
 }
 
@@ -719,7 +729,7 @@ func (d *Descriptor) Err() error {
 	return d.err
 }
 
-func (d *Descriptor) goType(typ interface{}, expectKind reflect.Kind) {
+func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 	t := reflect.TypeOf(typ)
 	tv := indirect(t)
 	info := &TypeInfo{
@@ -738,7 +748,7 @@ func (d *Descriptor) goType(typ interface{}, expectKind reflect.Kind) {
 		info.Nillable = true
 	}
 	switch {
-	case t.Kind() == expectKind:
+	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
 	case t.Implements(valueScannerType):
 		n := t.NumMethod()
 		for i := 0; i < n; i++ {
@@ -756,12 +766,17 @@ func (d *Descriptor) goType(typ interface{}, expectKind reflect.Kind) {
 			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
 		}
 	default:
-		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectKind)
+		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
 	}
 	d.Info = info
 }
 
-var valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
+var (
+	boolType         = reflect.TypeOf(false)
+	timeType         = reflect.TypeOf(time.Time{})
+	stringType       = reflect.TypeOf("string")
+	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
+)
 
 // ValueScanner is the interface that groups the Value and the Scan methods.
 type ValueScanner interface {
