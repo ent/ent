@@ -87,7 +87,7 @@ jobs:
         environment:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
-        command: -p 5432
+        command: -p 5433
       - image: entgo/gremlin-server
         entrypoint: /opt/gremlin-server/bin/gremlin-server.sh
         command: conf/gremlin-server.yaml
@@ -102,7 +102,7 @@ jobs:
             -wait tcp://localhost:3308
             -wait tcp://localhost:5430
             -wait tcp://localhost:5431
-            -wait tcp://localhost:5432
+            -wait tcp://localhost:5433
             -wait tcp://localhost:8182
       - *mktestdir
       - getmods
