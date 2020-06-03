@@ -109,7 +109,7 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 			{{- if $f.Nillable }}
 				if v := {{ $sf }}; v != nil {
 					builder.WriteString(", {{ $f.Name }}=")
-					{{- if $f.IsTime }}
+					{{- if and $f.IsTime (not $f.HasGoType) }}
 						builder.WriteString(v.Format(time.ANSIC))
 					{{- else if and $f.IsString (not $f.HasGoType) }}
 						builder.WriteString(*v)
@@ -119,7 +119,7 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 				}
 			{{- else }}
 				builder.WriteString(", {{ $f.Name }}=")
-				{{- if $f.IsTime }}
+				{{- if and $f.IsTime (not $f.HasGoType) }}
 					builder.WriteString({{ $sf }}.Format(time.ANSIC))
 				{{- else if and $f.IsString (not $f.HasGoType) }}
 					builder.WriteString({{ $sf }})

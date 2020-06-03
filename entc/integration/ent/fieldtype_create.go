@@ -437,6 +437,12 @@ func (ftc *FieldTypeCreate) SetDeleted(sb sql.NullBool) *FieldTypeCreate {
 	return ftc
 }
 
+// SetDeletedAt sets the deleted_at field.
+func (ftc *FieldTypeCreate) SetDeletedAt(st sql.NullTime) *FieldTypeCreate {
+	ftc.mutation.SetDeletedAt(st)
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -790,6 +796,14 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldDeleted,
 		})
 		ft.Deleted = value
+	}
+	if value, ok := ftc.mutation.DeletedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: fieldtype.FieldDeletedAt,
+		})
+		ft.DeletedAt = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

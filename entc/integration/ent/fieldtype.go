@@ -91,7 +91,9 @@ type FieldType struct {
 	// NullActive holds the value of the "null_active" field.
 	NullActive *schema.Status `json:"null_active,omitempty"`
 	// Deleted holds the value of the "deleted" field.
-	Deleted    sql.NullBool `json:"deleted,omitempty"`
+	Deleted sql.NullBool `json:"deleted,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt  sql.NullTime `json:"deleted_at,omitempty"`
 	file_field *int
 }
 
@@ -134,6 +136,7 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullBool{},    // active
 		&sql.NullBool{},    // null_active
 		&sql.NullBool{},    // deleted
+		&sql.NullTime{},    // deleted_at
 	}
 }
 
@@ -338,7 +341,12 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value != nil {
 		ft.Deleted = *value
 	}
-	values = values[35:]
+	if value, ok := values[35].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field deleted_at", values[35])
+	} else if value != nil {
+		ft.DeletedAt = *value
+	}
+	values = values[36:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -461,6 +469,8 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", deleted=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
+	builder.WriteString(", deleted_at=")
+	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteByte(')')
 	return builder.String()
 }

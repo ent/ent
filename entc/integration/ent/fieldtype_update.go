@@ -792,6 +792,18 @@ func (ftu *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDeletedAt sets the deleted_at field.
+func (ftu *FieldTypeUpdate) SetDeletedAt(st sql.NullTime) *FieldTypeUpdate {
+	ftu.mutation.SetDeletedAt(st)
+	return ftu
+}
+
+// ClearDeletedAt clears the value of deleted_at.
+func (ftu *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
+	ftu.mutation.ClearDeletedAt()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1462,6 +1474,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: fieldtype.FieldDeleted,
+		})
+	}
+	if value, ok := ftu.mutation.DeletedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: fieldtype.FieldDeletedAt,
+		})
+	}
+	if ftu.mutation.DeletedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: fieldtype.FieldDeletedAt,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2240,6 +2265,18 @@ func (ftuo *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetDeletedAt sets the deleted_at field.
+func (ftuo *FieldTypeUpdateOne) SetDeletedAt(st sql.NullTime) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDeletedAt(st)
+	return ftuo
+}
+
+// ClearDeletedAt clears the value of deleted_at.
+func (ftuo *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDeletedAt()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2908,6 +2945,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: fieldtype.FieldDeleted,
+		})
+	}
+	if value, ok := ftuo.mutation.DeletedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: fieldtype.FieldDeletedAt,
+		})
+	}
+	if ftuo.mutation.DeletedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: fieldtype.FieldDeletedAt,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

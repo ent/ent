@@ -1261,6 +1261,7 @@ type FieldTypeMutation struct {
 	active                     *schema.Status
 	null_active                *schema.Status
 	deleted                    *sql.NullBool
+	deleted_at                 *sql.NullTime
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -3529,6 +3530,56 @@ func (m *FieldTypeMutation) ResetDeleted() {
 	delete(m.clearedFields, fieldtype.FieldDeleted)
 }
 
+// SetDeletedAt sets the deleted_at field.
+func (m *FieldTypeMutation) SetDeletedAt(st sql.NullTime) {
+	m.deleted_at = &st
+}
+
+// DeletedAt returns the deleted_at value in the mutation.
+func (m *FieldTypeMutation) DeletedAt() (r sql.NullTime, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old deleted_at value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldDeletedAt(ctx context.Context) (v sql.NullTime, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDeletedAt is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of deleted_at.
+func (m *FieldTypeMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[fieldtype.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the field deleted_at was cleared in this mutation.
+func (m *FieldTypeMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt reset all changes of the "deleted_at" field.
+func (m *FieldTypeMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, fieldtype.FieldDeletedAt)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -3543,7 +3594,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 35)
+	fields := make([]string, 0, 36)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -3649,6 +3700,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.deleted != nil {
 		fields = append(fields, fieldtype.FieldDeleted)
 	}
+	if m.deleted_at != nil {
+		fields = append(fields, fieldtype.FieldDeletedAt)
+	}
 	return fields
 }
 
@@ -3727,6 +3781,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.NullActive()
 	case fieldtype.FieldDeleted:
 		return m.Deleted()
+	case fieldtype.FieldDeletedAt:
+		return m.DeletedAt()
 	}
 	return nil, false
 }
@@ -3806,6 +3862,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldNullActive(ctx)
 	case fieldtype.FieldDeleted:
 		return m.OldDeleted(ctx)
+	case fieldtype.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4059,6 +4117,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeleted(v)
+		return nil
+	case fieldtype.FieldDeletedAt:
+		v, ok := value.(sql.NullTime)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -4471,6 +4536,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldDeleted) {
 		fields = append(fields, fieldtype.FieldDeleted)
 	}
+	if m.FieldCleared(fieldtype.FieldDeletedAt) {
+		fields = append(fields, fieldtype.FieldDeletedAt)
+	}
 	return fields
 }
 
@@ -4574,6 +4642,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldDeleted:
 		m.ClearDeleted()
+		return nil
+	case fieldtype.FieldDeletedAt:
+		m.ClearDeletedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -4688,6 +4759,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldDeleted:
 		m.ResetDeleted()
+		return nil
+	case fieldtype.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
