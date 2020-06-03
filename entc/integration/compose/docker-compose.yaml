@@ -64,7 +64,7 @@ services:
     healthcheck:
       test: pg_isready -U postgres
     ports:
-      - 5432:5432
+      - 5433:5432
 
   gremlin:
     image: entgo/gremlin-server
