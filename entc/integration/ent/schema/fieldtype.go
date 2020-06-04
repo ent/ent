@@ -7,6 +7,7 @@ package schema
 import (
 	"database/sql/driver"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 
@@ -99,6 +100,9 @@ func (FieldType) Fields() []ent.Field {
 		field.Time("deleted_at").
 			Optional().
 			GoType(&sql.NullTime{}),
+		field.Bytes("ip").
+			Optional().
+			GoType(net.IP("127.0.0.1")),
 	}
 }
 

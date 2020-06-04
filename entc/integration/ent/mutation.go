@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -1262,6 +1263,7 @@ type FieldTypeMutation struct {
 	null_active                *schema.Status
 	deleted                    *sql.NullBool
 	deleted_at                 *sql.NullTime
+	ip                         *net.IP
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -3580,6 +3582,56 @@ func (m *FieldTypeMutation) ResetDeletedAt() {
 	delete(m.clearedFields, fieldtype.FieldDeletedAt)
 }
 
+// SetIP sets the ip field.
+func (m *FieldTypeMutation) SetIP(n net.IP) {
+	m.ip = &n
+}
+
+// IP returns the ip value in the mutation.
+func (m *FieldTypeMutation) IP() (r net.IP, exists bool) {
+	v := m.ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIP returns the old ip value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldIP(ctx context.Context) (v net.IP, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldIP is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIP: %w", err)
+	}
+	return oldValue.IP, nil
+}
+
+// ClearIP clears the value of ip.
+func (m *FieldTypeMutation) ClearIP() {
+	m.ip = nil
+	m.clearedFields[fieldtype.FieldIP] = struct{}{}
+}
+
+// IPCleared returns if the field ip was cleared in this mutation.
+func (m *FieldTypeMutation) IPCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldIP]
+	return ok
+}
+
+// ResetIP reset all changes of the "ip" field.
+func (m *FieldTypeMutation) ResetIP() {
+	m.ip = nil
+	delete(m.clearedFields, fieldtype.FieldIP)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -3594,7 +3646,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 36)
+	fields := make([]string, 0, 37)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -3703,6 +3755,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, fieldtype.FieldDeletedAt)
 	}
+	if m.ip != nil {
+		fields = append(fields, fieldtype.FieldIP)
+	}
 	return fields
 }
 
@@ -3783,6 +3838,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Deleted()
 	case fieldtype.FieldDeletedAt:
 		return m.DeletedAt()
+	case fieldtype.FieldIP:
+		return m.IP()
 	}
 	return nil, false
 }
@@ -3864,6 +3921,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDeleted(ctx)
 	case fieldtype.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case fieldtype.FieldIP:
+		return m.OldIP(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4124,6 +4183,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case fieldtype.FieldIP:
+		v, ok := value.(net.IP)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIP(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -4539,6 +4605,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldDeletedAt) {
 		fields = append(fields, fieldtype.FieldDeletedAt)
 	}
+	if m.FieldCleared(fieldtype.FieldIP) {
+		fields = append(fields, fieldtype.FieldIP)
+	}
 	return fields
 }
 
@@ -4645,6 +4714,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldDeletedAt:
 		m.ClearDeletedAt()
+		return nil
+	case fieldtype.FieldIP:
+		m.ClearIP()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -4762,6 +4834,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldDeletedAt:
 		m.ResetDeletedAt()
+		return nil
+	case fieldtype.FieldIP:
+		m.ResetIP()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
