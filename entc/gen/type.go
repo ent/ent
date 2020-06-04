@@ -822,6 +822,10 @@ func (f Field) BasicType(ident string) (expr string) {
 		case rt.TypeEqual(nullBoolType):
 			expr = fmt.Sprintf("%s.Bool", ident)
 		}
+	case field.TypeBytes:
+		if rt.Kind == reflect.Slice {
+			expr = fmt.Sprintf("[]byte(%s)", ident)
+		}
 	case field.TypeTime:
 		switch {
 		case rt.Kind == reflect.Bool:

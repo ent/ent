@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -443,6 +444,12 @@ func (ftc *FieldTypeCreate) SetDeletedAt(st sql.NullTime) *FieldTypeCreate {
 	return ftc
 }
 
+// SetIP sets the ip field.
+func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
+	ftc.mutation.SetIP(n)
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -804,6 +811,14 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldDeletedAt,
 		})
 		ft.DeletedAt = value
+	}
+	if value, ok := ftc.mutation.IP(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldIP,
+		})
+		ft.IP = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

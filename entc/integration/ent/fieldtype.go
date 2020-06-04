@@ -8,6 +8,7 @@ package ent
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -93,7 +94,9 @@ type FieldType struct {
 	// Deleted holds the value of the "deleted" field.
 	Deleted sql.NullBool `json:"deleted,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt  sql.NullTime `json:"deleted_at,omitempty"`
+	DeletedAt sql.NullTime `json:"deleted_at,omitempty"`
+	// IP holds the value of the "ip" field.
+	IP         net.IP `json:"ip,omitempty"`
 	file_field *int
 }
 
@@ -137,6 +140,7 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullBool{},    // null_active
 		&sql.NullBool{},    // deleted
 		&sql.NullTime{},    // deleted_at
+		&[]byte{},          // ip
 	}
 }
 
@@ -346,7 +350,12 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value != nil {
 		ft.DeletedAt = *value
 	}
-	values = values[36:]
+	if value, ok := values[36].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field ip", values[36])
+	} else if value != nil {
+		ft.IP = *value
+	}
+	values = values[37:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -471,6 +480,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
 	builder.WriteString(", deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
+	builder.WriteString(", ip=")
+	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteByte(')')
 	return builder.String()
 }

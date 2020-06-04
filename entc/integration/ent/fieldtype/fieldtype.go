@@ -87,6 +87,8 @@ const (
 	FieldDeleted = "deleted"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldIP holds the string denoting the ip field in the database.
+	FieldIP = "ip"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -131,6 +133,7 @@ var Columns = []string{
 	FieldNullActive,
 	FieldDeleted,
 	FieldDeletedAt,
+	FieldIP,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.
