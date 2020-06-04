@@ -487,6 +487,16 @@ func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Bytes("ip").
+//		GoType(net.IP("127.0.0.1"))
+//
+func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
+	b.desc.goType(typ, bytesType)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *bytesBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -773,8 +783,9 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 
 var (
 	boolType         = reflect.TypeOf(false)
+	bytesType        = reflect.TypeOf([]byte(nil))
 	timeType         = reflect.TypeOf(time.Time{})
-	stringType       = reflect.TypeOf("string")
+	stringType       = reflect.TypeOf("")
 	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
 )
 

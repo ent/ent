@@ -6,6 +6,7 @@ package field_test
 
 import (
 	"database/sql"
+	"net"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -110,12 +111,34 @@ func TestBool(t *testing.T) {
 }
 
 func TestBytes(t *testing.T) {
-	f := field.Bytes("active").Default([]byte("{}"))
-	fd := f.Descriptor()
+	fd := field.Bytes("active").Default([]byte("{}")).Descriptor()
 	assert.Equal(t, "active", fd.Name)
 	assert.Equal(t, field.TypeBytes, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, []byte("{}"), fd.Default)
+
+	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "net.IP", fd.Info.Ident)
+	assert.Equal(t, "net", fd.Info.PkgPath)
+	assert.Equal(t, "net.IP", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+
+	fd = field.Bytes("blob").GoType(&sql.NullString{}).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "sql.NullString", fd.Info.Ident)
+	assert.Equal(t, "database/sql", fd.Info.PkgPath)
+	assert.Equal(t, "sql.NullString", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+
+	fd = field.Bytes("blob").GoType(1).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Bytes("blob").GoType(struct{}{}).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Bytes("blob").GoType(new(net.IP)).Descriptor()
+	assert.Error(t, fd.Err())
 }
 
 func TestString(t *testing.T) {
