@@ -79,6 +79,16 @@ const (
 	FieldLink = "link"
 	// FieldNullLink holds the string denoting the null_link field in the database.
 	FieldNullLink = "null_link"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
+	// FieldNullActive holds the string denoting the null_active field in the database.
+	FieldNullActive = "null_active"
+	// FieldDeleted holds the string denoting the deleted field in the database.
+	FieldDeleted = "deleted"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldIP holds the string denoting the ip field in the database.
+	FieldIP = "ip"
 )
 
 var (

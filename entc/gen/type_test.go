@@ -88,6 +88,7 @@ func TestType_Label(t *testing.T) {
 		{"PHBOrg", "phb_org"},
 		{"UserID", "user_id"},
 		{"HTTPCode", "http_code"},
+		{"UserIDs", "user_ids"},
 	}
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name}
@@ -127,6 +128,7 @@ func TestType_Receiver(t *testing.T) {
 		{"DomainSpecificLang", "dospla"},
 		{"[]byte", "b"},
 		{"[16]byte", "b"},
+		{"UserPKey", "up"},
 	}
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name, Config: &Config{Package: "entc/gen"}}
