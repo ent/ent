@@ -17,7 +17,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $_, $f := $.Fields }}
-			{{- $f.StructField }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
@@ -25,7 +25,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
 	{{ range $_, $f := $.Fields }}
-		{{- $receiver }}.{{ $f.StructField }} = {{- if $f.IsTime }}time.Unix(0, {{ $scan }}.{{ $f.StructField }}) {{ else }}{{- $scan }}.{{ $f.StructField }}{{ end }}
+		{{- $receiver }}.{{ $f.StructField }} = {{ if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, {{ $scan }}.{{ $f.StructField }}) {{ else }}{{- $scan }}.{{ $f.StructField }}{{ end }}
 	{{ end -}}
 	return nil
 }
@@ -45,7 +45,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $_, $f := $.Fields }}
-			{{- $f.StructField }} {{ if $f.IsTime }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.Nillable }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
@@ -55,7 +55,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
 			ID: v.ID,
 			{{ range $_, $f := $.Fields }}
-				{{- $f.StructField }}: {{- if $f.IsTime }}time.Unix(0, v.{{ $f.StructField }}) {{ else }}v.{{ $f.StructField }}{{ end }},
+				{{- $f.StructField }}: {{- if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, v.{{ $f.StructField }}) {{ else }}v.{{ $f.StructField }}{{ end }},
 			{{ end -}}
 		})
 	}

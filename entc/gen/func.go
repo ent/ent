@@ -144,16 +144,21 @@ func camel(s string) string {
 //	HTTPCode => http_code
 //
 func snake(s string) string {
-	var b strings.Builder
+	var (
+		j int
+		b strings.Builder
+	)
 	for i := 0; i < len(s); i++ {
 		r := rune(s[i])
-		// Put '_' if it is not a start or end of a word, current letter is an uppercase letter,
-		// and previous letter is a lowercase letter (cases like: "UserInfo"), or next letter is
-		// also a lowercase letter and previous letter is not "_".
-		if i > 0 && i < len(s)-1 && unicode.IsUpper(r) &&
-			(unicode.IsLower(rune(s[i-1])) ||
-				unicode.IsLower(rune(s[i+1])) && unicode.IsLetter(rune(s[i-1]))) {
-			b.WriteString("_")
+		// Put '_' if it is not a start or end of a word, current letter is uppercase,
+		// and previous is lowercase (cases like: "UserInfo"), or next letter is also
+		// a lowercase and previous letter is not "_".
+		if i > 0 && i < len(s)-1 && unicode.IsUpper(r) {
+			if unicode.IsLower(rune(s[i-1])) ||
+				j != i-1 && unicode.IsLower(rune(s[i+1])) && unicode.IsLetter(rune(s[i-1])) {
+				j = i
+				b.WriteString("_")
+			}
 		}
 		b.WriteRune(unicode.ToLower(r))
 	}
@@ -168,7 +173,7 @@ func snake(s string) string {
 //	UserQuery => uq
 //
 func receiver(s string) (r string) {
-	// trim invalid tokens for identifier prefix.
+	// Trim invalid tokens for identifier prefix.
 	s = strings.Trim(s, "[]*&0123456789")
 	parts := strings.Split(snake(s), "_")
 	min := len(parts[0])

@@ -8,6 +8,7 @@ package fieldtype
 
 import (
 	"database/sql"
+	"net"
 	"net/http"
 	"time"
 
@@ -309,6 +310,46 @@ func NullLink(v schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNullLink, p.EQ(vc))
+	})
+}
+
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldActive, p.EQ(vc))
+	})
+}
+
+// NullActive applies equality check predicate on the "null_active" field. It's identical to NullActiveEQ.
+func NullActive(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullActive, p.EQ(vc))
+	})
+}
+
+// Deleted applies equality check predicate on the "deleted" field. It's identical to DeletedEQ.
+func Deleted(v sql.NullBool) predicate.FieldType {
+	vc := v.Bool
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeleted, p.EQ(vc))
+	})
+}
+
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.EQ(vc))
+	})
+}
+
+// IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
+func IP(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.EQ(vc))
 	})
 }
 
@@ -2887,6 +2928,264 @@ func NullLinkIsNil() predicate.FieldType {
 func NullLinkNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldNullLink)
+	})
+}
+
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldActive, p.EQ(vc))
+	})
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldActive, p.NEQ(vc))
+	})
+}
+
+// ActiveIsNil applies the IsNil predicate on the "active" field.
+func ActiveIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldActive)
+	})
+}
+
+// ActiveNotNil applies the NotNil predicate on the "active" field.
+func ActiveNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldActive)
+	})
+}
+
+// NullActiveEQ applies the EQ predicate on the "null_active" field.
+func NullActiveEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullActive, p.EQ(vc))
+	})
+}
+
+// NullActiveNEQ applies the NEQ predicate on the "null_active" field.
+func NullActiveNEQ(v schema.Status) predicate.FieldType {
+	vc := bool(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNullActive, p.NEQ(vc))
+	})
+}
+
+// NullActiveIsNil applies the IsNil predicate on the "null_active" field.
+func NullActiveIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldNullActive)
+	})
+}
+
+// NullActiveNotNil applies the NotNil predicate on the "null_active" field.
+func NullActiveNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldNullActive)
+	})
+}
+
+// DeletedEQ applies the EQ predicate on the "deleted" field.
+func DeletedEQ(v sql.NullBool) predicate.FieldType {
+	vc := v.Bool
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeleted, p.EQ(vc))
+	})
+}
+
+// DeletedNEQ applies the NEQ predicate on the "deleted" field.
+func DeletedNEQ(v sql.NullBool) predicate.FieldType {
+	vc := v.Bool
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeleted, p.NEQ(vc))
+	})
+}
+
+// DeletedIsNil applies the IsNil predicate on the "deleted" field.
+func DeletedIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldDeleted)
+	})
+}
+
+// DeletedNotNil applies the NotNil predicate on the "deleted" field.
+func DeletedNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldDeleted)
+	})
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.EQ(vc))
+	})
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.NEQ(vc))
+	})
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...sql.NullTime) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].Time
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.Within(v...))
+	})
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...sql.NullTime) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i].Time
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.Without(v...))
+	})
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.GT(vc))
+	})
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.GTE(vc))
+	})
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.LT(vc))
+	})
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v sql.NullTime) predicate.FieldType {
+	vc := v.Time
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDeletedAt, p.LTE(vc))
+	})
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldDeletedAt)
+	})
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldDeletedAt)
+	})
+}
+
+// IPEQ applies the EQ predicate on the "ip" field.
+func IPEQ(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.EQ(vc))
+	})
+}
+
+// IPNEQ applies the NEQ predicate on the "ip" field.
+func IPNEQ(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.NEQ(vc))
+	})
+}
+
+// IPIn applies the In predicate on the "ip" field.
+func IPIn(vs ...net.IP) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = []byte(vs[i])
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.Within(v...))
+	})
+}
+
+// IPNotIn applies the NotIn predicate on the "ip" field.
+func IPNotIn(vs ...net.IP) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = []byte(vs[i])
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.Without(v...))
+	})
+}
+
+// IPGT applies the GT predicate on the "ip" field.
+func IPGT(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.GT(vc))
+	})
+}
+
+// IPGTE applies the GTE predicate on the "ip" field.
+func IPGTE(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.GTE(vc))
+	})
+}
+
+// IPLT applies the LT predicate on the "ip" field.
+func IPLT(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.LT(vc))
+	})
+}
+
+// IPLTE applies the LTE predicate on the "ip" field.
+func IPLTE(v net.IP) predicate.FieldType {
+	vc := []byte(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldIP, p.LTE(vc))
+	})
+}
+
+// IPIsNil applies the IsNil predicate on the "ip" field.
+func IPIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldIP)
+	})
+}
+
+// IPNotNil applies the NotNil predicate on the "ip" field.
+func IPNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldIP)
 	})
 }
 

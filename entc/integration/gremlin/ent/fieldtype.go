@@ -9,6 +9,7 @@ package ent
 import (
 	"database/sql"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -87,6 +88,16 @@ type FieldType struct {
 	Link schema.Link `json:"link,omitempty"`
 	// NullLink holds the value of the "null_link" field.
 	NullLink *schema.Link `json:"null_link,omitempty"`
+	// Active holds the value of the "active" field.
+	Active schema.Status `json:"active,omitempty"`
+	// NullActive holds the value of the "null_active" field.
+	NullActive *schema.Status `json:"null_active,omitempty"`
+	// Deleted holds the value of the "deleted" field.
+	Deleted sql.NullBool `json:"deleted,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt sql.NullTime `json:"deleted_at,omitempty"`
+	// IP holds the value of the "ip" field.
+	IP net.IP `json:"ip,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -129,6 +140,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		NullStr               *sql.NullString `json:"null_str,omitempty"`
 		Link                  schema.Link     `json:"link,omitempty"`
 		NullLink              *schema.Link    `json:"null_link,omitempty"`
+		Active                schema.Status   `json:"active,omitempty"`
+		NullActive            *schema.Status  `json:"null_active,omitempty"`
+		Deleted               sql.NullBool    `json:"deleted,omitempty"`
+		DeletedAt             sql.NullTime    `json:"deleted_at,omitempty"`
+		IP                    net.IP          `json:"ip,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -166,6 +182,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.NullStr = scanft.NullStr
 	ft.Link = scanft.Link
 	ft.NullLink = scanft.NullLink
+	ft.Active = scanft.Active
+	ft.NullActive = scanft.NullActive
+	ft.Deleted = scanft.Deleted
+	ft.DeletedAt = scanft.DeletedAt
+	ft.IP = scanft.IP
 	return nil
 }
 
@@ -272,6 +293,18 @@ func (ft *FieldType) String() string {
 		builder.WriteString(", null_link=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", active=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Active))
+	if v := ft.NullActive; v != nil {
+		builder.WriteString(", null_active=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", deleted=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
+	builder.WriteString(", deleted_at=")
+	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
+	builder.WriteString(", ip=")
+	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -319,6 +352,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		NullStr               *sql.NullString `json:"null_str,omitempty"`
 		Link                  schema.Link     `json:"link,omitempty"`
 		NullLink              *schema.Link    `json:"null_link,omitempty"`
+		Active                schema.Status   `json:"active,omitempty"`
+		NullActive            *schema.Status  `json:"null_active,omitempty"`
+		Deleted               sql.NullBool    `json:"deleted,omitempty"`
+		DeletedAt             sql.NullTime    `json:"deleted_at,omitempty"`
+		IP                    net.IP          `json:"ip,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -358,6 +396,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			NullStr:               v.NullStr,
 			Link:                  v.Link,
 			NullLink:              v.NullLink,
+			Active:                v.Active,
+			NullActive:            v.NullActive,
+			Deleted:               v.Deleted,
+			DeletedAt:             v.DeletedAt,
+			IP:                    v.IP,
 		})
 	}
 	return nil

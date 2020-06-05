@@ -10,6 +10,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -742,6 +743,82 @@ func (ftu *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetActive sets the active field.
+func (ftu *FieldTypeUpdate) SetActive(s schema.Status) *FieldTypeUpdate {
+	ftu.mutation.SetActive(s)
+	return ftu
+}
+
+// SetNillableActive sets the active field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableActive(s *schema.Status) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetActive(*s)
+	}
+	return ftu
+}
+
+// ClearActive clears the value of active.
+func (ftu *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
+	ftu.mutation.ClearActive()
+	return ftu
+}
+
+// SetNullActive sets the null_active field.
+func (ftu *FieldTypeUpdate) SetNullActive(s schema.Status) *FieldTypeUpdate {
+	ftu.mutation.SetNullActive(s)
+	return ftu
+}
+
+// SetNillableNullActive sets the null_active field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNullActive(s *schema.Status) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetNullActive(*s)
+	}
+	return ftu
+}
+
+// ClearNullActive clears the value of null_active.
+func (ftu *FieldTypeUpdate) ClearNullActive() *FieldTypeUpdate {
+	ftu.mutation.ClearNullActive()
+	return ftu
+}
+
+// SetDeleted sets the deleted field.
+func (ftu *FieldTypeUpdate) SetDeleted(sb sql.NullBool) *FieldTypeUpdate {
+	ftu.mutation.SetDeleted(sb)
+	return ftu
+}
+
+// ClearDeleted clears the value of deleted.
+func (ftu *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
+	ftu.mutation.ClearDeleted()
+	return ftu
+}
+
+// SetDeletedAt sets the deleted_at field.
+func (ftu *FieldTypeUpdate) SetDeletedAt(st sql.NullTime) *FieldTypeUpdate {
+	ftu.mutation.SetDeletedAt(st)
+	return ftu
+}
+
+// ClearDeletedAt clears the value of deleted_at.
+func (ftu *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
+	ftu.mutation.ClearDeletedAt()
+	return ftu
+}
+
+// SetIP sets the ip field.
+func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
+	ftu.mutation.SetIP(n)
+	return ftu
+}
+
+// ClearIP clears the value of ip.
+func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
+	ftu.mutation.ClearIP()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -991,6 +1068,21 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
 	}
+	if value, ok := ftu.mutation.Active(); ok {
+		v.Property(dsl.Single, fieldtype.FieldActive, value)
+	}
+	if value, ok := ftu.mutation.NullActive(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullActive, value)
+	}
+	if value, ok := ftu.mutation.Deleted(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDeleted, value)
+	}
+	if value, ok := ftu.mutation.DeletedAt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
+	}
+	if value, ok := ftu.mutation.IP(); ok {
+		v.Property(dsl.Single, fieldtype.FieldIP, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1072,6 +1164,21 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.NullLinkCleared() {
 		properties = append(properties, fieldtype.FieldNullLink)
+	}
+	if ftu.mutation.ActiveCleared() {
+		properties = append(properties, fieldtype.FieldActive)
+	}
+	if ftu.mutation.NullActiveCleared() {
+		properties = append(properties, fieldtype.FieldNullActive)
+	}
+	if ftu.mutation.DeletedCleared() {
+		properties = append(properties, fieldtype.FieldDeleted)
+	}
+	if ftu.mutation.DeletedAtCleared() {
+		properties = append(properties, fieldtype.FieldDeletedAt)
+	}
+	if ftu.mutation.IPCleared() {
+		properties = append(properties, fieldtype.FieldIP)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -1794,6 +1901,82 @@ func (ftuo *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetActive sets the active field.
+func (ftuo *FieldTypeUpdateOne) SetActive(s schema.Status) *FieldTypeUpdateOne {
+	ftuo.mutation.SetActive(s)
+	return ftuo
+}
+
+// SetNillableActive sets the active field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableActive(s *schema.Status) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetActive(*s)
+	}
+	return ftuo
+}
+
+// ClearActive clears the value of active.
+func (ftuo *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearActive()
+	return ftuo
+}
+
+// SetNullActive sets the null_active field.
+func (ftuo *FieldTypeUpdateOne) SetNullActive(s schema.Status) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNullActive(s)
+	return ftuo
+}
+
+// SetNillableNullActive sets the null_active field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNullActive(s *schema.Status) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetNullActive(*s)
+	}
+	return ftuo
+}
+
+// ClearNullActive clears the value of null_active.
+func (ftuo *FieldTypeUpdateOne) ClearNullActive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullActive()
+	return ftuo
+}
+
+// SetDeleted sets the deleted field.
+func (ftuo *FieldTypeUpdateOne) SetDeleted(sb sql.NullBool) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDeleted(sb)
+	return ftuo
+}
+
+// ClearDeleted clears the value of deleted.
+func (ftuo *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDeleted()
+	return ftuo
+}
+
+// SetDeletedAt sets the deleted_at field.
+func (ftuo *FieldTypeUpdateOne) SetDeletedAt(st sql.NullTime) *FieldTypeUpdateOne {
+	ftuo.mutation.SetDeletedAt(st)
+	return ftuo
+}
+
+// ClearDeletedAt clears the value of deleted_at.
+func (ftuo *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDeletedAt()
+	return ftuo
+}
+
+// SetIP sets the ip field.
+func (ftuo *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
+	ftuo.mutation.SetIP(n)
+	return ftuo
+}
+
+// ClearIP clears the value of ip.
+func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearIP()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2048,6 +2231,21 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
 	}
+	if value, ok := ftuo.mutation.Active(); ok {
+		v.Property(dsl.Single, fieldtype.FieldActive, value)
+	}
+	if value, ok := ftuo.mutation.NullActive(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullActive, value)
+	}
+	if value, ok := ftuo.mutation.Deleted(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDeleted, value)
+	}
+	if value, ok := ftuo.mutation.DeletedAt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
+	}
+	if value, ok := ftuo.mutation.IP(); ok {
+		v.Property(dsl.Single, fieldtype.FieldIP, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -2129,6 +2327,21 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.NullLinkCleared() {
 		properties = append(properties, fieldtype.FieldNullLink)
+	}
+	if ftuo.mutation.ActiveCleared() {
+		properties = append(properties, fieldtype.FieldActive)
+	}
+	if ftuo.mutation.NullActiveCleared() {
+		properties = append(properties, fieldtype.FieldNullActive)
+	}
+	if ftuo.mutation.DeletedCleared() {
+		properties = append(properties, fieldtype.FieldDeleted)
+	}
+	if ftuo.mutation.DeletedAtCleared() {
+		properties = append(properties, fieldtype.FieldDeletedAt)
+	}
+	if ftuo.mutation.IPCleared() {
+		properties = append(properties, fieldtype.FieldIP)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

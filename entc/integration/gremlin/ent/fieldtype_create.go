@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -404,6 +405,52 @@ func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
+// SetActive sets the active field.
+func (ftc *FieldTypeCreate) SetActive(s schema.Status) *FieldTypeCreate {
+	ftc.mutation.SetActive(s)
+	return ftc
+}
+
+// SetNillableActive sets the active field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetActive(*s)
+	}
+	return ftc
+}
+
+// SetNullActive sets the null_active field.
+func (ftc *FieldTypeCreate) SetNullActive(s schema.Status) *FieldTypeCreate {
+	ftc.mutation.SetNullActive(s)
+	return ftc
+}
+
+// SetNillableNullActive sets the null_active field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetNullActive(*s)
+	}
+	return ftc
+}
+
+// SetDeleted sets the deleted field.
+func (ftc *FieldTypeCreate) SetDeleted(sb sql.NullBool) *FieldTypeCreate {
+	ftc.mutation.SetDeleted(sb)
+	return ftc
+}
+
+// SetDeletedAt sets the deleted_at field.
+func (ftc *FieldTypeCreate) SetDeletedAt(st sql.NullTime) *FieldTypeCreate {
+	ftc.mutation.SetDeletedAt(st)
+	return ftc
+}
+
+// SetIP sets the ip field.
+func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
+	ftc.mutation.SetIP(n)
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -580,6 +627,21 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
+	}
+	if value, ok := ftc.mutation.Active(); ok {
+		v.Property(dsl.Single, fieldtype.FieldActive, value)
+	}
+	if value, ok := ftc.mutation.NullActive(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullActive, value)
+	}
+	if value, ok := ftc.mutation.Deleted(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDeleted, value)
+	}
+	if value, ok := ftc.mutation.DeletedAt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
+	}
+	if value, ok := ftc.mutation.IP(); ok {
+		v.Property(dsl.Single, fieldtype.FieldIP, value)
 	}
 	return v.ValueMap(true)
 }
