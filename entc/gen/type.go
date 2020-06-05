@@ -682,7 +682,7 @@ func (f Field) NullType() string {
 		return f.Type.String()
 	}
 	switch f.Type.Type {
-	case field.TypeJSON:
+	case field.TypeJSON, field.TypeBytes:
 		return "[]byte"
 	case field.TypeString, field.TypeEnum:
 		return "sql.NullString"
