@@ -62,6 +62,30 @@ func TestInt(t *testing.T) {
 	assert.Equal(t, field.TypeUint16, field.Uint16("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeUint32, field.Uint32("age").Descriptor().Info.Type)
 	assert.Equal(t, field.TypeUint64, field.Uint64("age").Descriptor().Info.Type)
+
+	type Count int
+	fd = field.Int("active").GoType(Count(0)).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "field_test.Count", fd.Info.Ident)
+	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.Count", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+
+	fd = field.Int("count").GoType(&sql.NullInt64{}).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "sql.NullInt64", fd.Info.Ident)
+	assert.Equal(t, "database/sql", fd.Info.PkgPath)
+	assert.Equal(t, "sql.NullInt64", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+
+	fd = field.Int("count").GoType(false).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Int("count").GoType(struct{}{}).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Int("count").GoType(new(Count)).Descriptor()
+	assert.Error(t, fd.Err())
 }
 
 func TestFloat(t *testing.T) {

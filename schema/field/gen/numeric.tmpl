@@ -5,7 +5,10 @@
 
 package field
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 //go:generate go run gen/gen.go
 
@@ -33,7 +36,7 @@ func Float32(name string) *float32Builder { return &float32Builder{&Descriptor{
 	}}
 }
 
-{{ range $_, $t := $.Ints }}
+{{ range $t := $.Ints }}
 {{ $builder := printf "%sBuilder" $t }}
 
 // {{ $builder }} is the builder for {{ $t }} field.
@@ -160,12 +163,29 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 	return b
 }
 
+{{ $tt := title $t.String }}
+// GoType overrides the default Go type with a custom one.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		GoType(pkg.{{ $tt }}(0))
+//
+func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
+	b.desc.goType(typ, {{ $t }}Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	return b.desc
 }
 
 {{ end }}
+
+var (
+	{{- range $t := $.Ints }}
+		{{ $t }}Type = reflect.TypeOf({{ $t }}(0))
+	{{- end }}
+)
 
 {{ range $t := $.Floats }}
 {{ $builder := printf "%sBuilder" $t }}
