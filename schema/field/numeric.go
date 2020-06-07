@@ -4,7 +4,10 @@
 
 package field
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 //go:generate go run gen/gen.go
 
@@ -226,6 +229,16 @@ func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int("int").
+//		GoType(pkg.Int(0))
+//
+func (b *intBuilder) GoType(typ interface{}) *intBuilder {
+	b.desc.goType(typ, intType)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -340,6 +353,16 @@ func (b *uintBuilder) StorageKey(key string) *uintBuilder {
 //
 func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint("uint").
+//		GoType(pkg.Uint(0))
+//
+func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
+	b.desc.goType(typ, uintType)
 	return b
 }
 
@@ -470,6 +493,16 @@ func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int8("int8").
+//		GoType(pkg.Int8(0))
+//
+func (b *int8Builder) GoType(typ interface{}) *int8Builder {
+	b.desc.goType(typ, int8Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -594,6 +627,16 @@ func (b *int16Builder) StorageKey(key string) *int16Builder {
 //
 func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int16("int16").
+//		GoType(pkg.Int16(0))
+//
+func (b *int16Builder) GoType(typ interface{}) *int16Builder {
+	b.desc.goType(typ, int16Type)
 	return b
 }
 
@@ -724,6 +767,16 @@ func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int32("int32").
+//		GoType(pkg.Int32(0))
+//
+func (b *int32Builder) GoType(typ interface{}) *int32Builder {
+	b.desc.goType(typ, int32Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -851,6 +904,16 @@ func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int64("int64").
+//		GoType(pkg.Int64(0))
+//
+func (b *int64Builder) GoType(typ interface{}) *int64Builder {
+	b.desc.goType(typ, int64Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -965,6 +1028,16 @@ func (b *uint8Builder) StorageKey(key string) *uint8Builder {
 //
 func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint8("uint8").
+//		GoType(pkg.Uint8(0))
+//
+func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
+	b.desc.goType(typ, uint8Type)
 	return b
 }
 
@@ -1085,6 +1158,16 @@ func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint16("uint16").
+//		GoType(pkg.Uint16(0))
+//
+func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
+	b.desc.goType(typ, uint16Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1199,6 +1282,16 @@ func (b *uint32Builder) StorageKey(key string) *uint32Builder {
 //
 func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint32("uint32").
+//		GoType(pkg.Uint32(0))
+//
+func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
+	b.desc.goType(typ, uint32Type)
 	return b
 }
 
@@ -1319,10 +1412,33 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint64("uint64").
+//		GoType(pkg.Uint64(0))
+//
+func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
+	b.desc.goType(typ, uint64Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint64Builder) Descriptor() *Descriptor {
 	return b.desc
 }
+
+var (
+	intType    = reflect.TypeOf(int(0))
+	uintType   = reflect.TypeOf(uint(0))
+	int8Type   = reflect.TypeOf(int8(0))
+	int16Type  = reflect.TypeOf(int16(0))
+	int32Type  = reflect.TypeOf(int32(0))
+	int64Type  = reflect.TypeOf(int64(0))
+	uint8Type  = reflect.TypeOf(uint8(0))
+	uint16Type = reflect.TypeOf(uint16(0))
+	uint32Type = reflect.TypeOf(uint32(0))
+	uint64Type = reflect.TypeOf(uint64(0))
+)
 
 // float64Builder is the builder for float fields.
 type float64Builder struct {
