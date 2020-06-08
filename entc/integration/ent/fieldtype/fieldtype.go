@@ -89,6 +89,14 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
+	// FieldNullInt64 holds the string denoting the null_int64 field in the database.
+	FieldNullInt64 = "null_int64"
+	// FieldSchemaInt holds the string denoting the schema_int field in the database.
+	FieldSchemaInt = "schema_int"
+	// FieldSchemaInt8 holds the string denoting the schema_int8 field in the database.
+	FieldSchemaInt8 = "schema_int8"
+	// FieldSchemaInt64 holds the string denoting the schema_int64 field in the database.
+	FieldSchemaInt64 = "schema_int64"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -134,6 +142,10 @@ var Columns = []string{
 	FieldDeleted,
 	FieldDeletedAt,
 	FieldIP,
+	FieldNullInt64,
+	FieldSchemaInt,
+	FieldSchemaInt8,
+	FieldSchemaInt64,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.

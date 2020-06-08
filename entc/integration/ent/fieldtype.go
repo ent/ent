@@ -96,8 +96,16 @@ type FieldType struct {
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt sql.NullTime `json:"deleted_at,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP         net.IP `json:"ip,omitempty"`
-	file_field *int
+	IP net.IP `json:"ip,omitempty"`
+	// NullInt64 holds the value of the "null_int64" field.
+	NullInt64 sql.NullInt64 `json:"null_int64,omitempty"`
+	// SchemaInt holds the value of the "schema_int" field.
+	SchemaInt schema.Int `json:"schema_int,omitempty"`
+	// SchemaInt8 holds the value of the "schema_int8" field.
+	SchemaInt8 schema.Int8 `json:"schema_int8,omitempty"`
+	// SchemaInt64 holds the value of the "schema_int64" field.
+	SchemaInt64 schema.Int64 `json:"schema_int64,omitempty"`
+	file_field  *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -141,6 +149,10 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullBool{},    // deleted
 		&sql.NullTime{},    // deleted_at
 		&[]byte{},          // ip
+		&sql.NullInt64{},   // null_int64
+		&sql.NullInt64{},   // schema_int
+		&sql.NullInt64{},   // schema_int8
+		&sql.NullInt64{},   // schema_int64
 	}
 }
 
@@ -355,7 +367,27 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value != nil {
 		ft.IP = *value
 	}
-	values = values[37:]
+	if value, ok := values[37].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field null_int64", values[37])
+	} else if value != nil {
+		ft.NullInt64 = *value
+	}
+	if value, ok := values[38].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field schema_int", values[38])
+	} else if value.Valid {
+		ft.SchemaInt = schema.Int(schema.Int(value.Int64))
+	}
+	if value, ok := values[39].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field schema_int8", values[39])
+	} else if value.Valid {
+		ft.SchemaInt8 = schema.Int8(schema.Int8(value.Int64))
+	}
+	if value, ok := values[40].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field schema_int64", values[40])
+	} else if value.Valid {
+		ft.SchemaInt64 = schema.Int64(value.Int64)
+	}
+	values = values[41:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -482,6 +514,14 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
+	builder.WriteString(", null_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.NullInt64))
+	builder.WriteString(", schema_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt))
+	builder.WriteString(", schema_int8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
+	builder.WriteString(", schema_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
 	builder.WriteByte(')')
 	return builder.String()
 }

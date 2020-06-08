@@ -37,7 +37,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ range $f := $.Fields }}
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
-	{{ $comparable := or (not $f.HasGoType) $f.ConvertedToBasic }}
+	{{ $comparable := $f.ConvertedToBasic }}
 	{{- if and $hasP $comparable }}
         {{ $arg := "v" }}
 		{{ $func := $f.StructField }}

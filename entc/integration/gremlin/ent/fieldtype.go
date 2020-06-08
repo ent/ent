@@ -98,6 +98,14 @@ type FieldType struct {
 	DeletedAt sql.NullTime `json:"deleted_at,omitempty"`
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
+	// NullInt64 holds the value of the "null_int64" field.
+	NullInt64 sql.NullInt64 `json:"null_int64,omitempty"`
+	// SchemaInt holds the value of the "schema_int" field.
+	SchemaInt schema.Int `json:"schema_int,omitempty"`
+	// SchemaInt8 holds the value of the "schema_int8" field.
+	SchemaInt8 schema.Int8 `json:"schema_int8,omitempty"`
+	// SchemaInt64 holds the value of the "schema_int64" field.
+	SchemaInt64 schema.Int64 `json:"schema_int64,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -145,6 +153,10 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Deleted               sql.NullBool    `json:"deleted,omitempty"`
 		DeletedAt             sql.NullTime    `json:"deleted_at,omitempty"`
 		IP                    net.IP          `json:"ip,omitempty"`
+		NullInt64             sql.NullInt64   `json:"null_int64,omitempty"`
+		SchemaInt             schema.Int      `json:"schema_int,omitempty"`
+		SchemaInt8            schema.Int8     `json:"schema_int8,omitempty"`
+		SchemaInt64           schema.Int64    `json:"schema_int64,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -187,6 +199,10 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Deleted = scanft.Deleted
 	ft.DeletedAt = scanft.DeletedAt
 	ft.IP = scanft.IP
+	ft.NullInt64 = scanft.NullInt64
+	ft.SchemaInt = scanft.SchemaInt
+	ft.SchemaInt8 = scanft.SchemaInt8
+	ft.SchemaInt64 = scanft.SchemaInt64
 	return nil
 }
 
@@ -305,6 +321,14 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
+	builder.WriteString(", null_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.NullInt64))
+	builder.WriteString(", schema_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt))
+	builder.WriteString(", schema_int8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
+	builder.WriteString(", schema_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -357,6 +381,10 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Deleted               sql.NullBool    `json:"deleted,omitempty"`
 		DeletedAt             sql.NullTime    `json:"deleted_at,omitempty"`
 		IP                    net.IP          `json:"ip,omitempty"`
+		NullInt64             sql.NullInt64   `json:"null_int64,omitempty"`
+		SchemaInt             schema.Int      `json:"schema_int,omitempty"`
+		SchemaInt8            schema.Int8     `json:"schema_int8,omitempty"`
+		SchemaInt64           schema.Int64    `json:"schema_int64,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -401,6 +429,10 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Deleted:               v.Deleted,
 			DeletedAt:             v.DeletedAt,
 			IP:                    v.IP,
+			NullInt64:             v.NullInt64,
+			SchemaInt:             v.SchemaInt,
+			SchemaInt8:            v.SchemaInt8,
+			SchemaInt64:           v.SchemaInt64,
 		})
 	}
 	return nil

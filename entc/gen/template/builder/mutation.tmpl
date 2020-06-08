@@ -45,7 +45,7 @@ type {{ $mutation }} struct {
 	{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
 	{{- range $f := $n.Fields }}
 		{{ $f.BuilderField }} *{{ $f.Type }}
-		{{- if $f.Type.Numeric }}
+        {{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 			add{{ $f.BuilderField }} *{{ $f.Type }}
 		{{- end }}
 	{{- end }}
@@ -161,7 +161,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* setting numeric type override previous calls to Add. */}}
-		{{- if $f.Type.Numeric }}
+		{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 			m.add{{ $f.BuilderField }} = nil
 		{{- end }}
 	}
@@ -193,10 +193,13 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		return oldValue.{{ $f.StructField }}, nil
 	}
 
-	{{ if and $f.Type.Numeric }}
+	{{ if and $f.Type.Numeric $f.ConvertedToBasic }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
 		func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
+			{{- if $f.HasGoType }}
+			{{- else }}
+			{{- end }}
 			if m.add{{ $f.BuilderField }} != nil {
 				*m.add{{ $f.BuilderField }} += {{ $p }}
 			} else {
@@ -219,7 +222,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		// {{ $func }} clears the value of {{ $f.Name }}.
 		func (m *{{ $mutation }}) {{ $func }}() {
 			m.{{ $f.BuilderField }} = nil
-			{{- if $f.Type.Numeric }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 				m.add{{ $f.BuilderField }} = nil
 			{{- end }}
 			m.clearedFields[{{ $const }}] = struct{}{}
@@ -237,7 +240,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	// {{ $func }} reset all changes of the "{{ $f.Name }}" field.
 	func (m *{{ $mutation }}) {{ $func }}() {
 		m.{{ $f.BuilderField }} = nil
-		{{- if $f.Type.Numeric }}
+		{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 			m.add{{ $f.BuilderField }} = nil
 		{{- end }}
 		{{- if $f.Optional }}
@@ -424,7 +427,7 @@ func (m *{{ $mutation }}) AddedFields() []string {
 	{{- if $n.HasNumeric }}
 		var fields []string
 		{{- range $f := $n.Fields }}
-			{{- if $f.Type.Numeric }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				if m.add{{ $f.BuilderField }} != nil {
 					fields = append(fields, {{ $const }})
@@ -444,7 +447,7 @@ func (m *{{ $mutation }}) AddedField(name string) (ent.Value, bool) {
 	{{- if $n.HasNumeric }}
 		switch name {
 		{{- range $f := $n.Fields }}
-			{{- if $f.Type.Numeric }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
 					return m.Added{{ $f.StructField }}()
@@ -462,7 +465,7 @@ func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
 	{{- with $n.Fields }}
 		switch name {
 		{{- range $f := $n.Fields }}
-			{{- if $f.Type.Numeric }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
 					v, ok := value.({{ $f.Type }})

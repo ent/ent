@@ -1264,6 +1264,13 @@ type FieldTypeMutation struct {
 	deleted                    *sql.NullBool
 	deleted_at                 *sql.NullTime
 	ip                         *net.IP
+	null_int64                 *sql.NullInt64
+	schema_int                 *schema.Int
+	addschema_int              *schema.Int
+	schema_int8                *schema.Int8
+	addschema_int8             *schema.Int8
+	schema_int64               *schema.Int64
+	addschema_int64            *schema.Int64
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -3632,6 +3639,269 @@ func (m *FieldTypeMutation) ResetIP() {
 	delete(m.clearedFields, fieldtype.FieldIP)
 }
 
+// SetNullInt64 sets the null_int64 field.
+func (m *FieldTypeMutation) SetNullInt64(si sql.NullInt64) {
+	m.null_int64 = &si
+}
+
+// NullInt64 returns the null_int64 value in the mutation.
+func (m *FieldTypeMutation) NullInt64() (r sql.NullInt64, exists bool) {
+	v := m.null_int64
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNullInt64 returns the old null_int64 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldNullInt64(ctx context.Context) (v sql.NullInt64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNullInt64 is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNullInt64 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNullInt64: %w", err)
+	}
+	return oldValue.NullInt64, nil
+}
+
+// ClearNullInt64 clears the value of null_int64.
+func (m *FieldTypeMutation) ClearNullInt64() {
+	m.null_int64 = nil
+	m.clearedFields[fieldtype.FieldNullInt64] = struct{}{}
+}
+
+// NullInt64Cleared returns if the field null_int64 was cleared in this mutation.
+func (m *FieldTypeMutation) NullInt64Cleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldNullInt64]
+	return ok
+}
+
+// ResetNullInt64 reset all changes of the "null_int64" field.
+func (m *FieldTypeMutation) ResetNullInt64() {
+	m.null_int64 = nil
+	delete(m.clearedFields, fieldtype.FieldNullInt64)
+}
+
+// SetSchemaInt sets the schema_int field.
+func (m *FieldTypeMutation) SetSchemaInt(s schema.Int) {
+	m.schema_int = &s
+	m.addschema_int = nil
+}
+
+// SchemaInt returns the schema_int value in the mutation.
+func (m *FieldTypeMutation) SchemaInt() (r schema.Int, exists bool) {
+	v := m.schema_int
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSchemaInt returns the old schema_int value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldSchemaInt(ctx context.Context) (v schema.Int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSchemaInt is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSchemaInt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSchemaInt: %w", err)
+	}
+	return oldValue.SchemaInt, nil
+}
+
+// AddSchemaInt adds s to schema_int.
+func (m *FieldTypeMutation) AddSchemaInt(s schema.Int) {
+	if m.addschema_int != nil {
+		*m.addschema_int += s
+	} else {
+		m.addschema_int = &s
+	}
+}
+
+// AddedSchemaInt returns the value that was added to the schema_int field in this mutation.
+func (m *FieldTypeMutation) AddedSchemaInt() (r schema.Int, exists bool) {
+	v := m.addschema_int
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSchemaInt clears the value of schema_int.
+func (m *FieldTypeMutation) ClearSchemaInt() {
+	m.schema_int = nil
+	m.addschema_int = nil
+	m.clearedFields[fieldtype.FieldSchemaInt] = struct{}{}
+}
+
+// SchemaIntCleared returns if the field schema_int was cleared in this mutation.
+func (m *FieldTypeMutation) SchemaIntCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldSchemaInt]
+	return ok
+}
+
+// ResetSchemaInt reset all changes of the "schema_int" field.
+func (m *FieldTypeMutation) ResetSchemaInt() {
+	m.schema_int = nil
+	m.addschema_int = nil
+	delete(m.clearedFields, fieldtype.FieldSchemaInt)
+}
+
+// SetSchemaInt8 sets the schema_int8 field.
+func (m *FieldTypeMutation) SetSchemaInt8(s schema.Int8) {
+	m.schema_int8 = &s
+	m.addschema_int8 = nil
+}
+
+// SchemaInt8 returns the schema_int8 value in the mutation.
+func (m *FieldTypeMutation) SchemaInt8() (r schema.Int8, exists bool) {
+	v := m.schema_int8
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSchemaInt8 returns the old schema_int8 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldSchemaInt8(ctx context.Context) (v schema.Int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSchemaInt8 is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSchemaInt8 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSchemaInt8: %w", err)
+	}
+	return oldValue.SchemaInt8, nil
+}
+
+// AddSchemaInt8 adds s to schema_int8.
+func (m *FieldTypeMutation) AddSchemaInt8(s schema.Int8) {
+	if m.addschema_int8 != nil {
+		*m.addschema_int8 += s
+	} else {
+		m.addschema_int8 = &s
+	}
+}
+
+// AddedSchemaInt8 returns the value that was added to the schema_int8 field in this mutation.
+func (m *FieldTypeMutation) AddedSchemaInt8() (r schema.Int8, exists bool) {
+	v := m.addschema_int8
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSchemaInt8 clears the value of schema_int8.
+func (m *FieldTypeMutation) ClearSchemaInt8() {
+	m.schema_int8 = nil
+	m.addschema_int8 = nil
+	m.clearedFields[fieldtype.FieldSchemaInt8] = struct{}{}
+}
+
+// SchemaInt8Cleared returns if the field schema_int8 was cleared in this mutation.
+func (m *FieldTypeMutation) SchemaInt8Cleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldSchemaInt8]
+	return ok
+}
+
+// ResetSchemaInt8 reset all changes of the "schema_int8" field.
+func (m *FieldTypeMutation) ResetSchemaInt8() {
+	m.schema_int8 = nil
+	m.addschema_int8 = nil
+	delete(m.clearedFields, fieldtype.FieldSchemaInt8)
+}
+
+// SetSchemaInt64 sets the schema_int64 field.
+func (m *FieldTypeMutation) SetSchemaInt64(s schema.Int64) {
+	m.schema_int64 = &s
+	m.addschema_int64 = nil
+}
+
+// SchemaInt64 returns the schema_int64 value in the mutation.
+func (m *FieldTypeMutation) SchemaInt64() (r schema.Int64, exists bool) {
+	v := m.schema_int64
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSchemaInt64 returns the old schema_int64 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldSchemaInt64(ctx context.Context) (v schema.Int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSchemaInt64 is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSchemaInt64 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSchemaInt64: %w", err)
+	}
+	return oldValue.SchemaInt64, nil
+}
+
+// AddSchemaInt64 adds s to schema_int64.
+func (m *FieldTypeMutation) AddSchemaInt64(s schema.Int64) {
+	if m.addschema_int64 != nil {
+		*m.addschema_int64 += s
+	} else {
+		m.addschema_int64 = &s
+	}
+}
+
+// AddedSchemaInt64 returns the value that was added to the schema_int64 field in this mutation.
+func (m *FieldTypeMutation) AddedSchemaInt64() (r schema.Int64, exists bool) {
+	v := m.addschema_int64
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSchemaInt64 clears the value of schema_int64.
+func (m *FieldTypeMutation) ClearSchemaInt64() {
+	m.schema_int64 = nil
+	m.addschema_int64 = nil
+	m.clearedFields[fieldtype.FieldSchemaInt64] = struct{}{}
+}
+
+// SchemaInt64Cleared returns if the field schema_int64 was cleared in this mutation.
+func (m *FieldTypeMutation) SchemaInt64Cleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldSchemaInt64]
+	return ok
+}
+
+// ResetSchemaInt64 reset all changes of the "schema_int64" field.
+func (m *FieldTypeMutation) ResetSchemaInt64() {
+	m.schema_int64 = nil
+	m.addschema_int64 = nil
+	delete(m.clearedFields, fieldtype.FieldSchemaInt64)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -3646,7 +3916,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 37)
+	fields := make([]string, 0, 41)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -3758,6 +4028,18 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.ip != nil {
 		fields = append(fields, fieldtype.FieldIP)
 	}
+	if m.null_int64 != nil {
+		fields = append(fields, fieldtype.FieldNullInt64)
+	}
+	if m.schema_int != nil {
+		fields = append(fields, fieldtype.FieldSchemaInt)
+	}
+	if m.schema_int8 != nil {
+		fields = append(fields, fieldtype.FieldSchemaInt8)
+	}
+	if m.schema_int64 != nil {
+		fields = append(fields, fieldtype.FieldSchemaInt64)
+	}
 	return fields
 }
 
@@ -3840,6 +4122,14 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case fieldtype.FieldIP:
 		return m.IP()
+	case fieldtype.FieldNullInt64:
+		return m.NullInt64()
+	case fieldtype.FieldSchemaInt:
+		return m.SchemaInt()
+	case fieldtype.FieldSchemaInt8:
+		return m.SchemaInt8()
+	case fieldtype.FieldSchemaInt64:
+		return m.SchemaInt64()
 	}
 	return nil, false
 }
@@ -3923,6 +4213,14 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDeletedAt(ctx)
 	case fieldtype.FieldIP:
 		return m.OldIP(ctx)
+	case fieldtype.FieldNullInt64:
+		return m.OldNullInt64(ctx)
+	case fieldtype.FieldSchemaInt:
+		return m.OldSchemaInt(ctx)
+	case fieldtype.FieldSchemaInt8:
+		return m.OldSchemaInt8(ctx)
+	case fieldtype.FieldSchemaInt64:
+		return m.OldSchemaInt64(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4191,6 +4489,34 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetIP(v)
 		return nil
+	case fieldtype.FieldNullInt64:
+		v, ok := value.(sql.NullInt64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNullInt64(v)
+		return nil
+	case fieldtype.FieldSchemaInt:
+		v, ok := value.(schema.Int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSchemaInt(v)
+		return nil
+	case fieldtype.FieldSchemaInt8:
+		v, ok := value.(schema.Int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSchemaInt8(v)
+		return nil
+	case fieldtype.FieldSchemaInt64:
+		v, ok := value.(schema.Int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSchemaInt64(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4271,6 +4597,15 @@ func (m *FieldTypeMutation) AddedFields() []string {
 	if m.adddecimal != nil {
 		fields = append(fields, fieldtype.FieldDecimal)
 	}
+	if m.addschema_int != nil {
+		fields = append(fields, fieldtype.FieldSchemaInt)
+	}
+	if m.addschema_int8 != nil {
+		fields = append(fields, fieldtype.FieldSchemaInt8)
+	}
+	if m.addschema_int64 != nil {
+		fields = append(fields, fieldtype.FieldSchemaInt64)
+	}
 	return fields
 }
 
@@ -4327,6 +4662,12 @@ func (m *FieldTypeMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedOptionalFloat32()
 	case fieldtype.FieldDecimal:
 		return m.AddedDecimal()
+	case fieldtype.FieldSchemaInt:
+		return m.AddedSchemaInt()
+	case fieldtype.FieldSchemaInt8:
+		return m.AddedSchemaInt8()
+	case fieldtype.FieldSchemaInt64:
+		return m.AddedSchemaInt64()
 	}
 	return nil, false
 }
@@ -4504,6 +4845,27 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddDecimal(v)
 		return nil
+	case fieldtype.FieldSchemaInt:
+		v, ok := value.(schema.Int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSchemaInt(v)
+		return nil
+	case fieldtype.FieldSchemaInt8:
+		v, ok := value.(schema.Int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSchemaInt8(v)
+		return nil
+	case fieldtype.FieldSchemaInt64:
+		v, ok := value.(schema.Int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSchemaInt64(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType numeric field %s", name)
 }
@@ -4607,6 +4969,18 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(fieldtype.FieldIP) {
 		fields = append(fields, fieldtype.FieldIP)
+	}
+	if m.FieldCleared(fieldtype.FieldNullInt64) {
+		fields = append(fields, fieldtype.FieldNullInt64)
+	}
+	if m.FieldCleared(fieldtype.FieldSchemaInt) {
+		fields = append(fields, fieldtype.FieldSchemaInt)
+	}
+	if m.FieldCleared(fieldtype.FieldSchemaInt8) {
+		fields = append(fields, fieldtype.FieldSchemaInt8)
+	}
+	if m.FieldCleared(fieldtype.FieldSchemaInt64) {
+		fields = append(fields, fieldtype.FieldSchemaInt64)
 	}
 	return fields
 }
@@ -4717,6 +5091,18 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldIP:
 		m.ClearIP()
+		return nil
+	case fieldtype.FieldNullInt64:
+		m.ClearNullInt64()
+		return nil
+	case fieldtype.FieldSchemaInt:
+		m.ClearSchemaInt()
+		return nil
+	case fieldtype.FieldSchemaInt8:
+		m.ClearSchemaInt8()
+		return nil
+	case fieldtype.FieldSchemaInt64:
+		m.ClearSchemaInt64()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -4837,6 +5223,18 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldIP:
 		m.ResetIP()
+		return nil
+	case fieldtype.FieldNullInt64:
+		m.ResetNullInt64()
+		return nil
+	case fieldtype.FieldSchemaInt:
+		m.ResetSchemaInt()
+		return nil
+	case fieldtype.FieldSchemaInt8:
+		m.ResetSchemaInt8()
+		return nil
+	case fieldtype.FieldSchemaInt64:
+		m.ResetSchemaInt64()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

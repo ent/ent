@@ -451,6 +451,54 @@ func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNullInt64 sets the null_int64 field.
+func (ftc *FieldTypeCreate) SetNullInt64(si sql.NullInt64) *FieldTypeCreate {
+	ftc.mutation.SetNullInt64(si)
+	return ftc
+}
+
+// SetSchemaInt sets the schema_int field.
+func (ftc *FieldTypeCreate) SetSchemaInt(s schema.Int) *FieldTypeCreate {
+	ftc.mutation.SetSchemaInt(s)
+	return ftc
+}
+
+// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaInt(s *schema.Int) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaInt(*s)
+	}
+	return ftc
+}
+
+// SetSchemaInt8 sets the schema_int8 field.
+func (ftc *FieldTypeCreate) SetSchemaInt8(s schema.Int8) *FieldTypeCreate {
+	ftc.mutation.SetSchemaInt8(s)
+	return ftc
+}
+
+// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaInt8(*s)
+	}
+	return ftc
+}
+
+// SetSchemaInt64 sets the schema_int64 field.
+func (ftc *FieldTypeCreate) SetSchemaInt64(s schema.Int64) *FieldTypeCreate {
+	ftc.mutation.SetSchemaInt64(s)
+	return ftc
+}
+
+// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaInt64(*s)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -642,6 +690,18 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
+	}
+	if value, ok := ftc.mutation.NullInt64(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullInt64, value)
+	}
+	if value, ok := ftc.mutation.SchemaInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaInt, value)
+	}
+	if value, ok := ftc.mutation.SchemaInt8(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaInt8, value)
+	}
+	if value, ok := ftc.mutation.SchemaInt64(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaInt64, value)
 	}
 	return v.ValueMap(true)
 }

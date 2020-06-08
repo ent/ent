@@ -798,7 +798,6 @@ func (f Field) ConvertedToBasic() bool {
 var (
 	nullBoolType   = reflect.TypeOf(sql.NullBool{})
 	nullTimeType   = reflect.TypeOf(sql.NullTime{})
-	nullInt64Type  = reflect.TypeOf(sql.NullInt64{})
 	nullStringType = reflect.TypeOf(sql.NullString{})
 )
 
@@ -828,17 +827,10 @@ func (f Field) BasicType(ident string) (expr string) {
 		}
 	case field.TypeTime:
 		switch {
-		case rt.Kind == reflect.Bool:
-			expr = fmt.Sprintf("time.Time(%s)", ident)
 		case rt.TypeEqual(nullTimeType):
 			expr = fmt.Sprintf("%s.Time", ident)
-		}
-	case field.TypeInt64:
-		switch {
-		case rt.Kind == reflect.Int64:
-			expr = fmt.Sprintf("int64(%s)", ident)
-		case rt.TypeEqual(nullInt64Type):
-			expr = fmt.Sprintf("%s.Int64", ident)
+		case rt.Kind == reflect.Struct:
+			expr = fmt.Sprintf("time.Time(%s)", ident)
 		}
 	case field.TypeString:
 		switch {
@@ -848,6 +840,10 @@ func (f Field) BasicType(ident string) (expr string) {
 			expr = fmt.Sprintf("%s.String()", ident)
 		case rt.TypeEqual(nullStringType):
 			expr = fmt.Sprintf("%s.String", ident)
+		}
+	default:
+		if t.Numeric() && rt.Kind >= reflect.Int && rt.Kind <= reflect.Float64 {
+			expr = fmt.Sprintf("%s(%s)", rt.Kind, ident)
 		}
 	}
 	return expr
