@@ -362,6 +362,30 @@ func IP(v net.IP) predicate.FieldType {
 	})
 }
 
+// SchemaInt applies equality check predicate on the "schema_int" field. It's identical to SchemaIntEQ.
+func SchemaInt(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaInt8 applies equality check predicate on the "schema_int8" field. It's identical to SchemaInt8EQ.
+func SchemaInt8(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt64 applies equality check predicate on the "schema_int64" field. It's identical to SchemaInt64EQ.
+func SchemaInt64(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaInt64), vc))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -3699,6 +3723,308 @@ func IPIsNil() predicate.FieldType {
 func IPNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldIP)))
+	})
+}
+
+// NullInt64IsNil applies the IsNil predicate on the "null_int64" field.
+func NullInt64IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNullInt64)))
+	})
+}
+
+// NullInt64NotNil applies the NotNil predicate on the "null_int64" field.
+func NullInt64NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNullInt64)))
+	})
+}
+
+// SchemaIntEQ applies the EQ predicate on the "schema_int" field.
+func SchemaIntEQ(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaIntNEQ applies the NEQ predicate on the "schema_int" field.
+func SchemaIntNEQ(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaIntIn applies the In predicate on the "schema_int" field.
+func SchemaIntIn(vs ...schema.Int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSchemaInt), v...))
+	})
+}
+
+// SchemaIntNotIn applies the NotIn predicate on the "schema_int" field.
+func SchemaIntNotIn(vs ...schema.Int) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSchemaInt), v...))
+	})
+}
+
+// SchemaIntGT applies the GT predicate on the "schema_int" field.
+func SchemaIntGT(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaIntGTE applies the GTE predicate on the "schema_int" field.
+func SchemaIntGTE(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaIntLT applies the LT predicate on the "schema_int" field.
+func SchemaIntLT(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaIntLTE applies the LTE predicate on the "schema_int" field.
+func SchemaIntLTE(v schema.Int) predicate.FieldType {
+	vc := int(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSchemaInt), vc))
+	})
+}
+
+// SchemaIntIsNil applies the IsNil predicate on the "schema_int" field.
+func SchemaIntIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSchemaInt)))
+	})
+}
+
+// SchemaIntNotNil applies the NotNil predicate on the "schema_int" field.
+func SchemaIntNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSchemaInt)))
+	})
+}
+
+// SchemaInt8EQ applies the EQ predicate on the "schema_int8" field.
+func SchemaInt8EQ(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt8NEQ applies the NEQ predicate on the "schema_int8" field.
+func SchemaInt8NEQ(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt8In applies the In predicate on the "schema_int8" field.
+func SchemaInt8In(vs ...schema.Int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSchemaInt8), v...))
+	})
+}
+
+// SchemaInt8NotIn applies the NotIn predicate on the "schema_int8" field.
+func SchemaInt8NotIn(vs ...schema.Int8) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSchemaInt8), v...))
+	})
+}
+
+// SchemaInt8GT applies the GT predicate on the "schema_int8" field.
+func SchemaInt8GT(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt8GTE applies the GTE predicate on the "schema_int8" field.
+func SchemaInt8GTE(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt8LT applies the LT predicate on the "schema_int8" field.
+func SchemaInt8LT(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt8LTE applies the LTE predicate on the "schema_int8" field.
+func SchemaInt8LTE(v schema.Int8) predicate.FieldType {
+	vc := int8(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSchemaInt8), vc))
+	})
+}
+
+// SchemaInt8IsNil applies the IsNil predicate on the "schema_int8" field.
+func SchemaInt8IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSchemaInt8)))
+	})
+}
+
+// SchemaInt8NotNil applies the NotNil predicate on the "schema_int8" field.
+func SchemaInt8NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSchemaInt8)))
+	})
+}
+
+// SchemaInt64EQ applies the EQ predicate on the "schema_int64" field.
+func SchemaInt64EQ(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaInt64), vc))
+	})
+}
+
+// SchemaInt64NEQ applies the NEQ predicate on the "schema_int64" field.
+func SchemaInt64NEQ(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSchemaInt64), vc))
+	})
+}
+
+// SchemaInt64In applies the In predicate on the "schema_int64" field.
+func SchemaInt64In(vs ...schema.Int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int64(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSchemaInt64), v...))
+	})
+}
+
+// SchemaInt64NotIn applies the NotIn predicate on the "schema_int64" field.
+func SchemaInt64NotIn(vs ...schema.Int64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int64(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSchemaInt64), v...))
+	})
+}
+
+// SchemaInt64GT applies the GT predicate on the "schema_int64" field.
+func SchemaInt64GT(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSchemaInt64), vc))
+	})
+}
+
+// SchemaInt64GTE applies the GTE predicate on the "schema_int64" field.
+func SchemaInt64GTE(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSchemaInt64), vc))
+	})
+}
+
+// SchemaInt64LT applies the LT predicate on the "schema_int64" field.
+func SchemaInt64LT(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSchemaInt64), vc))
+	})
+}
+
+// SchemaInt64LTE applies the LTE predicate on the "schema_int64" field.
+func SchemaInt64LTE(v schema.Int64) predicate.FieldType {
+	vc := int64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSchemaInt64), vc))
+	})
+}
+
+// SchemaInt64IsNil applies the IsNil predicate on the "schema_int64" field.
+func SchemaInt64IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSchemaInt64)))
+	})
+}
+
+// SchemaInt64NotNil applies the NotNil predicate on the "schema_int64" field.
+func SchemaInt64NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSchemaInt64)))
 	})
 }
 

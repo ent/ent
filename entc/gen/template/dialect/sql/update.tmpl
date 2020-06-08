@@ -39,7 +39,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			}
 		}
 	{{- end }}
-	{{- range $_, $f := $.Fields }}
+	{{- range $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -48,7 +48,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						Column: {{ $.Package }}.{{ $f.Constant }},
 					})
 				}
-				{{- if $f.Type.Numeric }}
+				{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},

@@ -103,10 +103,27 @@ func (FieldType) Fields() []ent.Field {
 		field.Bytes("ip").
 			Optional().
 			GoType(net.IP("127.0.0.1")),
+		field.Int("null_int64").
+			Optional().
+			GoType(&sql.NullInt64{}),
+		field.Int("schema_int").
+			Optional().
+			GoType(Int(0)),
+		field.Int8("schema_int8").
+			Optional().
+			GoType(Int8(0)),
+		field.Int64("schema_int64").
+			Optional().
+			GoType(Int64(0)),
 	}
 }
 
-type Status bool
+type (
+	Int    int
+	Int8   int8
+	Int64  int64
+	Status bool
+)
 
 type Link struct {
 	*url.URL

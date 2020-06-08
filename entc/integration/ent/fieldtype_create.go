@@ -450,6 +450,54 @@ func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNullInt64 sets the null_int64 field.
+func (ftc *FieldTypeCreate) SetNullInt64(si sql.NullInt64) *FieldTypeCreate {
+	ftc.mutation.SetNullInt64(si)
+	return ftc
+}
+
+// SetSchemaInt sets the schema_int field.
+func (ftc *FieldTypeCreate) SetSchemaInt(s schema.Int) *FieldTypeCreate {
+	ftc.mutation.SetSchemaInt(s)
+	return ftc
+}
+
+// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaInt(s *schema.Int) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaInt(*s)
+	}
+	return ftc
+}
+
+// SetSchemaInt8 sets the schema_int8 field.
+func (ftc *FieldTypeCreate) SetSchemaInt8(s schema.Int8) *FieldTypeCreate {
+	ftc.mutation.SetSchemaInt8(s)
+	return ftc
+}
+
+// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaInt8(*s)
+	}
+	return ftc
+}
+
+// SetSchemaInt64 sets the schema_int64 field.
+func (ftc *FieldTypeCreate) SetSchemaInt64(s schema.Int64) *FieldTypeCreate {
+	ftc.mutation.SetSchemaInt64(s)
+	return ftc
+}
+
+// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaInt64(*s)
+	}
+	return ftc
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
@@ -819,6 +867,38 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldIP,
 		})
 		ft.IP = value
+	}
+	if value, ok := ftc.mutation.NullInt64(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldNullInt64,
+		})
+		ft.NullInt64 = value
+	}
+	if value, ok := ftc.mutation.SchemaInt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt,
+		})
+		ft.SchemaInt = value
+	}
+	if value, ok := ftc.mutation.SchemaInt8(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+		ft.SchemaInt8 = value
+	}
+	if value, ok := ftc.mutation.SchemaInt64(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt64,
+		})
+		ft.SchemaInt64 = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {

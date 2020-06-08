@@ -817,6 +817,100 @@ func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNullInt64 sets the null_int64 field.
+func (ftu *FieldTypeUpdate) SetNullInt64(si sql.NullInt64) *FieldTypeUpdate {
+	ftu.mutation.ResetNullInt64()
+	ftu.mutation.SetNullInt64(si)
+	return ftu
+}
+
+// ClearNullInt64 clears the value of null_int64.
+func (ftu *FieldTypeUpdate) ClearNullInt64() *FieldTypeUpdate {
+	ftu.mutation.ClearNullInt64()
+	return ftu
+}
+
+// SetSchemaInt sets the schema_int field.
+func (ftu *FieldTypeUpdate) SetSchemaInt(s schema.Int) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaInt()
+	ftu.mutation.SetSchemaInt(s)
+	return ftu
+}
+
+// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaInt(*s)
+	}
+	return ftu
+}
+
+// AddSchemaInt adds s to schema_int.
+func (ftu *FieldTypeUpdate) AddSchemaInt(s schema.Int) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaInt(s)
+	return ftu
+}
+
+// ClearSchemaInt clears the value of schema_int.
+func (ftu *FieldTypeUpdate) ClearSchemaInt() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaInt()
+	return ftu
+}
+
+// SetSchemaInt8 sets the schema_int8 field.
+func (ftu *FieldTypeUpdate) SetSchemaInt8(s schema.Int8) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaInt8()
+	ftu.mutation.SetSchemaInt8(s)
+	return ftu
+}
+
+// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaInt8(*s)
+	}
+	return ftu
+}
+
+// AddSchemaInt8 adds s to schema_int8.
+func (ftu *FieldTypeUpdate) AddSchemaInt8(s schema.Int8) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaInt8(s)
+	return ftu
+}
+
+// ClearSchemaInt8 clears the value of schema_int8.
+func (ftu *FieldTypeUpdate) ClearSchemaInt8() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaInt8()
+	return ftu
+}
+
+// SetSchemaInt64 sets the schema_int64 field.
+func (ftu *FieldTypeUpdate) SetSchemaInt64(s schema.Int64) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaInt64()
+	ftu.mutation.SetSchemaInt64(s)
+	return ftu
+}
+
+// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaInt64(*s)
+	}
+	return ftu
+}
+
+// AddSchemaInt64 adds s to schema_int64.
+func (ftu *FieldTypeUpdate) AddSchemaInt64(s schema.Int64) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaInt64(s)
+	return ftu
+}
+
+// ClearSchemaInt64 clears the value of schema_int64.
+func (ftu *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaInt64()
+	return ftu
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1513,6 +1607,79 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: fieldtype.FieldIP,
+		})
+	}
+	if value, ok := ftu.mutation.NullInt64(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldNullInt64,
+		})
+	}
+	if ftu.mutation.NullInt64Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldNullInt64,
+		})
+	}
+	if value, ok := ftu.mutation.SchemaInt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt,
+		})
+	}
+	if value, ok := ftu.mutation.AddedSchemaInt(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt,
+		})
+	}
+	if ftu.mutation.SchemaIntCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldSchemaInt,
+		})
+	}
+	if value, ok := ftu.mutation.SchemaInt8(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+	}
+	if value, ok := ftu.mutation.AddedSchemaInt8(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+	}
+	if ftu.mutation.SchemaInt8Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+	}
+	if value, ok := ftu.mutation.SchemaInt64(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt64,
+		})
+	}
+	if value, ok := ftu.mutation.AddedSchemaInt64(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt64,
+		})
+	}
+	if ftu.mutation.SchemaInt64Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: fieldtype.FieldSchemaInt64,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2315,6 +2482,100 @@ func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetNullInt64 sets the null_int64 field.
+func (ftuo *FieldTypeUpdateOne) SetNullInt64(si sql.NullInt64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetNullInt64()
+	ftuo.mutation.SetNullInt64(si)
+	return ftuo
+}
+
+// ClearNullInt64 clears the value of null_int64.
+func (ftuo *FieldTypeUpdateOne) ClearNullInt64() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullInt64()
+	return ftuo
+}
+
+// SetSchemaInt sets the schema_int field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaInt(s schema.Int) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaInt()
+	ftuo.mutation.SetSchemaInt(s)
+	return ftuo
+}
+
+// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaInt(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaInt adds s to schema_int.
+func (ftuo *FieldTypeUpdateOne) AddSchemaInt(s schema.Int) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaInt(s)
+	return ftuo
+}
+
+// ClearSchemaInt clears the value of schema_int.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaInt() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaInt()
+	return ftuo
+}
+
+// SetSchemaInt8 sets the schema_int8 field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaInt8(s schema.Int8) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaInt8()
+	ftuo.mutation.SetSchemaInt8(s)
+	return ftuo
+}
+
+// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaInt8(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaInt8 adds s to schema_int8.
+func (ftuo *FieldTypeUpdateOne) AddSchemaInt8(s schema.Int8) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaInt8(s)
+	return ftuo
+}
+
+// ClearSchemaInt8 clears the value of schema_int8.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaInt8() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaInt8()
+	return ftuo
+}
+
+// SetSchemaInt64 sets the schema_int64 field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaInt64(s schema.Int64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaInt64()
+	ftuo.mutation.SetSchemaInt64(s)
+	return ftuo
+}
+
+// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaInt64(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaInt64 adds s to schema_int64.
+func (ftuo *FieldTypeUpdateOne) AddSchemaInt64(s schema.Int64) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaInt64(s)
+	return ftuo
+}
+
+// ClearSchemaInt64 clears the value of schema_int64.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaInt64()
+	return ftuo
+}
+
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -3009,6 +3270,79 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: fieldtype.FieldIP,
+		})
+	}
+	if value, ok := ftuo.mutation.NullInt64(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldNullInt64,
+		})
+	}
+	if ftuo.mutation.NullInt64Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldNullInt64,
+		})
+	}
+	if value, ok := ftuo.mutation.SchemaInt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedSchemaInt(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt,
+		})
+	}
+	if ftuo.mutation.SchemaIntCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldSchemaInt,
+		})
+	}
+	if value, ok := ftuo.mutation.SchemaInt8(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedSchemaInt8(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+	}
+	if ftuo.mutation.SchemaInt8Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Column: fieldtype.FieldSchemaInt8,
+		})
+	}
+	if value, ok := ftuo.mutation.SchemaInt64(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt64,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedSchemaInt64(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaInt64,
+		})
+	}
+	if ftuo.mutation.SchemaInt64Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: fieldtype.FieldSchemaInt64,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}
