@@ -106,6 +106,11 @@ func (uu *UserUpdate) ClearStrings() *UserUpdate {
 	return uu
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -341,6 +346,11 @@ func (uuo *UserUpdateOne) SetStrings(s []string) *UserUpdateOne {
 func (uuo *UserUpdateOne) ClearStrings() *UserUpdateOne {
 	uuo.mutation.ClearStrings()
 	return uuo
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // Save executes the query and returns the updated entity.

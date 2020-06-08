@@ -97,6 +97,11 @@ func (uc *UserCreate) AddManage(g ...*Group) *UserCreate {
 	return uc.AddManageIDs(ids...)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uc *UserCreate) Mutation() *UserMutation {
+	return uc.mutation
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if _, ok := uc.mutation.Age(); !ok {

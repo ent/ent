@@ -45,7 +45,7 @@ type {{ $mutation }} struct {
 	{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
 	{{- range $f := $n.Fields }}
 		{{ $f.BuilderField }} *{{ $f.Type }}
-        {{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+		{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 			add{{ $f.BuilderField }} *{{ $f.Type }}
 		{{- end }}
 	{{- end }}

@@ -16,7 +16,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $fields = append $fields $.ID }}
 {{- end }}
 
-{{ range $_, $f := $fields }}
+{{ range $f := $fields }}
 	{{ $p := receiver $f.Type.String }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the {{ $f.Name }} field.
@@ -95,4 +95,10 @@ in the LICENSE file in the root directory of this source tree.
 		{{- end }}
 	}
 {{ end }}
+
+// Mutation returns the {{ $.MutationName }} object of the builder.
+func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} {
+	return {{ $receiver }}.mutation
+}
+
 {{ end }}

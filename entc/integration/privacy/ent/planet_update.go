@@ -73,6 +73,11 @@ func (pu *PlanetUpdate) AddNeighbors(p ...*Planet) *PlanetUpdate {
 	return pu.AddNeighborIDs(ids...)
 }
 
+// Mutation returns the PlanetMutation object of the builder.
+func (pu *PlanetUpdate) Mutation() *PlanetMutation {
+	return pu.mutation
+}
+
 // RemoveNeighborIDs removes the neighbors edge to Planet by ids.
 func (pu *PlanetUpdate) RemoveNeighborIDs(ids ...int) *PlanetUpdate {
 	pu.mutation.RemoveNeighborIDs(ids...)
@@ -274,6 +279,11 @@ func (puo *PlanetUpdateOne) AddNeighbors(p ...*Planet) *PlanetUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return puo.AddNeighborIDs(ids...)
+}
+
+// Mutation returns the PlanetMutation object of the builder.
+func (puo *PlanetUpdateOne) Mutation() *PlanetMutation {
+	return puo.mutation
 }
 
 // RemoveNeighborIDs removes the neighbors edge to Planet by ids.

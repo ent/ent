@@ -101,6 +101,11 @@ func (pu *PetUpdate) SetBestFriend(p *Pet) *PetUpdate {
 	return pu.SetBestFriendID(p.ID)
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pu *PetUpdate) Mutation() *PetMutation {
+	return pu.mutation
+}
+
 // ClearOwner clears the owner edge to User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
@@ -443,6 +448,11 @@ func (puo *PetUpdateOne) SetNillableBestFriendID(id *string) *PetUpdateOne {
 // SetBestFriend sets the best_friend edge to Pet.
 func (puo *PetUpdateOne) SetBestFriend(p *Pet) *PetUpdateOne {
 	return puo.SetBestFriendID(p.ID)
+}
+
+// Mutation returns the PetMutation object of the builder.
+func (puo *PetUpdateOne) Mutation() *PetMutation {
+	return puo.mutation
 }
 
 // ClearOwner clears the owner edge to User.

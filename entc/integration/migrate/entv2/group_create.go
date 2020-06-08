@@ -22,6 +22,11 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gc *GroupCreate) Mutation() *GroupMutation {
+	return gc.mutation
+}
+
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	var (

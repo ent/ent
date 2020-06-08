@@ -83,6 +83,11 @@ func (cc *CarCreate) SetOwner(p *Pet) *CarCreate {
 	return cc.SetOwnerID(p.ID)
 }
 
+// Mutation returns the CarMutation object of the builder.
+func (cc *CarCreate) Mutation() *CarMutation {
+	return cc.mutation
+}
+
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 	if v, ok := cc.mutation.BeforeID(); ok {

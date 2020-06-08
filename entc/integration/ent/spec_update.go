@@ -47,6 +47,11 @@ func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 	return su.AddCardIDs(ids...)
 }
 
+// Mutation returns the SpecMutation object of the builder.
+func (su *SpecUpdate) Mutation() *SpecMutation {
+	return su.mutation
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
@@ -201,6 +206,11 @@ func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return suo.AddCardIDs(ids...)
+}
+
+// Mutation returns the SpecMutation object of the builder.
+func (suo *SpecUpdateOne) Mutation() *SpecMutation {
+	return suo.mutation
 }
 
 // RemoveCardIDs removes the card edge to Card by ids.

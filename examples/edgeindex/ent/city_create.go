@@ -45,6 +45,11 @@ func (cc *CityCreate) AddStreets(s ...*Street) *CityCreate {
 	return cc.AddStreetIDs(ids...)
 }
 
+// Mutation returns the CityMutation object of the builder.
+func (cc *CityCreate) Mutation() *CityMutation {
+	return cc.mutation
+}
+
 // Save creates the City in the database.
 func (cc *CityCreate) Save(ctx context.Context) (*City, error) {
 	if _, ok := cc.mutation.Name(); !ok {

@@ -72,6 +72,11 @@ func (bu *BlobUpdate) AddLinks(b ...*Blob) *BlobUpdate {
 	return bu.AddLinkIDs(ids...)
 }
 
+// Mutation returns the BlobMutation object of the builder.
+func (bu *BlobUpdate) Mutation() *BlobMutation {
+	return bu.mutation
+}
+
 // ClearParent clears the parent edge to Blob.
 func (bu *BlobUpdate) ClearParent() *BlobUpdate {
 	bu.mutation.ClearParent()
@@ -299,6 +304,11 @@ func (buo *BlobUpdateOne) AddLinks(b ...*Blob) *BlobUpdateOne {
 		ids[i] = b[i].ID
 	}
 	return buo.AddLinkIDs(ids...)
+}
+
+// Mutation returns the BlobMutation object of the builder.
+func (buo *BlobUpdateOne) Mutation() *BlobMutation {
+	return buo.mutation
 }
 
 // ClearParent clears the parent edge to Blob.

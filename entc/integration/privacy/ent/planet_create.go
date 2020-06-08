@@ -58,6 +58,11 @@ func (pc *PlanetCreate) AddNeighbors(p ...*Planet) *PlanetCreate {
 	return pc.AddNeighborIDs(ids...)
 }
 
+// Mutation returns the PlanetMutation object of the builder.
+func (pc *PlanetCreate) Mutation() *PlanetMutation {
+	return pc.mutation
+}
+
 // Save creates the Planet in the database.
 func (pc *PlanetCreate) Save(ctx context.Context) (*Planet, error) {
 	if _, ok := pc.mutation.Name(); !ok {

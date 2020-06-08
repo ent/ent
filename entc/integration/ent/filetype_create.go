@@ -45,6 +45,11 @@ func (ftc *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
 	return ftc.AddFileIDs(ids...)
 }
 
+// Mutation returns the FileTypeMutation object of the builder.
+func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
+	return ftc.mutation
+}
+
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	if _, ok := ftc.mutation.Name(); !ok {

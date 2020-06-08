@@ -31,6 +31,11 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -116,6 +121,11 @@ type UserUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *UserMutation
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // Save executes the query and returns the updated entity.

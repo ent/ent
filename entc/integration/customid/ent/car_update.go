@@ -111,6 +111,11 @@ func (cu *CarUpdate) SetOwner(p *Pet) *CarUpdate {
 	return cu.SetOwnerID(p.ID)
 }
 
+// Mutation returns the CarMutation object of the builder.
+func (cu *CarUpdate) Mutation() *CarMutation {
+	return cu.mutation
+}
+
 // ClearOwner clears the owner edge to Pet.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
 	cu.mutation.ClearOwner()
@@ -374,6 +379,11 @@ func (cuo *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
 // SetOwner sets the owner edge to Pet.
 func (cuo *CarUpdateOne) SetOwner(p *Pet) *CarUpdateOne {
 	return cuo.SetOwnerID(p.ID)
+}
+
+// Mutation returns the CarMutation object of the builder.
+func (cuo *CarUpdateOne) Mutation() *CarMutation {
+	return cuo.mutation
 }
 
 // ClearOwner clears the owner edge to Pet.

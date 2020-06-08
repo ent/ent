@@ -63,6 +63,11 @@ func (nc *NodeCreate) AddChildren(n ...*Node) *NodeCreate {
 	return nc.AddChildIDs(ids...)
 }
 
+// Mutation returns the NodeMutation object of the builder.
+func (nc *NodeCreate) Mutation() *NodeMutation {
+	return nc.mutation
+}
+
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	if _, ok := nc.mutation.Value(); !ok {

@@ -111,6 +111,11 @@ func (cc *CardCreate) AddSpec(s ...*Spec) *CardCreate {
 	return cc.AddSpecIDs(ids...)
 }
 
+// Mutation returns the CardMutation object of the builder.
+func (cc *CardCreate) Mutation() *CardMutation {
+	return cc.mutation
+}
+
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if _, ok := cc.mutation.CreateTime(); !ok {

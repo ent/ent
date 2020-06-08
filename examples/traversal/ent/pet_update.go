@@ -72,6 +72,11 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pu *PetUpdate) Mutation() *PetMutation {
+	return pu.mutation
+}
+
 // RemoveFriendIDs removes the friends edge to Pet by ids.
 func (pu *PetUpdate) RemoveFriendIDs(ids ...int) *PetUpdate {
 	pu.mutation.RemoveFriendIDs(ids...)
@@ -299,6 +304,11 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 // SetOwner sets the owner edge to User.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
+}
+
+// Mutation returns the PetMutation object of the builder.
+func (puo *PetUpdateOne) Mutation() *PetMutation {
+	return puo.mutation
 }
 
 // RemoveFriendIDs removes the friends edge to Pet by ids.

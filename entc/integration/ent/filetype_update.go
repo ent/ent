@@ -53,6 +53,11 @@ func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
 	return ftu.AddFileIDs(ids...)
 }
 
+// Mutation returns the FileTypeMutation object of the builder.
+func (ftu *FileTypeUpdate) Mutation() *FileTypeMutation {
+	return ftu.mutation
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.RemoveFileIDs(ids...)
@@ -220,6 +225,11 @@ func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return ftuo.AddFileIDs(ids...)
+}
+
+// Mutation returns the FileTypeMutation object of the builder.
+func (ftuo *FileTypeUpdateOne) Mutation() *FileTypeMutation {
+	return ftuo.mutation
 }
 
 // RemoveFileIDs removes the files edge to File by ids.

@@ -911,6 +911,11 @@ func (ftu *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
 	return ftu
 }
 
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
+	return ftu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -2574,6 +2579,11 @@ func (ftuo *FieldTypeUpdateOne) AddSchemaInt64(s schema.Int64) *FieldTypeUpdateO
 func (ftuo *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearSchemaInt64()
 	return ftuo
+}
+
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
+	return ftuo.mutation
 }
 
 // Save executes the query and returns the updated entity.

@@ -84,6 +84,11 @@ func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
 	return cu
 }
 
+// Mutation returns the CommentMutation object of the builder.
+func (cu *CommentUpdate) Mutation() *CommentMutation {
+	return cu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -270,6 +275,11 @@ func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
 func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 	cuo.mutation.ClearNillableInt()
 	return cuo
+}
+
+// Mutation returns the CommentMutation object of the builder.
+func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
+	return cuo.mutation
 }
 
 // Save executes the query and returns the updated entity.

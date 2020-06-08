@@ -154,6 +154,11 @@ func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
 	return fu.AddFieldIDs(ids...)
 }
 
+// Mutation returns the FileMutation object of the builder.
+func (fu *FileUpdate) Mutation() *FileMutation {
+	return fu.mutation
+}
+
 // ClearOwner clears the owner edge to User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
@@ -547,6 +552,11 @@ func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return fuo.AddFieldIDs(ids...)
+}
+
+// Mutation returns the FileMutation object of the builder.
+func (fuo *FileUpdateOne) Mutation() *FileMutation {
+	return fuo.mutation
 }
 
 // ClearOwner clears the owner edge to User.

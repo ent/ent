@@ -68,6 +68,11 @@ func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	return uu.AddFriendIDs(ids...)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (uu *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemovePetIDs(ids...)
@@ -303,6 +308,11 @@ func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 		ids[i] = u[i].ID
 	}
 	return uuo.AddFriendIDs(ids...)
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // RemovePetIDs removes the pets edge to Pet by ids.

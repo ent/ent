@@ -53,6 +53,11 @@ func (cu *CityUpdate) AddStreets(s ...*Street) *CityUpdate {
 	return cu.AddStreetIDs(ids...)
 }
 
+// Mutation returns the CityMutation object of the builder.
+func (cu *CityUpdate) Mutation() *CityMutation {
+	return cu.mutation
+}
+
 // RemoveStreetIDs removes the streets edge to Street by ids.
 func (cu *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
 	cu.mutation.RemoveStreetIDs(ids...)
@@ -220,6 +225,11 @@ func (cuo *CityUpdateOne) AddStreets(s ...*Street) *CityUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return cuo.AddStreetIDs(ids...)
+}
+
+// Mutation returns the CityMutation object of the builder.
+func (cuo *CityUpdateOne) Mutation() *CityMutation {
+	return cuo.mutation
 }
 
 // RemoveStreetIDs removes the streets edge to Street by ids.

@@ -31,6 +31,11 @@ func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 	return iu
 }
 
+// Mutation returns the ItemMutation object of the builder.
+func (iu *ItemUpdate) Mutation() *ItemMutation {
+	return iu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -112,6 +117,11 @@ type ItemUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *ItemMutation
+}
+
+// Mutation returns the ItemMutation object of the builder.
+func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
+	return iuo.mutation
 }
 
 // Save executes the query and returns the updated entity.

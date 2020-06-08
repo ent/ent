@@ -90,6 +90,11 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	return uu.AddGroupIDs(ids...)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // RemoveCarIDs removes the cars edge to Car by ids.
 func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCarIDs(ids...)
@@ -365,6 +370,11 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 		ids[i] = g[i].ID
 	}
 	return uuo.AddGroupIDs(ids...)
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // RemoveCarIDs removes the cars edge to Car by ids.

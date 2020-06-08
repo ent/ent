@@ -44,6 +44,11 @@ func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
 	return gu
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gu *GroupUpdate) Mutation() *GroupMutation {
+	return gu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -156,6 +161,11 @@ func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
 func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
 	guo.mutation.AddMaxUsers(i)
 	return guo
+}
+
+// Mutation returns the GroupMutation object of the builder.
+func (guo *GroupUpdateOne) Mutation() *GroupMutation {
+	return guo.mutation
 }
 
 // Save executes the query and returns the updated entity.

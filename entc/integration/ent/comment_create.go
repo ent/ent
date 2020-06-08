@@ -49,6 +49,11 @@ func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 	return cc
 }
 
+// Mutation returns the CommentMutation object of the builder.
+func (cc *CommentCreate) Mutation() *CommentMutation {
+	return cc.mutation
+}
+
 // Save creates the Comment in the database.
 func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 	if _, ok := cc.mutation.UniqueInt(); !ok {

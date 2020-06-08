@@ -94,6 +94,11 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	return uc.AddPetIDs(ids...)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uc *UserCreate) Mutation() *UserMutation {
+	return uc.mutation
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	var (

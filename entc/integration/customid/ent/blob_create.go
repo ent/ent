@@ -69,6 +69,11 @@ func (bc *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
 	return bc.AddLinkIDs(ids...)
 }
 
+// Mutation returns the BlobMutation object of the builder.
+func (bc *BlobCreate) Mutation() *BlobMutation {
+	return bc.mutation
+}
+
 // Save creates the Blob in the database.
 func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 	if _, ok := bc.mutation.UUID(); !ok {

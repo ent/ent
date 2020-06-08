@@ -31,6 +31,11 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gu *GroupUpdate) Mutation() *GroupMutation {
+	return gu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -116,6 +121,11 @@ type GroupUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *GroupMutation
+}
+
+// Mutation returns the GroupMutation object of the builder.
+func (guo *GroupUpdateOne) Mutation() *GroupMutation {
+	return guo.mutation
 }
 
 // Save executes the query and returns the updated entity.
