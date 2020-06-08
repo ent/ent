@@ -51,6 +51,11 @@ func (gc *GalaxyCreate) AddPlanets(p ...*Planet) *GalaxyCreate {
 	return gc.AddPlanetIDs(ids...)
 }
 
+// Mutation returns the GalaxyMutation object of the builder.
+func (gc *GalaxyCreate) Mutation() *GalaxyMutation {
+	return gc.mutation
+}
+
 // Save creates the Galaxy in the database.
 func (gc *GalaxyCreate) Save(ctx context.Context) (*Galaxy, error) {
 	if _, ok := gc.mutation.Name(); !ok {

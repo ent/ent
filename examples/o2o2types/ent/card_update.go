@@ -57,6 +57,11 @@ func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
+// Mutation returns the CardMutation object of the builder.
+func (cu *CardUpdate) Mutation() *CardMutation {
+	return cu.mutation
+}
+
 // ClearOwner clears the owner edge to User.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
@@ -224,6 +229,11 @@ func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
 // SetOwner sets the owner edge to User.
 func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
+}
+
+// Mutation returns the CardMutation object of the builder.
+func (cuo *CardUpdateOne) Mutation() *CardMutation {
+	return cuo.mutation
 }
 
 // ClearOwner clears the owner edge to User.

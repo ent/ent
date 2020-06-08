@@ -64,6 +64,11 @@ func (gc *GroupCreate) SetAdmin(u *User) *GroupCreate {
 	return gc.SetAdminID(u.ID)
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gc *GroupCreate) Mutation() *GroupMutation {
+	return gc.mutation
+}
+
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	if _, ok := gc.mutation.Name(); !ok {

@@ -38,6 +38,11 @@ func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
 	return sc.AddCardIDs(ids...)
 }
 
+// Mutation returns the SpecMutation object of the builder.
+func (sc *SpecCreate) Mutation() *SpecMutation {
+	return sc.mutation
+}
+
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 	var (

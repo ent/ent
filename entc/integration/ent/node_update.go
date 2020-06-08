@@ -96,6 +96,11 @@ func (nu *NodeUpdate) SetNext(n *Node) *NodeUpdate {
 	return nu.SetNextID(n.ID)
 }
 
+// Mutation returns the NodeMutation object of the builder.
+func (nu *NodeUpdate) Mutation() *NodeMutation {
+	return nu.mutation
+}
+
 // ClearPrev clears the prev edge to Node.
 func (nu *NodeUpdate) ClearPrev() *NodeUpdate {
 	nu.mutation.ClearPrev()
@@ -349,6 +354,11 @@ func (nuo *NodeUpdateOne) SetNillableNextID(id *int) *NodeUpdateOne {
 // SetNext sets the next edge to Node.
 func (nuo *NodeUpdateOne) SetNext(n *Node) *NodeUpdateOne {
 	return nuo.SetNextID(n.ID)
+}
+
+// Mutation returns the NodeMutation object of the builder.
+func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
+	return nuo.mutation
 }
 
 // ClearPrev clears the prev edge to Node.

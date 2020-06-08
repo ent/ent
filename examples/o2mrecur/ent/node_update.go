@@ -78,6 +78,11 @@ func (nu *NodeUpdate) AddChildren(n ...*Node) *NodeUpdate {
 	return nu.AddChildIDs(ids...)
 }
 
+// Mutation returns the NodeMutation object of the builder.
+func (nu *NodeUpdate) Mutation() *NodeMutation {
+	return nu.mutation
+}
+
 // ClearParent clears the parent edge to Node.
 func (nu *NodeUpdate) ClearParent() *NodeUpdate {
 	nu.mutation.ClearParent()
@@ -319,6 +324,11 @@ func (nuo *NodeUpdateOne) AddChildren(n ...*Node) *NodeUpdateOne {
 		ids[i] = n[i].ID
 	}
 	return nuo.AddChildIDs(ids...)
+}
+
+// Mutation returns the NodeMutation object of the builder.
+func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
+	return nuo.mutation
 }
 
 // ClearParent clears the parent edge to Node.

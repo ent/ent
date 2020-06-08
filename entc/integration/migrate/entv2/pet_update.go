@@ -31,6 +31,11 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pu *PetUpdate) Mutation() *PetMutation {
+	return pu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -116,6 +121,11 @@ type PetUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *PetMutation
+}
+
+// Mutation returns the PetMutation object of the builder.
+func (puo *PetUpdateOne) Mutation() *PetMutation {
+	return puo.mutation
 }
 
 // Save executes the query and returns the updated entity.

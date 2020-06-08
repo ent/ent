@@ -184,6 +184,11 @@ func (uu *UserUpdate) SetPets(p *Pet) *UserUpdate {
 	return uu.SetPetsID(p.ID)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // RemoveCarIDs removes the car edge to Car by ids.
 func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCarIDs(ids...)
@@ -614,6 +619,11 @@ func (uuo *UserUpdateOne) SetNillablePetsID(id *int) *UserUpdateOne {
 // SetPets sets the pets edge to Pet.
 func (uuo *UserUpdateOne) SetPets(p *Pet) *UserUpdateOne {
 	return uuo.SetPetsID(p.ID)
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // RemoveCarIDs removes the car edge to Car by ids.

@@ -78,6 +78,11 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pu *PetUpdate) Mutation() *PetMutation {
+	return pu.mutation
+}
+
 // ClearTeam clears the team edge to User.
 func (pu *PetUpdate) ClearTeam() *PetUpdate {
 	pu.mutation.ClearTeam()
@@ -255,6 +260,11 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *string) *PetUpdateOne {
 // SetOwner sets the owner edge to User.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
+}
+
+// Mutation returns the PetMutation object of the builder.
+func (puo *PetUpdateOne) Mutation() *PetMutation {
+	return puo.mutation
 }
 
 // ClearTeam clears the team edge to User.

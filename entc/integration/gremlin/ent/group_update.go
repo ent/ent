@@ -165,6 +165,11 @@ func (gu *GroupUpdate) SetInfo(g *GroupInfo) *GroupUpdate {
 	return gu.SetInfoID(g.ID)
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gu *GroupUpdate) Mutation() *GroupMutation {
+	return gu.mutation
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (gu *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
 	gu.mutation.RemoveFileIDs(ids...)
@@ -527,6 +532,11 @@ func (guo *GroupUpdateOne) SetInfoID(id string) *GroupUpdateOne {
 // SetInfo sets the info edge to GroupInfo.
 func (guo *GroupUpdateOne) SetInfo(g *GroupInfo) *GroupUpdateOne {
 	return guo.SetInfoID(g.ID)
+}
+
+// Mutation returns the GroupMutation object of the builder.
+func (guo *GroupUpdateOne) Mutation() *GroupMutation {
+	return guo.mutation
 }
 
 // RemoveFileIDs removes the files edge to File by ids.

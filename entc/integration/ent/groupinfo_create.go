@@ -59,6 +59,11 @@ func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
 	return gic.AddGroupIDs(ids...)
 }
 
+// Mutation returns the GroupInfoMutation object of the builder.
+func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
+	return gic.mutation
+}
+
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 	if _, ok := gic.mutation.Desc(); !ok {

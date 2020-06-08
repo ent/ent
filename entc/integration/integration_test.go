@@ -115,6 +115,7 @@ var (
 		ImmutableValue,
 		Sensitive,
 		EagerLoading,
+		Mutation,
 	}
 )
 
@@ -1063,6 +1064,36 @@ func NoSchemaChanges(t *testing.T, client *ent.Client) {
 	})
 	err := client.Schema.WriteTo(context.Background(), w, migrate.WithDropIndex(true), migrate.WithDropColumn(true))
 	require.NoError(t, err)
+}
+
+func Mutation(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	setName := func(ns interface{ SetName(string) }, name string) {
+		ns.SetName(name)
+	}
+	ub := client.User.Create().SetAge(30)
+	setName(ub.Mutation(), "a8m")
+	pb := client.Pet.Create()
+	setName(pb.Mutation(), "pedro")
+
+	a8m := ub.SaveX(ctx)
+	require.Equal(t, "a8m", a8m.Name)
+	pedro := pb.SaveX(ctx)
+	require.Equal(t, "pedro", pedro.Name)
+
+	setUsers := func(ms ...*ent.UserMutation) {
+		for _, m := range ms {
+			m.SetName("boring")
+			m.SetAge(30)
+		}
+	}
+	uu := a8m.Update()
+	ub = client.User.Create()
+	setUsers(ub.Mutation(), uu.Mutation())
+	a8m = uu.SaveX(ctx)
+	usr := ub.SaveX(ctx)
+	require.Equal(t, "boring", a8m.Name)
+	require.Equal(t, "boring", usr.Name)
 }
 
 func drop(t *testing.T, client *ent.Client) {

@@ -108,6 +108,11 @@ func (uu *UserUpdate) SetBestFriend(u *User) *UserUpdate {
 	return uu.SetBestFriendID(u.ID)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // RemoveCardIDs removes the cards edge to Card by ids.
 func (uu *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCardIDs(ids...)
@@ -438,6 +443,11 @@ func (uuo *UserUpdateOne) SetNillableBestFriendID(id *int) *UserUpdateOne {
 // SetBestFriend sets the best_friend edge to User.
 func (uuo *UserUpdateOne) SetBestFriend(u *User) *UserUpdateOne {
 	return uuo.SetBestFriendID(u.ID)
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // RemoveCardIDs removes the cards edge to Card by ids.

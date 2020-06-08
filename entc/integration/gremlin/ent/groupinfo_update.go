@@ -76,6 +76,11 @@ func (giu *GroupInfoUpdate) AddGroups(g ...*Group) *GroupInfoUpdate {
 	return giu.AddGroupIDs(ids...)
 }
 
+// Mutation returns the GroupInfoMutation object of the builder.
+func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
+	return giu.mutation
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.RemoveGroupIDs(ids...)
@@ -253,6 +258,11 @@ func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
 		ids[i] = g[i].ID
 	}
 	return giuo.AddGroupIDs(ids...)
+}
+
+// Mutation returns the GroupInfoMutation object of the builder.
+func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
+	return giuo.mutation
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.

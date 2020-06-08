@@ -129,6 +129,11 @@ func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
 	return fc.AddFieldIDs(ids...)
 }
 
+// Mutation returns the FileMutation object of the builder.
+func (fc *FileCreate) Mutation() *FileMutation {
+	return fc.mutation
+}
+
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 	if _, ok := fc.mutation.Size(); !ok {

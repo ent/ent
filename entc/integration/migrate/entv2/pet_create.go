@@ -22,6 +22,11 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pc *PetCreate) Mutation() *PetMutation {
+	return pc.mutation
+}
+
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	var (

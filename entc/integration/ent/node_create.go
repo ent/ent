@@ -74,6 +74,11 @@ func (nc *NodeCreate) SetNext(n *Node) *NodeCreate {
 	return nc.SetNextID(n.ID)
 }
 
+// Mutation returns the NodeMutation object of the builder.
+func (nc *NodeCreate) Mutation() *NodeMutation {
+	return nc.mutation
+}
+
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	var (

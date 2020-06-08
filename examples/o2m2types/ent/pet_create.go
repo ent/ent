@@ -49,6 +49,11 @@ func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pc *PetCreate) Mutation() *PetMutation {
+	return pc.mutation
+}
+
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	if _, ok := pc.mutation.Name(); !ok {

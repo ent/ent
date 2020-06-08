@@ -49,6 +49,11 @@ func (sc *StreetCreate) SetCity(c *City) *StreetCreate {
 	return sc.SetCityID(c.ID)
 }
 
+// Mutation returns the StreetMutation object of the builder.
+func (sc *StreetCreate) Mutation() *StreetMutation {
+	return sc.mutation
+}
+
 // Save creates the Street in the database.
 func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
 	if _, ok := sc.mutation.Name(); !ok {

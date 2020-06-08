@@ -80,6 +80,11 @@ func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
 	return uu.AddFollowingIDs(ids...)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // RemoveFollowerIDs removes the followers edge to User by ids.
 func (uu *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFollowerIDs(ids...)
@@ -342,6 +347,11 @@ func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
 		ids[i] = u[i].ID
 	}
 	return uuo.AddFollowingIDs(ids...)
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // RemoveFollowerIDs removes the followers edge to User by ids.

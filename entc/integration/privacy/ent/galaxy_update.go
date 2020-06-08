@@ -59,6 +59,11 @@ func (gu *GalaxyUpdate) AddPlanets(p ...*Planet) *GalaxyUpdate {
 	return gu.AddPlanetIDs(ids...)
 }
 
+// Mutation returns the GalaxyMutation object of the builder.
+func (gu *GalaxyUpdate) Mutation() *GalaxyMutation {
+	return gu.mutation
+}
+
 // RemovePlanetIDs removes the planets edge to Planet by ids.
 func (gu *GalaxyUpdate) RemovePlanetIDs(ids ...int) *GalaxyUpdate {
 	gu.mutation.RemovePlanetIDs(ids...)
@@ -249,6 +254,11 @@ func (guo *GalaxyUpdateOne) AddPlanets(p ...*Planet) *GalaxyUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return guo.AddPlanetIDs(ids...)
+}
+
+// Mutation returns the GalaxyMutation object of the builder.
+func (guo *GalaxyUpdateOne) Mutation() *GalaxyMutation {
+	return guo.mutation
 }
 
 // RemovePlanetIDs removes the planets edge to Planet by ids.

@@ -72,6 +72,11 @@ func (gu *GroupUpdate) SetAdmin(u *User) *GroupUpdate {
 	return gu.SetAdminID(u.ID)
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gu *GroupUpdate) Mutation() *GroupMutation {
+	return gu.mutation
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
@@ -299,6 +304,11 @@ func (guo *GroupUpdateOne) SetNillableAdminID(id *int) *GroupUpdateOne {
 // SetAdmin sets the admin edge to User.
 func (guo *GroupUpdateOne) SetAdmin(u *User) *GroupUpdateOne {
 	return guo.SetAdminID(u.ID)
+}
+
+// Mutation returns the GroupMutation object of the builder.
+func (guo *GroupUpdateOne) Mutation() *GroupMutation {
+	return guo.mutation
 }
 
 // RemoveUserIDs removes the users edge to User by ids.

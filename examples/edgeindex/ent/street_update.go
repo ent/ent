@@ -57,6 +57,11 @@ func (su *StreetUpdate) SetCity(c *City) *StreetUpdate {
 	return su.SetCityID(c.ID)
 }
 
+// Mutation returns the StreetMutation object of the builder.
+func (su *StreetUpdate) Mutation() *StreetMutation {
+	return su.mutation
+}
+
 // ClearCity clears the city edge to City.
 func (su *StreetUpdate) ClearCity() *StreetUpdate {
 	su.mutation.ClearCity()
@@ -216,6 +221,11 @@ func (suo *StreetUpdateOne) SetNillableCityID(id *int) *StreetUpdateOne {
 // SetCity sets the city edge to City.
 func (suo *StreetUpdateOne) SetCity(c *City) *StreetUpdateOne {
 	return suo.SetCityID(c.ID)
+}
+
+// Mutation returns the StreetMutation object of the builder.
+func (suo *StreetUpdateOne) Mutation() *StreetMutation {
+	return suo.mutation
 }
 
 // ClearCity clears the city edge to City.

@@ -499,6 +499,11 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCr
 	return ftc
 }
 
+// Mutation returns the FieldTypeMutation object of the builder.
+func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
+	return ftc.mutation
+}
+
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {

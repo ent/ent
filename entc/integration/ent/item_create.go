@@ -22,6 +22,11 @@ type ItemCreate struct {
 	hooks    []Hook
 }
 
+// Mutation returns the ItemMutation object of the builder.
+func (ic *ItemCreate) Mutation() *ItemMutation {
+	return ic.mutation
+}
+
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 	var (

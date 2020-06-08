@@ -201,6 +201,11 @@ func (uu *UserUpdate) SetCar(c *Car) *UserUpdate {
 	return uu.SetCarID(c.ID)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uu *UserUpdate) Mutation() *UserMutation {
+	return uu.mutation
+}
+
 // ClearParent clears the parent edge to User.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
 	uu.mutation.ClearParent()
@@ -722,6 +727,11 @@ func (uuo *UserUpdateOne) SetNillableCarID(id *int) *UserUpdateOne {
 // SetCar sets the car edge to Car.
 func (uuo *UserUpdateOne) SetCar(c *Car) *UserUpdateOne {
 	return uuo.SetCarID(c.ID)
+}
+
+// Mutation returns the UserMutation object of the builder.
+func (uuo *UserUpdateOne) Mutation() *UserMutation {
+	return uuo.mutation
 }
 
 // ClearParent clears the parent edge to User.
