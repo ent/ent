@@ -115,14 +115,25 @@ func (FieldType) Fields() []ent.Field {
 		field.Int64("schema_int64").
 			Optional().
 			GoType(Int64(0)),
+		field.Float("schema_float").
+			Optional().
+			GoType(Float64(0)),
+		field.Float32("schema_float32").
+			Optional().
+			GoType(Float32(0)),
+		field.Float("null_float").
+			Optional().
+			GoType(&sql.NullFloat64{}),
 	}
 }
 
 type (
-	Int    int
-	Int8   int8
-	Int64  int64
-	Status bool
+	Int     int
+	Int8    int8
+	Int64   int64
+	Status  bool
+	Float64 float64
+	Float32 float32
 )
 
 type Link struct {

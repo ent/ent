@@ -386,6 +386,22 @@ func SchemaInt64(v schema.Int64) predicate.FieldType {
 	})
 }
 
+// SchemaFloat applies equality check predicate on the "schema_float" field. It's identical to SchemaFloatEQ.
+func SchemaFloat(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloat32 applies equality check predicate on the "schema_float32" field. It's identical to SchemaFloat32EQ.
+func SchemaFloat32(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
 // IntEQ applies the EQ predicate on the "int" field.
 func IntEQ(v int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -4025,6 +4041,212 @@ func SchemaInt64IsNil() predicate.FieldType {
 func SchemaInt64NotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldSchemaInt64)))
+	})
+}
+
+// SchemaFloatEQ applies the EQ predicate on the "schema_float" field.
+func SchemaFloatEQ(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloatNEQ applies the NEQ predicate on the "schema_float" field.
+func SchemaFloatNEQ(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloatIn applies the In predicate on the "schema_float" field.
+func SchemaFloatIn(vs ...schema.Float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = float64(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSchemaFloat), v...))
+	})
+}
+
+// SchemaFloatNotIn applies the NotIn predicate on the "schema_float" field.
+func SchemaFloatNotIn(vs ...schema.Float64) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = float64(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSchemaFloat), v...))
+	})
+}
+
+// SchemaFloatGT applies the GT predicate on the "schema_float" field.
+func SchemaFloatGT(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloatGTE applies the GTE predicate on the "schema_float" field.
+func SchemaFloatGTE(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloatLT applies the LT predicate on the "schema_float" field.
+func SchemaFloatLT(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloatLTE applies the LTE predicate on the "schema_float" field.
+func SchemaFloatLTE(v schema.Float64) predicate.FieldType {
+	vc := float64(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSchemaFloat), vc))
+	})
+}
+
+// SchemaFloatIsNil applies the IsNil predicate on the "schema_float" field.
+func SchemaFloatIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSchemaFloat)))
+	})
+}
+
+// SchemaFloatNotNil applies the NotNil predicate on the "schema_float" field.
+func SchemaFloatNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSchemaFloat)))
+	})
+}
+
+// SchemaFloat32EQ applies the EQ predicate on the "schema_float32" field.
+func SchemaFloat32EQ(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
+// SchemaFloat32NEQ applies the NEQ predicate on the "schema_float32" field.
+func SchemaFloat32NEQ(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
+// SchemaFloat32In applies the In predicate on the "schema_float32" field.
+func SchemaFloat32In(vs ...schema.Float32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = float32(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSchemaFloat32), v...))
+	})
+}
+
+// SchemaFloat32NotIn applies the NotIn predicate on the "schema_float32" field.
+func SchemaFloat32NotIn(vs ...schema.Float32) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = float32(vs[i])
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSchemaFloat32), v...))
+	})
+}
+
+// SchemaFloat32GT applies the GT predicate on the "schema_float32" field.
+func SchemaFloat32GT(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
+// SchemaFloat32GTE applies the GTE predicate on the "schema_float32" field.
+func SchemaFloat32GTE(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
+// SchemaFloat32LT applies the LT predicate on the "schema_float32" field.
+func SchemaFloat32LT(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
+// SchemaFloat32LTE applies the LTE predicate on the "schema_float32" field.
+func SchemaFloat32LTE(v schema.Float32) predicate.FieldType {
+	vc := float32(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSchemaFloat32), vc))
+	})
+}
+
+// SchemaFloat32IsNil applies the IsNil predicate on the "schema_float32" field.
+func SchemaFloat32IsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSchemaFloat32)))
+	})
+}
+
+// SchemaFloat32NotNil applies the NotNil predicate on the "schema_float32" field.
+func SchemaFloat32NotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSchemaFloat32)))
+	})
+}
+
+// NullFloatIsNil applies the IsNil predicate on the "null_float" field.
+func NullFloatIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNullFloat)))
+	})
+}
+
+// NullFloatNotNil applies the NotNil predicate on the "null_float" field.
+func NullFloatNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNullFloat)))
 	})
 }
 

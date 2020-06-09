@@ -105,7 +105,13 @@ type FieldType struct {
 	SchemaInt8 schema.Int8 `json:"schema_int8,omitempty"`
 	// SchemaInt64 holds the value of the "schema_int64" field.
 	SchemaInt64 schema.Int64 `json:"schema_int64,omitempty"`
-	file_field  *int
+	// SchemaFloat holds the value of the "schema_float" field.
+	SchemaFloat schema.Float64 `json:"schema_float,omitempty"`
+	// SchemaFloat32 holds the value of the "schema_float32" field.
+	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
+	// NullFloat holds the value of the "null_float" field.
+	NullFloat  sql.NullFloat64 `json:"null_float,omitempty"`
+	file_field *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -153,6 +159,9 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullInt64{},   // schema_int
 		&sql.NullInt64{},   // schema_int8
 		&sql.NullInt64{},   // schema_int64
+		&sql.NullFloat64{}, // schema_float
+		&sql.NullFloat64{}, // schema_float32
+		&sql.NullFloat64{}, // null_float
 	}
 }
 
@@ -387,7 +396,22 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ft.SchemaInt64 = schema.Int64(value.Int64)
 	}
-	values = values[41:]
+	if value, ok := values[41].(*sql.NullFloat64); !ok {
+		return fmt.Errorf("unexpected type %T for field schema_float", values[41])
+	} else if value.Valid {
+		ft.SchemaFloat = schema.Float64(value.Float64)
+	}
+	if value, ok := values[42].(*sql.NullFloat64); !ok {
+		return fmt.Errorf("unexpected type %T for field schema_float32", values[42])
+	} else if value.Valid {
+		ft.SchemaFloat32 = schema.Float32(schema.Float32(value.Float64))
+	}
+	if value, ok := values[43].(*sql.NullFloat64); !ok {
+		return fmt.Errorf("unexpected type %T for field null_float", values[43])
+	} else if value != nil {
+		ft.NullFloat = *value
+	}
+	values = values[44:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -522,6 +546,12 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
 	builder.WriteString(", schema_int64=")
 	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
+	builder.WriteString(", schema_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat))
+	builder.WriteString(", schema_float32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
+	builder.WriteString(", null_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
 	builder.WriteByte(')')
 	return builder.String()
 }
