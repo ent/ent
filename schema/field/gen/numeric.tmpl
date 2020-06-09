@@ -309,10 +309,27 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 	return b
 }
 
+{{ $tt := title $t.String }}
+// GoType overrides the default Go type with a custom one.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		GoType(pkg.{{ $tt }}(0))
+//
+func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
+	b.desc.goType(typ, {{ $t }}Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	return b.desc
 }
 {{ end }}
+
+var (
+{{- range $t := $.Floats }}
+    {{ $t }}Type = reflect.TypeOf({{ $t }}(0))
+{{- end }}
+)
 
 {{ end }}
