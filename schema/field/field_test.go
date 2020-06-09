@@ -99,6 +99,30 @@ func TestFloat(t *testing.T) {
 	fd = f.Descriptor()
 	assert.Len(t, fd.Validators, 2)
 	assert.Equal(t, field.TypeFloat32, field.Float32("age").Descriptor().Info.Type)
+
+	type Count float64
+	fd = field.Float("active").GoType(Count(0)).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "field_test.Count", fd.Info.Ident)
+	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.Count", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+
+	fd = field.Float("count").GoType(&sql.NullFloat64{}).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "sql.NullFloat64", fd.Info.Ident)
+	assert.Equal(t, "database/sql", fd.Info.PkgPath)
+	assert.Equal(t, "sql.NullFloat64", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+
+	fd = field.Float("count").GoType(1).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Float("count").GoType(struct{}{}).Descriptor()
+	assert.Error(t, fd.Err())
+	fd = field.Float("count").GoType(new(Count)).Descriptor()
+	assert.Error(t, fd.Err())
 }
 
 func TestBool(t *testing.T) {

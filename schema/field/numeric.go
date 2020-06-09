@@ -1558,6 +1558,16 @@ func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Float64("float64").
+//		GoType(pkg.Float64(0))
+//
+func (b *float64Builder) GoType(typ interface{}) *float64Builder {
+	b.desc.goType(typ, float64Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1681,7 +1691,22 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Float32("float32").
+//		GoType(pkg.Float32(0))
+//
+func (b *float32Builder) GoType(typ interface{}) *float32Builder {
+	b.desc.goType(typ, float32Type)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float32Builder) Descriptor() *Descriptor {
 	return b.desc
 }
+
+var (
+	float64Type = reflect.TypeOf(float64(0))
+	float32Type = reflect.TypeOf(float32(0))
+)
