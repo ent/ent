@@ -911,6 +911,73 @@ func (ftu *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftu *FieldTypeUpdate) SetSchemaFloat(s schema.Float64) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaFloat()
+	ftu.mutation.SetSchemaFloat(s)
+	return ftu
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaFloat(*s)
+	}
+	return ftu
+}
+
+// AddSchemaFloat adds s to schema_float.
+func (ftu *FieldTypeUpdate) AddSchemaFloat(s schema.Float64) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaFloat(s)
+	return ftu
+}
+
+// ClearSchemaFloat clears the value of schema_float.
+func (ftu *FieldTypeUpdate) ClearSchemaFloat() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaFloat()
+	return ftu
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftu *FieldTypeUpdate) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaFloat32()
+	ftu.mutation.SetSchemaFloat32(s)
+	return ftu
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaFloat32(*s)
+	}
+	return ftu
+}
+
+// AddSchemaFloat32 adds s to schema_float32.
+func (ftu *FieldTypeUpdate) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaFloat32(s)
+	return ftu
+}
+
+// ClearSchemaFloat32 clears the value of schema_float32.
+func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaFloat32()
+	return ftu
+}
+
+// SetNullFloat sets the null_float field.
+func (ftu *FieldTypeUpdate) SetNullFloat(sf sql.NullFloat64) *FieldTypeUpdate {
+	ftu.mutation.ResetNullFloat()
+	ftu.mutation.SetNullFloat(sf)
+	return ftu
+}
+
+// ClearNullFloat clears the value of null_float.
+func (ftu *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
+	ftu.mutation.ClearNullFloat()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1685,6 +1752,59 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: fieldtype.FieldSchemaInt64,
+		})
+	}
+	if value, ok := ftu.mutation.SchemaFloat(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+	}
+	if value, ok := ftu.mutation.AddedSchemaFloat(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+	}
+	if ftu.mutation.SchemaFloatCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+	}
+	if value, ok := ftu.mutation.SchemaFloat32(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+	}
+	if value, ok := ftu.mutation.AddedSchemaFloat32(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+	}
+	if ftu.mutation.SchemaFloat32Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+	}
+	if value, ok := ftu.mutation.NullFloat(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldNullFloat,
+		})
+	}
+	if ftu.mutation.NullFloatCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: fieldtype.FieldNullFloat,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2581,6 +2701,73 @@ func (ftuo *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaFloat()
+	ftuo.mutation.SetSchemaFloat(s)
+	return ftuo
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaFloat(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaFloat adds s to schema_float.
+func (ftuo *FieldTypeUpdateOne) AddSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaFloat(s)
+	return ftuo
+}
+
+// ClearSchemaFloat clears the value of schema_float.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaFloat()
+	return ftuo
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaFloat32()
+	ftuo.mutation.SetSchemaFloat32(s)
+	return ftuo
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaFloat32(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaFloat32 adds s to schema_float32.
+func (ftuo *FieldTypeUpdateOne) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaFloat32(s)
+	return ftuo
+}
+
+// ClearSchemaFloat32 clears the value of schema_float32.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaFloat32()
+	return ftuo
+}
+
+// SetNullFloat sets the null_float field.
+func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf sql.NullFloat64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetNullFloat()
+	ftuo.mutation.SetNullFloat(sf)
+	return ftuo
+}
+
+// ClearNullFloat clears the value of null_float.
+func (ftuo *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullFloat()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -3353,6 +3540,59 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: fieldtype.FieldSchemaInt64,
+		})
+	}
+	if value, ok := ftuo.mutation.SchemaFloat(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedSchemaFloat(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+	}
+	if ftuo.mutation.SchemaFloatCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+	}
+	if value, ok := ftuo.mutation.SchemaFloat32(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedSchemaFloat32(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+	}
+	if ftuo.mutation.SchemaFloat32Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+	}
+	if value, ok := ftuo.mutation.NullFloat(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldNullFloat,
+		})
+	}
+	if ftuo.mutation.NullFloatCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: fieldtype.FieldNullFloat,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

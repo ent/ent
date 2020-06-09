@@ -1271,6 +1271,11 @@ type FieldTypeMutation struct {
 	addschema_int8             *schema.Int8
 	schema_int64               *schema.Int64
 	addschema_int64            *schema.Int64
+	schema_float               *schema.Float64
+	addschema_float            *schema.Float64
+	schema_float32             *schema.Float32
+	addschema_float32          *schema.Float32
+	null_float                 *sql.NullFloat64
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -3902,6 +3907,198 @@ func (m *FieldTypeMutation) ResetSchemaInt64() {
 	delete(m.clearedFields, fieldtype.FieldSchemaInt64)
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (m *FieldTypeMutation) SetSchemaFloat(s schema.Float64) {
+	m.schema_float = &s
+	m.addschema_float = nil
+}
+
+// SchemaFloat returns the schema_float value in the mutation.
+func (m *FieldTypeMutation) SchemaFloat() (r schema.Float64, exists bool) {
+	v := m.schema_float
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSchemaFloat returns the old schema_float value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldSchemaFloat(ctx context.Context) (v schema.Float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSchemaFloat is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSchemaFloat requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSchemaFloat: %w", err)
+	}
+	return oldValue.SchemaFloat, nil
+}
+
+// AddSchemaFloat adds s to schema_float.
+func (m *FieldTypeMutation) AddSchemaFloat(s schema.Float64) {
+	if m.addschema_float != nil {
+		*m.addschema_float += s
+	} else {
+		m.addschema_float = &s
+	}
+}
+
+// AddedSchemaFloat returns the value that was added to the schema_float field in this mutation.
+func (m *FieldTypeMutation) AddedSchemaFloat() (r schema.Float64, exists bool) {
+	v := m.addschema_float
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSchemaFloat clears the value of schema_float.
+func (m *FieldTypeMutation) ClearSchemaFloat() {
+	m.schema_float = nil
+	m.addschema_float = nil
+	m.clearedFields[fieldtype.FieldSchemaFloat] = struct{}{}
+}
+
+// SchemaFloatCleared returns if the field schema_float was cleared in this mutation.
+func (m *FieldTypeMutation) SchemaFloatCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldSchemaFloat]
+	return ok
+}
+
+// ResetSchemaFloat reset all changes of the "schema_float" field.
+func (m *FieldTypeMutation) ResetSchemaFloat() {
+	m.schema_float = nil
+	m.addschema_float = nil
+	delete(m.clearedFields, fieldtype.FieldSchemaFloat)
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (m *FieldTypeMutation) SetSchemaFloat32(s schema.Float32) {
+	m.schema_float32 = &s
+	m.addschema_float32 = nil
+}
+
+// SchemaFloat32 returns the schema_float32 value in the mutation.
+func (m *FieldTypeMutation) SchemaFloat32() (r schema.Float32, exists bool) {
+	v := m.schema_float32
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSchemaFloat32 returns the old schema_float32 value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldSchemaFloat32(ctx context.Context) (v schema.Float32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSchemaFloat32 is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSchemaFloat32 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSchemaFloat32: %w", err)
+	}
+	return oldValue.SchemaFloat32, nil
+}
+
+// AddSchemaFloat32 adds s to schema_float32.
+func (m *FieldTypeMutation) AddSchemaFloat32(s schema.Float32) {
+	if m.addschema_float32 != nil {
+		*m.addschema_float32 += s
+	} else {
+		m.addschema_float32 = &s
+	}
+}
+
+// AddedSchemaFloat32 returns the value that was added to the schema_float32 field in this mutation.
+func (m *FieldTypeMutation) AddedSchemaFloat32() (r schema.Float32, exists bool) {
+	v := m.addschema_float32
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSchemaFloat32 clears the value of schema_float32.
+func (m *FieldTypeMutation) ClearSchemaFloat32() {
+	m.schema_float32 = nil
+	m.addschema_float32 = nil
+	m.clearedFields[fieldtype.FieldSchemaFloat32] = struct{}{}
+}
+
+// SchemaFloat32Cleared returns if the field schema_float32 was cleared in this mutation.
+func (m *FieldTypeMutation) SchemaFloat32Cleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldSchemaFloat32]
+	return ok
+}
+
+// ResetSchemaFloat32 reset all changes of the "schema_float32" field.
+func (m *FieldTypeMutation) ResetSchemaFloat32() {
+	m.schema_float32 = nil
+	m.addschema_float32 = nil
+	delete(m.clearedFields, fieldtype.FieldSchemaFloat32)
+}
+
+// SetNullFloat sets the null_float field.
+func (m *FieldTypeMutation) SetNullFloat(sf sql.NullFloat64) {
+	m.null_float = &sf
+}
+
+// NullFloat returns the null_float value in the mutation.
+func (m *FieldTypeMutation) NullFloat() (r sql.NullFloat64, exists bool) {
+	v := m.null_float
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNullFloat returns the old null_float value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldNullFloat(ctx context.Context) (v sql.NullFloat64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNullFloat is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNullFloat requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNullFloat: %w", err)
+	}
+	return oldValue.NullFloat, nil
+}
+
+// ClearNullFloat clears the value of null_float.
+func (m *FieldTypeMutation) ClearNullFloat() {
+	m.null_float = nil
+	m.clearedFields[fieldtype.FieldNullFloat] = struct{}{}
+}
+
+// NullFloatCleared returns if the field null_float was cleared in this mutation.
+func (m *FieldTypeMutation) NullFloatCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldNullFloat]
+	return ok
+}
+
+// ResetNullFloat reset all changes of the "null_float" field.
+func (m *FieldTypeMutation) ResetNullFloat() {
+	m.null_float = nil
+	delete(m.clearedFields, fieldtype.FieldNullFloat)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -3916,7 +4113,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 41)
+	fields := make([]string, 0, 44)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4040,6 +4237,15 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.schema_int64 != nil {
 		fields = append(fields, fieldtype.FieldSchemaInt64)
 	}
+	if m.schema_float != nil {
+		fields = append(fields, fieldtype.FieldSchemaFloat)
+	}
+	if m.schema_float32 != nil {
+		fields = append(fields, fieldtype.FieldSchemaFloat32)
+	}
+	if m.null_float != nil {
+		fields = append(fields, fieldtype.FieldNullFloat)
+	}
 	return fields
 }
 
@@ -4130,6 +4336,12 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.SchemaInt8()
 	case fieldtype.FieldSchemaInt64:
 		return m.SchemaInt64()
+	case fieldtype.FieldSchemaFloat:
+		return m.SchemaFloat()
+	case fieldtype.FieldSchemaFloat32:
+		return m.SchemaFloat32()
+	case fieldtype.FieldNullFloat:
+		return m.NullFloat()
 	}
 	return nil, false
 }
@@ -4221,6 +4433,12 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldSchemaInt8(ctx)
 	case fieldtype.FieldSchemaInt64:
 		return m.OldSchemaInt64(ctx)
+	case fieldtype.FieldSchemaFloat:
+		return m.OldSchemaFloat(ctx)
+	case fieldtype.FieldSchemaFloat32:
+		return m.OldSchemaFloat32(ctx)
+	case fieldtype.FieldNullFloat:
+		return m.OldNullFloat(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4517,6 +4735,27 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSchemaInt64(v)
 		return nil
+	case fieldtype.FieldSchemaFloat:
+		v, ok := value.(schema.Float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSchemaFloat(v)
+		return nil
+	case fieldtype.FieldSchemaFloat32:
+		v, ok := value.(schema.Float32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSchemaFloat32(v)
+		return nil
+	case fieldtype.FieldNullFloat:
+		v, ok := value.(sql.NullFloat64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNullFloat(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4606,6 +4845,12 @@ func (m *FieldTypeMutation) AddedFields() []string {
 	if m.addschema_int64 != nil {
 		fields = append(fields, fieldtype.FieldSchemaInt64)
 	}
+	if m.addschema_float != nil {
+		fields = append(fields, fieldtype.FieldSchemaFloat)
+	}
+	if m.addschema_float32 != nil {
+		fields = append(fields, fieldtype.FieldSchemaFloat32)
+	}
 	return fields
 }
 
@@ -4668,6 +4913,10 @@ func (m *FieldTypeMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSchemaInt8()
 	case fieldtype.FieldSchemaInt64:
 		return m.AddedSchemaInt64()
+	case fieldtype.FieldSchemaFloat:
+		return m.AddedSchemaFloat()
+	case fieldtype.FieldSchemaFloat32:
+		return m.AddedSchemaFloat32()
 	}
 	return nil, false
 }
@@ -4866,6 +5115,20 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddSchemaInt64(v)
 		return nil
+	case fieldtype.FieldSchemaFloat:
+		v, ok := value.(schema.Float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSchemaFloat(v)
+		return nil
+	case fieldtype.FieldSchemaFloat32:
+		v, ok := value.(schema.Float32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSchemaFloat32(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType numeric field %s", name)
 }
@@ -4981,6 +5244,15 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(fieldtype.FieldSchemaInt64) {
 		fields = append(fields, fieldtype.FieldSchemaInt64)
+	}
+	if m.FieldCleared(fieldtype.FieldSchemaFloat) {
+		fields = append(fields, fieldtype.FieldSchemaFloat)
+	}
+	if m.FieldCleared(fieldtype.FieldSchemaFloat32) {
+		fields = append(fields, fieldtype.FieldSchemaFloat32)
+	}
+	if m.FieldCleared(fieldtype.FieldNullFloat) {
+		fields = append(fields, fieldtype.FieldNullFloat)
 	}
 	return fields
 }
@@ -5103,6 +5375,15 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldSchemaInt64:
 		m.ClearSchemaInt64()
+		return nil
+	case fieldtype.FieldSchemaFloat:
+		m.ClearSchemaFloat()
+		return nil
+	case fieldtype.FieldSchemaFloat32:
+		m.ClearSchemaFloat32()
+		return nil
+	case fieldtype.FieldNullFloat:
+		m.ClearNullFloat()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -5235,6 +5516,15 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldSchemaInt64:
 		m.ResetSchemaInt64()
+		return nil
+	case fieldtype.FieldSchemaFloat:
+		m.ResetSchemaFloat()
+		return nil
+	case fieldtype.FieldSchemaFloat32:
+		m.ResetSchemaFloat32()
+		return nil
+	case fieldtype.FieldNullFloat:
+		m.ResetNullFloat()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

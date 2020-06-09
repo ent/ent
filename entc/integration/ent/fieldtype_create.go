@@ -498,6 +498,40 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCr
 	return ftc
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftc *FieldTypeCreate) SetSchemaFloat(s schema.Float64) *FieldTypeCreate {
+	ftc.mutation.SetSchemaFloat(s)
+	return ftc
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaFloat(*s)
+	}
+	return ftc
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftc *FieldTypeCreate) SetSchemaFloat32(s schema.Float32) *FieldTypeCreate {
+	ftc.mutation.SetSchemaFloat32(s)
+	return ftc
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaFloat32(*s)
+	}
+	return ftc
+}
+
+// SetNullFloat sets the null_float field.
+func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
+	ftc.mutation.SetNullFloat(sf)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -904,6 +938,30 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 			Column: fieldtype.FieldSchemaInt64,
 		})
 		ft.SchemaInt64 = value
+	}
+	if value, ok := ftc.mutation.SchemaFloat(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat,
+		})
+		ft.SchemaFloat = value
+	}
+	if value, ok := ftc.mutation.SchemaFloat32(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat32,
+			Value:  value,
+			Column: fieldtype.FieldSchemaFloat32,
+		})
+		ft.SchemaFloat32 = value
+	}
+	if value, ok := ftc.mutation.NullFloat(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: fieldtype.FieldNullFloat,
+		})
+		ft.NullFloat = value
 	}
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
