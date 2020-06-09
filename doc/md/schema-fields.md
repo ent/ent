@@ -162,11 +162,52 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
-		field.Float64("amount").
+		field.Float("amount").
 			SchemaType(map[string]string{
 				dialect.MySQL:    "decimal(6,2)",   // Override MySQL. 
 				dialect.Postgres: "numeric",        // Override Postgres.
 			}),
+	}
+}
+```
+
+## Go Type
+The default type for fields are the basic Go types. For example, for string fields, the type is `string`,
+and for time fields, the type is `time.Time`. The `GoType` method provides an option to override the
+default ent type with a custom one.
+
+The custom type must be either a type that is convertible to the Go basic type, or a type that implements the
+[ValueScanner](https://godoc.org/github.com/facebookincubator/ent/schema/field#ValueScanner) interface.
+
+
+```go
+package schema
+
+import (
+    "database/sql"
+
+    "github.com/facebookincubator/ent"
+    "github.com/facebookincubator/ent/dialect"
+    "github.com/facebookincubator/ent/schema/field"
+)
+
+// Amount is a custom Go type that's convertible to the basic float64 type.
+type Amount float64
+
+// Card schema.
+type Card struct {
+    ent.Schema
+}
+
+// Fields of the Card.
+func (Card) Fields() []ent.Field {
+	return []ent.Field{
+		field.Float("amount").
+			GoType(Amount(0)),
+		field.String("name").
+			Optional().
+			// A ValueScanner type.
+			GoType(&sql.NullString{}),
 	}
 }
 ```
