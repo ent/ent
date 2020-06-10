@@ -218,6 +218,12 @@ func (c *Column) ScanDefault(value string) error {
 			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
 		}
 		c.Default = v.String
+	case c.Type == field.TypeJSON:
+		v := &sql.NullString{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning json value for column %q: %v", c.Name, err)
+		}
+		c.Default = v.String
 	default:
 		return fmt.Errorf("unsupported type: %v", c.Type)
 	}
