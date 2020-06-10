@@ -481,6 +481,54 @@ func TestPostgres_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "add and remove indexes",
+			tables: func() []*Table {
+				c := []*Column{
+					{Name: "id", Type: field.TypeInt, Increment: true},
+					// Add implicit index.
+					{Name: "age", Type: field.TypeInt, Unique: true},
+					{Name: "score", Type: field.TypeInt},
+				}
+				return []*Table{
+					{
+						Name:       "users",
+						Columns:    c,
+						PrimaryKey: c[0:1],
+						Indexes: Indexes{
+							// Change non-unique index to unique.
+							{Name: "user_score", Columns: c[2:3], Unique: true},
+						},
+					},
+				}
+			}(),
+			options: []MigrateOption{WithDropIndex(true)},
+			before: func(mock pgMock) {
+				mock.start("120000")
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
+						AddRow("id", "bigint", "NO", "NULL").
+						AddRow("age", "bigint", "NO", "NULL").
+						AddRow("score", "bigint", "NO", "NULL"))
+				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+						AddRow("users_pkey", "id", "t", "t", 0).
+						AddRow("user_score", "score", "f", "f", 0))
+				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
+					WithArgs("UNIQUE", "user_score").
+					WillReturnRows(sqlmock.NewRows([]string{"count"}).
+						AddRow(0))
+				mock.ExpectExec(escape(`DROP INDEX "user_score"`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "users_age" ON "users"("age")`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "user_score" ON "users"("score")`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "add edge to table",
 			tables: func() []*Table {
 				var (
