@@ -393,6 +393,18 @@ func (i *Index) sameAs(idx *Index) bool {
 	return true
 }
 
+// columnNames returns the names of the columns of the index.
+func (i *Index) columnNames() []string {
+	if len(i.columns) > 0 {
+		return i.columns
+	}
+	columns := make([]string, 0, len(i.Columns))
+	for _, c := range i.Columns {
+		columns = append(columns, c.Name)
+	}
+	return columns
+}
+
 // Indexes used for scanning all sql.Rows into a list of indexes, because
 // multiple sql rows can represent the same index (multi-columns indexes).
 type Indexes []*Index

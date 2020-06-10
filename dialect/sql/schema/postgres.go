@@ -329,11 +329,30 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	return ops
 }
 
+// hasUniqueName reports if the index has a unique name in the schema.
+func hasUniqueName(i *Index) bool {
+	name := i.Name
+	// The "_key" suffix is added by Postgres for implicit indexes.
+	if strings.HasSuffix(name, "_key") {
+		name = strings.TrimSuffix(name, "_key")
+	}
+	suffix := strings.Join(i.columnNames(), "_")
+	if !strings.HasSuffix(name, suffix) {
+		return true // Assume it has a custom storage-key.
+	}
+	// The codegen prefixes by default indexes with the type name.
+	// For example, an index "users"("name"), will named as "user_name".
+	return name != suffix
+}
+
 // addIndex returns the querying for adding an index to PostgreSQL.
 func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
-	// Since index name should be unique in pg_class for schema,
-	// we prefix it with the table name and remove on read.
-	name := fmt.Sprintf("%s_%s", table, i.Name)
+	name := i.Name
+	if !hasUniqueName(i) {
+		// Since index name should be unique in pg_class for schema,
+		// we prefix it with the table name and remove on read.
+		name = fmt.Sprintf("%s_%s", table, i.Name)
+	}
 	idx := sql.Dialect(dialect.Postgres).
 		CreateIndex(name).Table(table)
 	if i.Unique {
@@ -349,7 +368,7 @@ func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
 	name := idx.Name
 	build := sql.Dialect(dialect.Postgres)
-	if prefix := table + "_"; !strings.HasPrefix(name, prefix) {
+	if prefix := table + "_"; !strings.HasPrefix(name, prefix) && !hasUniqueName(idx) {
 		name = prefix + name
 	}
 	query, args := sql.Dialect(dialect.Postgres).
