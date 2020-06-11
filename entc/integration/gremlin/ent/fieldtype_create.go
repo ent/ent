@@ -499,6 +499,40 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCr
 	return ftc
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftc *FieldTypeCreate) SetSchemaFloat(s schema.Float64) *FieldTypeCreate {
+	ftc.mutation.SetSchemaFloat(s)
+	return ftc
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaFloat(*s)
+	}
+	return ftc
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftc *FieldTypeCreate) SetSchemaFloat32(s schema.Float32) *FieldTypeCreate {
+	ftc.mutation.SetSchemaFloat32(s)
+	return ftc
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaFloat32(*s)
+	}
+	return ftc
+}
+
+// SetNullFloat sets the null_float field.
+func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
+	ftc.mutation.SetNullFloat(sf)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -707,6 +741,15 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.SchemaInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt64, value)
+	}
+	if value, ok := ftc.mutation.SchemaFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, value)
+	}
+	if value, ok := ftc.mutation.SchemaFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, value)
+	}
+	if value, ok := ftc.mutation.NullFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
 	}
 	return v.ValueMap(true)
 }

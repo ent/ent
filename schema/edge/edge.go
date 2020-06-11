@@ -10,14 +10,15 @@ import (
 
 // A Descriptor for edge configuration.
 type Descriptor struct {
-	Tag      string      // struct tag.
-	Type     string      // edge type.
-	Name     string      // edge name.
-	RefName  string      // ref name; inverse only.
-	Ref      *Descriptor // edge reference; to/from of the same type.
-	Unique   bool        // unique edge.
-	Inverse  bool        // inverse edge.
-	Required bool        // required on creation.
+	Tag        string      // struct tag.
+	Type       string      // edge type.
+	Name       string      // edge name.
+	RefName    string      // ref name; inverse only.
+	Ref        *Descriptor // edge reference; to/from of the same type.
+	Unique     bool        // unique edge.
+	Inverse    bool        // inverse edge.
+	Required   bool        // required on creation.
+	StorageKey *StorageKey // optional storage-key configuration.
 }
 
 // To defines an association edge between two vertices.
@@ -72,6 +73,16 @@ func (b *assocBuilder) Comment(string) *assocBuilder {
 	return b
 }
 
+// StorageKey sets the storage key of the edge.
+//
+//	edge.To("groups").
+//		StorageKey(edge.StorageKey{To: "user_id", From: "group_id"})
+//
+func (b *assocBuilder) StorageKey(key StorageKey) *assocBuilder {
+	b.desc.StorageKey = &key
+	return b
+}
+
 // Descriptor implements the ent.Descriptor interface.
 func (b *assocBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -116,4 +127,10 @@ func (b *inverseBuilder) Comment(string) *inverseBuilder {
 // Descriptor implements the ent.Descriptor interface.
 func (b *inverseBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+// StorageKey holds the configuration for edge storage-key.
+type StorageKey struct {
+	Table    string // Table or label.
+	To, From string // Foreign-key columns.
 }

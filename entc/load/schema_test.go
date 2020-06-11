@@ -50,6 +50,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("groups", Group.Type),
 		edge.To("parent", User.Type).
 			Unique().
+			StorageKey(edge.StorageKey{To: "user_parent_id"}).
 			From("children"),
 	}
 }
@@ -123,10 +124,12 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "Group", schema.Edges[0].Type)
 		require.False(t, schema.Edges[0].Inverse)
 		require.Equal(t, "children", schema.Edges[1].Name)
+		require.Equal(t, "user_parent_id", schema.Edges[1].StorageKey.To)
 		require.Equal(t, "User", schema.Edges[1].Type)
 		require.True(t, schema.Edges[1].Inverse)
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
+		require.Equal(t, "user_parent_id", schema.Edges[1].Ref.StorageKey.To)
 
 		require.Equal(t, []string{"name", "address"}, schema.Indexes[0].Fields)
 		require.True(t, schema.Indexes[0].Unique)

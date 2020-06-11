@@ -59,9 +59,12 @@ func (User) Edges() []ent.Edge {
 		// Edge(children<-M2O->parent) to be dropped.
 		// Edge(spouse<-O2O->spouse) to be dropped.
 		edge.To("car", Car.Type),
-		// A new edge was added.
+		// New edge to added.
 		edge.To("pets", Pet.Type).
+			StorageKey(edge.StorageKey{To: "owner_id"}).
 			Unique(),
+		edge.To("friends", User.Type).
+			StorageKey(edge.StorageKey{Table: "friends", To: "user", From: "friend"}),
 	}
 }
 

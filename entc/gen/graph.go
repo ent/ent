@@ -73,7 +73,7 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		check(resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
-		t.resolveFKs()
+		check(t.resolveFKs(), "resolve %q foreign-keys", t.Name)
 	}
 	for _, schema := range schemas {
 		g.addIndexes(schema)
@@ -144,6 +144,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		// Assoc only.
 		case !e.Inverse:
 			t.Edges = append(t.Edges, &Edge{
+				def:       e,
 				Type:      typ,
 				Name:      e.Name,
 				Owner:     t,
@@ -155,6 +156,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		case e.Inverse && e.Ref == nil:
 			expect(e.RefName != "", "missing reference name for inverse edge: %s.%s", t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
+				def:       e,
 				Type:      typ,
 				Name:      e.Name,
 				Owner:     typ,
@@ -169,6 +171,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			expect(e.RefName == "", "reference name is derived from the assoc name: %s.%s <-> %s.%s", t.Name, ref.Name, t.Name, e.Name)
 			expect(ref.Type == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
 			t.Edges = append(t.Edges, &Edge{
+				def:       e,
 				Type:      typ,
 				Name:      e.Name,
 				Owner:     t,
@@ -177,6 +180,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Optional:  !e.Required,
 				StructTag: e.Tag,
 			}, &Edge{
+				def:       e,
 				Type:      typ,
 				Owner:     t,
 				Name:      ref.Name,

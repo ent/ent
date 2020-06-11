@@ -106,6 +106,12 @@ type FieldType struct {
 	SchemaInt8 schema.Int8 `json:"schema_int8,omitempty"`
 	// SchemaInt64 holds the value of the "schema_int64" field.
 	SchemaInt64 schema.Int64 `json:"schema_int64,omitempty"`
+	// SchemaFloat holds the value of the "schema_float" field.
+	SchemaFloat schema.Float64 `json:"schema_float,omitempty"`
+	// SchemaFloat32 holds the value of the "schema_float32" field.
+	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
+	// NullFloat holds the value of the "null_float" field.
+	NullFloat sql.NullFloat64 `json:"null_float,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -157,6 +163,9 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		SchemaInt             schema.Int      `json:"schema_int,omitempty"`
 		SchemaInt8            schema.Int8     `json:"schema_int8,omitempty"`
 		SchemaInt64           schema.Int64    `json:"schema_int64,omitempty"`
+		SchemaFloat           schema.Float64  `json:"schema_float,omitempty"`
+		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
+		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -203,6 +212,9 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.SchemaInt = scanft.SchemaInt
 	ft.SchemaInt8 = scanft.SchemaInt8
 	ft.SchemaInt64 = scanft.SchemaInt64
+	ft.SchemaFloat = scanft.SchemaFloat
+	ft.SchemaFloat32 = scanft.SchemaFloat32
+	ft.NullFloat = scanft.NullFloat
 	return nil
 }
 
@@ -329,6 +341,12 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
 	builder.WriteString(", schema_int64=")
 	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
+	builder.WriteString(", schema_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat))
+	builder.WriteString(", schema_float32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
+	builder.WriteString(", null_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -385,6 +403,9 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		SchemaInt             schema.Int      `json:"schema_int,omitempty"`
 		SchemaInt8            schema.Int8     `json:"schema_int8,omitempty"`
 		SchemaInt64           schema.Int64    `json:"schema_int64,omitempty"`
+		SchemaFloat           schema.Float64  `json:"schema_float,omitempty"`
+		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
+		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -433,6 +454,9 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			SchemaInt:             v.SchemaInt,
 			SchemaInt8:            v.SchemaInt8,
 			SchemaInt64:           v.SchemaInt64,
+			SchemaFloat:           v.SchemaFloat,
+			SchemaFloat32:         v.SchemaFloat32,
+			NullFloat:             v.NullFloat,
 		})
 	}
 	return nil

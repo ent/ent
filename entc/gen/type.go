@@ -79,6 +79,7 @@ type (
 
 	// Edge of a graph between two types.
 	Edge struct {
+		def *load.Edge
 		// Name holds the name of the edge.
 		Name string
 		// Type holds a reference to the type this edge is directed to.
@@ -448,8 +449,11 @@ func (t *Type) AddIndex(idx *load.Index) error {
 }
 
 // resolveFKs makes sure all edge-fks are created for the types.
-func (t *Type) resolveFKs() {
+func (t *Type) resolveFKs() error {
 	for _, e := range t.Edges {
+		if err := e.setStorageKey(); err != nil {
+			return err
+		}
 		if e.IsInverse() || e.M2M() {
 			continue
 		}
@@ -474,6 +478,7 @@ func (t *Type) resolveFKs() {
 			e.Type.addFK(fk)
 		}
 	}
+	return nil
 }
 
 // AddForeignKey adds a foreign-key for the type if it doesn't exist.
@@ -956,6 +961,30 @@ func (e Edge) MutationReset() string {
 		name += "Edge"
 	}
 	return name
+}
+
+// setStorageKey sets the storage-key option in the schema or fail.
+func (e *Edge) setStorageKey() error {
+	key := e.def.StorageKey
+	if key == nil {
+		return nil
+	}
+	if key.Table != "" {
+		if !e.M2M() {
+			return fmt.Errorf("StorageKey.Table is allowed only for M2M edges (got %s)", e.Rel.Type)
+		}
+		e.Rel.Table = key.Table
+	}
+	if key.To != "" {
+		e.Rel.Columns[0] = key.To
+	}
+	if key.From != "" {
+		if !e.M2M() {
+			return fmt.Errorf("%s edge does not use StorageKey.From, use StorageKey.To instead", e.Rel.Type)
+		}
+		e.Rel.Columns[1] = key.From
+	}
+	return nil
 }
 
 // Column returns the first element from the columns slice.

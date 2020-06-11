@@ -56,14 +56,15 @@ type Field struct {
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
 type Edge struct {
-	Name     string `json:"name,omitempty"`
-	Type     string `json:"type,omitempty"`
-	Tag      string `json:"tag,omitempty"`
-	RefName  string `json:"ref_name,omitempty"`
-	Ref      *Edge  `json:"ref,omitempty"`
-	Unique   bool   `json:"unique,omitempty"`
-	Inverse  bool   `json:"inverse,omitempty"`
-	Required bool   `json:"required,omitempty"`
+	Name       string           `json:"name,omitempty"`
+	Type       string           `json:"type,omitempty"`
+	Tag        string           `json:"tag,omitempty"`
+	RefName    string           `json:"ref_name,omitempty"`
+	Ref        *Edge            `json:"ref,omitempty"`
+	Unique     bool             `json:"unique,omitempty"`
+	Inverse    bool             `json:"inverse,omitempty"`
+	Required   bool             `json:"required,omitempty"`
+	StorageKey *edge.StorageKey `json:"storage_key,omitempty"`
 }
 
 // Index represents an ent.Index that was loaded from a complied user package.
@@ -77,16 +78,18 @@ type Index struct {
 // NewEdge creates an loaded edge from edge descriptor.
 func NewEdge(ed *edge.Descriptor) *Edge {
 	ne := &Edge{
-		Tag:      ed.Tag,
-		Type:     ed.Type,
-		Name:     ed.Name,
-		Unique:   ed.Unique,
-		Inverse:  ed.Inverse,
-		Required: ed.Required,
-		RefName:  ed.RefName,
+		Tag:        ed.Tag,
+		Type:       ed.Type,
+		Name:       ed.Name,
+		Unique:     ed.Unique,
+		Inverse:    ed.Inverse,
+		Required:   ed.Required,
+		RefName:    ed.RefName,
+		StorageKey: ed.StorageKey,
 	}
 	if ref := ed.Ref; ref != nil {
 		ne.Ref = NewEdge(ref)
+		ne.StorageKey = ne.Ref.StorageKey
 	}
 	return ne
 }
