@@ -83,11 +83,11 @@ func (uc *UserCreate) Mutation() *UserMutation {
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if _, ok := uc.mutation.Age(); !ok {
-		return nil, errors.New("ent: missing required field \"age\"")
+		return nil, &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
 	}
 	if v, ok := uc.mutation.Age(); ok {
 		if err := user.AgeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"age\": %w", err)
+			return nil, &ValidationError{Name: "age", err: fmt.Errorf("ent: validator failed for field \"age\": %w", err)}
 		}
 	}
 	if _, ok := uc.mutation.Name(); !ok {

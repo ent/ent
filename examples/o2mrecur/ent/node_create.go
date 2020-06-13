@@ -71,7 +71,7 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	if _, ok := nc.mutation.Value(); !ok {
-		return nil, errors.New("ent: missing required field \"value\"")
+		return nil, &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
 	}
 	var (
 		err  error

@@ -913,6 +913,73 @@ func (ftu *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftu *FieldTypeUpdate) SetSchemaFloat(s schema.Float64) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaFloat()
+	ftu.mutation.SetSchemaFloat(s)
+	return ftu
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaFloat(*s)
+	}
+	return ftu
+}
+
+// AddSchemaFloat adds s to schema_float.
+func (ftu *FieldTypeUpdate) AddSchemaFloat(s schema.Float64) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaFloat(s)
+	return ftu
+}
+
+// ClearSchemaFloat clears the value of schema_float.
+func (ftu *FieldTypeUpdate) ClearSchemaFloat() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaFloat()
+	return ftu
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftu *FieldTypeUpdate) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
+	ftu.mutation.ResetSchemaFloat32()
+	ftu.mutation.SetSchemaFloat32(s)
+	return ftu
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetSchemaFloat32(*s)
+	}
+	return ftu
+}
+
+// AddSchemaFloat32 adds s to schema_float32.
+func (ftu *FieldTypeUpdate) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
+	ftu.mutation.AddSchemaFloat32(s)
+	return ftu
+}
+
+// ClearSchemaFloat32 clears the value of schema_float32.
+func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
+	ftu.mutation.ClearSchemaFloat32()
+	return ftu
+}
+
+// SetNullFloat sets the null_float field.
+func (ftu *FieldTypeUpdate) SetNullFloat(sf sql.NullFloat64) *FieldTypeUpdate {
+	ftu.mutation.ResetNullFloat()
+	ftu.mutation.SetNullFloat(sf)
+	return ftu
+}
+
+// ClearNullFloat clears the value of null_float.
+func (ftu *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
+	ftu.mutation.ClearNullFloat()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -922,12 +989,12 @@ func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
+			return 0, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
 		}
 	}
 	if v, ok := ftu.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
+			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -1203,6 +1270,21 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedSchemaInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt64, __.Union(__.Values(fieldtype.FieldSchemaInt64), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.SchemaFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, value)
+	}
+	if value, ok := ftu.mutation.AddedSchemaFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, __.Union(__.Values(fieldtype.FieldSchemaFloat), __.Constant(value)).Sum())
+	}
+	if value, ok := ftu.mutation.SchemaFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, value)
+	}
+	if value, ok := ftu.mutation.AddedSchemaFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, __.Union(__.Values(fieldtype.FieldSchemaFloat32), __.Constant(value)).Sum())
+	}
+	if value, ok := ftu.mutation.NullFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1311,6 +1393,15 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.SchemaInt64Cleared() {
 		properties = append(properties, fieldtype.FieldSchemaInt64)
+	}
+	if ftu.mutation.SchemaFloatCleared() {
+		properties = append(properties, fieldtype.FieldSchemaFloat)
+	}
+	if ftu.mutation.SchemaFloat32Cleared() {
+		properties = append(properties, fieldtype.FieldSchemaFloat32)
+	}
+	if ftu.mutation.NullFloatCleared() {
+		properties = append(properties, fieldtype.FieldNullFloat)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2203,6 +2294,73 @@ func (ftuo *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaFloat()
+	ftuo.mutation.SetSchemaFloat(s)
+	return ftuo
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaFloat(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaFloat adds s to schema_float.
+func (ftuo *FieldTypeUpdateOne) AddSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaFloat(s)
+	return ftuo
+}
+
+// ClearSchemaFloat clears the value of schema_float.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaFloat()
+	return ftuo
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftuo *FieldTypeUpdateOne) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetSchemaFloat32()
+	ftuo.mutation.SetSchemaFloat32(s)
+	return ftuo
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetSchemaFloat32(*s)
+	}
+	return ftuo
+}
+
+// AddSchemaFloat32 adds s to schema_float32.
+func (ftuo *FieldTypeUpdateOne) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
+	ftuo.mutation.AddSchemaFloat32(s)
+	return ftuo
+}
+
+// ClearSchemaFloat32 clears the value of schema_float32.
+func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSchemaFloat32()
+	return ftuo
+}
+
+// SetNullFloat sets the null_float field.
+func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf sql.NullFloat64) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetNullFloat()
+	ftuo.mutation.SetNullFloat(sf)
+	return ftuo
+}
+
+// ClearNullFloat clears the value of null_float.
+func (ftuo *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNullFloat()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2212,12 +2370,12 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
+			return nil, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
 		}
 	}
 	if v, ok := ftuo.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -2273,7 +2431,7 @@ func (ftuo *FieldTypeUpdateOne) gremlinSave(ctx context.Context) (*FieldType, er
 	res := &gremlin.Response{}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing FieldType.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FieldType.ID for update")}
 	}
 	query, bindings := ftuo.gremlin(id).Query()
 	if err := ftuo.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -2498,6 +2656,21 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedSchemaInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt64, __.Union(__.Values(fieldtype.FieldSchemaInt64), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.SchemaFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, value)
+	}
+	if value, ok := ftuo.mutation.AddedSchemaFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, __.Union(__.Values(fieldtype.FieldSchemaFloat), __.Constant(value)).Sum())
+	}
+	if value, ok := ftuo.mutation.SchemaFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, value)
+	}
+	if value, ok := ftuo.mutation.AddedSchemaFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, __.Union(__.Values(fieldtype.FieldSchemaFloat32), __.Constant(value)).Sum())
+	}
+	if value, ok := ftuo.mutation.NullFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -2606,6 +2779,15 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.SchemaInt64Cleared() {
 		properties = append(properties, fieldtype.FieldSchemaInt64)
+	}
+	if ftuo.mutation.SchemaFloatCleared() {
+		properties = append(properties, fieldtype.FieldSchemaFloat)
+	}
+	if ftuo.mutation.SchemaFloat32Cleared() {
+		properties = append(properties, fieldtype.FieldSchemaFloat32)
+	}
+	if ftuo.mutation.NullFloatCleared() {
+		properties = append(properties, fieldtype.FieldNullFloat)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

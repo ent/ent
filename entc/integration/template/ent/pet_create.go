@@ -72,7 +72,7 @@ func (pc *PetCreate) Mutation() *PetMutation {
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	if _, ok := pc.mutation.Age(); !ok {
-		return nil, errors.New("ent: missing required field \"age\"")
+		return nil, &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
 	}
 	var (
 		err  error

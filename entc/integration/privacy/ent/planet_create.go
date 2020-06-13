@@ -66,11 +66,11 @@ func (pc *PlanetCreate) Mutation() *PlanetMutation {
 // Save creates the Planet in the database.
 func (pc *PlanetCreate) Save(ctx context.Context) (*Planet, error) {
 	if _, ok := pc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	if v, ok := pc.mutation.Name(); ok {
 		if err := planet.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 	var (

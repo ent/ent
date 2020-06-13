@@ -280,7 +280,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Car.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Car.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if cuo.mutation.OwnerCleared() {

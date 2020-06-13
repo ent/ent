@@ -59,19 +59,19 @@ func (gc *GalaxyCreate) Mutation() *GalaxyMutation {
 // Save creates the Galaxy in the database.
 func (gc *GalaxyCreate) Save(ctx context.Context) (*Galaxy, error) {
 	if _, ok := gc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := galaxy.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 	if _, ok := gc.mutation.GetType(); !ok {
-		return nil, errors.New("ent: missing required field \"type\"")
+		return nil, &ValidationError{Name: "type", err: errors.New("ent: missing required field \"type\"")}
 	}
 	if v, ok := gc.mutation.GetType(); ok {
 		if err := galaxy.TypeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
 	}
 	var (

@@ -70,7 +70,7 @@ func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 	if _, ok := gic.mutation.Desc(); !ok {
-		return nil, errors.New("ent: missing required field \"desc\"")
+		return nil, &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
 	}
 	if _, ok := gic.mutation.MaxUsers(); !ok {
 		v := groupinfo.DefaultMaxUsers

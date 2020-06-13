@@ -499,6 +499,40 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCr
 	return ftc
 }
 
+// SetSchemaFloat sets the schema_float field.
+func (ftc *FieldTypeCreate) SetSchemaFloat(s schema.Float64) *FieldTypeCreate {
+	ftc.mutation.SetSchemaFloat(s)
+	return ftc
+}
+
+// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaFloat(*s)
+	}
+	return ftc
+}
+
+// SetSchemaFloat32 sets the schema_float32 field.
+func (ftc *FieldTypeCreate) SetSchemaFloat32(s schema.Float32) *FieldTypeCreate {
+	ftc.mutation.SetSchemaFloat32(s)
+	return ftc
+}
+
+// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetSchemaFloat32(*s)
+	}
+	return ftc
+}
+
+// SetNullFloat sets the null_float field.
+func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
+	ftc.mutation.SetNullFloat(sf)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -507,28 +541,28 @@ func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if _, ok := ftc.mutation.Int(); !ok {
-		return nil, errors.New("ent: missing required field \"int\"")
+		return nil, &ValidationError{Name: "int", err: errors.New("ent: missing required field \"int\"")}
 	}
 	if _, ok := ftc.mutation.Int8(); !ok {
-		return nil, errors.New("ent: missing required field \"int8\"")
+		return nil, &ValidationError{Name: "int8", err: errors.New("ent: missing required field \"int8\"")}
 	}
 	if _, ok := ftc.mutation.Int16(); !ok {
-		return nil, errors.New("ent: missing required field \"int16\"")
+		return nil, &ValidationError{Name: "int16", err: errors.New("ent: missing required field \"int16\"")}
 	}
 	if _, ok := ftc.mutation.Int32(); !ok {
-		return nil, errors.New("ent: missing required field \"int32\"")
+		return nil, &ValidationError{Name: "int32", err: errors.New("ent: missing required field \"int32\"")}
 	}
 	if _, ok := ftc.mutation.Int64(); !ok {
-		return nil, errors.New("ent: missing required field \"int64\"")
+		return nil, &ValidationError{Name: "int64", err: errors.New("ent: missing required field \"int64\"")}
 	}
 	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
+			return nil, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
 		}
 	}
 	if v, ok := ftc.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -707,6 +741,15 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.SchemaInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt64, value)
+	}
+	if value, ok := ftc.mutation.SchemaFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, value)
+	}
+	if value, ok := ftc.mutation.SchemaFloat32(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, value)
+	}
+	if value, ok := ftc.mutation.NullFloat(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
 	}
 	return v.ValueMap(true)
 }

@@ -56,13 +56,13 @@ func (cc *CardCreate) Mutation() *CardMutation {
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 	if _, ok := cc.mutation.Expired(); !ok {
-		return nil, errors.New("ent: missing required field \"expired\"")
+		return nil, &ValidationError{Name: "expired", err: errors.New("ent: missing required field \"expired\"")}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return nil, errors.New("ent: missing required field \"number\"")
+		return nil, &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
 	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
-		return nil, errors.New("ent: missing required edge \"owner\"")
+		return nil, &ValidationError{Name: "owner", err: errors.New("ent: missing required edge \"owner\"")}
 	}
 	var (
 		err  error

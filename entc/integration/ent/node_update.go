@@ -438,7 +438,7 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 	}
 	id, ok := nuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Node.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Node.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := nuo.mutation.Value(); ok {

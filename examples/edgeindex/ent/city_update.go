@@ -312,7 +312,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing City.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing City.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := cuo.mutation.Name(); ok {

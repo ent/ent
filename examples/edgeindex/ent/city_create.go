@@ -53,7 +53,7 @@ func (cc *CityCreate) Mutation() *CityMutation {
 // Save creates the City in the database.
 func (cc *CityCreate) Save(ctx context.Context) (*City, error) {
 	if _, ok := cc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	var (
 		err  error

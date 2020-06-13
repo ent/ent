@@ -37,7 +37,7 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	if _, ok := gc.mutation.MaxUsers(); !ok {
-		return nil, errors.New("ent: missing required field \"max_users\"")
+		return nil, &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
 	}
 	var (
 		err  error

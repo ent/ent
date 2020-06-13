@@ -16,7 +16,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if 
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
-			return {{ $zero }}, fmt.Errorf("missing {{ $.Name }}.ID for update")
+			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
 		}
 		query, bindings := {{ $receiver }}.gremlin(id).Query()
 	{{- else }}

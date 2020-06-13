@@ -149,6 +149,31 @@ func Sum(field string) AggregateFunc {
 	}
 }
 
+// ValidationError returns when validating a field fails.
+type ValidationError struct {
+	Name string // Field or edge name.
+	err  error
+}
+
+// Error implements the error interface.
+func (e *ValidationError) Error() string {
+	return e.err.Error()
+}
+
+// Unwrap implements the errors.Wrapper interface.
+func (e *ValidationError) Unwrap() error {
+	return e.err
+}
+
+// IsValidationError returns a boolean indicating whether the error is a validaton error.
+func IsValidationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	var e *ValidationError
+	return errors.As(err, &e)
+}
+
 // NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
 type NotFoundError struct {
 	label string

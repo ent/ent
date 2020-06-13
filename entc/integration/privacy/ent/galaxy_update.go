@@ -83,12 +83,12 @@ func (gu *GalaxyUpdate) RemovePlanets(p ...*Planet) *GalaxyUpdate {
 func (gu *GalaxyUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := gu.mutation.Name(); ok {
 		if err := galaxy.NameValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return 0, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 	if v, ok := gu.mutation.GetType(); ok {
 		if err := galaxy.TypeValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
+			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
 	}
 
@@ -280,12 +280,12 @@ func (guo *GalaxyUpdateOne) RemovePlanets(p ...*Planet) *GalaxyUpdateOne {
 func (guo *GalaxyUpdateOne) Save(ctx context.Context) (*Galaxy, error) {
 	if v, ok := guo.mutation.Name(); ok {
 		if err := galaxy.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 	if v, ok := guo.mutation.GetType(); ok {
 		if err := galaxy.TypeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
 	}
 
@@ -351,7 +351,7 @@ func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (ga *Galaxy, err error)
 	}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Galaxy.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Galaxy.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := guo.mutation.Name(); ok {

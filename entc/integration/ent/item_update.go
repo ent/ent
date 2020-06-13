@@ -192,7 +192,7 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (i *Item, err error) {
 	}
 	id, ok := iuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Item.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Item.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	i = &Item{config: iuo.config}

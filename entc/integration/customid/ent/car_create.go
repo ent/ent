@@ -92,20 +92,20 @@ func (cc *CarCreate) Mutation() *CarMutation {
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 	if v, ok := cc.mutation.BeforeID(); ok {
 		if err := car.BeforeIDValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)
+			return nil, &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
 		}
 	}
 	if v, ok := cc.mutation.AfterID(); ok {
 		if err := car.AfterIDValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)
+			return nil, &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
 		}
 	}
 	if _, ok := cc.mutation.Model(); !ok {
-		return nil, errors.New("ent: missing required field \"model\"")
+		return nil, &ValidationError{Name: "model", err: errors.New("ent: missing required field \"model\"")}
 	}
 	if v, ok := cc.mutation.ID(); ok {
 		if err := car.IDValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"id\": %w", err)
+			return nil, &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
 		}
 	}
 	var (

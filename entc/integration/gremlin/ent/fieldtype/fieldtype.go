@@ -97,6 +97,12 @@ const (
 	FieldSchemaInt8 = "schema_int8"
 	// FieldSchemaInt64 holds the string denoting the schema_int64 field in the database.
 	FieldSchemaInt64 = "schema_int64"
+	// FieldSchemaFloat holds the string denoting the schema_float field in the database.
+	FieldSchemaFloat = "schema_float"
+	// FieldSchemaFloat32 holds the string denoting the schema_float32 field in the database.
+	FieldSchemaFloat32 = "schema_float32"
+	// FieldNullFloat holds the string denoting the null_float field in the database.
+	FieldNullFloat = "null_float"
 )
 
 var (

@@ -346,7 +346,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Comment.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Comment.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := cuo.mutation.UniqueInt(); ok {

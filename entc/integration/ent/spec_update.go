@@ -293,7 +293,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 	}
 	id, ok := suo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Spec.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Spec.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if nodes := suo.mutation.RemovedCardIDs(); len(nodes) > 0 {

@@ -190,7 +190,7 @@ func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := fu.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"size\": %w", err)
+			return 0, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
 		}
 	}
 
@@ -590,7 +590,7 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	if v, ok := fuo.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"size\": %w", err)
+			return nil, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
 		}
 	}
 
@@ -656,7 +656,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 	}
 	id, ok := fuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing File.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing File.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := fuo.mutation.Size(); ok {

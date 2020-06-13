@@ -291,7 +291,7 @@ func (ftuo *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, erro
 	res := &gremlin.Response{}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing FileType.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FileType.ID for update")}
 	}
 	query, bindings := ftuo.gremlin(id).Query()
 	if err := ftuo.driver.Exec(ctx, query, bindings, res); err != nil {

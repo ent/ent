@@ -64,10 +64,10 @@ func (cc *CarCreate) Mutation() *CarMutation {
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 	if _, ok := cc.mutation.Model(); !ok {
-		return nil, errors.New("ent: missing required field \"model\"")
+		return nil, &ValidationError{Name: "model", err: errors.New("ent: missing required field \"model\"")}
 	}
 	if _, ok := cc.mutation.RegisteredAt(); !ok {
-		return nil, errors.New("ent: missing required field \"registered_at\"")
+		return nil, &ValidationError{Name: "registered_at", err: errors.New("ent: missing required field \"registered_at\"")}
 	}
 	var (
 		err  error

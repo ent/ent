@@ -368,7 +368,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 	}
 	id, ok := giuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing GroupInfo.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing GroupInfo.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := giuo.mutation.Desc(); ok {
