@@ -76,11 +76,11 @@ func TestEdge(t *testing.T) {
 
 	from = edge.To("following", User.Type).
 		StructTag("following").
-		StorageKey(edge.StorageKey{To: "following_id", From: "followers_id", Table: "user_followers"}).
+		StorageKey(edge.Table("user_followers"), edge.Columns("following_id", "followers_id")).
 		From("followers").
 		StructTag("followers").
 		Descriptor()
 	assert.Equal("followers", from.Tag)
 	assert.Equal("following", from.Ref.Tag)
-	assert.Equal(edge.StorageKey{To: "following_id", From: "followers_id", Table: "user_followers"}, *from.Ref.StorageKey)
+	assert.Equal(edge.StorageKey{Table: "user_followers", Columns: []string{"following_id", "followers_id"}}, *from.Ref.StorageKey)
 }

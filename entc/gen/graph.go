@@ -73,7 +73,7 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		check(resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
-		check(t.resolveFKs(), "resolve %q foreign-keys", t.Name)
+		check(t.resolveFKs(), "set %q foreign-keys", t.Name)
 	}
 	for _, schema := range schemas {
 		g.addIndexes(schema)
