@@ -38,6 +38,8 @@ const (
 	EdgeCar = "car"
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
+	// EdgeFriends holds the string denoting the friends edge name in mutations.
+	EdgeFriends = "friends"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -54,7 +56,9 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
-	PetsColumn = "user_pets"
+	PetsColumn = "owner_id"
+	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	FriendsTable = "friends"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -73,8 +77,14 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"user_pets",
+	"owner_id",
 }
+
+var (
+	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
+	// primary key for the friends relation (M2M).
+	FriendsPrimaryKey = []string{"user", "friend"}
+)
 
 var (
 	// DefaultPhone holds the default value on creation for the phone field.

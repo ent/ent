@@ -66,7 +66,7 @@ var (
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},
-		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -90,16 +90,46 @@ var (
 			},
 		},
 	}
+	// FriendsColumns holds the columns for the "friends" table.
+	FriendsColumns = []*schema.Column{
+		{Name: "user", Type: field.TypeInt},
+		{Name: "friend", Type: field.TypeInt},
+	}
+	// FriendsTable holds the schema information for the "friends" table.
+	FriendsTable = &schema.Table{
+		Name:       "friends",
+		Columns:    FriendsColumns,
+		PrimaryKey: []*schema.Column{FriendsColumns[0], FriendsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "friends_user",
+				Columns: []*schema.Column{FriendsColumns[0]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:  "friends_friend",
+				Columns: []*schema.Column{FriendsColumns[1]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CarsTable,
 		GroupsTable,
 		PetsTable,
 		UsersTable,
+		FriendsTable,
 	}
 )
 
 func init() {
 	CarsTable.ForeignKeys[0].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = PetsTable
+	FriendsTable.ForeignKeys[0].RefTable = UsersTable
+	FriendsTable.ForeignKeys[1].RefTable = UsersTable
 }

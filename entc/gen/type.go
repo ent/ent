@@ -79,6 +79,7 @@ type (
 
 	// Edge of a graph between two types.
 	Edge struct {
+		def *load.Edge
 		// Name holds the name of the edge.
 		Name string
 		// Type holds a reference to the type this edge is directed to.
@@ -448,8 +449,11 @@ func (t *Type) AddIndex(idx *load.Index) error {
 }
 
 // resolveFKs makes sure all edge-fks are created for the types.
-func (t *Type) resolveFKs() {
+func (t *Type) resolveFKs() error {
 	for _, e := range t.Edges {
+		if err := e.setStorageKey(); err != nil {
+			return fmt.Errorf("%q edge: %v", e.Name, err)
+		}
 		if e.IsInverse() || e.M2M() {
 			continue
 		}
@@ -474,6 +478,7 @@ func (t *Type) resolveFKs() {
 			e.Type.addFK(fk)
 		}
 	}
+	return nil
 }
 
 // AddForeignKey adds a foreign-key for the type if it doesn't exist.
@@ -956,6 +961,32 @@ func (e Edge) MutationReset() string {
 		name += "Edge"
 	}
 	return name
+}
+
+// setStorageKey sets the storage-key option in the schema or fail.
+func (e *Edge) setStorageKey() error {
+	key := e.def.StorageKey
+	if key == nil {
+		return nil
+	}
+	switch {
+	case key.Table != "" && !e.M2M():
+		return fmt.Errorf("StorageKey.Table is allowed only for M2M edges (got %s)", e.Rel.Type)
+	case len(key.Columns) == 1 && e.M2M():
+		return fmt.Errorf("%s edge have 2 columns. Use edge.Columns(to, from) instead", e.Rel.Type)
+	case len(key.Columns) > 1 && !e.M2M():
+		return fmt.Errorf("%s edge does not have 2 columns. Use edge.Column(%s) instead", e.Rel.Type, key.Columns[0])
+	}
+	if key.Table != "" {
+		e.Rel.Table = key.Table
+	}
+	if len(key.Columns) > 0 {
+		e.Rel.Columns[0] = key.Columns[0]
+	}
+	if len(key.Columns) > 1 {
+		e.Rel.Columns[1] = key.Columns[1]
+	}
+	return nil
 }
 
 // Column returns the first element from the columns slice.

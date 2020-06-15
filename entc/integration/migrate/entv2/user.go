@@ -40,8 +40,8 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges     UserEdges `json:"edges"`
-	user_pets *int
+	Edges    UserEdges `json:"edges"`
+	owner_id *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -50,9 +50,11 @@ type UserEdges struct {
 	Car []*Car
 	// Pets holds the value of the pets edge.
 	Pets *Pet
+	// Friends holds the value of the friends edge.
+	Friends []*User
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // CarOrErr returns the Car value or an error if the edge
@@ -78,6 +80,15 @@ func (e UserEdges) PetsOrErr() (*Pet, error) {
 	return nil, &NotLoadedError{edge: "pets"}
 }
 
+// FriendsOrErr returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendsOrErr() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -97,7 +108,7 @@ func (*User) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*User) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_pets
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
@@ -161,10 +172,10 @@ func (u *User) assignValues(values ...interface{}) error {
 	values = values[9:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
 		} else if value.Valid {
-			u.user_pets = new(int)
-			*u.user_pets = int(value.Int64)
+			u.owner_id = new(int)
+			*u.owner_id = int(value.Int64)
 		}
 	}
 	return nil
@@ -178,6 +189,11 @@ func (u *User) QueryCar() *CarQuery {
 // QueryPets queries the pets edge of the User.
 func (u *User) QueryPets() *PetQuery {
 	return (&UserClient{config: u.config}).QueryPets(u)
+}
+
+// QueryFriends queries the friends edge of the User.
+func (u *User) QueryFriends() *UserQuery {
+	return (&UserClient{config: u.config}).QueryFriends(u)
 }
 
 // Update returns a builder for updating this User.
