@@ -1,0 +1,36 @@
+name: Continuous Deployment
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'doc/**'
+
+jobs:
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install Dependencies
+        working-directory: doc/website
+        run: yarn
+      - name: Build Docs
+        working-directory: doc/website
+        run: yarn build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - name: Deploy Docs
+        working-directory: doc/website/build/ent
+        run: aws s3 sync . s3://entgo.io --delete --exclude "assets/*"
+      - name: Invalidate Cache
+        env:
+          CDN_DISTRIBUTION_ID: ${{ secrets.CDN_DISTRIBUTION_ID }}
+        run: aws cloudfront create-invalidation --distribution-id $CDN_DISTRIBUTION_ID --paths "/*" | jq -M "del(.Location)"
