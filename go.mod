@@ -20,11 +20,12 @@ require (
 	github.com/modern-go/reflect2 v1.0.1
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v0.0.7
+	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	go.opencensus.io v0.22.3
+	golang.org/x/mod v0.3.0 // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
-	golang.org/x/tools v0.0.0-20200329025819-fd4102a86c65
+	golang.org/x/tools v0.0.0-20200615222825-6aa8f57aacd9
 )

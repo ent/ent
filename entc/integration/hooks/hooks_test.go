@@ -207,7 +207,7 @@ func TestOldValues(t *testing.T) {
 		})
 	}, ent.OpUpdateOne))
 	// A generic hook (executed on all types).
-	client.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+	client.Use(hook.Unless(func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			namer, ok := m.(interface {
 				OldName(context.Context) (string, error)
@@ -230,7 +230,7 @@ func TestOldValues(t *testing.T) {
 			require.NoError(t, err)
 			return value, nil
 		})
-	}, ent.OpUpdateOne))
+	}, ^ent.OpUpdateOne))
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
 	_, err := client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version).Save(ctx)
