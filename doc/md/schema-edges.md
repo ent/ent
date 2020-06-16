@@ -862,7 +862,6 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mbidi).
 
-
 ## Required
 
 Edges can be defined as required in the entity creation using the `Required` method on the builder.
@@ -880,6 +879,24 @@ func (Card) Edges() []ent.Edge {
 ```
 
 If the example above, a card entity cannot be created without its owner. 
+
+## StorageKey
+
+Custom storage configuration can be provided for edges using the `StorageKey` method.
+
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("pets", Pet.Type).
+			// Set the column name in the "pets" table for O2M relationship.
+			StorageKey(edge.Column("owner_id")),
+		edge.To("friends", User.Type).
+			// Set the join-table and the column names for M2M relationship.
+			StorageKey(edge.Table("friends"), edge.Columns("user_id", "friend_id")),
+	}
+}
+```
 
 ## Indexes
 
