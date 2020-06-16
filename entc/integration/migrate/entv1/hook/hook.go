@@ -39,7 +39,7 @@ func (f UserFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, er
 	return f(ctx, mv)
 }
 
-// On executes the given hook only of the given operation.
+// On executes the given hook only for the given operation.
 //
 //	hook.On(Log, entv1.Delete|entv1.Create)
 //
@@ -54,6 +54,14 @@ func On(hk entv1.Hook, op entv1.Op) entv1.Hook {
 	}
 }
 
+// Unless skips the given hook only for the given operation.
+//
+//	hook.Unless(Log, entv1.Update|entv1.UpdateOne)
+//
+func Unless(hk entv1.Hook, op entv1.Op) entv1.Hook {
+	return On(hk, ^op)
+}
+
 // Reject returns a hook that rejects all operations that match op.
 //
 //	func (T) Hooks() []entv1.Hook {
@@ -63,14 +71,12 @@ func On(hk entv1.Hook, op entv1.Op) entv1.Hook {
 //	}
 //
 func Reject(op entv1.Op) entv1.Hook {
-	return func(next entv1.Mutator) entv1.Mutator {
-		return entv1.MutateFunc(func(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
-			if m.Op().Is(op) {
-				return nil, fmt.Errorf("%s operation is not allowed", m.Op())
-			}
-			return next.Mutate(ctx, m)
+	hk := func(entv1.Mutator) entv1.Mutator {
+		return entv1.MutateFunc(func(_ context.Context, m entv1.Mutation) (entv1.Value, error) {
+			return nil, fmt.Errorf("%s operation is not allowed", m.Op())
 		})
 	}
+	return On(hk, op)
 }
 
 // Chain acts as a list of hooks and is effectively immutable.

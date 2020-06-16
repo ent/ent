@@ -32,7 +32,7 @@ import "{{ $.Config.Package }}"
 	}
 {{ end }}
 
-// On executes the given hook only of the given operation.
+// On executes the given hook only for the given operation.
 //
 //	hook.On(Log, {{ $pkg }}.Delete|{{ $pkg }}.Create)
 //
@@ -47,6 +47,14 @@ func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
 	}
 }
 
+// Unless skips the given hook only for the given operation.
+//
+//	hook.Unless(Log, {{ $pkg }}.Update|{{ $pkg }}.UpdateOne)
+//
+func Unless(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+	return On(hk, ^op)
+}
+
 // Reject returns a hook that rejects all operations that match op.
 //
 //	func (T) Hooks() []{{ $pkg }}.Hook {
@@ -56,14 +64,12 @@ func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
 //	}
 //
 func Reject(op {{ $pkg }}.Op) {{ $pkg }}.Hook {
-	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
-		return {{ $pkg }}.MutateFunc(func(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
-			if m.Op().Is(op) {
-				return nil, fmt.Errorf("%s operation is not allowed", m.Op())
-			}
-			return next.Mutate(ctx, m)
+	hk := func({{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		return {{ $pkg }}.MutateFunc(func(_ context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
+			return nil, fmt.Errorf("%s operation is not allowed", m.Op())
 		})
 	}
+	return On(hk, op)
 }
 
 // Chain acts as a list of hooks and is effectively immutable.
