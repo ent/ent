@@ -25,7 +25,7 @@ const (
 )
 
 // MigrateOption allows for managing schema configuration using functional options.
-type MigrateOption func(m *Migrate)
+type MigrateOption func(*Migrate)
 
 // WithGlobalUniqueID sets the universal ids options to the migration.
 // Defaults to false.
