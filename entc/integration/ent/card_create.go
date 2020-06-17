@@ -124,16 +124,16 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 		cc.mutation.SetUpdateTime(v)
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return nil, errors.New("ent: missing required field \"number\"")
+		return nil, &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"number\": %w", err)
+			return nil, &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
 		}
 	}
 	if v, ok := cc.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 	var (

@@ -123,7 +123,7 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	}
 	if v, ok := cu.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return 0, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 
@@ -345,7 +345,7 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	}
 	if v, ok := cuo.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 
@@ -402,7 +402,7 @@ func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {
 	res := &gremlin.Response{}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Card.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
 	}
 	query, bindings := cuo.gremlin(id).Query()
 	if err := cuo.driver.Exec(ctx, query, bindings, res); err != nil {

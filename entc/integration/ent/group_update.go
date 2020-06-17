@@ -225,17 +225,17 @@ func (gu *GroupUpdate) ClearInfo() *GroupUpdate {
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := gu.mutation.GetType(); ok {
 		if err := group.TypeValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
+			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
 	}
 	if v, ok := gu.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)
+			return 0, &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
 		}
 	}
 	if v, ok := gu.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return 0, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 
@@ -719,17 +719,17 @@ func (guo *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	if v, ok := guo.mutation.GetType(); ok {
 		if err := group.TypeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
 	}
 	if v, ok := guo.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)
+			return nil, &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
 		}
 	}
 	if v, ok := guo.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 
@@ -798,7 +798,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 	}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Group.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := guo.mutation.Active(); ok {

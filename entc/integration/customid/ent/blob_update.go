@@ -397,7 +397,7 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 	}
 	id, ok := buo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Blob.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Blob.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := buo.mutation.UUID(); ok {

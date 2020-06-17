@@ -57,7 +57,7 @@ func (sc *StreetCreate) Mutation() *StreetMutation {
 // Save creates the Street in the database.
 func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
 	if _, ok := sc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	var (
 		err  error

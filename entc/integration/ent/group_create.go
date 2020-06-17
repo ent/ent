@@ -149,11 +149,11 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 		gc.mutation.SetActive(v)
 	}
 	if _, ok := gc.mutation.Expire(); !ok {
-		return nil, errors.New("ent: missing required field \"expire\"")
+		return nil, &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
 	}
 	if v, ok := gc.mutation.GetType(); ok {
 		if err := group.TypeValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %w", err)
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
 	}
 	if _, ok := gc.mutation.MaxUsers(); !ok {
@@ -162,19 +162,19 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	}
 	if v, ok := gc.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)
+			return nil, &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
 		}
 	}
 	if _, ok := gc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
 		}
 	}
 	if _, ok := gc.mutation.InfoID(); !ok {
-		return nil, errors.New("ent: missing required edge \"info\"")
+		return nil, &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
 	}
 	var (
 		err  error

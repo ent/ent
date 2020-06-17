@@ -326,14 +326,14 @@ func (uc *UserCreate) Mutation() *UserMutation {
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if v, ok := uc.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)
+			return nil, &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
 		}
 	}
 	if _, ok := uc.mutation.Age(); !ok {
-		return nil, errors.New("ent: missing required field \"age\"")
+		return nil, &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	if _, ok := uc.mutation.Last(); !ok {
 		v := user.DefaultLast
@@ -345,7 +345,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	}
 	if v, ok := uc.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"role\": %w", err)
+			return nil, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (

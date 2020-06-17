@@ -42,14 +42,14 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
 					{{ $mutation }}.Set{{ $f.StructField }}(v)
 				{{- else }}
-					return nil, errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")
+					return nil, &ValidationError{Name: "{{ $f.Name }}", err: errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")}
 				{{- end }}
 			}
 		{{- end }}
 		{{- with or $f.Validators $f.IsEnum }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				if err := {{ $.Package }}.{{ $f.Validator }}(v); err != nil {
-					return nil, fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)
+					return nil, &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)}
 				}
 			}
 		{{- end }}
@@ -61,7 +61,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			{{- else }}
 				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
 			{{- end }}
-				return nil, errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")
+				return nil, &ValidationError{Name: "{{ $e.Name }}", err: errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")}
 			}
 		{{- end }}
 	{{- end }}

@@ -176,22 +176,22 @@ func (uc *UserCreate) Mutation() *UserMutation {
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if _, ok := uc.mutation.Age(); !ok {
-		return nil, errors.New("entv1: missing required field \"age\"")
+		return nil, &ValidationError{Name: "age", err: errors.New("entv1: missing required field \"age\"")}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return nil, errors.New("entv1: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("entv1: missing required field \"name\"")}
 	}
 	if v, ok := uc.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
-			return nil, fmt.Errorf("entv1: validator failed for field \"name\": %w", err)
+			return nil, &ValidationError{Name: "name", err: fmt.Errorf("entv1: validator failed for field \"name\": %w", err)}
 		}
 	}
 	if _, ok := uc.mutation.Nickname(); !ok {
-		return nil, errors.New("entv1: missing required field \"nickname\"")
+		return nil, &ValidationError{Name: "nickname", err: errors.New("entv1: missing required field \"nickname\"")}
 	}
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("entv1: validator failed for field \"state\": %w", err)
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("entv1: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (

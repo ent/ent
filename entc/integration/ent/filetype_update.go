@@ -312,7 +312,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 	}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing FileType.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FileType.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := ftuo.mutation.Name(); ok {

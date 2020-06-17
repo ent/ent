@@ -397,7 +397,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 	}
 	id, ok := puo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Pet.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := puo.mutation.Name(); ok {

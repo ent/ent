@@ -107,7 +107,7 @@ func (pc *PetCreate) Mutation() *PetMutation {
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 	if v, ok := pc.mutation.ID(); ok {
 		if err := pet.IDValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"id\": %w", err)
+			return nil, &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
 		}
 	}
 	var (

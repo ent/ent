@@ -366,7 +366,7 @@ func (puo *PlanetUpdateOne) sqlSave(ctx context.Context) (pl *Planet, err error)
 	}
 	id, ok := puo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Planet.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Planet.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := puo.mutation.Age(); ok {

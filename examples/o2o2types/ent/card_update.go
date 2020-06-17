@@ -310,7 +310,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Card.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := cuo.mutation.Expired(); ok {

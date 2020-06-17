@@ -27,7 +27,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
-			return {{ $zero }}, fmt.Errorf("missing {{ $.Name }}.ID for update")
+			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
 		}
 		_spec.Node.ID.Value = id
 	{{- else }}

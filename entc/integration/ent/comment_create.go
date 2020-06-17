@@ -57,10 +57,10 @@ func (cc *CommentCreate) Mutation() *CommentMutation {
 // Save creates the Comment in the database.
 func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 	if _, ok := cc.mutation.UniqueInt(); !ok {
-		return nil, errors.New("ent: missing required field \"unique_int\"")
+		return nil, &ValidationError{Name: "unique_int", err: errors.New("ent: missing required field \"unique_int\"")}
 	}
 	if _, ok := cc.mutation.UniqueFloat(); !ok {
-		return nil, errors.New("ent: missing required field \"unique_float\"")
+		return nil, &ValidationError{Name: "unique_float", err: errors.New("ent: missing required field \"unique_float\"")}
 	}
 	var (
 		err  error

@@ -299,7 +299,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 	}
 	id, ok := suo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Street.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Street.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := suo.mutation.Name(); ok {

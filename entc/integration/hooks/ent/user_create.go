@@ -105,7 +105,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		uc.mutation.SetVersion(v)
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return nil, errors.New("ent: missing required field \"name\"")
+		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	var (
 		err  error

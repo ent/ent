@@ -179,7 +179,7 @@ func (iuo *ItemUpdateOne) gremlinSave(ctx context.Context) (*Item, error) {
 	res := &gremlin.Response{}
 	id, ok := iuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing Item.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Item.ID for update")}
 	}
 	query, bindings := iuo.gremlin(id).Query()
 	if err := iuo.driver.Exec(ctx, query, bindings, res); err != nil {

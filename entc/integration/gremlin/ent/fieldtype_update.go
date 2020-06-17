@@ -989,12 +989,12 @@ func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
+			return 0, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
 		}
 	}
 	if v, ok := ftu.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
+			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -2370,12 +2370,12 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)
+			return nil, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
 		}
 	}
 	if v, ok := ftuo.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"state\": %w", err)
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -2431,7 +2431,7 @@ func (ftuo *FieldTypeUpdateOne) gremlinSave(ctx context.Context) (*FieldType, er
 	res := &gremlin.Response{}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
-		return nil, fmt.Errorf("missing FieldType.ID for update")
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FieldType.ID for update")}
 	}
 	query, bindings := ftuo.gremlin(id).Query()
 	if err := ftuo.driver.Exec(ctx, query, bindings, res); err != nil {
