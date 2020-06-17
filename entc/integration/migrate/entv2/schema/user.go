@@ -90,10 +90,18 @@ func (Car) Edges() []ent.Edge {
 	}
 }
 
-// Additional types to be added to the schema.
-type (
-	// Pet schema.
-	Pet struct{ ent.Schema }
-	// Group schema.
-	Group struct{ ent.Schema }
-)
+// Group schema.
+type Group struct{ ent.Schema }
+
+// Pet schema.
+type Pet struct {
+	ent.Schema
+}
+
+func (Pet) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("pets").
+			Unique(),
+	}
+}

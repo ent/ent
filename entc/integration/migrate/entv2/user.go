@@ -40,8 +40,7 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges    UserEdges `json:"edges"`
-	owner_id *int
+	Edges UserEdges `json:"edges"`
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -105,13 +104,6 @@ func (*User) scanValues() []interface{} {
 	}
 }
 
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*User) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // owner_id
-	}
-}
-
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (u *User) assignValues(values ...interface{}) error {
@@ -168,15 +160,6 @@ func (u *User) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field state", values[8])
 	} else if value.Valid {
 		u.State = user.State(value.String)
-	}
-	values = values[9:]
-	if len(values) == len(user.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
-		} else if value.Valid {
-			u.owner_id = new(int)
-			*u.owner_id = int(value.Int64)
-		}
 	}
 	return nil
 }

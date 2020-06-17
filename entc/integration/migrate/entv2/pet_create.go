@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -20,6 +21,25 @@ type PetCreate struct {
 	config
 	mutation *PetMutation
 	hooks    []Hook
+}
+
+// SetOwnerID sets the owner edge to User by id.
+func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
+	pc.mutation.SetOwnerID(id)
+	return pc
+}
+
+// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
+	if id != nil {
+		pc = pc.SetOwnerID(*id)
+	}
+	return pc
+}
+
+// SetOwner sets the owner edge to User.
+func (pc *PetCreate) SetOwner(u *User) *PetCreate {
+	return pc.SetOwnerID(u.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -76,6 +96,25 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			},
 		}
 	)
+	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   pet.OwnerTable,
+			Columns: []string{pet.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr

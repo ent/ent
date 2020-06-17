@@ -400,6 +400,22 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 	return pe
 }
 
+// QueryOwner queries the owner edge of a Pet.
+func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, pet.OwnerTable, pet.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet
@@ -507,7 +523,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(pet.Table, pet.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, user.PetsTable, user.PetsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.PetsTable, user.PetsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

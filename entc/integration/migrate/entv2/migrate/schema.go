@@ -46,13 +46,22 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
-		Name:        "pets",
-		Columns:     PetsColumns,
-		PrimaryKey:  []*schema.Column{PetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "pets",
+		Columns:    PetsColumns,
+		PrimaryKey: []*schema.Column{PetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "pets_users_pets",
+				Columns: []*schema.Column{PetsColumns[1]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -66,22 +75,13 @@ var (
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},
-		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "users_pets_pets",
-				Columns: []*schema.Column{UsersColumns[10]},
-
-				RefColumns: []*schema.Column{PetsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+		Name:        "users",
+		Columns:     UsersColumns,
+		PrimaryKey:  []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_phone_age",
@@ -129,7 +129,7 @@ var (
 
 func init() {
 	CarsTable.ForeignKeys[0].RefTable = UsersTable
-	UsersTable.ForeignKeys[0].RefTable = PetsTable
+	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendsTable.ForeignKeys[1].RefTable = UsersTable
 }

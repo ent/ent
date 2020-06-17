@@ -12,11 +12,26 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
+
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
+	// OwnerTable is the table the holds the owner relation/edge.
+	OwnerTable = "pets"
+	// OwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for pet fields.
 var Columns = []string{
 	FieldID,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
+var ForeignKeys = []string{
+	"owner_id",
 }
