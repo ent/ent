@@ -965,16 +965,23 @@ func (e Edge) MutationReset() string {
 
 // setStorageKey sets the storage-key option in the schema or fail.
 func (e *Edge) setStorageKey() error {
+	rel := e.Rel
 	key := e.def.StorageKey
+	if e.IsInverse() {
+		assoc, ok := e.Owner.HasAssoc(e.Inverse)
+		if ok {
+			key = assoc.def.StorageKey
+		}
+	}
 	if key == nil {
 		return nil
 	}
 	switch {
-	case key.Table != "" && !e.M2M():
+	case key.Table != "" && rel.Type != M2M:
 		return fmt.Errorf("StorageKey.Table is allowed only for M2M edges (got %s)", e.Rel.Type)
-	case len(key.Columns) == 1 && e.M2M():
+	case len(key.Columns) == 1 && rel.Type == M2M:
 		return fmt.Errorf("%s edge have 2 columns. Use edge.Columns(to, from) instead", e.Rel.Type)
-	case len(key.Columns) > 1 && !e.M2M():
+	case len(key.Columns) > 1 && rel.Type != M2M:
 		return fmt.Errorf("%s edge does not have 2 columns. Use edge.Column(%s) instead", e.Rel.Type, key.Columns[0])
 	}
 	if key.Table != "" {

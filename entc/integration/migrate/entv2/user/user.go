@@ -51,7 +51,7 @@ const (
 	// CarColumn is the table column denoting the car relation/edge.
 	CarColumn = "user_car"
 	// PetsTable is the table the holds the pets relation/edge.
-	PetsTable = "users"
+	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
@@ -73,11 +73,6 @@ var Columns = []string{
 	FieldNewName,
 	FieldBlob,
 	FieldState,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
-var ForeignKeys = []string{
-	"owner_id",
 }
 
 var (

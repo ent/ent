@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -19,12 +20,46 @@ type Pet struct {
 	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the PetQuery when eager-loading is set.
+	Edges    PetEdges `json:"edges"`
+	owner_id *int
+}
+
+// PetEdges holds the relations/edges for other nodes in the graph.
+type PetEdges struct {
+	// Owner holds the value of the owner edge.
+	Owner *User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PetEdges) OwnerOrErr() (*User, error) {
+	if e.loadedTypes[0] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Owner, nil
+	}
+	return nil, &NotLoadedError{edge: "owner"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Pet) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{}, // id
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Pet) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
@@ -40,7 +75,21 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 	}
 	pe.ID = int(value.Int64)
 	values = values[1:]
+	values = values[0:]
+	if len(values) == len(pet.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+		} else if value.Valid {
+			pe.owner_id = new(int)
+			*pe.owner_id = int(value.Int64)
+		}
+	}
 	return nil
+}
+
+// QueryOwner queries the owner edge of the Pet.
+func (pe *Pet) QueryOwner() *UserQuery {
+	return (&PetClient{config: pe.config}).QueryOwner(pe)
 }
 
 // Update returns a builder for updating this Pet.
