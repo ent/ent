@@ -20,7 +20,7 @@ import (
 func TestXXX(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
-    // ...
+	// ...
 }
 ```
 
@@ -28,12 +28,12 @@ In order to pass functional options to `Open`, use `enttest.Option`:
 
 ```go
 func TestXXX(t *testing.T) {
-    opts := []enttest.Option{
-    	enttest.WithOptions(ent.Log(t.Log)),
-        enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)),
-    }
+	opts := []enttest.Option{
+		enttest.WithOptions(ent.Log(t.Log)),
+		enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)),
+	}
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", opts...)
 	defer client.Close()
-    // ...
+	// ...
 }
 ```
