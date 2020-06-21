@@ -166,7 +166,8 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 // cType returns the MySQL string type for the given column.
 func (d *MySQL) cType(c *Column) (t string) {
 	if c.SchemaType != nil && c.SchemaType[dialect.MySQL] != "" {
-		return c.SchemaType[dialect.MySQL]
+		// MySQL returns the column type lower cased.
+		return strings.ToLower(c.SchemaType[dialect.MySQL])
 	}
 	switch c.Type {
 	case field.TypeBool:
@@ -223,7 +224,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = c.scanTypeOr("timestamp")
 		// In MySQL, timestamp columns are `NOT NULL by default, and assigning NULL
 		// assigns the current_timestamp(). We avoid this if not set otherwise.
-		c.Nullable = true
+		c.Nullable = c.Attr == ""
 	case field.TypeEnum:
 		values := make([]string, len(c.Enums))
 		for i, e := range c.Enums {
@@ -358,6 +359,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeFloat64
 	case "time", "timestamp", "date", "datetime":
 		c.Type = field.TypeTime
+		// The mapping from schema defaults to database
+		// defaults is not supported for TypeTime fields.
+		defaults = sql.NullString{}
 	case "tinyblob":
 		c.Size = math.MaxUint8
 		c.Type = field.TypeBytes
