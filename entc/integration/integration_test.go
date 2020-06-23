@@ -1100,6 +1100,7 @@ func drop(t *testing.T, client *ent.Client) {
 	t.Log("drop data from database")
 	ctx := context.Background()
 	client.Pet.Delete().ExecX(ctx)
+	client.Item.Delete().ExecX(ctx)
 	client.File.Delete().ExecX(ctx)
 	client.Card.Delete().ExecX(ctx)
 	client.Node.Delete().ExecX(ctx)
