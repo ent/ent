@@ -116,6 +116,15 @@ be provided on entity creation by the application (e.g. UUID), override the buil
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
+			StructTag(`json:"oid,omitempty"`).
+			Increment(),
+	}
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Uint64("id").
 			StructTag(`json:"oid,omitempty"`),
 	}
 }

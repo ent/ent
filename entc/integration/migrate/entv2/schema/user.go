@@ -20,7 +20,8 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
-			StorageKey("oid"),
+			StorageKey("oid").
+			Increment(),
 		// changing the type of the field.
 		field.Int("age"),
 		// extending name field to longtext.

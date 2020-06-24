@@ -20,7 +20,8 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
-			StorageKey("oid"),
+			StorageKey("oid").
+			Increment(),
 		field.Int32("age"),
 		field.String("name").
 			MaxLen(10),

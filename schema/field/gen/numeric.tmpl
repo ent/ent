@@ -150,6 +150,12 @@ func (b *{{ $builder }}) StorageKey(key string) *{{ $builder }} {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *{{ $builder }}) Increment() *{{ $builder }} {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for {{ $t.String }}.
 //

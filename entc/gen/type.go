@@ -72,6 +72,8 @@ type (
 		Validators int
 		// Position info of the field.
 		Position *load.Position
+		// auto increment int filed.
+		Increment bool
 		// UserDefined indicates that this field was defined by the loaded schema.
 		// Unlike default id field, which is defined by the generator.
 		UserDefined bool
@@ -178,6 +180,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Immutable:     f.Immutable,
 			StructTag:     structTag(f.Name, f.Tag),
 			Validators:    f.Validators,
+			Increment:     f.Increment,
 			UserDefined:   true,
 		}
 		// User defined id field.
@@ -765,12 +768,17 @@ func (f Field) PK() *schema.Column {
 		Increment: true,
 	}
 	// If the PK was defined by the user and it's UUID or string.
-	if f.UserDefined && !f.Type.Numeric() {
-		c.Increment = false
-		c.Type = f.Type.Type
-		c.Unique = f.Unique
-		if f.def != nil && f.def.Size != nil {
-			c.Size = *f.def.Size
+	if f.UserDefined {
+		if f.Type.Numeric() {
+			c.Increment = f.Increment
+			c.Type = f.Type.Type
+		} else {
+			c.Increment = false
+			c.Type = f.Type.Type
+			c.Unique = f.Unique
+			if f.def != nil && f.def.Size != nil {
+				c.Size = *f.def.Size
+			}
 		}
 	}
 	if f.def != nil {

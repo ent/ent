@@ -730,6 +730,7 @@ type Descriptor struct {
 	StorageKey    string            // sql column or gremlin property.
 	Enums         []string          // enum values.
 	Sensitive     bool              // sensitive info string field.
+	Increment     bool              // auto increment int filed.
 	SchemaType    map[string]string // override the schema type.
 	err           error
 }

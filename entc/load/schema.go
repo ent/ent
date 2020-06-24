@@ -51,6 +51,7 @@ type Field struct {
 	StorageKey    string            `json:"storage_key,omitempty"`
 	Position      *Position         `json:"position,omitempty"`
 	Sensitive     bool              `json:"sensitive,omitempty"`
+	Increment     bool              `json:"increment,omitempty"`
 	SchemaType    map[string]string `json:"schema_type,omitempty"`
 }
 
@@ -113,6 +114,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		StorageKey:    fd.StorageKey,
 		Validators:    len(fd.Validators),
 		Sensitive:     fd.Sensitive,
+		Increment:     fd.Increment,
 		SchemaType:    fd.SchemaType,
 	}
 	if sf.Info == nil {

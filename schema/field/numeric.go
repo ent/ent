@@ -216,6 +216,12 @@ func (b *intBuilder) StorageKey(key string) *intBuilder {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *intBuilder) Increment() *intBuilder {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for int.
 //
@@ -340,6 +346,12 @@ func (b *uintBuilder) Validate(fn func(uint) error) *uintBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uintBuilder) StorageKey(key string) *uintBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Increment sets auto increment of the field.
+func (b *uintBuilder) Increment() *uintBuilder {
+	b.desc.Increment = true
 	return b
 }
 
@@ -480,6 +492,12 @@ func (b *int8Builder) StorageKey(key string) *int8Builder {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *int8Builder) Increment() *int8Builder {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for int8.
 //
@@ -614,6 +632,12 @@ func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *int16Builder) StorageKey(key string) *int16Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Increment sets auto increment of the field.
+func (b *int16Builder) Increment() *int16Builder {
+	b.desc.Increment = true
 	return b
 }
 
@@ -754,6 +778,12 @@ func (b *int32Builder) StorageKey(key string) *int32Builder {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *int32Builder) Increment() *int32Builder {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for int32.
 //
@@ -891,6 +921,12 @@ func (b *int64Builder) StorageKey(key string) *int64Builder {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *int64Builder) Increment() *int64Builder {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for int64.
 //
@@ -1015,6 +1051,12 @@ func (b *uint8Builder) Validate(fn func(uint8) error) *uint8Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint8Builder) StorageKey(key string) *uint8Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Increment sets auto increment of the field.
+func (b *uint8Builder) Increment() *uint8Builder {
+	b.desc.Increment = true
 	return b
 }
 
@@ -1145,6 +1187,12 @@ func (b *uint16Builder) StorageKey(key string) *uint16Builder {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *uint16Builder) Increment() *uint16Builder {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for uint16.
 //
@@ -1272,6 +1320,12 @@ func (b *uint32Builder) StorageKey(key string) *uint32Builder {
 	return b
 }
 
+// Increment sets auto increment of the field.
+func (b *uint32Builder) Increment() *uint32Builder {
+	b.desc.Increment = true
+	return b
+}
+
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for uint32.
 //
@@ -1396,6 +1450,12 @@ func (b *uint64Builder) Validate(fn func(uint64) error) *uint64Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint64Builder) StorageKey(key string) *uint64Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Increment sets auto increment of the field.
+func (b *uint64Builder) Increment() *uint64Builder {
+	b.desc.Increment = true
 	return b
 }
 
