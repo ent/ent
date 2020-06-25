@@ -72,6 +72,7 @@ func (FieldType) Fields() []ent.Field {
 		field.String("ndir").
 			Optional().
 			Nillable().
+			NotEmpty().
 			GoType(http.Dir("ndir")),
 		field.String("str").
 			Optional().
@@ -82,6 +83,7 @@ func (FieldType) Fields() []ent.Field {
 			GoType(&sql.NullString{}),
 		field.String("link").
 			Optional().
+			NotEmpty().
 			GoType(&Link{}),
 		field.String("null_link").
 			Optional().

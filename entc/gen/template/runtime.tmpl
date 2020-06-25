@@ -155,7 +155,7 @@ func init() {
 		{{- end }}
 		{{- with $f.Validators }}
 			{{- $name := print $pkg "." $f.Validator }}
-			{{- $type :=  printf "func (%s) error" $f.Type }}
+			{{- $type :=  printf "func (%s) error" $f.Type.Type }}
 			// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
 			{{- if eq $f.Validators 1 }}
 				{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
@@ -164,7 +164,7 @@ func init() {
 					validators := {{ $desc }}.Validators
 					fns := [...]func({{ $f.Type }}) error {
 						{{- range $j, $n := xrange $f.Validators }}
-							validators[{{ $j }}].(func({{ $f.Type }}) error),
+							validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
 						{{- end }}
 					}
 					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
