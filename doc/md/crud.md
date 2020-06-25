@@ -262,3 +262,54 @@ err := client.File.
 	Where(file.UpdatedAtLT(date))
 	Exec(ctx)
 ```
+
+## Mutation
+
+Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
+the same generated `UserMutation` object.
+However, all builder types implement the generic <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent#Mutation">`ent.Mutation`<a> interface.
+
+For example, in order to write a generic code that apply a set of methods on both `ent.UserCreate`
+and `ent.UserUpdate`, use the `UserMutation` object:
+
+```go
+func Do() {
+    creator := client.User.Create()
+    SetAgeName(creator.Mutation())
+	updater := client.User.UpdateOneID(id)
+	SetAgeName(updater.Mutation())
+}
+
+// SetAgeName sets the age and the name for any mutation.
+func SetAgeName(m *ent.UserMutation) {
+    m.SetAge(32)
+    m.SetName("Ariel")
+}
+```
+
+In some cases, you want to apply a set of methods on multiple types.
+For cases like this, either use the generic `ent.Mutation` interface,
+or create your own interface.
+
+```go
+func Do() {
+	creator1 := client.User.Create()
+	SetName(creator1.Mutation(), "a8m")
+
+	creator2 := client.Pet.Create()
+	SetName(creator2.Mutation(), "pedro")
+}
+
+// SetNamer wraps the 2 methods for getting
+// and setting the "name" field in mutations.
+type SetNamer interface {
+	SetName(string)
+	Name() (string, bool)
+}
+
+func SetName(m SetNamer, name string) {
+    if _, exist := m.Name(); !exist {
+    	m.SetName(name)
+    }
+}
+```
