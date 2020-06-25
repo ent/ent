@@ -997,6 +997,16 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
+	if v, ok := ftu.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return 0, &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return 0, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
 	var (
 		err      error
 		affected int
@@ -2376,6 +2386,16 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
 			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return nil, &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
 		}
 	}
 	var (

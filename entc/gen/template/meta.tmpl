@@ -72,7 +72,7 @@ const (
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := $f.Validator }}
-				{{- $type :=  printf "func (%s) error" $f.Type }}
+				{{- $type :=  printf "func (%s) error" $f.Type.Type }}
 				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
 				{{ $name }} {{ $type }}
 			{{- end }}

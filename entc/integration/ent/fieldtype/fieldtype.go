@@ -165,6 +165,10 @@ var ForeignKeys = []string{
 var (
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
+	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
+	NdirValidator func(string) error
+	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
+	LinkValidator func(string) error
 )
 
 // State defines the type for the state enum field.

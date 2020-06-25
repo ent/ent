@@ -162,9 +162,6 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		return nil, err
 	}
 	for _, f := range schema.Fields {
-		if err := typ.checkField(f); err != nil {
-			return nil, err
-		}
 		tf := &Field{
 			def:           f,
 			Name:          f.Name,
@@ -179,6 +176,9 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			StructTag:     structTag(f.Name, f.Tag),
 			Validators:    f.Validators,
 			UserDefined:   true,
+		}
+		if err := typ.checkField(tf, f); err != nil {
+			return nil, err
 		}
 		// User defined id field.
 		if tf.Name == typ.ID.Name {
@@ -556,7 +556,7 @@ func (t *Type) check() error {
 }
 
 // checkField checks the schema field.
-func (t *Type) checkField(f *load.Field) (err error) {
+func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 	switch {
 	case f.Name == "":
 		err = fmt.Errorf("field name cannot be empty")
@@ -575,6 +575,8 @@ func (t *Type) checkField(f *load.Field) (err error) {
 			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
 		}
+	case tf.Validators > 0 && !tf.ConvertedToBasic():
+		err = fmt.Errorf("GoType %q for field %q must be converted to basic Go type for validators", tf.Type, f.Name)
 	}
 	return err
 }

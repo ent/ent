@@ -50,6 +50,14 @@ func init() {
 	fieldtypeDescValidateOptionalInt32 := fieldtypeFields[15].Descriptor()
 	// fieldtype.ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	fieldtype.ValidateOptionalInt32Validator = fieldtypeDescValidateOptionalInt32.Validators[0].(func(int32) error)
+	// fieldtypeDescNdir is the schema descriptor for ndir field.
+	fieldtypeDescNdir := fieldtypeFields[27].Descriptor()
+	// fieldtype.NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
+	fieldtype.NdirValidator = fieldtypeDescNdir.Validators[0].(func(string) error)
+	// fieldtypeDescLink is the schema descriptor for link field.
+	fieldtypeDescLink := fieldtypeFields[30].Descriptor()
+	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
+	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
 	// fileDescSize is the schema descriptor for size field.

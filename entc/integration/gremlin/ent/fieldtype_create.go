@@ -565,6 +565,16 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
+	if v, ok := ftc.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return nil, &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
 	var (
 		err  error
 		node *FieldType
