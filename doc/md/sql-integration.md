@@ -103,3 +103,49 @@ func Open(dsn string) *ent.Client {
     return ent.NewClient(ent.Driver(drv))
 }
 ```
+
+
+## Use pgx with PostgreSQL
+
+```go
+package main
+
+import (
+	"context"
+	"database/sql"
+	"log"
+
+	"<project>/ent"
+
+	entsql "github.com/facebookincubator/ent/dialect/sql"
+	_ "github.com/jackc/pgx/v4/stdlib"
+)
+
+// Open new connection
+func Open(databaseUrl string) *ent.Client {
+	db, err := sql.Open("pgx", databaseUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+    defer db.Close()
+
+	// Create an ent.Driver from `db`.
+    drv := entsql.OpenDB("postgres", db)
+    return ent.NewClient(ent.Driver(drv))
+}
+
+func main() {
+    client := Open("postgresql://user:password@127.0.0.1/database")
+    
+	// Your code. For example:
+	ctx := context.Background()
+	if err := client.Schema.Create(ctx); err != nil {
+		log.Fatal(err)
+	}
+	users, err := client.User.Query().All(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(users)
+}
+```
