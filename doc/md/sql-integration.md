@@ -127,16 +127,16 @@ func Open(databaseUrl string) *ent.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-    defer db.Close()
+	defer db.Close()
 
 	// Create an ent.Driver from `db`.
-    drv := entsql.OpenDB("postgres", db)
-    return ent.NewClient(ent.Driver(drv))
+	drv := entsql.OpenDB("postgres", db)
+	return ent.NewClient(ent.Driver(drv))
 }
 
 func main() {
-    client := Open("postgresql://user:password@127.0.0.1/database")
-    
+	client := Open("postgresql://user:password@127.0.0.1/database")
+
 	// Your code. For example:
 	ctx := context.Background()
 	if err := client.Schema.Create(ctx); err != nil {
