@@ -71,7 +71,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("entv2: cannot start a transaction within a transaction")
@@ -82,6 +83,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:    ctx,
 		config: cfg,
 		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),

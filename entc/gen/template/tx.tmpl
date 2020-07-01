@@ -29,25 +29,68 @@ type Tx struct {
 
 	// completion callbacks.
 	mu         sync.Mutex
-	onCommit   []func(error)
-	onRollback []func(error)
+	onCommit   []CommitHook
+	onRollback []RollbackHook
+
+	// ctx lives for the life of the transaction. It is
+	// the same context used by the underlying connection.
+	ctx context.Context
 }
 
-{{- range $func := list "Commit" "Rollback" }}
+{{ $funcs := dict "Commit" "Committer" "Rollback" "Rollbacker" }}
+{{ range $func := keys $funcs }}
+	{{ $iface := get $funcs $func }}
+	type (
+		// {{ $iface }} is the interface that wraps the {{ $iface }} method.
+		{{ $iface }} interface {
+			{{ $func }}(context.Context, *Tx) error
+		}
+
+		// The {{ $func }}Func type is an adapter to allow the use of ordinary
+		// function as a {{ $iface }}. If f is a function with the appropriate
+		// signature, {{ $func }}Func(f) is a {{ $iface }} that calls f.
+		{{ $func }}Func func(context.Context, *Tx) error
+
+		// {{ $func }}Hook defines the "{{ lower $func }} middleware". A function that gets a {{ $iface }}
+		// and returns a {{ $iface }}. For example:
+		//
+		//	hook := func(next ent.{{ $iface }}) ent.{{ $iface }} {
+		//		return ent.{{ $func }}Func(func(context.Context, tx *ent.Tx) error {
+		//			// Do some stuff before.
+		//			if err := next.{{ $func }}(ctx, tx); err != nil {
+		//				return err
+		//			}
+		//			// Do some stuff after.
+		//			return nil
+		//		})
+		//	}
+		//
+		{{ $func }}Hook func({{ $iface }} ) {{ $iface }}
+	)
+
+	// {{ $func }} calls f(ctx, m).
+	func (f {{ $func }}Func) {{ $func }}(ctx context.Context, tx *Tx) error {
+		return f(ctx, tx)
+	}
+
 	{{- $onFuncs := print "on" $func }}
 	// {{ $func }} {{ lower $func }}s the transaction.
 	func (tx *Tx) {{ $func }}() error {
-		err := tx.config.driver.(*txDriver).tx.{{ $func }}()
+		txDriver := tx.config.driver.(*txDriver)
+		var fn {{ $iface }} = {{ $func }}Func(func(context.Context, *Tx) error {
+			return txDriver.tx.{{ $func }}()
+		})
 		tx.mu.Lock()
-		defer tx.mu.Unlock()
-		for _, f := range tx.{{ $onFuncs }} {
-			f(err)
+		hooks := append([]{{ $func }}Hook(nil), tx.{{ $onFuncs }}...)
+		tx.mu.Unlock()
+		for i := len(hooks) - 1; i >= 0; i-- {
+			fn = hooks[i](fn)
 		}
-		return err
+		return fn.{{ $func }}(tx.ctx, tx)
 	}
 
-	// On{{ $func }} adds a function to call on {{ lower $func }}.
-	func (tx *Tx) On{{ $func }}(f func(error)) {
+	// On{{ $func }} adds a hook to call on {{ lower $func }}.
+	func (tx *Tx) On{{ $func }}(f {{ $func }}Hook) {
 		tx.mu.Lock()
 		defer tx.mu.Unlock()
 		tx.{{ $onFuncs }} = append(tx.{{ $onFuncs }}, f)
