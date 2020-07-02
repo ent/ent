@@ -111,6 +111,16 @@ func (t TypeInfo) ValueScanner() bool {
 	return t.RType.implements(valueScannerType)
 }
 
+// Comparable reports whether values of this type are comparable.
+func (t TypeInfo) Comparable() bool {
+	switch t.Type {
+	case TypeBool, TypeTime, TypeUUID, TypeEnum, TypeString:
+		return true
+	default:
+		return t.Numeric()
+	}
+}
+
 var stringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 
 // Stringer indicates if this type implements the Stringer interface.
