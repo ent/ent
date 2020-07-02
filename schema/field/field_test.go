@@ -341,10 +341,11 @@ func TestField_Enums(t *testing.T) {
 }
 
 func TestField_UUID(t *testing.T) {
-	fd := field.UUID("id", uuid.UUID{}).
+	fd := field.UUID("id", uuid.UUID{}).Unique().
 		Default(uuid.New).
 		Descriptor()
 	assert.Equal(t, "id", fd.Name)
+	assert.True(t, fd.Unique)
 	assert.Equal(t, "uuid.UUID", fd.Info.String())
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)

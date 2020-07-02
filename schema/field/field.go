@@ -663,6 +663,12 @@ func (b *uuidBuilder) Optional() *uuidBuilder {
 	return b
 }
 
+// Unique makes the field unique within all vertices of this type.
+func (b *uuidBuilder) Unique() *uuidBuilder {
+	b.desc.Unique = true
+	return b
+}
+
 // Immutable indicates that this field cannot be updated.
 func (b *uuidBuilder) Immutable() *uuidBuilder {
 	b.desc.Immutable = true
