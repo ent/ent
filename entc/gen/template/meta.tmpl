@@ -106,19 +106,19 @@ const (
 			{{-  end }}
 		)
 
-		func (s {{ $enum }}) String() string {
-			return string(s)
+		{{ $receiver := receiver $f.BuilderField -}}
+		func ({{ $receiver }} {{ $enum }}) String() string {
+			return string({{ $receiver }})
 		}
 
 		{{ $name := $f.Validator -}}
-		{{ $arg := receiver $f.BuilderField }}
-		// {{ $name }} is a validator for the "{{ $arg }}" field enum values. It is called by the builders before save.
-		func {{ $name }}({{ $arg }} {{ $enum }}) error {
-			switch {{ $arg }} {
+		// {{ $name }} is a validator for the "{{ $receiver }}" field enum values. It is called by the builders before save.
+		func {{ $name }}({{ $receiver }} {{ $enum }}) error {
+			switch {{ $receiver }} {
 				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
 					return nil
 				default:
-					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $arg }})
+					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
 			}
 		}
 	{{ end }}
