@@ -341,7 +341,8 @@ func TestField_Enums(t *testing.T) {
 }
 
 func TestField_UUID(t *testing.T) {
-	fd := field.UUID("id", uuid.UUID{}).Unique().
+	fd := field.UUID("id", uuid.UUID{}).
+		Unique().
 		Default(uuid.New).
 		Descriptor()
 	assert.Equal(t, "id", fd.Name)
