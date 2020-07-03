@@ -67,8 +67,8 @@ const (
 	TypeIrregular    Type = "irregular"
 )
 
-func (s Type) String() string {
-	return string(s)
+func (_type Type) String() string {
+	return string(_type)
 }
 
 // TypeValidator is a validator for the "_type" field enum values. It is called by the builders before save.
