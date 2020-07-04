@@ -29,3 +29,5 @@ var Columns = []string{
 	FieldUniqueFloat,
 	FieldNillableInt,
 }
+
+// comment from another template.

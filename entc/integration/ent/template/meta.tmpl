@@ -1,0 +1,20 @@
+{{/* A template for adding additional fields to specific types. */}}
+{{ define "meta/additional/enums" }}
+	{{- range $f := $.Fields }}
+        {{- if $f.IsEnum }}
+			{{ $enum := trimPackage $f.Type.String $.Package }}
+			{{ $receiver := receiver $f.BuilderField }}
+
+			// Ptr returns a new pointer to the enum value.
+			func ({{ $receiver }} {{ $enum }}) Ptr() *{{ $enum }} {
+				v := {{ $receiver }}
+				return &v
+			}
+		{{- end }}
+	{{- end }}
+{{ end }}
+
+
+{{ define "meta/additional/comment" }}
+	// comment from another template.
+{{ end }}

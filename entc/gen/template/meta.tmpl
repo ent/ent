@@ -101,12 +101,12 @@ const (
 
 		// {{ $enum }} values.
 		const (
-			{{- range $_, $e := $f.Enums }}
+			{{- range $e := $f.Enums }}
 				{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
 			{{-  end }}
 		)
 
-		{{ $receiver := receiver $f.BuilderField -}}
+		{{ $receiver := receiver $f.BuilderField }}
 		func ({{ $receiver }} {{ $enum }}) String() string {
 			return string({{ $receiver }})
 		}
@@ -115,7 +115,7 @@ const (
 		// {{ $name }} is a validator for the "{{ $receiver }}" field enum values. It is called by the builders before save.
 		func {{ $name }}({{ $receiver }} {{ $enum }}) error {
 			switch {{ $receiver }} {
-				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ lower $e | pascal }}{{ end }}:
+				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
 					return nil
 				default:
 					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
@@ -125,6 +125,12 @@ const (
 {{ end }}
 
 {{ template "meta/additional" $ }}
+
+{{ with $tmpls := matchTemplate "meta/additional/*" }}
+	{{ range $tmpl := $tmpls }}
+        {{ xtemplate $tmpl $ }}
+	{{ end }}
+{{ end }}
 
 {{ end }}
 

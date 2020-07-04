@@ -113,3 +113,11 @@ func RoleValidator(r Role) error {
 		return fmt.Errorf("user: invalid enum value for role field: %q", r)
 	}
 }
+
+// comment from another template.
+
+// Ptr returns a new pointer to the enum value.
+func (r Role) Ptr() *Role {
+	v := r
+	return &v
+}

@@ -41,3 +41,5 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"node_next",
 }
+
+// comment from another template.

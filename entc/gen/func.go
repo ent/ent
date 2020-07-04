@@ -24,44 +24,45 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":         ops,
-		"add":         add,
-		"append":      reflect.Append,
-		"appends":     reflect.AppendSlice,
-		"order":       order,
-		"camel":       camel,
-		"snake":       snake,
-		"pascal":      pascal,
-		"extend":      extend,
-		"xrange":      xrange,
-		"receiver":    receiver,
-		"plural":      plural,
-		"aggregate":   aggregate,
-		"primitives":  primitives,
-		"singular":    rules.Singularize,
-		"quote":       strconv.Quote,
-		"base":        filepath.Base,
-		"keys":        keys,
-		"join":        join,
-		"lower":       strings.ToLower,
-		"upper":       strings.ToUpper,
-		"hasField":    hasField,
-		"hasImport":   hasImport,
-		"indirect":    indirect,
-		"hasPrefix":   strings.HasPrefix,
-		"hasSuffix":   strings.HasSuffix,
-		"trimPackage": trimPackage,
-		"xtemplate":   xtemplate,
-		"hasTemplate": hasTemplate,
-		"split":       strings.Split,
-		"tagLookup":   tagLookup,
-		"toString":    toString,
-		"dict":        dict,
-		"get":         get,
-		"set":         set,
-		"unset":       unset,
-		"hasKey":      hasKey,
-		"list":        list,
+		"ops":           ops,
+		"add":           add,
+		"append":        reflect.Append,
+		"appends":       reflect.AppendSlice,
+		"order":         order,
+		"camel":         camel,
+		"snake":         snake,
+		"pascal":        pascal,
+		"extend":        extend,
+		"xrange":        xrange,
+		"receiver":      receiver,
+		"plural":        plural,
+		"aggregate":     aggregate,
+		"primitives":    primitives,
+		"singular":      rules.Singularize,
+		"quote":         strconv.Quote,
+		"base":          filepath.Base,
+		"keys":          keys,
+		"join":          join,
+		"lower":         strings.ToLower,
+		"upper":         strings.ToUpper,
+		"hasField":      hasField,
+		"hasImport":     hasImport,
+		"indirect":      indirect,
+		"hasPrefix":     strings.HasPrefix,
+		"hasSuffix":     strings.HasSuffix,
+		"trimPackage":   trimPackage,
+		"xtemplate":     xtemplate,
+		"hasTemplate":   hasTemplate,
+		"matchTemplate": matchTemplate,
+		"split":         strings.Split,
+		"tagLookup":     tagLookup,
+		"toString":      toString,
+		"dict":          dict,
+		"get":           get,
+		"set":           set,
+		"unset":         unset,
+		"hasKey":        hasKey,
+		"list":          list,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
@@ -324,6 +325,17 @@ func hasTemplate(name string) bool {
 		}
 	}
 	return false
+}
+
+// matchTemplate returns all template names that match the given pattern.
+func matchTemplate(pattern string) []string {
+	var names []string
+	for _, t := range templates.Templates() {
+		if match, _ := filepath.Match(pattern, t.Name()); match {
+			names = append(names, t.Name())
+		}
+	}
+	return names
 }
 
 // hasField determines if a struct has a field with the given name.
