@@ -115,7 +115,7 @@ const (
 		// {{ $name }} is a validator for the "{{ $receiver }}" field enum values. It is called by the builders before save.
 		func {{ $name }}({{ $receiver }} {{ $enum }}) error {
 			switch {{ $receiver }} {
-				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
+				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ lower $e | pascal }}{{ end }}:
 					return nil
 				default:
 					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
