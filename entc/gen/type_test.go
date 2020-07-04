@@ -136,6 +136,23 @@ func TestType_Receiver(t *testing.T) {
 	}
 }
 
+func TestField_EnumName(t *testing.T) {
+	tests := []struct {
+		name string
+		enum string
+	}{
+		{"GIF", "TypeGIF"},
+		{"SVG", "TypeSVG"},
+		{"PNG", "TypePNG"},
+		{"MP4", "TypeMP4"},
+		{"unknown", "TypeUnknown"},
+		{"user_data", "TypeUserData"},
+	}
+	for _, tt := range tests {
+		require.Equal(t, tt.enum, Field{Name: "Type"}.EnumName(tt.name))
+	}
+}
+
 func TestType_WithRuntimeMixin(t *testing.T) {
 	position := &load.Position{MixedIn: true}
 	typ := &Type{
