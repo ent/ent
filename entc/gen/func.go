@@ -64,7 +64,7 @@ var (
 		"list":        list,
 	}
 	rules    = ruleset()
-	acronyms = make(map[string]bool)
+	acronyms = make(map[string]struct{})
 )
 
 // ops returns all operations for given field.
@@ -114,7 +114,7 @@ func pascal(s string) string {
 	words := strings.Split(s, "_")
 	for i, w := range words {
 		upper := strings.ToUpper(w)
-		if acronyms[upper] {
+		if _, ok := acronyms[upper]; ok {
 			words[i] = upper
 		} else {
 			words[i] = rules.Capitalize(w)
@@ -258,7 +258,7 @@ func ruleset() *inflect.Ruleset {
 		"TLS", "TTL", "UDP", "UI", "UID", "URI", "URL", "UTF8", "UUID", "VM",
 		"XML", "XMPP", "XSRF", "XSS",
 	} {
-		acronyms[w] = true
+		acronyms[w] = struct{}{}
 		rules.AddAcronym(w)
 	}
 	return rules

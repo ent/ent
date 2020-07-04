@@ -615,7 +615,7 @@ func (f Field) Enums() []string {
 
 // EnumName returns the constant name of the enum value.
 func (f Field) EnumName(enum string) string {
-	return pascal(f.Name) + pascal(enum)
+	return pascal(f.Name) + pascal(strings.ToLower(enum))
 }
 
 // Validator returns the validator name.
