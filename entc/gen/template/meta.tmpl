@@ -81,52 +81,50 @@ const (
 {{ end }}
 
 {{/* define custom type for enum fields */}}
-{{ range $f := $.Fields -}}
-	{{ if $f.IsEnum }}
-		{{/* omit the package name from the type. */}}
-		{{ $enum := trimPackage $f.Type.String $.Package }}
-		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
-		type {{ $enum }} string
+{{ range $f := $.EnumFields -}}
+	{{/* omit the package name from the type. */}}
+	{{ $enum := trimPackage $f.Type.String $.Package }}
+	// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
+	type {{ $enum }} string
 
-		{{- if $f.Default }}
-			{{- /*  find the enum that holds the default value. */ -}}
-			{{- range $_, $e := $f.Enums }}
-				{{- if eq $e $f.DefaultValue }}
-					{{- $name := $f.EnumName $e }}
-					// {{ $name }} is the default {{ $enum }}.
-					const {{ $f.DefaultName }} = {{ $name }}
-				{{- end }}
+	{{- if $f.Default }}
+		{{- /*  find the enum that holds the default value. */ -}}
+		{{- range $_, $e := $f.Enums }}
+			{{- if eq $e $f.DefaultValue }}
+				{{- $name := $f.EnumName $e }}
+				// {{ $name }} is the default {{ $enum }}.
+				const {{ $f.DefaultName }} = {{ $name }}
 			{{- end }}
 		{{- end }}
+	{{- end }}
 
-		// {{ $enum }} values.
-		const (
-			{{- range $_, $e := $f.Enums }}
-				{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
-			{{-  end }}
-		)
+	// {{ $enum }} values.
+	const (
+		{{- range $_, $e := $f.Enums }}
+			{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
+		{{-  end }}
+	)
 
-		{{ $receiver := receiver $f.BuilderField -}}
-		func ({{ $receiver }} {{ $enum }}) String() string {
-			return string({{ $receiver }})
+	{{ $receiver := receiver $f.BuilderField -}}
+	func ({{ $receiver }} {{ $enum }}) String() string {
+		return string({{ $receiver }})
+	}
+
+	{{ $name := $f.Validator -}}
+	// {{ $name }} is a validator for the "{{ $receiver }}" field enum values. It is called by the builders before save.
+	func {{ $name }}({{ $receiver }} {{ $enum }}) error {
+		switch {{ $receiver }} {
+			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
+				return nil
+			default:
+				return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
 		}
-
-		{{ $name := $f.Validator -}}
-		// {{ $name }} is a validator for the "{{ $receiver }}" field enum values. It is called by the builders before save.
-		func {{ $name }}({{ $receiver }} {{ $enum }}) error {
-			switch {{ $receiver }} {
-				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
-					return nil
-				default:
-					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
-			}
-		}
-	{{ end }}
+	}
 {{ end }}
 
 {{ template "meta/additional" $ }}
 
 {{ end }}
 
-{{/* A template that can be overrided in order to add additional code for the type package. */}}
+{{/* A template that can be overridden in order to add additional code for the type package. */}}
 {{ define "meta/additional" }}{{ end }}
