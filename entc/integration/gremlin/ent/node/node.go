@@ -24,3 +24,5 @@ const (
 	// NextLabel holds the string label denoting the next edge type in the database.
 	NextLabel = "node_next"
 )
+
+// comment from another template.

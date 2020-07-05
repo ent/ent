@@ -74,3 +74,5 @@ var (
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator func(int) error
 )
+
+// comment from another template.

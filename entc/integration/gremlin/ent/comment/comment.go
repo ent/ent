@@ -18,3 +18,5 @@ const (
 	// FieldNillableInt holds the string denoting the nillable_int field in the database.
 	FieldNillableInt = "nillable_int"
 )
+
+// comment from another template.

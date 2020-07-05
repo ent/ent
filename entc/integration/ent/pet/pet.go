@@ -48,3 +48,5 @@ var ForeignKeys = []string{
 	"user_pets",
 	"user_team",
 }
+
+// comment from another template.

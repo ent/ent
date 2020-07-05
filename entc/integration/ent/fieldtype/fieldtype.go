@@ -193,3 +193,10 @@ func StateValidator(s State) error {
 		return fmt.Errorf("fieldtype: invalid enum value for state field: %q", s)
 	}
 }
+
+// Ptr returns a new pointer to the enum value.
+func (s State) Ptr() *State {
+	return &s
+}
+
+// comment from another template.

@@ -18,3 +18,5 @@ const (
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "spec_card"
 )
+
+// comment from another template.

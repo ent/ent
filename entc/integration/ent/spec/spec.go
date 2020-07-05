@@ -34,3 +34,5 @@ var (
 	// primary key for the card relation (M2M).
 	CardPrimaryKey = []string{"spec_id", "card_id"}
 )
+
+// comment from another template.
