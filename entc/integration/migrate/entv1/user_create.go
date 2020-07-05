@@ -90,6 +90,20 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 	return uc
 }
 
+// SetStatus sets the status field.
+func (uc *UserCreate) SetStatus(s string) *UserCreate {
+	uc.mutation.SetStatus(s)
+	return uc
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uc *UserCreate) SetNillableStatus(s *string) *UserCreate {
+	if s != nil {
+		uc.SetStatus(*s)
+	}
+	return uc
+}
+
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -300,6 +314,14 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldState,
 		})
 		u.State = value
+	}
+	if value, ok := uc.mutation.Status(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+		u.Status = value
 	}
 	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

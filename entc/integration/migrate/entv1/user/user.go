@@ -29,6 +29,8 @@ const (
 	FieldBlob = "blob"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
@@ -72,6 +74,7 @@ var Columns = []string{
 	FieldRenamed,
 	FieldBlob,
 	FieldState,
+	FieldStatus,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.

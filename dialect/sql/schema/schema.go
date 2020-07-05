@@ -171,6 +171,9 @@ func (c *Column) ConvertibleTo(d *Column) bool {
 	case c.UintType() && d.IntType():
 		// uintX can not be converted to intY, when X > Y.
 		return c.Type-field.TypeUint8 <= d.Type-field.TypeInt8
+	case c.Type == field.TypeString && d.Type == field.TypeEnum ||
+		c.Type == field.TypeEnum && d.Type == field.TypeString:
+		return true
 	}
 	return c.FloatType() && d.FloatType()
 }

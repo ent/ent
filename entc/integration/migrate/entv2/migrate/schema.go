@@ -75,6 +75,7 @@ var (
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},
+		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

@@ -150,6 +150,26 @@ func (uu *UserUpdate) ClearState() *UserUpdate {
 	return uu
 }
 
+// SetStatus sets the status field.
+func (uu *UserUpdate) SetStatus(u user.Status) *UserUpdate {
+	uu.mutation.SetStatus(u)
+	return uu
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uu *UserUpdate) SetNillableStatus(u *user.Status) *UserUpdate {
+	if u != nil {
+		uu.SetStatus(*u)
+	}
+	return uu
+}
+
+// ClearStatus clears the value of status.
+func (uu *UserUpdate) ClearStatus() *UserUpdate {
+	uu.mutation.ClearStatus()
+	return uu
+}
+
 // AddCarIDs adds the car edge to Car by ids.
 func (uu *UserUpdate) AddCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCarIDs(ids...)
@@ -245,6 +265,11 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return 0, &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := uu.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return 0, &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
 		}
 	}
 
@@ -407,6 +432,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: user.FieldState,
+		})
+	}
+	if value, ok := uu.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
+	if uu.mutation.StatusCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: user.FieldStatus,
 		})
 	}
 	if nodes := uu.mutation.RemovedCarIDs(); len(nodes) > 0 {
@@ -655,6 +693,26 @@ func (uuo *UserUpdateOne) ClearState() *UserUpdateOne {
 	return uuo
 }
 
+// SetStatus sets the status field.
+func (uuo *UserUpdateOne) SetStatus(u user.Status) *UserUpdateOne {
+	uuo.mutation.SetStatus(u)
+	return uuo
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableStatus(u *user.Status) *UserUpdateOne {
+	if u != nil {
+		uuo.SetStatus(*u)
+	}
+	return uuo
+}
+
+// ClearStatus clears the value of status.
+func (uuo *UserUpdateOne) ClearStatus() *UserUpdateOne {
+	uuo.mutation.ClearStatus()
+	return uuo
+}
+
 // AddCarIDs adds the car edge to Car by ids.
 func (uuo *UserUpdateOne) AddCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddCarIDs(ids...)
@@ -750,6 +808,11 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	if v, ok := uuo.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return nil, &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := uuo.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return nil, &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
 		}
 	}
 
@@ -910,6 +973,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: user.FieldState,
+		})
+	}
+	if value, ok := uuo.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
+	if uuo.mutation.StatusCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: user.FieldStatus,
 		})
 	}
 	if nodes := uuo.mutation.RemovedCarIDs(); len(nodes) > 0 {

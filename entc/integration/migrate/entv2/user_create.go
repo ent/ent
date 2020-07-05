@@ -111,6 +111,20 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 	return uc
 }
 
+// SetStatus sets the status field.
+func (uc *UserCreate) SetStatus(u user.Status) *UserCreate {
+	uc.mutation.SetStatus(u)
+	return uc
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uc *UserCreate) SetNillableStatus(u *user.Status) *UserCreate {
+	if u != nil {
+		uc.SetStatus(*u)
+	}
+	return uc
+}
+
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -193,6 +207,11 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return nil, &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := uc.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return nil, &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
 		}
 	}
 	var (
@@ -317,6 +336,14 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldState,
 		})
 		u.State = value
+	}
+	if value, ok := uc.mutation.Status(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+		u.Status = value
 	}
 	if nodes := uc.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
