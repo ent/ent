@@ -367,6 +367,17 @@ func (t Type) MutableFields() []*Field {
 	return fields
 }
 
+// EnumFields returns the types's enum fields.
+func (t Type) EnumFields() []*Field {
+	var fields []*Field
+	for _, f := range t.Fields {
+		if f.IsEnum() {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
+
 // NumM2M returns the type's many-to-many edge count
 func (t Type) NumM2M() int {
 	var n int
