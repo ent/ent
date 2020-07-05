@@ -12,3 +12,5 @@ const (
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
 )
+
+// comment from another template.

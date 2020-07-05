@@ -20,3 +20,5 @@ const (
 	// FilesLabel holds the string label denoting the files edge type in the database.
 	FilesLabel = "file_type_files"
 )
+
+// comment from another template.

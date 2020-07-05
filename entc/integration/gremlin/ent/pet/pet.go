@@ -24,3 +24,5 @@ const (
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
 	OwnerInverseLabel = "user_pets"
 )
+
+// comment from another template.

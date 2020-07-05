@@ -407,7 +407,7 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 		name := tmpl.Name()
 		// Check that is not defined in the default templates
 		// if it's not the root.
-		if templates.Lookup(name) == nil && !parse.IsEmptyTree(tmpl.Root) {
+		if templates.Lookup(name) == nil && !parse.IsEmptyTree(tmpl.Root) && !extendExisting(name) {
 			external = append(external, GraphTemplate{
 				Name:   name,
 				Format: snake(name) + ".go",
@@ -502,4 +502,13 @@ func catch(err *error) {
 		}
 		*err = gerr
 	}
+}
+
+func extendExisting(name string) bool {
+	for _, t := range Templates {
+		if t.Match(name) {
+			return true
+		}
+	}
+	return false
 }

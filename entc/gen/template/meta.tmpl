@@ -100,7 +100,7 @@ const (
 
 	// {{ $enum }} values.
 	const (
-		{{- range $_, $e := $f.Enums }}
+		{{- range $e := $f.Enums }}
 			{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
 		{{-  end }}
 	)
@@ -123,6 +123,12 @@ const (
 {{ end }}
 
 {{ template "meta/additional" $ }}
+
+{{ with $tmpls := matchTemplate "meta/additional/*" }}
+	{{ range $tmpl := $tmpls }}
+        {{ xtemplate $tmpl $ }}
+	{{ end }}
+{{ end }}
 
 {{ end }}
 
