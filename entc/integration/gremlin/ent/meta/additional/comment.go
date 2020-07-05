@@ -1,2 +1,1 @@
-
-	// comment from another template.
+package comment

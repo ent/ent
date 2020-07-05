@@ -194,10 +194,10 @@ func StateValidator(s State) error {
 	}
 }
 
-// comment from another template.
-
 // Ptr returns a new pointer to the enum value.
 func (s State) Ptr() *State {
 	v := s
 	return &v
 }
+
+// comment from another template.
