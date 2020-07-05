@@ -129,6 +129,26 @@ func (uu *UserUpdate) ClearState() *UserUpdate {
 	return uu
 }
 
+// SetStatus sets the status field.
+func (uu *UserUpdate) SetStatus(s string) *UserUpdate {
+	uu.mutation.SetStatus(s)
+	return uu
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uu *UserUpdate) SetNillableStatus(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetStatus(*s)
+	}
+	return uu
+}
+
+// ClearStatus clears the value of status.
+func (uu *UserUpdate) ClearStatus() *UserUpdate {
+	uu.mutation.ClearStatus()
+	return uu
+}
+
 // SetParentID sets the parent edge to User by id.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
@@ -399,6 +419,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldState,
 		})
 	}
+	if value, ok := uu.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
+	if uu.mutation.StatusCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldStatus,
+		})
+	}
 	if uu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -654,6 +687,26 @@ func (uuo *UserUpdateOne) SetNillableState(u *user.State) *UserUpdateOne {
 // ClearState clears the value of state.
 func (uuo *UserUpdateOne) ClearState() *UserUpdateOne {
 	uuo.mutation.ClearState()
+	return uuo
+}
+
+// SetStatus sets the status field.
+func (uuo *UserUpdateOne) SetStatus(s string) *UserUpdateOne {
+	uuo.mutation.SetStatus(s)
+	return uuo
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableStatus(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetStatus(*s)
+	}
+	return uuo
+}
+
+// ClearStatus clears the value of status.
+func (uuo *UserUpdateOne) ClearStatus() *UserUpdateOne {
+	uuo.mutation.ClearStatus()
 	return uuo
 }
 
@@ -923,6 +976,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Column: user.FieldState,
+		})
+	}
+	if value, ok := uuo.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
+	if uuo.mutation.StatusCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldStatus,
 		})
 	}
 	if uuo.mutation.ParentCleared() {

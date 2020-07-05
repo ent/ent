@@ -34,6 +34,8 @@ type User struct {
 	Blob []byte `json:"blob,omitempty"`
 	// State holds the value of the "state" field.
 	State user.State `json:"state,omitempty"`
+	// Status holds the value of the "status" field.
+	Status string `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges         UserEdges `json:"edges"`
@@ -118,6 +120,7 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // renamed
 		&[]byte{},         // blob
 		&sql.NullString{}, // state
+		&sql.NullString{}, // status
 	}
 }
 
@@ -176,7 +179,12 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.State = user.State(value.String)
 	}
-	values = values[7:]
+	if value, ok := values[7].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field status", values[7])
+	} else if value.Valid {
+		u.Status = value.String
+	}
+	values = values[8:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_children", value)
@@ -251,6 +259,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Blob))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", u.State))
+	builder.WriteString(", status=")
+	builder.WriteString(u.Status)
 	builder.WriteByte(')')
 	return builder.String()
 }

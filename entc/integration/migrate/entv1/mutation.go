@@ -344,6 +344,7 @@ type UserMutation struct {
 	renamed         *string
 	blob            *[]byte
 	state           *user.State
+	status          *string
 	clearedFields   map[string]struct{}
 	parent          *int
 	clearedparent   bool
@@ -773,6 +774,56 @@ func (m *UserMutation) ResetState() {
 	delete(m.clearedFields, user.FieldState)
 }
 
+// SetStatus sets the status field.
+func (m *UserMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the status value in the mutation.
+func (m *UserMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old status value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ClearStatus clears the value of status.
+func (m *UserMutation) ClearStatus() {
+	m.status = nil
+	m.clearedFields[user.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the field status was cleared in this mutation.
+func (m *UserMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[user.FieldStatus]
+	return ok
+}
+
+// ResetStatus reset all changes of the "status" field.
+func (m *UserMutation) ResetStatus() {
+	m.status = nil
+	delete(m.clearedFields, user.FieldStatus)
+}
+
 // SetParentID sets the parent edge to User by id.
 func (m *UserMutation) SetParentID(id int) {
 	m.parent = &id
@@ -946,7 +997,7 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -967,6 +1018,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.state != nil {
 		fields = append(fields, user.FieldState)
+	}
+	if m.status != nil {
+		fields = append(fields, user.FieldStatus)
 	}
 	return fields
 }
@@ -990,6 +1044,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Blob()
 	case user.FieldState:
 		return m.State()
+	case user.FieldStatus:
+		return m.Status()
 	}
 	return nil, false
 }
@@ -1013,6 +1069,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldBlob(ctx)
 	case user.FieldState:
 		return m.OldState(ctx)
+	case user.FieldStatus:
+		return m.OldStatus(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -1071,6 +1129,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetState(v)
 		return nil
+	case user.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -1128,6 +1193,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldState) {
 		fields = append(fields, user.FieldState)
 	}
+	if m.FieldCleared(user.FieldStatus) {
+		fields = append(fields, user.FieldStatus)
+	}
 	return fields
 }
 
@@ -1153,6 +1221,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldState:
 		m.ClearState()
+		return nil
+	case user.FieldStatus:
+		m.ClearStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -1183,6 +1254,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldState:
 		m.ResetState()
+		return nil
+	case user.FieldStatus:
+		m.ResetStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

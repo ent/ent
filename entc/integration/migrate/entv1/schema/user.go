@@ -36,6 +36,8 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Optional().
 			Values("logged_in", "logged_out"),
+		field.String("status").
+			Optional(),
 	}
 }
 

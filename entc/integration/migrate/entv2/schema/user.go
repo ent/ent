@@ -50,6 +50,10 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Optional().
 			Values("logged_in", "logged_out", "online"),
+		// convert string to enum.
+		field.Enum("status").
+			Optional().
+			Values("done", "pending"),
 		// deleting the `address` column.
 	}
 }

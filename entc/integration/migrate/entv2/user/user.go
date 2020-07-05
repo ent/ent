@@ -33,6 +33,8 @@ const (
 	FieldBlob = "blob"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
@@ -73,6 +75,7 @@ var Columns = []string{
 	FieldNewName,
 	FieldBlob,
 	FieldState,
+	FieldStatus,
 }
 
 var (
@@ -109,5 +112,28 @@ func StateValidator(s State) error {
 		return nil
 	default:
 		return fmt.Errorf("user: invalid enum value for state field: %q", s)
+	}
+}
+
+// Status defines the type for the status enum field.
+type Status string
+
+// Status values.
+const (
+	StatusDone    Status = "done"
+	StatusPending Status = "pending"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "s" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusDone, StatusPending:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for status field: %q", s)
 	}
 }
