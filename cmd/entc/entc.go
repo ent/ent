@@ -194,13 +194,25 @@ func createDir(target string) error {
 	if err := os.MkdirAll(target, os.ModePerm); err != nil {
 		return fmt.Errorf("creating schema directory: %w", err)
 	}
-	if target != defaultSchema {
-		return nil
-	}
-	if err := ioutil.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
+	if err := ioutil.WriteFile(target+"/../generate.go", []byte(getGenerateFileData(target)), 0644); err != nil {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil
+}
+
+// ent/generate.go file used for "go generate" command.
+func getGenerateFileData(target string) string {
+	pathArr := strings.Split(target, "/")
+
+	var sb strings.Builder
+	sb.Grow(32)
+
+	sb.WriteString("package ent\n\n")
+	sb.WriteString("//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ")
+	sb.WriteString("./" + pathArr[len(pathArr)-1])
+	sb.WriteString("\n")
+
+	return sb.String()
 }
 
 // schema template for the "init" command.
@@ -228,8 +240,6 @@ func ({{ . }}) Edges() []ent.Edge {
 const (
 	// default schema package path.
 	defaultSchema = "ent/schema"
-	// ent/generate.go file used for "go generate" command.
-	genFile = "package ent\n\n//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema\n"
 )
 
 // examples formats the given examples to the cli.

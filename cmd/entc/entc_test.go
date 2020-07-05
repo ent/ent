@@ -33,3 +33,27 @@ func TestCmd(t *testing.T) {
 	_, err = os.Stat("ent/user.go")
 	require.NoError(t, err)
 }
+
+func TestCmdWithTargetArg(t *testing.T) {
+	targetBasePath := "entity"
+	targetSchemaFolderName := "schema"
+
+	defer os.RemoveAll(targetBasePath)
+	cmd := exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "init", "--target", targetBasePath+"/"+targetSchemaFolderName, "User")
+	stderr := bytes.NewBuffer(nil)
+	cmd.Stderr = stderr
+	require.NoError(t, cmd.Run(), stderr.String())
+
+	_, err := os.Stat(targetBasePath + "/generate.go")
+	require.NoError(t, err)
+	_, err = os.Stat(targetBasePath + "/" + targetSchemaFolderName + "/user.go")
+	require.NoError(t, err)
+
+	cmd = exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "generate", "./"+targetBasePath+"/"+targetSchemaFolderName)
+	stderr = bytes.NewBuffer(nil)
+	cmd.Stderr = stderr
+	require.NoError(t, cmd.Run(), stderr.String())
+
+	_, err = os.Stat(targetBasePath + "/user.go")
+	require.NoError(t, err)
+}
