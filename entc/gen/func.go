@@ -294,7 +294,6 @@ func keys(v reflect.Value) ([]string, error) {
 	for i, v := range v.MapKeys() {
 		keys[i] = v.String()
 	}
-	sort.Strings(keys)
 	return keys, nil
 }
 

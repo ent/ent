@@ -30,8 +30,6 @@ func (User) Mixin() []ent.Mixin {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
-		field.Uint("worth").
-			Optional(),
 	}
 }
 

@@ -44,20 +44,6 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
-// SetWorth sets the worth field.
-func (uc *UserCreate) SetWorth(u uint) *UserCreate {
-	uc.mutation.SetWorth(u)
-	return uc
-}
-
-// SetNillableWorth sets the worth field if the given value is not nil.
-func (uc *UserCreate) SetNillableWorth(u *uint) *UserCreate {
-	if u != nil {
-		uc.SetWorth(*u)
-	}
-	return uc
-}
-
 // AddCardIDs adds the cards edge to Card by ids.
 func (uc *UserCreate) AddCardIDs(ids ...int) *UserCreate {
 	uc.mutation.AddCardIDs(ids...)
@@ -183,14 +169,6 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Column: user.FieldName,
 		})
 		u.Name = value
-	}
-	if value, ok := uc.mutation.Worth(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint,
-			Value:  value,
-			Column: user.FieldWorth,
-		})
-		u.Worth = value
 	}
 	if nodes := uc.mutation.CardsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

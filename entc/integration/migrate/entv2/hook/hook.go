@@ -65,106 +65,14 @@ func (f UserFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, er
 	return f(ctx, mv)
 }
 
-// Condition is a hook condition function.
-type Condition func(context.Context, entv2.Mutation) bool
-
-// And groups conditions with the AND operator.
-func And(first, second Condition, rest ...Condition) Condition {
-	return func(ctx context.Context, m entv2.Mutation) bool {
-		if !first(ctx, m) || !second(ctx, m) {
-			return false
-		}
-		for _, cond := range rest {
-			if !cond(ctx, m) {
-				return false
-			}
-		}
-		return true
-	}
-}
-
-// Or groups conditions with the OR operator.
-func Or(first, second Condition, rest ...Condition) Condition {
-	return func(ctx context.Context, m entv2.Mutation) bool {
-		if first(ctx, m) || second(ctx, m) {
-			return true
-		}
-		for _, cond := range rest {
-			if cond(ctx, m) {
-				return true
-			}
-		}
-		return false
-	}
-}
-
-// Not negates a given condition.
-func Not(cond Condition) Condition {
-	return func(ctx context.Context, m entv2.Mutation) bool {
-		return !cond(ctx, m)
-	}
-}
-
-// HasOp is a condition testing mutation operation.
-func HasOp(op entv2.Op) Condition {
-	return func(_ context.Context, m entv2.Mutation) bool {
-		return m.Op().Is(op)
-	}
-}
-
-// HasAddedFields is a condition validating `.AddedField` on fields.
-func HasAddedFields(field string, fields ...string) Condition {
-	return func(_ context.Context, m entv2.Mutation) bool {
-		if _, exists := m.AddedField(field); !exists {
-			return false
-		}
-		for _, field := range fields {
-			if _, exists := m.AddedField(field); !exists {
-				return false
-			}
-		}
-		return true
-	}
-}
-
-// HasClearedFields is a condition validating `.FieldCleared` on fields.
-func HasClearedFields(field string, fields ...string) Condition {
-	return func(_ context.Context, m entv2.Mutation) bool {
-		if exists := m.FieldCleared(field); !exists {
-			return false
-		}
-		for _, field := range fields {
-			if exists := m.FieldCleared(field); !exists {
-				return false
-			}
-		}
-		return true
-	}
-}
-
-// HasFields is a condition validating `.Field` on fields.
-func HasFields(field string, fields ...string) Condition {
-	return func(_ context.Context, m entv2.Mutation) bool {
-		if _, exists := m.Field(field); !exists {
-			return false
-		}
-		for _, field := range fields {
-			if _, exists := m.Field(field); !exists {
-				return false
-			}
-		}
-		return true
-	}
-}
-
-// If executes the given hook under condition.
+// On executes the given hook only for the given operation.
 //
-//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//	hook.On(Log, entv2.Delete|entv2.Create)
 //
-func If(hk entv2.Hook, cond Condition) entv2.Hook {
+func On(hk entv2.Hook, op entv2.Op) entv2.Hook {
 	return func(next entv2.Mutator) entv2.Mutator {
 		return entv2.MutateFunc(func(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
-			if cond(ctx, m) {
+			if m.Op().Is(op) {
 				return hk(next).Mutate(ctx, m)
 			}
 			return next.Mutate(ctx, m)
@@ -172,20 +80,12 @@ func If(hk entv2.Hook, cond Condition) entv2.Hook {
 	}
 }
 
-// On executes the given hook only for the given operation.
-//
-//	hook.On(Log, entv2.Delete|entv2.Create)
-//
-func On(hk entv2.Hook, op entv2.Op) entv2.Hook {
-	return If(hk, HasOp(op))
-}
-
 // Unless skips the given hook only for the given operation.
 //
 //	hook.Unless(Log, entv2.Update|entv2.UpdateOne)
 //
 func Unless(hk entv2.Hook, op entv2.Op) entv2.Hook {
-	return If(hk, Not(HasOp(op)))
+	return On(hk, ^op)
 }
 
 // Reject returns a hook that rejects all operations that match op.
