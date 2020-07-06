@@ -535,6 +535,8 @@ type UserMutation struct {
 	version            *int
 	addversion         *int
 	name               *string
+	worth              *uint
+	addworth           *uint
 	clearedFields      map[string]struct{}
 	cards              map[int]struct{}
 	removedcards       map[int]struct{}
@@ -719,6 +721,77 @@ func (m *UserMutation) ResetName() {
 	m.name = nil
 }
 
+// SetWorth sets the worth field.
+func (m *UserMutation) SetWorth(u uint) {
+	m.worth = &u
+	m.addworth = nil
+}
+
+// Worth returns the worth value in the mutation.
+func (m *UserMutation) Worth() (r uint, exists bool) {
+	v := m.worth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorth returns the old worth value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldWorth(ctx context.Context) (v uint, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldWorth is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldWorth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorth: %w", err)
+	}
+	return oldValue.Worth, nil
+}
+
+// AddWorth adds u to worth.
+func (m *UserMutation) AddWorth(u uint) {
+	if m.addworth != nil {
+		*m.addworth += u
+	} else {
+		m.addworth = &u
+	}
+}
+
+// AddedWorth returns the value that was added to the worth field in this mutation.
+func (m *UserMutation) AddedWorth() (r uint, exists bool) {
+	v := m.addworth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWorth clears the value of worth.
+func (m *UserMutation) ClearWorth() {
+	m.worth = nil
+	m.addworth = nil
+	m.clearedFields[user.FieldWorth] = struct{}{}
+}
+
+// WorthCleared returns if the field worth was cleared in this mutation.
+func (m *UserMutation) WorthCleared() bool {
+	_, ok := m.clearedFields[user.FieldWorth]
+	return ok
+}
+
+// ResetWorth reset all changes of the "worth" field.
+func (m *UserMutation) ResetWorth() {
+	m.worth = nil
+	m.addworth = nil
+	delete(m.clearedFields, user.FieldWorth)
+}
+
 // AddCardIDs adds the cards edge to Card by ids.
 func (m *UserMutation) AddCardIDs(ids ...int) {
 	if m.cards == nil {
@@ -856,12 +929,15 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.version != nil {
 		fields = append(fields, user.FieldVersion)
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
+	}
+	if m.worth != nil {
+		fields = append(fields, user.FieldWorth)
 	}
 	return fields
 }
@@ -875,6 +951,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Version()
 	case user.FieldName:
 		return m.Name()
+	case user.FieldWorth:
+		return m.Worth()
 	}
 	return nil, false
 }
@@ -888,6 +966,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldVersion(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldWorth:
+		return m.OldWorth(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -911,6 +991,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case user.FieldWorth:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorth(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -922,6 +1009,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addversion != nil {
 		fields = append(fields, user.FieldVersion)
 	}
+	if m.addworth != nil {
+		fields = append(fields, user.FieldWorth)
+	}
 	return fields
 }
 
@@ -932,6 +1022,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldVersion:
 		return m.AddedVersion()
+	case user.FieldWorth:
+		return m.AddedWorth()
 	}
 	return nil, false
 }
@@ -948,6 +1040,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddVersion(v)
 		return nil
+	case user.FieldWorth:
+		v, ok := value.(uint)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWorth(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -955,7 +1054,11 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldWorth) {
+		fields = append(fields, user.FieldWorth)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -968,6 +1071,11 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldWorth:
+		m.ClearWorth()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
@@ -981,6 +1089,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldName:
 		m.ResetName()
+		return nil
+	case user.FieldWorth:
+		m.ResetWorth()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
