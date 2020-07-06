@@ -288,12 +288,13 @@ func aggregate() map[string]bool {
 // keys returns the given map keys.
 func keys(v reflect.Value) ([]string, error) {
 	if k := v.Type().Kind(); k != reflect.Map {
-		return nil, fmt.Errorf("expect map for keys, got: %v", k)
+		return nil, fmt.Errorf("expect map for keys, got: %s", k)
 	}
 	keys := make([]string, v.Len())
 	for i, v := range v.MapKeys() {
 		keys[i] = v.String()
 	}
+	sort.Strings(keys)
 	return keys, nil
 }
 
