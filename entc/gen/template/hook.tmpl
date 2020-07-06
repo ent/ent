@@ -32,14 +32,80 @@ import "{{ $.Config.Package }}"
 	}
 {{ end }}
 
-// On executes the given hook only for the given operation.
+// Condition is a hook condition function.
+type Condition func(context.Context, {{ $pkg }}.Mutation) bool
+
+// And groups conditions with the AND operator.
+func And(first, second Condition, rest ...Condition) Condition {
+	return func(ctx context.Context, m {{ $pkg }}.Mutation) bool {
+		if !first(ctx, m) || !second(ctx, m) {
+			return false
+		}
+		for _, cond := range rest {
+			if !cond(ctx, m) {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+// Or groups conditions with the OR operator.
+func Or(first, second Condition, rest ...Condition) Condition {
+	return func(ctx context.Context, m {{ $pkg }}.Mutation) bool {
+		if first(ctx, m) || second(ctx, m) {
+			return true
+		}
+		for _, cond := range rest {
+			if cond(ctx, m) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// Not negates a given condition.
+func Not(cond Condition) Condition {
+	return func(ctx context.Context, m {{ $pkg }}.Mutation) bool {
+		return !cond(ctx, m)
+	}
+}
+
+// HasOp is a condition testing mutation operation.
+func HasOp(op {{ $pkg }}.Op) Condition {
+	return func(_ context.Context, m {{ $pkg }}.Mutation) bool {
+		return m.Op().Is(op)
+	}
+}
+
+{{ $conds := dict "HasFields" "Field" "HasAddedFields" "AddedField" "HasClearedFields" "FieldCleared" -}}
+{{- range $cond := keys $conds }}
+	{{ $method := get $conds $cond -}}
+	// {{ $cond }} is a condition validating `.{{ $method }}` on fields.
+	func {{ $cond }}(field string, fields ...string) Condition {
+		return func(_ context.Context, m {{ $pkg }}.Mutation) bool {
+			if {{ if ne $method "FieldCleared" }}_, {{ end }}exists := m.{{ $method }}(field); !exists {
+				return false
+			}
+			for _, field := range fields {
+				if {{ if ne $method "FieldCleared" }}_, {{ end }}exists := m.{{ $method }}(field); !exists {
+					return false
+				}
+			}
+			return true
+		}
+	}
+{{- end }}
+
+// If executes the given hook under condition.
 //
-//	hook.On(Log, {{ $pkg }}.Delete|{{ $pkg }}.Create)
+//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
 //
-func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+func If(hk {{ $pkg }}.Hook, cond Condition) {{ $pkg }}.Hook {
 	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
 		return {{ $pkg }}.MutateFunc(func(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
-			if m.Op().Is(op) {
+			if cond(ctx, m) {
 				return hk(next).Mutate(ctx, m)
 			}
 			return next.Mutate(ctx, m)
@@ -47,12 +113,20 @@ func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
 	}
 }
 
+// On executes the given hook only for the given operation.
+//
+//	hook.On(Log, {{ $pkg }}.Delete|{{ $pkg }}.Create)
+//
+func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+	return If(hk, HasOp(op))
+}
+
 // Unless skips the given hook only for the given operation.
 //
 //	hook.Unless(Log, {{ $pkg }}.Update|{{ $pkg }}.UpdateOne)
 //
 func Unless(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
-	return On(hk, ^op)
+	return If(hk, Not(HasOp(op)))
 }
 
 // Reject returns a hook that rejects all operations that match op.
