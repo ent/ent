@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -35,25 +36,26 @@ func TestCmd(t *testing.T) {
 }
 
 func TestCmdWithTargetArg(t *testing.T) {
-	targetBasePath := "entity"
-	targetSchemaFolderName := "schema"
+	basePath := "entity"
+	schemaDir := "schema"
+	absPath, _ := filepath.Abs(filepath.Join(basePath, "/", schemaDir))
 
-	defer os.RemoveAll(targetBasePath)
-	cmd := exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "init", "--target", targetBasePath+"/"+targetSchemaFolderName, "User")
+	defer os.RemoveAll(basePath)
+	cmd := exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "init", "--target", absPath, "User")
 	stderr := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
 	require.NoError(t, cmd.Run(), stderr.String())
 
-	_, err := os.Stat(targetBasePath + "/generate.go")
+	_, err := os.Stat(filepath.Join(basePath, "/generate.go"))
 	require.NoError(t, err)
-	_, err = os.Stat(targetBasePath + "/" + targetSchemaFolderName + "/user.go")
+	_, err = os.Stat(filepath.Join(basePath, "/", schemaDir, "/user.go"))
 	require.NoError(t, err)
 
-	cmd = exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "generate", "./"+targetBasePath+"/"+targetSchemaFolderName)
+	cmd = exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "generate", absPath)
 	stderr = bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
 	require.NoError(t, cmd.Run(), stderr.String())
 
-	_, err = os.Stat(targetBasePath + "/user.go")
+	_, err = os.Stat(filepath.Join(basePath, "/user.go"))
 	require.NoError(t, err)
 }
