@@ -59,6 +59,33 @@ func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	return uu
 }
 
+// SetWorth sets the worth field.
+func (uu *UserUpdate) SetWorth(u uint) *UserUpdate {
+	uu.mutation.ResetWorth()
+	uu.mutation.SetWorth(u)
+	return uu
+}
+
+// SetNillableWorth sets the worth field if the given value is not nil.
+func (uu *UserUpdate) SetNillableWorth(u *uint) *UserUpdate {
+	if u != nil {
+		uu.SetWorth(*u)
+	}
+	return uu
+}
+
+// AddWorth adds u to worth.
+func (uu *UserUpdate) AddWorth(u uint) *UserUpdate {
+	uu.mutation.AddWorth(u)
+	return uu
+}
+
+// ClearWorth clears the value of worth.
+func (uu *UserUpdate) ClearWorth() *UserUpdate {
+	uu.mutation.ClearWorth()
+	return uu
+}
+
 // AddCardIDs adds the cards edge to Card by ids.
 func (uu *UserUpdate) AddCardIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCardIDs(ids...)
@@ -240,6 +267,26 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
+	if value, ok := uu.mutation.Worth(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: user.FieldWorth,
+		})
+	}
+	if value, ok := uu.mutation.AddedWorth(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: user.FieldWorth,
+		})
+	}
+	if uu.mutation.WorthCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Column: user.FieldWorth,
+		})
+	}
 	if nodes := uu.mutation.RemovedCardsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -393,6 +440,33 @@ func (uuo *UserUpdateOne) AddVersion(i int) *UserUpdateOne {
 // SetName sets the name field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
+	return uuo
+}
+
+// SetWorth sets the worth field.
+func (uuo *UserUpdateOne) SetWorth(u uint) *UserUpdateOne {
+	uuo.mutation.ResetWorth()
+	uuo.mutation.SetWorth(u)
+	return uuo
+}
+
+// SetNillableWorth sets the worth field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableWorth(u *uint) *UserUpdateOne {
+	if u != nil {
+		uuo.SetWorth(*u)
+	}
+	return uuo
+}
+
+// AddWorth adds u to worth.
+func (uuo *UserUpdateOne) AddWorth(u uint) *UserUpdateOne {
+	uuo.mutation.AddWorth(u)
+	return uuo
+}
+
+// ClearWorth clears the value of worth.
+func (uuo *UserUpdateOne) ClearWorth() *UserUpdateOne {
+	uuo.mutation.ClearWorth()
 	return uuo
 }
 
@@ -573,6 +647,26 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldName,
+		})
+	}
+	if value, ok := uuo.mutation.Worth(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: user.FieldWorth,
+		})
+	}
+	if value, ok := uuo.mutation.AddedWorth(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Value:  value,
+			Column: user.FieldWorth,
+		})
+	}
+	if uuo.mutation.WorthCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint,
+			Column: user.FieldWorth,
 		})
 	}
 	if nodes := uuo.mutation.RemovedCardsIDs(); len(nodes) > 0 {

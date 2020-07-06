@@ -19,6 +19,8 @@ const (
 	FieldVersion = "version"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldWorth holds the string denoting the worth field in the database.
+	FieldWorth = "worth"
 
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldID,
 	FieldVersion,
 	FieldName,
+	FieldWorth,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
