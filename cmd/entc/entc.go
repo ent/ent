@@ -194,7 +194,7 @@ func createDir(target string) error {
 	if err := os.MkdirAll(target, os.ModePerm); err != nil {
 		return fmt.Errorf("creating schema directory: %w", err)
 	}
-	if err := ioutil.WriteFile(filepath.Join(target, "/../generate.go"), getGenerateFileData(target), 0644); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(filepath.Dir(target), "generate.go"), getGenerateFileData(target), 0644); err != nil {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil
