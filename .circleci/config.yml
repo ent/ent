@@ -24,7 +24,7 @@ commands:
 jobs:
   lint:
     docker:
-    - image: golangci/golangci-lint:v1.26-alpine
+    - image: golangci/golangci-lint:v1.28-alpine
     steps:
       - checkout
       - *mktestdir
