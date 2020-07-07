@@ -27,9 +27,9 @@ In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file fo
 If your company or your product is using `ent`, please let us know by adding yourself to the [ent users page](https://github.com/facebookincubator/ent/wiki/ent-users).
 
 ## Project Status
-`ent` was developed and maintained by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
-from the Facebook Connectivity team. It's currently considered experimental (although we're using it in production),
-and the roadmap for v1 release is described [here](https://github.com/facebookincubator/ent/issues/46).  
+`ent` is developed and maintained by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
+from the [Facebook Connectivity][fbc] team. It's used by multiple teams and projects in production,
+and the roadmap for its v1 release is described [here](https://github.com/facebookincubator/ent/issues/46). 
 Read more about the motivation of the project [here](https://entgo.io/blog/2019/10/03/introducing-ent).
 
 ## License
@@ -38,3 +38,4 @@ ent is licensed under Apache 2.0 as found in the [LICENSE file](LICENSE).
 
 [entgo instal]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
 [Go modules]: https://github.com/golang/go/wiki/Modules#quick-start
+[fbc]: https://connectivity.fb.com
