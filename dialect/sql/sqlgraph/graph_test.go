@@ -741,6 +741,94 @@ func TestCreateNode(t *testing.T) {
 	}
 }
 
+func TestBatchCreate(t *testing.T) {
+	tests := []struct {
+		name    string
+		nodes   []*CreateSpec
+		expect  func(sqlmock.Sqlmock)
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "multiple",
+			nodes: []*CreateSpec{
+				{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id"},
+					Fields: []*FieldSpec{
+						{Column: "age", Type: field.TypeInt, Value: 32},
+						{Column: "name", Type: field.TypeString, Value: "a8m"},
+						{Column: "active", Type: field.TypeBool, Value: false},
+					},
+					Edges: []*EdgeSpec{
+						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+						{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+						{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
+						{Rel: M2O, Table: "company", Columns: []string{"workplace_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+						{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+					},
+				},
+				{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id"},
+					Fields: []*FieldSpec{
+						{Column: "age", Type: field.TypeInt, Value: 30},
+						{Column: "name", Type: field.TypeString, Value: "nati"},
+					},
+					Edges: []*EdgeSpec{
+						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+						{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+						{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
+						{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{3}, IDSpec: &FieldSpec{Column: "id"}}},
+					},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				// Insert nodes with FKs.
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`, `workplace_id`) VALUES (?, ?, ?, ?), (?, ?, ?, ?)")).
+					WithArgs(false, 32, "a8m", 2, nil, 30, "nati", nil).
+					WillReturnResult(sqlmock.NewResult(10, 2))
+				// Insert M2M inverse-edges.
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(2, 10, 2, 11).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				// Insert M2M bidirectional edges.
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
+					WithArgs(10, 2, 2, 10, 11, 2, 2, 11).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				// Insert M2M edges.
+				m.ExpectExec(escape("INSERT INTO `user_products` (`user_id`, `product_id`) VALUES (?, ?), (?, ?)")).
+					WithArgs(10, 2, 11, 2).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				// Update FKs exist in different tables.
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL")).
+					WithArgs(10 /* id of the 1st new node */, 2 /* pet id */).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL")).
+					WithArgs(11 /* id of the 2nd new node */, 3 /* pet id */).
+					WillReturnResult(sqlmock.NewResult(2, 2))
+				m.ExpectCommit()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+			tt.expect(mock)
+			err = BatchCreate(context.Background(), sql.OpenDB("mysql", db), &BatchCreateSpec{Nodes: tt.nodes})
+			require.Equal(t, tt.wantErr, err != nil, err)
+		})
+	}
+}
+
 type user struct {
 	id    int
 	age   int
