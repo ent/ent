@@ -521,6 +521,32 @@ func (ggb *GalaxyGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GalaxyGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ggb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxyGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ggb *GalaxyGroupBy) StringX(ctx context.Context) string {
+	v, err := ggb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ggb *GalaxyGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ggb.fields) > 1 {
@@ -536,6 +562,32 @@ func (ggb *GalaxyGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ggb *GalaxyGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ggb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GalaxyGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ggb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxyGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ggb *GalaxyGroupBy) IntX(ctx context.Context) int {
+	v, err := ggb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -563,6 +615,32 @@ func (ggb *GalaxyGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GalaxyGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ggb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxyGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ggb *GalaxyGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ggb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ggb *GalaxyGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ggb.fields) > 1 {
@@ -578,6 +656,32 @@ func (ggb *GalaxyGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ggb *GalaxyGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := ggb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GalaxyGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ggb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxyGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ggb *GalaxyGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ggb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -651,6 +755,32 @@ func (gs *GalaxySelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (gs *GalaxySelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = gs.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxySelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (gs *GalaxySelect) StringX(ctx context.Context) string {
+	v, err := gs.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (gs *GalaxySelect) Ints(ctx context.Context) ([]int, error) {
 	if len(gs.fields) > 1 {
@@ -666,6 +796,32 @@ func (gs *GalaxySelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (gs *GalaxySelect) IntsX(ctx context.Context) []int {
 	v, err := gs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (gs *GalaxySelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = gs.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxySelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (gs *GalaxySelect) IntX(ctx context.Context) int {
+	v, err := gs.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -693,6 +849,32 @@ func (gs *GalaxySelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (gs *GalaxySelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = gs.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxySelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (gs *GalaxySelect) Float64X(ctx context.Context) float64 {
+	v, err := gs.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (gs *GalaxySelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(gs.fields) > 1 {
@@ -708,6 +890,32 @@ func (gs *GalaxySelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (gs *GalaxySelect) BoolsX(ctx context.Context) []bool {
 	v, err := gs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (gs *GalaxySelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = gs.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{galaxy.Label}
+	default:
+		err = fmt.Errorf("ent: GalaxySelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (gs *GalaxySelect) BoolX(ctx context.Context) bool {
+	v, err := gs.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
