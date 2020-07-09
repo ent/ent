@@ -402,11 +402,11 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 }
 
 {{ range $_, $t := primitives }}
-	{{ $f := pascal $t | plural }}
-	// {{ $f }} returns list of {{ plural $t }} from group-by. It is only allowed when querying group-by with one field.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $f }}(ctx context.Context) ([]{{ $t }}, error) {
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from group-by. It is only allowed when querying group-by with one field.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
 		if len({{ $groupReceiver }}.fields) > 1 {
-			return nil, errors.New("{{ $pkg }}: {{ $groupBuilder }}.{{ $f }} is not achievable when grouping more than 1 field")
+			return nil, errors.New("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} is not achievable when grouping more than 1 field")
 		}
 		var v []{{ $t }}
 		if err := {{ $groupReceiver }}.Scan(ctx, &v); err != nil {
@@ -415,9 +415,36 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 		return v, nil
 	}
 
-	// {{ $f }}X is like {{ $f }}, but panics if an error occurs.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $f }}X(ctx context.Context) []{{ $t }} {
-		v, err := {{ $groupReceiver }}.{{ $f }}(ctx)
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := {{ $groupReceiver }}.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from group-by. It is only allowed when querying group-by with one field.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = {{ $groupReceiver }}.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{ {{ $.Package }}.Label}
+		default:
+			err = fmt.Errorf("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := {{ $groupReceiver }}.{{ $singular }}(ctx)
 		if err != nil {
 			panic(err)
 		}
@@ -462,11 +489,11 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 }
 
 {{ range $_, $t := primitives }}
-	{{ $f := pascal $t | plural }}
-	// {{ $f }} returns list of {{ plural $t }} from selector. It is only allowed when selecting one field.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $f }}(ctx context.Context) ([]{{ $t }}, error) {
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from selector. It is only allowed when selecting one field.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
 		if len({{ $selectReceiver }}.fields) > 1 {
-			return nil, errors.New("{{ $pkg }}: {{ $selectBuilder }}.{{ $f }} is not achievable when selecting more than 1 field")
+			return nil, errors.New("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} is not achievable when selecting more than 1 field")
 		}
 		var v []{{ $t }}
 		if err := {{ $selectReceiver }}.Scan(ctx, &v); err != nil {
@@ -475,9 +502,36 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 		return v, nil
 	}
 
-	// {{ $f }}X is like {{ $f }}, but panics if an error occurs.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $f }}X(ctx context.Context) []{{ $t }} {
-		v, err := {{ $selectReceiver }}.{{ $f }}(ctx)
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := {{ $selectReceiver }}.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from selector. It is only allowed when selecting one field.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = {{ $selectReceiver }}.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{ {{ $.Package }}.Label}
+		default:
+			err = fmt.Errorf("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := {{ $selectReceiver }}.{{ $singular }}(ctx)
 		if err != nil {
 			panic(err)
 		}

@@ -256,15 +256,16 @@ func Select(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 
 	t.Log("select one field")
-	client.User.Create().SetName("foo").SetAge(30).SaveX(ctx)
-	names := client.User.
+	u := client.User.Create().SetName("foo").SetAge(30).SaveX(ctx)
+	name := client.User.
 		Query().
+		Where(user.ID(u.ID)).
 		Select(user.FieldName).
-		StringsX(ctx)
-	require.Equal([]string{"foo"}, names)
+		StringX(ctx)
+	require.Equal("foo", name)
 	client.User.Create().SetName("bar").SetAge(30).SaveX(ctx)
 	t.Log("select one field with ordering")
-	names = client.User.
+	names := client.User.
 		Query().
 		Order(ent.Asc(user.FieldName)).
 		Select(user.FieldName).
@@ -628,6 +629,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	ages, err := client.User.Query().GroupBy(user.FieldAge).Ints(ctx)
 	require.NoError(err)
 	require.Len(ages, 3)
+	age, err := client.User.Query().Where(user.Name("alexsn")).GroupBy(user.FieldAge).Int(ctx)
+	require.True(ent.IsNotFound(err))
+	require.Zero(age)
 
 	t.Log("group-by two fields with aggregation")
 	client.User.Create().SetName(usr.Name).SetAge(usr.Age).SaveX(ctx)

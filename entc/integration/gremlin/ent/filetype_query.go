@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
@@ -438,6 +439,32 @@ func (ftgb *FileTypeGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ftgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) StringX(ctx context.Context) string {
+	v, err := ftgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ftgb *FileTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ftgb.fields) > 1 {
@@ -453,6 +480,32 @@ func (ftgb *FileTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ftgb *FileTypeGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ftgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ftgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) IntX(ctx context.Context) int {
+	v, err := ftgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -480,6 +533,32 @@ func (ftgb *FileTypeGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ftgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ftgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ftgb *FileTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ftgb.fields) > 1 {
@@ -495,6 +574,32 @@ func (ftgb *FileTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ftgb *FileTypeGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := ftgb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ftgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ftgb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -585,6 +690,32 @@ func (fts *FileTypeSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = fts.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (fts *FileTypeSelect) StringX(ctx context.Context) string {
+	v, err := fts.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (fts *FileTypeSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(fts.fields) > 1 {
@@ -600,6 +731,32 @@ func (fts *FileTypeSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (fts *FileTypeSelect) IntsX(ctx context.Context) []int {
 	v, err := fts.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = fts.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (fts *FileTypeSelect) IntX(ctx context.Context) int {
+	v, err := fts.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -627,6 +784,32 @@ func (fts *FileTypeSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = fts.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (fts *FileTypeSelect) Float64X(ctx context.Context) float64 {
+	v, err := fts.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (fts *FileTypeSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(fts.fields) > 1 {
@@ -642,6 +825,32 @@ func (fts *FileTypeSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (fts *FileTypeSelect) BoolsX(ctx context.Context) []bool {
 	v, err := fts.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = fts.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (fts *FileTypeSelect) BoolX(ctx context.Context) bool {
+	v, err := fts.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
