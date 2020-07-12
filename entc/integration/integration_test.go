@@ -797,6 +797,15 @@ type mocker struct{ mock.Mock }
 
 func (m *mocker) onCommit(err error)   { m.Called(err) }
 func (m *mocker) onRollback(err error) { m.Called(err) }
+func (m *mocker) rHook() ent.RollbackHook {
+	return func(next ent.Rollbacker) ent.Rollbacker {
+		return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
+			err := next.Rollback(ctx, tx)
+			m.onRollback(err)
+			return err
+		})
+	}
+}
 
 func Tx(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
@@ -806,7 +815,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.onRollback)
+		tx.OnRollback(m.rHook())
 		tx.Node.Create().SaveX(ctx)
 		require.NoError(t, tx.Rollback())
 		require.Zero(t, client.Node.Query().CountX(ctx), "rollback should discard all changes")
@@ -817,7 +826,13 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onCommit", mock.Anything).Twice()
 		defer m.AssertExpectations(t)
-		tx.OnCommit(m.onCommit)
+		tx.OnCommit(func(next ent.Committer) ent.Committer {
+			return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
+				err := next.Commit(ctx, tx)
+				m.onCommit(err)
+				return err
+			})
+		})
 		nde := tx.Node.Create().SaveX(ctx)
 		require.NoError(t, tx.Commit())
 		require.Error(t, tx.Commit(), "should return an error on the second call")
@@ -832,7 +847,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.onRollback)
+		tx.OnRollback(m.rHook())
 		_, err = tx.Client().Tx(ctx)
 		require.Error(t, err, "cannot start a transaction within a transaction")
 		require.NoError(t, tx.Rollback())
@@ -846,7 +861,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.onRollback)
+		tx.OnRollback(m.rHook())
 		_, err = tx.Item.Create().Save(ctx)
 		require.Error(t, err)
 		require.NoError(t, tx.Rollback())
