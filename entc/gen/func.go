@@ -6,6 +6,7 @@ package gen
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -63,6 +64,7 @@ var (
 		"unset":         unset,
 		"hasKey":        hasKey,
 		"list":          list,
+		"fail":          fail,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
@@ -430,4 +432,9 @@ func hasKey(d map[string]interface{}, key string) bool {
 // list creates a list from values.
 func list(v ...interface{}) []interface{} {
 	return v
+}
+
+// fail unconditionally returns an empty string and an error with the specified text.
+func fail(msg string) (string, error) {
+	return "", errors.New(msg)
 }
