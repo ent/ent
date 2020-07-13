@@ -92,6 +92,19 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 }
 
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
+	ft, _spec := ftc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	ft.ID = int(id)
+	return ft, nil
+}
+
+func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	var (
 		ft    = &FileType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -129,13 +142,5 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	ft.ID = int(id)
-	return ft, nil
+	return ft, _spec
 }

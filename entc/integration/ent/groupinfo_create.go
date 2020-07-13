@@ -110,6 +110,19 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 }
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
+	gi, _spec := gic.createSpec()
+	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	gi.ID = int(id)
+	return gi, nil
+}
+
+func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	var (
 		gi    = &GroupInfo{config: gic.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -155,13 +168,5 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	gi.ID = int(id)
-	return gi, nil
+	return gi, _spec
 }

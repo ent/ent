@@ -96,6 +96,19 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 }
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
+	s, _spec := sc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	s.ID = int(id)
+	return s, nil
+}
+
+func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 	var (
 		s     = &Street{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -133,13 +146,5 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	s.ID = int(id)
-	return s, nil
+	return s, _spec
 }

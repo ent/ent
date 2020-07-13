@@ -114,6 +114,19 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 }
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
+	n, _spec := nc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	n.ID = int(id)
+	return n, nil
+}
+
+func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	var (
 		n     = &Node{config: nc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -170,13 +183,5 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	n.ID = int(id)
-	return n, nil
+	return n, _spec
 }

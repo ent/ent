@@ -111,6 +111,19 @@ func (gc *GalaxyCreate) SaveX(ctx context.Context) *Galaxy {
 }
 
 func (gc *GalaxyCreate) sqlSave(ctx context.Context) (*Galaxy, error) {
+	ga, _spec := gc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	ga.ID = int(id)
+	return ga, nil
+}
+
+func (gc *GalaxyCreate) createSpec() (*Galaxy, *sqlgraph.CreateSpec) {
 	var (
 		ga    = &Galaxy{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -156,13 +169,5 @@ func (gc *GalaxyCreate) sqlSave(ctx context.Context) (*Galaxy, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	ga.ID = int(id)
-	return ga, nil
+	return ga, _spec
 }

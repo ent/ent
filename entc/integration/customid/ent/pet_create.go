@@ -147,6 +147,17 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 }
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
+	pe, _spec := pc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	return pe, nil
+}
+
+func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
 		pe    = &Pet{config: pc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -237,11 +248,5 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	return pe, nil
+	return pe, _spec
 }
