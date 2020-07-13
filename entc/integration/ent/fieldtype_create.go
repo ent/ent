@@ -611,6 +611,19 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 }
 
 func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
+	ft, _spec := ftc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	ft.ID = int(id)
+	return ft, nil
+}
+
+func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	var (
 		ft    = &FieldType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -973,13 +986,5 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		})
 		ft.NullFloat = value
 	}
-	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	ft.ID = int(id)
-	return ft, nil
+	return ft, _spec
 }

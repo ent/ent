@@ -82,6 +82,19 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 }
 
 func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
+	s, _spec := sc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	s.ID = int(id)
+	return s, nil
+}
+
+func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	var (
 		s     = &Spec{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -111,13 +124,5 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	s.ID = int(id)
-	return s, nil
+	return s, _spec
 }

@@ -110,6 +110,19 @@ func (pc *PlanetCreate) SaveX(ctx context.Context) *Planet {
 }
 
 func (pc *PlanetCreate) sqlSave(ctx context.Context) (*Planet, error) {
+	pl, _spec := pc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	pl.ID = int(id)
+	return pl, nil
+}
+
+func (pc *PlanetCreate) createSpec() (*Planet, *sqlgraph.CreateSpec) {
 	var (
 		pl    = &Planet{config: pc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -155,13 +168,5 @@ func (pc *PlanetCreate) sqlSave(ctx context.Context) (*Planet, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	pl.ID = int(id)
-	return pl, nil
+	return pl, _spec
 }

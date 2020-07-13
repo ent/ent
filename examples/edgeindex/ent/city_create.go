@@ -92,6 +92,19 @@ func (cc *CityCreate) SaveX(ctx context.Context) *City {
 }
 
 func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
+	c, _spec := cc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	c.ID = int(id)
+	return c, nil
+}
+
+func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	var (
 		c     = &City{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -129,13 +142,5 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	return c, _spec
 }

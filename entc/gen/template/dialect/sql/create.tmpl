@@ -10,40 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
-	var (
-		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: {{ $.Package }}.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type: field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.Package }}.{{ $.ID.Constant }},
-			},
-		}
-	)
-	{{- if $.ID.UserDefined }}
-		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
-			{{ $.Receiver }}.ID = id
-			_spec.ID.Value = id
-		}
-	{{- end }}
-	{{- range $_, $f := $.Fields }}
-		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-				Type: field.{{ $f.Type.ConstName }},
-				Value: value,
-				Column: {{ $.Package }}.{{ $f.Constant }},
-			})
-			{{ $.Receiver }}.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
-		}
-	{{- end }}
-	{{- range $_, $e := $.Edges }}
-		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
-			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
-				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
-			{{- end }}
-			_spec.Edges = append(_spec.Edges, edge)
-		}
-	{{- end }}
+	{{ $.Receiver }}, _spec := {{ $receiver }}.createSpec()
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -63,6 +30,44 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- end }}
 	{{- end }}
 	return {{ $.Receiver }}, nil
+}
+
+func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec) {
+	var (
+		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
+		_spec = &sqlgraph.CreateSpec{
+			Table: {{ $.Package }}.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type: field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		}
+	)
+	{{- if $.ID.UserDefined }}
+		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
+			{{ $.Receiver }}.ID = id
+			_spec.ID.Value = id
+		}
+	{{- end }}
+	{{- range $f := $.Fields }}
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+				Type: field.{{ $f.Type.ConstName }},
+				Value: value,
+				Column: {{ $.Package }}.{{ $f.Constant }},
+			})
+			{{ $.Receiver }}.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
+		}
+	{{- end }}
+	{{- range $e := $.Edges }}
+		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
+			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
+				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
+			{{- end }}
+			_spec.Edges = append(_spec.Edges, edge)
+		}
+	{{- end }}
+	return {{ $.Receiver }}, _spec
 }
 
 {{ end }}

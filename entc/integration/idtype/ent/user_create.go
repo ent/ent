@@ -125,6 +125,19 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+	u, _spec := uc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	u.ID = uint64(id)
+	return u, nil
+}
+
+func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		u     = &User{config: uc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -200,13 +213,5 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	u.ID = uint64(id)
-	return u, nil
+	return u, _spec
 }

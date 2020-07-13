@@ -99,6 +99,19 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 }
 
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
+	c, _spec := cc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	c.ID = int(id)
+	return c, nil
+}
+
+func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	var (
 		c     = &Comment{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -133,13 +146,5 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		})
 		c.NillableInt = &value
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	return c, _spec
 }

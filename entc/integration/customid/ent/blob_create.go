@@ -121,6 +121,17 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 }
 
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
+	b, _spec := bc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	return b, nil
+}
+
+func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
 		b     = &Blob{config: bc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -181,11 +192,5 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
-	}
-	return b, nil
+	return b, _spec
 }
