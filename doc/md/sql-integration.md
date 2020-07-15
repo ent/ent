@@ -117,6 +117,7 @@ import (
 
 	"<project>/ent"
 
+	"github.com/facebookincubator/ent/dialect"
 	entsql "github.com/facebookincubator/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -130,7 +131,7 @@ func Open(databaseUrl string) *ent.Client {
 	defer db.Close()
 
 	// Create an ent.Driver from `db`.
-	drv := entsql.OpenDB("postgres", db)
+	drv := entsql.OpenDB(dialect.Postgres, db)
 	return ent.NewClient(ent.Driver(drv))
 }
 
