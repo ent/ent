@@ -439,7 +439,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 	}
 	if !exists {
 		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}).
+			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
 		query, args := m.tBuilder(t).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
