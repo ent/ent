@@ -103,8 +103,8 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
-	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyXID(ctx))
-	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyXID(ctx))
+	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyIDX(ctx))
 	xabi := client.Pet.Create().SetID("xabi").AddFriends(pedro).SetBestFriend(pedro).SaveX(ctx)
 	require.Equal(t, "xabi", xabi.ID)
 

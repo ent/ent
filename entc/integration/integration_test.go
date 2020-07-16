@@ -510,8 +510,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.NotNil(client.Group.Query().OnlyX(ctx))
 
 	t.Log("get only ids")
-	require.NotEmpty(client.User.Query().OnlyXID(ctx))
-	require.NotEmpty(client.Group.Query().OnlyXID(ctx))
+	require.NotEmpty(client.User.Query().OnlyIDX(ctx))
+	require.NotEmpty(client.Group.Query().OnlyIDX(ctx))
 
 	t.Log("query spouse edge")
 	require.Zero(client.User.Query().Where(user.HasSpouse()).CountX(ctx))
