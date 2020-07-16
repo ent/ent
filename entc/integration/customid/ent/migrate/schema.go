@@ -15,7 +15,7 @@ var (
 	// BlobsColumns holds the columns for the "blobs" table.
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "uuid", Type: field.TypeUUID},
+		{Name: "uuid", Type: field.TypeUUID, Unique: true},
 		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BlobsTable holds the schema information for the "blobs" table.
