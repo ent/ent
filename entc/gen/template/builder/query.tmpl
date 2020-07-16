@@ -174,8 +174,8 @@ func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.T
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type }} {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
 	id, err := {{ $receiver }}.OnlyID(ctx)
 	if err != nil {
 		panic(err)

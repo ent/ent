@@ -201,8 +201,8 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id uint64, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyXID(ctx context.Context) uint64 {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (uq *UserQuery) OnlyIDX(ctx context.Context) uint64 {
 	id, err := uq.OnlyID(ctx)
 	if err != nil {
 		panic(err)

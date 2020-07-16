@@ -142,8 +142,8 @@ func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) string {
 	id, err := ftq.OnlyID(ctx)
 	if err != nil {
 		panic(err)

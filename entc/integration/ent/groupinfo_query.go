@@ -163,8 +163,8 @@ func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) int {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) int {
 	id, err := giq.OnlyID(ctx)
 	if err != nil {
 		panic(err)

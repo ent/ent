@@ -190,8 +190,8 @@ func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (fq *FileQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (fq *FileQuery) OnlyIDX(ctx context.Context) string {
 	id, err := fq.OnlyID(ctx)
 	if err != nil {
 		panic(err)

@@ -250,8 +250,8 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("node points to itself (circular linked-list with 1 node)")
 	head.Update().SetNext(head).SaveX(ctx)
-	require.Equal(head.ID, head.QueryPrev().OnlyXID(ctx))
-	require.Equal(head.ID, head.QueryNext().OnlyXID(ctx))
+	require.Equal(head.ID, head.QueryPrev().OnlyIDX(ctx))
+	require.Equal(head.ID, head.QueryNext().OnlyIDX(ctx))
 	head.Update().ClearNext().SaveX(ctx)
 	require.Zero(head.QueryPrev().CountX(ctx))
 	require.Zero(head.QueryNext().CountX(ctx))

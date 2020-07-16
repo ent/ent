@@ -141,8 +141,8 @@ func (iq *ItemQuery) OnlyID(ctx context.Context) (id int, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (iq *ItemQuery) OnlyXID(ctx context.Context) int {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (iq *ItemQuery) OnlyIDX(ctx context.Context) int {
 	id, err := iq.OnlyID(ctx)
 	if err != nil {
 		panic(err)

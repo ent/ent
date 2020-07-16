@@ -183,8 +183,8 @@ func (bq *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (bq *BlobQuery) OnlyXID(ctx context.Context) uuid.UUID {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (bq *BlobQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
