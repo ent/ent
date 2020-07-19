@@ -43,7 +43,7 @@ type Edge struct {
 }
 
 {{/* loop over all types and add implement the Node interface. */}}
-{{ range $_, $n := $.Nodes -}}
+{{ range $n := $.Nodes -}}
 	{{ $receiver := $n.Receiver }}
 	func ({{ $receiver }} *{{ $n.Name }}) Node(ctx context.Context) (node *Node, err error) {
 		node = &Node{

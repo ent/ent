@@ -266,6 +266,19 @@ func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.String("dir").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *stringBuilder) Annotations(annotations ...Annotation) *stringBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -347,6 +360,19 @@ func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Time("deleted_at").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *timeBuilder) Annotations(annotations ...Annotation) *timeBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -425,6 +451,19 @@ func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Bool("deleted").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *boolBuilder) Annotations(annotations ...Annotation) *boolBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *boolBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -462,7 +501,7 @@ func (b *bytesBuilder) Immutable() *bytesBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *bytesBuilder) Comment(c string) *bytesBuilder {
+func (b *bytesBuilder) Comment(string) *bytesBuilder {
 	return b
 }
 
@@ -497,9 +536,17 @@ func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
 	return b
 }
 
-// Descriptor implements the ent.Field interface by returning its descriptor.
-func (b *bytesBuilder) Descriptor() *Descriptor {
-	return b.desc
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Bytes("ip").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *bytesBuilder) Annotations(annotations ...Annotation) *bytesBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
 }
 
 // SchemaType overrides the default database type with a custom
@@ -514,6 +561,11 @@ func (b *bytesBuilder) Descriptor() *Descriptor {
 func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
 	b.desc.SchemaType = types
 	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *bytesBuilder) Descriptor() *Descriptor {
+	return b.desc
 }
 
 // jsonBuilder is the builder for json fields.
@@ -563,6 +615,19 @@ func (b *jsonBuilder) StructTag(s string) *jsonBuilder {
 //
 func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.JSON("json").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *jsonBuilder) Annotations(annotations ...Annotation) *jsonBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -636,6 +701,19 @@ func (b *enumBuilder) StructTag(s string) *enumBuilder {
 //
 func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
 	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Enum("enum").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *enumBuilder) Annotations(annotations ...Annotation) *enumBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -715,9 +793,30 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.UUID("id", uuid.New()).
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uuidBuilder) Annotations(annotations ...Annotation) *uuidBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+// Annotation is used to attach arbitrary metadata to the field object in codegen.
+// The object must be serializable to JSON raw value (e.g. struct, map or slice).
+// Template extensions can retrieve this metadata and use inside their templates.
+type Annotation interface {
+	// Name defines the name of the annotation.
+	Name() string
 }
 
 // A Descriptor for field configuration.
@@ -737,6 +836,7 @@ type Descriptor struct {
 	Enums         []string          // enum values.
 	Sensitive     bool              // sensitive info string field.
 	SchemaType    map[string]string // override the schema type.
+	Annotations   []Annotation      // field annotations.
 	err           error
 }
 

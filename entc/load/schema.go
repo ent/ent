@@ -35,23 +35,24 @@ type Position struct {
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name          string            `json:"name,omitempty"`
-	Info          *field.TypeInfo   `json:"type,omitempty"`
-	Tag           string            `json:"tag,omitempty"`
-	Size          *int64            `json:"size,omitempty"`
-	Enums         []string          `json:"enums,omitempty"`
-	Unique        bool              `json:"unique,omitempty"`
-	Nillable      bool              `json:"nillable,omitempty"`
-	Optional      bool              `json:"optional,omitempty"`
-	Default       bool              `json:"default,omitempty"`
-	DefaultValue  interface{}       `json:"default_value,omitempty"`
-	UpdateDefault bool              `json:"update_default,omitempty"`
-	Immutable     bool              `json:"immutable,omitempty"`
-	Validators    int               `json:"validators,omitempty"`
-	StorageKey    string            `json:"storage_key,omitempty"`
-	Position      *Position         `json:"position,omitempty"`
-	Sensitive     bool              `json:"sensitive,omitempty"`
-	SchemaType    map[string]string `json:"schema_type,omitempty"`
+	Name          string                 `json:"name,omitempty"`
+	Info          *field.TypeInfo        `json:"type,omitempty"`
+	Tag           string                 `json:"tag,omitempty"`
+	Size          *int64                 `json:"size,omitempty"`
+	Enums         []string               `json:"enums,omitempty"`
+	Unique        bool                   `json:"unique,omitempty"`
+	Nillable      bool                   `json:"nillable,omitempty"`
+	Optional      bool                   `json:"optional,omitempty"`
+	Default       bool                   `json:"default,omitempty"`
+	DefaultValue  interface{}            `json:"default_value,omitempty"`
+	UpdateDefault bool                   `json:"update_default,omitempty"`
+	Immutable     bool                   `json:"immutable,omitempty"`
+	Validators    int                    `json:"validators,omitempty"`
+	StorageKey    string                 `json:"storage_key,omitempty"`
+	Position      *Position              `json:"position,omitempty"`
+	Sensitive     bool                   `json:"sensitive,omitempty"`
+	SchemaType    map[string]string      `json:"schema_type,omitempty"`
+	Annotations   map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
@@ -114,6 +115,10 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Validators:    len(fd.Validators),
 		Sensitive:     fd.Sensitive,
 		SchemaType:    fd.SchemaType,
+		Annotations:   make(map[string]interface{}),
+	}
+	for _, at := range fd.Annotations {
+		sf.Annotations[at.Name()] = at
 	}
 	if sf.Info == nil {
 		return nil, fmt.Errorf("missing type info for field %q", sf.Name)

@@ -6,6 +6,7 @@ package schema
 
 import (
 	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/entc/integration/ent/template"
 	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
 	"github.com/facebookincubator/ent/schema/mixin"
@@ -27,11 +28,17 @@ func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("number").
 			Immutable().
-			NotEmpty(),
+			NotEmpty().
+			Annotations(&template.Extension{
+				Type: "string",
+			}),
 		field.String("name").
 			Optional().
 			Comment("Exact name written on card").
-			NotEmpty(),
+			NotEmpty().
+			Annotations(&template.Extension{
+				Type: "string",
+			}),
 	}
 }
 
