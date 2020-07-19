@@ -141,7 +141,7 @@ func TemplateDir(path string) Option {
 			if err != nil {
 				return fmt.Errorf("load template: %v", err)
 			}
-			if info.IsDir() {
+			if info.IsDir() || strings.HasSuffix(path, ".go") {
 				return nil
 			}
 			cfg.Template, err = cfg.Template.ParseFiles(path)

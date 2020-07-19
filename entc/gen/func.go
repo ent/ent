@@ -65,6 +65,7 @@ var (
 		"hasKey":        hasKey,
 		"list":          list,
 		"fail":          fail,
+		"replace":       strings.ReplaceAll,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})

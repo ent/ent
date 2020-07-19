@@ -20,6 +20,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type OrderConfig struct {
+	FieldName string
+}
+
+func (OrderConfig) Name() string {
+	return "order_config"
+}
+
+func (o *OrderConfig) MarshalJSON() ([]byte, error) {
+	return json.Marshal(*o)
+}
+
 type User struct {
 	ent.Schema
 }
@@ -28,7 +40,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("age"),
 		field.String("name").
-			Default("unknown"),
+			Default("unknown").
+			Annotations(&OrderConfig{FieldName: "name"}),
 		field.String("nillable").
 			Nillable(),
 		field.String("optional").
@@ -81,8 +94,8 @@ func TestMarshalSchema(t *testing.T) {
 		buf, err := MarshalSchema(u)
 		require.NoError(t, err)
 
-		schema := &Schema{}
-		require.NoError(t, json.Unmarshal(buf, schema))
+		schema, err := UnmarshalSchema(buf)
+		require.NoError(t, err)
 		require.Equal(t, "User", schema.Name)
 		require.Len(t, schema.Fields, 8)
 		require.Equal(t, "age", schema.Fields[0].Name)
@@ -91,6 +104,9 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "name", schema.Fields[1].Name)
 		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
 		require.Equal(t, "unknown", schema.Fields[1].DefaultValue)
+		require.NotEmpty(t, schema.Fields[1].Annotations)
+		ant := schema.Fields[1].Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)
 		require.Equal(t, field.TypeString, schema.Fields[2].Info.Type)

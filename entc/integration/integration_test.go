@@ -1115,6 +1115,12 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, "boring", usr.Name)
 }
 
+// Test templates codegen.
+var (
+	_ = ent.CardExtension{}
+	_ = ent.Card{}.StaticField
+)
+
 func drop(t *testing.T, client *ent.Client) {
 	t.Log("drop data from database")
 	ctx := context.Background()

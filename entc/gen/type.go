@@ -75,6 +75,9 @@ type (
 		// UserDefined indicates that this field was defined by the loaded schema.
 		// Unlike default id field, which is defined by the generator.
 		UserDefined bool
+		// Annotations that were defined in the field schema.
+		// The mapping is from the Annotation.Name() to the decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Edge of a graph between two types.
@@ -176,6 +179,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			StructTag:     structTag(f.Name, f.Tag),
 			Validators:    f.Validators,
 			UserDefined:   true,
+			Annotations:   f.Annotations,
 		}
 		if err := typ.checkField(tf, f); err != nil {
 			return nil, err
