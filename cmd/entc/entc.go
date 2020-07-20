@@ -202,14 +202,14 @@ func createDir(target string) error {
 
 // ent/generate.go file used for "go generate" command.
 func getGenerateFileData(target string) []byte {
-	pathArr := strings.Split(target, "/")
-
 	var sb strings.Builder
 	sb.Grow(32)
 
-	sb.WriteString("package ent\n\n")
+	sb.WriteString("package ")
+	sb.WriteString(filepath.Base(filepath.Dir(target)))
+	sb.WriteString("\n\n")
 	sb.WriteString("//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./")
-	sb.WriteString(pathArr[len(pathArr)-1])
+	sb.WriteString(filepath.Base(target))
 	sb.WriteString("\n")
 
 	return []byte(sb.String())
