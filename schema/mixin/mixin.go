@@ -79,3 +79,22 @@ func (Time) Fields() []ent.Field {
 
 // time mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*Time)(nil)
+
+// Annotate adds field annotations to underlying mixin fields.
+func Annotate(m ent.Mixin, annotations ...field.Annotation) ent.Mixin {
+	return annotator{Mixin: m, annotations: annotations}
+}
+
+type annotator struct {
+	ent.Mixin
+	annotations []field.Annotation
+}
+
+func (a annotator) Fields() []ent.Field {
+	fields := a.Mixin.Fields()
+	for _, f := range fields {
+		desc := f.Descriptor()
+		desc.Annotations = append(desc.Annotations, a.annotations...)
+	}
+	return fields
+}
