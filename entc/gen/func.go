@@ -108,14 +108,11 @@ func plural(name string) string {
 	return p
 }
 
-// pascal converts the given column name into a PascalCase.
-//
-//	user_info => UserInfo
-//	full_name => FullName
-//	user_id   => UserID
-//
-func pascal(s string) string {
-	words := strings.Split(s, "_")
+func isSeparator(r rune) bool {
+	return r == '_' || r == '-'
+}
+
+func pascalWords(words []string) string {
 	for i, w := range words {
 		upper := strings.ToUpper(w)
 		if _, ok := acronyms[upper]; ok {
@@ -127,18 +124,31 @@ func pascal(s string) string {
 	return strings.Join(words, "")
 }
 
-// camel converts the given column name into a camelCase.
+// pascal converts the given name into a PascalCase.
 //
-//	user_info => userInfo
-//	full_name => fullName
-//	user_id   => userID
+//	user_info => UserInfo
+//	full_name => FullName
+//	user_id   => UserID
+//	full-admin   => FullAdmin
+//
+func pascal(s string) string {
+	words := strings.FieldsFunc(s, isSeparator)
+	return pascalWords(words)
+}
+
+// camel converts the given name into a camelCase.
+//
+//	user_info  => userInfo
+//	full_name  => fullName
+//	user_id    => userID
+//	full-admin => fullAdmin
 //
 func camel(s string) string {
-	words := strings.SplitN(s, "_", 2)
+	words := strings.FieldsFunc(s, isSeparator)
 	if len(words) == 1 {
 		return strings.ToLower(words[0])
 	}
-	return strings.ToLower(words[0]) + pascal(words[1])
+	return strings.ToLower(words[0]) + pascalWords(words[1:])
 }
 
 // snake converts the given struct or field name into a snake_case.
