@@ -75,7 +75,6 @@ func (c *Car) assignValues(values ...interface{}) error {
 	}
 	c.ID = int(value.Int64)
 	values = values[1:]
-	values = values[0:]
 	if len(values) == len(car.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_car", value)
