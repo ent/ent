@@ -75,7 +75,6 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 	}
 	pe.ID = int(value.Int64)
 	values = values[1:]
-	values = values[0:]
 	if len(values) == len(pet.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)

@@ -115,7 +115,6 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 		pe.ID = value.String
 	}
 	values = values[1:]
-	values = values[0:]
 	if len(values) == len(pet.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullString); !ok {
 			return fmt.Errorf("unexpected type %T for field pet_best_friend", values[0])

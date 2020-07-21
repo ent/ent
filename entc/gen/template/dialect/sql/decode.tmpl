@@ -53,7 +53,9 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			{{- end }}
 		{{- end }}
 		{{- with $.ForeignKeys }}
-			values = values[{{ len $.Fields }}:]
+			{{- with $.Fields }}
+				values = values[{{ len . }}:]
+			{{- end }}
 			if len(values) == len({{ $.Package }}.ForeignKeys) {
 				{{- range $i, $fk := . }}
 					{{- $f := $fk.Field }}
