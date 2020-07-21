@@ -53,7 +53,7 @@ func TestAnnotate(t *testing.T) {
 		annotation("bar"),
 		annotation("baz"),
 	}
-	fields := mixin.Annotate(
+	fields := mixin.AnnotateFields(
 		mixin.Time{}, annotations...,
 	).Fields()
 	for _, f := range fields {
