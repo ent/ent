@@ -164,7 +164,7 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 		q = builder.Select().
 			From(t1).
 			Join(t2).
-			On(t1.C(s.From.Column), t2.C(s.Edge.Columns[0]))
+			On(t1.C(s.To.Column), t2.C(s.Edge.Columns[0]))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		q = builder.Select().
 			From(builder.Table(s.To.Table)).
