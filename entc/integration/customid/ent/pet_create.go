@@ -105,10 +105,8 @@ func (pc *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	if v, ok := pc.mutation.ID(); ok {
-		if err := pet.IDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
-		}
+	if err := pc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -144,6 +142,15 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 		panic(err)
 	}
 	return v
+}
+
+func (pc *PetCreate) preSave() error {
+	if v, ok := pc.mutation.ID(); ok {
+		if err := pet.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
@@ -249,4 +256,66 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return pe, _spec
+}
+
+// PetCreateBulk is the builder for creating a bulk of Pet entities.
+type PetCreateBulk struct {
+	config
+	builders []*PetCreate
+}
+
+// Save creates the Pet entities in the database.
+func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
+	nodes := make([]*Pet, len(pcb.builders))
+	mutators := make([]Mutator, len(pcb.builders))
+	for i := range pcb.builders {
+		func(i int, root context.Context) {
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				builder := pcb.builders[i]
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*PetMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, pcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				return nodes[i], nil
+			})
+			for i := len(pcb.builders[i].hooks) - 1; i >= 0; i-- {
+				mut = pcb.builders[i].hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		return nil, err
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
+	v, err := pcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

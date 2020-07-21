@@ -325,29 +325,8 @@ func (uc *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if v, ok := uc.mutation.OptionalInt(); ok {
-		if err := user.OptionalIntValidator(v); err != nil {
-			return nil, &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
-		}
-	}
-	if _, ok := uc.mutation.Age(); !ok {
-		return nil, &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
-	}
-	if _, ok := uc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
-	if _, ok := uc.mutation.Last(); !ok {
-		v := user.DefaultLast
-		uc.mutation.SetLast(v)
-	}
-	if _, ok := uc.mutation.Role(); !ok {
-		v := user.DefaultRole
-		uc.mutation.SetRole(v)
-	}
-	if v, ok := uc.mutation.Role(); ok {
-		if err := user.RoleValidator(v); err != nil {
-			return nil, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
-		}
+	if err := uc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -383,6 +362,34 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 		panic(err)
 	}
 	return v
+}
+
+func (uc *UserCreate) preSave() error {
+	if v, ok := uc.mutation.OptionalInt(); ok {
+		if err := user.OptionalIntValidator(v); err != nil {
+			return &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
+		}
+	}
+	if _, ok := uc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+	}
+	if _, ok := uc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := uc.mutation.Last(); !ok {
+		v := user.DefaultLast
+		uc.mutation.SetLast(v)
+	}
+	if _, ok := uc.mutation.Role(); !ok {
+		v := user.DefaultRole
+		uc.mutation.SetRole(v)
+	}
+	if v, ok := uc.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
@@ -691,4 +698,68 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return u, _spec
+}
+
+// UserCreateBulk is the builder for creating a bulk of User entities.
+type UserCreateBulk struct {
+	config
+	builders []*UserCreate
+}
+
+// Save creates the User entities in the database.
+func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
+	nodes := make([]*User, len(ucb.builders))
+	mutators := make([]Mutator, len(ucb.builders))
+	for i := range ucb.builders {
+		func(i int, root context.Context) {
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				builder := ucb.builders[i]
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*UserMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(ucb.builders[i].hooks) - 1; i >= 0; i-- {
+				mut = ucb.builders[i].hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if _, err := mutators[0].Mutate(ctx, ucb.builders[0].mutation); err != nil {
+		return nil, err
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
+	v, err := ucb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

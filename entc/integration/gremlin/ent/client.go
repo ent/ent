@@ -199,6 +199,11 @@ func (c *CardClient) Create() *CardCreate {
 	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Card entities.
+func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
+	return &CardCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Card.
 func (c *CardClient) Update() *CardUpdate {
 	mutation := newCardMutation(c.config, OpUpdate)
@@ -304,6 +309,11 @@ func (c *CommentClient) Create() *CommentCreate {
 	return &CommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Comment entities.
+func (c *CommentClient) CreateBulk(builders ...*CommentCreate) *CommentCreateBulk {
+	return &CommentCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Comment.
 func (c *CommentClient) Update() *CommentUpdate {
 	mutation := newCommentMutation(c.config, OpUpdate)
@@ -387,6 +397,11 @@ func (c *FieldTypeClient) Create() *FieldTypeCreate {
 	return &FieldTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of FieldType entities.
+func (c *FieldTypeClient) CreateBulk(builders ...*FieldTypeCreate) *FieldTypeCreateBulk {
+	return &FieldTypeCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for FieldType.
 func (c *FieldTypeClient) Update() *FieldTypeUpdate {
 	mutation := newFieldTypeMutation(c.config, OpUpdate)
@@ -468,6 +483,11 @@ func (c *FileClient) Use(hooks ...Hook) {
 func (c *FileClient) Create() *FileCreate {
 	mutation := newFileMutation(c.config, OpCreate)
 	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of File entities.
+func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
+	return &FileCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for File.
@@ -586,6 +606,11 @@ func (c *FileTypeClient) Create() *FileTypeCreate {
 	return &FileTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of FileType entities.
+func (c *FileTypeClient) CreateBulk(builders ...*FileTypeCreate) *FileTypeCreateBulk {
+	return &FileTypeCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for FileType.
 func (c *FileTypeClient) Update() *FileTypeUpdate {
 	mutation := newFileTypeMutation(c.config, OpUpdate)
@@ -678,6 +703,11 @@ func (c *GroupClient) Use(hooks ...Hook) {
 func (c *GroupClient) Create() *GroupCreate {
 	mutation := newGroupMutation(c.config, OpCreate)
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Group.
@@ -807,6 +837,11 @@ func (c *GroupInfoClient) Create() *GroupInfoCreate {
 	return &GroupInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of GroupInfo entities.
+func (c *GroupInfoClient) CreateBulk(builders ...*GroupInfoCreate) *GroupInfoCreateBulk {
+	return &GroupInfoCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for GroupInfo.
 func (c *GroupInfoClient) Update() *GroupInfoUpdate {
 	mutation := newGroupInfoMutation(c.config, OpUpdate)
@@ -901,6 +936,11 @@ func (c *ItemClient) Create() *ItemCreate {
 	return &ItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Item entities.
+func (c *ItemClient) CreateBulk(builders ...*ItemCreate) *ItemCreateBulk {
+	return &ItemCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Item.
 func (c *ItemClient) Update() *ItemUpdate {
 	mutation := newItemMutation(c.config, OpUpdate)
@@ -982,6 +1022,11 @@ func (c *NodeClient) Use(hooks ...Hook) {
 func (c *NodeClient) Create() *NodeCreate {
 	mutation := newNodeMutation(c.config, OpCreate)
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Node entities.
+func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
+	return &NodeCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Node.
@@ -1089,6 +1134,11 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Pet entities.
+func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
+	return &PetCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Pet.
 func (c *PetClient) Update() *PetUpdate {
 	mutation := newPetMutation(c.config, OpUpdate)
@@ -1194,6 +1244,11 @@ func (c *SpecClient) Create() *SpecCreate {
 	return &SpecCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Spec entities.
+func (c *SpecClient) CreateBulk(builders ...*SpecCreate) *SpecCreateBulk {
+	return &SpecCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Spec.
 func (c *SpecClient) Update() *SpecUpdate {
 	mutation := newSpecMutation(c.config, OpUpdate)
@@ -1286,6 +1341,11 @@ func (c *UserClient) Use(hooks ...Hook) {
 func (c *UserClient) Create() *UserCreate {
 	mutation := newUserMutation(c.config, OpCreate)
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for User.

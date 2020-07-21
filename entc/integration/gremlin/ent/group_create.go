@@ -145,37 +145,8 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if _, ok := gc.mutation.Active(); !ok {
-		v := group.DefaultActive
-		gc.mutation.SetActive(v)
-	}
-	if _, ok := gc.mutation.Expire(); !ok {
-		return nil, &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
-	}
-	if v, ok := gc.mutation.GetType(); ok {
-		if err := group.TypeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
-	if _, ok := gc.mutation.MaxUsers(); !ok {
-		v := group.DefaultMaxUsers
-		gc.mutation.SetMaxUsers(v)
-	}
-	if v, ok := gc.mutation.MaxUsers(); ok {
-		if err := group.MaxUsersValidator(v); err != nil {
-			return nil, &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
-		}
-	}
-	if _, ok := gc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
-	if v, ok := gc.mutation.Name(); ok {
-		if err := group.NameValidator(v); err != nil {
-			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
-	if _, ok := gc.mutation.InfoID(); !ok {
-		return nil, &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
+	if err := gc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -211,6 +182,42 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 		panic(err)
 	}
 	return v
+}
+
+func (gc *GroupCreate) preSave() error {
+	if _, ok := gc.mutation.Active(); !ok {
+		v := group.DefaultActive
+		gc.mutation.SetActive(v)
+	}
+	if _, ok := gc.mutation.Expire(); !ok {
+		return &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
+	}
+	if v, ok := gc.mutation.GetType(); ok {
+		if err := group.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.MaxUsers(); !ok {
+		v := group.DefaultMaxUsers
+		gc.mutation.SetMaxUsers(v)
+	}
+	if v, ok := gc.mutation.MaxUsers(); ok {
+		if err := group.MaxUsersValidator(v); err != nil {
+			return &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if v, ok := gc.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.InfoID(); !ok {
+		return &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
+	}
+	return nil
 }
 
 func (gc *GroupCreate) gremlinSave(ctx context.Context) (*Group, error) {
@@ -279,4 +286,10 @@ func (gc *GroupCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// GroupCreateBulk is the builder for creating a bulk of Group entities.
+type GroupCreateBulk struct {
+	config
+	builders []*GroupCreate
 }

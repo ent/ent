@@ -30,6 +30,9 @@ func (ic *ItemCreate) Mutation() *ItemMutation {
 
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
+	if err := ic.preSave(); err != nil {
+		return nil, err
+	}
 	var (
 		err  error
 		node *Item
@@ -66,6 +69,10 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 	return v
 }
 
+func (ic *ItemCreate) preSave() error {
+	return nil
+}
+
 func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
 	res := &gremlin.Response{}
 	query, bindings := ic.gremlin().Query()
@@ -85,4 +92,10 @@ func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
 func (ic *ItemCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(item.Label)
 	return v.ValueMap(true)
+}
+
+// ItemCreateBulk is the builder for creating a bulk of Item entities.
+type ItemCreateBulk struct {
+	config
+	builders []*ItemCreate
 }

@@ -150,6 +150,11 @@ func (c *GalaxyClient) Create() *GalaxyCreate {
 	return &GalaxyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Galaxy entities.
+func (c *GalaxyClient) CreateBulk(builders ...*GalaxyCreate) *GalaxyCreateBulk {
+	return &GalaxyCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Galaxy.
 func (c *GalaxyClient) Update() *GalaxyUpdate {
 	mutation := newGalaxyMutation(c.config, OpUpdate)
@@ -248,6 +253,11 @@ func (c *PlanetClient) Use(hooks ...Hook) {
 func (c *PlanetClient) Create() *PlanetCreate {
 	mutation := newPlanetMutation(c.config, OpCreate)
 	return &PlanetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Planet entities.
+func (c *PlanetClient) CreateBulk(builders ...*PlanetCreate) *PlanetCreateBulk {
+	return &PlanetCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Planet.

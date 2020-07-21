@@ -69,12 +69,8 @@ func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	if _, ok := gic.mutation.Desc(); !ok {
-		return nil, &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
-	}
-	if _, ok := gic.mutation.MaxUsers(); !ok {
-		v := groupinfo.DefaultMaxUsers
-		gic.mutation.SetMaxUsers(v)
+	if err := gic.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -110,6 +106,17 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 		panic(err)
 	}
 	return v
+}
+
+func (gic *GroupInfoCreate) preSave() error {
+	if _, ok := gic.mutation.Desc(); !ok {
+		return &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
+	}
+	if _, ok := gic.mutation.MaxUsers(); !ok {
+		v := groupinfo.DefaultMaxUsers
+		gic.mutation.SetMaxUsers(v)
+	}
+	return nil
 }
 
 func (gic *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
@@ -156,4 +163,10 @@ func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// GroupInfoCreateBulk is the builder for creating a bulk of GroupInfo entities.
+type GroupInfoCreateBulk struct {
+	config
+	builders []*GroupInfoCreate
 }

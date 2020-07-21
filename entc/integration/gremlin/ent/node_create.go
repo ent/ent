@@ -84,6 +84,9 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
+	if err := nc.preSave(); err != nil {
+		return nil, err
+	}
 	var (
 		err  error
 		node *Node
@@ -118,6 +121,10 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 		panic(err)
 	}
 	return v
+}
+
+func (nc *NodeCreate) preSave() error {
+	return nil
 }
 
 func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
@@ -168,4 +175,10 @@ func (nc *NodeCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// NodeCreateBulk is the builder for creating a bulk of Node entities.
+type NodeCreateBulk struct {
+	config
+	builders []*NodeCreate
 }

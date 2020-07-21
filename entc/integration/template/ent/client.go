@@ -160,6 +160,11 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Group.
 func (c *GroupClient) Update() *GroupUpdate {
 	mutation := newGroupMutation(c.config, OpUpdate)
@@ -241,6 +246,11 @@ func (c *PetClient) Use(hooks ...Hook) {
 func (c *PetClient) Create() *PetCreate {
 	mutation := newPetMutation(c.config, OpCreate)
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Pet entities.
+func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
+	return &PetCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Pet.
@@ -340,6 +350,11 @@ func (c *UserClient) Use(hooks ...Hook) {
 func (c *UserClient) Create() *UserCreate {
 	mutation := newUserMutation(c.config, OpCreate)
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for User.

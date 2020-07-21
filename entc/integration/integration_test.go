@@ -26,6 +26,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebookincubator/ent/entc/integration/ent/hook"
 	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
 	"github.com/facebookincubator/ent/entc/integration/ent/node"
 	"github.com/facebookincubator/ent/entc/integration/ent/pet"
@@ -117,6 +118,7 @@ var (
 		Sensitive,
 		EagerLoading,
 		Mutation,
+		CreateBulk,
 	}
 )
 
@@ -1123,6 +1125,66 @@ var (
 	_ = []filetype.State{filetype.StateOn, filetype.StateOff}
 	_ = []filetype.Type{filetype.TypeJPG, filetype.TypePNG, filetype.TypeSVG}
 )
+
+func CreateBulk(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	cards := client.Card.CreateBulk(
+		client.Card.Create().SetNumber("10").SetName("1st"),
+		client.Card.Create().SetNumber("20").SetName("2nd"),
+		client.Card.Create().SetNumber("30").SetName("3rd"),
+	).SaveX(ctx)
+	require.Equal(t, cards[0].ID, cards[1].ID-1)
+	require.Equal(t, cards[1].ID, cards[2].ID-1)
+
+	inf := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
+	groups := client.Group.CreateBulk(
+		client.Group.Create().SetName("Github").SetExpire(time.Now()).SetInfo(inf),
+		client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf),
+	).SaveX(ctx)
+	require.Equal(t, inf.ID, groups[0].QueryInfo().OnlyIDX(ctx))
+	require.Equal(t, inf.ID, groups[1].QueryInfo().OnlyIDX(ctx))
+
+	client.User.Use(
+		func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				m.SetPassword("password")
+				return next.Mutate(ctx, m)
+			})
+		},
+		func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				name, _ := m.Name()
+				m.SetNickname("@" + name)
+				return next.Mutate(ctx, m)
+			})
+		},
+	)
+
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a8m").SetAge(20).AddGroups(groups...),
+		client.User.Create().SetName("nati").SetAge(20).SetCard(cards[0]).AddGroups(groups[0]),
+	).SaveX(ctx)
+	require.Equal(t, 2, users[0].QueryGroups().CountX(ctx))
+	require.False(t, users[0].QueryCard().ExistX(ctx))
+	require.Equal(t, "password", users[0].Password)
+	require.Equal(t, "@a8m", users[0].Nickname)
+	require.Equal(t, groups[0].ID, users[1].QueryGroups().OnlyIDX(ctx))
+	require.Equal(t, cards[0].ID, users[1].QueryCard().OnlyIDX(ctx))
+	require.Equal(t, "password", users[1].Password)
+	require.Equal(t, "@nati", users[1].Nickname)
+
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("pedro").SetOwner(users[0]),
+		client.Pet.Create().SetName("xabi").SetOwner(users[1]),
+		client.Pet.Create().SetName("layla"),
+	).SaveX(ctx)
+	require.Equal(t, "pedro", pets[0].Name)
+	require.Equal(t, users[0].ID, pets[0].QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, "xabi", pets[1].Name)
+	require.Equal(t, users[1].ID, pets[1].QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, "layla", pets[2].Name)
+	require.False(t, pets[2].QueryOwner().ExistX(ctx))
+}
 
 func drop(t *testing.T, client *ent.Client) {
 	t.Log("drop data from database")
