@@ -30,6 +30,20 @@ func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
 	return ftc
 }
 
+// SetType sets the type field.
+func (ftc *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
+	ftc.mutation.SetType(f)
+	return ftc
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
+	if f != nil {
+		ftc.SetType(*f)
+	}
+	return ftc
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftc *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
 	ftc.mutation.AddFileIDs(ids...)
@@ -54,6 +68,15 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	if _, ok := ftc.mutation.Name(); !ok {
 		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := ftc.mutation.GetType(); !ok {
+		v := filetype.DefaultType
+		ftc.mutation.SetType(v)
+	}
+	if v, ok := ftc.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
 	}
 	var (
 		err  error
@@ -122,6 +145,14 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			Column: filetype.FieldName,
 		})
 		ft.Name = value
+	}
+	if value, ok := ftc.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldType,
+		})
+		ft.Type = value
 	}
 	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

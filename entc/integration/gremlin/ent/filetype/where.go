@@ -176,6 +176,42 @@ func NameHasSuffix(v string) predicate.FileType {
 	})
 }
 
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v Type) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.EQ(v))
+	})
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v Type) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.NEQ(v))
+	})
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...Type) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.Within(v...))
+	})
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...Type) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.Without(v...))
+	})
+}
+
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {

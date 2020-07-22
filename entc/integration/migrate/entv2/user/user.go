@@ -105,7 +105,7 @@ func (s State) String() string {
 	return string(s)
 }
 
-// StateValidator is a validator for the "s" field enum values. It is called by the builders before save.
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
 	case StateLoggedIn, StateLoggedOut, StateOnline:
@@ -128,7 +128,7 @@ func (s Status) String() string {
 	return string(s)
 }
 
-// StatusValidator is a validator for the "s" field enum values. It is called by the builders before save.
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
 	case StatusDone, StatusPending:

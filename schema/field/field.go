@@ -111,8 +111,9 @@ func Floats(name string) *jsonBuilder {
 //
 func Enum(name string) *enumBuilder {
 	return &enumBuilder{&Descriptor{
-		Name: name,
-		Info: &TypeInfo{Type: TypeEnum},
+		Name:  name,
+		Info:  &TypeInfo{Type: TypeEnum},
+		Enums: make(map[string]string),
 	}}
 }
 
@@ -641,9 +642,23 @@ type enumBuilder struct {
 	desc *Descriptor
 }
 
-// Value sets the numeric value of the enum. Defaults to its index in the declaration.
+// Values adds given values to the enum values.
 func (b *enumBuilder) Values(values ...string) *enumBuilder {
-	b.desc.Enums = values
+	for _, v := range values {
+		b.desc.Enums[v] = v
+	}
+	return b
+}
+
+// ValueMap adds the given values in the map to the enum value.
+// The key in the map is the Go identifier and the value in the
+// map is the actual enum value.
+//
+// If keys in not titled, ent codegen will change it to be exported.
+func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
+	for k, v := range values {
+		b.desc.Enums[k] = v
+	}
 	return b
 }
 
@@ -833,7 +848,7 @@ type Descriptor struct {
 	UpdateDefault interface{}       // default value on update.
 	Validators    []interface{}     // validator functions.
 	StorageKey    string            // sql column or gremlin property.
-	Enums         []string          // enum values.
+	Enums         map[string]string // enum values.
 	Sensitive     bool              // sensitive info string field.
 	SchemaType    map[string]string // override the schema type.
 	Annotations   []Annotation      // field annotations.

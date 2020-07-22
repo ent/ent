@@ -20,6 +20,13 @@ func (FileType) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
 			Unique(),
+		field.Enum("type").
+			ValueMap(map[string]string{
+				"PNG": "png",
+				"SVG": "svg",
+				"JPG": "jpg",
+			}).
+			Default("png"),
 	}
 }
 

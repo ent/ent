@@ -66,6 +66,8 @@ func init() {
 	file.DefaultSize = fileDescSize.Default.(int)
 	// file.SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	file.SizeValidator = fileDescSize.Validators[0].(func(int) error)
+	filetypeFields := schema.FileType{}.Fields()
+	_ = filetypeFields
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
 	// groupDescActive is the schema descriptor for active field.
