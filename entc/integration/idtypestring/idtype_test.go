@@ -25,5 +25,4 @@ func TestIDTypeString(t *testing.T) {
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
 	require.Equal(t, "1", a8m.ID)
-
 }
