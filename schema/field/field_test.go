@@ -336,7 +336,7 @@ func TestField_Enums(t *testing.T) {
 		Default("user").
 		Descriptor()
 	assert.Equal(t, "role", fd.Name)
-	assert.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+	assert.Equal(t, map[string]string{"admin": "admin", "master": "master", "user": "user"}, fd.Enums)
 	assert.Equal(t, "user", fd.Default)
 }
 

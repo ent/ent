@@ -49,7 +49,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: map[string]string{"": ""}},
 		},
 	})
 	require.Error(err, "duplicate enums")
@@ -57,7 +57,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: map[string]string{"": ""}},
 		},
 	})
 	require.Error(err, "empty value for enums")

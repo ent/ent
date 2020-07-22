@@ -23,6 +23,7 @@ import (
 	"github.com/facebookincubator/ent/entc/integration/ent"
 	"github.com/facebookincubator/ent/entc/integration/ent/enttest"
 	"github.com/facebookincubator/ent/entc/integration/ent/file"
+	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
 	"github.com/facebookincubator/ent/entc/integration/ent/group"
 	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
 	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
@@ -1119,6 +1120,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 var (
 	_ = ent.CardExtension{}
 	_ = ent.Card{}.StaticField
+	_ = []filetype.Type{filetype.TypeJPG, filetype.TypePNG, filetype.TypeSVG}
 )
 
 func drop(t *testing.T, client *ent.Client) {

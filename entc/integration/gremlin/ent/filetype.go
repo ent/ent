@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
 )
 
 // FileType is the model entity for the FileType schema.
@@ -20,6 +21,8 @@ type FileType struct {
 	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Type holds the value of the "type" field.
+	Type filetype.Type `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileTypeQuery when eager-loading is set.
 	Edges FileTypeEdges `json:"edges"`
@@ -50,14 +53,16 @@ func (ft *FileType) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanft struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID   string        `json:"id,omitempty"`
+		Name string        `json:"name,omitempty"`
+		Type filetype.Type `json:"type,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
 	}
 	ft.ID = scanft.ID
 	ft.Name = scanft.Name
+	ft.Type = scanft.Type
 	return nil
 }
 
@@ -91,6 +96,8 @@ func (ft *FileType) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(ft.Name)
+	builder.WriteString(", type=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Type))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -105,8 +112,9 @@ func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanft []struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID   string        `json:"id,omitempty"`
+		Name string        `json:"name,omitempty"`
+		Type filetype.Type `json:"type,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -115,6 +123,7 @@ func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
 		*ft = append(*ft, &FileType{
 			ID:   v.ID,
 			Name: v.Name,
+			Type: v.Type,
 		})
 	}
 	return nil

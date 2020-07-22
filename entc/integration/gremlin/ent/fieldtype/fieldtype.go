@@ -119,18 +119,18 @@ type State string
 
 // State values.
 const (
-	StateOn  State = "on"
 	StateOff State = "off"
+	StateOn  State = "on"
 )
 
 func (s State) String() string {
 	return string(s)
 }
 
-// StateValidator is a validator for the "s" field enum values. It is called by the builders before save.
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
-	case StateOn, StateOff:
+	case StateOff, StateOn:
 		return nil
 	default:
 		return fmt.Errorf("fieldtype: invalid enum value for state field: %q", s)

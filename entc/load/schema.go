@@ -39,7 +39,7 @@ type Field struct {
 	Info          *field.TypeInfo        `json:"type,omitempty"`
 	Tag           string                 `json:"tag,omitempty"`
 	Size          *int64                 `json:"size,omitempty"`
-	Enums         []string               `json:"enums,omitempty"`
+	Enums         map[string]string      `json:"enums,omitempty"`
 	Unique        bool                   `json:"unique,omitempty"`
 	Nillable      bool                   `json:"nillable,omitempty"`
 	Optional      bool                   `json:"optional,omitempty"`

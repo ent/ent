@@ -6,6 +6,10 @@
 
 package filetype
 
+import (
+	"fmt"
+)
+
 const (
 	// Label holds the string label denoting the filetype type in the database.
 	Label = "file_type"
@@ -13,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
@@ -20,5 +26,37 @@ const (
 	// FilesLabel holds the string label denoting the files edge type in the database.
 	FilesLabel = "file_type_files"
 )
+
+// Type defines the type for the type enum field.
+type Type string
+
+// TypePNG is the default Type.
+const DefaultType = TypePNG
+
+// Type values.
+const (
+	TypeJPG Type = "jpg"
+	TypePNG Type = "png"
+	TypeSVG Type = "svg"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeJPG, TypePNG, TypeSVG:
+		return nil
+	default:
+		return fmt.Errorf("filetype: invalid enum value for type field: %q", _type)
+	}
+}
+
+// Ptr returns a new pointer to the enum value.
+func (_type Type) Ptr() *Type {
+	return &_type
+}
 
 // comment from another template.

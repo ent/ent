@@ -62,6 +62,8 @@ type (
 		Nillable bool
 		// Default indicates if this field has a default value for creation.
 		Default bool
+		// Enums information for enum fields.
+		Enums []Enum
 		// UpdateDefault indicates if this field has a default value for update.
 		UpdateDefault bool
 		// Immutable indicates is this field cannot be updated.
@@ -143,6 +145,13 @@ type (
 		Field *Field
 		// Edge that is associated with this foreign-key.
 		Edge *Edge
+	}
+	// Enum holds the enum information for schema enums in codegen.
+	Enum struct {
+		// Name is the Go name of the enum.
+		Name string
+		// Value in the schema.
+		Value string
 	}
 )
 
@@ -586,7 +595,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 	case f.Sensitive && f.Tag != "":
 		err = fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
 	case f.Info.Type == field.TypeEnum:
-		if err = checkEnums(f); err == nil {
+		if tf.Enums, err = tf.enums(f); err == nil {
 			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
 		}
@@ -621,16 +630,29 @@ func (f Field) StructField() string {
 }
 
 // Enums returns the enum values of a field.
-func (f Field) Enums() []string {
-	if f.IsEnum() {
-		return f.def.Enums
+func (f Field) EnumNames() []string {
+	names := make([]string, 0, len(f.def.Enums))
+	for _, e := range f.Enums {
+		names = append(names, e.Name)
 	}
-	return nil
+	return names
 }
 
-// EnumName returns the constant name of the enum value.
+// EnumValues returns the values of the enum field.
+func (f Field) EnumValues() []string {
+	values := make([]string, 0, len(f.def.Enums))
+	for _, e := range f.Enums {
+		values = append(values, e.Value)
+	}
+	return values
+}
+
+// EnumName returns the constant name for the enum.
 func (f Field) EnumName(enum string) string {
-	return pascal(f.Name) + pascal(enum)
+	if !token.IsExported(enum) {
+		enum = pascal(enum)
+	}
+	return pascal(f.Name) + enum
 }
 
 // Validator returns the validator name.
@@ -751,8 +773,8 @@ func (f Field) Column() *schema.Column {
 		Type:     f.Type.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
-		Enums:    f.Enums(),
 		Size:     f.size(),
+		Enums:    f.EnumValues(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
@@ -881,6 +903,36 @@ func (f Field) goType(ident string) string {
 		return ident
 	}
 	return fmt.Sprintf("%s(%s)", f.Type, ident)
+}
+
+func (f Field) enums(lf *load.Field) ([]Enum, error) {
+	if len(lf.Enums) == 0 {
+		return nil, fmt.Errorf("missing values for enum field %q", f.Name)
+	}
+	enums := make([]Enum, 0, len(lf.Enums))
+	values := make(map[string]bool, len(lf.Enums))
+	for name, e := range lf.Enums {
+		switch {
+		case e == "":
+			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
+		case values[e]:
+			return nil, fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
+		case strings.IndexFunc(e, unicode.IsSpace) != -1:
+			return nil, fmt.Errorf("enum value %q cannot contain spaces", e)
+		default:
+			values[e] = true
+			enums = append(enums, Enum{Name: f.EnumName(name), Value: e})
+		}
+	}
+	if value := lf.DefaultValue; value != nil {
+		if value, ok := value.(string); !ok || !values[value] {
+			return nil, fmt.Errorf("invalid default value for enum field %q", f.Name)
+		}
+	}
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].Value < enums[j].Value
+	})
+	return enums, nil
 }
 
 // Label returns the Gremlin label name of the edge.
@@ -1050,31 +1102,6 @@ func (r Rel) String() string {
 		s = "M2M"
 	}
 	return s
-}
-
-func checkEnums(f *load.Field) error {
-	if len(f.Enums) == 0 {
-		return fmt.Errorf("missing values for enum field %q", f.Name)
-	}
-	values := make(map[string]bool, len(f.Enums))
-	for _, e := range f.Enums {
-		switch {
-		case e == "":
-			return fmt.Errorf("%q field value cannot be empty", f.Name)
-		case values[e]:
-			return fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
-		case strings.IndexFunc(e, unicode.IsSpace) != -1:
-			return fmt.Errorf("enum value %q cannot contain spaces", e)
-		default:
-			values[e] = true
-		}
-	}
-	if value := f.DefaultValue; value != nil {
-		if value, ok := value.(string); !ok || !values[value] {
-			return fmt.Errorf("invalid default value for enum field %q", f.Name)
-		}
-	}
-	return nil
 }
 
 func structTag(name, tag string) string {

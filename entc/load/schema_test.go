@@ -121,7 +121,7 @@ func TestMarshalSchema(t *testing.T) {
 
 		require.Equal(t, "state", schema.Fields[4].Name)
 		require.Equal(t, field.TypeEnum, schema.Fields[4].Info.Type)
-		require.Equal(t, []string{"on", "off"}, schema.Fields[4].Enums)
+		require.Equal(t, map[string]string{"on": "on", "off": "off"}, schema.Fields[4].Enums)
 
 		require.Equal(t, "sensitive", schema.Fields[5].Name)
 		require.Equal(t, field.TypeString, schema.Fields[5].Info.Type)
