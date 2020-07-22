@@ -1058,7 +1058,7 @@ func HasCar() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarTable, FieldID),
+			sqlgraph.To(CarTable, CarFieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, CarTable, CarColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1070,7 +1070,7 @@ func HasCarWith(preds ...predicate.Car) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarInverseTable, FieldID),
+			sqlgraph.To(CarInverseTable, CarFieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, CarTable, CarColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

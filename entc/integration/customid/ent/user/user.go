@@ -21,6 +21,10 @@ const (
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
 
+	// GroupFieldID holds the string denoting the id field of the Group.
+	GroupFieldID = "id"
+	// PetFieldID holds the string denoting the id field of the Pet.
+	PetFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.

@@ -43,6 +43,10 @@ const (
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 
+	// CarFieldID holds the string denoting the id field of the Car.
+	CarFieldID = "id"
+	// PetFieldID holds the string denoting the id field of the Pet.
+	PetFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CarTable is the table the holds the car relation/edge.

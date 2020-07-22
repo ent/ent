@@ -564,6 +564,20 @@ func (t Type) HasPolicy() bool {
 	return false
 }
 
+// RelatedTypes returns all the types (nodes) that
+// are related (with edges) to this type.
+func (t Type) RelatedTypes() []*Type {
+	seen := make(map[string]struct{})
+	related := make([]*Type, 0, len(t.Edges))
+	for _, e := range t.Edges {
+		if _, ok := seen[e.Type.Name]; !ok {
+			related = append(related, e.Type)
+			seen[e.Type.Name] = struct{}{}
+		}
+	}
+	return related
+}
+
 // check checks the schema type.
 func (t *Type) check() error {
 	pkg := t.Package()
