@@ -186,6 +186,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"jpg", "png", "svg"}, Default: "png"},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"OFF", "ON"}, Default: "ON"},
 	}
 	// FileTypesTable holds the schema information for the "file_types" table.
 	FileTypesTable = &schema.Table{

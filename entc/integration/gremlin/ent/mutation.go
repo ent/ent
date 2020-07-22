@@ -6319,6 +6319,7 @@ type FileTypeMutation struct {
 	id            *string
 	name          *string
 	_type         *filetype.Type
+	state         *filetype.State
 	clearedFields map[string]struct{}
 	files         map[string]struct{}
 	removedfiles  map[string]struct{}
@@ -6479,6 +6480,43 @@ func (m *FileTypeMutation) ResetType() {
 	m._type = nil
 }
 
+// SetState sets the state field.
+func (m *FileTypeMutation) SetState(f filetype.State) {
+	m.state = &f
+}
+
+// State returns the state value in the mutation.
+func (m *FileTypeMutation) State() (r filetype.State, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old state value of the FileType.
+// If the FileType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FileTypeMutation) OldState(ctx context.Context) (v filetype.State, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldState is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState reset all changes of the "state" field.
+func (m *FileTypeMutation) ResetState() {
+	m.state = nil
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (m *FileTypeMutation) AddFileIDs(ids ...string) {
 	if m.files == nil {
@@ -6535,12 +6573,15 @@ func (m *FileTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FileTypeMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, filetype.FieldName)
 	}
 	if m._type != nil {
 		fields = append(fields, filetype.FieldType)
+	}
+	if m.state != nil {
+		fields = append(fields, filetype.FieldState)
 	}
 	return fields
 }
@@ -6554,6 +6595,8 @@ func (m *FileTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case filetype.FieldType:
 		return m.GetType()
+	case filetype.FieldState:
+		return m.State()
 	}
 	return nil, false
 }
@@ -6567,6 +6610,8 @@ func (m *FileTypeMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldName(ctx)
 	case filetype.FieldType:
 		return m.OldType(ctx)
+	case filetype.FieldState:
+		return m.OldState(ctx)
 	}
 	return nil, fmt.Errorf("unknown FileType field %s", name)
 }
@@ -6589,6 +6634,13 @@ func (m *FileTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetType(v)
+		return nil
+	case filetype.FieldState:
+		v, ok := value.(filetype.State)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FileType field %s", name)
@@ -6645,6 +6697,9 @@ func (m *FileTypeMutation) ResetField(name string) error {
 		return nil
 	case filetype.FieldType:
 		m.ResetType()
+		return nil
+	case filetype.FieldState:
+		m.ResetState()
 		return nil
 	}
 	return fmt.Errorf("unknown FileType field %s", name)

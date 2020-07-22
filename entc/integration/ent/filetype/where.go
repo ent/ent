@@ -261,6 +261,54 @@ func TypeNotIn(vs ...Type) predicate.FileType {
 	})
 }
 
+// StateEQ applies the EQ predicate on the "state" field.
+func StateEQ(v State) predicate.FileType {
+	return predicate.FileType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldState), v))
+	})
+}
+
+// StateNEQ applies the NEQ predicate on the "state" field.
+func StateNEQ(v State) predicate.FileType {
+	return predicate.FileType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldState), v))
+	})
+}
+
+// StateIn applies the In predicate on the "state" field.
+func StateIn(vs ...State) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldState), v...))
+	})
+}
+
+// StateNotIn applies the NotIn predicate on the "state" field.
+func StateNotIn(vs ...State) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldState), v...))
+	})
+}
+
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.FileType {
 	return predicate.FileType(func(s *sql.Selector) {
