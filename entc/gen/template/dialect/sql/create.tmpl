@@ -24,7 +24,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			if {{ $.Receiver }}.ID == 0 {
 		{{- end }}
 			id := _spec.ID.Value.(int64)
-			{{ $.Receiver }}.ID = {{ $.ID.Type }}(id)
+			{{- if $.ID.IsString }}
+				{{ $.Receiver }}.ID = strconv.FormatInt(id, 10)
+			{{- else }}
+				{{ $.Receiver }}.ID = {{ $.ID.Type }}(id)
+			{{- end }}
 		{{- if $.ID.UserDefined }}
 			}
 		{{- end }}

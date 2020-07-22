@@ -44,7 +44,11 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
+			{{- if $.ID.IsString }}
+				{{ $receiver }}.ID = strconv.FormatInt(value.Int64, 10)
+			{{- else }}
+				{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
+			{{- end }}
 		{{- end }}
 		values = values[1:]
 		{{- range $i, $f := $.Fields }}

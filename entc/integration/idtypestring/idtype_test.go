@@ -1,0 +1,29 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+package idtype
+
+import (
+	"context"
+	"testing"
+
+	"github.com/facebookincubator/ent/entc/integration/idtypestring/ent"
+	"github.com/facebookincubator/ent/entc/integration/idtypestring/ent/migrate"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+)
+
+func TestIDTypeString(t *testing.T) {
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	require.Equal(t, "a8m", a8m.Name)
+	require.Equal(t, "1", a8m.ID)
+
+}
