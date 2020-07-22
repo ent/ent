@@ -53,6 +53,20 @@ func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
 	return ftu
 }
 
+// SetState sets the state field.
+func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
+	ftu.mutation.SetState(f)
+	return ftu
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
+	if f != nil {
+		ftu.SetState(*f)
+	}
+	return ftu
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftu *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
 	ftu.mutation.AddFileIDs(ids...)
@@ -93,6 +107,11 @@ func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 
@@ -183,6 +202,9 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.GetType(); ok {
 		v.Property(dsl.Single, filetype.FieldType, value)
 	}
+	if value, ok := ftu.mutation.State(); ok {
+		v.Property(dsl.Single, filetype.FieldState, value)
+	}
 	for _, id := range ftu.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
@@ -236,6 +258,20 @@ func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdate
 	return ftuo
 }
 
+// SetState sets the state field.
+func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
+	ftuo.mutation.SetState(f)
+	return ftuo
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
+	if f != nil {
+		ftuo.SetState(*f)
+	}
+	return ftuo
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
 	ftuo.mutation.AddFileIDs(ids...)
@@ -276,6 +312,11 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 	if v, ok := ftuo.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 
@@ -370,6 +411,9 @@ func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := ftuo.mutation.GetType(); ok {
 		v.Property(dsl.Single, filetype.FieldType, value)
+	}
+	if value, ok := ftuo.mutation.State(); ok {
+		v.Property(dsl.Single, filetype.FieldState, value)
 	}
 	for _, id := range ftuo.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()

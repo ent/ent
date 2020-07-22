@@ -44,6 +44,20 @@ func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
 	return ftc
 }
 
+// SetState sets the state field.
+func (ftc *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
+	ftc.mutation.SetState(f)
+	return ftc
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
+	if f != nil {
+		ftc.SetState(*f)
+	}
+	return ftc
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftc *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
 	ftc.mutation.AddFileIDs(ids...)
@@ -76,6 +90,15 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	if v, ok := ftc.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		v := filetype.DefaultState
+		ftc.mutation.SetState(v)
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -153,6 +176,14 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			Column: filetype.FieldType,
 		})
 		ft.Type = value
+	}
+	if value, ok := ftc.mutation.State(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldState,
+		})
+		ft.State = value
 	}
 	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

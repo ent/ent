@@ -23,6 +23,8 @@ type FileType struct {
 	Name string `json:"name,omitempty"`
 	// Type holds the value of the "type" field.
 	Type filetype.Type `json:"type,omitempty"`
+	// State holds the value of the "state" field.
+	State filetype.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileTypeQuery when eager-loading is set.
 	Edges FileTypeEdges `json:"edges"`
@@ -52,6 +54,7 @@ func (*FileType) scanValues() []interface{} {
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
 		&sql.NullString{}, // type
+		&sql.NullString{}, // state
 	}
 }
 
@@ -76,6 +79,11 @@ func (ft *FileType) assignValues(values ...interface{}) error {
 		return fmt.Errorf("unexpected type %T for field type", values[1])
 	} else if value.Valid {
 		ft.Type = filetype.Type(value.String)
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field state", values[2])
+	} else if value.Valid {
+		ft.State = filetype.State(value.String)
 	}
 	return nil
 }
@@ -112,6 +120,8 @@ func (ft *FileType) String() string {
 	builder.WriteString(ft.Name)
 	builder.WriteString(", type=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Type))
+	builder.WriteString(", state=")
+	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')
 	return builder.String()
 }

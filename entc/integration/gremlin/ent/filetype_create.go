@@ -46,6 +46,20 @@ func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
 	return ftc
 }
 
+// SetState sets the state field.
+func (ftc *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
+	ftc.mutation.SetState(f)
+	return ftc
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
+	if f != nil {
+		ftc.SetState(*f)
+	}
+	return ftc
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftc *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
 	ftc.mutation.AddFileIDs(ids...)
@@ -78,6 +92,15 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 	if v, ok := ftc.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		v := filetype.DefaultState
+		ftc.mutation.SetState(v)
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 	var (
@@ -148,6 +171,9 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.GetType(); ok {
 		v.Property(dsl.Single, filetype.FieldType, value)
+	}
+	if value, ok := ftc.mutation.State(); ok {
+		v.Property(dsl.Single, filetype.FieldState, value)
 	}
 	for _, id := range ftc.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()

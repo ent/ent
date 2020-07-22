@@ -1120,6 +1120,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 var (
 	_ = ent.CardExtension{}
 	_ = ent.Card{}.StaticField
+	_ = []filetype.State{filetype.StateOn, filetype.StateOff}
 	_ = []filetype.Type{filetype.TypeJPG, filetype.TypePNG, filetype.TypeSVG}
 )
 

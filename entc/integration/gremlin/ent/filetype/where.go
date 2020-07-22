@@ -212,6 +212,42 @@ func TypeNotIn(vs ...Type) predicate.FileType {
 	})
 }
 
+// StateEQ applies the EQ predicate on the "state" field.
+func StateEQ(v State) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.EQ(v))
+	})
+}
+
+// StateNEQ applies the NEQ predicate on the "state" field.
+func StateNEQ(v State) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.NEQ(v))
+	})
+}
+
+// StateIn applies the In predicate on the "state" field.
+func StateIn(vs ...State) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.Within(v...))
+	})
+}
+
+// StateNotIn applies the NotIn predicate on the "state" field.
+func StateNotIn(vs ...State) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.Without(v...))
+	})
+}
+
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {

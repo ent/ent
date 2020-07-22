@@ -52,6 +52,20 @@ func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
 	return ftu
 }
 
+// SetState sets the state field.
+func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
+	ftu.mutation.SetState(f)
+	return ftu
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
+	if f != nil {
+		ftu.SetState(*f)
+	}
+	return ftu
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftu *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.AddFileIDs(ids...)
@@ -92,6 +106,11 @@ func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 
@@ -176,6 +195,13 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: filetype.FieldType,
 		})
 	}
+	if value, ok := ftu.mutation.State(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldState,
+		})
+	}
 	if nodes := ftu.mutation.RemovedFilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -252,6 +278,20 @@ func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdate
 	return ftuo
 }
 
+// SetState sets the state field.
+func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
+	ftuo.mutation.SetState(f)
+	return ftuo
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
+	if f != nil {
+		ftuo.SetState(*f)
+	}
+	return ftuo
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
 	ftuo.mutation.AddFileIDs(ids...)
@@ -292,6 +332,11 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 	if v, ok := ftuo.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
 
@@ -372,6 +417,13 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: filetype.FieldType,
+		})
+	}
+	if value, ok := ftuo.mutation.State(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldState,
 		})
 	}
 	if nodes := ftuo.mutation.RemovedFilesIDs(); len(nodes) > 0 {

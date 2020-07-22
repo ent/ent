@@ -19,6 +19,8 @@ const (
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldState holds the string denoting the state field in the database.
+	FieldState = "state"
 
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
@@ -39,6 +41,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldType,
+	FieldState,
 }
 
 // Type defines the type for the type enum field.
@@ -68,9 +71,40 @@ func TypeValidator(_type Type) error {
 	}
 }
 
+// State defines the type for the state enum field.
+type State string
+
+// StateOn is the default State.
+const DefaultState = StateOn
+
+// State values.
+const (
+	StateOff State = "OFF"
+	StateOn  State = "ON"
+)
+
+func (s State) String() string {
+	return string(s)
+}
+
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
+func StateValidator(s State) error {
+	switch s {
+	case StateOff, StateOn:
+		return nil
+	default:
+		return fmt.Errorf("filetype: invalid enum value for state field: %q", s)
+	}
+}
+
 // Ptr returns a new pointer to the enum value.
 func (_type Type) Ptr() *Type {
 	return &_type
+}
+
+// Ptr returns a new pointer to the enum value.
+func (s State) Ptr() *State {
+	return &s
 }
 
 // comment from another template.

@@ -27,6 +27,12 @@ func (FileType) Fields() []ent.Field {
 				"JPG": "jpg",
 			}).
 			Default("png"),
+		field.Enum("state").
+			ValueMap(map[string]string{
+				"On":  "ON",
+				"Off": "OFF",
+			}).
+			Default("ON"),
 	}
 }
 
