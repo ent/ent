@@ -14,6 +14,7 @@ import (
 	"github.com/facebookincubator/ent"
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebookincubator/ent/entc/integration/ent/role"
 	"github.com/facebookincubator/ent/schema/field"
 )
 
@@ -126,6 +127,9 @@ func (FieldType) Fields() []ent.Field {
 		field.Float("null_float").
 			Optional().
 			GoType(&sql.NullFloat64{}),
+		field.Enum("role").
+			Default(string(role.Read)).
+			GoType(role.Role("role")),
 	}
 }
 

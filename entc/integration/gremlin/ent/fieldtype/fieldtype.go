@@ -8,6 +8,8 @@ package fieldtype
 
 import (
 	"fmt"
+
+	"github.com/facebookincubator/ent/entc/integration/ent/role"
 )
 
 const (
@@ -103,6 +105,8 @@ const (
 	FieldSchemaFloat32 = "schema_float32"
 	// FieldNullFloat holds the string denoting the null_float field in the database.
 	FieldNullFloat = "null_float"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
 )
 
 var (
@@ -134,6 +138,18 @@ func StateValidator(s State) error {
 		return nil
 	default:
 		return fmt.Errorf("fieldtype: invalid enum value for state field: %q", s)
+	}
+}
+
+const DefaultRole role.Role = "READ"
+
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
+func RoleValidator(r role.Role) error {
+	switch r {
+	case "ADMIN", "OWNER", "READ", "USER", "WRITE":
+		return nil
+	default:
+		return fmt.Errorf("fieldtype: invalid enum value for role field: %q", r)
 	}
 }
 

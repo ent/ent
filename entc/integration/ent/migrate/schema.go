@@ -97,6 +97,7 @@ var (
 		{Name: "schema_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "schema_float32", Type: field.TypeFloat32, Nullable: true},
 		{Name: "null_float", Type: field.TypeFloat64, Nullable: true},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "READ", "USER", "WRITE"}, Default: "READ"},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -107,7 +108,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[45]},
+				Columns: []*schema.Column{FieldTypesColumns[46]},
 
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,

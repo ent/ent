@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/facebookincubator/ent/entc/integration/ent/role"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/comment"
@@ -1276,6 +1277,7 @@ type FieldTypeMutation struct {
 	schema_float32             *schema.Float32
 	addschema_float32          *schema.Float32
 	null_float                 *sql.NullFloat64
+	role                       *role.Role
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -4099,6 +4101,43 @@ func (m *FieldTypeMutation) ResetNullFloat() {
 	delete(m.clearedFields, fieldtype.FieldNullFloat)
 }
 
+// SetRole sets the role field.
+func (m *FieldTypeMutation) SetRole(r role.Role) {
+	m.role = &r
+}
+
+// Role returns the role value in the mutation.
+func (m *FieldTypeMutation) Role() (r role.Role, exists bool) {
+	v := m.role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRole returns the old role value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldRole(ctx context.Context) (v role.Role, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRole is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRole: %w", err)
+	}
+	return oldValue.Role, nil
+}
+
+// ResetRole reset all changes of the "role" field.
+func (m *FieldTypeMutation) ResetRole() {
+	m.role = nil
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -4113,7 +4152,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 44)
+	fields := make([]string, 0, 45)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4246,6 +4285,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.null_float != nil {
 		fields = append(fields, fieldtype.FieldNullFloat)
 	}
+	if m.role != nil {
+		fields = append(fields, fieldtype.FieldRole)
+	}
 	return fields
 }
 
@@ -4342,6 +4384,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.SchemaFloat32()
 	case fieldtype.FieldNullFloat:
 		return m.NullFloat()
+	case fieldtype.FieldRole:
+		return m.Role()
 	}
 	return nil, false
 }
@@ -4439,6 +4483,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldSchemaFloat32(ctx)
 	case fieldtype.FieldNullFloat:
 		return m.OldNullFloat(ctx)
+	case fieldtype.FieldRole:
+		return m.OldRole(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4755,6 +4801,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNullFloat(v)
+		return nil
+	case fieldtype.FieldRole:
+		v, ok := value.(role.Role)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRole(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -5525,6 +5578,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldNullFloat:
 		m.ResetNullFloat()
+		return nil
+	case fieldtype.FieldRole:
+		m.ResetRole()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

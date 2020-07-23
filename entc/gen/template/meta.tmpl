@@ -87,38 +87,46 @@ const (
 
 {{/* define custom type for enum fields */}}
 {{ range $f := $.EnumFields }}
-	{{/* omit the package name from the type. */}}
-	{{ $enum := trimPackage $f.Type.String $.Package }}
-	// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
-	type {{ $enum }} string
+	{{ $enum := $f.Type }}
+	{{ $receiver := receiver $f.BuilderField }}
+	{{ if $f.HasGoType }}
+		{{ if $f.Default }}
+			const {{ $f.DefaultName }} {{ $enum }} = "{{ $f.DefaultValue }}"
+		{{ end }}
+	{{ else }}
+		{{/* omit the package name from the type. */}}
+		{{ $enum = trimPackage $f.Type.String $.Package }}
+		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
+		type {{ $enum }} string
 
-	{{- if $f.Default }}
-		{{- /*  find the enum that holds the default value. */ -}}
-		{{- range $e := $f.Enums }}
-			{{- if eq $e.Value $f.DefaultValue }}
-				// {{ $e.Name }} is the default {{ $enum }}.
-				const {{ $f.DefaultName }} = {{ $e.Name }}
+		{{- if $f.Default }}
+			{{- /*  find the enum that holds the default value. */ -}}
+			{{- range $e := $f.Enums }}
+				{{- if eq $e.Value $f.DefaultValue }}
+					// {{ $e.Name }} is the default {{ $enum }}.
+					const {{ $f.DefaultName }} = {{ $e.Name }}
+				{{- end }}
 			{{- end }}
 		{{- end }}
-	{{- end }}
 
-	// {{ $enum }} values.
-	const (
-		{{- range $e := $f.Enums }}
-			{{ $e.Name }} {{ $enum }} = "{{ $e.Value }}"
-		{{-  end }}
-	)
+		// {{ $enum }} values.
+		const (
+			{{- range $e := $f.Enums }}
+				{{ $e.Name }} {{ $enum }} = "{{ $e.Value }}"
+			{{-  end }}
+		)
 
-	{{ $receiver := receiver $f.BuilderField -}}
-	func ({{ $receiver }} {{ $enum }}) String() string {
-		return string({{ $receiver }})
-	}
+		func ({{ $receiver }} {{ $enum }}) String() string {
+			return string({{ $receiver }})
+		}
+	{{ end }}
+
 
 	{{ $name := $f.Validator }}
 	// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
 	func {{ $name }}({{ $receiver }} {{ $enum }}) error {
 		switch {{ $receiver }} {
-			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $e.Name }}{{ end }}:
+			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ if $f.HasGoType }}"{{ $e.Value }}"{{ else }}{{ $e.Name }}{{ end }}{{ end }}:
 				return nil
 			default:
 				return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})

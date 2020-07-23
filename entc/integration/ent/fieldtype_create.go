@@ -17,6 +17,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
+	"github.com/facebookincubator/ent/entc/integration/ent/role"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/schema/field"
 )
@@ -532,6 +533,20 @@ func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRole sets the role field.
+func (ftc *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
+	ftc.mutation.SetRole(r)
+	return ftc
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetRole(*r)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -572,6 +587,15 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftc.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.Role(); !ok {
+		v := fieldtype.DefaultRole
+		ftc.mutation.SetRole(v)
+	}
+	if v, ok := ftc.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return nil, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (
@@ -985,6 +1009,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldNullFloat,
 		})
 		ft.NullFloat = value
+	}
+	if value, ok := ftc.mutation.Role(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldRole,
+		})
+		ft.Role = value
 	}
 	return ft, _spec
 }
