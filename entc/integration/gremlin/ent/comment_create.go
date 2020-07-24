@@ -59,11 +59,8 @@ func (cc *CommentCreate) Mutation() *CommentMutation {
 
 // Save creates the Comment in the database.
 func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
-	if _, ok := cc.mutation.UniqueInt(); !ok {
-		return nil, &ValidationError{Name: "unique_int", err: errors.New("ent: missing required field \"unique_int\"")}
-	}
-	if _, ok := cc.mutation.UniqueFloat(); !ok {
-		return nil, &ValidationError{Name: "unique_float", err: errors.New("ent: missing required field \"unique_float\"")}
+	if err := cc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -99,6 +96,16 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 		panic(err)
 	}
 	return v
+}
+
+func (cc *CommentCreate) preSave() error {
+	if _, ok := cc.mutation.UniqueInt(); !ok {
+		return &ValidationError{Name: "unique_int", err: errors.New("ent: missing required field \"unique_int\"")}
+	}
+	if _, ok := cc.mutation.UniqueFloat(); !ok {
+		return &ValidationError{Name: "unique_float", err: errors.New("ent: missing required field \"unique_float\"")}
+	}
+	return nil
 }
 
 func (cc *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
@@ -149,4 +156,10 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// CommentCreateBulk is the builder for creating a bulk of Comment entities.
+type CommentCreateBulk struct {
+	config
+	builders []*CommentCreate
 }

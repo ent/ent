@@ -19,6 +19,7 @@ import (
 
 {{ $builder := print (pascal $.Name) "Create" }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 // {{ $builder }} is the builder for creating a {{ $.Name }} entity.
 type {{ $builder }} struct {
@@ -33,39 +34,9 @@ type {{ $builder }} struct {
 
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
-	{{- $mutation := print $receiver ".mutation" }}
-	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
-	{{- range $f := $fields }}
-		{{- if or $f.Default (and (not $f.Optional) (ne $f.Name $.ID.Name)) }}
-			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				{{- if $f.Default }}
-					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
-					{{ $mutation }}.Set{{ $f.StructField }}(v)
-				{{- else }}
-					return nil, &ValidationError{Name: "{{ $f.Name }}", err: errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")}
-				{{- end }}
-			}
-		{{- end }}
-		{{- with or $f.Validators $f.IsEnum }}
-			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-				{{- $basic := $f.BasicType "v" }}
-				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-					return nil, &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)}
-				}
-			}
-		{{- end }}
-	{{- end }}
-	{{- range $e := $.Edges }}
-		{{- if not $e.Optional }}
-			{{- if $e.Unique }}
-				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); !ok {
-			{{- else }}
-				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
-			{{- end }}
-				return nil, &ValidationError{Name: "{{ $e.Name }}", err: errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")}
-			}
-		{{- end }}
-	{{- end }}
+	if err := {{ $receiver }}.preSave(); err != nil {
+		return nil, err
+	}
 	var (
 		err error
 		node *{{ $.Name }}
@@ -102,9 +73,61 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} 
 	return v
 }
 
+func ({{ $receiver }} *{{ $builder }}) preSave() error {
+	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+	{{- range $f := $fields }}
+		{{- if or $f.Default (and (not $f.Optional) (ne $f.Name $.ID.Name)) }}
+			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
+				{{- if $f.Default }}
+					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
+					{{ $mutation }}.Set{{ $f.StructField }}(v)
+				{{- else }}
+					return &ValidationError{Name: "{{ $f.Name }}", err: errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")}
+				{{- end }}
+			}
+		{{- end }}
+		{{- with or $f.Validators $f.IsEnum }}
+			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+				{{- $basic := $f.BasicType "v" }}
+				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
+					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)}
+				}
+			}
+		{{- end }}
+	{{- end }}
+	{{- range $e := $.Edges }}
+		{{- if not $e.Optional }}
+			{{- if $e.Unique }}
+				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); !ok {
+			{{- else }}
+				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
+			{{- end }}
+				return &ValidationError{Name: "{{ $e.Name }}", err: errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")}
+			}
+		{{- end }}
+	{{- end }}
+	return nil
+}
+
 {{ with extend $ "Builder" $builder }}
 	{{ $tmpl := printf "dialect/%s/create" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
+{{ $bulk := printf "%sCreateBulk" (pascal $.Name) }}
+{{ $receiver = receiver $bulk }}
+
+// {{ $bulk }} is the builder for creating a bulk of {{ $.Name }} entities.
+type {{ $bulk }} struct {
+	config
+	builders []*{{  $builder }}
+}
+
+{{/* If the storage driver supports bulk creation */}}
+{{ $tmpl := printf "dialect/%s/create_bulk" $.Storage }}
+{{ if hasTemplate $tmpl }}
+    {{ with extend $ "Builder" $bulk "Reciever" $receiver }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
+{{ end }}
 {{ end }}

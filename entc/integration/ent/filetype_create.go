@@ -80,26 +80,8 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	if _, ok := ftc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
-	if _, ok := ftc.mutation.GetType(); !ok {
-		v := filetype.DefaultType
-		ftc.mutation.SetType(v)
-	}
-	if v, ok := ftc.mutation.GetType(); ok {
-		if err := filetype.TypeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
-	if _, ok := ftc.mutation.State(); !ok {
-		v := filetype.DefaultState
-		ftc.mutation.SetState(v)
-	}
-	if v, ok := ftc.mutation.State(); ok {
-		if err := filetype.StateValidator(v); err != nil {
-			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
+	if err := ftc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -135,6 +117,31 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 		panic(err)
 	}
 	return v
+}
+
+func (ftc *FileTypeCreate) preSave() error {
+	if _, ok := ftc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := ftc.mutation.GetType(); !ok {
+		v := filetype.DefaultType
+		ftc.mutation.SetType(v)
+	}
+	if v, ok := ftc.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		v := filetype.DefaultState
+		ftc.mutation.SetState(v)
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
@@ -205,4 +212,68 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return ft, _spec
+}
+
+// FileTypeCreateBulk is the builder for creating a bulk of FileType entities.
+type FileTypeCreateBulk struct {
+	config
+	builders []*FileTypeCreate
+}
+
+// Save creates the FileType entities in the database.
+func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
+	nodes := make([]*FileType, len(ftcb.builders))
+	mutators := make([]Mutator, len(ftcb.builders))
+	for i := range ftcb.builders {
+		func(i int, root context.Context) {
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				builder := ftcb.builders[i]
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*FileTypeMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ftcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(ftcb.builders[i].hooks) - 1; i >= 0; i-- {
+				mut = ftcb.builders[i].hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if _, err := mutators[0].Mutate(ctx, ftcb.builders[0].mutation); err != nil {
+		return nil, err
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
+	v, err := ftcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
