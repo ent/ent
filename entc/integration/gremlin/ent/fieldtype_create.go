@@ -18,6 +18,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/gremlin"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebookincubator/ent/entc/integration/ent/role"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
 )
@@ -533,6 +534,20 @@ func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRole sets the role field.
+func (ftc *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
+	ftc.mutation.SetRole(r)
+	return ftc
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetRole(*r)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -573,6 +588,15 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftc.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.Role(); !ok {
+		v := fieldtype.DefaultRole
+		ftc.mutation.SetRole(v)
+	}
+	if v, ok := ftc.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return nil, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (
@@ -760,6 +784,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
+	if value, ok := ftc.mutation.Role(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
 	return v.ValueMap(true)
 }

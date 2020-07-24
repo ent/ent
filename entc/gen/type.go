@@ -595,7 +595,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 	case f.Sensitive && f.Tag != "":
 		err = fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
 	case f.Info.Type == field.TypeEnum:
-		if tf.Enums, err = tf.enums(f); err == nil {
+		if tf.Enums, err = tf.enums(f); err == nil && !tf.HasGoType() {
 			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
 		}
@@ -861,6 +861,8 @@ func (f Field) BasicType(ident string) (expr string) {
 	}
 	t, rt := f.Type, f.Type.RType
 	switch t.Type {
+	case field.TypeEnum:
+		expr = ident
 	case field.TypeBool:
 		switch {
 		case rt.Kind == reflect.Bool:

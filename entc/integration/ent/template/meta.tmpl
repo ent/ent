@@ -1,7 +1,7 @@
 {{/* A template for adding additional fields to specific types. */}}
 {{ define "meta/additional/enums" }}
-	{{- range $f := $.Fields }}
-		{{- if $f.IsEnum }}
+	{{- range $f := $.EnumFields }}
+		{{- if not $f.HasGoType }}
 			{{ $enum := trimPackage $f.Type.String $.Package }}
 			{{ $receiver := receiver $f.BuilderField }}
 

@@ -326,6 +326,12 @@ func TestField_Tag(t *testing.T) {
 	assert.Equal(t, `json:"expired,omitempty"`, fd.Tag)
 }
 
+type Role string
+
+func (Role) Values() []string {
+	return []string{"admin", "owner"}
+}
+
 func TestField_Enums(t *testing.T) {
 	fd := field.Enum("role").
 		Values(
@@ -338,6 +344,15 @@ func TestField_Enums(t *testing.T) {
 	assert.Equal(t, "role", fd.Name)
 	assert.Equal(t, map[string]string{"admin": "admin", "master": "master", "user": "user"}, fd.Enums)
 	assert.Equal(t, "user", fd.Default)
+
+	fd = field.Enum("role").GoType(Role("")).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "field_test.Role", fd.Info.Ident)
+	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.Role", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+	assert.Equal(t, map[string]string{"admin": "admin", "owner": "owner"}, fd.Enums)
 }
 
 func TestField_UUID(t *testing.T) {

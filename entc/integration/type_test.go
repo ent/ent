@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/entc/integration/ent"
+	"github.com/facebookincubator/ent/entc/integration/ent/role"
 	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 
 	"github.com/stretchr/testify/require"
@@ -61,6 +62,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNullStr(sql.NullString{String: "str", Valid: true}).
 		SetLink(schema.Link{URL: link}).
 		SetNullLink(schema.Link{URL: link}).
+		SetRole(role.Admin).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)

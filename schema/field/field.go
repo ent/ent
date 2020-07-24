@@ -732,6 +732,22 @@ func (b *enumBuilder) Annotations(annotations ...Annotation) *enumBuilder {
 	return b
 }
 
+// EnumValues defines the interface for getting the enum values.
+type EnumValues interface {
+	Values() []string
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Enum("enum").
+//		GoType(role.Enum("role"))
+//
+func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
+	b.Values(ev.Values()...)
+	b.desc.goType(ev, stringType)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
 	return b.desc
