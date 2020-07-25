@@ -839,7 +839,7 @@ func (f Field) HasGoType() bool {
 // ConvertedToBasic indicates if the Go type of the field
 // can be converted to basic type (string, int, etc).
 func (f Field) ConvertedToBasic() bool {
-	return !f.HasGoType() || f.BasicType("") != ""
+	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
 var (
