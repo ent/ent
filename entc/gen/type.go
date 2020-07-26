@@ -754,7 +754,7 @@ func (f Field) NullTypeField(rec string) string {
 	case field.TypeEnum:
 		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
-		expr = fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String()))
+		expr = f.goType(fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String())))
 	case field.TypeTime:
 		expr = fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
@@ -763,7 +763,7 @@ func (f Field) NullTypeField(rec string) string {
 		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
 		expr = fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
 	}
-	return f.goType(expr)
+	return expr
 }
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
