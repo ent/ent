@@ -388,12 +388,12 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	if value, ok := values[38].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_int", values[38])
 	} else if value.Valid {
-		ft.SchemaInt = schema.Int(schema.Int(value.Int64))
+		ft.SchemaInt = schema.Int(value.Int64)
 	}
 	if value, ok := values[39].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_int8", values[39])
 	} else if value.Valid {
-		ft.SchemaInt8 = schema.Int8(schema.Int8(value.Int64))
+		ft.SchemaInt8 = schema.Int8(value.Int64)
 	}
 	if value, ok := values[40].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_int64", values[40])
@@ -408,7 +408,7 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	if value, ok := values[42].(*sql.NullFloat64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_float32", values[42])
 	} else if value.Valid {
-		ft.SchemaFloat32 = schema.Float32(schema.Float32(value.Float64))
+		ft.SchemaFloat32 = schema.Float32(value.Float64)
 	}
 	if value, ok := values[43].(*sql.NullFloat64); !ok {
 		return fmt.Errorf("unexpected type %T for field null_float", values[43])
@@ -418,7 +418,7 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	if value, ok := values[44].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field role", values[44])
 	} else if value.Valid {
-		ft.Role = role.Role(role.Role(value.String))
+		ft.Role = role.Role(value.String)
 	}
 	values = values[45:]
 	if len(values) == len(fieldtype.ForeignKeys) {
