@@ -66,6 +66,8 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeInt, Increment: true},
+		{Name: "mixed_string", Type: field.TypeString, Default: "default"},
+		{Name: "mixed_enum", Type: field.TypeEnum, Enums: []string{"off", "on"}, Default: "on"},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "nickname", Type: field.TypeString},
@@ -87,7 +89,7 @@ var (
 			{
 				Name:    "user_phone_age",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[4], UsersColumns[1]},
+				Columns: []*schema.Column{UsersColumns[6], UsersColumns[3]},
 			},
 		},
 	}

@@ -25,6 +25,34 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
+// SetMixedString sets the mixed_string field.
+func (uc *UserCreate) SetMixedString(s string) *UserCreate {
+	uc.mutation.SetMixedString(s)
+	return uc
+}
+
+// SetNillableMixedString sets the mixed_string field if the given value is not nil.
+func (uc *UserCreate) SetNillableMixedString(s *string) *UserCreate {
+	if s != nil {
+		uc.SetMixedString(*s)
+	}
+	return uc
+}
+
+// SetMixedEnum sets the mixed_enum field.
+func (uc *UserCreate) SetMixedEnum(ue user.MixedEnum) *UserCreate {
+	uc.mutation.SetMixedEnum(ue)
+	return uc
+}
+
+// SetNillableMixedEnum sets the mixed_enum field if the given value is not nil.
+func (uc *UserCreate) SetNillableMixedEnum(ue *user.MixedEnum) *UserCreate {
+	if ue != nil {
+		uc.SetMixedEnum(*ue)
+	}
+	return uc
+}
+
 // SetAge sets the age field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
@@ -227,6 +255,19 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 func (uc *UserCreate) preSave() error {
+	if _, ok := uc.mutation.MixedString(); !ok {
+		v := user.DefaultMixedString
+		uc.mutation.SetMixedString(v)
+	}
+	if _, ok := uc.mutation.MixedEnum(); !ok {
+		v := user.DefaultMixedEnum
+		uc.mutation.SetMixedEnum(v)
+	}
+	if v, ok := uc.mutation.MixedEnum(); ok {
+		if err := user.MixedEnumValidator(v); err != nil {
+			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+		}
+	}
 	if _, ok := uc.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New("entv2: missing required field \"age\"")}
 	}
@@ -286,6 +327,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if id, ok := uc.mutation.ID(); ok {
 		u.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := uc.mutation.MixedString(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldMixedString,
+		})
+		u.MixedString = value
+	}
+	if value, ok := uc.mutation.MixedEnum(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldMixedEnum,
+		})
+		u.MixedEnum = value
 	}
 	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

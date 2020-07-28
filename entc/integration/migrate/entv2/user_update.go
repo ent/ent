@@ -33,6 +33,34 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
+// SetMixedString sets the mixed_string field.
+func (uu *UserUpdate) SetMixedString(s string) *UserUpdate {
+	uu.mutation.SetMixedString(s)
+	return uu
+}
+
+// SetNillableMixedString sets the mixed_string field if the given value is not nil.
+func (uu *UserUpdate) SetNillableMixedString(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetMixedString(*s)
+	}
+	return uu
+}
+
+// SetMixedEnum sets the mixed_enum field.
+func (uu *UserUpdate) SetMixedEnum(ue user.MixedEnum) *UserUpdate {
+	uu.mutation.SetMixedEnum(ue)
+	return uu
+}
+
+// SetNillableMixedEnum sets the mixed_enum field if the given value is not nil.
+func (uu *UserUpdate) SetNillableMixedEnum(ue *user.MixedEnum) *UserUpdate {
+	if ue != nil {
+		uu.SetMixedEnum(*ue)
+	}
+	return uu
+}
+
 // SetAge sets the age field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
@@ -262,6 +290,11 @@ func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	if v, ok := uu.mutation.MixedEnum(); ok {
+		if err := user.MixedEnumValidator(v); err != nil {
+			return 0, &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+		}
+	}
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return 0, &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
@@ -339,6 +372,20 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := uu.mutation.MixedString(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldMixedString,
+		})
+	}
+	if value, ok := uu.mutation.MixedEnum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldMixedEnum,
+		})
 	}
 	if value, ok := uu.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -576,6 +623,34 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
+// SetMixedString sets the mixed_string field.
+func (uuo *UserUpdateOne) SetMixedString(s string) *UserUpdateOne {
+	uuo.mutation.SetMixedString(s)
+	return uuo
+}
+
+// SetNillableMixedString sets the mixed_string field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableMixedString(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetMixedString(*s)
+	}
+	return uuo
+}
+
+// SetMixedEnum sets the mixed_enum field.
+func (uuo *UserUpdateOne) SetMixedEnum(ue user.MixedEnum) *UserUpdateOne {
+	uuo.mutation.SetMixedEnum(ue)
+	return uuo
+}
+
+// SetNillableMixedEnum sets the mixed_enum field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableMixedEnum(ue *user.MixedEnum) *UserUpdateOne {
+	if ue != nil {
+		uuo.SetMixedEnum(*ue)
+	}
+	return uuo
+}
+
 // SetAge sets the age field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
@@ -805,6 +880,11 @@ func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if v, ok := uuo.mutation.MixedEnum(); ok {
+		if err := user.MixedEnumValidator(v); err != nil {
+			return nil, &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+		}
+	}
 	if v, ok := uuo.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return nil, &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
@@ -881,6 +961,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if value, ok := uuo.mutation.MixedString(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldMixedString,
+		})
+	}
+	if value, ok := uuo.mutation.MixedEnum(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldMixedEnum,
+		})
+	}
 	if value, ok := uuo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

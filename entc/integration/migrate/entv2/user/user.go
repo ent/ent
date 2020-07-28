@@ -15,6 +15,10 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "oid"
+	// FieldMixedString holds the string denoting the mixed_string field in the database.
+	FieldMixedString = "mixed_string"
+	// FieldMixedEnum holds the string denoting the mixed_enum field in the database.
+	FieldMixedEnum = "mixed_enum"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
@@ -70,6 +74,8 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldMixedString,
+	FieldMixedEnum,
 	FieldAge,
 	FieldName,
 	FieldNickname,
@@ -89,11 +95,39 @@ var (
 )
 
 var (
+	// DefaultMixedString holds the default value on creation for the mixed_string field.
+	DefaultMixedString string
 	// DefaultPhone holds the default value on creation for the phone field.
 	DefaultPhone string
 	// DefaultTitle holds the default value on creation for the title field.
 	DefaultTitle string
 )
+
+// MixedEnum defines the type for the mixed_enum enum field.
+type MixedEnum string
+
+// MixedEnumOn is the default MixedEnum.
+const DefaultMixedEnum = MixedEnumOn
+
+// MixedEnum values.
+const (
+	MixedEnumOff MixedEnum = "off"
+	MixedEnumOn  MixedEnum = "on"
+)
+
+func (me MixedEnum) String() string {
+	return string(me)
+}
+
+// MixedEnumValidator is a validator for the "mixed_enum" field enum values. It is called by the builders before save.
+func MixedEnumValidator(me MixedEnum) error {
+	switch me {
+	case MixedEnumOff, MixedEnumOn:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for mixed_enum field: %q", me)
+	}
+}
 
 // State defines the type for the state enum field.
 type State string

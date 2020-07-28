@@ -15,8 +15,14 @@ import (
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescMixedString is the schema descriptor for mixed_string field.
+	userDescMixedString := userMixinFields0[0].Descriptor()
+	// user.DefaultMixedString holds the default value on creation for the mixed_string field.
+	user.DefaultMixedString = userDescMixedString.Default.(string)
 	// userDescPhone is the schema descriptor for phone field.
 	userDescPhone := userFields[4].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.
