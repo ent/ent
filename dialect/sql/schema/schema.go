@@ -215,7 +215,7 @@ func (c *Column) ScanDefault(value string) error {
 			return fmt.Errorf("scanning bool value for column %q: %v", c.Name, err)
 		}
 		c.Default = v.Bool
-	case c.Type == field.TypeString:
+	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
 			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
@@ -228,7 +228,7 @@ func (c *Column) ScanDefault(value string) error {
 		}
 		c.Default = v.String
 	default:
-		return fmt.Errorf("unsupported type: %v", c.Type)
+		return fmt.Errorf("unsupported default type: %v", c.Type)
 	}
 	return nil
 }
@@ -256,7 +256,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 // supportDefault reports if the column type supports default value.
 func (c Column) supportDefault() bool {
 	switch {
-	case c.Type == field.TypeString:
+	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		return c.Size < 1<<16 // not a text.
 	case c.Type.Numeric(), c.Type == field.TypeBool:
 		return true
