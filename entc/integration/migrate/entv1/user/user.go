@@ -41,6 +41,8 @@ const (
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 
+	// CarFieldID holds the string denoting the id field of the Car.
+	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ParentTable is the table the holds the parent relation/edge.

@@ -107,6 +107,8 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyIDX(ctx))
 	xabi := client.Pet.Create().SetID("xabi").AddFriends(pedro).SetBestFriend(pedro).SaveX(ctx)
 	require.Equal(t, "xabi", xabi.ID)
+	pedro = client.Pet.Query().Where(pet.HasOwnerWith(user.ID(a8m.ID))).OnlyX(ctx)
+	require.Equal(t, "pedro", pedro.ID)
 
 	pets := client.Pet.Query().WithFriends().WithBestFriend().Order(ent.Asc(pet.FieldID)).AllX(ctx)
 	require.Len(t, pets, 2)

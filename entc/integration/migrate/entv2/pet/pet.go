@@ -15,6 +15,8 @@ const (
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 
+	// UserFieldID holds the string denoting the id field of the User.
+	UserFieldID = "oid"
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
 	// OwnerTable is the table the holds the owner relation/edge.
