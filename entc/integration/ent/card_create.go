@@ -325,8 +325,10 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 			mutators[i] = mut
 		}(i, ctx)
 	}
-	if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
-		return nil, err
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+			return nil, err
+		}
 	}
 	return nodes, nil
 }

@@ -239,8 +239,10 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 			mutators[i] = mut
 		}(i, ctx)
 	}
-	if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
-		return nil, err
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
 	}
 	return nodes, nil
 }

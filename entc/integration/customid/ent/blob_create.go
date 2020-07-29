@@ -249,8 +249,10 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 			mutators[i] = mut
 		}(i, ctx)
 	}
-	if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
-		return nil, err
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
 	}
 	return nodes, nil
 }
