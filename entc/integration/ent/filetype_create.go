@@ -263,8 +263,10 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 			mutators[i] = mut
 		}(i, ctx)
 	}
-	if _, err := mutators[0].Mutate(ctx, ftcb.builders[0].mutation); err != nil {
-		return nil, err
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ftcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
 	}
 	return nodes, nil
 }
