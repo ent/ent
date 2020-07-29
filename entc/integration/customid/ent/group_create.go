@@ -159,8 +159,8 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	mutators := make([]Mutator, len(gcb.builders))
 	for i := range gcb.builders {
 		func(i int, root context.Context) {
+			builder := gcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := gcb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -191,8 +191,8 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				}
 				return nodes[i], nil
 			})
-			for i := len(gcb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = gcb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

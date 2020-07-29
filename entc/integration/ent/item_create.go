@@ -112,8 +112,8 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 	mutators := make([]Mutator, len(icb.builders))
 	for i := range icb.builders {
 		func(i int, root context.Context) {
+			builder := icb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := icb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -142,8 +142,8 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
-			for i := len(icb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = icb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

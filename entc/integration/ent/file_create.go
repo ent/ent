@@ -318,8 +318,8 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 	mutators := make([]Mutator, len(fcb.builders))
 	for i := range fcb.builders {
 		func(i int, root context.Context) {
+			builder := fcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := fcb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -348,8 +348,8 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
-			for i := len(fcb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = fcb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

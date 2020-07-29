@@ -1041,8 +1041,8 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 	mutators := make([]Mutator, len(ftcb.builders))
 	for i := range ftcb.builders {
 		func(i int, root context.Context) {
+			builder := ftcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := ftcb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -1071,8 +1071,8 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
-			for i := len(ftcb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = ftcb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

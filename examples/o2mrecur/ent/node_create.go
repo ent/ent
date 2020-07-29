@@ -202,8 +202,8 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	mutators := make([]Mutator, len(ncb.builders))
 	for i := range ncb.builders {
 		func(i int, root context.Context) {
+			builder := ncb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := ncb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -232,8 +232,8 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
-			for i := len(ncb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = ncb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

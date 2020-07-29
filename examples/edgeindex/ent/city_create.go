@@ -165,8 +165,8 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 	mutators := make([]Mutator, len(ccb.builders))
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
+			builder := ccb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := ccb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -195,8 +195,8 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
-			for i := len(ccb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = ccb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

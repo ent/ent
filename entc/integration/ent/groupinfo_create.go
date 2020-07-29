@@ -191,8 +191,8 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 	mutators := make([]Mutator, len(gicb.builders))
 	for i := range gicb.builders {
 		func(i int, root context.Context) {
+			builder := gicb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := gicb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -221,8 +221,8 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
-			for i := len(gicb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = gicb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)
