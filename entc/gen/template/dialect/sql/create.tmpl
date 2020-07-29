@@ -83,8 +83,8 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 	mutators := make([]Mutator, len({{ $receiver }}.builders))
 	for i := range {{ $receiver }}.builders {
 		func(i int, root context.Context) {
+			builder := {{ $receiver }}.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := {{ $receiver }}.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -123,8 +123,8 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				{{- end }}
 				return nodes[i], nil
 			})
-			for i := len({{ $receiver }}.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = {{ $receiver }}.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

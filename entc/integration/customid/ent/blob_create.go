@@ -215,8 +215,8 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 	mutators := make([]Mutator, len(bcb.builders))
 	for i := range bcb.builders {
 		func(i int, root context.Context) {
+			builder := bcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				builder := bcb.builders[i]
 				if err := builder.preSave(); err != nil {
 					return nil, err
 				}
@@ -243,8 +243,8 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 				}
 				return nodes[i], nil
 			})
-			for i := len(bcb.builders[i].hooks) - 1; i >= 0; i-- {
-				mut = bcb.builders[i].hooks[i](mut)
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)
