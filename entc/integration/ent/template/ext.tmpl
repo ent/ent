@@ -11,6 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ range $n := $.Nodes }}
 	{{ $hasExt := false }}
 	{{ range $f := $n.Fields }}{{ if $f.Annotations.Extension }}{{ $hasExt = true }}{{ end }}{{ end }}
+	{{ range $e := $n.Edges }}{{ if $e.Annotations.Extension }}{{ $hasExt = true }}{{ end }}{{ end }}
 	{{/* If one or fields contain the "Extension" annotation */}}
 	{{ if $hasExt }}
 		// {{ $n.Name }}Extension is a type for holding the extension information defined in the schema.
@@ -18,6 +19,11 @@ in the LICENSE file in the root directory of this source tree.
 			{{- range $f := $n.Fields }}
 				{{- with $ant := $f.Annotations.Extension }}
 					{{ $f.StructField }} {{ $ant.Type }}
+				{{- end }}
+			{{- end }}
+			{{- range $e := $n.Edges }}
+				{{- with $ant := $e.Annotations.Extension }}
+					{{ $e.StructField }} {{ $ant.Type }}
 				{{- end }}
 			{{- end }}
 		}

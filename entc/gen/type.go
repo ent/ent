@@ -77,8 +77,8 @@ type (
 		// UserDefined indicates that this field was defined by the loaded schema.
 		// Unlike default id field, which is defined by the generator.
 		UserDefined bool
-		// Annotations that were defined in the field schema.
-		// The mapping is from the Annotation.Name() to the decoded object.
+		// Annotations that were defined for the field in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
 		Annotations map[string]interface{}
 	}
 
@@ -110,6 +110,9 @@ type (
 		//	edge.To("spouse", User.Type).Unique()   // one 2 one.
 		//
 		Bidi bool
+		// Annotations that were defined for the edge in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Relation holds the relational database information for edges.
