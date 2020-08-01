@@ -78,6 +78,7 @@ func JSON(name string, typ interface{}) *jsonBuilder {
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		info.Nillable = true
+		info.PkgPath = pkgPath(t)
 	}
 	return &jsonBuilder{&Descriptor{
 		Name: name,
@@ -938,4 +939,16 @@ func indirect(t reflect.Type) reflect.Type {
 		t = t.Elem()
 	}
 	return t
+}
+
+func pkgPath(t reflect.Type) string {
+	pkg := t.PkgPath()
+	if pkg != "" {
+		return pkg
+	}
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		return pkgPath(t.Elem())
+	}
+	return pkg
 }

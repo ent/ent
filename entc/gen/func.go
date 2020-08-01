@@ -126,10 +126,10 @@ func pascalWords(words []string) string {
 
 // pascal converts the given name into a PascalCase.
 //
-//	user_info => UserInfo
-//	full_name => FullName
-//	user_id   => UserID
-//	full-admin   => FullAdmin
+//	user_info 	=> UserInfo
+//	full_name 	=> FullName
+//	user_id   	=> UserID
+//	full-admin	=> FullAdmin
 //
 func pascal(s string) string {
 	words := strings.FieldsFunc(s, isSeparator)

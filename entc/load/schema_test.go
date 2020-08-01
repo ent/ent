@@ -135,6 +135,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "uuid", schema.Fields[7].Name)
 		require.Equal(t, field.TypeUUID, schema.Fields[7].Info.Type)
 		require.True(t, schema.Fields[7].Default)
+		require.Equal(t, "github.com/google/uuid", schema.Fields[7].Info.PkgPath)
 
 		require.Len(t, schema.Edges, 2)
 		require.Equal(t, "groups", schema.Edges[0].Name)
