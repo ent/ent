@@ -17,7 +17,7 @@ import (
 	{{- end }}
 )
 
-{{ $builder := print (pascal $.Name) "Create" }}
+{{ $builder := $.CreateName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 

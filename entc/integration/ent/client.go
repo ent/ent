@@ -262,7 +262,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	return &CardDeleteOne{builder}
 }
 
-// Create returns a query builder for Card.
+// Query returns a query builder for Card.
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
@@ -382,7 +382,7 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 	return &CommentDeleteOne{builder}
 }
 
-// Create returns a query builder for Comment.
+// Query returns a query builder for Comment.
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{config: c.config}
 }
@@ -470,7 +470,7 @@ func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 	return &FieldTypeDeleteOne{builder}
 }
 
-// Create returns a query builder for FieldType.
+// Query returns a query builder for FieldType.
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{config: c.config}
 }
@@ -558,7 +558,7 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	return &FileDeleteOne{builder}
 }
 
-// Create returns a query builder for File.
+// Query returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{config: c.config}
 }
@@ -694,7 +694,7 @@ func (c *FileTypeClient) DeleteOneID(id int) *FileTypeDeleteOne {
 	return &FileTypeDeleteOne{builder}
 }
 
-// Create returns a query builder for FileType.
+// Query returns a query builder for FileType.
 func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{config: c.config}
 }
@@ -798,7 +798,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -950,7 +950,7 @@ func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 	return &GroupInfoDeleteOne{builder}
 }
 
-// Create returns a query builder for GroupInfo.
+// Query returns a query builder for GroupInfo.
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{config: c.config}
 }
@@ -1054,7 +1054,7 @@ func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
 	return &ItemDeleteOne{builder}
 }
 
-// Create returns a query builder for Item.
+// Query returns a query builder for Item.
 func (c *ItemClient) Query() *ItemQuery {
 	return &ItemQuery{config: c.config}
 }
@@ -1142,7 +1142,7 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	return &NodeDeleteOne{builder}
 }
 
-// Create returns a query builder for Node.
+// Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
 }
@@ -1262,7 +1262,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -1382,7 +1382,7 @@ func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 	return &SpecDeleteOne{builder}
 }
 
-// Create returns a query builder for Spec.
+// Query returns a query builder for Spec.
 func (c *SpecClient) Query() *SpecQuery {
 	return &SpecQuery{config: c.config}
 }
@@ -1486,7 +1486,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }

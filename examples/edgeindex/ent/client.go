@@ -192,7 +192,7 @@ func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
 	return &CityDeleteOne{builder}
 }
 
-// Create returns a query builder for City.
+// Query returns a query builder for City.
 func (c *CityClient) Query() *CityQuery {
 	return &CityQuery{config: c.config}
 }
@@ -296,7 +296,7 @@ func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 	return &StreetDeleteOne{builder}
 }
 
-// Create returns a query builder for Street.
+// Query returns a query builder for Street.
 func (c *StreetClient) Query() *StreetQuery {
 	return &StreetQuery{config: c.config}
 }

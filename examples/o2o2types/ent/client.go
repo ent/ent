@@ -192,7 +192,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	return &CardDeleteOne{builder}
 }
 
-// Create returns a query builder for Card.
+// Query returns a query builder for Card.
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
@@ -296,7 +296,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }

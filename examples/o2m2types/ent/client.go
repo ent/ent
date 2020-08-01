@@ -192,7 +192,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -296,7 +296,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }
