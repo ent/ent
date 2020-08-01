@@ -59,7 +59,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
-	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print (pascal $e.Type.Name) "FieldID" }}{{ end -}}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, {{ $.ID.Constant }}),
@@ -78,7 +78,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
-	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print (pascal $e.Type.Name) "FieldID" }}{{ end -}}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, {{ $.ID.Constant }}),

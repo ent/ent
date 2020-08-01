@@ -7,6 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "client" }}
 
 {{ $pkg := base $.Config.Package }}
+{{ $pascalName := $pascalName }}
 {{ template "header" $ }}
 
 import (
@@ -32,7 +33,7 @@ type Client struct {
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
-		{{ $n.Name }} *{{ $n.Name }}Client
+		{{ $n.Name }} *{{ $pascalName }}Client
 	{{- end }}
 	{{ template "client/fields/additional" $ }}
 }
@@ -51,7 +52,7 @@ func (c *Client) init() {
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
 	{{- range $n := $.Nodes }}
-    	c.{{ $n.Name }} =  New{{ $n.Name }}Client(c.config)
+    	c.{{ $n.Name }} =  New{{ $pascalName }}Client(c.config)
 	{{- end }}
 }
 
@@ -83,7 +84,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx: ctx,
 		config: cfg,
 		{{ range $_, $n := $.Nodes -}}
-			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
+			{{ $n.Name }}: New{{ $pascalName }}Client(cfg),
 		{{ end -}}
 	}, nil
 }
@@ -126,7 +127,7 @@ func (c *Client) Use(hooks ...Hook) {
 
 
 {{ range $_, $n := $.Nodes }}
-{{ $client := print $n.Name "Client" }}
+{{ $client := print $pascalName "Client" }}
 // {{ $client }} is a client for the {{ $n.Name }} schema.
 type {{ $client }} struct {
 	config
@@ -146,56 +147,56 @@ func (c *{{ $client }}) Use(hooks ...Hook) {
 }
 
 // Create returns a create builder for {{ $n.Name }}.
-func (c *{{ $client }}) Create() *{{ $n.Name }}Create {
+func (c *{{ $client }}) Create() *{{ $pascalName }}Create {
 	mutation := new{{ $n.MutationName }}(c.config, OpCreate)
-	return &{{ $n.Name }}Create{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $pascalName }}Create{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // BulkCreate returns a builder for creating a bulk of {{ $n.Name }} entities.
-func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.Name }}Create) *{{ $n.Name }}CreateBulk {
-	return &{{ $n.Name }}CreateBulk{config: c.config, builders: builders}
+func (c *{{ $client }}) CreateBulk(builders ...*{{ $pascalName }}Create) *{{ $pascalName }}CreateBulk {
+	return &{{ $pascalName }}CreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for {{ $n.Name }}.
-func (c *{{ $client }}) Update() *{{ $n.Name }}Update {
+func (c *{{ $client }}) Update() *{{ $pascalName }}Update {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdate)
-	return &{{ $n.Name }}Update{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $pascalName }}Update{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}UpdateOne {
+func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $pascalName }}UpdateOne {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
-	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $pascalName }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}UpdateOne {
+func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{  $pascalName }}UpdateOne {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
-	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{  $pascalName }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for {{ $n.Name }}.
-func (c *{{ $client }}) Delete() *{{ $n.Name }}Delete {
+func (c *{{ $client }}) Delete() *{{ $pascalName }}Delete {
 	mutation := new{{ $n.MutationName }}(c.config, OpDelete)
-	return &{{ $n.Name }}Delete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $pascalName }}Delete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}DeleteOne {
+func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $pascalName }}DeleteOne {
 	return c.DeleteOneID({{ $rec }}.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}DeleteOne {
+func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $pascalName }}DeleteOne {
 	builder := c.Delete().Where({{ $n.Package }}.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &{{ $n.Name }}DeleteOne{builder}
+	return &{{ $pascalName }}DeleteOne{builder}
 }
 
 // Create returns a query builder for {{ $n.Name }}.
-func (c *{{ $client }}) Query() *{{ $n.Name }}Query {
-	return &{{ $n.Name }}Query{config: c.config}
+func (c *{{ $client }}) Query() *{{ $pascalName }}Query {
+	return &{{ $pascalName }}Query{config: c.config}
 }
 
 // Get returns a {{ $n.Name }} entity by its id.

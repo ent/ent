@@ -8,8 +8,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/meta/constants" }}
 	{{- range $t := $.RelatedTypes }}
 		{{- if ne $t.ID.StorageKey $.ID.StorageKey }}
-			// {{ $t.Name }}FieldID holds the string denoting the id field of the {{ $t.Name }}.
-			{{ $t.Name }}FieldID = "{{ $t.ID.StorageKey }}"
+			// {{ pascal $t.Name }}FieldID holds the string denoting the id field of the {{ $t.Name }}.
+			{{ pascal $t.Name }}FieldID = "{{ $t.ID.StorageKey }}"
 		{{- end }}
 	{{- end }}
 	// Table holds the table name of the {{ lower $.Name }} in the database.

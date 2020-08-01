@@ -18,7 +18,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		config: cfg,
 		{{ range $_, $n := $.Nodes -}}
-			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
+			{{ $n.Name }}: New{{ pascal $n.Name }}Client(cfg),
 		{{ end -}}
 	}, nil
 }

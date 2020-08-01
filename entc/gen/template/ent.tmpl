@@ -7,6 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "model" }}
 
 {{ $pkg := base $.Config.Package }}
+{{ $pascalName := $pascalName }}
 {{ template "header" $ }}
 
 {{ template "import" $ }}
@@ -22,8 +23,8 @@ type {{ $.Name }} struct {
 	{{- end }}
 	{{- with $.Edges }}
 		// Edges holds the relations/edges for other nodes in the graph.
-		// The values are being populated by the {{ $.Name }}Query when eager-loading is set.
-		Edges {{ $.Name }}Edges `json:"edges"`
+		// The values are being populated by the {{ $pascalName }}Query when eager-loading is set.
+		Edges {{ $pascalName }}Edges `json:"edges"`
 	{{- end -}}
 	{{- /* Additional fields to add by the storage driver. */}}
 	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
@@ -35,8 +36,8 @@ type {{ $.Name }} struct {
 }
 
 {{- with $.Edges }}
-// {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
-type {{ $.Name }}Edges struct {
+// {{ $pascalName }}Edges holds the relations/edges for other nodes in the graph.
+type {{ $pascalName }}Edges struct {
 	{{- range $e := . }}
 		// {{ $e.StructField }} holds the value of the {{ $e.Name }} edge.
 		{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
@@ -49,7 +50,7 @@ type {{ $.Name }}Edges struct {
 {{- range $i, $e := . }}
 	// {{ $e.StructField }}OrErr returns the {{ $e.StructField }} value or an error if the edge
 	// was not loaded in eager-loading{{ if $e.Unique }}, or loaded but was not found{{ end }}.
-	func (e {{ $.Name }}Edges) {{ $e.StructField }}OrErr() ({{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }}, error) {
+	func (e {{ $pascalName }}Edges) {{ $e.StructField }}OrErr() ({{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }}, error) {
 		if e.loadedTypes[{{ $i }}] {
 			{{- if $e.Unique }}
 				if e.{{ $e.StructField }} == nil {
@@ -74,15 +75,15 @@ type {{ $.Name }}Edges struct {
 	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the {{ $e.Name }} edge of the {{ $.Name }}.
 	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.Name}}Query {
-		return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
+		return (&{{ $pascalName }}Client{config: {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
 	}
 {{ end }}
 
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that, you need to call {{ $.Name }}.Unwrap() before calling this method, if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
-func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.Name }}UpdateOne {
-	return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).UpdateOne({{ $receiver }})
+func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $pascalName }}UpdateOne {
+	return (&{{ $pascalName }}Client{config: {{ $receiver }}.config}).UpdateOne({{ $receiver }})
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
