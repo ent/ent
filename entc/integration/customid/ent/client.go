@@ -214,7 +214,7 @@ func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 	return &BlobDeleteOne{builder}
 }
 
-// Create returns a query builder for Blob.
+// Query returns a query builder for Blob.
 func (c *BlobClient) Query() *BlobQuery {
 	return &BlobQuery{config: c.config}
 }
@@ -334,7 +334,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	return &CarDeleteOne{builder}
 }
 
-// Create returns a query builder for Car.
+// Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{config: c.config}
 }
@@ -438,7 +438,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -542,7 +542,7 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -694,7 +694,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }

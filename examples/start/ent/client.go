@@ -199,7 +199,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	return &CarDeleteOne{builder}
 }
 
-// Create returns a query builder for Car.
+// Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{config: c.config}
 }
@@ -303,7 +303,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -407,7 +407,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }

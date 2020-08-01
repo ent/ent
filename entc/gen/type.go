@@ -517,9 +517,39 @@ func (t *Type) addFK(fk *ForeignKey) {
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
-// QueryName returns the struct name of the query builder for this type.
+// QueryName returns the struct name denoting the query-builder for this type.
 func (t Type) QueryName() string {
 	return pascal(t.Name) + "Query"
+}
+
+// CreateName returns the struct name denoting the create-builder for this type.
+func (t Type) CreateName() string {
+	return pascal(t.Name) + "Create"
+}
+
+// CreateBulk returns the struct name denoting the create-bulk-builder for this type.
+func (t Type) CreateBulkName() string {
+	return pascal(t.Name) + "CreateBulk"
+}
+
+// UpdateName returns the struct name denoting the update-builder for this type.
+func (t Type) UpdateName() string {
+	return pascal(t.Name) + "Update"
+}
+
+// UpdateOneName returns the struct name denoting the update-one-builder for this type.
+func (t Type) UpdateOneName() string {
+	return pascal(t.Name) + "UpdateOne"
+}
+
+// DeleteName returns the struct name denoting the delete-builder for this type.
+func (t Type) DeleteName() string {
+	return pascal(t.Name) + "Delete"
+}
+
+// DeleteOneName returns the struct name denoting the delete-one-builder for this type.
+func (t Type) DeleteOneName() string {
+	return pascal(t.Name) + "DeleteOne"
 }
 
 // MutationName returns the struct name of the mutation builder for this type.

@@ -146,56 +146,56 @@ func (c *{{ $client }}) Use(hooks ...Hook) {
 }
 
 // Create returns a create builder for {{ $n.Name }}.
-func (c *{{ $client }}) Create() *{{ $n.Name }}Create {
+func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpCreate)
-	return &{{ $n.Name }}Create{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // BulkCreate returns a builder for creating a bulk of {{ $n.Name }} entities.
-func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.Name }}Create) *{{ $n.Name }}CreateBulk {
-	return &{{ $n.Name }}CreateBulk{config: c.config, builders: builders}
+func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.CreateBulkName }} {
+	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for {{ $n.Name }}.
-func (c *{{ $client }}) Update() *{{ $n.Name }}Update {
+func (c *{{ $client }}) Update() *{{ $n.UpdateName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdate)
-	return &{{ $n.Name }}Update{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $n.UpdateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}UpdateOne {
+func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
-	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}UpdateOne {
+func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.UpdateOneName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
-	return &{{ $n.Name }}UpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for {{ $n.Name }}.
-func (c *{{ $client }}) Delete() *{{ $n.Name }}Delete {
+func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 	mutation := new{{ $n.MutationName }}(c.config, OpDelete)
-	return &{{ $n.Name }}Delete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.Name }}DeleteOne {
+func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.DeleteOneName }} {
 	return c.DeleteOneID({{ $rec }}.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.Name }}DeleteOne {
+func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
 	builder := c.Delete().Where({{ $n.Package }}.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &{{ $n.Name }}DeleteOne{builder}
+	return &{{ $n.DeleteOneName }}{builder}
 }
 
-// Create returns a query builder for {{ $n.Name }}.
-func (c *{{ $client }}) Query() *{{ $n.Name }}Query {
-	return &{{ $n.Name }}Query{config: c.config}
+// Query returns a query builder for {{ $n.Name }}.
+func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
+	return &{{ $n.QueryName }}{config: c.config}
 }
 
 // Get returns a {{ $n.Name }} entity by its id.

@@ -185,7 +185,7 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	return &NodeDeleteOne{builder}
 }
 
-// Create returns a query builder for Node.
+// Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
 }

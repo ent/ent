@@ -192,7 +192,7 @@ func (c *GalaxyClient) DeleteOneID(id int) *GalaxyDeleteOne {
 	return &GalaxyDeleteOne{builder}
 }
 
-// Create returns a query builder for Galaxy.
+// Query returns a query builder for Galaxy.
 func (c *GalaxyClient) Query() *GalaxyQuery {
 	return &GalaxyQuery{config: c.config}
 }
@@ -297,7 +297,7 @@ func (c *PlanetClient) DeleteOneID(id int) *PlanetDeleteOne {
 	return &PlanetDeleteOne{builder}
 }
 
-// Create returns a query builder for Planet.
+// Query returns a query builder for Planet.
 func (c *PlanetClient) Query() *PlanetQuery {
 	return &PlanetQuery{config: c.config}
 }
