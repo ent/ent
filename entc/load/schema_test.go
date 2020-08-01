@@ -60,7 +60,8 @@ func (User) Fields() []ent.Field {
 
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("groups", Group.Type),
+		edge.To("groups", Group.Type).
+			Annotations(&OrderConfig{FieldName: "name"}),
 		edge.To("parent", User.Type).
 			Unique().
 			StorageKey(edge.Column("user_parent_id")).
@@ -139,6 +140,10 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "groups", schema.Edges[0].Name)
 		require.Equal(t, "Group", schema.Edges[0].Type)
 		require.False(t, schema.Edges[0].Inverse)
+		require.NotEmpty(t, schema.Edges[0].Annotations)
+		ant = schema.Edges[0].Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "name")
+
 		require.Equal(t, "children", schema.Edges[1].Name)
 		require.Equal(t, "user_parent_id", schema.Edges[1].StorageKey.Columns[0])
 		require.Equal(t, "User", schema.Edges[1].Type)

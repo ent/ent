@@ -844,9 +844,9 @@ func (b *uuidBuilder) Descriptor() *Descriptor {
 
 // Annotation is used to attach arbitrary metadata to the field object in codegen.
 // The object must be serializable to JSON raw value (e.g. struct, map or slice).
-// Template extensions can retrieve this metadata and use inside their templates.
+// Template extensions can retrieve this metadata and use it inside their templates.
 type Annotation interface {
-	// Name defines the name of the annotation.
+	// Name defines the name of the annotation to be retrieved by the codegen.
 	Name() string
 }
 

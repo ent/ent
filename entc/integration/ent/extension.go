@@ -10,4 +10,5 @@ package ent
 type CardExtension struct {
 	Number string
 	Name   string
+	Spec   int
 }

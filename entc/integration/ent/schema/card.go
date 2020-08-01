@@ -50,6 +50,9 @@ func (Card) Edges() []ent.Edge {
 			Ref("card").
 			Unique(),
 		edge.From("spec", Spec.Type).
-			Ref("card"),
+			Ref("card").
+			Annotations(&template.Extension{
+				Type: "int",
+			}),
 	}
 }

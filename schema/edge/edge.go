@@ -8,17 +8,26 @@ import (
 	"reflect"
 )
 
+// Annotation is used to attach arbitrary metadata to the edge object in codegen.
+// The object must be serializable to JSON raw value (e.g. struct, map or slice).
+// Template extensions can retrieve this metadata and use it inside their templates.
+type Annotation interface {
+	// Name defines the name of the annotation to be retrieved by the codegen.
+	Name() string
+}
+
 // A Descriptor for edge configuration.
 type Descriptor struct {
-	Tag        string      // struct tag.
-	Type       string      // edge type.
-	Name       string      // edge name.
-	RefName    string      // ref name; inverse only.
-	Ref        *Descriptor // edge reference; to/from of the same type.
-	Unique     bool        // unique edge.
-	Inverse    bool        // inverse edge.
-	Required   bool        // required on creation.
-	StorageKey *StorageKey // optional storage-key configuration.
+	Tag         string       // struct tag.
+	Type        string       // edge type.
+	Name        string       // edge name.
+	RefName     string       // ref name; inverse only.
+	Ref         *Descriptor  // edge reference; to/from of the same type.
+	Unique      bool         // unique edge.
+	Inverse     bool         // inverse edge.
+	Required    bool         // required on creation.
+	StorageKey  *StorageKey  // optional storage-key configuration.
+	Annotations []Annotation // edge annotations.
 }
 
 // To defines an association edge between two vertices.
@@ -75,7 +84,7 @@ func (b *assocBuilder) Comment(string) *assocBuilder {
 
 // StorageKey sets the storage key of the edge.
 //
-//	edge.To("groups").
+//	edge.To("groups", Group.Type).
 //		StorageKey(edge.Table("user_groups"), edge.Columns("user_id", "group_id"))
 //
 func (b *assocBuilder) StorageKey(opts ...StorageOption) *assocBuilder {
@@ -85,6 +94,19 @@ func (b *assocBuilder) StorageKey(opts ...StorageOption) *assocBuilder {
 	for i := range opts {
 		opts[i](b.desc.StorageKey)
 	}
+	return b
+}
+
+// Annotations adds a list of annotations to the edge object to be used by
+// codegen extensions.
+//
+//	edge.To("pets", Pet.Type).
+//		Annotations(entgql.Config{
+//			FieldName: "Pets",
+//		})
+//
+func (b *assocBuilder) Annotations(annotations ...Annotation) *assocBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -126,6 +148,21 @@ func (b *inverseBuilder) StructTag(s string) *inverseBuilder {
 
 // Comment used to put annotations on the schema.
 func (b *inverseBuilder) Comment(string) *inverseBuilder {
+	return b
+}
+
+// Annotations adds a list of annotations to the edge object to be used by
+// codegen extensions.
+//
+//	edge.From("owner", User.Type).
+//		Ref("pets").
+//		Unique().
+//		Annotations(entgql.Config{
+//			FieldName: "Owner",
+//		})
+//
+func (b *inverseBuilder) Annotations(annotations ...Annotation) *inverseBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
