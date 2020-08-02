@@ -317,6 +317,17 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "strings", fd.Name)
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
 	assert.Equal(t, "[]string", fd.Info.String())
+
+	fd = field.JSON("values", &url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", []url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", []*url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", map[string]url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", map[string]*url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
 }
 
 func TestField_Tag(t *testing.T) {
