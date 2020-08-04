@@ -496,3 +496,29 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+## Annotations
+
+`Annotations` is used to attach arbitrary metadata to the field object in code generation.
+Template extensions can retrieve this metadata and use it inside their templates.
+
+Note that the metadata object must be serializable to a JSON raw value (e.g. struct, map or slice).
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("creation_date").
+			Annotations(entgql.Annotation{
+				OrderField: "CREATED_AT",
+			}),
+	}
+}
+```
+
+Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).
