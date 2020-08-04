@@ -904,3 +904,31 @@ Indexes can be defined on multi fields and some types of edges as well.
 However, you should note, that this is currently an SQL-only feature.
 
 Read more about this in the [Indexes](schema-indexes.md) section.
+
+## Annotations
+
+`Annotations` is used to attach arbitrary metadata to the edge object in code generation.
+Template extensions can retrieve this metadata and use it inside their templates.
+
+Note that the metadata object must be serializable to a JSON raw value (e.g. struct, map or slice).
+
+```go
+// Pet schema.
+type Pet struct {
+	ent.Schema
+}
+
+// Edges of the Pet.
+func (Pet) Edges() []ent.Edge {
+	return []ent.Field{
+		edge.To("owner", User.Type).
+			Ref("pets").
+			Unique().
+			Annotations(entgql.Annotation{
+				OrderField: "OWNER",
+			}),
+	}
+}
+```
+
+Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).

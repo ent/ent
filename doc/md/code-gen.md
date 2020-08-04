@@ -111,8 +111,7 @@ as follows:
 entc generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
 ```
 
-Example of a custom template provides a `Node` API for GraphQL - 
-[Github](https://github.com/facebookincubator/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+More information and examples can be found in the [external templates doc](templates.md).
 
 ## Use `entc` As A Package
 
