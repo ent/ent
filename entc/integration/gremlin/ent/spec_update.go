@@ -10,12 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecUpdate is the builder for updating Spec entities.

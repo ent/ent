@@ -14,9 +14,9 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
+	"github.com/facebook/ent/entc/integration/json/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (

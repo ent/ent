@@ -10,12 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/schema/field"
 )
 
 // SpecUpdate is the builder for updating Spec entities.

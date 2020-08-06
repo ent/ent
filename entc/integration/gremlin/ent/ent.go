@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 )
 
 // ent aliases to avoid import conflict in user's code.

@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 )
 
 // Pet is the model entity for the Pet schema.

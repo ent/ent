@@ -7,7 +7,7 @@
 package predicate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql"
 )
 
 // Group is the predicate function for group builders.

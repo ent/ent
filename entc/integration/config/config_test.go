@@ -8,10 +8,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/config/ent"
-	"github.com/facebookincubator/ent/entc/integration/config/ent/migrate"
-	"github.com/facebookincubator/ent/entc/integration/config/ent/schema"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/config/ent"
+	"github.com/facebook/ent/entc/integration/config/ent/migrate"
+	"github.com/facebook/ent/entc/integration/config/ent/schema"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"

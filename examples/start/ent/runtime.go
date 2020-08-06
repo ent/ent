@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"github.com/facebookincubator/ent/examples/start/ent/group"
-	"github.com/facebookincubator/ent/examples/start/ent/schema"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebook/ent/examples/start/ent/group"
+	"github.com/facebook/ent/examples/start/ent/schema"
+	"github.com/facebook/ent/examples/start/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime

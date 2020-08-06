@@ -17,9 +17,9 @@ import (
 	"text/template"
 	"text/template/parse"
 
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"golang.org/x/tools/imports"
 )

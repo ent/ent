@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/o2m2types/ent/pet"
-	"github.com/facebookincubator/ent/examples/o2m2types/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/o2m2types/ent/pet"
+	"github.com/facebook/ent/examples/o2m2types/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // PetDelete is the builder for deleting a Pet entity.

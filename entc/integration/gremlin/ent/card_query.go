@@ -12,14 +12,14 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardQuery is the builder for querying Card entities.

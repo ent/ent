@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/m2mrecur/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/m2mrecur/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.

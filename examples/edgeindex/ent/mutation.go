@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (

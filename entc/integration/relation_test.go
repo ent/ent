@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/entc/integration/ent"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/node"
+	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/user"
 
 	"github.com/stretchr/testify/require"
 )

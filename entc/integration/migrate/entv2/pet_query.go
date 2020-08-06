@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // PetQuery is the builder for querying Pet entities.

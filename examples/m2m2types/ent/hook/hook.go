@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/m2m2types/ent"
+	"github.com/facebook/ent/examples/m2m2types/ent"
 )
 
 // The GroupFunc type is an adapter to allow the use of ordinary

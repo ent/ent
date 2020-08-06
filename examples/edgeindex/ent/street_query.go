@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/schema/field"
 )
 
 // StreetQuery is the builder for querying Street entities.

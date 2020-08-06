@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
 )
 
 // User is the model entity for the User schema.

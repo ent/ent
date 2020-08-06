@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent"
-	gen "github.com/facebookincubator/ent/entc/integration/hooks/ent"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/hook"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/mixin"
+	"github.com/facebook/ent"
+	gen "github.com/facebook/ent/entc/integration/hooks/ent"
+	"github.com/facebook/ent/entc/integration/hooks/ent/card"
+	"github.com/facebook/ent/entc/integration/hooks/ent/hook"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/mixin"
 )
 
 // RejectMany rejects all update operations

@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // User is the model entity for the User schema.

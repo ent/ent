@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/schema/field"
 )
 
 // StreetDelete is the builder for deleting a Street entity.

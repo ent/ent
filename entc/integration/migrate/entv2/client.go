@@ -11,16 +11,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/migrate"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.

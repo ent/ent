@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/config/ent/migrate"
+	"github.com/facebook/ent/entc/integration/config/ent/migrate"
 
-	"github.com/facebookincubator/ent/entc/integration/config/ent/user"
+	"github.com/facebook/ent/entc/integration/config/ent/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
 )
 
 // Client is the client that holds all ent builders.

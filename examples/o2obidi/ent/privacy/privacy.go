@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/o2obidi/ent"
+	"github.com/facebook/ent/examples/o2obidi/ent"
 )
 
 var (

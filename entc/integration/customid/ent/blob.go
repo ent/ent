@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
 	"github.com/google/uuid"
 )
 

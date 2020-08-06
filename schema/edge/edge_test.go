@@ -7,8 +7,8 @@ package edge_test
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
 
 	"github.com/stretchr/testify/assert"
 )

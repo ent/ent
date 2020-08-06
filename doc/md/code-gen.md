@@ -9,7 +9,7 @@ title: Introduction
 `entc` run the following command:
 
 ```bash
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ``` 
 
 ## Initialize A New Schema
@@ -59,7 +59,7 @@ go mod init <project>
 And then, re-run the following command in order to add `ent` to your `go.mod` file:
 
 ```console
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ```
 
 Add a `generate.go` file to your project under `<project>/ent`:
@@ -67,7 +67,7 @@ Add a `generate.go` file to your project under `<project>/ent`:
 ```go
 package ent
 
-//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema
+//go:generate go run github.com/facebook/ent/cmd/entc generate ./schema
 ```
 
 Finally, you can run `go generate ./ent` from the root directory of your project
@@ -123,9 +123,9 @@ package main
 import (
 	"log"
 
-	"github.com/facebookincubator/ent/entc"
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/schema/field"
 )
 
 func main() {
@@ -139,7 +139,7 @@ func main() {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/entcpkg).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/entcpkg).
 
 
 ## Schema Description

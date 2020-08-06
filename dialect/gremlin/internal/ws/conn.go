@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding"
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/encoding"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
 
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"

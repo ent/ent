@@ -17,7 +17,7 @@ import (
 		"{{ $n.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
-	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebook/ent/dialect"
 	{{ range $_, $import := $.Storage.Imports -}}
 		"{{ $import }}"
 	{{ end -}}

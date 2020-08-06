@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebook/ent/dialect"
 )
 
 // Querier wraps the basic Query method that is implemented

@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin"
 )
 
 // Comment is the model entity for the Comment schema.

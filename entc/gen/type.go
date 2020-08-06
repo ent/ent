@@ -16,10 +16,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 )
 
 // The following types and their exported methods used by the codegen

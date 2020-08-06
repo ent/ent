@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/privacy/ent/galaxy"
+	"github.com/facebook/ent/entc/integration/privacy/ent/planet"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GalaxyCreate is the builder for creating a Galaxy entity.

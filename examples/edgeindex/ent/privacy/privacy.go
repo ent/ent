@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/edgeindex/ent"
+	"github.com/facebook/ent/examples/edgeindex/ent"
 )
 
 var (

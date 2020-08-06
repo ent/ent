@@ -9,10 +9,10 @@ package card
 import (
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
