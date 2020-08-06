@@ -7,8 +7,11 @@ package mixin_test
 import (
 	"testing"
 
+	"github.com/facebookincubator/ent"
+	"github.com/facebookincubator/ent/schema/edge"
 	"github.com/facebookincubator/ent/schema/field"
 	"github.com/facebookincubator/ent/schema/mixin"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -47,7 +50,7 @@ type annotation string
 
 func (annotation) Name() string { return "" }
 
-func TestAnnotate(t *testing.T) {
+func TestAnnotateFields(t *testing.T) {
 	annotations := []field.Annotation{
 		annotation("foo"),
 		annotation("bar"),
@@ -56,8 +59,40 @@ func TestAnnotate(t *testing.T) {
 	fields := mixin.AnnotateFields(
 		mixin.Time{}, annotations...,
 	).Fields()
+	require.Len(t, fields, 2)
 	for _, f := range fields {
 		desc := f.Descriptor()
+		require.Len(t, desc.Annotations, len(annotations))
+		for i := range desc.Annotations {
+			assert.Equal(t, annotations[i], desc.Annotations[i])
+		}
+	}
+}
+
+type TestSchema struct {
+	ent.Schema
+}
+
+func (TestSchema) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("one", TestSchema.Type),
+		edge.From("two", TestSchema.Type).
+			Ref("one"),
+	}
+}
+
+func TestAnnotateEdges(t *testing.T) {
+	annotations := []edge.Annotation{
+		annotation("foo"),
+		annotation("bar"),
+		annotation("baz"),
+	}
+	edges := mixin.AnnotateEdges(
+		TestSchema{}, annotations...,
+	).Edges()
+	require.Len(t, edges, 2)
+	for _, e := range edges {
+		desc := e.Descriptor()
 		require.Len(t, desc.Annotations, len(annotations))
 		for i := range desc.Annotations {
 			assert.Equal(t, annotations[i], desc.Annotations[i])
