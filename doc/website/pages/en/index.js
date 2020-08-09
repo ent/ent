@@ -33,7 +33,7 @@ const Features = () => (
   <div className="features">
     <Block
       title="Schema As Code"
-      content="Simple API for modeling any graph schema as Go objects"
+      content="Simple API for modeling any database schema as Go objects"
       link="docs/schema-def"
     />
     <Block
