@@ -1138,13 +1138,20 @@ func (p *Predicate) Contains(col, sub string) *Predicate {
 func ContainsFold(col, sub string) *Predicate { return (&Predicate{}).ContainsFold(col, sub) }
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
-// The recommendation is to avoid using it, and to use a dialect specific feature, like
-// `ILIKE` in PostgreSQL, and `COLLATE` clause in MySQL.
 func (p *Predicate) ContainsFold(col, sub string) *Predicate {
 	return p.append(func(b *Builder) {
 		f := &Func{}
 		f.SetDialect(b.dialect)
-		b.Ident(f.Lower(col)).WriteString(" LIKE ")
+		switch b.dialect {
+		case dialect.MySQL:
+			// We assume the CHARACTER SET is configured to utf8mb4,
+			// because this how it is defined in dialect/sql/schema.
+			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci LIKE ")
+		case dialect.Postgres:
+			b.Ident(col).WriteString(" ILIKE ")
+		default: // SQLite.
+			b.Ident(f.Lower(col)).WriteString(" LIKE ")
+		}
 		b.Arg("%" + strings.ToLower(sub) + "%")
 	})
 }

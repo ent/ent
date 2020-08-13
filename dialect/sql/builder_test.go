@@ -802,7 +802,8 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar", "baz"},
 		},
 		{
-			input: Select().
+			input: Dialect(dialect.SQLite).
+				Select().
 				From(Table("users")).
 				Where(ContainsFold("name", "Ariel").And().ContainsFold("nick", "Bar")),
 			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) LIKE ? AND LOWER(`nick`) LIKE ?",
@@ -813,7 +814,15 @@ func TestBuilder(t *testing.T) {
 				Select().
 				From(Table("users")).
 				Where(ContainsFold("name", "Ariel").And().ContainsFold("nick", "Bar")),
-			wantQuery: `SELECT * FROM "users" WHERE LOWER("name") LIKE $1 AND LOWER("nick") LIKE $2`,
+			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 AND "nick" ILIKE $2`,
+			wantArgs:  []interface{}{"%ariel%", "%bar%"},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select().
+				From(Table("users")).
+				Where(ContainsFold("name", "Ariel").And().ContainsFold("nick", "Bar")),
+			wantQuery: "SELECT * FROM `users` WHERE `name` COLLATE utf8mb4_general_ci LIKE ? AND `nick` COLLATE utf8mb4_general_ci LIKE ?",
 			wantArgs:  []interface{}{"%ariel%", "%bar%"},
 		},
 		{
