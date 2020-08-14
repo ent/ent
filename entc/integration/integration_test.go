@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net"
@@ -577,6 +578,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Error(err, "type validator failed")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("failed").SetExpire(time.Now().Add(time.Hour)).Save(ctx)
 	require.Error(err, "name validator failed")
+	require.IsType(&ent.ValidationError{}, err)
+	require.EqualError(err, "ent: validator failed for field \"name\": last name must begin with uppercase")
+	require.EqualError(errors.Unwrap(err), "last name must begin with uppercase")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github20").SetExpire(time.Now().Add(time.Hour)).Save(ctx)
 	require.Error(err, "name validator failed")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github").SetMaxUsers(-1).SetExpire(time.Now().Add(time.Hour)).Save(ctx)
