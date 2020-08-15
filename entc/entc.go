@@ -170,13 +170,13 @@ func templateOption(next Option) Option {
 	return func(cfg *gen.Config) (err error) {
 		if cfg.Template == nil {
 			cfg.Template = template.New("external").Funcs(gen.Funcs)
-			if cfg.TemplateFuncMap != nil {
-				cfg.Template = cfg.Template.Funcs(cfg.TemplateFuncMap)
-			}
 		}
+
 		if cfg.TemplateFuncMap == nil {
 			cfg.TemplateFuncMap = template.FuncMap{}
+			cfg.Template = cfg.Template.Funcs(cfg.TemplateFuncMap)
 		}
+
 		return next(cfg)
 	}
 }
