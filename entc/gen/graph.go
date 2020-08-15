@@ -46,6 +46,8 @@ type (
 		// Note that, additional templates are executed on the Graph object and
 		// the execution output is stored in a file derived by the template name.
 		Template *template.Template
+
+		TemplateFuncMap template.FuncMap
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -88,6 +90,11 @@ func (g *Graph) Gen() (err error) {
 		written             []string
 		templates, external = g.templates()
 	)
+
+	if g.Config.TemplateFuncMap != nil {
+		templates.Funcs(g.Config.TemplateFuncMap)
+	}
+
 	for _, n := range g.Nodes {
 		path := filepath.Join(g.Config.Target, n.Package())
 		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)

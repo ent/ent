@@ -150,12 +150,32 @@ func TemplateDir(path string) Option {
 	})
 }
 
+// TemplateFuncMap allows provide additional template functions to generator
+func TemplateFuncMap(funcs ...template.FuncMap) Option {
+	return templateOption(func(config *gen.Config) error {
+		for _, fm := range funcs {
+			config.Template.Funcs(fm)
+			for k, v := range fm {
+				config.TemplateFuncMap[k] = v
+			}
+		}
+
+		return nil
+	})
+}
+
 // templateOption ensures the template instantiate
 // once for config and execute the given Option.
 func templateOption(next Option) Option {
 	return func(cfg *gen.Config) (err error) {
 		if cfg.Template == nil {
 			cfg.Template = template.New("external").Funcs(gen.Funcs)
+			if cfg.TemplateFuncMap != nil {
+				cfg.Template = cfg.Template.Funcs(cfg.TemplateFuncMap)
+			}
+		}
+		if cfg.TemplateFuncMap == nil {
+			cfg.TemplateFuncMap = template.FuncMap{}
 		}
 		return next(cfg)
 	}
