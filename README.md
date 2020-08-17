@@ -26,9 +26,10 @@ The documentation for developing and using ent is available at: https://entgo.io
 In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file for how to go get started.  
 If your company or your product is using `ent`, please let us know by adding yourself to the [ent users page](https://github.com/facebookincubator/ent/wiki/ent-users).
 
-## Project Status
-`ent` is developed and maintained by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
-from the [Facebook Connectivity][fbc] team. It's used by multiple teams and projects in production,
+## About the Project
+The `ent` project was inspired by Ent, an entity framework we use internally. It is developed and maintained
+by [a8m](https://github.com/a8m) and [alexsn](https://github.com/alexsn)
+from the [Facebook Connectivity][fbc] team. It is used by multiple teams and projects in production,
 and the roadmap for its v1 release is described [here](https://github.com/facebookincubator/ent/issues/46). 
 Read more about the motivation of the project [here](https://entgo.io/blog/2019/10/03/introducing-ent).
 
