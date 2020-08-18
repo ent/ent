@@ -1,4 +1,4 @@
-module github.com/facebookincubator/ent
+module github.com/facebook/ent
 
 go 1.14
 

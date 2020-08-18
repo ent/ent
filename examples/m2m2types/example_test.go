@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/m2m2types/ent"
-	"github.com/facebookincubator/ent/examples/m2m2types/ent/group"
-	"github.com/facebookincubator/ent/examples/m2m2types/ent/user"
+	"github.com/facebook/ent/examples/m2m2types/ent"
+	"github.com/facebook/ent/examples/m2m2types/ent/group"
+	"github.com/facebook/ent/examples/m2m2types/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )

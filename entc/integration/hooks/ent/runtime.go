@@ -6,4 +6,4 @@
 
 package ent
 
-// The schema-stitching logic is generated in github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime/runtime.go
+// The schema-stitching logic is generated in github.com/facebook/ent/entc/integration/hooks/ent/runtime/runtime.go

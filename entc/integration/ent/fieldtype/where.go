@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/role"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
 )
 
 // ID filters vertices based on their identifier.

@@ -5,13 +5,13 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/privacy"
+	"github.com/facebook/ent/entc/integration/privacy/ent/privacy"
 
-	"github.com/facebookincubator/ent/entc/integration/privacy/rule"
+	"github.com/facebook/ent/entc/integration/privacy/rule"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
 )
 
 // Galaxy defines the schema of a galaxy.

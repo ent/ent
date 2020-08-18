@@ -19,8 +19,8 @@ In the example above, you can see 2 relations declared using edges. Let's go ove
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
 )
 
 // User schema.
@@ -49,8 +49,8 @@ func (User) Edges() []ent.Edge {
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
 )
 
 // Pet holds the schema definition for the Pet entity.
@@ -95,8 +95,8 @@ more widely below.
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
 )
 
 // Group schema.
@@ -124,8 +124,8 @@ func (Group) Edges() []ent.Edge {
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
 )
 
 // User schema.
@@ -252,7 +252,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2types).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2o2types).
 
 ## O2O Same Type
 
@@ -348,7 +348,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2orecur).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2orecur).
 
 ## O2O Bidirectional
 
@@ -422,7 +422,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2obidi).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2obidi).
 
 ## O2M Two Types
 
@@ -503,7 +503,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	return nil
 }
 ```
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2m2types).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2m2types).
 
 ## O2M Same Type
 
@@ -612,7 +612,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2mrecur).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2mrecur).
 
 ## M2M Two Types
 
@@ -704,7 +704,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2m2types).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
 
@@ -797,7 +797,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mrecur).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mrecur).
 
 
 ## M2M Bidirectional
@@ -860,7 +860,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mbidi).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mbidi).
 
 ## Required
 

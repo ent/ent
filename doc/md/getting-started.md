@@ -17,7 +17,7 @@ sidebar_label: Quick Introduction
 ## Installation
 
 ```console
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ```
 
 After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.
@@ -45,7 +45,7 @@ The command above will generate the schema for `User` under `<project>/ent/schem
 
 package schema
 
-import "github.com/facebookincubator/ent"
+import "github.com/facebook/ent"
 
 // User holds the schema definition for the User entity.
 type User struct {
@@ -70,8 +70,8 @@ Add 2 fields to the `User` schema:
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 
@@ -208,8 +208,8 @@ And then we add the rest of the fields manually:
 import (
 	"regexp"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // Fields of the Car.
@@ -242,8 +242,8 @@ Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
  import (
  	"log"
 
- 	"github.com/facebookincubator/ent"
- 	"github.com/facebookincubator/ent/schema/edge"
+ 	"github.com/facebook/ent"
+ 	"github.com/facebook/ent/schema/edge"
  )
 
  // Edges of the User.
@@ -337,8 +337,8 @@ in the `User` schema, and run `go generate ./ent`.
 import (
 	"log"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
 )
 
 // Edges of the Car.
@@ -398,8 +398,8 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	 import (
 		"log"
 	
-		"github.com/facebookincubator/ent"
-		"github.com/facebookincubator/ent/schema/edge"
+		"github.com/facebook/ent"
+		"github.com/facebook/ent/schema/edge"
 	 )
 	
 	 // Edges of the Group.
@@ -415,8 +415,8 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	 import (
 	 	"log"
 	
-	 	"github.com/facebookincubator/ent"
-	 	"github.com/facebookincubator/ent/schema/edge"
+	 	"github.com/facebook/ent"
+	 	"github.com/facebook/ent/schema/edge"
 	 )
 	
 	 // Edges of the User.
@@ -605,4 +605,4 @@ Now when we have a graph with data, we can run a few queries on it:
     }
     ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/start).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/start).

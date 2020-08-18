@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/start/ent/car"
-	"github.com/facebookincubator/ent/examples/start/ent/predicate"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/start/ent/car"
+	"github.com/facebook/ent/examples/start/ent/predicate"
+	"github.com/facebook/ent/examples/start/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CarQuery is the builder for querying Car entities.

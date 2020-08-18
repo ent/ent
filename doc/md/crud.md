@@ -280,7 +280,7 @@ err := client.File.
 
 Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
 the same generated `UserMutation` object.
-However, all builder types implement the generic <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent#Mutation">`ent.Mutation`<a> interface.
+However, all builder types implement the generic <a target="_blank" href="https://godoc.org/github.com/facebook/ent#Mutation">`ent.Mutation`<a> interface.
 
 For example, in order to write a generic code that apply a set of methods on both `ent.UserCreate`
 and `ent.UserUpdate`, use the `UserMutation` object:

@@ -15,8 +15,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/entc/load"
 )
 
 // LoadGraph loads the schema package from the given schema path,

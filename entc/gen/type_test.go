@@ -7,8 +7,8 @@ package gen
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )

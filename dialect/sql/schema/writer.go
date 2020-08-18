@@ -9,7 +9,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebook/ent/dialect"
 )
 
 // WriteDriver is a driver that writes all driver exec operations to its writer.

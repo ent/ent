@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (

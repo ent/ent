@@ -7,7 +7,7 @@ package schema
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )

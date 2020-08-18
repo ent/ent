@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
+	"github.com/facebook/ent/examples/o2o2types/ent/card"
+	"github.com/facebook/ent/examples/o2o2types/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (

@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.

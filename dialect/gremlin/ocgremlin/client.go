@@ -7,7 +7,7 @@ package ocgremlin
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin"
 
 	"go.opencensus.io/trace"
 )

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

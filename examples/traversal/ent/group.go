@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/examples/traversal/ent/group"
-	"github.com/facebookincubator/ent/examples/traversal/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/examples/traversal/ent/group"
+	"github.com/facebook/ent/examples/traversal/ent/user"
 )
 
 // Group is the model entity for the Group schema.

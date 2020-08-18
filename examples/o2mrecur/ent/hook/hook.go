@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent"
+	"github.com/facebook/ent/examples/o2mrecur/ent"
 )
 
 // The NodeFunc type is an adapter to allow the use of ordinary
