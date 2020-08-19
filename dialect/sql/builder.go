@@ -717,7 +717,7 @@ func (u *UpdateBuilder) SetNull(column string) *UpdateBuilder {
 // Where adds a where predicate for update statement.
 func (u *UpdateBuilder) Where(p *Predicate) *UpdateBuilder {
 	if u.where != nil {
-		u.where.merge(p)
+		u.where = And(u.where, p)
 	} else {
 		u.where = p
 	}
@@ -787,7 +787,7 @@ func Delete(table string) *DeleteBuilder { return &DeleteBuilder{table: table} }
 // Where appends a where predicate to the `DELETE` statement.
 func (d *DeleteBuilder) Where(p *Predicate) *DeleteBuilder {
 	if d.where != nil {
-		d.where.merge(p)
+		d.where = And(d.where, p)
 	} else {
 		d.where = p
 	}
@@ -817,7 +817,8 @@ func (d *DeleteBuilder) Query() (string, []interface{}) {
 // Predicate is a where predicate.
 type Predicate struct {
 	Builder
-	fns []func(*Builder)
+	depth int
+	fns   []func(*Builder)
 }
 
 // P creates a new predicates.
@@ -831,30 +832,9 @@ func P() *Predicate { return &Predicate{} }
 //	Or(EQ("name", "foo"), EQ("name", "bar"))
 //
 func Or(preds ...*Predicate) *Predicate {
-	return P().append(func(b *Builder) {
-		if len(preds) > 1 {
-			b.WriteString("(")
-		}
-		for i := range preds {
-			if i > 0 {
-				b.WriteString(" OR ")
-			}
-			b.Nested(func(b *Builder) {
-				b.Join(preds[i])
-			})
-		}
-		if len(preds) > 1 {
-			b.WriteString(")")
-		}
-	})
-}
-
-// Or appends an OR only if it's not a start of expression.
-func (p *Predicate) Or() *Predicate {
+	p := P()
 	return p.append(func(b *Builder) {
-		if b.Len() > 0 {
-			b.WriteString(" OR ")
-		}
+		p.mayWrap(preds, b, "OR")
 	})
 }
 
@@ -894,24 +874,9 @@ func (p *Predicate) Not() *Predicate {
 
 // And combines all given predicates with AND between them.
 func And(preds ...*Predicate) *Predicate {
-	return P().append(func(b *Builder) {
-		for i := range preds {
-			if i > 0 {
-				b.WriteString(" AND ")
-			}
-			b.Nested(func(b *Builder) {
-				b.Join(preds[i])
-			})
-		}
-	})
-}
-
-// And appends And only if it's not a start of expression.
-func (p *Predicate) And() *Predicate {
+	p := P()
 	return p.append(func(b *Builder) {
-		if b.Len() > 0 {
-			b.WriteString(" AND ")
-		}
+		p.mayWrap(preds, b, "AND")
 	})
 }
 
@@ -1196,16 +1161,6 @@ func (p *Predicate) Query() (string, []interface{}) {
 	return p.String(), p.args
 }
 
-// merge two predicates.
-func (p *Predicate) merge(pred *Predicate) *Predicate {
-	if len(pred.fns) == 0 {
-		return p
-	}
-	p.And()
-	p.fns = append(p.fns, pred.fns...)
-	return p
-}
-
 // clone returns a shallow clone of p.
 func (p *Predicate) clone() *Predicate {
 	if p == nil {
@@ -1217,6 +1172,32 @@ func (p *Predicate) clone() *Predicate {
 func (p *Predicate) append(f func(*Builder)) *Predicate {
 	p.fns = append(p.fns, f)
 	return p
+}
+
+func (p *Predicate) mayWrap(preds []*Predicate, b *Builder, op string) {
+	switch n := len(preds); {
+	case n == 1:
+		b.Join(preds[0])
+		return
+	case n > 1 && p.depth != 0:
+		b.WriteByte('(')
+		defer b.WriteByte(')')
+	}
+	for i := range preds {
+		preds[i].depth = p.depth + 1
+		if i > 0 {
+			b.WriteByte(' ')
+			b.WriteString(op)
+			b.WriteByte(' ')
+		}
+		if len(preds[i].fns) > 1 {
+			b.Nested(func(b *Builder) {
+				b.Join(preds[i])
+			})
+		} else {
+			b.Join(preds[i])
+		}
+	}
 }
 
 // Func represents an SQL function.
@@ -1478,7 +1459,7 @@ func (s *Selector) Where(p *Predicate) *Selector {
 		s.where = Or(s.where, p)
 		s.or = false
 	default:
-		s.where.merge(p)
+		s.where = And(s.where, p)
 	}
 	return s
 }

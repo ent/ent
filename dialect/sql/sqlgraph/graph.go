@@ -1214,9 +1214,9 @@ func matchIDs(column1 string, pk1 []driver.Value, column2 string, pk2 []driver.V
 	if len(pk2) > 1 {
 		// Use "IN" predicate instead of list of "OR"
 		// in case of more than on nodes to connect.
-		return p.And().InValues(column2, pk2...)
+		return sql.And(p, sql.InValues(column2, pk2...))
 	}
-	return p.And().EQ(column2, pk2[0])
+	return sql.And(p, sql.EQ(column2, pk2[0]))
 }
 
 // cartesian product of 2 id sets.
