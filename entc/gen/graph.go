@@ -190,7 +190,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
 				StructTag:   ref.Tag,
-				Annotations: e.Annotations,
+				Annotations: ref.Annotations,
 			})
 		default:
 			panic(graphError{"edge must be either an assoc or inverse edge"})

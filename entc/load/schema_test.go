@@ -66,6 +66,10 @@ func (User) Edges() []ent.Edge {
 			Unique().
 			StorageKey(edge.Column("user_parent_id")).
 			From("children"),
+		edge.To("following", User.Type).
+			Annotations(&OrderConfig{FieldName: "following"}).
+			From("followers").
+			Annotations(&OrderConfig{FieldName: "followers"}),
 	}
 }
 
@@ -137,7 +141,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.True(t, schema.Fields[7].Default)
 		require.Equal(t, "github.com/google/uuid", schema.Fields[7].Info.PkgPath)
 
-		require.Len(t, schema.Edges, 2)
+		require.Len(t, schema.Edges, 3)
 		require.Equal(t, "groups", schema.Edges[0].Name)
 		require.Equal(t, "Group", schema.Edges[0].Type)
 		require.False(t, schema.Edges[0].Inverse)
@@ -152,6 +156,11 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
 		require.Equal(t, "user_parent_id", schema.Edges[1].Ref.StorageKey.Columns[0])
+
+		ant = schema.Edges[2].Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "followers")
+		ant = schema.Edges[2].Ref.Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "following")
 
 		require.Equal(t, []string{"name", "address"}, schema.Indexes[0].Fields)
 		require.True(t, schema.Indexes[0].Unique)
