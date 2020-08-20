@@ -57,6 +57,7 @@ var (
 			{Name: "t1_o2m", Type: "T1", RefName: "t2_m2o", Inverse: true},
 			{Name: "t1_m2o", Type: "T1", RefName: "t2_o2m", Unique: true, Inverse: true},
 			{Name: "t1_m2m", Type: "T1", RefName: "t2_m2m", Inverse: true},
+			{Name: "t2_m2m_from", Type: "T2", Ref: &load.Edge{Name: "t2_m2m_to", Type: "T2", Annotations: dict("GQL", map[string]string{"Name": "To"})}, Inverse: true, Annotations: dict("GQL", map[string]string{"Name": "From"})},
 		},
 	}
 )
@@ -118,6 +119,11 @@ func TestNewGraph(t *testing.T) {
 	require.True(e1.IsInverse())
 	require.Equal("t2", e1.Inverse)
 	require.Equal(graph.Nodes[0], e1.Type)
+
+	require.Equal("t2_m2m_from", t2.Edges[5].Name)
+	require.Equal("t2_m2m_to", t2.Edges[6].Name)
+	require.Equal(map[string]string{"Name": "From"}, t2.Edges[5].Annotations["GQL"])
+	require.Equal(map[string]string{"Name": "To"}, t2.Edges[6].Annotations["GQL"])
 }
 
 func TestNewGraphRequiredLoop(t *testing.T) {
