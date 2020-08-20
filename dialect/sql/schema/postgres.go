@@ -52,7 +52,10 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("table_name", name)).Query()
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("table_name", name),
+		)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
@@ -60,7 +63,11 @@ func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (
 func (d *Postgres) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("constraint_type", "FOREIGN KEY").And().EQ("constraint_name", name)).Query()
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("constraint_type", "FOREIGN KEY"),
+			sql.EQ("constraint_name", name),
+		)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
@@ -82,7 +89,10 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	query, args := sql.Dialect(dialect.Postgres).
 		Select("column_name", "data_type", "is_nullable", "column_default").
 		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("table_name", name)).Query()
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("table_name", name),
+		)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("postgres: reading table description %v", err)
 	}
@@ -373,7 +383,11 @@ func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, tab
 	}
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("constraint_type", "UNIQUE").And().EQ("constraint_name", name)).
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("constraint_type", "UNIQUE"),
+			sql.EQ("constraint_name", name),
+		)).
 		Query()
 	exists, err := exist(ctx, tx, query, args...)
 	if err != nil {

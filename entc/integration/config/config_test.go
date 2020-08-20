@@ -30,7 +30,7 @@ func TestSchemaConfig(t *testing.T) {
 	table := schema.User{}.Config().Table
 	query, args := sql.Select().Count().
 		From(sql.Table("sqlite_master")).
-		Where(sql.EQ("type", "table").And().EQ("name", table)).
+		Where(sql.And(sql.EQ("type", "table"), sql.EQ("name", table))).
 		Query()
 	rows := &sql.Rows{}
 	require.NoError(t, drv.Query(ctx, query, args, rows))

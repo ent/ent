@@ -424,7 +424,7 @@ FROM "groups"
 WHERE "groups"."id" IN
   (SELECT "user_groups"."group_id"
   FROM "user_groups"
-  JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE ("name" IS NOT NULL) AND ("name" = $1))`,
+  JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE "name" IS NOT NULL AND "name" = $1)`,
 			wantArgs: []interface{}{"a8m"},
 		},
 	}
@@ -556,7 +556,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL)")).
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
 					WithArgs(1, 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -579,7 +579,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` IN (?, ?, ?)) AND (`owner_id` IS NULL)")).
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE `id` IN (?, ?, ?) AND `owner_id` IS NULL")).
 					WithArgs(1, 2, 3, 4).
 					WillReturnResult(sqlmock.NewResult(1, 3))
 				m.ExpectCommit()
@@ -602,7 +602,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
 					WithArgs("a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("UPDATE `cards` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL)")).
+				m.ExpectExec(escape("UPDATE `cards` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
 					WithArgs(1, 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -625,7 +625,7 @@ func TestCreateNode(t *testing.T) {
 				m.ExpectExec(escape("INSERT INTO `users` (`name`, `spouse_id`) VALUES (?, ?)")).
 					WithArgs("a8m", 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectExec(escape("UPDATE `users` SET `spouse_id` = ? WHERE (`id` = ?) AND (`spouse_id` IS NULL)")).
+				m.ExpectExec(escape("UPDATE `users` SET `spouse_id` = ? WHERE `id` = ? AND `spouse_id` IS NULL")).
 					WithArgs(1, 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
@@ -808,10 +808,10 @@ func TestBatchCreate(t *testing.T) {
 					WithArgs(10, 2, 11, 2).
 					WillReturnResult(sqlmock.NewResult(2, 2))
 				// Update FKs exist in different tables.
-				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL")).
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
 					WithArgs(10 /* id of the 1st new node */, 2 /* pet id */).
 					WillReturnResult(sqlmock.NewResult(2, 2))
-				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE (`id` = ?) AND (`owner_id` IS NULL")).
+				m.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
 					WithArgs(11 /* id of the 2nd new node */, 3 /* pet id */).
 					WillReturnResult(sqlmock.NewResult(2, 2))
 				m.ExpectCommit()
@@ -987,7 +987,7 @@ func TestUpdateNode(t *testing.T) {
 					WithArgs(2, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				// Set 3's column to point "spouse 1".
-				mock.ExpectExec(escape("UPDATE `users` SET `spouse_id` = ? WHERE (`id` = ?) AND (`spouse_id` IS NULL)")).
+				mock.ExpectExec(escape("UPDATE `users` SET `spouse_id` = ? WHERE `id` = ? AND `spouse_id` IS NULL")).
 					WithArgs(1, 3).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
@@ -1021,11 +1021,11 @@ func TestUpdateNode(t *testing.T) {
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
 				// Clear user groups.
-				mock.ExpectExec(escape("DELETE FROM `group_users` WHERE (`group_id` IN (?, ?) AND `user_id` = ?)")).
+				mock.ExpectExec(escape("DELETE FROM `group_users` WHERE `group_id` IN (?, ?) AND `user_id` = ?")).
 					WithArgs(3, 7, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				// Clear user friends.
-				mock.ExpectExec(escape("DELETE FROM `user_friends` WHERE ((`user_id` = ? AND `friend_id` = ?) OR (`user_id` = ? AND `friend_id` = ?))")).
+				mock.ExpectExec(escape("DELETE FROM `user_friends` WHERE (`user_id` = ? AND `friend_id` = ?) OR (`user_id` = ? AND `friend_id` = ?)")).
 					WithArgs(1, 2, 2, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				// Add new groups.
@@ -1187,15 +1187,15 @@ func TestUpdateNodes(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"id"}).
 						AddRow(1))
 				// Clear user's groups.
-				mock.ExpectExec(escape("DELETE FROM `group_users` WHERE (`group_id` IN (?, ?) AND `user_id` = ?)")).
+				mock.ExpectExec(escape("DELETE FROM `group_users` WHERE `group_id` IN (?, ?) AND `user_id` = ?")).
 					WithArgs(2, 3, 1).
 					WillReturnResult(sqlmock.NewResult(0, 2))
 				// Clear user's followers.
-				mock.ExpectExec(escape("DELETE FROM `user_followers` WHERE ((`user_id` = ? AND `follower_id` IN (?, ?)) OR (`user_id` IN (?, ?) AND `follower_id` = ?))")).
+				mock.ExpectExec(escape("DELETE FROM `user_followers` WHERE (`user_id` = ? AND `follower_id` IN (?, ?)) OR (`user_id` IN (?, ?) AND `follower_id` = ?)")).
 					WithArgs(1, 5, 6, 5, 6, 1).
 					WillReturnResult(sqlmock.NewResult(0, 2))
 				// Clear user's friends.
-				mock.ExpectExec(escape("DELETE FROM `user_friends` WHERE ((`user_id` = ? AND `friend_id` = ?) OR (`user_id` = ? AND `friend_id` = ?))")).
+				mock.ExpectExec(escape("DELETE FROM `user_friends` WHERE (`user_id` = ? AND `friend_id` = ?) OR (`user_id` = ? AND `friend_id` = ?)")).
 					WithArgs(1, 4, 4, 1).
 					WillReturnResult(sqlmock.NewResult(0, 2))
 				// Attach new groups to user.

@@ -700,7 +700,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("old_index", "old", "0", "1").
 						AddRow("parent_id", "parent_id", "0", "1"))
 				mock.fkExists("parent_id", true)
-				mock.ExpectQuery(escape("SELECT `column_name` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1 JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2 ON `t1`.`constraint_name` = `t2`.`constraint_name` WHERE (`t2`.`constraint_type` = 'FOREIGN KEY') AND (`t2`.`table_schema` = (SELECT DATABASE())) AND (`t1`.`table_schema` = (SELECT DATABASE())) AND (`t2`.`constraint_name` = ?)")).
+				mock.ExpectQuery(escape("SELECT `column_name` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1 JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2 ON `t1`.`constraint_name` = `t2`.`constraint_name` WHERE `t2`.`constraint_type` = 'FOREIGN KEY' AND `t2`.`table_schema` = (SELECT DATABASE()) AND `t1`.`table_schema` = (SELECT DATABASE()) AND `t2`.`constraint_name` = ?")).
 					WithArgs("parent_id").
 					WillReturnRows(sqlmock.NewRows([]string{"COLUMN_NAME"}).
 						AddRow("parent_id"))

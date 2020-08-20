@@ -46,13 +46,20 @@ func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 
 func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).Query()
+		Where(sql.And(
+			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("TABLE_NAME", name),
+		)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
 func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("CONSTRAINT_TYPE", "FOREIGN KEY").And().EQ("CONSTRAINT_NAME", name)).Query()
+		Where(sql.And(
+			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("CONSTRAINT_TYPE", "FOREIGN KEY"),
+			sql.EQ("CONSTRAINT_NAME", name),
+		)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
@@ -61,7 +68,10 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	rows := &sql.Rows{}
 	query, args := sql.Select("column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name").
 		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).Query()
+		Where(sql.And(
+			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("TABLE_NAME", name)),
+		).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("mysql: reading table description %v", err)
 	}
@@ -100,7 +110,10 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Ind
 	rows := &sql.Rows{}
 	query, args := sql.Select("index_name", "column_name", "non_unique", "seq_in_index").
 		From(sql.Table("INFORMATION_SCHEMA.STATISTICS").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", name)).
+		Where(sql.And(
+			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("TABLE_NAME", name),
+		)).
 		OrderBy("index_name", "seq_in_index").
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -125,7 +138,10 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 	rows := &sql.Rows{}
 	query, args := sql.Select("AUTO_INCREMENT").
 		From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
-		Where(sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")).And().EQ("TABLE_NAME", t.Name)).
+		Where(sql.And(
+			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("TABLE_NAME", t.Name),
+		)).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return fmt.Errorf("mysql: query auto_increment %v", err)
@@ -521,13 +537,13 @@ func parseColumn(typ string) (parts []string, size int64, unsigned bool, err err
 // fkNames returns the foreign-key names of a column.
 func fkNames(ctx context.Context, tx dialect.Tx, table, column string) ([]string, error) {
 	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote()).
-		Where(sql.
-			EQ("TABLE_NAME", table).
-			And().EQ("COLUMN_NAME", column).
+		Where(sql.And(
+			sql.EQ("TABLE_NAME", table),
+			sql.EQ("COLUMN_NAME", column),
 			// NULL for unique and primary-key constraints.
-			And().NotNull("POSITION_IN_UNIQUE_CONSTRAINT").
-			And().EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
-		).
+			sql.NotNull("POSITION_IN_UNIQUE_CONSTRAINT"),
+			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+		)).
 		Query()
 	var (
 		names []string
