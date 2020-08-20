@@ -828,7 +828,7 @@ type Predicate struct {
 	fns   []func(*Builder)
 }
 
-// P creates a new predicates.
+// P creates a new predicate.
 //
 //	P().EQ("name", "a8m").And().EQ("age", 30)
 //
