@@ -592,7 +592,7 @@ func (a assets) format() error {
 	return nil
 }
 
-// expect panic if the condition is false.
+// expect panics if the condition is false.
 func expect(cond bool, msg string, args ...interface{}) {
 	if !cond {
 		panic(graphError{fmt.Sprintf(msg, args...)})
