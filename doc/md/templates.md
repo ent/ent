@@ -44,7 +44,7 @@ In order to override an existing template, use its name. For example:
 ## Annotations
 Schema annotations allow to attach metadata to fields and edges and inject them to external templates.  
 An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
-and implement the [Annotation](https://godoc.org/github.com/facebook/ent/schema/field#Annotation) interface.
+and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#Annotation) interface.
 
 Here's an example of an annotation and its usage in schema and template:
 
@@ -104,4 +104,4 @@ A custom template for implementing the `Node` API for GraphQL -
 ## Documentation
 
 Templates are executed on either a specific node-type or the entire schema graph. For API
-documentation, see the <a target="_blank" href="https://godoc.org/github.com/facebook/ent/entc/gen">GoDoc<a>.
+documentation, see the <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent/entc/gen?tab=doc">GoDoc<a>.
