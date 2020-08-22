@@ -65,6 +65,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("friends", User.Type),
 		edge.From("groups", Group.Type).
 			Ref("users"),
+		edge.From("manage", Group.Type).
+			Ref("admin"),
 	}
 }
 ``` 
