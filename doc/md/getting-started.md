@@ -126,6 +126,7 @@ To get started, create a new `ent.Client`. For this example, we will use SQLite3
 package main
 
 import (
+	"context"
 	"log"
 
 	"<project>/ent"
