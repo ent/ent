@@ -17,7 +17,7 @@ import (
 	"github.com/facebook/ent/schema/field"
 )
 
-// MySQL is a mysql migration driver.
+// MySQL is a MySQL migration driver.
 type MySQL struct {
 	dialect.Driver
 	version string
@@ -238,7 +238,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = c.scanTypeOr("double")
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp")
-		// In MySQL, timestamp columns are `NOT NULL by default, and assigning NULL
+		// In MySQL, timestamp columns are `NOT NULL` by default, and assigning NULL
 		// assigns the current_timestamp(). We avoid this if not set otherwise.
 		c.Nullable = c.Attr == ""
 	case field.TypeEnum:
