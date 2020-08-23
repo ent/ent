@@ -1822,13 +1822,13 @@ type Builder struct {
 func (b *Builder) Quote(ident string) string {
 	switch {
 	case b.postgres():
-		// if it was quoted with the wrong
+		// If it was quoted with the wrong
 		// identifier character.
 		if strings.Contains(ident, "`") {
 			return strings.Replace(ident, "`", `"`, -1)
 		}
 		return strconv.Quote(ident)
-	// an identifier for unknown dialect.
+	// An identifier for unknown dialect.
 	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
 		return ident
 	default:
@@ -1853,7 +1853,7 @@ func (b *Builder) Ident(s string) *Builder {
 	case s != "*" && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
 		b.WriteString(b.Quote(s))
 	case (isFunc(s) || isModifier(s)) && b.postgres():
-		// modifiers and aggregation functions that
+		// Modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.Replace(s, "`", `"`, -1))
 	default:
