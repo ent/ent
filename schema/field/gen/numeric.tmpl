@@ -174,6 +174,19 @@ func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *{{ $builder }}) Annotations(annotations ...Annotation) *{{ $builder }} {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	return b.desc
@@ -317,6 +330,19 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //
 func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 	b.desc.goType(typ, {{ $t }}Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *{{ $builder }}) Annotations(annotations ...Annotation) *{{ $builder }} {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 

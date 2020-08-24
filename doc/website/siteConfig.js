@@ -30,15 +30,15 @@ const siteConfig = {
 
   // Used for publishing and more
   projectName: 'ent',
-  organizationName: 'facebookincubator',
+  organizationName: 'facebook',
 
 
   customDocsPath: 'md',
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
-    {href: 'https://godoc.org/github.com/facebookincubator/ent', label: 'GoDoc'},
-    {href: 'https://github.com/facebookincubator/ent', label: 'Github'},
+    {href: 'https://pkg.go.dev/github.com/facebook/ent?tab=doc', label: 'GoDoc'},
+    {href: 'https://github.com/facebook/ent', label: 'Github'},
     { blog: true, label: 'Blog' },
   ],
 
@@ -75,6 +75,41 @@ const siteConfig = {
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
     theme: 'androidstudio',
+    hljs: function(hljs) {
+      hljs.registerLanguage('gotemplate', function(hljs) {
+          var GO_KEYWORDS = {
+              keyword:
+                  'break default func interface select case map struct chan else goto package switch ' +
+                  'const fallthrough if range type continue for import return var go defer ' +
+                  'bool byte complex64 complex128 float32 float64 int8 int16 int32 int64 string uint8 ' +
+                  'uint16 uint32 uint64 int uint uintptr rune with define block end',
+              literal:
+                  'true false iota nil',
+              built_in: 'append cap close complex copy imag len make new panic print println real recover delete' +
+                  'printf fail slice dict list'
+          };
+          return {
+              name: 'GoTemplate',
+              aliases: ['gotmpl'],
+              keywords: GO_KEYWORDS,
+              contains: [
+                  hljs.COMMENT('{{-* */\\*', '\\*/ *-*}}'),
+                  hljs.C_LINE_COMMENT_MODE,
+                  {
+                      className: 'string',
+                      variants: [
+                          hljs.QUOTE_STRING_MODE,
+                          hljs.APOS_STRING_MODE,
+                          {begin: '`', end: '`'},
+                      ]
+                  },
+                  {
+                      begin: /:=/
+                  },
+              ]
+          };
+      });
+    }
   },
 
   // Add custom scripts here that would be placed in <script> tags.

@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecCreate is the builder for creating a Spec entity.
@@ -45,6 +45,9 @@ func (sc *SpecCreate) Mutation() *SpecMutation {
 
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
+	if err := sc.preSave(); err != nil {
+		return nil, err
+	}
 	var (
 		err  error
 		node *Spec
@@ -81,6 +84,10 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 	return v
 }
 
+func (sc *SpecCreate) preSave() error {
+	return nil
+}
+
 func (sc *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
 	res := &gremlin.Response{}
 	query, bindings := sc.gremlin().Query()
@@ -103,4 +110,10 @@ func (sc *SpecCreate) gremlin() *dsl.Traversal {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	return v.ValueMap(true)
+}
+
+// SpecCreateBulk is the builder for creating a bulk of Spec entities.
+type SpecCreateBulk struct {
+	config
+	builders []*SpecCreate
 }

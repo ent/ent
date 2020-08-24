@@ -9,7 +9,7 @@ package galaxy
 import (
 	"fmt"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -47,7 +47,7 @@ var Columns = []string{
 // package on the initialization of the application. Therefore,
 // it should be imported in the main as follows:
 //
-//	import _ "github.com/facebookincubator/ent/entc/integration/privacy/ent/runtime"
+//	import _ "github.com/facebook/ent/entc/integration/privacy/ent/runtime"
 //
 var (
 	Hooks  [1]ent.Hook
@@ -61,20 +61,20 @@ type Type string
 
 // Type values.
 const (
-	TypeSpiral       Type = "spiral"
 	TypeBarredSpiral Type = "barred_spiral"
 	TypeElliptical   Type = "elliptical"
 	TypeIrregular    Type = "irregular"
+	TypeSpiral       Type = "spiral"
 )
 
 func (_type Type) String() string {
 	return string(_type)
 }
 
-// TypeValidator is a validator for the "_type" field enum values. It is called by the builders before save.
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeSpiral, TypeBarredSpiral, TypeElliptical, TypeIrregular:
+	case TypeBarredSpiral, TypeElliptical, TypeIrregular, TypeSpiral:
 		return nil
 	default:
 		return fmt.Errorf("galaxy: invalid enum value for type field: %q", _type)

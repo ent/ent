@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/predicate"
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/o2o2types/ent/predicate"
+	"github.com/facebook/ent/examples/o2o2types/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // UserDelete is the builder for deleting a User entity.

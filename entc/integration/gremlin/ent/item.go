@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin"
 )
 
 // Item is the model entity for the Item schema.

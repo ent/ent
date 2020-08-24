@@ -12,7 +12,7 @@ import (
 )
 
 // ColumnScanner is the interface that wraps the
-// three sql.Rows methods used for scanning.
+// four sql.Rows methods used for scanning.
 type ColumnScanner interface {
 	Next() bool
 	Scan(...interface{}) error

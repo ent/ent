@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
@@ -27,6 +27,34 @@ type FileTypeCreate struct {
 // SetName sets the name field.
 func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
 	ftc.mutation.SetName(s)
+	return ftc
+}
+
+// SetType sets the type field.
+func (ftc *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
+	ftc.mutation.SetType(f)
+	return ftc
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
+	if f != nil {
+		ftc.SetType(*f)
+	}
+	return ftc
+}
+
+// SetState sets the state field.
+func (ftc *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
+	ftc.mutation.SetState(f)
+	return ftc
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
+	if f != nil {
+		ftc.SetState(*f)
+	}
 	return ftc
 }
 
@@ -52,8 +80,8 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	if _, ok := ftc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	if err := ftc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -91,7 +119,45 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 	return v
 }
 
+func (ftc *FileTypeCreate) preSave() error {
+	if _, ok := ftc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := ftc.mutation.GetType(); !ok {
+		v := filetype.DefaultType
+		ftc.mutation.SetType(v)
+	}
+	if v, ok := ftc.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		v := filetype.DefaultState
+		ftc.mutation.SetState(v)
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
+	ft, _spec := ftc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	ft.ID = int(id)
+	return ft, nil
+}
+
+func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	var (
 		ft    = &FileType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -109,6 +175,22 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 			Column: filetype.FieldName,
 		})
 		ft.Name = value
+	}
+	if value, ok := ftc.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldType,
+		})
+		ft.Type = value
+	}
+	if value, ok := ftc.mutation.State(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldState,
+		})
+		ft.State = value
 	}
 	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -129,13 +211,71 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return ft, _spec
+}
+
+// FileTypeCreateBulk is the builder for creating a bulk of FileType entities.
+type FileTypeCreateBulk struct {
+	config
+	builders []*FileTypeCreate
+}
+
+// Save creates the FileType entities in the database.
+func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
+	nodes := make([]*FileType, len(ftcb.builders))
+	mutators := make([]Mutator, len(ftcb.builders))
+	for i := range ftcb.builders {
+		func(i int, root context.Context) {
+			builder := ftcb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*FileTypeMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ftcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	ft.ID = int(id)
-	return ft, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ftcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
+	v, err := ftcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

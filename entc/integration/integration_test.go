@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net"
@@ -19,16 +20,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/entc/integration/ent"
-	"github.com/facebookincubator/ent/entc/integration/ent/enttest"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/entc/integration/ent"
+	"github.com/facebook/ent/entc/integration/ent/enttest"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/ent/hook"
+	"github.com/facebook/ent/entc/integration/ent/migrate"
+	"github.com/facebook/ent/entc/integration/ent/node"
+	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/user"
 	"github.com/stretchr/testify/mock"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -116,6 +119,7 @@ var (
 		Sensitive,
 		EagerLoading,
 		Mutation,
+		CreateBulk,
 	}
 )
 
@@ -256,15 +260,16 @@ func Select(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 
 	t.Log("select one field")
-	client.User.Create().SetName("foo").SetAge(30).SaveX(ctx)
-	names := client.User.
+	u := client.User.Create().SetName("foo").SetAge(30).SaveX(ctx)
+	name := client.User.
 		Query().
+		Where(user.ID(u.ID)).
 		Select(user.FieldName).
-		StringsX(ctx)
-	require.Equal([]string{"foo"}, names)
+		StringX(ctx)
+	require.Equal("foo", name)
 	client.User.Create().SetName("bar").SetAge(30).SaveX(ctx)
 	t.Log("select one field with ordering")
-	names = client.User.
+	names := client.User.
 		Query().
 		Order(ent.Asc(user.FieldName)).
 		Select(user.FieldName).
@@ -509,8 +514,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.NotNil(client.Group.Query().OnlyX(ctx))
 
 	t.Log("get only ids")
-	require.NotEmpty(client.User.Query().OnlyXID(ctx))
-	require.NotEmpty(client.Group.Query().OnlyXID(ctx))
+	require.NotEmpty(client.User.Query().OnlyIDX(ctx))
+	require.NotEmpty(client.Group.Query().OnlyIDX(ctx))
 
 	t.Log("query spouse edge")
 	require.Zero(client.User.Query().Where(user.HasSpouse()).CountX(ctx))
@@ -573,6 +578,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Error(err, "type validator failed")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("failed").SetExpire(time.Now().Add(time.Hour)).Save(ctx)
 	require.Error(err, "name validator failed")
+	require.IsType(&ent.ValidationError{}, err)
+	require.EqualError(err, "ent: validator failed for field \"name\": last name must begin with uppercase")
+	require.EqualError(errors.Unwrap(err), "last name must begin with uppercase")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github20").SetExpire(time.Now().Add(time.Hour)).Save(ctx)
 	require.Error(err, "name validator failed")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github").SetMaxUsers(-1).SetExpire(time.Now().Add(time.Hour)).Save(ctx)
@@ -628,6 +636,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	ages, err := client.User.Query().GroupBy(user.FieldAge).Ints(ctx)
 	require.NoError(err)
 	require.Len(ages, 3)
+	age, err := client.User.Query().Where(user.Name("alexsn")).GroupBy(user.FieldAge).Int(ctx)
+	require.True(ent.IsNotFound(err))
+	require.Zero(age)
 
 	t.Log("group-by two fields with aggregation")
 	client.User.Create().SetName(usr.Name).SetAge(usr.Age).SaveX(ctx)
@@ -793,6 +804,15 @@ type mocker struct{ mock.Mock }
 
 func (m *mocker) onCommit(err error)   { m.Called(err) }
 func (m *mocker) onRollback(err error) { m.Called(err) }
+func (m *mocker) rHook() ent.RollbackHook {
+	return func(next ent.Rollbacker) ent.Rollbacker {
+		return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
+			err := next.Rollback(ctx, tx)
+			m.onRollback(err)
+			return err
+		})
+	}
+}
 
 func Tx(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
@@ -802,7 +822,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.onRollback)
+		tx.OnRollback(m.rHook())
 		tx.Node.Create().SaveX(ctx)
 		require.NoError(t, tx.Rollback())
 		require.Zero(t, client.Node.Query().CountX(ctx), "rollback should discard all changes")
@@ -813,7 +833,13 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onCommit", mock.Anything).Twice()
 		defer m.AssertExpectations(t)
-		tx.OnCommit(m.onCommit)
+		tx.OnCommit(func(next ent.Committer) ent.Committer {
+			return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
+				err := next.Commit(ctx, tx)
+				m.onCommit(err)
+				return err
+			})
+		})
 		nde := tx.Node.Create().SaveX(ctx)
 		require.NoError(t, tx.Commit())
 		require.Error(t, tx.Commit(), "should return an error on the second call")
@@ -828,7 +854,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.onRollback)
+		tx.OnRollback(m.rHook())
 		_, err = tx.Client().Tx(ctx)
 		require.Error(t, err, "cannot start a transaction within a transaction")
 		require.NoError(t, tx.Rollback())
@@ -842,7 +868,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.onRollback)
+		tx.OnRollback(m.rHook())
 		_, err = tx.Item.Create().Save(ctx)
 		require.Error(t, err)
 		require.NoError(t, tx.Rollback())
@@ -1094,6 +1120,74 @@ func Mutation(t *testing.T, client *ent.Client) {
 	usr := ub.SaveX(ctx)
 	require.Equal(t, "boring", a8m.Name)
 	require.Equal(t, "boring", usr.Name)
+}
+
+// Test templates codegen.
+var (
+	_ = ent.CardExtension{}
+	_ = ent.Card{}.StaticField
+	_ = []filetype.State{filetype.StateOn, filetype.StateOff}
+	_ = []filetype.Type{filetype.TypeJPG, filetype.TypePNG, filetype.TypeSVG}
+)
+
+func CreateBulk(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	cards := client.Card.CreateBulk(
+		client.Card.Create().SetNumber("10").SetName("1st"),
+		client.Card.Create().SetNumber("20").SetName("2nd"),
+		client.Card.Create().SetNumber("30").SetName("3rd"),
+	).SaveX(ctx)
+	require.Equal(t, cards[0].ID, cards[1].ID-1)
+	require.Equal(t, cards[1].ID, cards[2].ID-1)
+
+	inf := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
+	groups := client.Group.CreateBulk(
+		client.Group.Create().SetName("Github").SetExpire(time.Now()).SetInfo(inf),
+		client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf),
+	).SaveX(ctx)
+	require.Equal(t, inf.ID, groups[0].QueryInfo().OnlyIDX(ctx))
+	require.Equal(t, inf.ID, groups[1].QueryInfo().OnlyIDX(ctx))
+
+	client.User.Use(
+		func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				m.SetPassword("password")
+				return next.Mutate(ctx, m)
+			})
+		},
+		func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				name, _ := m.Name()
+				m.SetNickname("@" + name)
+				return next.Mutate(ctx, m)
+			})
+		},
+	)
+
+	users := client.User.CreateBulk(
+		client.User.Create().SetName("a8m").SetAge(20).AddGroups(groups...),
+		client.User.Create().SetName("nati").SetAge(20).SetCard(cards[0]).AddGroups(groups[0]),
+	).SaveX(ctx)
+	require.Equal(t, 2, users[0].QueryGroups().CountX(ctx))
+	require.False(t, users[0].QueryCard().ExistX(ctx))
+	require.Equal(t, "password", users[0].Password)
+	require.Equal(t, "@a8m", users[0].Nickname)
+	require.Equal(t, groups[0].ID, users[1].QueryGroups().OnlyIDX(ctx))
+	require.Equal(t, cards[0].ID, users[1].QueryCard().OnlyIDX(ctx))
+	require.Equal(t, "password", users[1].Password)
+	require.Equal(t, "@nati", users[1].Nickname)
+
+	pets := client.Pet.CreateBulk(
+		client.Pet.Create().SetName("pedro").SetOwner(users[0]),
+		client.Pet.Create().SetName("xabi").SetOwner(users[1]),
+		client.Pet.Create().SetName("layla"),
+	).SaveX(ctx)
+	require.Equal(t, "pedro", pets[0].Name)
+	require.Equal(t, users[0].ID, pets[0].QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, "xabi", pets[1].Name)
+	require.Equal(t, users[1].ID, pets[1].QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, "layla", pets[2].Name)
+	require.False(t, pets[2].QueryOwner().ExistX(ctx))
 }
 
 func drop(t *testing.T, client *ent.Client) {

@@ -13,11 +13,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/integration/template/ent/group"
+	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/user"
 
 	"golang.org/x/sync/semaphore"
 )

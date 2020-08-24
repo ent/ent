@@ -12,14 +12,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -118,26 +118,8 @@ func (cc *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if _, ok := cc.mutation.CreateTime(); !ok {
-		v := card.DefaultCreateTime()
-		cc.mutation.SetCreateTime(v)
-	}
-	if _, ok := cc.mutation.UpdateTime(); !ok {
-		v := card.DefaultUpdateTime()
-		cc.mutation.SetUpdateTime(v)
-	}
-	if _, ok := cc.mutation.Number(); !ok {
-		return nil, &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
-	}
-	if v, ok := cc.mutation.Number(); ok {
-		if err := card.NumberValidator(v); err != nil {
-			return nil, &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
-		}
-	}
-	if v, ok := cc.mutation.Name(); ok {
-		if err := card.NameValidator(v); err != nil {
-			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
+	if err := cc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -173,6 +155,31 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 		panic(err)
 	}
 	return v
+}
+
+func (cc *CardCreate) preSave() error {
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		v := card.DefaultCreateTime()
+		cc.mutation.SetCreateTime(v)
+	}
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		v := card.DefaultUpdateTime()
+		cc.mutation.SetUpdateTime(v)
+	}
+	if _, ok := cc.mutation.Number(); !ok {
+		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+	}
+	if v, ok := cc.mutation.Number(); ok {
+		if err := card.NumberValidator(v); err != nil {
+			return &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
+		}
+	}
+	if v, ok := cc.mutation.Name(); ok {
+		if err := card.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
@@ -228,4 +235,10 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// CardCreateBulk is the builder for creating a bulk of Card entities.
+type CardCreateBulk struct {
+	config
+	builders []*CardCreate
 }

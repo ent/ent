@@ -7,7 +7,7 @@
 package planet
 
 import (
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -51,7 +51,7 @@ var (
 // package on the initialization of the application. Therefore,
 // it should be imported in the main as follows:
 //
-//	import _ "github.com/facebookincubator/ent/entc/integration/privacy/ent/runtime"
+//	import _ "github.com/facebook/ent/entc/integration/privacy/ent/runtime"
 //
 var (
 	Hooks  [2]ent.Hook

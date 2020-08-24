@@ -7,10 +7,10 @@
 package filetype
 
 import (
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
@@ -173,6 +173,78 @@ func NameHasPrefix(v string) predicate.FileType {
 func NameHasSuffix(v string) predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.EndingWith(v))
+	})
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v Type) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.EQ(v))
+	})
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v Type) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.NEQ(v))
+	})
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...Type) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.Within(v...))
+	})
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...Type) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.Without(v...))
+	})
+}
+
+// StateEQ applies the EQ predicate on the "state" field.
+func StateEQ(v State) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.EQ(v))
+	})
+}
+
+// StateNEQ applies the NEQ predicate on the "state" field.
+func StateNEQ(v State) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.NEQ(v))
+	})
+}
+
+// StateIn applies the In predicate on the "state" field.
+func StateIn(vs ...State) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.Within(v...))
+	})
+}
+
+// StateNotIn applies the NotIn predicate on the "state" field.
+func StateNotIn(vs ...State) predicate.FileType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldState, p.Without(v...))
 	})
 }
 

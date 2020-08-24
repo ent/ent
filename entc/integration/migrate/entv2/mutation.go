@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -868,6 +868,8 @@ type UserMutation struct {
 	op             Op
 	typ            string
 	id             *int
+	mixed_string   *string
+	mixed_enum     *user.MixedEnum
 	age            *int
 	addage         *int
 	name           *string
@@ -973,6 +975,80 @@ func (m *UserMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// SetMixedString sets the mixed_string field.
+func (m *UserMutation) SetMixedString(s string) {
+	m.mixed_string = &s
+}
+
+// MixedString returns the mixed_string value in the mutation.
+func (m *UserMutation) MixedString() (r string, exists bool) {
+	v := m.mixed_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMixedString returns the old mixed_string value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldMixedString(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMixedString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMixedString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMixedString: %w", err)
+	}
+	return oldValue.MixedString, nil
+}
+
+// ResetMixedString reset all changes of the "mixed_string" field.
+func (m *UserMutation) ResetMixedString() {
+	m.mixed_string = nil
+}
+
+// SetMixedEnum sets the mixed_enum field.
+func (m *UserMutation) SetMixedEnum(ue user.MixedEnum) {
+	m.mixed_enum = &ue
+}
+
+// MixedEnum returns the mixed_enum value in the mutation.
+func (m *UserMutation) MixedEnum() (r user.MixedEnum, exists bool) {
+	v := m.mixed_enum
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMixedEnum returns the old mixed_enum value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldMixedEnum(ctx context.Context) (v user.MixedEnum, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMixedEnum is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMixedEnum requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMixedEnum: %w", err)
+	}
+	return oldValue.MixedEnum, nil
+}
+
+// ResetMixedEnum reset all changes of the "mixed_enum" field.
+func (m *UserMutation) ResetMixedEnum() {
+	m.mixed_enum = nil
 }
 
 // SetAge sets the age field.
@@ -1567,7 +1643,13 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 12)
+	if m.mixed_string != nil {
+		fields = append(fields, user.FieldMixedString)
+	}
+	if m.mixed_enum != nil {
+		fields = append(fields, user.FieldMixedEnum)
+	}
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -1606,6 +1688,10 @@ func (m *UserMutation) Fields() []string {
 // not set, or was not define in the schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldMixedString:
+		return m.MixedString()
+	case user.FieldMixedEnum:
+		return m.MixedEnum()
 	case user.FieldAge:
 		return m.Age()
 	case user.FieldName:
@@ -1635,6 +1721,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // or the query to the database was failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldMixedString:
+		return m.OldMixedString(ctx)
+	case user.FieldMixedEnum:
+		return m.OldMixedEnum(ctx)
 	case user.FieldAge:
 		return m.OldAge(ctx)
 	case user.FieldName:
@@ -1664,6 +1754,20 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type mismatch the field type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldMixedString:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMixedString(v)
+		return nil
+	case user.FieldMixedEnum:
+		v, ok := value.(user.MixedEnum)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMixedEnum(v)
+		return nil
 	case user.FieldAge:
 		v, ok := value.(int)
 		if !ok {
@@ -1832,6 +1936,12 @@ func (m *UserMutation) ClearField(name string) error {
 // defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldMixedString:
+		m.ResetMixedString()
+		return nil
+	case user.FieldMixedEnum:
+		m.ResetMixedEnum()
+		return nil
 	case user.FieldAge:
 		m.ResetAge()
 		return nil

@@ -5,15 +5,36 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
+	"github.com/facebook/ent/schema/mixin"
 )
+
+type Mixin struct {
+	mixin.Schema
+}
+
+func (m Mixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("mixed_string").
+			Default("default"),
+		field.Enum("mixed_enum").
+			Values("on", "off").
+			Default("on"),
+	}
+}
 
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
+}
+
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		Mixin{},
+	}
 }
 
 // Fields of the User.

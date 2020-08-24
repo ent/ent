@@ -13,7 +13,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/schema/field"
 )
 
 func main() {

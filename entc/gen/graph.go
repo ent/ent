@@ -17,9 +17,9 @@ import (
 	"text/template"
 	"text/template/parse"
 
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"golang.org/x/tools/imports"
 )
@@ -63,11 +63,11 @@ type (
 func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
 	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
-	for _, schema := range schemas {
-		g.addNode(schema)
+	for i := range schemas {
+		g.addNode(schemas[i])
 	}
-	for _, schema := range schemas {
-		g.addEdges(schema)
+	for i := range schemas {
+		g.addEdges(schemas[i])
 	}
 	for _, t := range g.Nodes {
 		check(resolve(t), "resolve %q relations", t.Name)
@@ -75,8 +75,8 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for _, t := range g.Nodes {
 		check(t.resolveFKs(), "set %q foreign-keys", t.Name)
 	}
-	for _, schema := range schemas {
-		g.addIndexes(schema)
+	for i := range schemas {
+		g.addIndexes(schemas[i])
 	}
 	return
 }
@@ -144,26 +144,28 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		// Assoc only.
 		case !e.Inverse:
 			t.Edges = append(t.Edges, &Edge{
-				def:       e,
-				Type:      typ,
-				Name:      e.Name,
-				Owner:     t,
-				Unique:    e.Unique,
-				Optional:  !e.Required,
-				StructTag: e.Tag,
+				def:         e,
+				Type:        typ,
+				Name:        e.Name,
+				Owner:       t,
+				Unique:      e.Unique,
+				Optional:    !e.Required,
+				StructTag:   e.Tag,
+				Annotations: e.Annotations,
 			})
 		// Inverse only.
 		case e.Inverse && e.Ref == nil:
 			expect(e.RefName != "", "missing reference name for inverse edge: %s.%s", t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
-				def:       e,
-				Type:      typ,
-				Name:      e.Name,
-				Owner:     typ,
-				Inverse:   e.RefName,
-				Unique:    e.Unique,
-				Optional:  !e.Required,
-				StructTag: e.Tag,
+				def:         e,
+				Type:        typ,
+				Name:        e.Name,
+				Owner:       typ,
+				Inverse:     e.RefName,
+				Unique:      e.Unique,
+				Optional:    !e.Required,
+				StructTag:   e.Tag,
+				Annotations: e.Annotations,
 			})
 		// Inverse and assoc.
 		case e.Inverse:
@@ -171,22 +173,24 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			expect(e.RefName == "", "reference name is derived from the assoc name: %s.%s <-> %s.%s", t.Name, ref.Name, t.Name, e.Name)
 			expect(ref.Type == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
 			t.Edges = append(t.Edges, &Edge{
-				def:       e,
-				Type:      typ,
-				Name:      e.Name,
-				Owner:     t,
-				Inverse:   ref.Name,
-				Unique:    e.Unique,
-				Optional:  !e.Required,
-				StructTag: e.Tag,
+				def:         e,
+				Type:        typ,
+				Name:        e.Name,
+				Owner:       t,
+				Inverse:     ref.Name,
+				Unique:      e.Unique,
+				Optional:    !e.Required,
+				StructTag:   e.Tag,
+				Annotations: e.Annotations,
 			}, &Edge{
-				def:       e,
-				Type:      typ,
-				Owner:     t,
-				Name:      ref.Name,
-				Unique:    ref.Unique,
-				Optional:  !ref.Required,
-				StructTag: ref.Tag,
+				def:         e,
+				Type:        typ,
+				Owner:       t,
+				Name:        ref.Name,
+				Unique:      ref.Unique,
+				Optional:    !ref.Required,
+				StructTag:   ref.Tag,
+				Annotations: ref.Annotations,
 			})
 		default:
 			panic(graphError{"edge must be either an assoc or inverse edge"})

@@ -16,10 +16,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 )
 
 // The following types and their exported methods used by the codegen
@@ -62,6 +62,8 @@ type (
 		Nillable bool
 		// Default indicates if this field has a default value for creation.
 		Default bool
+		// Enums information for enum fields.
+		Enums []Enum
 		// UpdateDefault indicates if this field has a default value for update.
 		UpdateDefault bool
 		// Immutable indicates is this field cannot be updated.
@@ -75,6 +77,9 @@ type (
 		// UserDefined indicates that this field was defined by the loaded schema.
 		// Unlike default id field, which is defined by the generator.
 		UserDefined bool
+		// Annotations that were defined for the field in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Edge of a graph between two types.
@@ -105,6 +110,9 @@ type (
 		//	edge.To("spouse", User.Type).Unique()   // one 2 one.
 		//
 		Bidi bool
+		// Annotations that were defined for the edge in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Relation holds the relational database information for edges.
@@ -141,6 +149,13 @@ type (
 		// Edge that is associated with this foreign-key.
 		Edge *Edge
 	}
+	// Enum holds the enum information for schema enums in codegen.
+	Enum struct {
+		// Name is the Go name of the enum.
+		Name string
+		// Value in the schema.
+		Value string
+	}
 )
 
 // NewType creates a new type and its fields from the given schema.
@@ -176,6 +191,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			StructTag:     structTag(f.Name, f.Tag),
 			Validators:    f.Validators,
 			UserDefined:   true,
+			Annotations:   f.Annotations,
 		}
 		if err := typ.checkField(tf, f); err != nil {
 			return nil, err
@@ -501,9 +517,39 @@ func (t *Type) addFK(fk *ForeignKey) {
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
-// QueryName returns the struct name of the query builder for this type.
+// QueryName returns the struct name denoting the query-builder for this type.
 func (t Type) QueryName() string {
 	return pascal(t.Name) + "Query"
+}
+
+// CreateName returns the struct name denoting the create-builder for this type.
+func (t Type) CreateName() string {
+	return pascal(t.Name) + "Create"
+}
+
+// CreateBulk returns the struct name denoting the create-bulk-builder for this type.
+func (t Type) CreateBulkName() string {
+	return pascal(t.Name) + "CreateBulk"
+}
+
+// UpdateName returns the struct name denoting the update-builder for this type.
+func (t Type) UpdateName() string {
+	return pascal(t.Name) + "Update"
+}
+
+// UpdateOneName returns the struct name denoting the update-one-builder for this type.
+func (t Type) UpdateOneName() string {
+	return pascal(t.Name) + "UpdateOne"
+}
+
+// DeleteName returns the struct name denoting the delete-builder for this type.
+func (t Type) DeleteName() string {
+	return pascal(t.Name) + "Delete"
+}
+
+// DeleteOneName returns the struct name denoting the delete-one-builder for this type.
+func (t Type) DeleteOneName() string {
+	return pascal(t.Name) + "DeleteOne"
 }
 
 // MutationName returns the struct name of the mutation builder for this type.
@@ -551,6 +597,20 @@ func (t Type) HasPolicy() bool {
 	return false
 }
 
+// RelatedTypes returns all the types (nodes) that
+// are related (with edges) to this type.
+func (t Type) RelatedTypes() []*Type {
+	seen := make(map[string]struct{})
+	related := make([]*Type, 0, len(t.Edges))
+	for _, e := range t.Edges {
+		if _, ok := seen[e.Type.Name]; !ok {
+			related = append(related, e.Type)
+			seen[e.Type.Name] = struct{}{}
+		}
+	}
+	return related
+}
+
 // check checks the schema type.
 func (t *Type) check() error {
 	pkg := t.Package()
@@ -575,14 +635,14 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		err = fmt.Errorf("invalid type for field %s", f.Name)
 	case f.Nillable && !f.Optional:
 		err = fmt.Errorf("nillable field %q must be optional", f.Name)
-	case f.Unique && f.Default:
+	case f.Unique && f.Default && f.Info.Type != field.TypeUUID:
 		err = fmt.Errorf("unique field %q cannot have default value", f.Name)
 	case t.fields[f.Name] != nil:
 		err = fmt.Errorf("field %q redeclared for type %q", f.Name, t.Name)
 	case f.Sensitive && f.Tag != "":
 		err = fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
 	case f.Info.Type == field.TypeEnum:
-		if err = checkEnums(f); err == nil {
+		if tf.Enums, err = tf.enums(f); err == nil && !tf.HasGoType() {
 			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
 		}
@@ -617,16 +677,29 @@ func (f Field) StructField() string {
 }
 
 // Enums returns the enum values of a field.
-func (f Field) Enums() []string {
-	if f.IsEnum() {
-		return f.def.Enums
+func (f Field) EnumNames() []string {
+	names := make([]string, 0, len(f.def.Enums))
+	for _, e := range f.Enums {
+		names = append(names, e.Name)
 	}
-	return nil
+	return names
 }
 
-// EnumName returns the constant name of the enum value.
+// EnumValues returns the values of the enum field.
+func (f Field) EnumValues() []string {
+	values := make([]string, 0, len(f.def.Enums))
+	for _, e := range f.Enums {
+		values = append(values, e.Value)
+	}
+	return values
+}
+
+// EnumName returns the constant name for the enum.
 func (f Field) EnumName(enum string) string {
-	return pascal(f.Name) + pascal(enum)
+	if !token.IsExported(enum) {
+		enum = pascal(enum)
+	}
+	return pascal(f.Name) + enum
 }
 
 // Validator returns the validator name.
@@ -728,7 +801,7 @@ func (f Field) NullTypeField(rec string) string {
 	case field.TypeEnum:
 		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
-		expr = fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String()))
+		expr = f.goType(fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String())))
 	case field.TypeTime:
 		expr = fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
@@ -737,7 +810,7 @@ func (f Field) NullTypeField(rec string) string {
 		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
 		expr = fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
 	}
-	return f.goType(expr)
+	return expr
 }
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
@@ -747,8 +820,8 @@ func (f Field) Column() *schema.Column {
 		Type:     f.Type.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
-		Enums:    f.Enums(),
 		Size:     f.size(),
+		Enums:    f.EnumValues(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
@@ -813,7 +886,7 @@ func (f Field) HasGoType() bool {
 // ConvertedToBasic indicates if the Go type of the field
 // can be converted to basic type (string, int, etc).
 func (f Field) ConvertedToBasic() bool {
-	return !f.HasGoType() || f.BasicType("") != ""
+	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
 var (
@@ -835,6 +908,8 @@ func (f Field) BasicType(ident string) (expr string) {
 	}
 	t, rt := f.Type, f.Type.RType
 	switch t.Type {
+	case field.TypeEnum:
+		expr = ident
 	case field.TypeBool:
 		switch {
 		case rt.Kind == reflect.Bool:
@@ -877,6 +952,36 @@ func (f Field) goType(ident string) string {
 		return ident
 	}
 	return fmt.Sprintf("%s(%s)", f.Type, ident)
+}
+
+func (f Field) enums(lf *load.Field) ([]Enum, error) {
+	if len(lf.Enums) == 0 {
+		return nil, fmt.Errorf("missing values for enum field %q", f.Name)
+	}
+	enums := make([]Enum, 0, len(lf.Enums))
+	values := make(map[string]bool, len(lf.Enums))
+	for name, e := range lf.Enums {
+		switch {
+		case e == "":
+			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
+		case values[e]:
+			return nil, fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
+		case strings.IndexFunc(e, unicode.IsSpace) != -1:
+			return nil, fmt.Errorf("enum value %q cannot contain spaces", e)
+		default:
+			values[e] = true
+			enums = append(enums, Enum{Name: f.EnumName(name), Value: e})
+		}
+	}
+	if value := lf.DefaultValue; value != nil {
+		if value, ok := value.(string); !ok || !values[value] {
+			return nil, fmt.Errorf("invalid default value for enum field %q", f.Name)
+		}
+	}
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].Value < enums[j].Value
+	})
+	return enums, nil
 }
 
 // Label returns the Gremlin label name of the edge.
@@ -1046,31 +1151,6 @@ func (r Rel) String() string {
 		s = "M2M"
 	}
 	return s
-}
-
-func checkEnums(f *load.Field) error {
-	if len(f.Enums) == 0 {
-		return fmt.Errorf("missing values for enum field %q", f.Name)
-	}
-	values := make(map[string]bool, len(f.Enums))
-	for _, e := range f.Enums {
-		switch {
-		case e == "":
-			return fmt.Errorf("%q field value cannot be empty", f.Name)
-		case values[e]:
-			return fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
-		case strings.IndexFunc(e, unicode.IsSpace) != -1:
-			return fmt.Errorf("enum value %q cannot contain spaces", e)
-		default:
-			values[e] = true
-		}
-	}
-	if value := f.DefaultValue; value != nil {
-		if value, ok := value.(string); !ok || !values[value] {
-			return fmt.Errorf("invalid default value for enum field %q", f.Name)
-		}
-	}
-	return nil
 }
 
 func structTag(name, tag string) string {

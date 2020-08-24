@@ -11,14 +11,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/migrate"
+	"github.com/facebook/ent/entc/integration/privacy/ent/migrate"
 
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
+	"github.com/facebook/ent/entc/integration/privacy/ent/galaxy"
+	"github.com/facebook/ent/entc/integration/privacy/ent/planet"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -63,7 +63,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
@@ -74,6 +75,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:    ctx,
 		config: cfg,
 		Galaxy: NewGalaxyClient(cfg),
 		Planet: NewPlanetClient(cfg),
@@ -148,6 +150,11 @@ func (c *GalaxyClient) Create() *GalaxyCreate {
 	return &GalaxyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Galaxy entities.
+func (c *GalaxyClient) CreateBulk(builders ...*GalaxyCreate) *GalaxyCreateBulk {
+	return &GalaxyCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Galaxy.
 func (c *GalaxyClient) Update() *GalaxyUpdate {
 	mutation := newGalaxyMutation(c.config, OpUpdate)
@@ -185,7 +192,7 @@ func (c *GalaxyClient) DeleteOneID(id int) *GalaxyDeleteOne {
 	return &GalaxyDeleteOne{builder}
 }
 
-// Create returns a query builder for Galaxy.
+// Query returns a query builder for Galaxy.
 func (c *GalaxyClient) Query() *GalaxyQuery {
 	return &GalaxyQuery{config: c.config}
 }
@@ -248,6 +255,11 @@ func (c *PlanetClient) Create() *PlanetCreate {
 	return &PlanetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Planet entities.
+func (c *PlanetClient) CreateBulk(builders ...*PlanetCreate) *PlanetCreateBulk {
+	return &PlanetCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Planet.
 func (c *PlanetClient) Update() *PlanetUpdate {
 	mutation := newPlanetMutation(c.config, OpUpdate)
@@ -285,7 +297,7 @@ func (c *PlanetClient) DeleteOneID(id int) *PlanetDeleteOne {
 	return &PlanetDeleteOne{builder}
 }
 
-// Create returns a query builder for Planet.
+// Query returns a query builder for Planet.
 func (c *PlanetClient) Query() *PlanetQuery {
 	return &PlanetQuery{config: c.config}
 }

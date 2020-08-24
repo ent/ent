@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebook/ent/dialect"
 
 	"github.com/stretchr/testify/require"
 )

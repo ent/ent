@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
 )
 
 // Group is the model entity for the Group schema.

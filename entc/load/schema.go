@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 )
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
@@ -35,36 +35,38 @@ type Position struct {
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name          string            `json:"name,omitempty"`
-	Info          *field.TypeInfo   `json:"type,omitempty"`
-	Tag           string            `json:"tag,omitempty"`
-	Size          *int64            `json:"size,omitempty"`
-	Enums         []string          `json:"enums,omitempty"`
-	Unique        bool              `json:"unique,omitempty"`
-	Nillable      bool              `json:"nillable,omitempty"`
-	Optional      bool              `json:"optional,omitempty"`
-	Default       bool              `json:"default,omitempty"`
-	DefaultValue  interface{}       `json:"default_value,omitempty"`
-	UpdateDefault bool              `json:"update_default,omitempty"`
-	Immutable     bool              `json:"immutable,omitempty"`
-	Validators    int               `json:"validators,omitempty"`
-	StorageKey    string            `json:"storage_key,omitempty"`
-	Position      *Position         `json:"position,omitempty"`
-	Sensitive     bool              `json:"sensitive,omitempty"`
-	SchemaType    map[string]string `json:"schema_type,omitempty"`
+	Name          string                 `json:"name,omitempty"`
+	Info          *field.TypeInfo        `json:"type,omitempty"`
+	Tag           string                 `json:"tag,omitempty"`
+	Size          *int64                 `json:"size,omitempty"`
+	Enums         map[string]string      `json:"enums,omitempty"`
+	Unique        bool                   `json:"unique,omitempty"`
+	Nillable      bool                   `json:"nillable,omitempty"`
+	Optional      bool                   `json:"optional,omitempty"`
+	Default       bool                   `json:"default,omitempty"`
+	DefaultValue  interface{}            `json:"default_value,omitempty"`
+	UpdateDefault bool                   `json:"update_default,omitempty"`
+	Immutable     bool                   `json:"immutable,omitempty"`
+	Validators    int                    `json:"validators,omitempty"`
+	StorageKey    string                 `json:"storage_key,omitempty"`
+	Position      *Position              `json:"position,omitempty"`
+	Sensitive     bool                   `json:"sensitive,omitempty"`
+	SchemaType    map[string]string      `json:"schema_type,omitempty"`
+	Annotations   map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
 type Edge struct {
-	Name       string           `json:"name,omitempty"`
-	Type       string           `json:"type,omitempty"`
-	Tag        string           `json:"tag,omitempty"`
-	RefName    string           `json:"ref_name,omitempty"`
-	Ref        *Edge            `json:"ref,omitempty"`
-	Unique     bool             `json:"unique,omitempty"`
-	Inverse    bool             `json:"inverse,omitempty"`
-	Required   bool             `json:"required,omitempty"`
-	StorageKey *edge.StorageKey `json:"storage_key,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	Type        string                 `json:"type,omitempty"`
+	Tag         string                 `json:"tag,omitempty"`
+	RefName     string                 `json:"ref_name,omitempty"`
+	Ref         *Edge                  `json:"ref,omitempty"`
+	Unique      bool                   `json:"unique,omitempty"`
+	Inverse     bool                   `json:"inverse,omitempty"`
+	Required    bool                   `json:"required,omitempty"`
+	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // Index represents an ent.Index that was loaded from a complied user package.
@@ -78,14 +80,18 @@ type Index struct {
 // NewEdge creates an loaded edge from edge descriptor.
 func NewEdge(ed *edge.Descriptor) *Edge {
 	ne := &Edge{
-		Tag:        ed.Tag,
-		Type:       ed.Type,
-		Name:       ed.Name,
-		Unique:     ed.Unique,
-		Inverse:    ed.Inverse,
-		Required:   ed.Required,
-		RefName:    ed.RefName,
-		StorageKey: ed.StorageKey,
+		Tag:         ed.Tag,
+		Type:        ed.Type,
+		Name:        ed.Name,
+		Unique:      ed.Unique,
+		Inverse:     ed.Inverse,
+		Required:    ed.Required,
+		RefName:     ed.RefName,
+		StorageKey:  ed.StorageKey,
+		Annotations: make(map[string]interface{}),
+	}
+	for _, at := range ed.Annotations {
+		ne.Annotations[at.Name()] = at
 	}
 	if ref := ed.Ref; ref != nil {
 		ne.Ref = NewEdge(ref)
@@ -114,6 +120,10 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Validators:    len(fd.Validators),
 		Sensitive:     fd.Sensitive,
 		SchemaType:    fd.SchemaType,
+		Annotations:   make(map[string]interface{}),
+	}
+	for _, at := range fd.Annotations {
+		sf.Annotations[at.Name()] = at
 	}
 	if sf.Info == nil {
 		return nil, fmt.Errorf("missing type info for field %q", sf.Name)

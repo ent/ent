@@ -41,11 +41,67 @@ In order to override an existing template, use its name. For example:
 {{ end }}
 ```
 
+## Annotations
+Schema annotations allow to attach metadata to fields and edges and inject them to external templates.  
+An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
+and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#Annotation) interface.
+
+Here's an example of an annotation and its usage in schema and template:
+
+1\. An annotation definition:
+```go
+package entgql
+
+// Annotation annotates fields with metadata for templates.
+type Annotation struct {
+	// OrderField is the ordering field as defined in graphql schema.
+	OrderField string
+}
+
+// Name implements ent.Annotation interface.
+func (Annotation) Name() string {
+	return "EntGQL"
+}
+```
+
+2\. Annotation usage in ent/schema:
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("creation_date").
+			Annotations(entgql.Annotation{
+				OrderField: "CREATED_AT",
+			}),
+	}
+}
+```
+
+3\. Annotation usage in external template:
+```gotemplate
+{{ range $node := $.Nodes }}
+	{{ range $f := $node.Fields }}
+		{{/* Get the annotation by its name. See: Annotation.Name */}}
+		{{ if $annotation := $f.Annotations.EntGQL }}
+			{{/* Get the field from the annotation. */}}
+			{{ $orderField := $annotation.OrderField }}
+		{{ end }}
+	{{ end }}
+{{ end }}
+```
+
+
 ## Examples
 A custom template for implementing the `Node` API for GraphQL - 
-[Github](https://github.com/facebookincubator/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+[Github](https://github.com/facebook/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
 
 ## Documentation
 
 Templates are executed on either a specific node-type or the entire schema graph. For API
-documentation, see the <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent/entc/gen">GoDoc<a>.
+documentation, see the <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent/entc/gen?tab=doc">GoDoc<a>.

@@ -15,7 +15,7 @@ import (
 
 func TestCmd(t *testing.T) {
 	defer os.RemoveAll("ent")
-	cmd := exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "init", "User")
+	cmd := exec.Command("go", "run", "github.com/facebook/ent/cmd/entc", "init", "User")
 	stderr := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
 	require.NoError(t, cmd.Run(), stderr.String())
@@ -25,7 +25,7 @@ func TestCmd(t *testing.T) {
 	_, err = os.Stat("ent/schema/user.go")
 	require.NoError(t, err)
 
-	cmd = exec.Command("go", "run", "github.com/facebookincubator/ent/cmd/entc", "generate", "./ent/schema")
+	cmd = exec.Command("go", "run", "github.com/facebook/ent/cmd/entc", "generate", "./ent/schema")
 	stderr = bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
 	require.NoError(t, cmd.Run(), stderr.String())

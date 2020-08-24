@@ -10,9 +10,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -76,13 +76,8 @@ func (bc *BlobCreate) Mutation() *BlobMutation {
 
 // Save creates the Blob in the database.
 func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
-	if _, ok := bc.mutation.UUID(); !ok {
-		v := blob.DefaultUUID()
-		bc.mutation.SetUUID(v)
-	}
-	if _, ok := bc.mutation.ID(); !ok {
-		v := blob.DefaultID()
-		bc.mutation.SetID(v)
+	if err := bc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -120,7 +115,30 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 	return v
 }
 
+func (bc *BlobCreate) preSave() error {
+	if _, ok := bc.mutation.UUID(); !ok {
+		v := blob.DefaultUUID()
+		bc.mutation.SetUUID(v)
+	}
+	if _, ok := bc.mutation.ID(); !ok {
+		v := blob.DefaultID()
+		bc.mutation.SetID(v)
+	}
+	return nil
+}
+
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
+	b, _spec := bc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	return b, nil
+}
+
+func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
 		b     = &Blob{config: bc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -181,11 +199,69 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return b, _spec
+}
+
+// BlobCreateBulk is the builder for creating a bulk of Blob entities.
+type BlobCreateBulk struct {
+	config
+	builders []*BlobCreate
+}
+
+// Save creates the Blob entities in the database.
+func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
+	nodes := make([]*Blob, len(bcb.builders))
+	mutators := make([]Mutator, len(bcb.builders))
+	for i := range bcb.builders {
+		func(i int, root context.Context) {
+			builder := bcb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*BlobMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, bcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	return b, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
+	v, err := bcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

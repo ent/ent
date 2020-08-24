@@ -6,7 +6,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/facebookincubator/ent/entc/integration/migrate/entv2/runtime.go
+// The schema-stitching logic is generated in github.com/facebook/ent/entc/integration/migrate/entv2/runtime.go
 
 const (
 	Version = "(devel)" // Version of ent codegen.

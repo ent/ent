@@ -15,13 +15,14 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/entc/integration/json/ent"
-	"github.com/facebookincubator/ent/entc/integration/json/ent/migrate"
-	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/entc/integration/json/ent"
+	"github.com/facebook/ent/entc/integration/json/ent/migrate"
+	"github.com/facebook/ent/entc/integration/json/ent/user"
 
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
 
@@ -81,6 +82,21 @@ func TestPostgres(t *testing.T) {
 			RawMessage(t, client)
 		})
 	}
+}
+
+func TestSQLite(t *testing.T) {
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+	URL(t, client)
+	Dirs(t, client)
+	Ints(t, client)
+	Floats(t, client)
+	Strings(t, client)
+	RawMessage(t, client)
 }
 
 func Ints(t *testing.T, client *ent.Client) {

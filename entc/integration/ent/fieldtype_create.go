@@ -14,11 +14,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -532,6 +533,20 @@ func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRole sets the role field.
+func (ftc *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
+	ftc.mutation.SetRole(r)
+	return ftc
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetRole(*r)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -539,40 +554,8 @@ func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	if _, ok := ftc.mutation.Int(); !ok {
-		return nil, &ValidationError{Name: "int", err: errors.New("ent: missing required field \"int\"")}
-	}
-	if _, ok := ftc.mutation.Int8(); !ok {
-		return nil, &ValidationError{Name: "int8", err: errors.New("ent: missing required field \"int8\"")}
-	}
-	if _, ok := ftc.mutation.Int16(); !ok {
-		return nil, &ValidationError{Name: "int16", err: errors.New("ent: missing required field \"int16\"")}
-	}
-	if _, ok := ftc.mutation.Int32(); !ok {
-		return nil, &ValidationError{Name: "int32", err: errors.New("ent: missing required field \"int32\"")}
-	}
-	if _, ok := ftc.mutation.Int64(); !ok {
-		return nil, &ValidationError{Name: "int64", err: errors.New("ent: missing required field \"int64\"")}
-	}
-	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
-		}
-	}
-	if v, ok := ftc.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
-	}
-	if v, ok := ftc.mutation.Ndir(); ok {
-		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return nil, &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
-		}
-	}
-	if v, ok := ftc.mutation.Link(); ok {
-		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
-		}
+	if err := ftc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -610,7 +593,68 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 	return v
 }
 
+func (ftc *FieldTypeCreate) preSave() error {
+	if _, ok := ftc.mutation.Int(); !ok {
+		return &ValidationError{Name: "int", err: errors.New("ent: missing required field \"int\"")}
+	}
+	if _, ok := ftc.mutation.Int8(); !ok {
+		return &ValidationError{Name: "int8", err: errors.New("ent: missing required field \"int8\"")}
+	}
+	if _, ok := ftc.mutation.Int16(); !ok {
+		return &ValidationError{Name: "int16", err: errors.New("ent: missing required field \"int16\"")}
+	}
+	if _, ok := ftc.mutation.Int32(); !ok {
+		return &ValidationError{Name: "int32", err: errors.New("ent: missing required field \"int32\"")}
+	}
+	if _, ok := ftc.mutation.Int64(); !ok {
+		return &ValidationError{Name: "int64", err: errors.New("ent: missing required field \"int64\"")}
+	}
+	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.Role(); !ok {
+		v := fieldtype.DefaultRole
+		ftc.mutation.SetRole(v)
+	}
+	if v, ok := ftc.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
+	ft, _spec := ftc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	ft.ID = int(id)
+	return ft, nil
+}
+
+func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	var (
 		ft    = &FieldType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -973,13 +1017,79 @@ func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 		})
 		ft.NullFloat = value
 	}
-	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	if value, ok := ftc.mutation.Role(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldRole,
+		})
+		ft.Role = value
 	}
-	id := _spec.ID.Value.(int64)
-	ft.ID = int(id)
-	return ft, nil
+	return ft, _spec
+}
+
+// FieldTypeCreateBulk is the builder for creating a bulk of FieldType entities.
+type FieldTypeCreateBulk struct {
+	config
+	builders []*FieldTypeCreate
+}
+
+// Save creates the FieldType entities in the database.
+func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
+	nodes := make([]*FieldType, len(ftcb.builders))
+	mutators := make([]Mutator, len(ftcb.builders))
+	for i := range ftcb.builders {
+		func(i int, root context.Context) {
+			builder := ftcb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*FieldTypeMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ftcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ftcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ftcb *FieldTypeCreateBulk) SaveX(ctx context.Context) []*FieldType {
+	v, err := ftcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

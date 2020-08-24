@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/o2obidi/ent"
+	"github.com/facebook/ent/examples/o2obidi/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary
