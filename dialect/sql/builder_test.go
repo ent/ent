@@ -1213,6 +1213,42 @@ WHERE
 	OR ("f" <> $10 AND "g" <> $11)`),
 			wantArgs: []interface{}{1, 2, 3, 2, 4, 5, "a", "b", "c", "f", "g"},
 		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select("*").
+				From(Table("users")).
+				Where(P().Append(func(b *Builder) {
+					b.JSONPath("a", Path("b", "c", "[1]", "d"), Unquote(true))
+					b.WriteString(" = ")
+					b.Arg("a")
+				})),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) = ?",
+			wantArgs:  []interface{}{"a"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("users")).
+				Where(P().Append(func(b *Builder) {
+					b.JSONPath("a", Path("b", "c", "[1]", "d"), Unquote(true))
+					b.WriteString(" = ")
+					b.Arg("a")
+				})),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' = $1`,
+			wantArgs:  []interface{}{"a"},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("users")).
+				Where(P().Append(func(b *Builder) {
+					b.JSONPath("a", Path("b", "c", "[1]", "d"), Cast("int"))
+					b.WriteString(" = ")
+					b.Arg(1)
+				})),
+			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
+			wantArgs:  []interface{}{1},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
