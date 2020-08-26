@@ -1839,16 +1839,6 @@ func (b *Builder) Quote(ident string) string {
 	}
 }
 
-// isIdent reports if the given string is a dialect identifier.
-func (b *Builder) isIdent(s string) bool {
-	switch {
-	case b.postgres():
-		return strings.Contains(s, `"`)
-	default:
-		return strings.Contains(s, "`")
-	}
-}
-
 // Ident appends the given string as an identifier.
 func (b *Builder) Ident(s string) *Builder {
 	switch {
@@ -1873,6 +1863,18 @@ func (b *Builder) IdentComma(s ...string) *Builder {
 		}
 		b.Ident(s[i])
 	}
+	return b
+}
+
+// WriteByte wraps the Buffer.WriteByte to make it chainable with other methods.
+func (b *Builder) WriteByte(c byte) *Builder {
+	b.Buffer.WriteByte(c)
+	return b
+}
+
+// WriteString wraps the Buffer.WriteString to make it chainable with other methods.
+func (b *Builder) WriteString(s string) *Builder {
+	b.Buffer.WriteString(s)
 	return b
 }
 
@@ -2108,6 +2110,16 @@ func (b *Builder) fromIdent(ident string) {
 		b.SetDialect(dialect.Postgres)
 	}
 	// otherwise, use the default.
+}
+
+// isIdent reports if the given string is a dialect identifier.
+func (b *Builder) isIdent(s string) bool {
+	switch {
+	case b.postgres():
+		return strings.Contains(s, `"`)
+	default:
+		return strings.Contains(s, "`")
+	}
 }
 
 // state wraps the all methods for setting and getting
