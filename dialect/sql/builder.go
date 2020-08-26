@@ -826,7 +826,9 @@ type Predicate struct {
 //
 //	P().EQ("name", "a8m").And().EQ("age", 30)
 //
-func P() *Predicate { return &Predicate{} }
+func P(fns ...func(*Builder)) *Predicate {
+	return &Predicate{fns: fns}
+}
 
 // Or combines all given predicates with OR between them.
 //
@@ -844,7 +846,7 @@ func Or(preds ...*Predicate) *Predicate {
 //	Delete().From("users").Where(False())
 //
 func False() *Predicate {
-	return (&Predicate{}).False()
+	return P().False()
 }
 
 // False appends FALSE to the predicate.
@@ -883,7 +885,7 @@ func And(preds ...*Predicate) *Predicate {
 
 // EQ returns a "=" predicate.
 func EQ(col string, value interface{}) *Predicate {
-	return (&Predicate{}).EQ(col, value)
+	return P().EQ(col, value)
 }
 
 // EQ appends a "=" predicate.
@@ -896,7 +898,7 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 
 // NEQ returns a "<>" predicate.
 func NEQ(col string, value interface{}) *Predicate {
-	return (&Predicate{}).NEQ(col, value)
+	return P().NEQ(col, value)
 }
 
 // NEQ appends a "<>" predicate.
@@ -909,7 +911,7 @@ func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 
 // LT returns a "<" predicate.
 func LT(col string, value interface{}) *Predicate {
-	return (&Predicate{}).LT(col, value)
+	return P().LT(col, value)
 }
 
 // LT appends a "<" predicate.
@@ -922,7 +924,7 @@ func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 
 // LTE returns a "<=" predicate.
 func LTE(col string, value interface{}) *Predicate {
-	return (&Predicate{}).LTE(col, value)
+	return P().LTE(col, value)
 }
 
 // LTE appends a "<=" predicate.
@@ -935,7 +937,7 @@ func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 
 // GT returns a ">" predicate.
 func GT(col string, value interface{}) *Predicate {
-	return (&Predicate{}).GT(col, value)
+	return P().GT(col, value)
 }
 
 // GT appends a ">" predicate.
@@ -948,7 +950,7 @@ func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 
 // GTE returns a ">=" predicate.
 func GTE(col string, value interface{}) *Predicate {
-	return (&Predicate{}).GTE(col, value)
+	return P().GTE(col, value)
 }
 
 // GTE appends a ">=" predicate.
@@ -961,7 +963,7 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 
 // NotNull returns the `IS NOT NULL` predicate.
 func NotNull(col string) *Predicate {
-	return (&Predicate{}).NotNull(col)
+	return P().NotNull(col)
 }
 
 // NotNull appends the `IS NOT NULL` predicate.
@@ -973,7 +975,7 @@ func (p *Predicate) NotNull(col string) *Predicate {
 
 // IsNull returns the `IS NULL` predicate.
 func IsNull(col string) *Predicate {
-	return (&Predicate{}).IsNull(col)
+	return P().IsNull(col)
 }
 
 // IsNull appends the `IS NULL` predicate.
@@ -985,7 +987,7 @@ func (p *Predicate) IsNull(col string) *Predicate {
 
 // In returns the `IN` predicate.
 func In(col string, args ...interface{}) *Predicate {
-	return (&Predicate{}).In(col, args...)
+	return P().In(col, args...)
 }
 
 // In appends the `IN` predicate.
@@ -1007,12 +1009,12 @@ func (p *Predicate) In(col string, args ...interface{}) *Predicate {
 
 // InInts returns the `IN` predicate for ints.
 func InInts(col string, args ...int) *Predicate {
-	return (&Predicate{}).InInts(col, args...)
+	return P().InInts(col, args...)
 }
 
 // InValues adds the `IN` predicate for slice of driver.Value.
 func InValues(col string, args ...driver.Value) *Predicate {
-	return (&Predicate{}).InValues(col, args...)
+	return P().InValues(col, args...)
 }
 
 // InInts adds the `IN` predicate for ints.
@@ -1035,7 +1037,7 @@ func (p *Predicate) InValues(col string, args ...driver.Value) *Predicate {
 
 // NotIn returns the `Not IN` predicate.
 func NotIn(col string, args ...interface{}) *Predicate {
-	return (&Predicate{}).NotIn(col, args...)
+	return P().NotIn(col, args...)
 }
 
 // NotIn appends the `Not IN` predicate.
@@ -1050,7 +1052,7 @@ func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
 
 // Like returns the `LIKE` predicate.
 func Like(col, pattern string) *Predicate {
-	return (&Predicate{}).Like(col, pattern)
+	return P().Like(col, pattern)
 }
 
 // Like appends the `LIKE` predicate.
@@ -1063,7 +1065,7 @@ func (p *Predicate) Like(col, pattern string) *Predicate {
 
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func HasPrefix(col, prefix string) *Predicate {
-	return (&Predicate{}).HasPrefix(col, prefix)
+	return P().HasPrefix(col, prefix)
 }
 
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
@@ -1072,7 +1074,7 @@ func (p *Predicate) HasPrefix(col, prefix string) *Predicate {
 }
 
 // HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
-func HasSuffix(col, suffix string) *Predicate { return (&Predicate{}).HasSuffix(col, suffix) }
+func HasSuffix(col, suffix string) *Predicate { return P().HasSuffix(col, suffix) }
 
 // HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
 func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
@@ -1080,7 +1082,7 @@ func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
 }
 
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
-func EqualFold(col, sub string) *Predicate { return (&Predicate{}).EqualFold(col, sub) }
+func EqualFold(col, sub string) *Predicate { return P().EqualFold(col, sub) }
 
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
 func (p *Predicate) EqualFold(col, sub string) *Predicate {
@@ -1093,7 +1095,7 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 }
 
 // Contains is a helper predicate that checks substring using the LIKE predicate.
-func Contains(col, sub string) *Predicate { return (&Predicate{}).Contains(col, sub) }
+func Contains(col, sub string) *Predicate { return P().Contains(col, sub) }
 
 // Contains is a helper predicate that checks substring using the LIKE predicate.
 func (p *Predicate) Contains(col, sub string) *Predicate {
@@ -1101,7 +1103,7 @@ func (p *Predicate) Contains(col, sub string) *Predicate {
 }
 
 // ContainsFold is a helper predicate that checks substring using the LIKE predicate.
-func ContainsFold(col, sub string) *Predicate { return (&Predicate{}).ContainsFold(col, sub) }
+func ContainsFold(col, sub string) *Predicate { return P().ContainsFold(col, sub) }
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
 func (p *Predicate) ContainsFold(col, sub string) *Predicate {
@@ -1123,11 +1125,11 @@ func (p *Predicate) ContainsFold(col, sub string) *Predicate {
 }
 
 func CompositeGT(columns []string, args ...interface{}) *Predicate {
-	return (&Predicate{}).CompositeGT(columns, args...)
+	return P().CompositeGT(columns, args...)
 }
 
 func CompositeLT(columns []string, args ...interface{}) *Predicate {
-	return (&Predicate{}).CompositeLT(columns, args...)
+	return P().CompositeLT(columns, args...)
 }
 
 func (p *Predicate) compositeP(operator string, columns []string, args ...interface{}) *Predicate {
