@@ -1880,6 +1880,16 @@ func (b *Builder) WriteString(s string) *Builder {
 	return b
 }
 
+// An Op represents a predicate operator.
+type Op int
+
+const (
+	OpEQ Op = iota
+	OpNEQ
+)
+
+var ops = [...]string{}
+
 // JSONOption allows for calling database JSON paths with functional options.
 type JSONOption func(*JSONPath)
 
