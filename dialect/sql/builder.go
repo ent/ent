@@ -891,7 +891,8 @@ func EQ(col string, value interface{}) *Predicate {
 // EQ appends a "=" predicate.
 func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" = ")
+		b.Ident(col)
+		b.WriteOp(OpEQ)
 		b.Arg(arg)
 	})
 }
@@ -904,7 +905,8 @@ func NEQ(col string, value interface{}) *Predicate {
 // NEQ appends a "<>" predicate.
 func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" <> ")
+		b.Ident(col)
+		b.WriteOp(OpNEQ)
 		b.Arg(arg)
 	})
 }
@@ -917,7 +919,8 @@ func LT(col string, value interface{}) *Predicate {
 // LT appends a "<" predicate.
 func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" < ")
+		b.Ident(col)
+		p.WriteOp(OpLT)
 		b.Arg(arg)
 	})
 }
@@ -930,7 +933,8 @@ func LTE(col string, value interface{}) *Predicate {
 // LTE appends a "<=" predicate.
 func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" <= ")
+		b.Ident(col)
+		p.WriteOp(OpLTE)
 		b.Arg(arg)
 	})
 }
@@ -943,7 +947,8 @@ func GT(col string, value interface{}) *Predicate {
 // GT appends a ">" predicate.
 func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" > ")
+		b.Ident(col)
+		p.WriteOp(OpGT)
 		b.Arg(arg)
 	})
 }
@@ -956,7 +961,8 @@ func GTE(col string, value interface{}) *Predicate {
 // GTE appends a ">=" predicate.
 func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" >= ")
+		b.Ident(col)
+		p.WriteOp(OpGTE)
 		b.Arg(arg)
 	})
 }
@@ -996,7 +1002,7 @@ func (p *Predicate) In(col string, args ...interface{}) *Predicate {
 		return p
 	}
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" IN ")
+		b.Ident(col).WriteOp(OpIn)
 		b.Nested(func(b *Builder) {
 			if s, ok := args[0].(*Selector); ok {
 				b.Join(s)
@@ -1043,7 +1049,7 @@ func NotIn(col string, args ...interface{}) *Predicate {
 // NotIn appends the `Not IN` predicate.
 func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" NOT IN ")
+		b.Ident(col).WriteOp(OpNotIn)
 		b.Nested(func(b *Builder) {
 			b.Args(args...)
 		})
@@ -1058,7 +1064,7 @@ func Like(col, pattern string) *Predicate {
 // Like appends the `LIKE` predicate.
 func (p *Predicate) Like(col, pattern string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" LIKE ")
+		b.Ident(col).WriteOp(OpLike)
 		b.Arg(pattern)
 	})
 }
@@ -1089,7 +1095,8 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 	return p.Append(func(b *Builder) {
 		f := &Func{}
 		f.SetDialect(b.dialect)
-		b.Ident(f.Lower(col)).WriteString(" = ")
+		b.Ident(f.Lower(col))
+		b.WriteOp(OpEQ)
 		b.Arg(strings.ToLower(sub))
 	})
 }
@@ -1884,11 +1891,35 @@ func (b *Builder) WriteString(s string) *Builder {
 type Op int
 
 const (
-	OpEQ Op = iota
-	OpNEQ
+	OpEQ    Op = iota // logical and.
+	OpNEQ             // <>
+	OpGT              // >
+	OpGTE             // >=
+	OpLT              // <
+	OpLTE             // <=
+	OpIn              // IN
+	OpNotIn           // NOT IN
+	OpLike            // LIKE
 )
 
-var ops = [...]string{}
+var ops = [...]string{
+	OpEQ:    "=",
+	OpNEQ:   "<>",
+	OpGT:    ">",
+	OpGTE:   ">=",
+	OpLT:    "<",
+	OpLTE:   "<=",
+	OpIn:    "IN",
+	OpNotIn: "NOT IN",
+	OpLike:  "LIKE",
+}
+
+// WriteOp writes an operator to the builder.
+func (b *Builder) WriteOp(op Op) {
+	if op >= OpEQ && op <= OpLike {
+		b.Pad().WriteString(ops[op]).Pad()
+	}
+}
 
 // JSONOption allows for calling database JSON paths with functional options.
 type JSONOption func(*JSONPath)
