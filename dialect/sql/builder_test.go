@@ -1217,9 +1217,9 @@ WHERE
 			input: Dialect(dialect.MySQL).
 				Select("*").
 				From(Table("users")).
-				Where(P().Append(func(b *Builder) {
+				Where(P(func(b *Builder) {
 					b.JSONPath("a", Path("b", "c", "[1]", "d"), Unquote(true))
-					b.WriteString(" = ")
+					b.WriteOp(OpEQ)
 					b.Arg("a")
 				})),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) = ?",
@@ -1229,9 +1229,9 @@ WHERE
 			input: Dialect(dialect.Postgres).
 				Select("*").
 				From(Table("users")).
-				Where(P().Append(func(b *Builder) {
+				Where(P(func(b *Builder) {
 					b.JSONPath("a", Path("b", "c", "[1]", "d"), Unquote(true))
-					b.WriteString(" = ")
+					b.WriteOp(OpEQ)
 					b.Arg("a")
 				})),
 			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' = $1`,
@@ -1241,9 +1241,9 @@ WHERE
 			input: Dialect(dialect.Postgres).
 				Select("*").
 				From(Table("users")).
-				Where(P().Append(func(b *Builder) {
+				Where(P(func(b *Builder) {
 					b.JSONPath("a", Path("b", "c", "[1]", "d"), Cast("int"))
-					b.WriteString(" = ")
+					b.WriteOp(OpEQ)
 					b.Arg(1)
 				})),
 			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
