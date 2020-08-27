@@ -3,6 +3,8 @@ on:
   push:
     paths-ignore:
       - 'doc/**'
+    tags-ignore:
+      - '*.*'
   pull_request:
     paths-ignore:
       - 'doc/**'
@@ -13,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run linters
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v2
         with:
           version: v1.28
 

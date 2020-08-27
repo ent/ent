@@ -11,10 +11,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FieldType holds the schema definition for the FieldType entity.
@@ -126,6 +127,9 @@ func (FieldType) Fields() []ent.Field {
 		field.Float("null_float").
 			Optional().
 			GoType(&sql.NullFloat64{}),
+		field.Enum("role").
+			Default(string(role.Read)).
+			GoType(role.Role("role")),
 	}
 }
 

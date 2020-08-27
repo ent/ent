@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/o2o2types/ent"
+	"github.com/facebook/ent/examples/o2o2types/ent"
 )
 
 // The CardFunc type is an adapter to allow the use of ordinary

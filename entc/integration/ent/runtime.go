@@ -9,13 +9,13 @@ package ent
 import (
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime
@@ -66,6 +66,8 @@ func init() {
 	file.DefaultSize = fileDescSize.Default.(int)
 	// file.SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	file.SizeValidator = fileDescSize.Validators[0].(func(int) error)
+	filetypeFields := schema.FileType{}.Fields()
+	_ = filetypeFields
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
 	// groupDescActive is the schema descriptor for active field.

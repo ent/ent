@@ -8,11 +8,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/hook"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/planet"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/privacy"
+	"github.com/facebook/ent/entc/integration/privacy/ent"
+	"github.com/facebook/ent/entc/integration/privacy/ent/galaxy"
+	"github.com/facebook/ent/entc/integration/privacy/ent/hook"
+	"github.com/facebook/ent/entc/integration/privacy/ent/planet"
+	"github.com/facebook/ent/entc/integration/privacy/ent/privacy"
 )
 
 // DenyUpdateRule is a mutation rule that denies update many operations.

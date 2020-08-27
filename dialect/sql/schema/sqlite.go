@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 // SQLite is an SQLite migration driver.
@@ -36,7 +36,10 @@ func (d *SQLite) init(ctx context.Context, tx dialect.Tx) error {
 func (d *SQLite) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Select().Count().
 		From(sql.Table("sqlite_master")).
-		Where(sql.EQ("type", "table").And().EQ("name", name)).
+		Where(sql.And(
+			sql.EQ("type", "table"),
+			sql.EQ("name", name),
+		)).
 		Query()
 	return exist(ctx, tx, query, args...)
 }

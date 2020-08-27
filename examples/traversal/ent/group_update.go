@@ -10,12 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/traversal/ent/group"
-	"github.com/facebookincubator/ent/examples/traversal/ent/predicate"
-	"github.com/facebookincubator/ent/examples/traversal/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/traversal/ent/group"
+	"github.com/facebook/ent/examples/traversal/ent/predicate"
+	"github.com/facebook/ent/examples/traversal/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.

@@ -11,14 +11,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -136,17 +136,8 @@ func (fc *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	if _, ok := fc.mutation.Size(); !ok {
-		v := file.DefaultSize
-		fc.mutation.SetSize(v)
-	}
-	if v, ok := fc.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
-		}
-	}
-	if _, ok := fc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	if err := fc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -182,6 +173,22 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 		panic(err)
 	}
 	return v
+}
+
+func (fc *FileCreate) preSave() error {
+	if _, ok := fc.mutation.Size(); !ok {
+		v := file.DefaultSize
+		fc.mutation.SetSize(v)
+	}
+	if v, ok := fc.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	if _, ok := fc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	return nil
 }
 
 func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
@@ -240,4 +247,10 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// FileCreateBulk is the builder for creating a bulk of File entities.
+type FileCreateBulk struct {
+	config
+	builders []*FileCreate
 }

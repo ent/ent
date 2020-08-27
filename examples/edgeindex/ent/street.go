@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
 )
 
 // Street is the model entity for the Street schema.

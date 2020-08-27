@@ -10,7 +10,7 @@ const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+	FieldID = "oid"
 
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
@@ -21,6 +21,10 @@ const (
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
 
+	// GroupFieldID holds the string denoting the id field of the Group.
+	GroupFieldID = "id"
+	// PetFieldID holds the string denoting the id field of the Pet.
+	PetFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.

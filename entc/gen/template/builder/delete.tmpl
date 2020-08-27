@@ -16,7 +16,7 @@ import (
 )
 
 
-{{ $builder := print (pascal $.Name) "Delete" }}
+{{ $builder := $.DeleteName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 
@@ -78,7 +78,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
-{{ $onebuilder := print $builder "One" }}
+{{ $onebuilder := $.DeleteOneName }}
 {{ $oneReceiver := receiver $onebuilder }}
 
 // {{ $onebuilder }} is the builder for deleting a single {{ $.Name }} entity.

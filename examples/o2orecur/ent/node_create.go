@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/o2orecur/ent/node"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/o2orecur/ent/node"
+	"github.com/facebook/ent/schema/field"
 )
 
 // NodeCreate is the builder for creating a Node entity.
@@ -74,8 +74,8 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	if _, ok := nc.mutation.Value(); !ok {
-		return nil, &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
+	if err := nc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -113,7 +113,27 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 	return v
 }
 
+func (nc *NodeCreate) preSave() error {
+	if _, ok := nc.mutation.Value(); !ok {
+		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
+	}
+	return nil
+}
+
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
+	n, _spec := nc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	n.ID = int(id)
+	return n, nil
+}
+
+func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	var (
 		n     = &Node{config: nc.config}
 		_spec = &sqlgraph.CreateSpec{
@@ -170,13 +190,71 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return n, _spec
+}
+
+// NodeCreateBulk is the builder for creating a bulk of Node entities.
+type NodeCreateBulk struct {
+	config
+	builders []*NodeCreate
+}
+
+// Save creates the Node entities in the database.
+func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))
+	nodes := make([]*Node, len(ncb.builders))
+	mutators := make([]Mutator, len(ncb.builders))
+	for i := range ncb.builders {
+		func(i int, root context.Context) {
+			builder := ncb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				if err := builder.preSave(); err != nil {
+					return nil, err
+				}
+				mutation, ok := m.(*NodeMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ncb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	n.ID = int(id)
-	return n, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ncb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ncb *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
+	v, err := ncb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

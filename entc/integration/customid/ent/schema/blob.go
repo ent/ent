@@ -5,9 +5,9 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/google/uuid"
 )
@@ -23,7 +23,8 @@ func (Blob) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.UUID("uuid", uuid.UUID{}).
-			Default(uuid.New),
+			Default(uuid.New).
+			Unique(),
 	}
 }
 

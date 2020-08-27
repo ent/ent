@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/entc/integration/template/ent"
+	"github.com/facebook/ent/entc/integration/template/ent"
 )
 
 var (

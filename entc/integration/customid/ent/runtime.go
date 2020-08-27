@@ -7,10 +7,10 @@
 package ent
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/schema"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/entc/integration/customid/ent/car"
+	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
 )
 

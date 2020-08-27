@@ -10,13 +10,15 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "header" $ }}
 
 import (
+	"context"
+	"fmt"
 	"sync"
 
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (

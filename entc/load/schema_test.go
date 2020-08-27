@@ -10,15 +10,27 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
-	"github.com/facebookincubator/ent/schema/mixin"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
+	"github.com/facebook/ent/schema/mixin"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
+
+type OrderConfig struct {
+	FieldName string
+}
+
+func (OrderConfig) Name() string {
+	return "order_config"
+}
+
+func (o *OrderConfig) MarshalJSON() ([]byte, error) {
+	return json.Marshal(*o)
+}
 
 type User struct {
 	ent.Schema
@@ -28,7 +40,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("age"),
 		field.String("name").
-			Default("unknown"),
+			Default("unknown").
+			Annotations(&OrderConfig{FieldName: "name"}),
 		field.String("nillable").
 			Nillable(),
 		field.String("optional").
@@ -47,11 +60,16 @@ func (User) Fields() []ent.Field {
 
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("groups", Group.Type),
+		edge.To("groups", Group.Type).
+			Annotations(&OrderConfig{FieldName: "name"}),
 		edge.To("parent", User.Type).
 			Unique().
 			StorageKey(edge.Column("user_parent_id")).
 			From("children"),
+		edge.To("following", User.Type).
+			Annotations(&OrderConfig{FieldName: "following"}).
+			From("followers").
+			Annotations(&OrderConfig{FieldName: "followers"}),
 	}
 }
 
@@ -81,8 +99,8 @@ func TestMarshalSchema(t *testing.T) {
 		buf, err := MarshalSchema(u)
 		require.NoError(t, err)
 
-		schema := &Schema{}
-		require.NoError(t, json.Unmarshal(buf, schema))
+		schema, err := UnmarshalSchema(buf)
+		require.NoError(t, err)
 		require.Equal(t, "User", schema.Name)
 		require.Len(t, schema.Fields, 8)
 		require.Equal(t, "age", schema.Fields[0].Name)
@@ -91,6 +109,9 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "name", schema.Fields[1].Name)
 		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
 		require.Equal(t, "unknown", schema.Fields[1].DefaultValue)
+		require.NotEmpty(t, schema.Fields[1].Annotations)
+		ant := schema.Fields[1].Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)
 		require.Equal(t, field.TypeString, schema.Fields[2].Info.Type)
@@ -105,7 +126,7 @@ func TestMarshalSchema(t *testing.T) {
 
 		require.Equal(t, "state", schema.Fields[4].Name)
 		require.Equal(t, field.TypeEnum, schema.Fields[4].Info.Type)
-		require.Equal(t, []string{"on", "off"}, schema.Fields[4].Enums)
+		require.Equal(t, map[string]string{"on": "on", "off": "off"}, schema.Fields[4].Enums)
 
 		require.Equal(t, "sensitive", schema.Fields[5].Name)
 		require.Equal(t, field.TypeString, schema.Fields[5].Info.Type)
@@ -118,11 +139,16 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "uuid", schema.Fields[7].Name)
 		require.Equal(t, field.TypeUUID, schema.Fields[7].Info.Type)
 		require.True(t, schema.Fields[7].Default)
+		require.Equal(t, "github.com/google/uuid", schema.Fields[7].Info.PkgPath)
 
-		require.Len(t, schema.Edges, 2)
+		require.Len(t, schema.Edges, 3)
 		require.Equal(t, "groups", schema.Edges[0].Name)
 		require.Equal(t, "Group", schema.Edges[0].Type)
 		require.False(t, schema.Edges[0].Inverse)
+		require.NotEmpty(t, schema.Edges[0].Annotations)
+		ant = schema.Edges[0].Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "name")
+
 		require.Equal(t, "children", schema.Edges[1].Name)
 		require.Equal(t, "user_parent_id", schema.Edges[1].StorageKey.Columns[0])
 		require.Equal(t, "User", schema.Edges[1].Type)
@@ -130,6 +156,11 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
 		require.Equal(t, "user_parent_id", schema.Edges[1].Ref.StorageKey.Columns[0])
+
+		ant = schema.Edges[2].Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "followers")
+		ant = schema.Edges[2].Ref.Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "following")
 
 		require.Equal(t, []string{"name", "address"}, schema.Indexes[0].Fields)
 		require.True(t, schema.Indexes[0].Unique)

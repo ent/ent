@@ -18,8 +18,8 @@ package schema
 import (
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User schema.
@@ -63,8 +63,8 @@ import (
 	"time"
 	"net/url"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User schema.
@@ -149,9 +149,9 @@ there is an option to override the default behavior using the `SchemaType` metho
 package schema
 
 import (
-    "github.com/facebookincubator/ent"
-    "github.com/facebookincubator/ent/dialect"
-    "github.com/facebookincubator/ent/schema/field"
+    "github.com/facebook/ent"
+    "github.com/facebook/ent/dialect"
+    "github.com/facebook/ent/schema/field"
 )
 
 // Card schema.
@@ -177,7 +177,7 @@ and for time fields, the type is `time.Time`. The `GoType` method provides an op
 default ent type with a custom one.
 
 The custom type must be either a type that is convertible to the Go basic type, or a type that implements the
-[ValueScanner](https://godoc.org/github.com/facebookincubator/ent/schema/field#ValueScanner) interface.
+[ValueScanner](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#ValueScanner) interface.
 
 
 ```go
@@ -186,9 +186,9 @@ package schema
 import (
     "database/sql"
 
-    "github.com/facebookincubator/ent"
-    "github.com/facebookincubator/ent/dialect"
-    "github.com/facebookincubator/ent/schema/field"
+    "github.com/facebook/ent"
+    "github.com/facebook/ent/dialect"
+    "github.com/facebook/ent/schema/field"
 )
 
 // Amount is a custom Go type that's convertible to the basic float64 type.
@@ -246,8 +246,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 
@@ -496,3 +496,29 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+## Annotations
+
+`Annotations` is used to attach arbitrary metadata to the field object in code generation.
+Template extensions can retrieve this metadata and use it inside their templates.
+
+Note that the metadata object must be serializable to a JSON raw value (e.g. struct, map or slice).
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("creation_date").
+			Annotations(entgql.Annotation{
+				OrderField: "CREATED_AT",
+			}),
+	}
+}
+```
+
+Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).

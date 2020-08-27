@@ -11,9 +11,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 const (
@@ -439,7 +439,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 	}
 	if !exists {
 		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}).
+			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
 		query, args := m.tBuilder(t).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {

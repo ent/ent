@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 	GalaxiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"spiral", "barred_spiral", "elliptical", "irregular"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"barred_spiral", "elliptical", "irregular", "spiral"}},
 	}
 	// GalaxiesTable holds the schema information for the "galaxies" table.
 	GalaxiesTable = &schema.Table{

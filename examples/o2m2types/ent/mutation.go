@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/o2m2types/ent/pet"
-	"github.com/facebookincubator/ent/examples/o2m2types/ent/user"
+	"github.com/facebook/ent/examples/o2m2types/ent/pet"
+	"github.com/facebook/ent/examples/o2m2types/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (

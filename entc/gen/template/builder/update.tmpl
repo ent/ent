@@ -18,7 +18,7 @@ import (
 )
 
 
-{{ $builder := print (pascal $.Name) "Update" }}
+{{ $builder := $.UpdateName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 
@@ -102,7 +102,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
-{{ $onebuilder := printf "%sOne" $builder }}
+{{ $onebuilder := $.UpdateOneName }}
 {{ $receiver = receiver $onebuilder }}
 {{ $mutation = print $receiver ".mutation" }}
 

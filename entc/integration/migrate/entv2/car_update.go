@@ -10,12 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.

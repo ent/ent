@@ -38,7 +38,12 @@ const (
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
-{{ if or $.HasDefault $.HasValidators $.NumHooks $.HasPolicy }}
+{{/* Has at least one field (not enum) with default value */}}
+{{ $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+{{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
+
+{{/* Generate global variables for hooks, validators and policy checkers */}}
+{{ if or $hasDefault $.HasValidators $.NumHooks $.HasPolicy }}
     {{- $numHooks := $.NumHooks }}
     {{- if $.HasPolicy }}
         {{- $numHooks = add $numHooks 1 }}
@@ -81,40 +86,47 @@ const (
 {{ end }}
 
 {{/* define custom type for enum fields */}}
-{{ range $f := $.EnumFields -}}
-	{{/* omit the package name from the type. */}}
-	{{ $enum := trimPackage $f.Type.String $.Package }}
-	// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
-	type {{ $enum }} string
+{{ range $f := $.EnumFields }}
+	{{ $enum := $f.Type }}
+	{{ $receiver := receiver $f.BuilderField }}
+	{{ if $f.HasGoType }}
+		{{ if $f.Default }}
+			const {{ $f.DefaultName }} {{ $enum }} = "{{ $f.DefaultValue }}"
+		{{ end }}
+	{{ else }}
+		{{/* omit the package name from the type. */}}
+		{{ $enum = trimPackage $f.Type.String $.Package }}
+		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
+		type {{ $enum }} string
 
-	{{- if $f.Default }}
-		{{- /*  find the enum that holds the default value. */ -}}
-		{{- range $_, $e := $f.Enums }}
-			{{- if eq $e $f.DefaultValue }}
-				{{- $name := $f.EnumName $e }}
-				// {{ $name }} is the default {{ $enum }}.
-				const {{ $f.DefaultName }} = {{ $name }}
+		{{- if $f.Default }}
+			{{- /*  find the enum that holds the default value. */ -}}
+			{{- range $e := $f.Enums }}
+				{{- if eq $e.Value $f.DefaultValue }}
+					// {{ $e.Name }} is the default {{ $enum }}.
+					const {{ $f.DefaultName }} = {{ $e.Name }}
+				{{- end }}
 			{{- end }}
 		{{- end }}
-	{{- end }}
 
-	// {{ $enum }} values.
-	const (
-		{{- range $e := $f.Enums }}
-			{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
-		{{-  end }}
-	)
+		// {{ $enum }} values.
+		const (
+			{{- range $e := $f.Enums }}
+				{{ $e.Name }} {{ $enum }} = "{{ $e.Value }}"
+			{{-  end }}
+		)
 
-	{{ $receiver := receiver $f.BuilderField -}}
-	func ({{ $receiver }} {{ $enum }}) String() string {
-		return string({{ $receiver }})
-	}
+		func ({{ $receiver }} {{ $enum }}) String() string {
+			return string({{ $receiver }})
+		}
+	{{ end }}
 
-	{{ $name := $f.Validator -}}
-	// {{ $name }} is a validator for the "{{ $receiver }}" field enum values. It is called by the builders before save.
+
+	{{ $name := $f.Validator }}
+	// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
 	func {{ $name }}({{ $receiver }} {{ $enum }}) error {
 		switch {{ $receiver }} {
-			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
+			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ if $f.HasGoType }}"{{ $e.Value }}"{{ else }}{{ $e.Name }}{{ end }}{{ end }}:
 				return nil
 			default:
 				return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})

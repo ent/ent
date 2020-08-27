@@ -14,13 +14,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
@@ -980,6 +981,20 @@ func (ftu *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetRole sets the role field.
+func (ftu *FieldTypeUpdate) SetRole(r role.Role) *FieldTypeUpdate {
+	ftu.mutation.SetRole(r)
+	return ftu
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetRole(*r)
+	}
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1005,6 +1020,11 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return 0, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return 0, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (
@@ -1294,6 +1314,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftu.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
+	if value, ok := ftu.mutation.Role(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
@@ -2371,6 +2394,20 @@ func (ftuo *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetRole sets the role field.
+func (ftuo *FieldTypeUpdateOne) SetRole(r role.Role) *FieldTypeUpdateOne {
+	ftuo.mutation.SetRole(r)
+	return ftuo
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetRole(*r)
+	}
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2396,6 +2433,11 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return nil, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (
@@ -2690,6 +2732,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := ftuo.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
+	if value, ok := ftuo.mutation.Role(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {

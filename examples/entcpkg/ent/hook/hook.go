@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/examples/entcpkg/ent"
+	"github.com/facebook/ent/examples/entcpkg/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

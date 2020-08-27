@@ -7,8 +7,9 @@ package mixin
 import (
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
 )
 
 // Schema is the default implementation for the ent.Mixin interface.
@@ -79,3 +80,41 @@ func (Time) Fields() []ent.Field {
 
 // time mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*Time)(nil)
+
+// AnnotateFields adds field annotations to underlying mixin fields.
+func AnnotateFields(m ent.Mixin, annotations ...field.Annotation) ent.Mixin {
+	return fieldAnnotator{Mixin: m, annotations: annotations}
+}
+
+// AnnotateEdges adds edge annotations to underlying mixin edges.
+func AnnotateEdges(m ent.Mixin, annotations ...edge.Annotation) ent.Mixin {
+	return edgeAnnotator{Mixin: m, annotations: annotations}
+}
+
+type fieldAnnotator struct {
+	ent.Mixin
+	annotations []field.Annotation
+}
+
+func (a fieldAnnotator) Fields() []ent.Field {
+	fields := a.Mixin.Fields()
+	for i := range fields {
+		desc := fields[i].Descriptor()
+		desc.Annotations = append(desc.Annotations, a.annotations...)
+	}
+	return fields
+}
+
+type edgeAnnotator struct {
+	ent.Mixin
+	annotations []edge.Annotation
+}
+
+func (a edgeAnnotator) Edges() []ent.Edge {
+	edges := a.Mixin.Edges()
+	for i := range edges {
+		desc := edges[i].Descriptor()
+		desc.Annotations = append(desc.Annotations, a.annotations...)
+	}
+	return edges
+}

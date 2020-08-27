@@ -41,6 +41,8 @@ const (
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 
+	// CarFieldID holds the string denoting the id field of the Car.
+	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ParentTable is the table the holds the parent relation/edge.
@@ -101,7 +103,7 @@ func (s State) String() string {
 	return string(s)
 }
 
-// StateValidator is a validator for the "s" field enum values. It is called by the builders before save.
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
 	case StateLoggedIn, StateLoggedOut:

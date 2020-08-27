@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/hooks/ent/card"
+	"github.com/facebook/ent/entc/integration/hooks/ent/user"
 )
 
 // Card is the model entity for the Card schema.

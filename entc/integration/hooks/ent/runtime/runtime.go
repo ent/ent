@@ -9,11 +9,11 @@ package runtime
 import (
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
+	"github.com/facebook/ent/entc/integration/hooks/ent/card"
+	"github.com/facebook/ent/entc/integration/hooks/ent/schema"
+	"github.com/facebook/ent/entc/integration/hooks/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 // The init function reads all schema descriptors with runtime

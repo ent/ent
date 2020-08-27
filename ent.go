@@ -8,9 +8,9 @@ package ent
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 )
 
 type (

@@ -239,6 +239,19 @@ func (b *intBuilder) GoType(typ interface{}) *intBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int("int").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *intBuilder) Annotations(annotations ...Annotation) *intBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -363,6 +376,19 @@ func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 //
 func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
 	b.desc.goType(typ, uintType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint("uint").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uintBuilder) Annotations(annotations ...Annotation) *uintBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -503,6 +529,19 @@ func (b *int8Builder) GoType(typ interface{}) *int8Builder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int8("int8").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int8Builder) Annotations(annotations ...Annotation) *int8Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -637,6 +676,19 @@ func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 //
 func (b *int16Builder) GoType(typ interface{}) *int16Builder {
 	b.desc.goType(typ, int16Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int16("int16").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int16Builder) Annotations(annotations ...Annotation) *int16Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -777,6 +829,19 @@ func (b *int32Builder) GoType(typ interface{}) *int32Builder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int32("int32").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int32Builder) Annotations(annotations ...Annotation) *int32Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -914,6 +979,19 @@ func (b *int64Builder) GoType(typ interface{}) *int64Builder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int64("int64").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int64Builder) Annotations(annotations ...Annotation) *int64Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1038,6 +1116,19 @@ func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 //
 func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
 	b.desc.goType(typ, uint8Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint8("uint8").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint8Builder) Annotations(annotations ...Annotation) *uint8Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -1168,6 +1259,19 @@ func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint16("uint16").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint16Builder) Annotations(annotations ...Annotation) *uint16Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1295,6 +1399,19 @@ func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint32("uint32").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint32Builder) Annotations(annotations ...Annotation) *uint32Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1419,6 +1536,19 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 //
 func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
 	b.desc.goType(typ, uint64Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint64("uint64").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint64Builder) Annotations(annotations ...Annotation) *uint64Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -1568,6 +1698,19 @@ func (b *float64Builder) GoType(typ interface{}) *float64Builder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Float64("float64").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *float64Builder) Annotations(annotations ...Annotation) *float64Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1698,6 +1841,19 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 //
 func (b *float32Builder) GoType(typ interface{}) *float32Builder {
 	b.desc.goType(typ, float32Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Float32("float32").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *float32Builder) Annotations(annotations ...Annotation) *float32Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 

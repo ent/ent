@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // ent aliases to avoid import conflict in user's code.
@@ -113,7 +113,7 @@ func (e *ValidationError) Error() string {
 
 // Unwrap implements the errors.Wrapper interface.
 func (e *ValidationError) Unwrap() error {
-	return e.err
+	return errors.Unwrap(e.err)
 }
 
 // IsValidationError returns a boolean indicating whether the error is a validaton error.

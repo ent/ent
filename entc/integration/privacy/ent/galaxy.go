@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/privacy/ent/galaxy"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/privacy/ent/galaxy"
 )
 
 // Galaxy is the model entity for the Galaxy schema.

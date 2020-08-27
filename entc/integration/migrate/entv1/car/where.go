@@ -7,9 +7,9 @@
 package car
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/predicate"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/predicate"
 )
 
 // ID filters vertices based on their identifier.
@@ -100,7 +100,7 @@ func HasOwner() predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.To(OwnerTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -112,7 +112,7 @@ func HasOwnerWith(preds ...predicate.User) predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.To(OwnerInverseTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

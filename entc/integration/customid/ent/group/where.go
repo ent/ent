@@ -7,9 +7,9 @@
 package group
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
@@ -100,7 +100,7 @@ func HasUsers() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersTable, FieldID),
+			sqlgraph.To(UsersTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -112,7 +112,7 @@ func HasUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersInverseTable, FieldID),
+			sqlgraph.To(UsersInverseTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

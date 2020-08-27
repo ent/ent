@@ -9,11 +9,11 @@ package enttest
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/examples/o2orecur/ent"
+	"github.com/facebook/ent/examples/o2orecur/ent"
 	// required by schema hooks.
-	_ "github.com/facebookincubator/ent/examples/o2orecur/ent/runtime"
+	_ "github.com/facebook/ent/examples/o2orecur/ent/runtime"
 
-	"github.com/facebookincubator/ent/dialect/sql/schema"
+	"github.com/facebook/ent/dialect/sql/schema"
 )
 
 type (

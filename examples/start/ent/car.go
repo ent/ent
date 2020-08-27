@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/examples/start/ent/car"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/examples/start/ent/car"
+	"github.com/facebook/ent/examples/start/ent/user"
 )
 
 // Car is the model entity for the Car schema.

@@ -10,12 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.
@@ -35,6 +35,34 @@ func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 // SetName sets the name field.
 func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
 	ftu.mutation.SetName(s)
+	return ftu
+}
+
+// SetType sets the type field.
+func (ftu *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
+	ftu.mutation.SetType(f)
+	return ftu
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
+	if f != nil {
+		ftu.SetType(*f)
+	}
+	return ftu
+}
+
+// SetState sets the state field.
+func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
+	ftu.mutation.SetState(f)
+	return ftu
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
+	if f != nil {
+		ftu.SetState(*f)
+	}
 	return ftu
 }
 
@@ -75,6 +103,16 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
+	if v, ok := ftu.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
 
 	var (
 		err      error
@@ -150,6 +188,20 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: filetype.FieldName,
 		})
 	}
+	if value, ok := ftu.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldType,
+		})
+	}
+	if value, ok := ftu.mutation.State(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldState,
+		})
+	}
 	if nodes := ftu.mutation.RemovedFilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -212,6 +264,34 @@ func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
 	return ftuo
 }
 
+// SetType sets the type field.
+func (ftuo *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
+	ftuo.mutation.SetType(f)
+	return ftuo
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
+	if f != nil {
+		ftuo.SetType(*f)
+	}
+	return ftuo
+}
+
+// SetState sets the state field.
+func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
+	ftuo.mutation.SetState(f)
+	return ftuo
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
+	if f != nil {
+		ftuo.SetState(*f)
+	}
+	return ftuo
+}
+
 // AddFileIDs adds the files edge to File by ids.
 func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
 	ftuo.mutation.AddFileIDs(ids...)
@@ -249,6 +329,16 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
+	if v, ok := ftuo.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
 
 	var (
 		err  error
@@ -320,6 +410,20 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: filetype.FieldName,
+		})
+	}
+	if value, ok := ftuo.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldType,
+		})
+	}
+	if value, ok := ftuo.mutation.State(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: filetype.FieldState,
 		})
 	}
 	if nodes := ftuo.mutation.RemovedFilesIDs(); len(nodes) > 0 {

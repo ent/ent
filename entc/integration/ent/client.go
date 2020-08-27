@@ -11,24 +11,24 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
+	"github.com/facebook/ent/entc/integration/ent/migrate"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/item"
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/comment"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/ent/item"
+	"github.com/facebook/ent/entc/integration/ent/node"
+	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/entc/integration/ent/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -103,7 +103,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
@@ -114,6 +115,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:       ctx,
 		config:    cfg,
 		Card:      NewCardClient(cfg),
 		Comment:   NewCommentClient(cfg),
@@ -218,6 +220,11 @@ func (c *CardClient) Create() *CardCreate {
 	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Card entities.
+func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
+	return &CardCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Card.
 func (c *CardClient) Update() *CardUpdate {
 	mutation := newCardMutation(c.config, OpUpdate)
@@ -255,7 +262,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	return &CardDeleteOne{builder}
 }
 
-// Create returns a query builder for Card.
+// Query returns a query builder for Card.
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
@@ -333,6 +340,11 @@ func (c *CommentClient) Create() *CommentCreate {
 	return &CommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Comment entities.
+func (c *CommentClient) CreateBulk(builders ...*CommentCreate) *CommentCreateBulk {
+	return &CommentCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Comment.
 func (c *CommentClient) Update() *CommentUpdate {
 	mutation := newCommentMutation(c.config, OpUpdate)
@@ -370,7 +382,7 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 	return &CommentDeleteOne{builder}
 }
 
-// Create returns a query builder for Comment.
+// Query returns a query builder for Comment.
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{config: c.config}
 }
@@ -416,6 +428,11 @@ func (c *FieldTypeClient) Create() *FieldTypeCreate {
 	return &FieldTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of FieldType entities.
+func (c *FieldTypeClient) CreateBulk(builders ...*FieldTypeCreate) *FieldTypeCreateBulk {
+	return &FieldTypeCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for FieldType.
 func (c *FieldTypeClient) Update() *FieldTypeUpdate {
 	mutation := newFieldTypeMutation(c.config, OpUpdate)
@@ -453,7 +470,7 @@ func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 	return &FieldTypeDeleteOne{builder}
 }
 
-// Create returns a query builder for FieldType.
+// Query returns a query builder for FieldType.
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{config: c.config}
 }
@@ -499,6 +516,11 @@ func (c *FileClient) Create() *FileCreate {
 	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of File entities.
+func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
+	return &FileCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for File.
 func (c *FileClient) Update() *FileUpdate {
 	mutation := newFileMutation(c.config, OpUpdate)
@@ -536,7 +558,7 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	return &FileDeleteOne{builder}
 }
 
-// Create returns a query builder for File.
+// Query returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{config: c.config}
 }
@@ -630,6 +652,11 @@ func (c *FileTypeClient) Create() *FileTypeCreate {
 	return &FileTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of FileType entities.
+func (c *FileTypeClient) CreateBulk(builders ...*FileTypeCreate) *FileTypeCreateBulk {
+	return &FileTypeCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for FileType.
 func (c *FileTypeClient) Update() *FileTypeUpdate {
 	mutation := newFileTypeMutation(c.config, OpUpdate)
@@ -667,7 +694,7 @@ func (c *FileTypeClient) DeleteOneID(id int) *FileTypeDeleteOne {
 	return &FileTypeDeleteOne{builder}
 }
 
-// Create returns a query builder for FileType.
+// Query returns a query builder for FileType.
 func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{config: c.config}
 }
@@ -729,6 +756,11 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Group.
 func (c *GroupClient) Update() *GroupUpdate {
 	mutation := newGroupMutation(c.config, OpUpdate)
@@ -766,7 +798,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -876,6 +908,11 @@ func (c *GroupInfoClient) Create() *GroupInfoCreate {
 	return &GroupInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of GroupInfo entities.
+func (c *GroupInfoClient) CreateBulk(builders ...*GroupInfoCreate) *GroupInfoCreateBulk {
+	return &GroupInfoCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for GroupInfo.
 func (c *GroupInfoClient) Update() *GroupInfoUpdate {
 	mutation := newGroupInfoMutation(c.config, OpUpdate)
@@ -913,7 +950,7 @@ func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 	return &GroupInfoDeleteOne{builder}
 }
 
-// Create returns a query builder for GroupInfo.
+// Query returns a query builder for GroupInfo.
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{config: c.config}
 }
@@ -975,6 +1012,11 @@ func (c *ItemClient) Create() *ItemCreate {
 	return &ItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Item entities.
+func (c *ItemClient) CreateBulk(builders ...*ItemCreate) *ItemCreateBulk {
+	return &ItemCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Item.
 func (c *ItemClient) Update() *ItemUpdate {
 	mutation := newItemMutation(c.config, OpUpdate)
@@ -1012,7 +1054,7 @@ func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
 	return &ItemDeleteOne{builder}
 }
 
-// Create returns a query builder for Item.
+// Query returns a query builder for Item.
 func (c *ItemClient) Query() *ItemQuery {
 	return &ItemQuery{config: c.config}
 }
@@ -1058,6 +1100,11 @@ func (c *NodeClient) Create() *NodeCreate {
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Node entities.
+func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
+	return &NodeCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Node.
 func (c *NodeClient) Update() *NodeUpdate {
 	mutation := newNodeMutation(c.config, OpUpdate)
@@ -1095,7 +1142,7 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	return &NodeDeleteOne{builder}
 }
 
-// Create returns a query builder for Node.
+// Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
 }
@@ -1173,6 +1220,11 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Pet entities.
+func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
+	return &PetCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Pet.
 func (c *PetClient) Update() *PetUpdate {
 	mutation := newPetMutation(c.config, OpUpdate)
@@ -1210,7 +1262,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -1288,6 +1340,11 @@ func (c *SpecClient) Create() *SpecCreate {
 	return &SpecCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Spec entities.
+func (c *SpecClient) CreateBulk(builders ...*SpecCreate) *SpecCreateBulk {
+	return &SpecCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Spec.
 func (c *SpecClient) Update() *SpecUpdate {
 	mutation := newSpecMutation(c.config, OpUpdate)
@@ -1325,7 +1382,7 @@ func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 	return &SpecDeleteOne{builder}
 }
 
-// Create returns a query builder for Spec.
+// Query returns a query builder for Spec.
 func (c *SpecClient) Query() *SpecQuery {
 	return &SpecQuery{config: c.config}
 }
@@ -1387,6 +1444,11 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
 	mutation := newUserMutation(c.config, OpUpdate)
@@ -1424,7 +1486,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }

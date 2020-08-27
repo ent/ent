@@ -7,15 +7,15 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 var (
 	// BlobsColumns holds the columns for the "blobs" table.
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "uuid", Type: field.TypeUUID},
+		{Name: "uuid", Type: field.TypeUUID, Unique: true},
 		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BlobsTable holds the schema information for the "blobs" table.
@@ -97,7 +97,7 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "oid", Type: field.TypeInt, Increment: true},
 		{Name: "user_children", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.

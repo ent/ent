@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/facebookincubator/ent/entc/gen/internal"
+	"github.com/facebook/ent/entc/gen/internal"
 )
 
 //go:generate go run github.com/go-bindata/go-bindata/go-bindata -o=internal/bindata.go -pkg=internal -modtime=1 ./template/...

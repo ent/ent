@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/entc/gen"
+	"github.com/facebook/ent/entc/gen"
 
 	"github.com/olekukonko/tablewriter"
 )

@@ -7,7 +7,7 @@ package index_test
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent/schema/index"
 
 	"github.com/stretchr/testify/require"
 )

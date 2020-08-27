@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 var (
@@ -74,7 +74,7 @@ var (
 		{Name: "optional_uint16", Type: field.TypeUint16, Nullable: true},
 		{Name: "optional_uint32", Type: field.TypeUint32, Nullable: true},
 		{Name: "optional_uint64", Type: field.TypeUint64, Nullable: true},
-		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
+		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"off", "on"}},
 		{Name: "optional_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "optional_float32", Type: field.TypeFloat32, Nullable: true},
 		{Name: "datetime", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime", "postgres": "date"}},
@@ -97,6 +97,7 @@ var (
 		{Name: "schema_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "schema_float32", Type: field.TypeFloat32, Nullable: true},
 		{Name: "null_float", Type: field.TypeFloat64, Nullable: true},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "READ", "USER", "WRITE"}, Default: "READ"},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -107,7 +108,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[45]},
+				Columns: []*schema.Column{FieldTypesColumns[46]},
 
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -185,6 +186,8 @@ var (
 	FileTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"jpg", "png", "svg"}, Default: "png"},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"OFF", "ON"}, Default: "ON"},
 	}
 	// FileTypesTable holds the schema information for the "file_types" table.
 	FileTypesTable = &schema.Table{
@@ -320,7 +323,7 @@ var (
 		{Name: "nickname", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin"}, Default: "user"},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"admin", "free-user", "user"}, Default: "user"},
 		{Name: "sso_cert", Type: field.TypeString, Nullable: true},
 		{Name: "group_blocked", Type: field.TypeInt, Nullable: true},
 		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},

@@ -14,9 +14,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 // Rel is a relation type of an edge.
@@ -164,7 +164,7 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 		q = builder.Select().
 			From(t1).
 			Join(t2).
-			On(t1.C(s.From.Column), t2.C(s.Edge.Columns[0]))
+			On(t1.C(s.To.Column), t2.C(s.Edge.Columns[0]))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		q = builder.Select().
 			From(builder.Table(s.To.Table)).
@@ -1214,9 +1214,9 @@ func matchIDs(column1 string, pk1 []driver.Value, column2 string, pk2 []driver.V
 	if len(pk2) > 1 {
 		// Use "IN" predicate instead of list of "OR"
 		// in case of more than on nodes to connect.
-		return p.And().InValues(column2, pk2...)
+		return sql.And(p, sql.InValues(column2, pk2...))
 	}
-	return p.And().EQ(column2, pk2[0])
+	return sql.And(p, sql.EQ(column2, pk2[0]))
 }
 
 // cartesian product of 2 id sets.

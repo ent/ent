@@ -10,13 +10,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.
@@ -36,6 +36,34 @@ func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 // SetName sets the name field.
 func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
 	ftu.mutation.SetName(s)
+	return ftu
+}
+
+// SetType sets the type field.
+func (ftu *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
+	ftu.mutation.SetType(f)
+	return ftu
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
+	if f != nil {
+		ftu.SetType(*f)
+	}
+	return ftu
+}
+
+// SetState sets the state field.
+func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
+	ftu.mutation.SetState(f)
+	return ftu
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
+	if f != nil {
+		ftu.SetState(*f)
+	}
 	return ftu
 }
 
@@ -76,6 +104,16 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
+	if v, ok := ftu.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
 
 	var (
 		err      error
@@ -161,6 +199,12 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 		})
 		v.Property(dsl.Single, filetype.FieldName, value)
 	}
+	if value, ok := ftu.mutation.GetType(); ok {
+		v.Property(dsl.Single, filetype.FieldType, value)
+	}
+	if value, ok := ftu.mutation.State(); ok {
+		v.Property(dsl.Single, filetype.FieldState, value)
+	}
 	for _, id := range ftu.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
@@ -197,6 +241,34 @@ type FileTypeUpdateOne struct {
 // SetName sets the name field.
 func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
 	ftuo.mutation.SetName(s)
+	return ftuo
+}
+
+// SetType sets the type field.
+func (ftuo *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
+	ftuo.mutation.SetType(f)
+	return ftuo
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
+	if f != nil {
+		ftuo.SetType(*f)
+	}
+	return ftuo
+}
+
+// SetState sets the state field.
+func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
+	ftuo.mutation.SetState(f)
+	return ftuo
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
+	if f != nil {
+		ftuo.SetState(*f)
+	}
 	return ftuo
 }
 
@@ -237,6 +309,16 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
+	if v, ok := ftuo.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
 
 	var (
 		err  error
@@ -326,6 +408,12 @@ func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, value)),
 		})
 		v.Property(dsl.Single, filetype.FieldName, value)
+	}
+	if value, ok := ftuo.mutation.GetType(); ok {
+		v.Property(dsl.Single, filetype.FieldType, value)
+	}
+	if value, ok := ftuo.mutation.State(); ok {
+		v.Property(dsl.Single, filetype.FieldState, value)
 	}
 	for _, id := range ftuo.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()

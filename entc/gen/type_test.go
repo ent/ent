@@ -7,8 +7,8 @@ package gen
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -49,7 +49,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: map[string]string{"": ""}},
 		},
 	})
 	require.Error(err, "duplicate enums")
@@ -57,7 +57,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: map[string]string{"": ""}},
 		},
 	})
 	require.Error(err, "empty value for enums")

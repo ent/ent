@@ -15,11 +15,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -533,6 +534,20 @@ func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRole sets the role field.
+func (ftc *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
+	ftc.mutation.SetRole(r)
+	return ftc
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetRole(*r)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -540,40 +555,8 @@ func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	if _, ok := ftc.mutation.Int(); !ok {
-		return nil, &ValidationError{Name: "int", err: errors.New("ent: missing required field \"int\"")}
-	}
-	if _, ok := ftc.mutation.Int8(); !ok {
-		return nil, &ValidationError{Name: "int8", err: errors.New("ent: missing required field \"int8\"")}
-	}
-	if _, ok := ftc.mutation.Int16(); !ok {
-		return nil, &ValidationError{Name: "int16", err: errors.New("ent: missing required field \"int16\"")}
-	}
-	if _, ok := ftc.mutation.Int32(); !ok {
-		return nil, &ValidationError{Name: "int32", err: errors.New("ent: missing required field \"int32\"")}
-	}
-	if _, ok := ftc.mutation.Int64(); !ok {
-		return nil, &ValidationError{Name: "int64", err: errors.New("ent: missing required field \"int64\"")}
-	}
-	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
-		}
-	}
-	if v, ok := ftc.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
-	}
-	if v, ok := ftc.mutation.Ndir(); ok {
-		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return nil, &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
-		}
-	}
-	if v, ok := ftc.mutation.Link(); ok {
-		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
-		}
+	if err := ftc.preSave(); err != nil {
+		return nil, err
 	}
 	var (
 		err  error
@@ -609,6 +592,54 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 		panic(err)
 	}
 	return v
+}
+
+func (ftc *FieldTypeCreate) preSave() error {
+	if _, ok := ftc.mutation.Int(); !ok {
+		return &ValidationError{Name: "int", err: errors.New("ent: missing required field \"int\"")}
+	}
+	if _, ok := ftc.mutation.Int8(); !ok {
+		return &ValidationError{Name: "int8", err: errors.New("ent: missing required field \"int8\"")}
+	}
+	if _, ok := ftc.mutation.Int16(); !ok {
+		return &ValidationError{Name: "int16", err: errors.New("ent: missing required field \"int16\"")}
+	}
+	if _, ok := ftc.mutation.Int32(); !ok {
+		return &ValidationError{Name: "int32", err: errors.New("ent: missing required field \"int32\"")}
+	}
+	if _, ok := ftc.mutation.Int64(); !ok {
+		return &ValidationError{Name: "int64", err: errors.New("ent: missing required field \"int64\"")}
+	}
+	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.Role(); !ok {
+		v := fieldtype.DefaultRole
+		ftc.mutation.SetRole(v)
+	}
+	if v, ok := ftc.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (ftc *FieldTypeCreate) gremlinSave(ctx context.Context) (*FieldType, error) {
@@ -761,5 +792,14 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	if value, ok := ftc.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
 	}
+	if value, ok := ftc.mutation.Role(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRole, value)
+	}
 	return v.ValueMap(true)
+}
+
+// FieldTypeCreateBulk is the builder for creating a bulk of FieldType entities.
+type FieldTypeCreateBulk struct {
+	config
+	builders []*FieldTypeCreate
 }

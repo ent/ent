@@ -16,7 +16,7 @@ import (
     "time"
 
     "<your_project>/ent"
-    "github.com/facebookincubator/ent/dialect/sql"
+    "github.com/facebook/ent/dialect/sql"
 )
 
 func Open() (*ent.Client, error) {
@@ -43,7 +43,7 @@ import (
     "time"
 
     "<your_project>/ent"
-    entsql "github.com/facebookincubator/ent/dialect/sql"
+    entsql "github.com/facebook/ent/dialect/sql"
 )
 
 func Open() (*ent.Client, error) {
@@ -74,7 +74,7 @@ import (
 	
 	"contrib.go.opencensus.io/integrations/ocsql"
 	"github.com/go-sql-driver/mysql"
-	entsql "github.com/facebookincubator/ent/dialect/sql"
+	entsql "github.com/facebook/ent/dialect/sql"
 )
 
 type connector struct {
@@ -117,7 +117,8 @@ import (
 
 	"<project>/ent"
 
-	entsql "github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebook/ent/dialect"
+	entsql "github.com/facebook/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -130,7 +131,7 @@ func Open(databaseUrl string) *ent.Client {
 	defer db.Close()
 
 	// Create an ent.Driver from `db`.
-	drv := entsql.OpenDB("postgres", db)
+	drv := entsql.OpenDB(dialect.Postgres, db)
 	return ent.NewClient(ent.Driver(drv))
 }
 

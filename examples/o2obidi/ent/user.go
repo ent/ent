@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/examples/o2obidi/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/examples/o2obidi/ent/user"
 )
 
 // User is the model entity for the User schema.

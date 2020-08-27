@@ -15,8 +15,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/entc/load"
 )
 
 // LoadGraph loads the schema package from the given schema path,
@@ -141,7 +141,7 @@ func TemplateDir(path string) Option {
 			if err != nil {
 				return fmt.Errorf("load template: %v", err)
 			}
-			if info.IsDir() {
+			if info.IsDir() || strings.HasSuffix(path, ".go") {
 				return nil
 			}
 			cfg.Template, err = cfg.Template.ParseFiles(path)

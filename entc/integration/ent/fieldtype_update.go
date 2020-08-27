@@ -13,12 +13,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
@@ -978,6 +979,20 @@ func (ftu *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetRole sets the role field.
+func (ftu *FieldTypeUpdate) SetRole(r role.Role) *FieldTypeUpdate {
+	ftu.mutation.SetRole(r)
+	return ftu
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetRole(*r)
+	}
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1003,6 +1018,11 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := ftu.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return 0, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return 0, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (
@@ -1815,6 +1835,13 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Column: fieldtype.FieldNullFloat,
+		})
+	}
+	if value, ok := ftu.mutation.Role(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldRole,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2778,6 +2805,20 @@ func (ftuo *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetRole sets the role field.
+func (ftuo *FieldTypeUpdateOne) SetRole(r role.Role) *FieldTypeUpdateOne {
+	ftuo.mutation.SetRole(r)
+	return ftuo
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetRole(*r)
+	}
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2803,6 +2844,11 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	if v, ok := ftuo.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return nil, &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return nil, &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
 	var (
@@ -3613,6 +3659,13 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Column: fieldtype.FieldNullFloat,
+		})
+	}
+	if value, ok := ftuo.mutation.Role(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldRole,
 		})
 	}
 	ft = &FieldType{config: ftuo.config}

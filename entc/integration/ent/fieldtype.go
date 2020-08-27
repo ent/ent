@@ -13,9 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -110,7 +111,9 @@ type FieldType struct {
 	// SchemaFloat32 holds the value of the "schema_float32" field.
 	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
 	// NullFloat holds the value of the "null_float" field.
-	NullFloat  sql.NullFloat64 `json:"null_float,omitempty"`
+	NullFloat sql.NullFloat64 `json:"null_float,omitempty"`
+	// Role holds the value of the "role" field.
+	Role       role.Role `json:"role,omitempty"`
 	file_field *int
 }
 
@@ -162,6 +165,7 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullFloat64{}, // schema_float
 		&sql.NullFloat64{}, // schema_float32
 		&sql.NullFloat64{}, // null_float
+		&sql.NullString{},  // role
 	}
 }
 
@@ -384,12 +388,12 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	if value, ok := values[38].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_int", values[38])
 	} else if value.Valid {
-		ft.SchemaInt = schema.Int(schema.Int(value.Int64))
+		ft.SchemaInt = schema.Int(value.Int64)
 	}
 	if value, ok := values[39].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_int8", values[39])
 	} else if value.Valid {
-		ft.SchemaInt8 = schema.Int8(schema.Int8(value.Int64))
+		ft.SchemaInt8 = schema.Int8(value.Int64)
 	}
 	if value, ok := values[40].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_int64", values[40])
@@ -404,14 +408,19 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	if value, ok := values[42].(*sql.NullFloat64); !ok {
 		return fmt.Errorf("unexpected type %T for field schema_float32", values[42])
 	} else if value.Valid {
-		ft.SchemaFloat32 = schema.Float32(schema.Float32(value.Float64))
+		ft.SchemaFloat32 = schema.Float32(value.Float64)
 	}
 	if value, ok := values[43].(*sql.NullFloat64); !ok {
 		return fmt.Errorf("unexpected type %T for field null_float", values[43])
 	} else if value != nil {
 		ft.NullFloat = *value
 	}
-	values = values[44:]
+	if value, ok := values[44].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field role", values[44])
+	} else if value.Valid {
+		ft.Role = role.Role(value.String)
+	}
+	values = values[45:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -552,6 +561,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
 	builder.WriteString(", null_float=")
 	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteByte(')')
 	return builder.String()
 }
