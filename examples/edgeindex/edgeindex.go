@@ -53,7 +53,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("ST").
 		SetCity(tlv).
 		Save(ctx)
-	if err == nil {
+	if err != nil {
 		return fmt.Errorf("expecting creation to fail")
 	}
 	// Add a street "ST" to "NYC".
