@@ -143,7 +143,7 @@ func main() {
 }
 ```
 
-**Write changes to file**
+**Write changes to a file**
 ```go
 package main
 

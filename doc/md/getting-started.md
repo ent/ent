@@ -140,7 +140,7 @@ func main() {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
 	defer client.Close()
-	// run the auto migration tool.
+	// Run the auto migration tool.
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
@@ -226,7 +226,7 @@ func (Car) Fields() []ent.Field {
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
-			// regexp validation for group name.
+			// Regexp validation for group name.
 			Match(regexp.MustCompile("[a-zA-Z_]+$")),
 	}
 }
@@ -258,7 +258,7 @@ Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
 We continue our example by creating 2 cars and adding them to a user.
 ```go
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
-	// creating new car with model "Tesla".
+	// Create a new car with model "Tesla".
 	tesla, err := client.Car.
 		Create().
 		SetModel("Tesla").
@@ -268,7 +268,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		return nil, fmt.Errorf("failed creating car: %v", err)
 	}
 
-	// creating new car with model "Ford".
+	// Create a new car with model "Ford".
 	ford, err := client.Car.
 		Create().
 		SetModel("Ford").
@@ -279,7 +279,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	}
 	log.Println("car was created: ", ford)
 
-	// create a new user, and add it the 2 cars.
+	// Create a new user, and add it the 2 cars.
 	a8m, err := client.User.
 		Create().
 		SetAge(30).
@@ -309,7 +309,7 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 	}
 	log.Println("returned cars:", cars)
 
-	// what about filtering specific cars.
+	// What about filtering specific cars.
 	ford, err := a8m.QueryCars().
 		Where(car.ModelEQ("Ford")).
 		Only(ctx)
@@ -345,7 +345,7 @@ import (
 // Edges of the Car.
 func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
-		// create an inverse-edge called "owner" of type `User`
+		// Create an inverse-edge called "owner" of type `User`
 	 	// and reference it to the "cars" edge (in User schema)
 	 	// explicitly using the `Ref` method.
 	 	edge.From("owner", User.Type).
@@ -370,7 +370,7 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 	if err != nil {
 		return fmt.Errorf("failed querying user cars: %v", err)
 	}
-	// query the inverse edge.
+	// Query the inverse edge.
 	for _, ca := range cars {
 		owner, err := ca.QueryOwner().Only(ctx)
 		if err != nil {
@@ -424,7 +424,7 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	 func (User) Edges() []ent.Edge {
 	 	return []ent.Edge{
 			edge.To("cars", Car.Type),
-		 	// create an inverse-edge called "groups" of type `Group`
+		 	// Create an inverse-edge called "groups" of type `Group`
 		 	// and reference it to the "users" edge (in Group schema)
 		 	// explicitly using the `Ref` method.
 			edge.From("groups", Group.Type).
@@ -449,7 +449,7 @@ entities and relations). Let's create the following graph using the framework:
 ```go
 
 func CreateGraph(ctx context.Context, client *ent.Client) error {
-	// first, create the users.
+	// First, create the users.
 	a8m, err := client.User.
 		Create().
 		SetAge(30).
@@ -466,7 +466,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	// then, create the cars, and attach them to the users in the creation.
+	// Then, create the cars, and attach them to the users in the creation.
 	_, err = client.Car.
 		Create().
 		SetModel("Tesla").
@@ -494,7 +494,7 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	// create the groups, and add their users in the creation.
+	// Create the groups, and add their users in the creation.
 	_, err = client.Group.
 		Create().
 		SetName("GitLab").
