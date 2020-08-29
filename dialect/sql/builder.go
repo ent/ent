@@ -1915,10 +1915,11 @@ var ops = [...]string{
 }
 
 // WriteOp writes an operator to the builder.
-func (b *Builder) WriteOp(op Op) {
+func (b *Builder) WriteOp(op Op) *Builder {
 	if op >= OpEQ && op <= OpLike {
 		b.Pad().WriteString(ops[op]).Pad()
 	}
+	return b
 }
 
 // JSONOption allows for calling database JSON paths with functional options.
