@@ -1249,6 +1249,16 @@ WHERE
 			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
 			wantArgs:  []interface{}{1},
 		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("test")).
+				Where(P(func(b *Builder) {
+					b.WriteString("nlevel(").Ident("path").WriteByte(')').WriteOp(OpGT).Arg(1)
+				})),
+			wantQuery: `SELECT * FROM "test" WHERE nlevel("path") > $1`,
+			wantArgs:  []interface{}{1},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
