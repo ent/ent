@@ -52,9 +52,9 @@ const DefaultType = TypePNG
 
 // Type values.
 const (
-	TypeJPG Type = "jpg"
 	TypePNG Type = "png"
 	TypeSVG Type = "svg"
+	TypeJPG Type = "jpg"
 )
 
 func (_type Type) String() string {
@@ -64,7 +64,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeJPG, TypePNG, TypeSVG:
+	case TypePNG, TypeSVG, TypeJPG:
 		return nil
 	default:
 		return fmt.Errorf("filetype: invalid enum value for type field: %q", _type)
@@ -79,8 +79,8 @@ const DefaultState = StateOn
 
 // State values.
 const (
-	StateOff State = "OFF"
 	StateOn  State = "ON"
+	StateOff State = "OFF"
 )
 
 func (s State) String() string {
@@ -90,7 +90,7 @@ func (s State) String() string {
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
-	case StateOff, StateOn:
+	case StateOn, StateOff:
 		return nil
 	default:
 		return fmt.Errorf("filetype: invalid enum value for state field: %q", s)

@@ -12,6 +12,7 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"sort"
 	"time"
 )
 
@@ -112,9 +113,8 @@ func Floats(name string) *jsonBuilder {
 //
 func Enum(name string) *enumBuilder {
 	return &enumBuilder{&Descriptor{
-		Name:  name,
-		Info:  &TypeInfo{Type: TypeEnum},
-		Enums: make(map[string]string),
+		Name: name,
+		Info: &TypeInfo{Type: TypeEnum},
 	}}
 }
 
@@ -644,9 +644,37 @@ type enumBuilder struct {
 }
 
 // Values adds given values to the enum values.
+//
+//	field.Enum("priority").
+//		Values("low", "mid", "high")
+//
 func (b *enumBuilder) Values(values ...string) *enumBuilder {
 	for _, v := range values {
-		b.desc.Enums[v] = v
+		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: v, V: v})
+	}
+	return b
+}
+
+// NamedValues adds the given name, value pairs to the enum value.
+// The "name" defines the Go identifier of the enum, and the value
+// defines the actual value in the database.
+//
+// NamedValues returns an error if given an odd number of arguments.
+//
+//	field.Enum("priority").
+//		NamedValues(
+//			"LOW", "low",
+//			"MID", "mid",
+//			"HIGH", "high",
+//		)
+//
+func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
+	if len(namevalue)%2 == 1 {
+		b.desc.err = fmt.Errorf("Enum.NamedValues: odd argument count")
+		return b
+	}
+	for i := 0; i < len(namevalue); i += 2 {
+		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: namevalue[i], V: namevalue[i+1]})
 	}
 	return b
 }
@@ -656,10 +684,18 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 // map is the actual enum value.
 //
 // If keys in not titled, ent codegen will change it to be exported.
+//
+// Deprecated: the ValueMap method predates the NamedValues method and it
+// is planned be removed in v0.5.0. New code should use NamedValues instead.
 func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
+	enums := make([]struct{ N, V string }, len(values))
 	for k, v := range values {
-		b.desc.Enums[k] = v
+		enums = append(enums, struct{ N, V string }{N: k, V: v})
 	}
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].V < enums[j].V
+	})
+	b.desc.Enums = append(b.desc.Enums, enums...)
 	return b
 }
 
@@ -853,22 +889,22 @@ type Annotation interface {
 
 // A Descriptor for field configuration.
 type Descriptor struct {
-	Tag           string            // struct tag.
-	Size          int               // varchar size.
-	Name          string            // field name.
-	Info          *TypeInfo         // field type info.
-	Unique        bool              // unique index of field.
-	Nillable      bool              // nillable struct field.
-	Optional      bool              // nullable field in database.
-	Immutable     bool              // create-only field.
-	Default       interface{}       // default value on create.
-	UpdateDefault interface{}       // default value on update.
-	Validators    []interface{}     // validator functions.
-	StorageKey    string            // sql column or gremlin property.
-	Enums         map[string]string // enum values.
-	Sensitive     bool              // sensitive info string field.
-	SchemaType    map[string]string // override the schema type.
-	Annotations   []Annotation      // field annotations.
+	Tag           string                  // struct tag.
+	Size          int                     // varchar size.
+	Name          string                  // field name.
+	Info          *TypeInfo               // field type info.
+	Unique        bool                    // unique index of field.
+	Nillable      bool                    // nillable struct field.
+	Optional      bool                    // nullable field in database.
+	Immutable     bool                    // create-only field.
+	Default       interface{}             // default value on create.
+	UpdateDefault interface{}             // default value on update.
+	Validators    []interface{}           // validator functions.
+	StorageKey    string                  // sql column or gremlin property.
+	Enums         []struct{ N, V string } // enum values.
+	Sensitive     bool                    // sensitive info string field.
+	SchemaType    map[string]string       // override the schema type.
+	Annotations   []Annotation            // field annotations.
 	err           error
 }
 

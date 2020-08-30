@@ -111,8 +111,8 @@ const DefaultMixedEnum = MixedEnumOn
 
 // MixedEnum values.
 const (
-	MixedEnumOff MixedEnum = "off"
 	MixedEnumOn  MixedEnum = "on"
+	MixedEnumOff MixedEnum = "off"
 )
 
 func (me MixedEnum) String() string {
@@ -122,7 +122,7 @@ func (me MixedEnum) String() string {
 // MixedEnumValidator is a validator for the "mixed_enum" field enum values. It is called by the builders before save.
 func MixedEnumValidator(me MixedEnum) error {
 	switch me {
-	case MixedEnumOff, MixedEnumOn:
+	case MixedEnumOn, MixedEnumOff:
 		return nil
 	default:
 		return fmt.Errorf("user: invalid enum value for mixed_enum field: %q", me)

@@ -960,17 +960,17 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 	}
 	enums := make([]Enum, 0, len(lf.Enums))
 	values := make(map[string]bool, len(lf.Enums))
-	for name, e := range lf.Enums {
-		switch {
-		case e == "":
+	for i := range lf.Enums {
+		switch name, value := lf.Enums[i].N, lf.Enums[i].V; {
+		case value == "":
 			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
-		case values[e]:
-			return nil, fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
-		case strings.IndexFunc(e, unicode.IsSpace) != -1:
-			return nil, fmt.Errorf("enum value %q cannot contain spaces", e)
+		case values[value]:
+			return nil, fmt.Errorf("duplicate values %q for enum field %q", value, f.Name)
+		case strings.IndexFunc(value, unicode.IsSpace) != -1:
+			return nil, fmt.Errorf("enum value %q cannot contain spaces", value)
 		default:
-			values[e] = true
-			enums = append(enums, Enum{Name: f.EnumName(name), Value: e})
+			values[value] = true
+			enums = append(enums, Enum{Name: f.EnumName(name), Value: value})
 		}
 	}
 	if value := lf.DefaultValue; value != nil {
@@ -978,9 +978,6 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 			return nil, fmt.Errorf("invalid default value for enum field %q", f.Name)
 		}
 	}
-	sort.Slice(enums, func(i, j int) bool {
-		return enums[i].Value < enums[j].Value
-	})
 	return enums, nil
 }
 
