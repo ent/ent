@@ -1195,6 +1195,7 @@ func drop(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	client.Pet.Delete().ExecX(ctx)
 	client.Item.Delete().ExecX(ctx)
+	client.Task.Delete().ExecX(ctx)
 	client.File.Delete().ExecX(ctx)
 	client.Card.Delete().ExecX(ctx)
 	client.Node.Delete().ExecX(ctx)

@@ -27,6 +27,7 @@ import (
 	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/task"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 
 	"github.com/facebook/ent"
@@ -52,6 +53,7 @@ const (
 	TypeNode      = "Node"
 	TypePet       = "Pet"
 	TypeSpec      = "Spec"
+	TypeTask      = "Task"
 	TypeUser      = "User"
 )
 
@@ -9592,6 +9594,335 @@ func (m *SpecMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Spec edge %s", name)
+}
+
+// TaskMutation represents an operation that mutate the Tasks
+// nodes in the graph.
+type TaskMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	priority      *schema.Priority
+	addpriority   *schema.Priority
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Task, error)
+}
+
+var _ ent.Mutation = (*TaskMutation)(nil)
+
+// taskOption allows to manage the mutation configuration using functional options.
+type taskOption func(*TaskMutation)
+
+// newTaskMutation creates new mutation for $n.Name.
+func newTaskMutation(c config, op Op, opts ...taskOption) *TaskMutation {
+	m := &TaskMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTask,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTaskID sets the id field of the mutation.
+func withTaskID(id string) taskOption {
+	return func(m *TaskMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Task
+		)
+		m.oldValue = func(ctx context.Context) (*Task, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Task.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTask sets the old Task of the mutation.
+func withTask(node *Task) taskOption {
+	return func(m *TaskMutation) {
+		m.oldValue = func(context.Context) (*Task, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TaskMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TaskMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *TaskMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetPriority sets the priority field.
+func (m *TaskMutation) SetPriority(s schema.Priority) {
+	m.priority = &s
+	m.addpriority = nil
+}
+
+// Priority returns the priority value in the mutation.
+func (m *TaskMutation) Priority() (r schema.Priority, exists bool) {
+	v := m.priority
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPriority returns the old priority value of the Task.
+// If the Task object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *TaskMutation) OldPriority(ctx context.Context) (v schema.Priority, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPriority is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPriority requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPriority: %w", err)
+	}
+	return oldValue.Priority, nil
+}
+
+// AddPriority adds s to priority.
+func (m *TaskMutation) AddPriority(s schema.Priority) {
+	if m.addpriority != nil {
+		*m.addpriority += s
+	} else {
+		m.addpriority = &s
+	}
+}
+
+// AddedPriority returns the value that was added to the priority field in this mutation.
+func (m *TaskMutation) AddedPriority() (r schema.Priority, exists bool) {
+	v := m.addpriority
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPriority reset all changes of the "priority" field.
+func (m *TaskMutation) ResetPriority() {
+	m.priority = nil
+	m.addpriority = nil
+}
+
+// Op returns the operation name.
+func (m *TaskMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Task).
+func (m *TaskMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *TaskMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.priority != nil {
+		fields = append(fields, task.FieldPriority)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *TaskMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case task.FieldPriority:
+		return m.Priority()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case task.FieldPriority:
+		return m.OldPriority(ctx)
+	}
+	return nil, fmt.Errorf("unknown Task field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *TaskMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case task.FieldPriority:
+		v, ok := value.(schema.Priority)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPriority(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Task field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *TaskMutation) AddedFields() []string {
+	var fields []string
+	if m.addpriority != nil {
+		fields = append(fields, task.FieldPriority)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *TaskMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case task.FieldPriority:
+		return m.AddedPriority()
+	}
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *TaskMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case task.FieldPriority:
+		v, ok := value.(schema.Priority)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPriority(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Task numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *TaskMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *TaskMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TaskMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Task nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *TaskMutation) ResetField(name string) error {
+	switch name {
+	case task.FieldPriority:
+		m.ResetPriority()
+		return nil
+	}
+	return fmt.Errorf("unknown Task field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *TaskMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *TaskMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *TaskMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *TaskMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *TaskMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *TaskMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *TaskMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Task unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *TaskMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Task edge %s", name)
 }
 
 // UserMutation represents an operation that mutate the Users

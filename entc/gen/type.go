@@ -898,9 +898,9 @@ var (
 // BasicType returns a Go expression for the given identifier
 // to convert it to a basic type. For example:
 //
-//	v (http.Dir)			=> string(v)
-//	v (fmt.Stringer)		=> v.String()
-//	v (database/sql.NullString)	=> v.String
+//	v (http.Dir)		=> string(v)
+//	v (fmt.Stringer)	=> v.String()
+//	v (sql.NullString)	=> v.String
 //
 func (f Field) BasicType(ident string) (expr string) {
 	if !f.HasGoType() {

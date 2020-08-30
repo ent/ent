@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/facebook/ent/entc/integration/ent/task"
+
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent"
 	"github.com/facebook/ent/entc/integration/ent/role"
@@ -128,4 +130,23 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Int(64), ft.SchemaInt)
 	require.Equal(schema.Int8(8), ft.SchemaInt8)
 	require.Equal(schema.Int64(64), ft.SchemaInt64)
+
+	_, err = client.Task.CreateBulk(
+		client.Task.Create().SetPriority(schema.PriorityLow),
+		client.Task.Create().SetPriority(schema.PriorityMid),
+		client.Task.Create().SetPriority(schema.PriorityHigh),
+	).Save(ctx)
+	require.NoError(err)
+	_, err = client.Task.Create().SetPriority(schema.Priority(10)).Save(ctx)
+	require.Error(err)
+
+	tasks := client.Task.Query().Order(ent.Asc(task.FieldPriority)).AllX(ctx)
+	require.Equal(schema.PriorityLow, tasks[0].Priority)
+	require.Equal(schema.PriorityMid, tasks[1].Priority)
+	require.Equal(schema.PriorityHigh, tasks[2].Priority)
+
+	tasks = client.Task.Query().Order(ent.Desc(task.FieldPriority)).AllX(ctx)
+	require.Equal(schema.PriorityLow, tasks[2].Priority)
+	require.Equal(schema.PriorityMid, tasks[1].Priority)
+	require.Equal(schema.PriorityHigh, tasks[0].Priority)
 }

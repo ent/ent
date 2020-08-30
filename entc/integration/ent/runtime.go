@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/group"
 	"github.com/facebook/ent/entc/integration/ent/groupinfo"
 	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/ent/task"
 	"github.com/facebook/ent/entc/integration/ent/user"
 )
 
@@ -122,6 +123,14 @@ func init() {
 	groupinfoDescMaxUsers := groupinfoFields[1].Descriptor()
 	// groupinfo.DefaultMaxUsers holds the default value on creation for the max_users field.
 	groupinfo.DefaultMaxUsers = groupinfoDescMaxUsers.Default.(int)
+	taskFields := schema.Task{}.Fields()
+	_ = taskFields
+	// taskDescPriority is the schema descriptor for priority field.
+	taskDescPriority := taskFields[0].Descriptor()
+	// task.DefaultPriority holds the default value on creation for the priority field.
+	task.DefaultPriority = schema.Priority(taskDescPriority.Default.(int))
+	// task.PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
+	task.PriorityValidator = taskDescPriority.Validators[0].(func(int) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	userFields := schema.User{}.Fields()
