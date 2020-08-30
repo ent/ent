@@ -367,6 +367,14 @@ func TestField_Enums(t *testing.T) {
 	assert.Equal(t, "user", fd.Enums[0].V)
 	assert.Equal(t, "user", fd.Default)
 
+	fd = field.Enum("role").
+		ValueMap(map[string]string{"USER": "user"}).
+		Default("user").
+		Descriptor()
+	assert.Equal(t, "role", fd.Name)
+	assert.Equal(t, "USER", fd.Enums[0].N)
+	assert.Equal(t, "user", fd.Enums[0].V)
+
 	fd = field.Enum("role").GoType(Role("")).Descriptor()
 	assert.NoError(t, fd.Err())
 	assert.Equal(t, "field_test.Role", fd.Info.Ident)
