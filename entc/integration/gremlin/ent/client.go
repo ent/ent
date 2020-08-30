@@ -23,6 +23,7 @@ import (
 	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/task"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 
 	"github.com/facebook/ent/dialect"
@@ -56,6 +57,8 @@ type Client struct {
 	Pet *PetClient
 	// Spec is the client for interacting with the Spec builders.
 	Spec *SpecClient
+	// Task is the client for interacting with the Task builders.
+	Task *TaskClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -81,6 +84,7 @@ func (c *Client) init() {
 	c.Node = NewNodeClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Spec = NewSpecClient(c.config)
+	c.Task = NewTaskClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -134,6 +138,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
 		Spec:      NewSpecClient(cfg),
+		Task:      NewTaskClient(cfg),
 		User:      NewUserClient(cfg),
 	}, nil
 }
@@ -174,6 +179,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Node.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.Spec.Use(hooks...)
+	c.Task.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -1319,6 +1325,94 @@ func (c *SpecClient) QueryCard(s *Spec) *CardQuery {
 // Hooks returns the client hooks.
 func (c *SpecClient) Hooks() []Hook {
 	return c.hooks.Spec
+}
+
+// TaskClient is a client for the Task schema.
+type TaskClient struct {
+	config
+}
+
+// NewTaskClient returns a client for the Task from the given config.
+func NewTaskClient(c config) *TaskClient {
+	return &TaskClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `task.Hooks(f(g(h())))`.
+func (c *TaskClient) Use(hooks ...Hook) {
+	c.hooks.Task = append(c.hooks.Task, hooks...)
+}
+
+// Create returns a create builder for Task.
+func (c *TaskClient) Create() *TaskCreate {
+	mutation := newTaskMutation(c.config, OpCreate)
+	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Task entities.
+func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
+	return &TaskCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Task.
+func (c *TaskClient) Update() *TaskUpdate {
+	mutation := newTaskMutation(c.config, OpUpdate)
+	return &TaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TaskClient) UpdateOne(t *Task) *TaskUpdateOne {
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTask(t))
+	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TaskClient) UpdateOneID(id string) *TaskUpdateOne {
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTaskID(id))
+	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Task.
+func (c *TaskClient) Delete() *TaskDelete {
+	mutation := newTaskMutation(c.config, OpDelete)
+	return &TaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TaskClient) DeleteOneID(id string) *TaskDeleteOne {
+	builder := c.Delete().Where(task.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TaskDeleteOne{builder}
+}
+
+// Query returns a query builder for Task.
+func (c *TaskClient) Query() *TaskQuery {
+	return &TaskQuery{config: c.config}
+}
+
+// Get returns a Task entity by its id.
+func (c *TaskClient) Get(ctx context.Context, id string) (*Task, error) {
+	return c.Query().Where(task.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TaskClient) GetX(ctx context.Context, id string) *Task {
+	t, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+// Hooks returns the client hooks.
+func (c *TaskClient) Hooks() []Hook {
+	return c.hooks.Task
 }
 
 // UserClient is a client for the User schema.

@@ -4,7 +4,9 @@
 
 package schema
 
-import "github.com/facebook/ent"
+import (
+	"github.com/facebook/ent"
+)
 
 // Item holds the schema definition for the Item entity.
 type Item struct {

@@ -313,6 +313,18 @@ var (
 		PrimaryKey:  []*schema.Column{SpecsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// TasksColumns holds the columns for the "tasks" table.
+	TasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "priority", Type: field.TypeInt, Default: 1},
+	}
+	// TasksTable holds the schema information for the "tasks" table.
+	TasksTable = &schema.Table{
+		Name:        "tasks",
+		Columns:     TasksColumns,
+		PrimaryKey:  []*schema.Column{TasksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -479,6 +491,7 @@ var (
 		NodesTable,
 		PetsTable,
 		SpecsTable,
+		TasksTable,
 		UsersTable,
 		SpecCardTable,
 		UserGroupsTable,

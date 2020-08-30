@@ -39,6 +39,7 @@ type hooks struct {
 	Node      []ent.Hook
 	Pet       []ent.Hook
 	Spec      []ent.Hook
+	Task      []ent.Hook
 	User      []ent.Hook
 }
 
