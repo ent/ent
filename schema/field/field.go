@@ -688,7 +688,7 @@ func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
 // Deprecated: the ValueMap method predates the NamedValues method and it
 // is planned be removed in v0.5.0. New code should use NamedValues instead.
 func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
-	enums := make([]struct{ N, V string }, len(values))
+	enums := make([]struct{ N, V string }, 0, len(values))
 	for k, v := range values {
 		enums = append(enums, struct{ N, V string }{N: k, V: v})
 	}
