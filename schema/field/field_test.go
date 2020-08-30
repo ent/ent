@@ -353,7 +353,18 @@ func TestField_Enums(t *testing.T) {
 		Default("user").
 		Descriptor()
 	assert.Equal(t, "role", fd.Name)
-	assert.Equal(t, map[string]string{"admin": "admin", "master": "master", "user": "user"}, fd.Enums)
+	assert.Equal(t, "user", fd.Enums[0].V)
+	assert.Equal(t, "admin", fd.Enums[1].V)
+	assert.Equal(t, "master", fd.Enums[2].V)
+	assert.Equal(t, "user", fd.Default)
+
+	fd = field.Enum("role").
+		NamedValues("USER", "user").
+		Default("user").
+		Descriptor()
+	assert.Equal(t, "role", fd.Name)
+	assert.Equal(t, "USER", fd.Enums[0].N)
+	assert.Equal(t, "user", fd.Enums[0].V)
 	assert.Equal(t, "user", fd.Default)
 
 	fd = field.Enum("role").GoType(Role("")).Descriptor()
@@ -363,7 +374,8 @@ func TestField_Enums(t *testing.T) {
 	assert.Equal(t, "field_test.Role", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
-	assert.Equal(t, map[string]string{"admin": "admin", "owner": "owner"}, fd.Enums)
+	assert.Equal(t, "admin", fd.Enums[0].V)
+	assert.Equal(t, "owner", fd.Enums[1].V)
 }
 
 func TestField_UUID(t *testing.T) {

@@ -61,10 +61,10 @@ type Type string
 
 // Type values.
 const (
+	TypeSpiral       Type = "spiral"
 	TypeBarredSpiral Type = "barred_spiral"
 	TypeElliptical   Type = "elliptical"
 	TypeIrregular    Type = "irregular"
-	TypeSpiral       Type = "spiral"
 )
 
 func (_type Type) String() string {
@@ -74,7 +74,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeBarredSpiral, TypeElliptical, TypeIrregular, TypeSpiral:
+	case TypeSpiral, TypeBarredSpiral, TypeElliptical, TypeIrregular:
 		return nil
 	default:
 		return fmt.Errorf("galaxy: invalid enum value for type field: %q", _type)

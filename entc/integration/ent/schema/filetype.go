@@ -21,17 +21,17 @@ func (FileType) Fields() []ent.Field {
 		field.String("name").
 			Unique(),
 		field.Enum("type").
-			ValueMap(map[string]string{
-				"PNG": "png",
-				"SVG": "svg",
-				"JPG": "jpg",
-			}).
+			NamedValues(
+				"PNG", "png",
+				"SVG", "svg",
+				"JPG", "jpg",
+			).
 			Default("png"),
 		field.Enum("state").
-			ValueMap(map[string]string{
-				"On":  "ON",
-				"Off": "OFF",
-			}).
+			NamedValues(
+				"On", "ON",
+				"Off", "OFF",
+			).
 			Default("ON"),
 	}
 }
