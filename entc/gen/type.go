@@ -77,7 +77,7 @@ type (
 		// UserDefined indicates that this field was defined by the loaded schema.
 		// Unlike default id field, which is defined by the generator.
 		UserDefined bool
-		// SchemaType is a underlying type for a edge in the schema.
+		// SchemaType is a underlying column type for a field in the schema.
 		SchemaType map[string]string
 		// Annotations that were defined for the field in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
