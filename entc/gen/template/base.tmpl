@@ -84,7 +84,7 @@ func (e *ValidationError) Error() string {
 
 // Unwrap implements the errors.Wrapper interface.
 func (e *ValidationError) Unwrap() error {
-    return errors.Unwrap(e.err)
+    return e.err
 }
 
 // IsValidationError returns a boolean indicating whether the error is a validaton error.

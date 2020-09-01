@@ -31,6 +31,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/migrate"
 	"github.com/facebook/ent/entc/integration/ent/node"
 	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/ent/user"
 	"github.com/stretchr/testify/mock"
 
@@ -578,9 +579,10 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Error(err, "type validator failed")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("failed").SetExpire(time.Now().Add(time.Hour)).Save(ctx)
 	require.Error(err, "name validator failed")
-	require.IsType(&ent.ValidationError{}, err)
+	var checkerr schema.CheckError
+	require.True(errors.As(err, &checkerr))
 	require.EqualError(err, "ent: validator failed for field \"name\": last name must begin with uppercase")
-	require.EqualError(errors.Unwrap(err), "last name must begin with uppercase")
+	require.EqualError(checkerr, "last name must begin with uppercase")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github20").SetExpire(time.Now().Add(time.Hour)).Save(ctx)
 	require.Error(err, "name validator failed")
 	_, err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github").SetMaxUsers(-1).SetExpire(time.Now().Add(time.Hour)).Save(ctx)
