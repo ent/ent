@@ -1259,6 +1259,29 @@ WHERE
 			wantQuery: `SELECT * FROM "test" WHERE nlevel("path") > $1`,
 			wantArgs:  []interface{}{1},
 		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("test")).
+				Where(P(func(b *Builder) {
+					b.WriteString("nlevel(").Ident("path").WriteByte(')').WriteOp(OpGT).Arg(1)
+				})),
+			wantQuery: `SELECT * FROM "test" WHERE nlevel("path") > $1`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input: Select("*").
+				From(Table("test")).
+				Where(JSONHasKey("j", "a", "*", "c")),
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("test")).
+				Where(JSONHasKey("j", "a", "b", "c")),
+			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
