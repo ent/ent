@@ -897,6 +897,18 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 	})
 }
 
+// JSONHasKey calls Predicate.JSONHasKey.
+func JSONHasKey(col string, path ...string) *Predicate {
+	return P().JSONHasKey(col, path...)
+}
+
+// JSONHasKey return a predicate for checking that a JSON key exists and not NULL;
+func (p *Predicate) JSONHasKey(col string, path ...string) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.JSONPath(col, Path(path...)).WriteOp(OpNotNull)
+	})
+}
+
 // NEQ returns a "<>" predicate.
 func NEQ(col string, value interface{}) *Predicate {
 	return P().NEQ(col, value)
@@ -1891,33 +1903,42 @@ func (b *Builder) WriteString(s string) *Builder {
 type Op int
 
 const (
-	OpEQ    Op = iota // logical and.
-	OpNEQ             // <>
-	OpGT              // >
-	OpGTE             // >=
-	OpLT              // <
-	OpLTE             // <=
-	OpIn              // IN
-	OpNotIn           // NOT IN
-	OpLike            // LIKE
+	OpEQ      Op = iota // logical and.
+	OpNEQ               // <>
+	OpGT                // >
+	OpGTE               // >=
+	OpLT                // <
+	OpLTE               // <=
+	OpIn                // IN
+	OpNotIn             // NOT IN
+	OpLike              // LIKE
+	OpIsNull            // IS NULL
+	OpNotNull           // IS NOT NULL
 )
 
 var ops = [...]string{
-	OpEQ:    "=",
-	OpNEQ:   "<>",
-	OpGT:    ">",
-	OpGTE:   ">=",
-	OpLT:    "<",
-	OpLTE:   "<=",
-	OpIn:    "IN",
-	OpNotIn: "NOT IN",
-	OpLike:  "LIKE",
+	OpEQ:      "=",
+	OpNEQ:     "<>",
+	OpGT:      ">",
+	OpGTE:     ">=",
+	OpLT:      "<",
+	OpLTE:     "<=",
+	OpIn:      "IN",
+	OpNotIn:   "NOT IN",
+	OpLike:    "LIKE",
+	OpIsNull:  "IS NULL",
+	OpNotNull: "IS NOT NULL",
 }
 
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {
-	if op >= OpEQ && op <= OpLike {
+	switch {
+	case op >= OpEQ && op <= OpLike:
 		b.Pad().WriteString(ops[op]).Pad()
+	case op == OpIsNull || op == OpNotNull:
+		b.Pad().WriteString(ops[op])
+	default:
+		panic(fmt.Sprintf("invalid op %d", op))
 	}
 	return b
 }
@@ -2008,12 +2029,13 @@ func (p *JSONPath) writeTo(b *Builder) {
 //
 //	b.JSONPath("column", Path("a", "b", "[1]", "c"), Cast("int"))
 //
-func (b *Builder) JSONPath(ident string, opts ...JSONOption) {
+func (b *Builder) JSONPath(ident string, opts ...JSONOption) *Builder {
 	path := &JSONPath{ident: ident}
 	for i := range opts {
 		opts[i](path)
 	}
 	path.writeTo(b)
+	return b
 }
 
 // Arg appends an input argument to the builder.
