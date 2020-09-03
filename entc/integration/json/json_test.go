@@ -6,21 +6,19 @@ package json
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/json/ent"
 	"github.com/facebook/ent/entc/integration/json/ent/migrate"
 	"github.com/facebook/ent/entc/integration/json/ent/user"
 
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
@@ -28,21 +26,15 @@ import (
 
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
-		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
 		t.Run(version, func(t *testing.T) {
-			cfg := mysql.Config{
-				User: "root", Passwd: "pass", Net: "tcp", Addr: addr,
-				AllowNativePasswords: true, ParseTime: true,
-			}
-			db, err := sql.Open("mysql", cfg.FormatDSN())
+			db, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/", port))
 			require.NoError(t, err)
 			defer db.Close()
-			_, err = db.Exec("CREATE DATABASE IF NOT EXISTS json")
+			ctx := context.Background()
+			err = db.Exec(ctx, "CREATE DATABASE IF NOT EXISTS json", []interface{}{}, nil)
 			require.NoError(t, err, "creating database")
-			defer db.Exec("DROP DATABASE IF EXISTS json")
-
-			cfg.DBName = "json"
-			client, err := ent.Open("mysql", cfg.FormatDSN())
+			defer db.Exec(ctx, "DROP DATABASE IF EXISTS json", []interface{}{}, nil)
+			client, err := ent.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/json", port))
 			require.NoError(t, err, "connecting to json database")
 			err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
 			require.NoError(t, err)
@@ -53,6 +45,10 @@ func TestMySQL(t *testing.T) {
 			Floats(t, client)
 			Strings(t, client)
 			RawMessage(t, client)
+			// Skip predicates test for MySQL old versions.
+			if version != "56" {
+				Predicates(t, client)
+			}
 		})
 	}
 }
@@ -64,9 +60,10 @@ func TestPostgres(t *testing.T) {
 			db, err := sql.Open(dialect.Postgres, dsn)
 			require.NoError(t, err)
 			defer db.Close()
-			_, err = db.Exec("CREATE DATABASE json")
+			ctx := context.Background()
+			err = db.Exec(ctx, "CREATE DATABASE json", []interface{}{}, nil)
 			require.NoError(t, err, "creating database")
-			defer db.Exec("DROP DATABASE json")
+			defer db.Exec(ctx, "DROP DATABASE IF EXISTS json", []interface{}{}, nil)
 
 			client, err := ent.Open(dialect.Postgres, dsn+" dbname=json")
 			require.NoError(t, err, "connecting to json database")
@@ -80,6 +77,7 @@ func TestPostgres(t *testing.T) {
 			Floats(t, client)
 			Strings(t, client)
 			RawMessage(t, client)
+			Predicates(t, client)
 		})
 	}
 }
@@ -97,6 +95,7 @@ func TestSQLite(t *testing.T) {
 	Floats(t, client)
 	Strings(t, client)
 	RawMessage(t, client)
+	Predicates(t, client)
 }
 
 func Ints(t *testing.T, client *ent.Client) {
@@ -166,4 +165,32 @@ func URL(t *testing.T, client *ent.Client) {
 	usr := client.User.Create().SetURL(u).SaveX(ctx)
 	require.Equal(t, u, usr.URL)
 	require.Equal(t, u, client.User.GetX(ctx, usr.ID).URL)
+}
+
+func Predicates(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	client.User.Delete().ExecX(ctx)
+
+	u1, err := url.Parse("https://github.com/a8m/ent")
+	require.NoError(t, err)
+	u2, err := url.Parse("ftp://a8m@github.com/ent")
+	require.NoError(t, err)
+	users, err := client.User.CreateBulk(
+		client.User.Create().SetURL(u1),
+		client.User.Create().SetURL(u2),
+	).Save(ctx)
+	require.NoError(t, err)
+	require.Len(t, users, 2)
+
+	count, err := client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sql.JSONHasKey(user.FieldURL, "Scheme"))
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 2, count)
+
+	count, err = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sql.Not(sql.JSONHasKey(user.FieldURL, "Scheme")))
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Zero(t, count)
 }
