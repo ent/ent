@@ -171,7 +171,7 @@ jobs:
             ${{ runner.os }}-go-
       - name: Run integration tests
         working-directory: entc/integration
-        run: go test -race -count=2 ./...
+        run: go test -race -count=2 -tags='json1' ./...
 
   migration:
     runs-on: ubuntu-latest
@@ -281,4 +281,4 @@ jobs:
         run: git checkout -
       - name: Run integration on HEAD
         working-directory: entc/integration
-        run: go test -race -count=2 ./...
+        run: go test -race -count=2 .

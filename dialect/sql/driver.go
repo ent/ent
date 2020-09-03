@@ -111,7 +111,7 @@ func (c *conn) Exec(ctx context.Context, query string, args, v interface{}) erro
 	return nil
 }
 
-// Exec implements the dialect.Query method.
+// Query implements the dialect.Query method.
 func (c *conn) Query(ctx context.Context, query string, args, v interface{}) error {
 	vr, ok := v.(*Rows)
 	if !ok {
