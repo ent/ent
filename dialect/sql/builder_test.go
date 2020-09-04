@@ -1272,15 +1272,58 @@ WHERE
 		{
 			input: Select("*").
 				From(Table("test")).
-				Where(JSONHasKey("j", "a", "*", "c")),
+				Where(JSONHasKey("j", "a.*.c")),
 			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
 		},
 		{
 			input: Dialect(dialect.Postgres).
 				Select("*").
 				From(Table("test")).
-				Where(JSONHasKey("j", "a", "b", "c")),
+				Where(JSONHasKey("j", "a.b.c")),
 			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("test")).
+				Where(JSONHasKey("j", "a.b.c")),
+			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("users")).
+				Where(P(func(b *Builder) {
+					b.JSONPath("a", DotPath("b.c[1].d"), Cast("int"))
+					b.WriteOp(OpEQ)
+					b.Arg(1)
+				})),
+			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select("*").
+				From(Table("users")).
+				Where(P(func(b *Builder) {
+					b.JSONPath("a", DotPath("b.c[1].d"))
+					b.WriteOp(OpEQ)
+					b.Arg("a")
+				})),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.c[1].d\") = ?",
+			wantArgs:  []interface{}{"a"},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select("*").
+				From(Table("users")).
+				Where(P(func(b *Builder) {
+					b.JSONPath("a", DotPath("b.\"c[1]\".d[1][2].e"))
+					b.WriteOp(OpEQ)
+					b.Arg("a")
+				})),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.\"c[1]\".d[1][2].e\") = ?",
+			wantArgs:  []interface{}{"a"},
 		},
 	}
 	for i, tt := range tests {
@@ -1288,6 +1331,61 @@ WHERE
 			query, args := tt.input.Query()
 			require.Equal(t, tt.wantQuery, query)
 			require.Equal(t, tt.wantArgs, args)
+		})
+	}
+}
+
+func TestParsePath(t *testing.T) {
+	tests := []struct {
+		input    string
+		wantPath []string
+		wantErr  bool
+	}{
+		{
+			input:    "a.b.c",
+			wantPath: []string{"a", "b", "c"},
+		},
+		{
+			input:    "a[1][2]",
+			wantPath: []string{"a", "[1]", "[2]"},
+		},
+		{
+			input:    "a[1][2].b",
+			wantPath: []string{"a", "[1]", "[2]", "b"},
+		},
+		{
+			input:    `a."b.c[0]"`,
+			wantPath: []string{"a", `"b.c[0]"`},
+		},
+		{
+			input:    `a."b.c[0]".d`,
+			wantPath: []string{"a", `"b.c[0]"`, "d"},
+		},
+		{
+			input: `...`,
+		},
+		{
+			input:    `.a.b.`,
+			wantPath: []string{"a", "b"},
+		},
+		{
+			input:   `a."`,
+			wantErr: true,
+		},
+		{
+			input:   `a[`,
+			wantErr: true,
+		},
+		{
+			input:   `a[a]`,
+			wantErr: true,
+		},
+	}
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			path, err := ParsePath(tt.input)
+			require.Equal(t, tt.wantPath, path)
+			require.Equal(t, tt.wantErr, err != nil)
 		})
 	}
 }

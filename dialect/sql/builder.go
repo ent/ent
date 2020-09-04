@@ -898,14 +898,17 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 }
 
 // JSONHasKey calls Predicate.JSONHasKey.
-func JSONHasKey(col string, path ...string) *Predicate {
-	return P().JSONHasKey(col, path...)
+func JSONHasKey(col string, path string) *Predicate {
+	return P().JSONHasKey(col, path)
 }
 
-// JSONHasKey return a predicate for checking that a JSON key exists and not NULL;
-func (p *Predicate) JSONHasKey(col string, path ...string) *Predicate {
+// JSONHasKey return a predicate for checking that a JSON key exists and not NULL.
+//
+//	P().JSONHasKey("column", "a.b[2].c")
+//
+func (p *Predicate) JSONHasKey(col string, path string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.JSONPath(col, Path(path...)).WriteOp(OpNotNull)
+		b.JSONPath(col, DotPath(path)).WriteOp(OpNotNull)
 	})
 }
 
@@ -1956,6 +1959,19 @@ func Path(path ...string) JSONOption {
 	}
 }
 
+// DotPath is similar to Path, but accepts string with dot format.
+//
+//	b.JSONPath("column", DotPath("a.b[2].c"))
+//	b.JSONPath("column", DotPath("a.b.c"))
+//
+// Note that DotPath is ignored if the input is invalid.
+func DotPath(dotpath string) JSONOption {
+	path, _ := ParsePath(dotpath)
+	return func(p *JSONPath) {
+		p.path = path
+	}
+}
+
 // Unquote indicates that the result value should be unquoted.
 //
 //	b.JSONPath("column", Path("a", "b", "[1]", "c"), Unquote(true))
@@ -2363,6 +2379,60 @@ func (d *DialectBuilder) DropIndex(name string) *DropIndexBuilder {
 	b := DropIndex(name)
 	b.SetDialect(d.dialect)
 	return b
+}
+
+// ParsePath parses the "dotpath" for the DotPath option.
+//
+//	"a.b"		=> ["a", "b"]
+//	"a[1][2]"	=> ["a", "[1]", "[2]"]
+//	"a.\"b.c\"	=> ["a", "\"b.c\""]
+//
+func ParsePath(dotpath string) ([]string, error) {
+	var (
+		i, p int
+		path []string
+	)
+	for i < len(dotpath) {
+		switch r := dotpath[i]; {
+		case r == '"':
+			if i == len(dotpath)-1 {
+				return nil, fmt.Errorf("unexpected quote")
+			}
+			idx := strings.IndexRune(dotpath[i+1:], '"')
+			if idx == -1 || idx == 0 {
+				return nil, fmt.Errorf("unbalanced quote")
+			}
+			i += idx + 2
+		case r == '[':
+			if p != i {
+				path = append(path, dotpath[p:i])
+			}
+			p = i
+			if i == len(dotpath)-1 {
+				return nil, fmt.Errorf("unexpected bracket")
+			}
+			idx := strings.IndexRune(dotpath[i:], ']')
+			if idx == -1 || idx == 1 {
+				return nil, fmt.Errorf("unbalanced bracket")
+			}
+			if !isNumber(dotpath[i+1 : i+idx]) {
+				return nil, fmt.Errorf("invalid index %q", dotpath[i:i+idx+1])
+			}
+			i += idx + 1
+		case r == '.' || r == ']':
+			if p != i {
+				path = append(path, dotpath[p:i])
+			}
+			i++
+			p = i
+		default:
+			i++
+		}
+	}
+	if p != i {
+		path = append(path, dotpath[p:i])
+	}
+	return path, nil
 }
 
 // isNumber reports whether the string is a number (category N).
