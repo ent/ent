@@ -897,21 +897,6 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 	})
 }
 
-// JSONHasKey calls Predicate.JSONHasKey.
-func JSONHasKey(col string, path string) *Predicate {
-	return P().JSONHasKey(col, path)
-}
-
-// JSONHasKey return a predicate for checking that a JSON key exists and not NULL.
-//
-//	P().JSONHasKey("column", "a.b[2].c")
-//
-func (p *Predicate) JSONHasKey(col string, path string) *Predicate {
-	return p.Append(func(b *Builder) {
-		b.JSONPath(col, DotPath(path)).WriteOp(OpNotNull)
-	})
-}
-
 // NEQ returns a "<>" predicate.
 func NEQ(col string, value interface{}) *Predicate {
 	return P().NEQ(col, value)
@@ -979,6 +964,37 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 		b.Ident(col)
 		p.WriteOp(OpGTE)
 		b.Arg(arg)
+	})
+}
+
+// JSONHasKey calls Predicate.JSONHasKey.
+func JSONHasKey(col, path string) *Predicate {
+	return P().JSONHasKey(col, path)
+}
+
+// JSONHasKey return a predicate for checking that a JSON key exists and not NULL.
+//
+//	P().JSONHasKey("column", "a.b[2].c")
+//
+func (p *Predicate) JSONHasKey(col, path string) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.JSONPath(col, DotPath(path)).WriteOp(OpNotNull)
+	})
+}
+
+// JSONValueEQ calls Predicate.JSONValueEQ.
+func JSONValueEQ(col, path string, arg interface{}) *Predicate {
+	return P().JSONValueEQ(col, path, arg)
+}
+
+// JSONValueEQ return a predicate for checking that a JSON
+// value (returned by the path) is equal to the given argument.
+//
+//	P().JSONValueEQ("column", "a.b[2].c", arg)
+//
+func (p *Predicate) JSONValueEQ(col, path string, arg interface{}) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.JSONPath(col, DotPath(path)).WriteOp(OpEQ).Arg(arg)
 	})
 }
 
