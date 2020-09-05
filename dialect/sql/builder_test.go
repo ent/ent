@@ -1270,26 +1270,6 @@ WHERE
 			wantArgs:  []interface{}{1},
 		},
 		{
-			input: Select("*").
-				From(Table("test")).
-				Where(JSONHasKey("j", "a.*.c")),
-			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
-		},
-		{
-			input: Dialect(dialect.Postgres).
-				Select("*").
-				From(Table("test")).
-				Where(JSONHasKey("j", "a.b.c")),
-			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
-		},
-		{
-			input: Dialect(dialect.Postgres).
-				Select("*").
-				From(Table("test")).
-				Where(JSONHasKey("j", "a.b.c")),
-			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
-		},
-		{
 			input: Dialect(dialect.Postgres).
 				Select("*").
 				From(Table("users")).
@@ -1324,6 +1304,33 @@ WHERE
 				})),
 			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`a`, \"$.b.\"c[1]\".d[1][2].e\") = ?",
 			wantArgs:  []interface{}{"a"},
+		},
+		{
+			input: Select("*").
+				From(Table("test")).
+				Where(JSONHasKey("j", "a.*.c")),
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("test")).
+				Where(JSONHasKey("j", "a.b.c")),
+			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("test")).
+				Where(JSONHasKey("j", "a.b.c")),
+			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+		},
+		{
+			input: Select("*").
+				From(Table("test")).
+				Where(JSONValueEQ("j", "a.b.c", 1)),
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.b.c\") = ?",
+			wantArgs:  []interface{}{1},
 		},
 	}
 	for i, tt := range tests {
