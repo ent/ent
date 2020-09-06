@@ -68,15 +68,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{- end }}
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
-		{{- if $e.Unique }}
-			if {{ $mutation }}.{{ $e.StructField }}Cleared() {
-				{{- with extend $ "Edge" $e }}
-					{{ template "dialect/sql/defedge" . }}
-				{{- end }}
-				_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-			}
-		{{- else }}
-			if nodes := {{ $mutation }}.Removed{{ $e.StructField }}IDs(); len(nodes) > 0 {
+		if {{ $mutation }}.{{ $e.MutationCleared }}() {
+			{{- with extend $ "Edge" $e }}
+				{{ template "dialect/sql/defedge" . }}
+			{{- end }}
+			_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+		}
+		{{- if not $e.Unique }}
+			if nodes := {{ $mutation }}.Removed{{ $e.StructField }}IDs(); len(nodes) > 0 && !{{ $mutation }}.{{ $e.MutationCleared }}() {
 				{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
 					{{ template "dialect/sql/defedge" . }}
 				{{- end }}

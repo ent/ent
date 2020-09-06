@@ -79,6 +79,12 @@ func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 	return giu.mutation
 }
 
+// ClearGroups clears all "groups" edges to type Group.
+func (giu *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
+	giu.mutation.ClearGroups()
+	return giu
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...int) *GroupInfoUpdate {
 	giu.mutation.RemoveGroupIDs(ids...)
@@ -185,7 +191,23 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: groupinfo.FieldMaxUsers,
 		})
 	}
-	if nodes := giu.mutation.RemovedGroupsIDs(); len(nodes) > 0 {
+	if giu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := giu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !giu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -286,6 +308,12 @@ func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
 // Mutation returns the GroupInfoMutation object of the builder.
 func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 	return giuo.mutation
+}
+
+// ClearGroups clears all "groups" edges to type Group.
+func (giuo *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
+	giuo.mutation.ClearGroups()
+	return giuo
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
@@ -392,7 +420,23 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 			Column: groupinfo.FieldMaxUsers,
 		})
 	}
-	if nodes := giuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 {
+	if giuo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   groupinfo.GroupsTable,
+			Columns: []string{groupinfo.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := giuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !giuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

@@ -170,6 +170,12 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
+// ClearFiles clears all "files" edges to type File.
+func (gu *GroupUpdate) ClearFiles() *GroupUpdate {
+	gu.mutation.ClearFiles()
+	return gu
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (gu *GroupUpdate) RemoveFileIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveFileIDs(ids...)
@@ -183,6 +189,12 @@ func (gu *GroupUpdate) RemoveFiles(f ...*File) *GroupUpdate {
 		ids[i] = f[i].ID
 	}
 	return gu.RemoveFileIDs(ids...)
+}
+
+// ClearBlocked clears all "blocked" edges to type User.
+func (gu *GroupUpdate) ClearBlocked() *GroupUpdate {
+	gu.mutation.ClearBlocked()
+	return gu
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
@@ -200,6 +212,12 @@ func (gu *GroupUpdate) RemoveBlocked(u ...*User) *GroupUpdate {
 	return gu.RemoveBlockedIDs(ids...)
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
+	gu.mutation.ClearUsers()
+	return gu
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
@@ -215,7 +233,7 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
-// ClearInfo clears the info edge to GroupInfo.
+// ClearInfo clears the "info" edge to type GroupInfo.
 func (gu *GroupUpdate) ClearInfo() *GroupUpdate {
 	gu.mutation.ClearInfo()
 	return gu
@@ -363,7 +381,23 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: group.FieldName,
 		})
 	}
-	if nodes := gu.mutation.RemovedFilesIDs(); len(nodes) > 0 {
+	if gu.mutation.FilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedFilesIDs(); len(nodes) > 0 && !gu.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -401,7 +435,23 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := gu.mutation.RemovedBlockedIDs(); len(nodes) > 0 {
+	if gu.mutation.BlockedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedBlockedIDs(); len(nodes) > 0 && !gu.mutation.BlockedCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -439,7 +489,23 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+	if gu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !gu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -664,6 +730,12 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
+// ClearFiles clears all "files" edges to type File.
+func (guo *GroupUpdateOne) ClearFiles() *GroupUpdateOne {
+	guo.mutation.ClearFiles()
+	return guo
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (guo *GroupUpdateOne) RemoveFileIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveFileIDs(ids...)
@@ -677,6 +749,12 @@ func (guo *GroupUpdateOne) RemoveFiles(f ...*File) *GroupUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return guo.RemoveFileIDs(ids...)
+}
+
+// ClearBlocked clears all "blocked" edges to type User.
+func (guo *GroupUpdateOne) ClearBlocked() *GroupUpdateOne {
+	guo.mutation.ClearBlocked()
+	return guo
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
@@ -694,6 +772,12 @@ func (guo *GroupUpdateOne) RemoveBlocked(u ...*User) *GroupUpdateOne {
 	return guo.RemoveBlockedIDs(ids...)
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
+	guo.mutation.ClearUsers()
+	return guo
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
@@ -709,7 +793,7 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// ClearInfo clears the info edge to GroupInfo.
+// ClearInfo clears the "info" edge to type GroupInfo.
 func (guo *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
 	guo.mutation.ClearInfo()
 	return guo
@@ -855,7 +939,23 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Column: group.FieldName,
 		})
 	}
-	if nodes := guo.mutation.RemovedFilesIDs(); len(nodes) > 0 {
+	if guo.mutation.FilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedFilesIDs(); len(nodes) > 0 && !guo.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -893,7 +993,23 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := guo.mutation.RemovedBlockedIDs(); len(nodes) > 0 {
+	if guo.mutation.BlockedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedBlockedIDs(); len(nodes) > 0 && !guo.mutation.BlockedCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -931,7 +1047,23 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+	if guo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,

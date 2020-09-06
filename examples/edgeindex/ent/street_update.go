@@ -62,7 +62,7 @@ func (su *StreetUpdate) Mutation() *StreetMutation {
 	return su.mutation
 }
 
-// ClearCity clears the city edge to City.
+// ClearCity clears the "city" edge to type City.
 func (su *StreetUpdate) ClearCity() *StreetUpdate {
 	su.mutation.ClearCity()
 	return su
@@ -228,7 +228,7 @@ func (suo *StreetUpdateOne) Mutation() *StreetMutation {
 	return suo.mutation
 }
 
-// ClearCity clears the city edge to City.
+// ClearCity clears the "city" edge to type City.
 func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 	suo.mutation.ClearCity()
 	return suo

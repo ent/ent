@@ -77,9 +77,15 @@ func (bu *BlobUpdate) Mutation() *BlobMutation {
 	return bu.mutation
 }
 
-// ClearParent clears the parent edge to Blob.
+// ClearParent clears the "parent" edge to type Blob.
 func (bu *BlobUpdate) ClearParent() *BlobUpdate {
 	bu.mutation.ClearParent()
+	return bu
+}
+
+// ClearLinks clears all "links" edges to type Blob.
+func (bu *BlobUpdate) ClearLinks() *BlobUpdate {
+	bu.mutation.ClearLinks()
 	return bu
 }
 
@@ -210,7 +216,23 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := bu.mutation.RemovedLinksIDs(); len(nodes) > 0 {
+	if bu.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedLinksIDs(); len(nodes) > 0 && !bu.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -311,9 +333,15 @@ func (buo *BlobUpdateOne) Mutation() *BlobMutation {
 	return buo.mutation
 }
 
-// ClearParent clears the parent edge to Blob.
+// ClearParent clears the "parent" edge to type Blob.
 func (buo *BlobUpdateOne) ClearParent() *BlobUpdateOne {
 	buo.mutation.ClearParent()
+	return buo
+}
+
+// ClearLinks clears all "links" edges to type Blob.
+func (buo *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
+	buo.mutation.ClearLinks()
 	return buo
 }
 
@@ -442,7 +470,23 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := buo.mutation.RemovedLinksIDs(); len(nodes) > 0 {
+	if buo.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedLinksIDs(); len(nodes) > 0 && !buo.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

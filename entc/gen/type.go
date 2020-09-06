@@ -1081,6 +1081,29 @@ func (e Edge) MutationReset() string {
 	return name
 }
 
+// MutationClear returns the method name for clearing the edge value.
+// The default name is "Clear<EdgeName>". If the the method conflicts
+// with the mutation methods, suffix the method with "Edge".
+func (e Edge) MutationClear() string {
+	name := "Clear" + pascal(e.Name)
+	if _, ok := mutMethods[name]; ok {
+		name += "Edge"
+	}
+	return name
+}
+
+// MutationCleared returns the method name for indicating if the edge
+// was cleared in the mutation. The default name is "<EdgeName>Cleared".
+// If the the method conflicts with the mutation methods, add "Edge" the
+// after the edge name.
+func (e Edge) MutationCleared() string {
+	name := pascal(e.Name) + "Cleared"
+	if _, ok := mutMethods[name]; ok {
+		return pascal(e.Name) + "EdgeCleared"
+	}
+	return name
+}
+
 // setStorageKey sets the storage-key option in the schema or fail.
 func (e *Edge) setStorageKey() error {
 	rel := e.Rel

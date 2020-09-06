@@ -103,13 +103,13 @@ func (nu *NodeUpdate) Mutation() *NodeMutation {
 	return nu.mutation
 }
 
-// ClearPrev clears the prev edge to Node.
+// ClearPrev clears the "prev" edge to type Node.
 func (nu *NodeUpdate) ClearPrev() *NodeUpdate {
 	nu.mutation.ClearPrev()
 	return nu
 }
 
-// ClearNext clears the next edge to Node.
+// ClearNext clears the "next" edge to type Node.
 func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 	nu.mutation.ClearNext()
 	return nu
@@ -322,13 +322,13 @@ func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
 	return nuo.mutation
 }
 
-// ClearPrev clears the prev edge to Node.
+// ClearPrev clears the "prev" edge to type Node.
 func (nuo *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
 	nuo.mutation.ClearPrev()
 	return nuo
 }
 
-// ClearNext clears the next edge to Node.
+// ClearNext clears the "next" edge to type Node.
 func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 	nuo.mutation.ClearNext()
 	return nuo

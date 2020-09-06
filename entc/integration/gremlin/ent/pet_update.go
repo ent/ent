@@ -83,13 +83,13 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
 }
 
-// ClearTeam clears the team edge to User.
+// ClearTeam clears the "team" edge to type User.
 func (pu *PetUpdate) ClearTeam() *PetUpdate {
 	pu.mutation.ClearTeam()
 	return pu
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
 	return pu
@@ -267,13 +267,13 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
 }
 
-// ClearTeam clears the team edge to User.
+// ClearTeam clears the "team" edge to type User.
 func (puo *PetUpdateOne) ClearTeam() *PetUpdateOne {
 	puo.mutation.ClearTeam()
 	return puo
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
 	return puo

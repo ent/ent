@@ -78,6 +78,12 @@ func (pu *PlanetUpdate) Mutation() *PlanetMutation {
 	return pu.mutation
 }
 
+// ClearNeighbors clears all "neighbors" edges to type Planet.
+func (pu *PlanetUpdate) ClearNeighbors() *PlanetUpdate {
+	pu.mutation.ClearNeighbors()
+	return pu
+}
+
 // RemoveNeighborIDs removes the neighbors edge to Planet by ids.
 func (pu *PlanetUpdate) RemoveNeighborIDs(ids ...int) *PlanetUpdate {
 	pu.mutation.RemoveNeighborIDs(ids...)
@@ -183,7 +189,23 @@ func (pu *PlanetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: planet.FieldAge,
 		})
 	}
-	if nodes := pu.mutation.RemovedNeighborsIDs(); len(nodes) > 0 {
+	if pu.mutation.NeighborsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   planet.NeighborsTable,
+			Columns: planet.NeighborsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: planet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedNeighborsIDs(); len(nodes) > 0 && !pu.mutation.NeighborsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -284,6 +306,12 @@ func (puo *PlanetUpdateOne) AddNeighbors(p ...*Planet) *PlanetUpdateOne {
 // Mutation returns the PlanetMutation object of the builder.
 func (puo *PlanetUpdateOne) Mutation() *PlanetMutation {
 	return puo.mutation
+}
+
+// ClearNeighbors clears all "neighbors" edges to type Planet.
+func (puo *PlanetUpdateOne) ClearNeighbors() *PlanetUpdateOne {
+	puo.mutation.ClearNeighbors()
+	return puo
 }
 
 // RemoveNeighborIDs removes the neighbors edge to Planet by ids.
@@ -389,7 +417,23 @@ func (puo *PlanetUpdateOne) sqlSave(ctx context.Context) (pl *Planet, err error)
 			Column: planet.FieldAge,
 		})
 	}
-	if nodes := puo.mutation.RemovedNeighborsIDs(); len(nodes) > 0 {
+	if puo.mutation.NeighborsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   planet.NeighborsTable,
+			Columns: planet.NeighborsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: planet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedNeighborsIDs(); len(nodes) > 0 && !puo.mutation.NeighborsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

@@ -92,9 +92,15 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
+	return cu
+}
+
+// ClearSpec clears all "spec" edges to type Spec.
+func (cu *CardUpdate) ClearSpec() *CardUpdate {
+	cu.mutation.ClearSpec()
 	return cu
 }
 
@@ -247,7 +253,23 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := cu.mutation.RemovedSpecIDs(); len(nodes) > 0 {
+	if cu.mutation.SpecCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedSpecIDs(); len(nodes) > 0 && !cu.mutation.SpecCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -362,9 +384,15 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
+	return cuo
+}
+
+// ClearSpec clears all "spec" edges to type Spec.
+func (cuo *CardUpdateOne) ClearSpec() *CardUpdateOne {
+	cuo.mutation.ClearSpec()
 	return cuo
 }
 
@@ -515,7 +543,23 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := cuo.mutation.RemovedSpecIDs(); len(nodes) > 0 {
+	if cuo.mutation.SpecCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   card.SpecTable,
+			Columns: card.SpecPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: spec.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedSpecIDs(); len(nodes) > 0 && !cuo.mutation.SpecCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,

@@ -83,9 +83,15 @@ func (nu *NodeUpdate) Mutation() *NodeMutation {
 	return nu.mutation
 }
 
-// ClearParent clears the parent edge to Node.
+// ClearParent clears the "parent" edge to type Node.
 func (nu *NodeUpdate) ClearParent() *NodeUpdate {
 	nu.mutation.ClearParent()
+	return nu
+}
+
+// ClearChildren clears all "children" edges to type Node.
+func (nu *NodeUpdate) ClearChildren() *NodeUpdate {
+	nu.mutation.ClearChildren()
 	return nu
 }
 
@@ -223,7 +229,23 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := nu.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
+	if nu.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   node.ChildrenTable,
+			Columns: []string{node.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: node.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := nu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !nu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -331,9 +353,15 @@ func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
 	return nuo.mutation
 }
 
-// ClearParent clears the parent edge to Node.
+// ClearParent clears the "parent" edge to type Node.
 func (nuo *NodeUpdateOne) ClearParent() *NodeUpdateOne {
 	nuo.mutation.ClearParent()
+	return nuo
+}
+
+// ClearChildren clears all "children" edges to type Node.
+func (nuo *NodeUpdateOne) ClearChildren() *NodeUpdateOne {
+	nuo.mutation.ClearChildren()
 	return nuo
 }
 
@@ -469,7 +497,23 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := nuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
+	if nuo.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   node.ChildrenTable,
+			Columns: []string{node.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: node.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := nuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !nuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

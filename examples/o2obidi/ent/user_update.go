@@ -74,7 +74,7 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearSpouse clears the spouse edge to User.
+// ClearSpouse clears the "spouse" edge to type User.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 	uu.mutation.ClearSpouse()
 	return uu
@@ -267,7 +267,7 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearSpouse clears the spouse edge to User.
+// ClearSpouse clears the "spouse" edge to type User.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 	uuo.mutation.ClearSpouse()
 	return uuo

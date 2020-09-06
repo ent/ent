@@ -170,6 +170,12 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
+// ClearFiles clears all "files" edges to type File.
+func (gu *GroupUpdate) ClearFiles() *GroupUpdate {
+	gu.mutation.ClearFiles()
+	return gu
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (gu *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
 	gu.mutation.RemoveFileIDs(ids...)
@@ -183,6 +189,12 @@ func (gu *GroupUpdate) RemoveFiles(f ...*File) *GroupUpdate {
 		ids[i] = f[i].ID
 	}
 	return gu.RemoveFileIDs(ids...)
+}
+
+// ClearBlocked clears all "blocked" edges to type User.
+func (gu *GroupUpdate) ClearBlocked() *GroupUpdate {
+	gu.mutation.ClearBlocked()
+	return gu
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
@@ -200,6 +212,12 @@ func (gu *GroupUpdate) RemoveBlocked(u ...*User) *GroupUpdate {
 	return gu.RemoveBlockedIDs(ids...)
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
+	gu.mutation.ClearUsers()
+	return gu
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
@@ -215,7 +233,7 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
-// ClearInfo clears the info edge to GroupInfo.
+// ClearInfo clears the "info" edge to type GroupInfo.
 func (gu *GroupUpdate) ClearInfo() *GroupUpdate {
 	gu.mutation.ClearInfo()
 	return gu
@@ -539,6 +557,12 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
+// ClearFiles clears all "files" edges to type File.
+func (guo *GroupUpdateOne) ClearFiles() *GroupUpdateOne {
+	guo.mutation.ClearFiles()
+	return guo
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (guo *GroupUpdateOne) RemoveFileIDs(ids ...string) *GroupUpdateOne {
 	guo.mutation.RemoveFileIDs(ids...)
@@ -552,6 +576,12 @@ func (guo *GroupUpdateOne) RemoveFiles(f ...*File) *GroupUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return guo.RemoveFileIDs(ids...)
+}
+
+// ClearBlocked clears all "blocked" edges to type User.
+func (guo *GroupUpdateOne) ClearBlocked() *GroupUpdateOne {
+	guo.mutation.ClearBlocked()
+	return guo
 }
 
 // RemoveBlockedIDs removes the blocked edge to User by ids.
@@ -569,6 +599,12 @@ func (guo *GroupUpdateOne) RemoveBlocked(u ...*User) *GroupUpdateOne {
 	return guo.RemoveBlockedIDs(ids...)
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
+	guo.mutation.ClearUsers()
+	return guo
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (guo *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
@@ -584,7 +620,7 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// ClearInfo clears the info edge to GroupInfo.
+// ClearInfo clears the "info" edge to type GroupInfo.
 func (guo *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
 	guo.mutation.ClearInfo()
 	return guo

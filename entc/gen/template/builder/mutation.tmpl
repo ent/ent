@@ -54,12 +54,12 @@ type {{ $mutation }} struct {
 	clearedFields map[string]struct{}
 	{{- range $e := $n.Edges }}
 		{{- if $e.Unique }}
-            {{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
-			cleared{{ $e.BuilderField }} bool
+			{{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
 		{{- else }}
             {{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 			removed{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 		{{- end }}
+		cleared{{ $e.BuilderField }} bool
 	{{- end }}
 	done bool
 	oldValue func(context.Context) (*{{ $n.Name }}, error)
@@ -268,19 +268,20 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 			}
 		{{- end }}
 	}
+
+	{{ $func := $e.MutationClear }}
+	// {{ $func }} clears the {{ $e.Name }} edge to {{ $e.Type.Name }}.
+	func (m *{{ $mutation }}) {{ $func }}() {
+		m.cleared{{ $e.BuilderField }} = true
+	}
+
+	{{ $func = $e.MutationCleared }}
+	// {{ $func }} returns if the edge {{ $e.Name }} was cleared.
+	func (m *{{ $mutation }}) {{ $func }}() bool {
+		return m.cleared{{ $e.BuilderField }}
+	}
+
 	{{ if $e.Unique }}
-		{{ $func := print "Clear" $e.StructField }}
-		// {{ $func }} clears the {{ $e.Name }} edge to {{ $e.Type.Name }}.
-		func (m *{{ $mutation }}) {{ $func }}() {
-			m.cleared{{ $e.BuilderField }} = true
-		}
-
-		{{ $func = print $e.StructField "Cleared" }}
-		// {{ $func }} returns if the edge {{ $e.Name }} was cleared.
-		func (m *{{ $mutation }}) {{ $func }}() bool {
-			return m.cleared{{ $e.BuilderField }}
-		}
-
 		// {{ $e.StructField }}ID returns the {{ $e.Name }} id in the mutation.
 		func (m *{{ $mutation }}) {{ $e.StructField }}ID() (id {{ $e.Type.ID.Type }}, exists bool) {
 			if m.{{ $e.BuilderField }} != nil {
@@ -334,13 +335,12 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	}
 
 
-	{{ $func := $e.MutationReset }}
+	{{ $func = $e.MutationReset }}
 	// {{ $func }} reset all changes of the "{{ $e.Name }}" edge.
 	func (m *{{ $mutation }}) {{ $func }}() {
 		m.{{ $e.BuilderField }} = nil
-		{{- if $e.Unique }}
-			m.cleared{{ $e.BuilderField }} = false
-		{{- else }}
+		m.cleared{{ $e.BuilderField }} = false
+		{{- if not $e.Unique }}
 			m.removed{{ $e.BuilderField }} = nil
 		{{- end }}
 	}
@@ -625,12 +625,10 @@ func (m *{{ $mutation }}) RemovedIDs(name string) []ent.Value {
 func (m *{{ $mutation }}) ClearedEdges() []string {
 	edges := make([]string, 0, {{ len $n.Edges }})
 	{{- range $e := $n.Edges }}
-		{{- if $e.Unique }}
-			if m.cleared{{ $e.BuilderField }} {
-				{{- $const := print $n.Package "." $e.Constant }}
-				edges = append(edges, {{ $const }})
-			}
-		{{- end }}
+		if m.cleared{{ $e.BuilderField }} {
+			{{- $const := print $n.Package "." $e.Constant }}
+			edges = append(edges, {{ $const }})
+		}
 	{{- end }}
 	return edges
 }
@@ -641,11 +639,9 @@ func (m *{{ $mutation }}) EdgeCleared(name string) bool {
 	{{- with $n.Edges }}
 		switch name {
 		{{- range $e := $n.Edges }}
-			{{- if $e.Unique }}
-				{{- $const := print $n.Package "." $e.Constant }}
-				case {{ $const }}:
-					return m.cleared{{ $e.BuilderField }}
-			{{- end }}
+			{{- $const := print $n.Package "." $e.Constant }}
+			case {{ $const }}:
+				return m.cleared{{ $e.BuilderField }}
 		{{- end }}
 		}
 	{{- end }}
@@ -661,7 +657,7 @@ func (m *{{ $mutation }}) ClearEdge(name string) error {
 			{{- if $e.Unique }}
 				{{- $const := print $n.Package "." $e.Constant }}
 				case {{ $const }}:
-					m.Clear{{ $e.StructField }}()
+					m.{{ $e.MutationClear }}()
 					return nil
 			{{- end }}
 		{{- end }}

@@ -95,6 +95,12 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
+// ClearCars clears all "cars" edges to type Car.
+func (uu *UserUpdate) ClearCars() *UserUpdate {
+	uu.mutation.ClearCars()
+	return uu
+}
+
 // RemoveCarIDs removes the cars edge to Car by ids.
 func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCarIDs(ids...)
@@ -108,6 +114,12 @@ func (uu *UserUpdate) RemoveCars(c ...*Car) *UserUpdate {
 		ids[i] = c[i].ID
 	}
 	return uu.RemoveCarIDs(ids...)
+}
+
+// ClearGroups clears all "groups" edges to type Group.
+func (uu *UserUpdate) ClearGroups() *UserUpdate {
+	uu.mutation.ClearGroups()
+	return uu
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
@@ -221,7 +233,23 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
-	if nodes := uu.mutation.RemovedCarsIDs(); len(nodes) > 0 {
+	if uu.mutation.CarsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarsTable,
+			Columns: []string{user.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedCarsIDs(); len(nodes) > 0 && !uu.mutation.CarsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -259,7 +287,23 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uu.mutation.RemovedGroupsIDs(); len(nodes) > 0 {
+	if uu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !uu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -377,6 +421,12 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
+// ClearCars clears all "cars" edges to type Car.
+func (uuo *UserUpdateOne) ClearCars() *UserUpdateOne {
+	uuo.mutation.ClearCars()
+	return uuo
+}
+
 // RemoveCarIDs removes the cars edge to Car by ids.
 func (uuo *UserUpdateOne) RemoveCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveCarIDs(ids...)
@@ -390,6 +440,12 @@ func (uuo *UserUpdateOne) RemoveCars(c ...*Car) *UserUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return uuo.RemoveCarIDs(ids...)
+}
+
+// ClearGroups clears all "groups" edges to type Group.
+func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
+	uuo.mutation.ClearGroups()
+	return uuo
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
@@ -501,7 +557,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Column: user.FieldName,
 		})
 	}
-	if nodes := uuo.mutation.RemovedCarsIDs(); len(nodes) > 0 {
+	if uuo.mutation.CarsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarsTable,
+			Columns: []string{user.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: car.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedCarsIDs(); len(nodes) > 0 && !uuo.mutation.CarsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -539,7 +611,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 {
+	if uuo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !uuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,

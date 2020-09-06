@@ -52,6 +52,12 @@ func (su *SpecUpdate) Mutation() *SpecMutation {
 	return su.mutation
 }
 
+// ClearCard clears all "card" edges to type Card.
+func (su *SpecUpdate) ClearCard() *SpecUpdate {
+	su.mutation.ClearCard()
+	return su
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
@@ -137,7 +143,23 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if nodes := su.mutation.RemovedCardIDs(); len(nodes) > 0 {
+	if su.mutation.CardCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   spec.CardTable,
+			Columns: spec.CardPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: card.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.RemovedCardIDs(); len(nodes) > 0 && !su.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -211,6 +233,12 @@ func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 // Mutation returns the SpecMutation object of the builder.
 func (suo *SpecUpdateOne) Mutation() *SpecMutation {
 	return suo.mutation
+}
+
+// ClearCard clears all "card" edges to type Card.
+func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
+	suo.mutation.ClearCard()
+	return suo
 }
 
 // RemoveCardIDs removes the card edge to Card by ids.
@@ -296,7 +324,23 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Spec.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	if nodes := suo.mutation.RemovedCardIDs(); len(nodes) > 0 {
+	if suo.mutation.CardCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   spec.CardTable,
+			Columns: spec.CardPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: card.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.RemovedCardIDs(); len(nodes) > 0 && !suo.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

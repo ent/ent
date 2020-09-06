@@ -87,6 +87,12 @@ func (ftu *FileTypeUpdate) Mutation() *FileTypeMutation {
 	return ftu.mutation
 }
 
+// ClearFiles clears all "files" edges to type File.
+func (ftu *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
+	ftu.mutation.ClearFiles()
+	return ftu
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
 	ftu.mutation.RemoveFileIDs(ids...)
@@ -290,6 +296,12 @@ func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 // Mutation returns the FileTypeMutation object of the builder.
 func (ftuo *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 	return ftuo.mutation
+}
+
+// ClearFiles clears all "files" edges to type File.
+func (ftuo *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
+	ftuo.mutation.ClearFiles()
+	return ftuo
 }
 
 // RemoveFileIDs removes the files edge to File by ids.

@@ -86,6 +86,12 @@ func (ftu *FileTypeUpdate) Mutation() *FileTypeMutation {
 	return ftu.mutation
 }
 
+// ClearFiles clears all "files" edges to type File.
+func (ftu *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
+	ftu.mutation.ClearFiles()
+	return ftu
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
 func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.RemoveFileIDs(ids...)
@@ -202,7 +208,23 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: filetype.FieldState,
 		})
 	}
-	if nodes := ftu.mutation.RemovedFilesIDs(); len(nodes) > 0 {
+	if ftu.mutation.FilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ftu.mutation.RemovedFilesIDs(); len(nodes) > 0 && !ftu.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -310,6 +332,12 @@ func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 // Mutation returns the FileTypeMutation object of the builder.
 func (ftuo *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 	return ftuo.mutation
+}
+
+// ClearFiles clears all "files" edges to type File.
+func (ftuo *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
+	ftuo.mutation.ClearFiles()
+	return ftuo
 }
 
 // RemoveFileIDs removes the files edge to File by ids.
@@ -426,7 +454,23 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 			Column: filetype.FieldState,
 		})
 	}
-	if nodes := ftuo.mutation.RemovedFilesIDs(); len(nodes) > 0 {
+	if ftuo.mutation.FilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ftuo.mutation.RemovedFilesIDs(); len(nodes) > 0 && !ftuo.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

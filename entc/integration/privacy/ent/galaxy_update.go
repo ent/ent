@@ -64,6 +64,12 @@ func (gu *GalaxyUpdate) Mutation() *GalaxyMutation {
 	return gu.mutation
 }
 
+// ClearPlanets clears all "planets" edges to type Planet.
+func (gu *GalaxyUpdate) ClearPlanets() *GalaxyUpdate {
+	gu.mutation.ClearPlanets()
+	return gu
+}
+
 // RemovePlanetIDs removes the planets edge to Planet by ids.
 func (gu *GalaxyUpdate) RemovePlanetIDs(ids ...int) *GalaxyUpdate {
 	gu.mutation.RemovePlanetIDs(ids...)
@@ -173,7 +179,23 @@ func (gu *GalaxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: galaxy.FieldType,
 		})
 	}
-	if nodes := gu.mutation.RemovedPlanetsIDs(); len(nodes) > 0 {
+	if gu.mutation.PlanetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   galaxy.PlanetsTable,
+			Columns: []string{galaxy.PlanetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: planet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedPlanetsIDs(); len(nodes) > 0 && !gu.mutation.PlanetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -259,6 +281,12 @@ func (guo *GalaxyUpdateOne) AddPlanets(p ...*Planet) *GalaxyUpdateOne {
 // Mutation returns the GalaxyMutation object of the builder.
 func (guo *GalaxyUpdateOne) Mutation() *GalaxyMutation {
 	return guo.mutation
+}
+
+// ClearPlanets clears all "planets" edges to type Planet.
+func (guo *GalaxyUpdateOne) ClearPlanets() *GalaxyUpdateOne {
+	guo.mutation.ClearPlanets()
+	return guo
 }
 
 // RemovePlanetIDs removes the planets edge to Planet by ids.
@@ -368,7 +396,23 @@ func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (ga *Galaxy, err error)
 			Column: galaxy.FieldType,
 		})
 	}
-	if nodes := guo.mutation.RemovedPlanetsIDs(); len(nodes) > 0 {
+	if guo.mutation.PlanetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   galaxy.PlanetsTable,
+			Columns: []string{galaxy.PlanetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: planet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedPlanetsIDs(); len(nodes) > 0 && !guo.mutation.PlanetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
