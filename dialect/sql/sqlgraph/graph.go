@@ -927,7 +927,7 @@ type graph struct {
 func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeSpecs) error {
 	var (
 		res sql.Result
-		// Delete all M2M edges from the same type at once.
+		// Remove all M2M edges from the same type at once.
 		// The EdgeSpec is the same for all members in a group.
 		tables = edges.GroupTable()
 	)
@@ -935,13 +935,23 @@ func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges Edg
 		edges := tables[table]
 		preds := make([]*sql.Predicate, 0, len(edges))
 		for _, edge := range edges {
-			pk1, pk2 := ids, edge.Target.Nodes
+			fromC, toC := edge.Columns[0], edge.Columns[1]
 			if edge.Inverse {
-				pk1, pk2 = pk2, pk1
+				fromC, toC = toC, fromC
 			}
-			preds = append(preds, matchIDs(edge.Columns[0], pk1, edge.Columns[1], pk2))
-			if edge.Bidi {
-				preds = append(preds, matchIDs(edge.Columns[0], pk2, edge.Columns[1], pk1))
+			// If there are no specific edges (to target-nodes) to remove,
+			// clear all edges that go out (or come in) from the nodes.
+			if len(edge.Target.Nodes) == 0 {
+				preds = append(preds, matchID(fromC, ids))
+				if edge.Bidi {
+					preds = append(preds, matchID(toC, ids))
+				}
+			} else {
+				pk1, pk2 := ids, edge.Target.Nodes
+				preds = append(preds, matchIDs(fromC, pk1, toC, pk2))
+				if edge.Bidi {
+					preds = append(preds, matchIDs(toC, pk1, fromC, pk2))
+				}
 			}
 		}
 		query, args := g.builder.Delete(table).Where(sql.Or(preds...)).Query()
