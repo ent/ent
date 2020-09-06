@@ -202,3 +202,39 @@ executes `f(g(h(...)))` on mutations.
 Also note, that **runtime hooks** are called before **schema hooks**. That is, if `g`,
 and `h` were defined in the schema, and `f` was registered using `client.Use(...)`,
 they will be executed as follows: `f(g(h(...)))`. 
+
+## Hook helpers
+
+The generated hooks package provides several helpers that can help you control when a hook will
+be executed.
+
+```go
+package schema
+
+import (
+	"context"
+	"fmt"
+
+	"<project>/ent/hook"
+
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/mixin"
+)
+
+
+type SomeMixin struct {
+	mixin.Schema
+}
+
+func (SomeMixin) Hooks() []ent.Hook {
+    return []ent.Hook{
+        // Execute "HookA" only for the UpdateOne and DeleteOne operations.
+        hook.On(HookA(), ent.OpUpdateOne|ent.OpDeleteOne),
+        // Don't execute "HookB" on Create operation.
+        hook.Unless(HookB(), ent.OpCreate),
+        // Execute "HookC" only if the ent.Mutation is changing the "status" field,
+        // and clearing the "dirty" field.
+        hook.If(HookC(), hook.And(hook.HasFields("status"), hook.HasClearedFields("dirty"))),
+    }
+}
+```

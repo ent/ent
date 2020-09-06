@@ -100,7 +100,7 @@ func HasOp(op {{ $pkg }}.Op) Condition {
 
 // If executes the given hook under condition.
 //
-//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
 //
 func If(hk {{ $pkg }}.Hook, cond Condition) {{ $pkg }}.Hook {
 	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
