@@ -116,7 +116,7 @@ func (cu *CarUpdate) Mutation() *CarMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the owner edge to Pet.
+// ClearOwner clears the "owner" edge to type Pet.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
 	cu.mutation.ClearOwner()
 	return cu
@@ -386,7 +386,7 @@ func (cuo *CarUpdateOne) Mutation() *CarMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the owner edge to Pet.
+// ClearOwner clears the "owner" edge to type Pet.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo

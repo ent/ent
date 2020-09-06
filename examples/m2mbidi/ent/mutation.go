@@ -41,6 +41,7 @@ type UserMutation struct {
 	clearedFields  map[string]struct{}
 	friends        map[int]struct{}
 	removedfriends map[int]struct{}
+	clearedfriends bool
 	done           bool
 	oldValue       func(context.Context) (*User, error)
 }
@@ -228,6 +229,16 @@ func (m *UserMutation) AddFriendIDs(ids ...int) {
 	}
 }
 
+// ClearFriends clears the friends edge to User.
+func (m *UserMutation) ClearFriends() {
+	m.clearedfriends = true
+}
+
+// FriendsCleared returns if the edge friends was cleared.
+func (m *UserMutation) FriendsCleared() bool {
+	return m.clearedfriends
+}
+
 // RemoveFriendIDs removes the friends edge to User by ids.
 func (m *UserMutation) RemoveFriendIDs(ids ...int) {
 	if m.removedfriends == nil {
@@ -257,6 +268,7 @@ func (m *UserMutation) FriendsIDs() (ids []int) {
 // ResetFriends reset all changes of the "friends" edge.
 func (m *UserMutation) ResetFriends() {
 	m.friends = nil
+	m.clearedfriends = false
 	m.removedfriends = nil
 }
 
@@ -456,6 +468,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedfriends {
+		edges = append(edges, user.EdgeFriends)
+	}
 	return edges
 }
 
@@ -463,6 +478,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeFriends:
+		return m.clearedfriends
 	}
 	return false
 }

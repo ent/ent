@@ -160,15 +160,21 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
 	return fu
 }
 
-// ClearType clears the type edge to FileType.
+// ClearType clears the "type" edge to type FileType.
 func (fu *FileUpdate) ClearType() *FileUpdate {
 	fu.mutation.ClearType()
+	return fu
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fu *FileUpdate) ClearFieldEdge() *FileUpdate {
+	fu.mutation.ClearFieldEdge()
 	return fu
 }
 
@@ -469,15 +475,21 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.mutation.ClearOwner()
 	return fuo
 }
 
-// ClearType clears the type edge to FileType.
+// ClearType clears the "type" edge to type FileType.
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
 	fuo.mutation.ClearType()
+	return fuo
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fuo *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
+	fuo.mutation.ClearFieldEdge()
 	return fuo
 }
 

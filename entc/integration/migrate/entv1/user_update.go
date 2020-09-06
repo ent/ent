@@ -226,9 +226,15 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearParent clears the parent edge to User.
+// ClearParent clears the "parent" edge to type User.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
 	uu.mutation.ClearParent()
+	return uu
+}
+
+// ClearChildren clears all "children" edges to type User.
+func (uu *UserUpdate) ClearChildren() *UserUpdate {
+	uu.mutation.ClearChildren()
 	return uu
 }
 
@@ -247,13 +253,13 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 	return uu.RemoveChildIDs(ids...)
 }
 
-// ClearSpouse clears the spouse edge to User.
+// ClearSpouse clears the "spouse" edge to type User.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 	uu.mutation.ClearSpouse()
 	return uu
 }
 
-// ClearCar clears the car edge to Car.
+// ClearCar clears the "car" edge to type Car.
 func (uu *UserUpdate) ClearCar() *UserUpdate {
 	uu.mutation.ClearCar()
 	return uu
@@ -467,7 +473,23 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uu.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
+	if uu.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !uu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -787,9 +809,15 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearParent clears the parent edge to User.
+// ClearParent clears the "parent" edge to type User.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	uuo.mutation.ClearParent()
+	return uuo
+}
+
+// ClearChildren clears all "children" edges to type User.
+func (uuo *UserUpdateOne) ClearChildren() *UserUpdateOne {
+	uuo.mutation.ClearChildren()
 	return uuo
 }
 
@@ -808,13 +836,13 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 	return uuo.RemoveChildIDs(ids...)
 }
 
-// ClearSpouse clears the spouse edge to User.
+// ClearSpouse clears the "spouse" edge to type User.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
-// ClearCar clears the car edge to Car.
+// ClearCar clears the "car" edge to type Car.
 func (uuo *UserUpdateOne) ClearCar() *UserUpdateOne {
 	uuo.mutation.ClearCar()
 	return uuo
@@ -1026,7 +1054,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
+	if uuo.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: []string{user.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !uuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

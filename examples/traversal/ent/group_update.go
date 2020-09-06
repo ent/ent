@@ -77,6 +77,12 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
+	gu.mutation.ClearUsers()
+	return gu
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
@@ -92,7 +98,7 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
-// ClearAdmin clears the admin edge to User.
+// ClearAdmin clears the "admin" edge to type User.
 func (gu *GroupUpdate) ClearAdmin() *GroupUpdate {
 	gu.mutation.ClearAdmin()
 	return gu
@@ -175,7 +181,23 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: group.FieldName,
 		})
 	}
-	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+	if gu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !gu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -311,6 +333,12 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
+	guo.mutation.ClearUsers()
+	return guo
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
@@ -326,7 +354,7 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// ClearAdmin clears the admin edge to User.
+// ClearAdmin clears the "admin" edge to type User.
 func (guo *GroupUpdateOne) ClearAdmin() *GroupUpdateOne {
 	guo.mutation.ClearAdmin()
 	return guo
@@ -407,7 +435,23 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Column: group.FieldName,
 		})
 	}
-	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+	if guo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

@@ -62,7 +62,7 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
 	return cu
@@ -236,7 +236,7 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo

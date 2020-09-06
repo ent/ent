@@ -58,6 +58,12 @@ func (cu *CityUpdate) Mutation() *CityMutation {
 	return cu.mutation
 }
 
+// ClearStreets clears all "streets" edges to type Street.
+func (cu *CityUpdate) ClearStreets() *CityUpdate {
+	cu.mutation.ClearStreets()
+	return cu
+}
+
 // RemoveStreetIDs removes the streets edge to Street by ids.
 func (cu *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
 	cu.mutation.RemoveStreetIDs(ids...)
@@ -150,7 +156,23 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: city.FieldName,
 		})
 	}
-	if nodes := cu.mutation.RemovedStreetsIDs(); len(nodes) > 0 {
+	if cu.mutation.StreetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   city.StreetsTable,
+			Columns: []string{city.StreetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: street.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedStreetsIDs(); len(nodes) > 0 && !cu.mutation.StreetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -230,6 +252,12 @@ func (cuo *CityUpdateOne) AddStreets(s ...*Street) *CityUpdateOne {
 // Mutation returns the CityMutation object of the builder.
 func (cuo *CityUpdateOne) Mutation() *CityMutation {
 	return cuo.mutation
+}
+
+// ClearStreets clears all "streets" edges to type Street.
+func (cuo *CityUpdateOne) ClearStreets() *CityUpdateOne {
+	cuo.mutation.ClearStreets()
+	return cuo
 }
 
 // RemoveStreetIDs removes the streets edge to Street by ids.
@@ -322,7 +350,23 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 			Column: city.FieldName,
 		})
 	}
-	if nodes := cuo.mutation.RemovedStreetsIDs(); len(nodes) > 0 {
+	if cuo.mutation.StreetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   city.StreetsTable,
+			Columns: []string{city.StreetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: street.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedStreetsIDs(); len(nodes) > 0 && !cuo.mutation.StreetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

@@ -159,15 +159,21 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
 	return fu
 }
 
-// ClearType clears the type edge to FileType.
+// ClearType clears the "type" edge to type FileType.
 func (fu *FileUpdate) ClearType() *FileUpdate {
 	fu.mutation.ClearType()
+	return fu
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fu *FileUpdate) ClearFieldEdge() *FileUpdate {
+	fu.mutation.ClearFieldEdge()
 	return fu
 }
 
@@ -378,7 +384,23 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := fu.mutation.RemovedFieldIDs(); len(nodes) > 0 {
+	if fu.mutation.FieldEdgeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.RemovedFieldIDs(); len(nodes) > 0 && !fu.mutation.FieldEdgeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -559,15 +581,21 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.mutation.ClearOwner()
 	return fuo
 }
 
-// ClearType clears the type edge to FileType.
+// ClearType clears the "type" edge to type FileType.
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
 	fuo.mutation.ClearType()
+	return fuo
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fuo *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
+	fuo.mutation.ClearFieldEdge()
 	return fuo
 }
 
@@ -776,7 +804,23 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := fuo.mutation.RemovedFieldIDs(); len(nodes) > 0 {
+	if fuo.mutation.FieldEdgeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.RemovedFieldIDs(); len(nodes) > 0 && !fuo.mutation.FieldEdgeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

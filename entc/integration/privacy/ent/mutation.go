@@ -42,6 +42,7 @@ type GalaxyMutation struct {
 	clearedFields  map[string]struct{}
 	planets        map[int]struct{}
 	removedplanets map[int]struct{}
+	clearedplanets bool
 	done           bool
 	oldValue       func(context.Context) (*Galaxy, error)
 }
@@ -209,6 +210,16 @@ func (m *GalaxyMutation) AddPlanetIDs(ids ...int) {
 	}
 }
 
+// ClearPlanets clears the planets edge to Planet.
+func (m *GalaxyMutation) ClearPlanets() {
+	m.clearedplanets = true
+}
+
+// PlanetsCleared returns if the edge planets was cleared.
+func (m *GalaxyMutation) PlanetsCleared() bool {
+	return m.clearedplanets
+}
+
 // RemovePlanetIDs removes the planets edge to Planet by ids.
 func (m *GalaxyMutation) RemovePlanetIDs(ids ...int) {
 	if m.removedplanets == nil {
@@ -238,6 +249,7 @@ func (m *GalaxyMutation) PlanetsIDs() (ids []int) {
 // ResetPlanets reset all changes of the "planets" edge.
 func (m *GalaxyMutation) ResetPlanets() {
 	m.planets = nil
+	m.clearedplanets = false
 	m.removedplanets = nil
 }
 
@@ -422,6 +434,9 @@ func (m *GalaxyMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *GalaxyMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedplanets {
+		edges = append(edges, galaxy.EdgePlanets)
+	}
 	return edges
 }
 
@@ -429,6 +444,8 @@ func (m *GalaxyMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *GalaxyMutation) EdgeCleared(name string) bool {
 	switch name {
+	case galaxy.EdgePlanets:
+		return m.clearedplanets
 	}
 	return false
 }
@@ -466,6 +483,7 @@ type PlanetMutation struct {
 	clearedFields    map[string]struct{}
 	neighbors        map[int]struct{}
 	removedneighbors map[int]struct{}
+	clearedneighbors bool
 	done             bool
 	oldValue         func(context.Context) (*Planet, error)
 }
@@ -667,6 +685,16 @@ func (m *PlanetMutation) AddNeighborIDs(ids ...int) {
 	}
 }
 
+// ClearNeighbors clears the neighbors edge to Planet.
+func (m *PlanetMutation) ClearNeighbors() {
+	m.clearedneighbors = true
+}
+
+// NeighborsCleared returns if the edge neighbors was cleared.
+func (m *PlanetMutation) NeighborsCleared() bool {
+	return m.clearedneighbors
+}
+
 // RemoveNeighborIDs removes the neighbors edge to Planet by ids.
 func (m *PlanetMutation) RemoveNeighborIDs(ids ...int) {
 	if m.removedneighbors == nil {
@@ -696,6 +724,7 @@ func (m *PlanetMutation) NeighborsIDs() (ids []int) {
 // ResetNeighbors reset all changes of the "neighbors" edge.
 func (m *PlanetMutation) ResetNeighbors() {
 	m.neighbors = nil
+	m.clearedneighbors = false
 	m.removedneighbors = nil
 }
 
@@ -904,6 +933,9 @@ func (m *PlanetMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *PlanetMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedneighbors {
+		edges = append(edges, planet.EdgeNeighbors)
+	}
 	return edges
 }
 
@@ -911,6 +943,8 @@ func (m *PlanetMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *PlanetMutation) EdgeCleared(name string) bool {
 	switch name {
+	case planet.EdgeNeighbors:
+		return m.clearedneighbors
 	}
 	return false
 }

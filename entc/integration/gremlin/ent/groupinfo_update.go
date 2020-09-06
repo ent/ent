@@ -81,6 +81,12 @@ func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 	return giu.mutation
 }
 
+// ClearGroups clears all "groups" edges to type Group.
+func (giu *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
+	giu.mutation.ClearGroups()
+	return giu
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.RemoveGroupIDs(ids...)
@@ -263,6 +269,12 @@ func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
 // Mutation returns the GroupInfoMutation object of the builder.
 func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 	return giuo.mutation
+}
+
+// ClearGroups clears all "groups" edges to type Group.
+func (giuo *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
+	giuo.mutation.ClearGroups()
+	return giuo
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.

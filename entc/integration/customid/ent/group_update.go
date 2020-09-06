@@ -52,6 +52,12 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
+	gu.mutation.ClearUsers()
+	return gu
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
@@ -137,7 +143,23 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+	if gu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !gu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -211,6 +233,12 @@ func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 // Mutation returns the GroupMutation object of the builder.
 func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
+}
+
+// ClearUsers clears all "users" edges to type User.
+func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
+	guo.mutation.ClearUsers()
+	return guo
 }
 
 // RemoveUserIDs removes the users edge to User by ids.
@@ -296,7 +324,23 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 {
+	if guo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

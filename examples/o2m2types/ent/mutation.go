@@ -405,6 +405,7 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	pets          map[int]struct{}
 	removedpets   map[int]struct{}
+	clearedpets   bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
 }
@@ -592,6 +593,16 @@ func (m *UserMutation) AddPetIDs(ids ...int) {
 	}
 }
 
+// ClearPets clears the pets edge to Pet.
+func (m *UserMutation) ClearPets() {
+	m.clearedpets = true
+}
+
+// PetsCleared returns if the edge pets was cleared.
+func (m *UserMutation) PetsCleared() bool {
+	return m.clearedpets
+}
+
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (m *UserMutation) RemovePetIDs(ids ...int) {
 	if m.removedpets == nil {
@@ -621,6 +632,7 @@ func (m *UserMutation) PetsIDs() (ids []int) {
 // ResetPets reset all changes of the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
+	m.clearedpets = false
 	m.removedpets = nil
 }
 
@@ -820,6 +832,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedpets {
+		edges = append(edges, user.EdgePets)
+	}
 	return edges
 }
 
@@ -827,6 +842,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgePets:
+		return m.clearedpets
 	}
 	return false
 }

@@ -73,6 +73,12 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
+// ClearPets clears all "pets" edges to type Pet.
+func (uu *UserUpdate) ClearPets() *UserUpdate {
+	uu.mutation.ClearPets()
+	return uu
+}
+
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (uu *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemovePetIDs(ids...)
@@ -86,6 +92,12 @@ func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 		ids[i] = p[i].ID
 	}
 	return uu.RemovePetIDs(ids...)
+}
+
+// ClearFriends clears all "friends" edges to type User.
+func (uu *UserUpdate) ClearFriends() *UserUpdate {
+	uu.mutation.ClearFriends()
+	return uu
 }
 
 // RemoveFriendIDs removes the friends edge to User by ids.
@@ -180,7 +192,23 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
-	if nodes := uu.mutation.RemovedPetsIDs(); len(nodes) > 0 {
+	if uu.mutation.PetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedPetsIDs(); len(nodes) > 0 && !uu.mutation.PetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -218,7 +246,23 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uu.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
+	if uu.mutation.FriendsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FriendsTable,
+			Columns: user.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !uu.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -315,6 +359,12 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
+// ClearPets clears all "pets" edges to type Pet.
+func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
+	uuo.mutation.ClearPets()
+	return uuo
+}
+
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (uuo *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemovePetIDs(ids...)
@@ -328,6 +378,12 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return uuo.RemovePetIDs(ids...)
+}
+
+// ClearFriends clears all "friends" edges to type User.
+func (uuo *UserUpdateOne) ClearFriends() *UserUpdateOne {
+	uuo.mutation.ClearFriends()
+	return uuo
 }
 
 // RemoveFriendIDs removes the friends edge to User by ids.
@@ -420,7 +476,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Column: user.FieldName,
 		})
 	}
-	if nodes := uuo.mutation.RemovedPetsIDs(); len(nodes) > 0 {
+	if uuo.mutation.PetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: pet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedPetsIDs(); len(nodes) > 0 && !uuo.mutation.PetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -458,7 +530,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := uuo.mutation.RemovedFriendsIDs(); len(nodes) > 0 {
+	if uuo.mutation.FriendsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.FriendsTable,
+			Columns: user.FriendsPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !uuo.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

@@ -52,6 +52,12 @@ func (su *SpecUpdate) Mutation() *SpecMutation {
 	return su.mutation
 }
 
+// ClearCard clears all "card" edges to type Card.
+func (su *SpecUpdate) ClearCard() *SpecUpdate {
+	su.mutation.ClearCard()
+	return su
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
@@ -179,6 +185,12 @@ func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 // Mutation returns the SpecMutation object of the builder.
 func (suo *SpecUpdateOne) Mutation() *SpecMutation {
 	return suo.mutation
+}
+
+// ClearCard clears all "card" edges to type Card.
+func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
+	suo.mutation.ClearCard()
+	return suo
 }
 
 // RemoveCardIDs removes the card edge to Card by ids.

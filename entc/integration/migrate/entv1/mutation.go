@@ -350,6 +350,7 @@ type UserMutation struct {
 	clearedparent   bool
 	children        map[int]struct{}
 	removedchildren map[int]struct{}
+	clearedchildren bool
 	spouse          *int
 	clearedspouse   bool
 	car             *int
@@ -873,6 +874,16 @@ func (m *UserMutation) AddChildIDs(ids ...int) {
 	}
 }
 
+// ClearChildren clears the children edge to User.
+func (m *UserMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared returns if the edge children was cleared.
+func (m *UserMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
 // RemoveChildIDs removes the children edge to User by ids.
 func (m *UserMutation) RemoveChildIDs(ids ...int) {
 	if m.removedchildren == nil {
@@ -902,6 +913,7 @@ func (m *UserMutation) ChildrenIDs() (ids []int) {
 // ResetChildren reset all changes of the "children" edge.
 func (m *UserMutation) ResetChildren() {
 	m.children = nil
+	m.clearedchildren = false
 	m.removedchildren = nil
 }
 
@@ -1338,6 +1350,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedparent {
 		edges = append(edges, user.EdgeParent)
 	}
+	if m.clearedchildren {
+		edges = append(edges, user.EdgeChildren)
+	}
 	if m.clearedspouse {
 		edges = append(edges, user.EdgeSpouse)
 	}
@@ -1353,6 +1368,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeParent:
 		return m.clearedparent
+	case user.EdgeChildren:
+		return m.clearedchildren
 	case user.EdgeSpouse:
 		return m.clearedspouse
 	case user.EdgeCar:

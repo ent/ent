@@ -105,6 +105,7 @@ var (
 		Relation,
 		Predicate,
 		AddValues,
+		ClearEdges,
 		ClearFields,
 		UniqueConstraint,
 		O2OTwoTypes,
@@ -710,6 +711,91 @@ func ClearFields(t *testing.T, client *ent.Client) {
 	t.Log("revert previous set")
 	img = img.Update().SetUser("a8m").ClearUser().SaveX(ctx)
 	require.Nil(t, img.User)
+}
+
+func ClearEdges(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+
+	t.Log("clear o2m edges")
+	ft := client.FileType.Create().SetName("photo").SaveX(ctx)
+	client.File.CreateBulk(
+		client.File.Create().SetName("A").SetSize(10).SetType(ft),
+		client.File.Create().SetName("B").SetSize(20).SetType(ft),
+	).SaveX(ctx)
+	require.NotZero(t, ft.QueryFiles().CountX(ctx))
+	ft = ft.Update().ClearFiles().SaveX(ctx)
+	require.Zero(t, ft.QueryFiles().CountX(ctx))
+
+	t.Log("clear m2m edges")
+	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
+	nat := client.User.Create().SetName("nati").SetAge(28).SaveX(ctx)
+	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m, nat).SaveX(ctx)
+	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m, nat).SaveX(ctx)
+	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx))
+	a8m.Update().ClearGroups().SaveX(ctx)
+	require.Zero(t, a8m.QueryGroups().CountX(ctx))
+	err := client.Group.Update().AddUsers(a8m).Exec(ctx)
+	require.NoError(t, err, "return the user-edge back to groups")
+	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx))
+
+	t.Log("clear m2m inverse-edges")
+	require.Equal(t, 2, hub.QueryUsers().CountX(ctx))
+	hub = hub.Update().ClearUsers().SaveX(ctx)
+	require.Zero(t, hub.QueryUsers().CountX(ctx))
+	require.Equal(t, 2, lab.QueryUsers().CountX(ctx))
+	client.Group.Update().ClearUsers().ExecX(ctx)
+	require.Zero(t, lab.QueryUsers().CountX(ctx))
+	require.Zero(t, a8m.QueryGroups().CountX(ctx))
+	require.Zero(t, nat.QueryGroups().CountX(ctx))
+
+	t.Log("clear m2m bidi-edges")
+	friends := client.User.CreateBulk(
+		client.User.Create().SetName("f1").SetAge(30).AddFriends(a8m, nat),
+		client.User.Create().SetName("f2").SetAge(30).AddFriends(a8m, nat),
+		client.User.Create().SetName("f3").SetAge(30).AddFriends(a8m, nat),
+	).SaveX(ctx)
+	for i := range friends {
+		require.Equal(t, 2, friends[i].QueryFriends().CountX(ctx))
+	}
+	require.Equal(t, 3, a8m.QueryFriends().CountX(ctx))
+	require.Equal(t, 3, nat.QueryFriends().CountX(ctx))
+	nat = nat.Update().ClearFriends().SaveX(ctx)
+	require.Zero(t, nat.QueryFriends().CountX(ctx))
+	require.Equal(t, 3, a8m.QueryFriends().CountX(ctx))
+	for i := range friends {
+		require.Equal(t, 1, friends[i].QueryFriends().CountX(ctx))
+	}
+	client.User.Update().ClearFriends().ExecX(ctx)
+	require.Zero(t, client.User.Query().Where(user.HasFriends()).CountX(ctx))
+
+	t.Log("clear m2m inverse-bidi-edges")
+	a8m = a8m.Update().AddFollowing(friends...).SaveX(ctx)
+	require.Equal(t, 3, a8m.QueryFollowing().CountX(ctx))
+	require.Zero(t, a8m.QueryFollowers().CountX(ctx))
+	nat = nat.Update().AddFollowers(friends...).SaveX(ctx)
+	require.Zero(t, nat.QueryFollowing().CountX(ctx))
+	require.Equal(t, 3, nat.QueryFollowers().CountX(ctx))
+	for i := range friends {
+		require.Equal(t, 1, friends[i].QueryFollowers().CountX(ctx))
+		require.Equal(t, 1, friends[i].QueryFollowing().CountX(ctx))
+	}
+	nat.Update().ClearFollowing().ExecX(ctx)
+	require.Equal(t, 3, nat.QueryFollowers().CountX(ctx), "expect no effect on followers")
+	nat.Update().ClearFollowers().ExecX(ctx)
+	require.Zero(t, nat.QueryFollowers().CountX(ctx))
+	for i := range friends {
+		require.Equal(t, 1, friends[i].QueryFollowers().CountX(ctx), "expect no effect to followers")
+		require.Zero(t, friends[i].QueryFollowing().CountX(ctx))
+	}
+	a8m.Update().ClearFollowers().ExecX(ctx)
+	require.Equal(t, 3, a8m.QueryFollowing().CountX(ctx), "expect no effect on following")
+	a8m.Update().ClearFollowing().ExecX(ctx)
+	require.Zero(t, a8m.QueryFollowing().CountX(ctx))
+	for i := range friends {
+		require.Zero(t, friends[i].QueryFollowers().CountX(ctx))
+		require.Zero(t, friends[i].QueryFollowing().CountX(ctx))
+	}
 }
 
 func UniqueConstraint(t *testing.T, client *ent.Client) {

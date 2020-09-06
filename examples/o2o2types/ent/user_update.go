@@ -75,7 +75,7 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCard clears the card edge to Card.
+// ClearCard clears the "card" edge to type Card.
 func (uu *UserUpdate) ClearCard() *UserUpdate {
 	uu.mutation.ClearCard()
 	return uu
@@ -268,7 +268,7 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCard clears the card edge to Card.
+// ClearCard clears the "card" edge to type Card.
 func (uuo *UserUpdateOne) ClearCard() *UserUpdateOne {
 	uuo.mutation.ClearCard()
 	return uuo
