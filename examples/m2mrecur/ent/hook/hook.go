@@ -120,7 +120,7 @@ func HasFields(field string, fields ...string) Condition {
 
 // If executes the given hook under condition.
 //
-//	Hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
 //
 func If(hk ent.Hook, cond Condition) ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
