@@ -19,6 +19,9 @@ type User struct {
 	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+
+	// StaticField defined by templates (titled STATICFIELD).
+	StaticField string `json:"static_field,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
