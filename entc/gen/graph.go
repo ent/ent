@@ -85,9 +85,10 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 func (g *Graph) Gen() (err error) {
 	defer catch(&err)
 	var (
-		written             []string
-		templates, external = g.templates()
+		written  []string
+		external []GraphTemplate
 	)
+	templates, external = g.templates()
 	for _, n := range g.Nodes {
 		path := filepath.Join(g.Config.Target, n.Package())
 		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
@@ -402,24 +403,25 @@ func (g *Graph) typ(name string) (*Type, bool) {
 // templates returns the template.Template for the code and external templates
 // to execute on the Graph object if provided.
 func (g *Graph) templates() (*template.Template, []GraphTemplate) {
-	templates = template.Must(templates.Clone())
 	if g.Template == nil {
 		return templates, nil
 	}
-	external := make([]GraphTemplate, 0)
+	g.Template.Funcs(Funcs)
+	external := make([]GraphTemplate, 0, len(g.Template.Templates()))
 	for _, tmpl := range g.Template.Templates() {
 		name := tmpl.Name()
-		// Check that is not defined in the default templates
-		// if it's not the root.
+		// Check that the template is not defined in the default templates if it's not the root.
 		if templates.Lookup(name) == nil && !parse.IsEmptyTree(tmpl.Root) && !extendExisting(name) {
 			external = append(external, GraphTemplate{
 				Name:   name,
 				Format: snake(name) + ".go",
 			})
 		}
-		templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 	}
-	return templates, external
+	for _, tmpl := range templates.Templates() {
+		g.Template = template.Must(g.Template.AddParseTree(tmpl.Name(), tmpl.Tree))
+	}
+	return g.Template, external
 }
 
 // ModuleInfo returns the entc binary module version.
