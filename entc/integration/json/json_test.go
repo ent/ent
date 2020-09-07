@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqljson"
 	"github.com/facebook/ent/entc/integration/json/ent"
 	"github.com/facebook/ent/entc/integration/json/ent/migrate"
 	"github.com/facebook/ent/entc/integration/json/ent/user"
@@ -183,13 +184,13 @@ func Predicates(t *testing.T, client *ent.Client) {
 	require.Len(t, users, 2)
 
 	count, err := client.User.Query().Where(func(s *sql.Selector) {
-		s.Where(sql.JSONHasKey(user.FieldURL, "Scheme"))
+		s.Where(sqljson.HasKey(user.FieldURL, sqljson.Path("Scheme")))
 	}).Count(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 2, count)
 
 	count, err = client.User.Query().Where(func(s *sql.Selector) {
-		s.Where(sql.Not(sql.JSONHasKey(user.FieldURL, "Scheme")))
+		s.Where(sql.Not(sqljson.HasKey(user.FieldURL, sqljson.Path("Scheme"))))
 	}).Count(ctx)
 	require.NoError(t, err)
 	require.Zero(t, count)

@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/facebook/ent/dialect"
 )
@@ -964,37 +963,6 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 		b.Ident(col)
 		p.WriteOp(OpGTE)
 		b.Arg(arg)
-	})
-}
-
-// JSONHasKey calls Predicate.JSONHasKey.
-func JSONHasKey(col, path string) *Predicate {
-	return P().JSONHasKey(col, path)
-}
-
-// JSONHasKey return a predicate for checking that a JSON key exists and not NULL.
-//
-//	P().JSONHasKey("column", "a.b[2].c")
-//
-func (p *Predicate) JSONHasKey(col, path string) *Predicate {
-	return p.Append(func(b *Builder) {
-		b.JSONPath(col, DotPath(path)).WriteOp(OpNotNull)
-	})
-}
-
-// JSONValueEQ calls Predicate.JSONValueEQ.
-func JSONValueEQ(col, path string, arg interface{}) *Predicate {
-	return P().JSONValueEQ(col, path, arg)
-}
-
-// JSONValueEQ return a predicate for checking that a JSON
-// value (returned by the path) is equal to the given argument.
-//
-//	P().JSONValueEQ("column", "a.b[2].c", arg)
-//
-func (p *Predicate) JSONValueEQ(col, path string, arg interface{}) *Predicate {
-	return p.Append(func(b *Builder) {
-		b.JSONPath(col, DotPath(path)).WriteOp(OpEQ).Arg(arg)
 	})
 }
 
@@ -1962,114 +1930,6 @@ func (b *Builder) WriteOp(op Op) *Builder {
 	return b
 }
 
-// JSONOption allows for calling database JSON paths with functional options.
-type JSONOption func(*JSONPath)
-
-// Path sets the path to the JSON value of a column.
-//
-//	b.JSONPath("column", Path("a", "b", "[1]", "c"))
-//
-func Path(path ...string) JSONOption {
-	return func(p *JSONPath) {
-		p.path = path
-	}
-}
-
-// DotPath is similar to Path, but accepts string with dot format.
-//
-//	b.JSONPath("column", DotPath("a.b[2].c"))
-//	b.JSONPath("column", DotPath("a.b.c"))
-//
-// Note that DotPath is ignored if the input is invalid.
-func DotPath(dotpath string) JSONOption {
-	path, _ := ParsePath(dotpath)
-	return func(p *JSONPath) {
-		p.path = path
-	}
-}
-
-// Unquote indicates that the result value should be unquoted.
-//
-//	b.JSONPath("column", Path("a", "b", "[1]", "c"), Unquote(true))
-//
-func Unquote(unquote bool) JSONOption {
-	return func(p *JSONPath) {
-		p.unquote = unquote
-	}
-}
-
-// Cast indicates that the result value should be casted to the given type.
-//
-//	b.JSONPath("column", Path("a", "b", "[1]", "c"), Cast("int"))
-//
-func Cast(typ string) JSONOption {
-	return func(p *JSONPath) {
-		p.cast = typ
-	}
-}
-
-// JSONPath represents a path to a JSON value.
-type JSONPath struct {
-	ident   string
-	path    []string
-	cast    string
-	unquote bool
-}
-
-// writeTo writes the JSON path to the builder.
-func (p *JSONPath) writeTo(b *Builder) {
-	switch {
-	case len(p.path) == 0:
-		b.Ident(p.ident)
-	case b.postgres():
-		if p.cast != "" {
-			b.WriteString("CAST(")
-			defer b.WriteString(" AS " + p.cast + ")")
-		}
-		b.Ident(p.ident)
-		for i, s := range p.path {
-			b.WriteString("->")
-			if p.unquote && i == len(p.path)-1 {
-				b.WriteString(">")
-			}
-			if idx, ok := isJSONIdx(s); ok {
-				b.WriteString(idx)
-			} else {
-				b.WriteString("'" + s + "'")
-			}
-		}
-	default:
-		if p.unquote && b.mysql() {
-			b.WriteString("JSON_UNQUOTE(")
-			defer b.WriteByte(')')
-		}
-		b.WriteString("JSON_EXTRACT(")
-		b.Ident(p.ident).Comma()
-		b.WriteString(`"$`)
-		for _, p := range p.path {
-			if _, ok := isJSONIdx(p); ok {
-				b.WriteString(p)
-			} else {
-				b.WriteString("." + p)
-			}
-		}
-		b.WriteString(`")`)
-	}
-}
-
-// JSONPath appends the given JSON paths to the builder.
-//
-//	b.JSONPath("column", Path("a", "b", "[1]", "c"), Cast("int"))
-//
-func (b *Builder) JSONPath(ident string, opts ...JSONOption) *Builder {
-	path := &JSONPath{ident: ident}
-	for i := range opts {
-		opts[i](path)
-	}
-	path.writeTo(b)
-	return b
-}
-
 // Arg appends an input argument to the builder.
 func (b *Builder) Arg(a interface{}) *Builder {
 	if r, ok := a.(*raw); ok {
@@ -2195,11 +2055,6 @@ func (b Builder) clone() Builder {
 // postgres reports if the builder dialect is PostgreSQL.
 func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
-}
-
-// mysql reports if the builder dialect is MySQL.
-func (b Builder) mysql() bool {
-	return b.Dialect() == dialect.MySQL
 }
 
 // fromIdent sets the builder dialect from the identifier format.
@@ -2395,78 +2250,6 @@ func (d *DialectBuilder) DropIndex(name string) *DropIndexBuilder {
 	b := DropIndex(name)
 	b.SetDialect(d.dialect)
 	return b
-}
-
-// ParsePath parses the "dotpath" for the DotPath option.
-//
-//	"a.b"		=> ["a", "b"]
-//	"a[1][2]"	=> ["a", "[1]", "[2]"]
-//	"a.\"b.c\"	=> ["a", "\"b.c\""]
-//
-func ParsePath(dotpath string) ([]string, error) {
-	var (
-		i, p int
-		path []string
-	)
-	for i < len(dotpath) {
-		switch r := dotpath[i]; {
-		case r == '"':
-			if i == len(dotpath)-1 {
-				return nil, fmt.Errorf("unexpected quote")
-			}
-			idx := strings.IndexRune(dotpath[i+1:], '"')
-			if idx == -1 || idx == 0 {
-				return nil, fmt.Errorf("unbalanced quote")
-			}
-			i += idx + 2
-		case r == '[':
-			if p != i {
-				path = append(path, dotpath[p:i])
-			}
-			p = i
-			if i == len(dotpath)-1 {
-				return nil, fmt.Errorf("unexpected bracket")
-			}
-			idx := strings.IndexRune(dotpath[i:], ']')
-			if idx == -1 || idx == 1 {
-				return nil, fmt.Errorf("unbalanced bracket")
-			}
-			if !isNumber(dotpath[i+1 : i+idx]) {
-				return nil, fmt.Errorf("invalid index %q", dotpath[i:i+idx+1])
-			}
-			i += idx + 1
-		case r == '.' || r == ']':
-			if p != i {
-				path = append(path, dotpath[p:i])
-			}
-			i++
-			p = i
-		default:
-			i++
-		}
-	}
-	if p != i {
-		path = append(path, dotpath[p:i])
-	}
-	return path, nil
-}
-
-// isNumber reports whether the string is a number (category N).
-func isNumber(s string) bool {
-	for _, r := range s {
-		if !unicode.IsNumber(r) {
-			return false
-		}
-	}
-	return true
-}
-
-// isJSONIdx reports whether the string represents a JSON index.
-func isJSONIdx(s string) (string, bool) {
-	if len(s) > 2 && s[0] == '[' && s[len(s)-1] == ']' && isNumber(s[1:len(s)-1]) {
-		return s[1 : len(s)-1], true
-	}
-	return "", false
 }
 
 func isFunc(s string) bool {
