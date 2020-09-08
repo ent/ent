@@ -796,6 +796,14 @@ func ClearEdges(t *testing.T, client *ent.Client) {
 		require.Zero(t, friends[i].QueryFollowers().CountX(ctx))
 		require.Zero(t, friends[i].QueryFollowing().CountX(ctx))
 	}
+
+	t.Log("remove/clear and add edges")
+	a8m = a8m.Update().AddFollowing(friends[0], friends[1]).SaveX(ctx)
+	require.Equal(t, []int{friends[0].ID, friends[1].ID}, a8m.QueryFollowing().Order(ent.Asc(user.FieldID)).IDsX(ctx))
+	a8m = a8m.Update().RemoveFollowing(friends[0], friends[1]).AddFollowing(friends[2]).SaveX(ctx)
+	require.Equal(t, friends[2].ID, a8m.QueryFollowing().OnlyIDX(ctx))
+	a8m = a8m.Update().ClearFollowing().AddFollowing(friends[0]).SaveX(ctx)
+	require.Equal(t, friends[0].ID, a8m.QueryFollowing().OnlyIDX(ctx))
 }
 
 func UniqueConstraint(t *testing.T, client *ent.Client) {
