@@ -23,6 +23,8 @@ const (
 	FieldName = "name"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldInHook holds the string denoting the in_hook field in the database.
+	FieldInHook = "in_hook"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldNumber,
 	FieldName,
 	FieldCreatedAt,
+	FieldInHook,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Card type.

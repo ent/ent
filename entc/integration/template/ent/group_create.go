@@ -36,20 +36,23 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if err := gc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Group
 	)
 	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
+			return nil, err
+		}
 		node, err = gc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GroupMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gc.check(); err != nil {
+				return nil, err
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
@@ -75,7 +78,8 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
-func (gc *GroupCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.MaxUsers(); !ok {
 		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
 	}
@@ -132,12 +136,12 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 		func(i int, root context.Context) {
 			builder := gcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*GroupMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

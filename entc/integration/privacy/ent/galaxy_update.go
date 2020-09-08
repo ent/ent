@@ -87,28 +87,23 @@ func (gu *GalaxyUpdate) RemovePlanets(p ...*Planet) *GalaxyUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GalaxyUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := gu.mutation.Name(); ok {
-		if err := galaxy.NameValidator(v); err != nil {
-			return 0, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
-	if v, ok := gu.mutation.GetType(); ok {
-		if err := galaxy.TypeValidator(v); err != nil {
-			return 0, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
-
 	var (
 		err      error
 		affected int
 	)
 	if len(gu.hooks) == 0 {
+		if err = gu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = gu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GalaxyMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gu.check(); err != nil {
+				return 0, err
 			}
 			gu.mutation = mutation
 			affected, err = gu.sqlSave(ctx)
@@ -145,6 +140,21 @@ func (gu *GalaxyUpdate) ExecX(ctx context.Context) {
 	if err := gu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gu *GalaxyUpdate) check() error {
+	if v, ok := gu.mutation.Name(); ok {
+		if err := galaxy.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if v, ok := gu.mutation.GetType(); ok {
+		if err := galaxy.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (gu *GalaxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -306,28 +316,23 @@ func (guo *GalaxyUpdateOne) RemovePlanets(p ...*Planet) *GalaxyUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (guo *GalaxyUpdateOne) Save(ctx context.Context) (*Galaxy, error) {
-	if v, ok := guo.mutation.Name(); ok {
-		if err := galaxy.NameValidator(v); err != nil {
-			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
-	if v, ok := guo.mutation.GetType(); ok {
-		if err := galaxy.TypeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
-
 	var (
 		err  error
 		node *Galaxy
 	)
 	if len(guo.hooks) == 0 {
+		if err = guo.check(); err != nil {
+			return nil, err
+		}
 		node, err = guo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GalaxyMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = guo.check(); err != nil {
+				return nil, err
 			}
 			guo.mutation = mutation
 			node, err = guo.sqlSave(ctx)
@@ -364,6 +369,21 @@ func (guo *GalaxyUpdateOne) ExecX(ctx context.Context) {
 	if err := guo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (guo *GalaxyUpdateOne) check() error {
+	if v, ok := guo.mutation.Name(); ok {
+		if err := galaxy.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if v, ok := guo.mutation.GetType(); ok {
+		if err := galaxy.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (ga *Galaxy, err error) {

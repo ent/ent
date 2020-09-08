@@ -30,20 +30,23 @@ func (ic *ItemCreate) Mutation() *ItemMutation {
 
 // Save creates the Item in the database.
 func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	if err := ic.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Item
 	)
 	if len(ic.hooks) == 0 {
+		if err = ic.check(); err != nil {
+			return nil, err
+		}
 		node, err = ic.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ItemMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ic.check(); err != nil {
+				return nil, err
 			}
 			ic.mutation = mutation
 			node, err = ic.gremlinSave(ctx)
@@ -69,7 +72,8 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 	return v
 }
 
-func (ic *ItemCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (ic *ItemCreate) check() error {
 	return nil
 }
 

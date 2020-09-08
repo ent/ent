@@ -64,7 +64,6 @@ func (pu *PetUpdate) ClearOwner() *PetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -217,7 +216,6 @@ func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-
 	var (
 		err  error
 		node *Pet

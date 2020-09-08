@@ -84,13 +84,16 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 	for i := range {{ $receiver }}.builders {
 		func(i int, root context.Context) {
 			builder := {{ $receiver }}.builders[i]
+			{{- if $.HasDefault }}
+				builder.defaults()
+			{{- end }}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*{{ $.MutationName }})
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

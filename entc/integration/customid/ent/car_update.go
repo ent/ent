@@ -124,28 +124,23 @@ func (cu *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := cu.mutation.BeforeID(); ok {
-		if err := car.BeforeIDValidator(v); err != nil {
-			return 0, &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.AfterID(); ok {
-		if err := car.AfterIDValidator(v); err != nil {
-			return 0, &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
-		}
-	}
-
 	var (
 		err      error
 		affected int
 	)
 	if len(cu.hooks) == 0 {
+		if err = cu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = cu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CarMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cu.check(); err != nil {
+				return 0, err
 			}
 			cu.mutation = mutation
 			affected, err = cu.sqlSave(ctx)
@@ -182,6 +177,21 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cu *CarUpdate) check() error {
+	if v, ok := cu.mutation.BeforeID(); ok {
+		if err := car.BeforeIDValidator(v); err != nil {
+			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+		}
+	}
+	if v, ok := cu.mutation.AfterID(); ok {
+		if err := car.AfterIDValidator(v); err != nil {
+			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -394,28 +404,23 @@ func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	if v, ok := cuo.mutation.BeforeID(); ok {
-		if err := car.BeforeIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.AfterID(); ok {
-		if err := car.AfterIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
-		}
-	}
-
 	var (
 		err  error
 		node *Car
 	)
 	if len(cuo.hooks) == 0 {
+		if err = cuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = cuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CarMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cuo.check(); err != nil {
+				return nil, err
 			}
 			cuo.mutation = mutation
 			node, err = cuo.sqlSave(ctx)
@@ -452,6 +457,21 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cuo *CarUpdateOne) check() error {
+	if v, ok := cuo.mutation.BeforeID(); ok {
+		if err := car.BeforeIDValidator(v); err != nil {
+			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+		}
+	}
+	if v, ok := cuo.mutation.AfterID(); ok {
+		if err := car.AfterIDValidator(v); err != nil {
+			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {

@@ -106,7 +106,6 @@ func (gu *GroupUpdate) ClearAdmin() *GroupUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -362,7 +361,6 @@ func (guo *GroupUpdateOne) ClearAdmin() *GroupUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-
 	var (
 		err  error
 		node *Group

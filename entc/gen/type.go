@@ -300,6 +300,21 @@ func (t Type) HasNumeric() bool {
 	return false
 }
 
+// HasUpdateCheckers reports if this type has any checkers to run on update(one).
+func (t Type) HasUpdateCheckers() bool {
+	for _, f := range t.Fields {
+		if (f.Validators > 0 || f.IsEnum()) && !f.Immutable {
+			return true
+		}
+	}
+	for _, e := range t.Edges {
+		if e.Unique && !e.Optional {
+			return true
+		}
+	}
+	return false
+}
+
 // FKEdges returns all edges that reside on the type table as foreign-keys.
 func (t Type) FKEdges() (edges []*Edge) {
 	for _, e := range t.Edges {

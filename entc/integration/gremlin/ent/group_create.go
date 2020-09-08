@@ -145,20 +145,24 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if err := gc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Group
 	)
+	gc.defaults()
 	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
+			return nil, err
+		}
 		node, err = gc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GroupMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gc.check(); err != nil {
+				return nil, err
 			}
 			gc.mutation = mutation
 			node, err = gc.gremlinSave(ctx)
@@ -184,10 +188,22 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
-func (gc *GroupCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (gc *GroupCreate) defaults() {
 	if _, ok := gc.mutation.Active(); !ok {
 		v := group.DefaultActive
 		gc.mutation.SetActive(v)
+	}
+	if _, ok := gc.mutation.MaxUsers(); !ok {
+		v := group.DefaultMaxUsers
+		gc.mutation.SetMaxUsers(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New("ent: missing required field \"active\"")}
 	}
 	if _, ok := gc.mutation.Expire(); !ok {
 		return &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
@@ -196,10 +212,6 @@ func (gc *GroupCreate) preSave() error {
 		if err := group.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
 		}
-	}
-	if _, ok := gc.mutation.MaxUsers(); !ok {
-		v := group.DefaultMaxUsers
-		gc.mutation.SetMaxUsers(v)
 	}
 	if v, ok := gc.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {

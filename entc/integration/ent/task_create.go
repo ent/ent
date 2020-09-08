@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
@@ -44,20 +45,24 @@ func (tc *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	if err := tc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Task
 	)
+	tc.defaults()
 	if len(tc.hooks) == 0 {
+		if err = tc.check(); err != nil {
+			return nil, err
+		}
 		node, err = tc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TaskMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tc.check(); err != nil {
+				return nil, err
 			}
 			tc.mutation = mutation
 			node, err = tc.sqlSave(ctx)
@@ -83,10 +88,18 @@ func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
 	return v
 }
 
-func (tc *TaskCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (tc *TaskCreate) defaults() {
 	if _, ok := tc.mutation.Priority(); !ok {
 		v := task.DefaultPriority
 		tc.mutation.SetPriority(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tc *TaskCreate) check() error {
+	if _, ok := tc.mutation.Priority(); !ok {
+		return &ValidationError{Name: "priority", err: errors.New("ent: missing required field \"priority\"")}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
@@ -145,13 +158,14 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*TaskMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

@@ -61,6 +61,7 @@ func (Card) Hooks() []ent.Hook {
 		),
 		func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
+				m.SetInHook("value was set in hook")
 				if _, ok := m.Name(); !ok {
 					m.SetName("unknown")
 				}
@@ -81,6 +82,8 @@ func (Card) Fields() []ent.Field {
 			Comment("Exact name written on card"),
 		field.Time("created_at").
 			Default(time.Now),
+		field.String("in_hook").
+			Comment("A mandatory field that is set by the hook"),
 	}
 }
 

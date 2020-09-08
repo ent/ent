@@ -67,6 +67,12 @@ func (cu *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
 	return cu
 }
 
+// SetInHook sets the in_hook field.
+func (cu *CardUpdate) SetInHook(s string) *CardUpdate {
+	cu.mutation.SetInHook(s)
+	return cu
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
@@ -99,7 +105,6 @@ func (cu *CardUpdate) ClearOwner() *CardUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -185,6 +190,13 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: card.FieldCreatedAt,
+		})
+	}
+	if value, ok := cu.mutation.InHook(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: card.FieldInHook,
 		})
 	}
 	if cu.mutation.OwnerCleared() {
@@ -274,6 +286,12 @@ func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
 	return cuo
 }
 
+// SetInHook sets the in_hook field.
+func (cuo *CardUpdateOne) SetInHook(s string) *CardUpdateOne {
+	cuo.mutation.SetInHook(s)
+	return cuo
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
 	cuo.mutation.SetOwnerID(id)
@@ -306,7 +324,6 @@ func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-
 	var (
 		err  error
 		node *Card
@@ -390,6 +407,13 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: card.FieldCreatedAt,
+		})
+	}
+	if value, ok := cuo.mutation.InHook(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: card.FieldInHook,
 		})
 	}
 	if cuo.mutation.OwnerCleared() {

@@ -555,20 +555,24 @@ func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	if err := ftc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *FieldType
 	)
+	ftc.defaults()
 	if len(ftc.hooks) == 0 {
+		if err = ftc.check(); err != nil {
+			return nil, err
+		}
 		node, err = ftc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FieldTypeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ftc.check(); err != nil {
+				return nil, err
 			}
 			ftc.mutation = mutation
 			node, err = ftc.gremlinSave(ctx)
@@ -594,7 +598,16 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 	return v
 }
 
-func (ftc *FieldTypeCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (ftc *FieldTypeCreate) defaults() {
+	if _, ok := ftc.mutation.Role(); !ok {
+		v := fieldtype.DefaultRole
+		ftc.mutation.SetRole(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ftc *FieldTypeCreate) check() error {
 	if _, ok := ftc.mutation.Int(); !ok {
 		return &ValidationError{Name: "int", err: errors.New("ent: missing required field \"int\"")}
 	}
@@ -631,8 +644,7 @@ func (ftc *FieldTypeCreate) preSave() error {
 		}
 	}
 	if _, ok := ftc.mutation.Role(); !ok {
-		v := fieldtype.DefaultRole
-		ftc.mutation.SetRole(v)
+		return &ValidationError{Name: "role", err: errors.New("ent: missing required field \"role\"")}
 	}
 	if v, ok := ftc.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {

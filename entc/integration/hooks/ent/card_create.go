@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -66,6 +67,12 @@ func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
 	return cc
 }
 
+// SetInHook sets the in_hook field.
+func (cc *CardCreate) SetInHook(s string) *CardCreate {
+	cc.mutation.SetInHook(s)
+	return cc
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	cc.mutation.SetOwnerID(id)
@@ -92,20 +99,24 @@ func (cc *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if err := cc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Card
 	)
+	cc.defaults()
 	if len(cc.hooks) == 0 {
+		if err = cc.check(); err != nil {
+			return nil, err
+		}
 		node, err = cc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CardMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cc.check(); err != nil {
+				return nil, err
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
@@ -131,10 +142,22 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 	return v
 }
 
-func (cc *CardCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (cc *CardCreate) defaults() {
 	if _, ok := cc.mutation.Number(); !ok {
 		v := card.DefaultNumber
 		cc.mutation.SetNumber(v)
+	}
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		v := card.DefaultCreatedAt()
+		cc.mutation.SetCreatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cc *CardCreate) check() error {
+	if _, ok := cc.mutation.Number(); !ok {
+		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
@@ -142,8 +165,10 @@ func (cc *CardCreate) preSave() error {
 		}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
-		v := card.DefaultCreatedAt()
-		cc.mutation.SetCreatedAt(v)
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := cc.mutation.InHook(); !ok {
+		return &ValidationError{Name: "in_hook", err: errors.New("ent: missing required field \"in_hook\"")}
 	}
 	return nil
 }
@@ -196,6 +221,14 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		})
 		c.CreatedAt = value
 	}
+	if value, ok := cc.mutation.InHook(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: card.FieldInHook,
+		})
+		c.InHook = value
+	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -232,13 +265,14 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*CardMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()
