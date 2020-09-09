@@ -34,20 +34,26 @@ type {{ $builder }} struct {
 
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
-	if err := {{ $receiver }}.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err error
 		node *{{ $.Name }}
 	)
+	{{- if $.HasDefault }}
+		{{ $receiver }}.defaults()
+	{{- end }}
 	if len({{ $receiver }}.hooks) == 0 {
+		if err = {{ $receiver }}.check(); err != nil {
+			return nil, err
+		}
 		node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*{{ $.MutationName }})
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = {{ $receiver }}.check(); err != nil {
+				return nil, err
 			}
 			{{ $mutation }} = mutation
 			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
@@ -73,17 +79,27 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} 
 	return v
 }
 
-func ({{ $receiver }} *{{ $builder }}) preSave() error {
-	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
-	{{- range $f := $fields }}
-		{{- if or $f.Default (and (not $f.Optional) (ne $f.Name $.ID.Name)) }}
-			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				{{- if $f.Default }}
+{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+{{ if $.HasDefault }}
+	// defaults sets the default values of the builder before save.
+	func ({{ $receiver }} *{{ $builder }}) defaults() {
+		{{- range $f := $fields }}
+			{{- if or $f.Default }}
+				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
 					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
 					{{ $mutation }}.Set{{ $f.StructField }}(v)
-				{{- else }}
-					return &ValidationError{Name: "{{ $f.Name }}", err: errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")}
-				{{- end }}
+				}
+			{{- end }}
+		{{- end }}
+	}
+{{ end }}
+
+// check runs all checks and user-defined validators on the builder.
+func ({{ $receiver }} *{{ $builder }}) check() error {
+	{{- range $f := $fields }}
+		{{- if and (not $f.Optional) (ne $f.Name $.ID.Name) }}
+			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
+				return &ValidationError{Name: "{{ $f.Name }}", err: errors.New("{{ $pkg }}: missing required field \"{{ $f.Name }}\"")}
 			}
 		{{- end }}
 		{{- with or $f.Validators $f.IsEnum }}

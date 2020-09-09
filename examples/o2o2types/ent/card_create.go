@@ -55,20 +55,23 @@ func (cc *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if err := cc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Card
 	)
 	if len(cc.hooks) == 0 {
+		if err = cc.check(); err != nil {
+			return nil, err
+		}
 		node, err = cc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CardMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cc.check(); err != nil {
+				return nil, err
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
@@ -94,7 +97,8 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 	return v
 }
 
-func (cc *CardCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.Expired(); !ok {
 		return &ValidationError{Name: "expired", err: errors.New("ent: missing required field \"expired\"")}
 	}
@@ -184,12 +188,12 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*CardMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

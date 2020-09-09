@@ -74,20 +74,23 @@ func (nc *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	if err := nc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Node
 	)
 	if len(nc.hooks) == 0 {
+		if err = nc.check(); err != nil {
+			return nil, err
+		}
 		node, err = nc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*NodeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = nc.check(); err != nil {
+				return nil, err
 			}
 			nc.mutation = mutation
 			node, err = nc.sqlSave(ctx)
@@ -113,7 +116,8 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 	return v
 }
 
-func (nc *NodeCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (nc *NodeCreate) check() error {
 	if _, ok := nc.mutation.Value(); !ok {
 		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
 	}
@@ -208,12 +212,12 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 		func(i int, root context.Context) {
 			builder := ncb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*NodeMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

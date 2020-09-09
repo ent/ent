@@ -215,20 +215,24 @@ func (uc *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if err := uc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *User
 	)
+	uc.defaults()
 	if len(uc.hooks) == 0 {
+		if err = uc.check(); err != nil {
+			return nil, err
+		}
 		node, err = uc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = uc.check(); err != nil {
+				return nil, err
 			}
 			uc.mutation = mutation
 			node, err = uc.sqlSave(ctx)
@@ -254,7 +258,8 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 	return v
 }
 
-func (uc *UserCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.MixedString(); !ok {
 		v := user.DefaultMixedString
 		uc.mutation.SetMixedString(v)
@@ -262,6 +267,24 @@ func (uc *UserCreate) preSave() error {
 	if _, ok := uc.mutation.MixedEnum(); !ok {
 		v := user.DefaultMixedEnum
 		uc.mutation.SetMixedEnum(v)
+	}
+	if _, ok := uc.mutation.Phone(); !ok {
+		v := user.DefaultPhone
+		uc.mutation.SetPhone(v)
+	}
+	if _, ok := uc.mutation.Title(); !ok {
+		v := user.DefaultTitle
+		uc.mutation.SetTitle(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (uc *UserCreate) check() error {
+	if _, ok := uc.mutation.MixedString(); !ok {
+		return &ValidationError{Name: "mixed_string", err: errors.New("entv2: missing required field \"mixed_string\"")}
+	}
+	if _, ok := uc.mutation.MixedEnum(); !ok {
+		return &ValidationError{Name: "mixed_enum", err: errors.New("entv2: missing required field \"mixed_enum\"")}
 	}
 	if v, ok := uc.mutation.MixedEnum(); ok {
 		if err := user.MixedEnumValidator(v); err != nil {
@@ -278,12 +301,10 @@ func (uc *UserCreate) preSave() error {
 		return &ValidationError{Name: "nickname", err: errors.New("entv2: missing required field \"nickname\"")}
 	}
 	if _, ok := uc.mutation.Phone(); !ok {
-		v := user.DefaultPhone
-		uc.mutation.SetPhone(v)
+		return &ValidationError{Name: "phone", err: errors.New("entv2: missing required field \"phone\"")}
 	}
 	if _, ok := uc.mutation.Title(); !ok {
-		v := user.DefaultTitle
-		uc.mutation.SetTitle(v)
+		return &ValidationError{Name: "title", err: errors.New("entv2: missing required field \"title\"")}
 	}
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
@@ -498,13 +519,14 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range ucb.builders {
 		func(i int, root context.Context) {
 			builder := ucb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*UserMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

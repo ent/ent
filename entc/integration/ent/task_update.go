@@ -60,22 +60,23 @@ func (tu *TaskUpdate) Mutation() *TaskMutation {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := tu.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
-			return 0, &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
-		}
-	}
 	var (
 		err      error
 		affected int
 	)
 	if len(tu.hooks) == 0 {
+		if err = tu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = tu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TaskMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tu.check(); err != nil {
+				return 0, err
 			}
 			tu.mutation = mutation
 			affected, err = tu.sqlSave(ctx)
@@ -112,6 +113,16 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tu *TaskUpdate) check() error {
+	if v, ok := tu.mutation.Priority(); ok {
+		if err := task.PriorityValidator(int(v)); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -192,22 +203,23 @@ func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
 
 // Save executes the query and returns the updated entity.
 func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
-	if v, ok := tuo.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
-			return nil, &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
-		}
-	}
 	var (
 		err  error
 		node *Task
 	)
 	if len(tuo.hooks) == 0 {
+		if err = tuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = tuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TaskMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tuo.check(); err != nil {
+				return nil, err
 			}
 			tuo.mutation = mutation
 			node, err = tuo.sqlSave(ctx)
@@ -244,6 +256,16 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TaskUpdateOne) check() error {
+	if v, ok := tuo.mutation.Priority(); ok {
+		if err := task.PriorityValidator(int(v)); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (t *Task, err error) {

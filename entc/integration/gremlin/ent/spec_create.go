@@ -45,20 +45,23 @@ func (sc *SpecCreate) Mutation() *SpecMutation {
 
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	if err := sc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Spec
 	)
 	if len(sc.hooks) == 0 {
+		if err = sc.check(); err != nil {
+			return nil, err
+		}
 		node, err = sc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*SpecMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = sc.check(); err != nil {
+				return nil, err
 			}
 			sc.mutation = mutation
 			node, err = sc.gremlinSave(ctx)
@@ -84,7 +87,8 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 	return v
 }
 
-func (sc *SpecCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (sc *SpecCreate) check() error {
 	return nil
 }
 

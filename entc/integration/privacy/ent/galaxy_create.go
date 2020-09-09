@@ -58,20 +58,23 @@ func (gc *GalaxyCreate) Mutation() *GalaxyMutation {
 
 // Save creates the Galaxy in the database.
 func (gc *GalaxyCreate) Save(ctx context.Context) (*Galaxy, error) {
-	if err := gc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Galaxy
 	)
 	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
+			return nil, err
+		}
 		node, err = gc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GalaxyMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gc.check(); err != nil {
+				return nil, err
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
@@ -97,7 +100,8 @@ func (gc *GalaxyCreate) SaveX(ctx context.Context) *Galaxy {
 	return v
 }
 
-func (gc *GalaxyCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (gc *GalaxyCreate) check() error {
 	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
@@ -194,12 +198,12 @@ func (gcb *GalaxyCreateBulk) Save(ctx context.Context) ([]*Galaxy, error) {
 		func(i int, root context.Context) {
 			builder := gcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*GalaxyMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

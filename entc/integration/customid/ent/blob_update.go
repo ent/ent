@@ -106,7 +106,6 @@ func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -362,7 +361,6 @@ func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-
 	var (
 		err  error
 		node *Blob

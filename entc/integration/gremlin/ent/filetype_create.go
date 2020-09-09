@@ -82,20 +82,24 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	if err := ftc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *FileType
 	)
+	ftc.defaults()
 	if len(ftc.hooks) == 0 {
+		if err = ftc.check(); err != nil {
+			return nil, err
+		}
 		node, err = ftc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileTypeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ftc.check(); err != nil {
+				return nil, err
 			}
 			ftc.mutation = mutation
 			node, err = ftc.gremlinSave(ctx)
@@ -121,13 +125,25 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 	return v
 }
 
-func (ftc *FileTypeCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (ftc *FileTypeCreate) defaults() {
+	if _, ok := ftc.mutation.GetType(); !ok {
+		v := filetype.DefaultType
+		ftc.mutation.SetType(v)
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		v := filetype.DefaultState
+		ftc.mutation.SetState(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ftc *FileTypeCreate) check() error {
 	if _, ok := ftc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
 	if _, ok := ftc.mutation.GetType(); !ok {
-		v := filetype.DefaultType
-		ftc.mutation.SetType(v)
+		return &ValidationError{Name: "type", err: errors.New("ent: missing required field \"type\"")}
 	}
 	if v, ok := ftc.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
@@ -135,8 +151,7 @@ func (ftc *FileTypeCreate) preSave() error {
 		}
 	}
 	if _, ok := ftc.mutation.State(); !ok {
-		v := filetype.DefaultState
-		ftc.mutation.SetState(v)
+		return &ValidationError{Name: "state", err: errors.New("ent: missing required field \"state\"")}
 	}
 	if v, ok := ftc.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {

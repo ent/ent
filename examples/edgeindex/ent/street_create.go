@@ -56,20 +56,23 @@ func (sc *StreetCreate) Mutation() *StreetMutation {
 
 // Save creates the Street in the database.
 func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
-	if err := sc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Street
 	)
 	if len(sc.hooks) == 0 {
+		if err = sc.check(); err != nil {
+			return nil, err
+		}
 		node, err = sc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*StreetMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = sc.check(); err != nil {
+				return nil, err
 			}
 			sc.mutation = mutation
 			node, err = sc.sqlSave(ctx)
@@ -95,7 +98,8 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 	return v
 }
 
-func (sc *StreetCreate) preSave() error {
+// check runs all checks and user-defined validators on the builder.
+func (sc *StreetCreate) check() error {
 	if _, ok := sc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
@@ -171,12 +175,12 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*StreetMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()
