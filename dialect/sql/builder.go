@@ -2,6 +2,13 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
+// Package sql provides wrappers around the standard database/sql package
+// to allow the generated code to interact with a statically-typed API.
+//
+// Users that are interacting with this package should be aware that the
+// following builders don't check the given SQL syntax nor validate or escape
+// user-inputs. ~All validations are expected to be happened in the generated
+// ent package.
 package sql
 
 import (
