@@ -94,6 +94,16 @@ var (
 	FriendsPrimaryKey = []string{"user", "friend"}
 )
 
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
+
 var (
 	// DefaultMixedString holds the default value on creation for the mixed_string field.
 	DefaultMixedString string

@@ -686,6 +686,11 @@ func (gigb *GroupInfoGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range gigb.fields {
+		if !groupinfo.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := gigb.sqlQuery().Query()
 	if err := gigb.driver.Query(ctx, query, args, rows); err != nil {
@@ -920,6 +925,11 @@ func (gis *GroupInfoSelect) BoolX(ctx context.Context) bool {
 }
 
 func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range gis.fields {
+		if !groupinfo.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := gis.sqlQuery().Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {

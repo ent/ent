@@ -697,6 +697,11 @@ func (sgb *SpecGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (sgb *SpecGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range sgb.fields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := sgb.sqlQuery().Query()
 	if err := sgb.driver.Query(ctx, query, args, rows); err != nil {
@@ -931,6 +936,11 @@ func (ss *SpecSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ss *SpecSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ss.fields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ss.sqlQuery().Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

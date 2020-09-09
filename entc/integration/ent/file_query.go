@@ -811,6 +811,11 @@ func (fgb *FileGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (fgb *FileGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range fgb.fields {
+		if !file.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := fgb.sqlQuery().Query()
 	if err := fgb.driver.Query(ctx, query, args, rows); err != nil {
@@ -1045,6 +1050,11 @@ func (fs *FileSelect) BoolX(ctx context.Context) bool {
 }
 
 func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range fs.fields {
+		if !file.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := fs.sqlQuery().Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

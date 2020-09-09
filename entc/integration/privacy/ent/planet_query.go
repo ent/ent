@@ -731,6 +731,11 @@ func (pgb *PlanetGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (pgb *PlanetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range pgb.fields {
+		if !planet.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := pgb.sqlQuery().Query()
 	if err := pgb.driver.Query(ctx, query, args, rows); err != nil {
@@ -965,6 +970,11 @@ func (ps *PlanetSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ps *PlanetSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ps.fields {
+		if !planet.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ps.sqlQuery().Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
