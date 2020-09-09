@@ -620,6 +620,11 @@ func (ugb *UserGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ugb.fields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ugb.sqlQuery().Query()
 	if err := ugb.driver.Query(ctx, query, args, rows); err != nil {
@@ -854,6 +859,11 @@ func (us *UserSelect) BoolX(ctx context.Context) bool {
 }
 
 func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range us.fields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := us.sqlQuery().Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {

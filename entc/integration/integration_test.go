@@ -592,6 +592,10 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Error(err, "max_users validator failed")
 	_, err = client.Group.UpdateOne(grp).SetMaxUsers(-10).Save(ctx)
 	require.Error(err, "max_users validator failed")
+	_, err = client.Group.Query().Select("unknown_field").String(ctx)
+	require.EqualError(err, "invalid field \"unknown_field\" for selection")
+	_, err = client.Group.Query().GroupBy("unknown_field").String(ctx)
+	require.EqualError(err, "invalid field \"unknown_field\" for group-by")
 
 	t.Log("query using edge-with predicate")
 	require.Len(usr.QueryGroups().Where(group.HasInfoWith(groupinfo.Desc("group info"))).AllX(ctx), 1)

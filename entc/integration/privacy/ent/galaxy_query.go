@@ -689,6 +689,11 @@ func (ggb *GalaxyGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (ggb *GalaxyGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ggb.fields {
+		if !galaxy.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ggb.sqlQuery().Query()
 	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
@@ -923,6 +928,11 @@ func (gs *GalaxySelect) BoolX(ctx context.Context) bool {
 }
 
 func (gs *GalaxySelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range gs.fields {
+		if !galaxy.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := gs.sqlQuery().Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {

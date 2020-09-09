@@ -752,6 +752,11 @@ func (ngb *NodeGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (ngb *NodeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ngb.fields {
+		if !node.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ngb.sqlQuery().Query()
 	if err := ngb.driver.Query(ctx, query, args, rows); err != nil {
@@ -986,6 +991,11 @@ func (ns *NodeSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ns.fields {
+		if !node.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ns.sqlQuery().Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

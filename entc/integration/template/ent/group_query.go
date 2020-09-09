@@ -620,6 +620,11 @@ func (ggb *GroupGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (ggb *GroupGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ggb.fields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ggb.sqlQuery().Query()
 	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
@@ -854,6 +859,11 @@ func (gs *GroupSelect) BoolX(ctx context.Context) bool {
 }
 
 func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range gs.fields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := gs.sqlQuery().Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {

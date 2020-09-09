@@ -620,6 +620,11 @@ func (tgb *TaskGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range tgb.fields {
+		if !task.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := tgb.sqlQuery().Query()
 	if err := tgb.driver.Query(ctx, query, args, rows); err != nil {
@@ -854,6 +859,11 @@ func (ts *TaskSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ts *TaskSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ts.fields {
+		if !task.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sqlQuery().Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

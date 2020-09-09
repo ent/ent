@@ -50,6 +50,21 @@ var (
 	LinksPrimaryKey = []string{"blob_id", "link_id"}
 )
 
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
+}
+
 var (
 	// DefaultUUID holds the default value on creation for the uuid field.
 	DefaultUUID func() uuid.UUID

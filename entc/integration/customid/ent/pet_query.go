@@ -880,6 +880,11 @@ func (pgb *PetGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range pgb.fields {
+		if !pet.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := pgb.sqlQuery().Query()
 	if err := pgb.driver.Query(ctx, query, args, rows); err != nil {
@@ -1114,6 +1119,11 @@ func (ps *PetSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ps.fields {
+		if !pet.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ps.sqlQuery().Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {

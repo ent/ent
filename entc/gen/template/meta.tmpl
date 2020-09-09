@@ -38,6 +38,11 @@ const (
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
+{{ $tmpl = printf "dialect/%s/meta/functions" $.Storage }}
+{{ if hasTemplate $tmpl }}
+    {{ xtemplate $tmpl $ }}
+{{ end }}
+
 {{/* Has at least one field (not enum) with default value */}}
 {{ $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
 {{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}

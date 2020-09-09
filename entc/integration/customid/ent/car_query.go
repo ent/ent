@@ -693,6 +693,11 @@ func (cgb *CarGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (cgb *CarGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range cgb.fields {
+		if !car.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := cgb.sqlQuery().Query()
 	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
@@ -927,6 +932,11 @@ func (cs *CarSelect) BoolX(ctx context.Context) bool {
 }
 
 func (cs *CarSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range cs.fields {
+		if !car.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sqlQuery().Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
