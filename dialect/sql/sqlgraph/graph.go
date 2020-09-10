@@ -547,7 +547,11 @@ type query struct {
 
 func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 	rows := &sql.Rows{}
-	query, args := q.selector().Query()
+	selector, err := q.selector()
+	if err != nil {
+		return err
+	}
+	query, args := selector.Query()
 	if err := drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -566,7 +570,10 @@ func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 
 func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	rows := &sql.Rows{}
-	selector := q.selector()
+	selector, err := q.selector()
+	if err != nil {
+		return 0, err
+	}
 	selector.Count(selector.C(q.Node.ID.Column))
 	if q.Unique {
 		selector.SetDistinct(false)
@@ -580,7 +587,7 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	return sql.ScanInt(rows)
 }
 
-func (q *query) selector() *sql.Selector {
+func (q *query) selector() (*sql.Selector, error) {
 	selector := q.builder.Select().From(q.builder.Table(q.Node.Table))
 	if q.From != nil {
 		selector = q.From
@@ -603,7 +610,10 @@ func (q *query) selector() *sql.Selector {
 	if q.Unique {
 		selector.Distinct()
 	}
-	return selector
+	if err := selector.Err(); err != nil {
+		return nil, err
+	}
+	return selector, nil
 }
 
 type updater struct {
