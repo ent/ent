@@ -695,8 +695,12 @@ func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error 
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := gigb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := gigb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := gigb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -709,7 +713,7 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
 	columns = append(columns, gigb.fields...)
 	for _, fn := range gigb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, groupinfo.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(gigb.fields...)
 }

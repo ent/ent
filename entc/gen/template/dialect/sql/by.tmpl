@@ -24,19 +24,25 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* custom signature for group-by function */}}
 {{ define "dialect/sql/group/signature" -}}
-	type AggregateFunc func(*sql.Selector) string
+	type AggregateFunc func(*sql.Selector, func(string) bool) string
 {{- end }}
 
 {{ define "dialect/sql/group/as" -}}
-	func(s *sql.Selector) string {
-			return sql.As(fn(s), end)
+	func(s *sql.Selector, check func(string) bool) string {
+			return sql.As(fn(s, check), end)
 	}
 {{- end }}
 
 {{ define "dialect/sql/group/func" -}}
 	{{- $fn := $.Scope.Func -}}
 	{{- $withField := $.Scope.WithField -}}
-	func(s *sql.Selector) string {
+	func(s *sql.Selector, {{ if $withField }}check{{ else }}_{{ end }} func(string) bool) string {
+		{{- if $withField }}
+			if !check(field) {
+				s.AddError(&ValidationError{Name: field, err: fmt.Errorf("invalid field %q for grouping", field)})
+				return ""
+			}
+		{{- end }}
 		return sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})
 	}
 {{- end }}

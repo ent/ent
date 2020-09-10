@@ -67,8 +67,12 @@ func (pq *PlanetQuery) QueryNeighbors() *PlanetQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := pq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(planet.Table, planet.FieldID, pq.sqlQuery()),
+			sqlgraph.From(planet.Table, planet.FieldID, selector),
 			sqlgraph.To(planet.Table, planet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, planet.NeighborsTable, planet.NeighborsPrimaryKey...),
 		)
@@ -477,7 +481,7 @@ func (pq *PlanetQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := pq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, planet.ValidColumn)
 			}
 		}
 	}
@@ -496,7 +500,7 @@ func (pq *PlanetQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range pq.order {
-		p(selector)
+		p(selector, planet.ValidColumn)
 	}
 	if offset := pq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -736,8 +740,12 @@ func (pgb *PlanetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := pgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := pgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := pgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -750,7 +758,7 @@ func (pgb *PlanetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
 	columns = append(columns, pgb.fields...)
 	for _, fn := range pgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, planet.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(pgb.fields...)
 }

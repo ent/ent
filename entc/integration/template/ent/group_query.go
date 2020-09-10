@@ -366,7 +366,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := gq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, group.ValidColumn)
 			}
 		}
 	}
@@ -385,7 +385,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p(selector)
+		p(selector, group.ValidColumn)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -625,8 +625,12 @@ func (ggb *GroupGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ggb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ggb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -639,7 +643,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 	columns = append(columns, ggb.fields...)
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, group.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
 }

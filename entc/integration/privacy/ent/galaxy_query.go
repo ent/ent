@@ -67,8 +67,12 @@ func (gq *GalaxyQuery) QueryPlanets() *PlanetQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := gq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(galaxy.Table, galaxy.FieldID, gq.sqlQuery()),
+			sqlgraph.From(galaxy.Table, galaxy.FieldID, selector),
 			sqlgraph.To(planet.Table, planet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, galaxy.PlanetsTable, galaxy.PlanetsColumn),
 		)
@@ -435,7 +439,7 @@ func (gq *GalaxyQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := gq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, galaxy.ValidColumn)
 			}
 		}
 	}
@@ -454,7 +458,7 @@ func (gq *GalaxyQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p(selector)
+		p(selector, galaxy.ValidColumn)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -694,8 +698,12 @@ func (ggb *GalaxyGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ggb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ggb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -708,7 +716,7 @@ func (ggb *GalaxyGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 	columns = append(columns, ggb.fields...)
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, galaxy.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
 }

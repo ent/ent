@@ -601,8 +601,12 @@ func (igb *ItemGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := igb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := igb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := igb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -615,7 +619,7 @@ func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 	columns = append(columns, igb.fields...)
 	for _, fn := range igb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, item.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(igb.fields...)
 }

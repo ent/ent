@@ -68,8 +68,12 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := nq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+			sqlgraph.From(node.Table, node.FieldID, selector),
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
 		)
@@ -86,8 +90,12 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := nq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(node.Table, node.FieldID, nq.sqlQuery()),
+			sqlgraph.From(node.Table, node.FieldID, selector),
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
 		)
@@ -498,7 +506,7 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := nq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, node.ValidColumn)
 			}
 		}
 	}
@@ -517,7 +525,7 @@ func (nq *NodeQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range nq.order {
-		p(selector)
+		p(selector, node.ValidColumn)
 	}
 	if offset := nq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -757,8 +765,12 @@ func (ngb *NodeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ngb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ngb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ngb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -771,7 +783,7 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 	columns = append(columns, ngb.fields...)
 	for _, fn := range ngb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, node.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ngb.fields...)
 }
