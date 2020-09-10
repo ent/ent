@@ -31,7 +31,7 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// OrderFunc applies an ordering on either graph traversal or sql selector.
+// OrderFunc applies an ordering on the graph traversal.
 type OrderFunc func(*dsl.Traversal)
 
 // Asc applies the given fields in ASC order.

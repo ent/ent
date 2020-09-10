@@ -706,8 +706,12 @@ func (sgb *SpecGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := sgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := sgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := sgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -720,7 +724,7 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, spec.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }

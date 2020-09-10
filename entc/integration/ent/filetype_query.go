@@ -695,8 +695,12 @@ func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ftgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ftgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ftgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -709,7 +713,7 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 	columns = append(columns, ftgb.fields...)
 	for _, fn := range ftgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, filetype.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ftgb.fields...)
 }

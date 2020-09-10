@@ -600,6 +600,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.EqualError(err, "invalid field \"invalid\" for ordering")
 	_, err = client.User.Query().Order(ent.Asc("invalid")).QueryFollowing().Only(ctx)
 	require.EqualError(err, "invalid field \"invalid\" for ordering")
+	_, err = client.User.Query().GroupBy("name").Aggregate(ent.Sum("invalid")).String(ctx)
+	require.EqualError(err, "invalid field \"invalid\" for grouping")
 
 	t.Log("query using edge-with predicate")
 	require.Len(usr.QueryGroups().Where(group.HasInfoWith(groupinfo.Desc("group info"))).AllX(ctx), 1)

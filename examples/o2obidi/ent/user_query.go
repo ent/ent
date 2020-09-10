@@ -66,8 +66,12 @@ func (uq *UserQuery) QuerySpouse() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
 		)
@@ -438,7 +442,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := uq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, user.ValidColumn)
 			}
 		}
 	}
@@ -457,7 +461,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p(selector)
+		p(selector, user.ValidColumn)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -697,8 +701,12 @@ func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ugb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ugb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ugb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -711,7 +719,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, user.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }

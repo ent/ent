@@ -765,8 +765,12 @@ func (ngb *NodeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ngb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ngb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ngb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -779,7 +783,7 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 	columns = append(columns, ngb.fields...)
 	for _, fn := range ngb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, node.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ngb.fields...)
 }

@@ -67,8 +67,12 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := cq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(card.Table, card.FieldID, cq.sqlQuery()),
+			sqlgraph.From(card.Table, card.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
 		)
@@ -439,7 +443,7 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := cq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, card.ValidColumn)
 			}
 		}
 	}
@@ -458,7 +462,7 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p(selector)
+		p(selector, card.ValidColumn)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -698,8 +702,12 @@ func (cgb *CardGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := cgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := cgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -712,7 +720,7 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, card.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }

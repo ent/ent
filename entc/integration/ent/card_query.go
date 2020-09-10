@@ -802,8 +802,12 @@ func (cgb *CardGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := cgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := cgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -816,7 +820,7 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, card.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }

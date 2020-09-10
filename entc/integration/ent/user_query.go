@@ -1473,8 +1473,12 @@ func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
+	selector := ugb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ugb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ugb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -1487,7 +1491,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, user.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }
