@@ -596,6 +596,10 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.EqualError(err, "invalid field \"unknown_field\" for selection")
 	_, err = client.Group.Query().GroupBy("unknown_field").String(ctx)
 	require.EqualError(err, "invalid field \"unknown_field\" for group-by")
+	_, err = client.User.Query().Order(ent.Asc("invalid")).Only(ctx)
+	require.EqualError(err, "invalid field \"invalid\" for ordering")
+	_, err = client.User.Query().Order(ent.Asc("invalid")).QueryFollowing().Only(ctx)
+	require.EqualError(err, "invalid field \"invalid\" for ordering")
 
 	t.Log("query using edge-with predicate")
 	require.Len(usr.QueryGroups().Where(group.HasInfoWith(groupinfo.Desc("group info"))).AllX(ctx), 1)

@@ -118,7 +118,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	if ps := {{ $receiver }}.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, {{ $.Package }}.ValidColumn)
 			}
 		}
 	}
@@ -137,7 +137,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range {{ $receiver }}.order {
-		p(selector)
+		p(selector, {{ $.Package }}.ValidColumn)
 	}
 	if offset := {{ $receiver }}.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -157,8 +157,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
+	selector := {{ $receiver }}.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return nil, err
+	}
 	step := sqlgraph.NewStep(
-		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, {{ $receiver }}.sqlQuery()),
+		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, selector),
 		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
 		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}

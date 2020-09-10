@@ -342,7 +342,7 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := iq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, item.ValidColumn)
 			}
 		}
 	}
@@ -361,7 +361,7 @@ func (iq *ItemQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range iq.order {
-		p(selector)
+		p(selector, item.ValidColumn)
 	}
 	if offset := iq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

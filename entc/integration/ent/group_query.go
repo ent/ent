@@ -73,8 +73,12 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := gq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
 		)
@@ -91,8 +95,12 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := gq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
 		)
@@ -109,8 +117,12 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := gq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
 		)
@@ -127,8 +139,12 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := gq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
 		)
@@ -654,7 +670,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := gq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, group.ValidColumn)
 			}
 		}
 	}
@@ -673,7 +689,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p(selector)
+		p(selector, group.ValidColumn)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

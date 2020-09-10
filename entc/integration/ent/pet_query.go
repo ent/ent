@@ -68,8 +68,12 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := pq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, pet.TeamTable, pet.TeamColumn),
 		)
@@ -86,8 +90,12 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := pq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, pq.sqlQuery()),
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
 		)
@@ -495,7 +503,7 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := pq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, pet.ValidColumn)
 			}
 		}
 	}
@@ -514,7 +522,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range pq.order {
-		p(selector)
+		p(selector, pet.ValidColumn)
 	}
 	if offset := pq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

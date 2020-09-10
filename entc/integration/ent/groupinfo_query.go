@@ -67,8 +67,12 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 		if err := giq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := giq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, giq.sqlQuery()),
+			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
 		)
@@ -432,7 +436,7 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := giq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, groupinfo.ValidColumn)
 			}
 		}
 	}
@@ -451,7 +455,7 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range giq.order {
-		p(selector)
+		p(selector, groupinfo.ValidColumn)
 	}
 	if offset := giq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

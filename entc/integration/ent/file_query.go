@@ -72,8 +72,12 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := fq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
 		)
@@ -90,8 +94,12 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := fq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(filetype.Table, filetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
 		)
@@ -108,8 +116,12 @@ func (fq *FileQuery) QueryField() *FieldTypeQuery {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := fq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, fq.sqlQuery()),
+			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
 		)
@@ -557,7 +569,7 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := fq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, file.ValidColumn)
 			}
 		}
 	}
@@ -576,7 +588,7 @@ func (fq *FileQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range fq.order {
-		p(selector)
+		p(selector, file.ValidColumn)
 	}
 	if offset := fq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

@@ -70,8 +70,12 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := cq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(card.Table, card.FieldID, cq.sqlQuery()),
+			sqlgraph.From(card.Table, card.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
 		)
@@ -88,8 +92,12 @@ func (cq *CardQuery) QuerySpec() *SpecQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := cq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(card.Table, card.FieldID, cq.sqlQuery()),
+			sqlgraph.From(card.Table, card.FieldID, selector),
 			sqlgraph.To(spec.Table, spec.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, card.SpecTable, card.SpecPrimaryKey...),
 		)
@@ -535,7 +543,7 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := cq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, card.ValidColumn)
 			}
 		}
 	}
@@ -554,7 +562,7 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p(selector)
+		p(selector, card.ValidColumn)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

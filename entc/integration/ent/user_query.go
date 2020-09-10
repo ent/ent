@@ -81,8 +81,12 @@ func (uq *UserQuery) QueryCard() *CardQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(card.Table, card.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
 		)
@@ -99,8 +103,12 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 		)
@@ -117,8 +125,12 @@ func (uq *UserQuery) QueryFiles() *FileQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
 		)
@@ -135,8 +147,12 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
 		)
@@ -153,8 +169,12 @@ func (uq *UserQuery) QueryFriends() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 		)
@@ -171,8 +191,12 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
 		)
@@ -189,8 +213,12 @@ func (uq *UserQuery) QueryFollowing() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
 		)
@@ -207,8 +235,12 @@ func (uq *UserQuery) QueryTeam() *PetQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.TeamTable, user.TeamColumn),
 		)
@@ -225,8 +257,12 @@ func (uq *UserQuery) QuerySpouse() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
 		)
@@ -243,8 +279,12 @@ func (uq *UserQuery) QueryChildren() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.ChildrenTable, user.ChildrenColumn),
 		)
@@ -261,8 +301,12 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
+			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
 		)
@@ -1170,7 +1214,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := uq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, user.ValidColumn)
 			}
 		}
 	}
@@ -1189,7 +1233,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p(selector)
+		p(selector, user.ValidColumn)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

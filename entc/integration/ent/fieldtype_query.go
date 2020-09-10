@@ -374,7 +374,7 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := ftq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, fieldtype.ValidColumn)
 			}
 		}
 	}
@@ -393,7 +393,7 @@ func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ftq.order {
-		p(selector)
+		p(selector, fieldtype.ValidColumn)
 	}
 	if offset := ftq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
