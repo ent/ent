@@ -67,8 +67,12 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := ftq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
+			sqlgraph.From(filetype.Table, filetype.FieldID, selector),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
 		)
@@ -432,7 +436,7 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := ftq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, filetype.ValidColumn)
 			}
 		}
 	}
@@ -451,7 +455,7 @@ func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ftq.order {
-		p(selector)
+		p(selector, filetype.ValidColumn)
 	}
 	if offset := ftq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

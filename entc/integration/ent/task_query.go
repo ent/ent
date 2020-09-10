@@ -366,7 +366,7 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := tq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, task.ValidColumn)
 			}
 		}
 	}
@@ -385,7 +385,7 @@ func (tq *TaskQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range tq.order {
-		p(selector)
+		p(selector, task.ValidColumn)
 	}
 	if offset := tq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

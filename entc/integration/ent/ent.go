@@ -29,23 +29,31 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// OrderFunc applies an ordering on either graph traversal or sql selector.
-type OrderFunc func(*sql.Selector)
+// OrderFunc applies an ordering on the sql selector.
+type OrderFunc func(*sql.Selector, func(string) bool)
 
 // Asc applies the given fields in ASC order.
 func Asc(fields ...string) OrderFunc {
-	return func(s *sql.Selector) {
+	return func(s *sql.Selector, check func(string) bool) {
 		for _, f := range fields {
-			s.OrderBy(sql.Asc(f))
+			if check(f) {
+				s.OrderBy(sql.Asc(f))
+			} else {
+				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("invalid field %q for ordering", f)})
+			}
 		}
 	}
 }
 
 // Desc applies the given fields in DESC order.
 func Desc(fields ...string) OrderFunc {
-	return func(s *sql.Selector) {
+	return func(s *sql.Selector, check func(string) bool) {
 		for _, f := range fields {
-			s.OrderBy(sql.Desc(f))
+			if check(f) {
+				s.OrderBy(sql.Desc(f))
+			} else {
+				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("invalid field %q for ordering", f)})
+			}
 		}
 	}
 }

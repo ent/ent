@@ -366,7 +366,7 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := cq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, comment.ValidColumn)
 			}
 		}
 	}
@@ -385,7 +385,7 @@ func (cq *CommentQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p(selector)
+		p(selector, comment.ValidColumn)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

@@ -67,8 +67,12 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := sq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(spec.Table, spec.FieldID, sq.sqlQuery()),
+			sqlgraph.From(spec.Table, spec.FieldID, selector),
 			sqlgraph.To(card.Table, card.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
 		)
@@ -443,7 +447,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := sq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, spec.ValidColumn)
 			}
 		}
 	}
@@ -462,7 +466,7 @@ func (sq *SpecQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range sq.order {
-		p(selector)
+		p(selector, spec.ValidColumn)
 	}
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
