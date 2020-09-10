@@ -5,6 +5,7 @@
 package sql
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -1241,4 +1242,13 @@ WHERE
 			require.Equal(t, tt.wantArgs, args)
 		})
 	}
+}
+
+func TestBuilder_Err(t *testing.T) {
+	b := Select("i-")
+	require.NoError(t, b.Err())
+	b.AddError(fmt.Errorf("invalid"))
+	require.EqualError(t, b.Err(), "invalid")
+	b.AddError(fmt.Errorf("unexpected"))
+	require.EqualError(t, b.Err(), "invalid; unexpected")
 }
