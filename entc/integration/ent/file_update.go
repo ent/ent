@@ -101,6 +101,26 @@ func (fu *FileUpdate) ClearGroup() *FileUpdate {
 	return fu
 }
 
+// SetOp sets the op field.
+func (fu *FileUpdate) SetOp(b bool) *FileUpdate {
+	fu.mutation.SetOp(b)
+	return fu
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
+	if b != nil {
+		fu.SetOp(*b)
+	}
+	return fu
+}
+
+// ClearOp clears the value of op.
+func (fu *FileUpdate) ClearOp() *FileUpdate {
+	fu.mutation.ClearOp()
+	return fu
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (fu *FileUpdate) SetOwnerID(id int) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
@@ -324,6 +344,19 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: file.FieldGroup,
 		})
 	}
+	if value, ok := fu.mutation.GetOp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: file.FieldOp,
+		})
+	}
+	if fu.mutation.OpCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: file.FieldOp,
+		})
+	}
 	if fu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -530,6 +563,26 @@ func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 // ClearGroup clears the value of group.
 func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
 	fuo.mutation.ClearGroup()
+	return fuo
+}
+
+// SetOp sets the op field.
+func (fuo *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
+	fuo.mutation.SetOp(b)
+	return fuo
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
+	if b != nil {
+		fuo.SetOp(*b)
+	}
+	return fuo
+}
+
+// ClearOp clears the value of op.
+func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
+	fuo.mutation.ClearOp()
 	return fuo
 }
 
@@ -752,6 +805,19 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldGroup,
+		})
+	}
+	if value, ok := fuo.mutation.GetOp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: file.FieldOp,
+		})
+	}
+	if fuo.mutation.OpCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: file.FieldOp,
 		})
 	}
 	if fuo.mutation.OwnerCleared() {

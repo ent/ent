@@ -76,6 +76,20 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	return fc
 }
 
+// SetOp sets the op field.
+func (fc *FileCreate) SetOp(b bool) *FileCreate {
+	fc.mutation.SetOp(b)
+	return fc
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
+	if b != nil {
+		fc.SetOp(*b)
+	}
+	return fc
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (fc *FileCreate) SetOwnerID(id string) *FileCreate {
 	fc.mutation.SetOwnerID(id)
@@ -237,6 +251,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := fc.mutation.Group(); ok {
 		v.Property(dsl.Single, file.FieldGroup, value)
+	}
+	if value, ok := fc.mutation.GetOp(); ok {
+		v.Property(dsl.Single, file.FieldOp, value)
 	}
 	for _, id := range fc.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()

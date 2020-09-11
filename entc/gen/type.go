@@ -1203,36 +1203,55 @@ func structTag(name, tag string) string {
 // and ensures it doesn't conflict with Go keywords and other
 // builder fields and it's not exported.
 func builderField(name string) string {
-	if token.Lookup(name).IsKeyword() || name == "config" || strings.ToUpper(name[:1]) == name[:1] {
+	_, ok := privateField[name]
+	if ok || token.Lookup(name).IsKeyword() || strings.ToUpper(name[:1]) == name[:1] {
 		return "_" + name
 	}
 	return name
 }
 
-// global identifiers used by the generated package.
-var globalIdent = names(
-	"AggregateFunc",
-	"As",
-	"Asc",
-	"Count",
-	"Debug",
-	"Desc",
-	"Driver",
-	"Hook",
-	"Log",
-	"MutateFunc",
-	"Mutation",
-	"Mutator",
-	"Op",
-	"Option",
-	"OrderFunc",
-	"Max",
-	"Mean",
-	"Min",
-	"Sum",
-	"Policy",
-	"Query",
-	"Value",
+var (
+	// global identifiers used by the generated package.
+	globalIdent = names(
+		"AggregateFunc",
+		"As",
+		"Asc",
+		"Count",
+		"Debug",
+		"Desc",
+		"Driver",
+		"Hook",
+		"Log",
+		"MutateFunc",
+		"Mutation",
+		"Mutator",
+		"Op",
+		"Option",
+		"OrderFunc",
+		"Max",
+		"Mean",
+		"Min",
+		"Sum",
+		"Policy",
+		"Query",
+		"Value",
+	)
+	// private fields used by the different builders.
+	privateField = names(
+		"config",
+		"done",
+		"hooks",
+		"limit",
+		"mutation",
+		"offset",
+		"oldValue",
+		"order",
+		"op",
+		"path",
+		"predicates",
+		"typ",
+		"unique",
+	)
 )
 
 func names(ids ...string) map[string]struct{} {

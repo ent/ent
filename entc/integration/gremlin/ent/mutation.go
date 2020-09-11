@@ -5669,6 +5669,7 @@ type FileMutation struct {
 	name          *string
 	user          *string
 	group         *string
+	_op           *bool
 	clearedFields map[string]struct{}
 	owner         *string
 	clearedowner  bool
@@ -5954,6 +5955,56 @@ func (m *FileMutation) ResetGroup() {
 	delete(m.clearedFields, file.FieldGroup)
 }
 
+// SetOp sets the op field.
+func (m *FileMutation) SetOp(b bool) {
+	m._op = &b
+}
+
+// GetOp returns the op value in the mutation.
+func (m *FileMutation) GetOp() (r bool, exists bool) {
+	v := m._op
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOp returns the old op value of the File.
+// If the File object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FileMutation) OldOp(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldOp is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldOp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOp: %w", err)
+	}
+	return oldValue.Op, nil
+}
+
+// ClearOp clears the value of op.
+func (m *FileMutation) ClearOp() {
+	m._op = nil
+	m.clearedFields[file.FieldOp] = struct{}{}
+}
+
+// OpCleared returns if the field op was cleared in this mutation.
+func (m *FileMutation) OpCleared() bool {
+	_, ok := m.clearedFields[file.FieldOp]
+	return ok
+}
+
+// ResetOp reset all changes of the "op" field.
+func (m *FileMutation) ResetOp() {
+	m._op = nil
+	delete(m.clearedFields, file.FieldOp)
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (m *FileMutation) SetOwnerID(id string) {
 	m.owner = &id
@@ -6099,7 +6150,7 @@ func (m *FileMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.size != nil {
 		fields = append(fields, file.FieldSize)
 	}
@@ -6111,6 +6162,9 @@ func (m *FileMutation) Fields() []string {
 	}
 	if m.group != nil {
 		fields = append(fields, file.FieldGroup)
+	}
+	if m._op != nil {
+		fields = append(fields, file.FieldOp)
 	}
 	return fields
 }
@@ -6128,6 +6182,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 		return m.User()
 	case file.FieldGroup:
 		return m.Group()
+	case file.FieldOp:
+		return m.GetOp()
 	}
 	return nil, false
 }
@@ -6145,6 +6201,8 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUser(ctx)
 	case file.FieldGroup:
 		return m.OldGroup(ctx)
+	case file.FieldOp:
+		return m.OldOp(ctx)
 	}
 	return nil, fmt.Errorf("unknown File field %s", name)
 }
@@ -6181,6 +6239,13 @@ func (m *FileMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetGroup(v)
+		return nil
+	case file.FieldOp:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOp(v)
 		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)
@@ -6233,6 +6298,9 @@ func (m *FileMutation) ClearedFields() []string {
 	if m.FieldCleared(file.FieldGroup) {
 		fields = append(fields, file.FieldGroup)
 	}
+	if m.FieldCleared(file.FieldOp) {
+		fields = append(fields, file.FieldOp)
+	}
 	return fields
 }
 
@@ -6252,6 +6320,9 @@ func (m *FileMutation) ClearField(name string) error {
 		return nil
 	case file.FieldGroup:
 		m.ClearGroup()
+		return nil
+	case file.FieldOp:
+		m.ClearOp()
 		return nil
 	}
 	return fmt.Errorf("unknown File nullable field %s", name)
@@ -6273,6 +6344,9 @@ func (m *FileMutation) ResetField(name string) error {
 		return nil
 	case file.FieldGroup:
 		m.ResetGroup()
+		return nil
+	case file.FieldOp:
+		m.ResetOp()
 		return nil
 	}
 	return fmt.Errorf("unknown File field %s", name)

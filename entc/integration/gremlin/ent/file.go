@@ -28,6 +28,8 @@ type File struct {
 	User *string `json:"user,omitempty"`
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
+	// Op holds the value of the "op" field.
+	Op bool `json:"op,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges FileEdges `json:"edges"`
@@ -95,6 +97,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
+		Op    bool    `json:"op,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
@@ -104,6 +107,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	f.Name = scanf.Name
 	f.User = scanf.User
 	f.Group = scanf.Group
+	f.Op = scanf.Op
 	return nil
 }
 
@@ -155,6 +159,8 @@ func (f *File) String() string {
 	}
 	builder.WriteString(", group=")
 	builder.WriteString(f.Group)
+	builder.WriteString(", op=")
+	builder.WriteString(fmt.Sprintf("%v", f.Op))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -174,6 +180,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
+		Op    bool    `json:"op,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
@@ -185,6 +192,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 			Name:  v.Name,
 			User:  v.User,
 			Group: v.Group,
+			Op:    v.Op,
 		})
 	}
 	return nil
