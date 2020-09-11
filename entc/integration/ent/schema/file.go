@@ -31,6 +31,8 @@ func (File) Fields() []ent.Field {
 			Nillable(),
 		field.String("group").
 			Optional(),
+		field.Bool("op").
+			Optional(),
 	}
 }
 

@@ -123,6 +123,13 @@ func Group(v string) predicate.File {
 	})
 }
 
+// Op applies equality check predicate on the "op" field. It's identical to OpEQ.
+func Op(v bool) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOp), v))
+	})
+}
+
 // SizeEQ applies the EQ predicate on the "size" field.
 func SizeEQ(v int) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
@@ -557,6 +564,34 @@ func GroupEqualFold(v string) predicate.File {
 func GroupContainsFold(v string) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldGroup), v))
+	})
+}
+
+// OpEQ applies the EQ predicate on the "op" field.
+func OpEQ(v bool) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOp), v))
+	})
+}
+
+// OpNEQ applies the NEQ predicate on the "op" field.
+func OpNEQ(v bool) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOp), v))
+	})
+}
+
+// OpIsNil applies the IsNil predicate on the "op" field.
+func OpIsNil() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldOp)))
+	})
+}
+
+// OpNotNil applies the NotNil predicate on the "op" field.
+func OpNotNil() predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldOp)))
 	})
 }
 

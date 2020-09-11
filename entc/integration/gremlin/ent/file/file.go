@@ -19,6 +19,8 @@ const (
 	FieldUser = "user"
 	// FieldGroup holds the string denoting the group field in the database.
 	FieldGroup = "group"
+	// FieldOp holds the string denoting the op field in the database.
+	FieldOp = "op"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"

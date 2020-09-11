@@ -74,6 +74,20 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	return fc
 }
 
+// SetOp sets the op field.
+func (fc *FileCreate) SetOp(b bool) *FileCreate {
+	fc.mutation.SetOp(b)
+	return fc
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
+	if b != nil {
+		fc.SetOp(*b)
+	}
+	return fc
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (fc *FileCreate) SetOwnerID(id int) *FileCreate {
 	fc.mutation.SetOwnerID(id)
@@ -256,6 +270,14 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Column: file.FieldGroup,
 		})
 		f.Group = value
+	}
+	if value, ok := fc.mutation.GetOp(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: file.FieldOp,
+		})
+		f.Op = value
 	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

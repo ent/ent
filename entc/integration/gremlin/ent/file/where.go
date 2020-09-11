@@ -112,6 +112,13 @@ func Group(v string) predicate.File {
 	})
 }
 
+// Op applies equality check predicate on the "op" field. It's identical to OpEQ.
+func Op(v bool) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.EQ(v))
+	})
+}
+
 // SizeEQ applies the EQ predicate on the "size" field.
 func SizeEQ(v int) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
@@ -456,6 +463,34 @@ func GroupIsNil() predicate.File {
 func GroupNotNil() predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldGroup)
+	})
+}
+
+// OpEQ applies the EQ predicate on the "op" field.
+func OpEQ(v bool) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.EQ(v))
+	})
+}
+
+// OpNEQ applies the NEQ predicate on the "op" field.
+func OpNEQ(v bool) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.NEQ(v))
+	})
+}
+
+// OpIsNil applies the IsNil predicate on the "op" field.
+func OpIsNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOp)
+	})
+}
+
+// OpNotNil applies the NotNil predicate on the "op" field.
+func OpNotNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOp)
 	})
 }
 
