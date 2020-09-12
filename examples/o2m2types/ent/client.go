@@ -204,11 +204,11 @@ func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
-	pe, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Pet.
@@ -308,11 +308,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryPets queries the pets edge of a User.

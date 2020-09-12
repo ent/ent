@@ -204,11 +204,11 @@ func (c *CityClient) Get(ctx context.Context, id int) (*City, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CityClient) GetX(ctx context.Context, id int) *City {
-	ci, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ci
+	return obj
 }
 
 // QueryStreets queries the streets edge of a City.
@@ -308,11 +308,11 @@ func (c *StreetClient) Get(ctx context.Context, id int) (*Street, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *StreetClient) GetX(ctx context.Context, id int) *Street {
-	s, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return obj
 }
 
 // QueryCity queries the city edge of a Street.

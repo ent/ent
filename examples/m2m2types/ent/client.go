@@ -204,11 +204,11 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // QueryUsers queries the users edge of a Group.
@@ -308,11 +308,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryGroups queries the groups edge of a User.

@@ -197,11 +197,11 @@ func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
-	n, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return obj
 }
 
 // QueryParent queries the parent edge of a Node.
