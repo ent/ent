@@ -59,14 +59,23 @@ func WithFixture(b bool) MigrateOption {
 	}
 }
 
+// WithForeighKeysDisable disables creating foreigh-key in ddl. In some case we are
+// not allowed to use foreigh-key. Defaults to false
+func WithForeighKeysDisable(b bool) MigrateOption {
+	return func(m *Migrate) {
+		m.disableForeighKeys = b
+	}
+}
+
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID bool     // global unique ids.
-	dropColumns bool     // drop deleted columns.
-	dropIndexes bool     // drop deleted indexes.
-	withFixture bool     // with fks rename fixture.
-	typeRanges  []string // types order by their range.
+	universalID        bool     // global unique ids.
+	dropColumns        bool     // drop deleted columns.
+	dropIndexes        bool     // drop deleted indexes.
+	withFixture        bool     // with fks rename fixture.
+	disableForeighKeys bool     // do not create foreigh keys
+	typeRanges         []string // types order by their range.
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
@@ -119,6 +128,9 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
 		m.setupTable(t)
+		if m.disableForeighKeys {
+			t.ForeignKeys = nil
+		}
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
 		case err != nil:
 			return err
