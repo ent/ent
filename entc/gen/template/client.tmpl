@@ -205,11 +205,11 @@ func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Na
 
 // GetX is like Get, but panics if an error occurs.
 func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Name }} {
-	{{ $rec }}, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return {{ $rec }}
+	return obj
 }
 
 {{ range $_, $e := $n.Edges }}
