@@ -281,11 +281,11 @@ func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CardClient) GetX(ctx context.Context, id int) *Card {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Card.
@@ -401,11 +401,11 @@ func (c *CommentClient) Get(ctx context.Context, id int) (*Comment, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CommentClient) GetX(ctx context.Context, id int) *Comment {
-	co, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return co
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -489,11 +489,11 @@ func (c *FieldTypeClient) Get(ctx context.Context, id int) (*FieldType, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *FieldTypeClient) GetX(ctx context.Context, id int) *FieldType {
-	ft, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -577,11 +577,11 @@ func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *FileClient) GetX(ctx context.Context, id int) *File {
-	f, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return obj
 }
 
 // QueryOwner queries the owner edge of a File.
@@ -713,11 +713,11 @@ func (c *FileTypeClient) Get(ctx context.Context, id int) (*FileType, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *FileTypeClient) GetX(ctx context.Context, id int) *FileType {
-	ft, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return obj
 }
 
 // QueryFiles queries the files edge of a FileType.
@@ -817,11 +817,11 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // QueryFiles queries the files edge of a Group.
@@ -969,11 +969,11 @@ func (c *GroupInfoClient) Get(ctx context.Context, id int) (*GroupInfo, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupInfoClient) GetX(ctx context.Context, id int) *GroupInfo {
-	gi, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return obj
 }
 
 // QueryGroups queries the groups edge of a GroupInfo.
@@ -1073,11 +1073,11 @@ func (c *ItemClient) Get(ctx context.Context, id int) (*Item, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *ItemClient) GetX(ctx context.Context, id int) *Item {
-	i, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -1161,11 +1161,11 @@ func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
-	n, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return obj
 }
 
 // QueryPrev queries the prev edge of a Node.
@@ -1281,11 +1281,11 @@ func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
-	pe, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return obj
 }
 
 // QueryTeam queries the team edge of a Pet.
@@ -1401,11 +1401,11 @@ func (c *SpecClient) Get(ctx context.Context, id int) (*Spec, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *SpecClient) GetX(ctx context.Context, id int) *Spec {
-	s, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return obj
 }
 
 // QueryCard queries the card edge of a Spec.
@@ -1505,11 +1505,11 @@ func (c *TaskClient) Get(ctx context.Context, id int) (*Task, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
-	t, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return t
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -1593,11 +1593,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryCard queries the card edge of a User.

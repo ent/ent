@@ -211,11 +211,11 @@ func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CarClient) GetX(ctx context.Context, id int) *Car {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Car.
@@ -315,11 +315,11 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // QueryUsers queries the users edge of a Group.
@@ -419,11 +419,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryCars queries the cars edge of a User.

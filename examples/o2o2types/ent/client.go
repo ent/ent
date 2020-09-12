@@ -204,11 +204,11 @@ func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CardClient) GetX(ctx context.Context, id int) *Card {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Card.
@@ -308,11 +308,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryCard queries the card edge of a User.

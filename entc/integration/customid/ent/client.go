@@ -226,11 +226,11 @@ func (c *BlobClient) Get(ctx context.Context, id uuid.UUID) (*Blob, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *BlobClient) GetX(ctx context.Context, id uuid.UUID) *Blob {
-	b, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return b
+	return obj
 }
 
 // QueryParent queries the parent edge of a Blob.
@@ -346,11 +346,11 @@ func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CarClient) GetX(ctx context.Context, id int) *Car {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Car.
@@ -450,11 +450,11 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // QueryUsers queries the users edge of a Group.
@@ -554,11 +554,11 @@ func (c *PetClient) Get(ctx context.Context, id string) (*Pet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
-	pe, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Pet.
@@ -706,11 +706,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryGroups queries the groups edge of a User.

@@ -204,11 +204,11 @@ func (c *GalaxyClient) Get(ctx context.Context, id int) (*Galaxy, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GalaxyClient) GetX(ctx context.Context, id int) *Galaxy {
-	ga, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ga
+	return obj
 }
 
 // QueryPlanets queries the planets edge of a Galaxy.
@@ -309,11 +309,11 @@ func (c *PlanetClient) Get(ctx context.Context, id int) (*Planet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PlanetClient) GetX(ctx context.Context, id int) *Planet {
-	pl, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pl
+	return obj
 }
 
 // QueryNeighbors queries the neighbors edge of a Planet.
