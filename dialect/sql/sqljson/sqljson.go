@@ -62,7 +62,8 @@ func ValueGT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 }
 
 // ValueGTE return a predicate for checking that a JSON value
-// (returned by the path) is greater than the given argument.
+// (returned by the path) is greater than or equal to the given
+// argument.
 //
 //	sqljson.ValueGTE("a", 1, sqljson.Path("b"))
 //
@@ -70,6 +71,31 @@ func ValueGTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		WritePath(b, column, opts...)
 		b.WriteOp(sql.OpGTE).Arg(arg)
+	})
+}
+
+// ValueLT return a predicate for checking that a JSON value
+// (returned by the path) is less than the given argument.
+//
+//	sqljson.ValueLT("a", 1, sqljson.Path("b"))
+//
+func ValueLT(column string, arg interface{}, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		WritePath(b, column, opts...)
+		b.WriteOp(sql.OpLT).Arg(arg)
+	})
+}
+
+// ValueLTE return a predicate for checking that a JSON value
+// (returned by the path) is less than or equal to the given
+// argument.
+//
+//	sqljson.ValueLTE("a", 1, sqljson.Path("b"))
+//
+func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		WritePath(b, column, opts...)
+		b.WriteOp(sql.OpLTE).Arg(arg)
 	})
 }
 
