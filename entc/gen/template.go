@@ -59,8 +59,9 @@ var (
 			Format: pkgf("%s.go"),
 		},
 		{
-			Name:   "where",
-			Format: pkgf("%s/where.go"),
+			Name:          "where",
+			Format:        pkgf("%s/where.go"),
+			ExtendPattern: "where/additional/*",
 		},
 		{
 			Name: "meta",

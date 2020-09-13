@@ -10,6 +10,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
@@ -297,5 +298,18 @@ func Not(p predicate.GroupInfo) predicate.GroupInfo {
 		t := __.New()
 		p(t)
 		tr.Where(__.Not(t))
+	})
+}
+
+// Desc applies the Regex predicate on the "desc" field.
+func DescRegex(pattern string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(s *sql.Selector) {
+		s.Where(sql.P(func(b *sql.Builder) {
+			b.Ident(FieldDesc)
+			b.Pad()
+			b.WriteString("REGEX")
+			b.Pad()
+			b.WriteString(b.Quote(pattern))
+		}))
 	})
 }

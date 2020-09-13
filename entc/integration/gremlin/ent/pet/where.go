@@ -10,6 +10,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
@@ -244,5 +245,18 @@ func Not(p predicate.Pet) predicate.Pet {
 		t := __.New()
 		p(t)
 		tr.Where(__.Not(t))
+	})
+}
+
+// Name applies the Regex predicate on the "name" field.
+func NameRegex(pattern string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.P(func(b *sql.Builder) {
+			b.Ident(FieldName)
+			b.Pad()
+			b.WriteString("REGEX")
+			b.Pad()
+			b.WriteString(b.Quote(pattern))
+		}))
 	})
 }

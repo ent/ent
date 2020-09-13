@@ -355,3 +355,16 @@ func Not(p predicate.GroupInfo) predicate.GroupInfo {
 		p(s.Not())
 	})
 }
+
+// Desc applies the Regex predicate on the "desc" field.
+func DescRegex(pattern string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(s *sql.Selector) {
+		s.Where(sql.P(func(b *sql.Builder) {
+			b.Ident(FieldDesc)
+			b.Pad()
+			b.WriteString("REGEX")
+			b.Pad()
+			b.WriteString(b.Quote(pattern))
+		}))
+	})
+}
