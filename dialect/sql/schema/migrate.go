@@ -52,7 +52,7 @@ func WithDropIndex(b bool) MigrateOption {
 }
 
 // WithFixture sets the foreign-key renaming option to the migration when upgrading
-// ent from v0.1.0 (issue-#285). Defaults to true.
+// ent from v0.1.0 (issue-#285). Defaults to false.
 func WithFixture(b bool) MigrateOption {
 	return func(m *Migrate) {
 		m.withFixture = b
@@ -71,7 +71,7 @@ type Migrate struct {
 
 // NewMigrate create a migration structure for the given SQL driver.
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{withFixture: true}
+	m := &Migrate{}
 	switch d.Dialect() {
 	case dialect.MySQL:
 		m.sqlDialect = &MySQL{Driver: d}
