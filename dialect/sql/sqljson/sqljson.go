@@ -28,12 +28,48 @@ func HasKey(column string, opts ...Option) *sql.Predicate {
 // ValueEQ return a predicate for checking that a JSON value
 // (returned by the path) is equal to the given argument.
 //
-//	P().JSONValueEQ("column", "a.b[2].c", arg)
+//	sqljson.ValueEQ("a", 1, sqljson.Path("b"))
 //
 func ValueEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		WritePath(b, column, opts...)
 		b.WriteOp(sql.OpEQ).Arg(arg)
+	})
+}
+
+// ValueNEQ return a predicate for checking that a JSON value
+// (returned by the path) is not equal to the given argument.
+//
+//	sqljson.ValueNEQ("a", 1, sqljson.Path("b"))
+//
+func ValueNEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		WritePath(b, column, opts...)
+		b.WriteOp(sql.OpNEQ).Arg(arg)
+	})
+}
+
+// ValueGT return a predicate for checking that a JSON value
+// (returned by the path) is greater than the given argument.
+//
+//	sqljson.ValueGT("a", 1, sqljson.Path("b"))
+//
+func ValueGT(column string, arg interface{}, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		WritePath(b, column, opts...)
+		b.WriteOp(sql.OpGT).Arg(arg)
+	})
+}
+
+// ValueGTE return a predicate for checking that a JSON value
+// (returned by the path) is greater than the given argument.
+//
+//	sqljson.ValueGTE("a", 1, sqljson.Path("b"))
+//
+func ValueGTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		WritePath(b, column, opts...)
+		b.WriteOp(sql.OpGTE).Arg(arg)
 	})
 }
 
