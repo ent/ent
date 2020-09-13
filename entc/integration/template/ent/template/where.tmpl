@@ -3,15 +3,15 @@
 	{{ range $f := $.Fields }}
 		{{- if $f.IsString }}
 			{{ $func := $f.StructField }}
-			// {{ $func }} applies the Regex predicate on the {{ quote $f.Name }} field.
-			func {{ $func }}Regex(pattern string) predicate.{{ $.Name }} {
+			// {{ $func }} applies the Glob predicate on the {{ quote $f.Name }} field.
+			func {{ $func }}Glob(pattern string) predicate.{{ $.Name }} {
 			return predicate.{{ $.Name }}(func(s *sql.Selector) {
 				s.Where(sql.P(func(b *sql.Builder) {
 					b.Ident(Field{{ $f.StructField}})
 					b.Pad()
-					b.WriteString("REGEX")
+					b.WriteString("glob")
 					b.Pad()
-					b.WriteString(b.Quote(pattern))
+					b.Arg(pattern)
 				}))
 			})
 			}

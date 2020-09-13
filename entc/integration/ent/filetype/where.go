@@ -368,16 +368,3 @@ func Not(p predicate.FileType) predicate.FileType {
 		p(s.Not())
 	})
 }
-
-// Name applies the Regex predicate on the "name" field.
-func NameRegex(pattern string) predicate.FileType {
-	return predicate.FileType(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldName)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}

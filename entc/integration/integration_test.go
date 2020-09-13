@@ -104,7 +104,6 @@ var (
 		Delete,
 		Relation,
 		Predicate,
-		CustomPredicate,
 		AddValues,
 		ClearEdges,
 		ClearFields,
@@ -392,24 +391,6 @@ func Predicate(t *testing.T, client *ent.Client) {
 			).
 			CountX(ctx),
 	)
-}
-
-func CustomPredicate(t *testing.T, client *ent.Client) {
-	if !strings.Contains(t.Name(), "MySQL") {
-		t.Skip("Predicate is targeted at MySQL")
-	}
-
-	require := require.New(t)
-	ctx := context.Background()
-
-	_ = client.File.Create().SetName("1").SetSize(10).SaveX(ctx)
-	_ = client.File.Create().SetName("2").SetSize(20).SaveX(ctx)
-	_ = client.File.Create().SetName("3").SetSize(20).SaveX(ctx)
-
-	results := client.File.Query().
-		Where(file.NameRegex("^[12]$")).
-		AllX(ctx)
-	require.Equal(2, len(results))
 }
 
 func AddValues(t *testing.T, client *ent.Client) {

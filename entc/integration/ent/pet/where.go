@@ -300,16 +300,3 @@ func Not(p predicate.Pet) predicate.Pet {
 		p(s.Not())
 	})
 }
-
-// Name applies the Regex predicate on the "name" field.
-func NameRegex(pattern string) predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldName)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}

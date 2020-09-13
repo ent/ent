@@ -6,6 +6,7 @@ package template
 
 import (
 	"context"
+	"github.com/facebook/ent/entc/integration/template/ent/user"
 	"reflect"
 	"testing"
 
@@ -46,4 +47,8 @@ func TestCustomTemplate(t *testing.T) {
 
 	// check for client additional fields.
 	require.True(t, reflect.ValueOf(client).Elem().FieldByName("tables").IsValid())
+
+	result := client.User.Query().Where(user.NameGlob("a8*")).
+		AllX(ctx)
+	require.Equal(t, 1, len(result))
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
@@ -1127,83 +1126,5 @@ func Not(p predicate.User) predicate.User {
 		t := __.New()
 		p(t)
 		tr.Where(__.Not(t))
-	})
-}
-
-// Name applies the Regex predicate on the "name" field.
-func NameRegex(pattern string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldName)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}
-
-// Last applies the Regex predicate on the "last" field.
-func LastRegex(pattern string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldLast)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}
-
-// Nickname applies the Regex predicate on the "nickname" field.
-func NicknameRegex(pattern string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldNickname)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}
-
-// Phone applies the Regex predicate on the "phone" field.
-func PhoneRegex(pattern string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldPhone)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}
-
-// Password applies the Regex predicate on the "password" field.
-func PasswordRegex(pattern string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldPassword)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
-	})
-}
-
-// SSOCert applies the Regex predicate on the "SSOCert" field.
-func SSOCertRegex(pattern string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.P(func(b *sql.Builder) {
-			b.Ident(FieldSSOCert)
-			b.Pad()
-			b.WriteString("REGEX")
-			b.Pad()
-			b.WriteString(b.Quote(pattern))
-		}))
 	})
 }
