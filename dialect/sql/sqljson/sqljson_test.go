@@ -92,6 +92,20 @@ func TestWritePath(t *testing.T) {
 			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
 			wantArgs:  []interface{}{1},
 		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(
+					sql.Or(
+						sqljson.ValueNEQ("a", 1, sqljson.Path("b")),
+						sqljson.ValueGT("a", 1, sqljson.Path("c")),
+						sqljson.ValueGTE("a", 1, sqljson.Path("d")),
+					),
+				),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b' <> $1 OR "a"->'c' > $2 OR "a"->'d' >= $3`,
+			wantArgs:  []interface{}{1, 1, 1},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
