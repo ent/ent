@@ -101,10 +101,12 @@ func TestWritePath(t *testing.T) {
 						sqljson.ValueNEQ("a", 1, sqljson.Path("b")),
 						sqljson.ValueGT("a", 1, sqljson.Path("c")),
 						sqljson.ValueGTE("a", 1, sqljson.Path("d")),
+						sqljson.ValueLT("a", 1, sqljson.Path("e")),
+						sqljson.ValueLTE("a", 1, sqljson.Path("f")),
 					),
 				),
-			wantQuery: `SELECT * FROM "users" WHERE "a"->'b' <> $1 OR "a"->'c' > $2 OR "a"->'d' >= $3`,
-			wantArgs:  []interface{}{1, 1, 1},
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b' <> $1 OR "a"->'c' > $2 OR "a"->'d' >= $3 OR "a"->'e' < $4 OR "a"->'f' <= $5`,
+			wantArgs:  []interface{}{1, 1, 1, 1, 1},
 		},
 	}
 	for i, tt := range tests {
