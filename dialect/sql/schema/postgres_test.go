@@ -565,7 +565,6 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
-				mock.fkExists("user_spouse____________________390ed76f91d3c57cd3516e7690f621dc", false)
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "spouse_id" bigint NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.fkExists("user_spouse____________________390ed76f91d3c57cd3516e7690f621dc", false)
