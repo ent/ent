@@ -108,6 +108,30 @@ func TestWritePath(t *testing.T) {
 			wantQuery: `SELECT * FROM "users" WHERE ("a"->>'b')::int <> $1 OR ("a"->>'c')::int > $2 OR ("a"->>'d')::float >= $3 OR ("a"->>'e')::int < $4 OR ("a"->>'f')::int <= $5`,
 			wantArgs:  []interface{}{1, 1, 1.1, 1, 1},
 		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.LenEQ("a", 1)),
+			wantQuery: `SELECT * FROM "users" WHERE JSONB_ARRAY_LENGTH("a") = $1`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.LenEQ("a", 1)),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_LENGTH(`a`, \"$\") = ?",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.LenEQ("a", 1)),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$\") = ?",
+			wantArgs:  []interface{}{1},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
