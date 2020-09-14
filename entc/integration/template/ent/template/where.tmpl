@@ -1,0 +1,18 @@
+{{/* A template for adding additional where clauses to specific types. */}}
+{{ define "where/additional/strings" }}
+	{{ range $f := $.Fields }}
+		{{ if $f.IsString }}
+			{{ $func := print $f.StructField "Glob" }}
+			// {{ $func }} applies the Glob predicate on the {{ quote $f.Name }} field.
+			func {{ $func }}(pattern string) predicate.{{ $.Name }} {
+				return predicate.{{ $.Name }}(func(s *sql.Selector) {
+					s.Where(sql.P(func(b *sql.Builder) {
+						b.Ident(s.C({{ $f.Constant }}))
+						b.WriteString(" glob ")
+						b.Arg(pattern)
+					}))
+				})
+			}
+		{{ end }}
+	{{ end }}
+{{ end }}

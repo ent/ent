@@ -300,3 +300,14 @@ func Not(p predicate.User) predicate.User {
 		p(s.Not())
 	})
 }
+
+// NameGlob applies the Glob predicate on the "name" field.
+func NameGlob(pattern string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.P(func(b *sql.Builder) {
+			b.Ident(s.C(FieldName))
+			b.WriteString(" glob ")
+			b.Arg(pattern)
+		}))
+	})
+}

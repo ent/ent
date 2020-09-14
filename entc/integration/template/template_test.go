@@ -11,6 +11,7 @@ import (
 
 	"github.com/facebook/ent/entc/integration/template/ent"
 	"github.com/facebook/ent/entc/integration/template/ent/migrate"
+	"github.com/facebook/ent/entc/integration/template/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
@@ -46,4 +47,8 @@ func TestCustomTemplate(t *testing.T) {
 
 	// check for client additional fields.
 	require.True(t, reflect.ValueOf(client).Elem().FieldByName("tables").IsValid())
+
+	result := client.User.Query().Where(user.NameGlob("a8*")).
+		AllX(ctx)
+	require.Equal(t, 1, len(result))
 }
