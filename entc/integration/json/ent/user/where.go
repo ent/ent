@@ -94,6 +94,20 @@ func IDLTE(id int) predicate.User {
 	})
 }
 
+// TIsNil applies the IsNil predicate on the "t" field.
+func TIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldT)))
+	})
+}
+
+// TNotNil applies the NotNil predicate on the "t" field.
+func TNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldT)))
+	})
+}
+
 // URLIsNil applies the IsNil predicate on the "url" field.
 func URLIsNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

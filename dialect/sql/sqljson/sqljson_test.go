@@ -25,7 +25,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", 1, sqljson.Path("b", "c", "[1]", "d"), sqljson.Cast("int"))),
-			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
+			wantQuery: `SELECT * FROM "users" WHERE ("a"->'b'->'c'->1->>'d')::int = $1`,
 			wantArgs:  []interface{}{1},
 		},
 		{
@@ -65,7 +65,7 @@ func TestWritePath(t *testing.T) {
 					sql.EQ("e", 10),
 					sqljson.ValueEQ("a", 1, sqljson.DotPath("b.c")),
 				)),
-			wantQuery: `SELECT * FROM "test" WHERE "e" = $1 AND "a"->'b'->'c' = $2`,
+			wantQuery: `SELECT * FROM "test" WHERE "e" = $1 AND ("a"->'b'->>'c')::int = $2`,
 			wantArgs:  []interface{}{10, 1},
 		},
 		{
@@ -89,7 +89,7 @@ func TestWritePath(t *testing.T) {
 				Select("*").
 				From(sql.Table("users")).
 				Where(sqljson.ValueEQ("a", 1, sqljson.Path("b", "c", "[1]", "d"), sqljson.Cast("int"))),
-			wantQuery: `SELECT * FROM "users" WHERE CAST("a"->'b'->'c'->1->'d' AS int) = $1`,
+			wantQuery: `SELECT * FROM "users" WHERE ("a"->'b'->'c'->1->>'d')::int = $1`,
 			wantArgs:  []interface{}{1},
 		},
 		{
@@ -100,13 +100,13 @@ func TestWritePath(t *testing.T) {
 					sql.Or(
 						sqljson.ValueNEQ("a", 1, sqljson.Path("b")),
 						sqljson.ValueGT("a", 1, sqljson.Path("c")),
-						sqljson.ValueGTE("a", 1, sqljson.Path("d")),
+						sqljson.ValueGTE("a", 1.1, sqljson.Path("d")),
 						sqljson.ValueLT("a", 1, sqljson.Path("e")),
 						sqljson.ValueLTE("a", 1, sqljson.Path("f")),
 					),
 				),
-			wantQuery: `SELECT * FROM "users" WHERE "a"->'b' <> $1 OR "a"->'c' > $2 OR "a"->'d' >= $3 OR "a"->'e' < $4 OR "a"->'f' <= $5`,
-			wantArgs:  []interface{}{1, 1, 1, 1, 1},
+			wantQuery: `SELECT * FROM "users" WHERE ("a"->>'b')::int <> $1 OR ("a"->>'c')::int > $2 OR ("a"->>'d')::float >= $3 OR ("a"->>'e')::int < $4 OR ("a"->>'f')::int <= $5`,
+			wantArgs:  []interface{}{1, 1, 1.1, 1, 1},
 		},
 	}
 	for i, tt := range tests {

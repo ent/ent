@@ -12,6 +12,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/facebook/ent/entc/integration/json/ent/schema"
+
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqljson"
@@ -194,4 +196,48 @@ func Predicates(t *testing.T, client *ent.Client) {
 	}).Count(ctx)
 	require.NoError(t, err)
 	require.Zero(t, count)
+
+	count, err = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueEQ(user.FieldURL, "https", sqljson.Path("Scheme")))
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
+
+	count, err = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueNEQ(user.FieldURL, "https", sqljson.Path("Scheme")))
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
+
+	client.User.Delete().ExecX(ctx)
+
+	users, err = client.User.CreateBulk(
+		client.User.Create().SetT(&schema.T{I: 1, F: 1.1, T: &schema.T{I: 10}}),
+		client.User.Create().SetT(&schema.T{I: 2, F: 2.2, T: &schema.T{I: 20, T: &schema.T{I: 30}}}),
+	).Save(ctx)
+	require.NoError(t, err)
+	require.Len(t, users, 2)
+
+	count, err = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueGTE(user.FieldT, 1, sqljson.Path("i")))
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 2, count)
+
+	count, err = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueLTE(user.FieldT, 30, sqljson.DotPath("t.t.i")))
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
+
+	count, err = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(
+			sql.Or(
+				sqljson.ValueEQ(user.FieldT, 1.1, sqljson.Path("f")),
+				sqljson.ValueEQ(user.FieldT, 30, sqljson.DotPath("t.t.i")),
+			),
+		)
+	}).Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, 2, count)
 }

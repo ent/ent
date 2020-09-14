@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/json/ent/schema"
 	"github.com/facebook/ent/entc/integration/json/ent/user"
 )
 
@@ -22,6 +23,8 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// T holds the value of the "t" field.
+	T *schema.T `json:"t,omitempty"`
 	// URL holds the value of the "url" field.
 	URL *url.URL `json:"url,omitempty"`
 	// Raw holds the value of the "raw" field.
@@ -40,6 +43,7 @@ type User struct {
 func (*User) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{}, // id
+		&[]byte{},        // t
 		&[]byte{},        // url
 		&[]byte{},        // raw
 		&[]byte{},        // dirs
@@ -63,47 +67,55 @@ func (u *User) assignValues(values ...interface{}) error {
 	values = values[1:]
 
 	if value, ok := values[0].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field url", values[0])
+		return fmt.Errorf("unexpected type %T for field t", values[0])
+	} else if value != nil && len(*value) > 0 {
+		if err := json.Unmarshal(*value, &u.T); err != nil {
+			return fmt.Errorf("unmarshal field t: %v", err)
+		}
+	}
+
+	if value, ok := values[1].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field url", values[1])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.URL); err != nil {
 			return fmt.Errorf("unmarshal field url: %v", err)
 		}
 	}
 
-	if value, ok := values[1].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field raw", values[1])
+	if value, ok := values[2].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field raw", values[2])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Raw); err != nil {
 			return fmt.Errorf("unmarshal field raw: %v", err)
 		}
 	}
 
-	if value, ok := values[2].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field dirs", values[2])
+	if value, ok := values[3].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field dirs", values[3])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Dirs); err != nil {
 			return fmt.Errorf("unmarshal field dirs: %v", err)
 		}
 	}
 
-	if value, ok := values[3].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field ints", values[3])
+	if value, ok := values[4].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field ints", values[4])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Ints); err != nil {
 			return fmt.Errorf("unmarshal field ints: %v", err)
 		}
 	}
 
-	if value, ok := values[4].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field floats", values[4])
+	if value, ok := values[5].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field floats", values[5])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Floats); err != nil {
 			return fmt.Errorf("unmarshal field floats: %v", err)
 		}
 	}
 
-	if value, ok := values[5].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field strings", values[5])
+	if value, ok := values[6].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field strings", values[6])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Strings); err != nil {
 			return fmt.Errorf("unmarshal field strings: %v", err)
@@ -135,6 +147,8 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", t=")
+	builder.WriteString(fmt.Sprintf("%v", u.T))
 	builder.WriteString(", url=")
 	builder.WriteString(fmt.Sprintf("%v", u.URL))
 	builder.WriteString(", raw=")
