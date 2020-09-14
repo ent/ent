@@ -6,12 +6,12 @@ package template
 
 import (
 	"context"
-	"github.com/facebook/ent/entc/integration/template/ent/user"
 	"reflect"
 	"testing"
 
 	"github.com/facebook/ent/entc/integration/template/ent"
 	"github.com/facebook/ent/entc/integration/template/ent/migrate"
+	"github.com/facebook/ent/entc/integration/template/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
