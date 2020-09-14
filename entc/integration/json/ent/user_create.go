@@ -14,6 +14,7 @@ import (
 	"net/url"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/json/ent/schema"
 	"github.com/facebook/ent/entc/integration/json/ent/user"
 	"github.com/facebook/ent/schema/field"
 )
@@ -23,6 +24,12 @@ type UserCreate struct {
 	config
 	mutation *UserMutation
 	hooks    []Hook
+}
+
+// SetT sets the t field.
+func (uc *UserCreate) SetT(s *schema.T) *UserCreate {
+	uc.mutation.SetT(s)
+	return uc
 }
 
 // SetURL sets the url field.
@@ -139,6 +146,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := uc.mutation.T(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldT,
+		})
+		u.T = value
+	}
 	if value, ok := uc.mutation.URL(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
