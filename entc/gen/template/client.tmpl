@@ -125,7 +125,7 @@ func (c *Client) Use(hooks ...Hook) {
 }
 
 
-{{ range $_, $n := $.Nodes }}
+{{ range $n := $.Nodes }}
 {{ $client := print $n.Name "Client" }}
 // {{ $client }} is a client for the {{ $n.Name }} schema.
 type {{ $client }} struct {
