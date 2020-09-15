@@ -106,10 +106,79 @@ func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	})
 }
 
+// LenEQ return a predicate for checking that an array length
+// of a JSON (returned by the path) is equal to the given argument.
+//
+//	sqljson.LenEQ("a", 1, sqljson.Path("b"))
+//
 func LenEQ(column string, size int, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		LenPath(b, column, opts...)
 		b.WriteOp(sql.OpEQ).Arg(size)
+	})
+}
+
+// LenNEQ return a predicate for checking that an array length
+// of a JSON (returned by the path) is not equal to the given argument.
+//
+//	sqljson.LenEQ("a", 1, sqljson.Path("b"))
+//
+func LenNEQ(column string, size int, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		LenPath(b, column, opts...)
+		b.WriteOp(sql.OpNEQ).Arg(size)
+	})
+}
+
+// LenGT return a predicate for checking that an array length
+// of a JSON (returned by the path) is greater than the given
+// argument.
+//
+//	sqljson.LenGT("a", 1, sqljson.Path("b"))
+//
+func LenGT(column string, size int, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		LenPath(b, column, opts...)
+		b.WriteOp(sql.OpGT).Arg(size)
+	})
+}
+
+// LenGTE return a predicate for checking that an array length
+// of a JSON (returned by the path) is greater than or equal to
+// the given argument.
+//
+//	sqljson.LenGTE("a", 1, sqljson.Path("b"))
+//
+func LenGTE(column string, size int, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		LenPath(b, column, opts...)
+		b.WriteOp(sql.OpGTE).Arg(size)
+	})
+}
+
+// LenLT return a predicate for checking that an array length
+// of a JSON (returned by the path) is less than the given
+// argument.
+//
+//	sqljson.LenLT("a", 1, sqljson.Path("b"))
+//
+func LenLT(column string, size int, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		LenPath(b, column, opts...)
+		b.WriteOp(sql.OpLT).Arg(size)
+	})
+}
+
+// LenLTE return a predicate for checking that an array length
+// of a JSON (returned by the path) is less than or equal to
+// the given argument.
+//
+//	sqljson.LenLTE("a", 1, sqljson.Path("b"))
+//
+func LenLTE(column string, size int, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		LenPath(b, column, opts...)
+		b.WriteOp(sql.OpLTE).Arg(size)
 	})
 }
 
