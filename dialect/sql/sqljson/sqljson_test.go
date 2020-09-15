@@ -132,6 +132,21 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$\") = ?",
 			wantArgs:  []interface{}{1},
 		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(
+					sql.Or(
+						sqljson.LenGT("a", 1, sqljson.Path("b")),
+						sqljson.LenGTE("a", 1, sqljson.Path("c")),
+						sqljson.LenLT("a", 1, sqljson.Path("d")),
+						sqljson.LenLTE("a", 1, sqljson.Path("e")),
+					),
+				),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$.b\") > ? OR JSON_ARRAY_LENGTH(`a`, \"$.c\") >= ? OR JSON_ARRAY_LENGTH(`a`, \"$.d\") < ? OR JSON_ARRAY_LENGTH(`a`, \"$.e\") <= ?",
+			wantArgs:  []interface{}{1, 1, 1, 1},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
