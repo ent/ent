@@ -29,9 +29,10 @@ type (
 	// GraphTemplate specifies a template that is executed with
 	// the Graph object.
 	GraphTemplate struct {
-		Name   string            // template name.
-		Skip   func(*Graph) bool // skip condition.
-		Format string            // file name format.
+		Name     string             // template name.
+		Skip     func(*Graph) bool  // skip condition.
+		Format   string             // file name format.
+		external *template.Template // external template.
 	}
 )
 
