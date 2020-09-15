@@ -21,7 +21,7 @@ import (
 //
 func HasKey(column string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpNotNull)
 	})
 }
@@ -34,7 +34,7 @@ func HasKey(column string, opts ...Option) *sql.Predicate {
 func ValueEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpEQ).Arg(arg)
 	})
 }
@@ -47,7 +47,7 @@ func ValueEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 func ValueNEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpNEQ).Arg(arg)
 	})
 }
@@ -60,7 +60,7 @@ func ValueNEQ(column string, arg interface{}, opts ...Option) *sql.Predicate {
 func ValueGT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpGT).Arg(arg)
 	})
 }
@@ -74,7 +74,7 @@ func ValueGT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 func ValueGTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpGTE).Arg(arg)
 	})
 }
@@ -87,7 +87,7 @@ func ValueGTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 func ValueLT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpLT).Arg(arg)
 	})
 }
@@ -101,21 +101,42 @@ func ValueLT(column string, arg interface{}, opts ...Option) *sql.Predicate {
 func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
 		opts, arg = normalizePG(b, arg, opts)
-		WritePath(b, column, opts...)
+		ValuePath(b, column, opts...)
 		b.WriteOp(sql.OpLTE).Arg(arg)
 	})
 }
 
-// WritePath writes the JSON path from the given options to the SQL builder.
+func LenEQ(column string, size int, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		LenPath(b, column, opts...)
+		b.WriteOp(sql.OpEQ).Arg(size)
+	})
+}
+
+// ValuePath writes to the given SQL builder the JSON path for
+// getting the value of a given JSON path.
 //
-//	sqljson.WritePath(b, Path("a", "b", "[1]", "c"), Cast("int"))
+//	sqljson.ValuePath(b, Path("a", "b", "[1]", "c"), Cast("int"))
 //
-func WritePath(b *sql.Builder, column string, opts ...Option) {
+func ValuePath(b *sql.Builder, column string, opts ...Option) {
 	path := &PathOptions{Ident: column}
 	for i := range opts {
 		opts[i](path)
 	}
-	path.WriteTo(b)
+	path.value(b)
+}
+
+// LenPath writes to the given SQL builder the JSON path for
+// getting the length of a given JSON path.
+//
+//	sqljson.LenPath(b, Path("a", "b", "[1]", "c"))
+//
+func LenPath(b *sql.Builder, column string, opts ...Option) {
+	path := &PathOptions{Ident: column}
+	for i := range opts {
+		opts[i](path)
+	}
+	path.length(b)
 }
 
 // Option allows for calling database JSON paths with functional options.
@@ -123,7 +144,7 @@ type Option func(*PathOptions)
 
 // Path sets the path to the JSON value of a column.
 //
-//	WritePath(b, "column", Path("a", "b", "[1]", "c"))
+//	ValuePath(b, "column", Path("a", "b", "[1]", "c"))
 //
 func Path(path ...string) Option {
 	return func(p *PathOptions) {
@@ -133,8 +154,8 @@ func Path(path ...string) Option {
 
 // DotPath is similar to Path, but accepts string with dot format.
 //
-//	WritePath(b, "column", DotPath("a.b.c"))
-//	WritePath(b, "column", DotPath("a.b[2].c"))
+//	ValuePath(b, "column", DotPath("a.b.c"))
+//	ValuePath(b, "column", DotPath("a.b[2].c"))
 //
 // Note that DotPath is ignored if the input is invalid.
 func DotPath(dotpath string) Option {
@@ -146,7 +167,7 @@ func DotPath(dotpath string) Option {
 
 // Unquote indicates that the result value should be unquoted.
 //
-//	WritePath(b, "column", Path("a", "b", "[1]", "c"), Unquote(true))
+//	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Unquote(true))
 //
 func Unquote(unquote bool) Option {
 	return func(p *PathOptions) {
@@ -156,7 +177,7 @@ func Unquote(unquote bool) Option {
 
 // Cast indicates that the result value should be casted to the given type.
 //
-//	WritePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
+//	ValuePath(b, "column", Path("a", "b", "[1]", "c"), Cast("int"))
 //
 func Cast(typ string) Option {
 	return func(p *PathOptions) {
@@ -172,8 +193,8 @@ type PathOptions struct {
 	Unquote bool
 }
 
-// WriteTo writes the JSON path to the sql.Builder.
-func (p *PathOptions) WriteTo(b *sql.Builder) {
+// value writes the path for getting the JSON value.
+func (p *PathOptions) value(b *sql.Builder) {
 	switch {
 	case len(p.Path) == 0:
 		b.Ident(p.Ident)
@@ -182,34 +203,59 @@ func (p *PathOptions) WriteTo(b *sql.Builder) {
 			b.WriteByte('(')
 			defer b.WriteString(")::" + p.Cast)
 		}
-		b.Ident(p.Ident)
-		for i, s := range p.Path {
-			b.WriteString("->")
-			if p.Unquote && i == len(p.Path)-1 {
-				b.WriteString(">")
-			}
-			if idx, ok := isJSONIdx(s); ok {
-				b.WriteString(idx)
-			} else {
-				b.WriteString("'" + s + "'")
-			}
-		}
+		p.pgPath(b)
 	default:
 		if p.Unquote && b.Dialect() == dialect.MySQL {
 			b.WriteString("JSON_UNQUOTE(")
 			defer b.WriteByte(')')
 		}
-		b.WriteString("JSON_EXTRACT(")
-		b.Ident(p.Ident).Comma()
-		b.WriteString(`"$`)
-		for _, p := range p.Path {
-			if _, ok := isJSONIdx(p); ok {
-				b.WriteString(p)
-			} else {
-				b.WriteString("." + p)
-			}
+		p.mysqlPath("JSON_EXTRACT", b)
+	}
+}
+
+// value writes the path for getting the length of a JSON value.
+func (p *PathOptions) length(b *sql.Builder) {
+	switch {
+	case b.Dialect() == dialect.Postgres:
+		b.WriteString("JSONB_ARRAY_LENGTH(")
+		p.pgPath(b)
+		b.WriteByte(')')
+	case b.Dialect() == dialect.MySQL:
+		p.mysqlPath("JSON_LENGTH", b)
+	default:
+		p.mysqlPath("JSON_ARRAY_LENGTH", b)
+	}
+}
+
+// mysqlPath writes the JSON path in MySQL format for the
+// the given function. `JSON_EXTRACT("a", '$.b.c')`.
+func (p *PathOptions) mysqlPath(fn string, b *sql.Builder) {
+	b.WriteString(fn).WriteByte('(')
+	b.Ident(p.Ident).Comma()
+	b.WriteString(`"$`)
+	for _, p := range p.Path {
+		if _, ok := isJSONIdx(p); ok {
+			b.WriteString(p)
+		} else {
+			b.WriteString("." + p)
 		}
-		b.WriteString(`")`)
+	}
+	b.WriteString(`")`)
+}
+
+// pgPath writes the JSON path in Postgres format `"a"->'b'->>'c'`.
+func (p *PathOptions) pgPath(b *sql.Builder) {
+	b.Ident(p.Ident)
+	for i, s := range p.Path {
+		b.WriteString("->")
+		if p.Unquote && i == len(p.Path)-1 {
+			b.WriteString(">")
+		}
+		if idx, ok := isJSONIdx(s); ok {
+			b.WriteString(idx)
+		} else {
+			b.WriteString("'" + s + "'")
+		}
 	}
 }
 
