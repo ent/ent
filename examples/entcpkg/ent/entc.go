@@ -38,6 +38,6 @@ func main() {
 		},
 	}, opts...)
 	if err != nil {
-		log.Fatal("running ent codegen:", err)
+		log.Fatalf("running ent codegen: %v", err)
 	}
 }

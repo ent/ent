@@ -125,11 +125,7 @@ func (g *Graph) Gen() (err error) {
 			check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
 		}
 		b := bytes.NewBuffer(nil)
-		execT := templates
-		if tmpl.external != nil {
-			execT = tmpl.external
-		}
-		check(execT.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
+		check(templates.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
 		target := filepath.Join(g.Config.Target, tmpl.Format)
 		check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
 		written = append(written, target)
@@ -431,23 +427,20 @@ func (g *Graph) templates() (*template.Template, []GraphTemplate) {
 	for _, rootT := range g.Templates {
 		rootT.Funcs(Funcs)
 		rootT.Funcs(g.Funcs)
-		// Make sure external-templates have access to the default-templates.
-		for _, defaultT := range templates.Templates() {
-			rootT = template.Must(rootT.AddParseTree(defaultT.Name(), defaultT.Tree))
-		}
 		for _, tmpl := range rootT.Templates() {
-			switch name := tmpl.Name(); {
-			case parse.IsEmptyTree(tmpl.Root):
-			// If this template overrides or extends one of the default templates.
-			case templates.Lookup(name) != nil || extendExisting(name):
-				templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
-			default:
+			if parse.IsEmptyTree(tmpl.Root) {
+				continue
+			}
+			name := tmpl.Name()
+			// If this template doesn't override or extend one of the
+			// default templates, generate it in a new file.
+			if templates.Lookup(name) == nil && !extendExisting(name) {
 				external = append(external, GraphTemplate{
-					Name:     name,
-					Format:   snake(name) + ".go",
-					external: rootT,
+					Name:   name,
+					Format: snake(name) + ".go",
 				})
 			}
+			templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 		}
 	}
 	return templates, external
