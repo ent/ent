@@ -7,9 +7,10 @@ title: External Templates
 If the template name is already defined by `entc`, it will override the existing one. Otherwise, it will write the
 execution output to a file with the same name as the template. For example:
 
-`node.tmpl` - This template example will be written in a file named: `ent/node.go`.
+`stringer.tmpl` - This template example will be written in a file named: `ent/stringer.go`.
+
 ```gotemplate
-{{ define "node" }}
+{{ define "stringer" }}
 
 {{/* Add the base header for the generated file */}}
 {{ $pkg := base $.Config.Package }}
@@ -23,6 +24,32 @@ execution output to a file with the same name as the template. For example:
 			return fmt.Sprintf("{{ $n.Name }}(nil)")
 		}
 		return {{ $receiver }}.String()
+	}
+{{ end }}
+
+{{ end }}
+```
+
+`debug.tmpl` - This template example will be written in a file named: `ent/debug.go`.
+
+```gotemplate
+{{ define "debug" }}
+
+{{/* A template that adds the functionality for running each client <T> in debug mode */}}
+
+{{/* Add the base header for the generated file */}}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+{{/* Loop over all nodes and add option the "Debug" method */}}
+{{ range $n := $.Nodes }}
+	{{ $client := print $n.Name "Client" }}
+	func (c *{{ $client }}) Debug() *{{ $client }} {
+		if c.debug {
+			return c
+		}
+		cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+		return &{{ $client }}{config: cfg}
 	}
 {{ end }}
 
@@ -98,8 +125,11 @@ func (User) Fields() []ent.Field {
 
 
 ## Examples
-A custom template for implementing the `Node` API for GraphQL - 
+- A custom template for implementing the `Node` API for GraphQL - 
 [Github](https://github.com/facebook/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+
+- An example for executing external templates with custom functions. See  [configuration](https://github.com/facebook/ent/blob/master/examples/entcpkg/ent/entc.go) and its
+[README](https://github.com/facebook/ent/blob/master/examples/entcpkg) file.
 
 ## Documentation
 
