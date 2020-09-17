@@ -71,6 +71,8 @@ import (
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
+		{{- /* Import external packages */}}
+		{{- template "import/types" $n }}
 	{{- end }}
 
 	"github.com/facebook/ent"

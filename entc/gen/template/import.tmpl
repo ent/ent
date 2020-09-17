@@ -12,18 +12,14 @@ import (
 	"math"
 	"strings"
 	"time"
-	{{- /* ignore generting on graph specififc templates */}}
+	{{- /* Ignore generting on graph specififc templates */}}
 	{{- if not (eq $.Config.Package $.Package) }}
 		"{{ $.Config.Package }}/predicate"
 		{{- with $.ID.Type.PkgPath }}
 			"{{ . }}"
 		{{- end }}
-		{{- range $f := $.Fields }}
-			{{- $pkg := $f.Type.PkgPath }}
-			{{- if and $pkg (not (hasImport (base $pkg ))) }}
-				"{{ $pkg }}"
-			{{- end }}
-		{{- end }}
+		{{- /* Import external packages */}}
+        {{- template "import/types" $ }}
 	{{- end }}
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/dialect"
@@ -32,9 +28,19 @@ import (
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}
-	{{ template "imports/additional" $ }}
+	{{ template "import/additional" $ }}
 )
 {{ end }}
 
+{{/* A template for importing fields with custom types */}}
+{{ define "import/types" -}}
+    {{- range $f := $.Fields }}
+        {{- $pkg := $f.Type.PkgPath }}
+        {{- if and $pkg (not (hasImport (base $pkg ))) }}
+			"{{ $pkg }}"
+        {{- end }}
+    {{- end }}
+{{- end }}
+
 {{/* A template that can be overrided in order to add additional imports to packages.*/}}
-{{ define "imports/additional" }}{{end}}
+{{ define "import/additional" }}{{end}}
