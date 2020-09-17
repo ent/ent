@@ -15,15 +15,27 @@ var (
 		Name:        "privacy",
 		Stage:       Alpha,
 		Default:     false,
-		Description: "Privacy provides a privacy layer for ent through the schema configuration.",
+		Description: "Privacy provides a privacy layer for ent through the schema configuration",
 		cleanup: func(c *Config) error {
 			return os.RemoveAll(filepath.Join(c.Target, "privacy"))
+		},
+	}
+
+	// FeatureEntQL provides a feature-flag for the entql extension for ent.
+	FeatureEntQL = Feature{
+		Name:        "entql",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "EntQL provides a generic filtering capability at runtime",
+		cleanup: func(c *Config) error {
+			return os.RemoveAll(filepath.Join(c.Target, "entql.go"))
 		},
 	}
 
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
+		FeatureEntQL,
 	}
 )
 

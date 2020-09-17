@@ -98,6 +98,7 @@ var (
 		Indexes,
 		Types,
 		Clone,
+		EntQL,
 		Sanity,
 		Paging,
 		Select,

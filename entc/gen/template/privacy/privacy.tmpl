@@ -159,7 +159,7 @@ func OnMutationOperation(rule MutationRule, op {{ $pkg }}.Op) MutationRule {
 // DenyMutationOperationRule returns a rule denying specified mutation operation.
 func DenyMutationOperationRule(op {{ $pkg }}.Op) MutationRule {
 	rule := MutationRuleFunc(func(_ context.Context, m {{ $pkg }}.Mutation) error {
-		return Denyf("ent/privacy: operation %s is not allowed", m.Op())
+		return Denyf("{{ $pkg }}/privacy: operation %s is not allowed", m.Op())
 	})
 	return OnMutationOperation(rule, op)
 }
@@ -176,7 +176,7 @@ func DenyMutationOperationRule(op {{ $pkg }}.Op) MutationRule {
 		if q, ok := q.({{ $type }}); ok {
 			return f(ctx, q)
 		}
-		return Denyf("ent/privacy: unexpected query type %T, expect {{ $type }}", q)
+		return Denyf("{{ $pkg }}/privacy: unexpected query type %T, expect {{ $type }}", q)
 	}
 
 	{{ $name = print $n.Name "MutationRuleFunc" }}
@@ -190,8 +190,12 @@ func DenyMutationOperationRule(op {{ $pkg }}.Op) MutationRule {
 		if m, ok := m.({{ $type }}); ok {
 			return f(ctx, m)
 		}
-		return Denyf("ent/privacy: unexpected mutation type %T, expect {{ $type }}", m)
+		return Denyf("{{ $pkg }}/privacy: unexpected mutation type %T, expect {{ $type }}", m)
 	}
+{{- end }}
+
+{{- if $.FeatureEnabled "entql" }}
+	{{ template "privacy/filter" $ }}
 {{- end }}
 
 {{ end }}

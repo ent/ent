@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"github.com/facebook/ent/entc/integration/privacy/ent"
+	"github.com/facebook/ent/entql"
 
 	"github.com/facebook/ent/privacy"
 )
@@ -238,4 +239,63 @@ func (f UserMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) 
 		return f(ctx, m)
 	}
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserMutation", m)
+}
+
+type (
+	// Filter is the interface that wraps the Where function
+	// for filtering nodes in queries and mutations.
+	Filter interface {
+		// Where applies a filter on the executed query/mutation.
+		Where(entql.P)
+	}
+
+	// The FilterFunc type is an adapter to allow the use of ordinary
+	// functions as filters for query and mutation types.
+	FilterFunc func(context.Context, Filter) error
+)
+
+// EvalQuery calls f(ctx, q) if the query implement the Filter interface, deny otherwise.
+func (f FilterFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	fr, err := queryFilter(q)
+	if err != nil {
+		return err
+	}
+	return f(ctx, fr)
+}
+
+// EvalMutation calls f(ctx, q) if the mutation implement the Filter interface, deny otherwise.
+func (f FilterFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	fr, err := mutationFilter(m)
+	if err != nil {
+		return err
+	}
+	return f(ctx, fr)
+}
+
+var _ QueryMutationRule = FilterFunc(nil)
+
+func queryFilter(q ent.Query) (Filter, error) {
+	switch q := q.(type) {
+	case *ent.TaskQuery:
+		return q.Filter(), nil
+	case *ent.TeamQuery:
+		return q.Filter(), nil
+	case *ent.UserQuery:
+		return q.Filter(), nil
+	default:
+		return nil, Denyf("ent/privacy: unexpected query type %T for query filter", q)
+	}
+}
+
+func mutationFilter(m ent.Mutation) (Filter, error) {
+	switch m := m.(type) {
+	case *ent.TaskMutation:
+		return m.Filter(), nil
+	case *ent.TeamMutation:
+		return m.Filter(), nil
+	case *ent.UserMutation:
+		return m.Filter(), nil
+	default:
+		return nil, Denyf("ent/privacy: unexpected mutation type %T for mutation filter", m)
+	}
 }

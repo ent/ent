@@ -11,6 +11,7 @@ import (
 
 	"github.com/facebook/ent/entc/integration/privacy/ent"
 	"github.com/facebook/ent/entc/integration/privacy/ent/hook"
+	"github.com/facebook/ent/entc/integration/privacy/ent/predicate"
 	"github.com/facebook/ent/entc/integration/privacy/ent/privacy"
 	"github.com/facebook/ent/entc/integration/privacy/ent/task"
 	"github.com/facebook/ent/entc/integration/privacy/ent/team"
@@ -88,20 +89,20 @@ func AllowTaskCreateIfOwner() privacy.MutationRule {
 
 // FilterTeamRule is a query rule that filters out tasks and users that are not in the team.
 func FilterTeamRule() privacy.QueryRule {
-	return privacy.QueryRuleFunc(func(ctx context.Context, q ent.Query) error {
+	type TeamsFilter interface {
+		WhereHasTeamsWith(...predicate.Team)
+	}
+	return privacy.FilterFunc(func(ctx context.Context, f privacy.Filter) error {
 		view := viewer.FromContext(ctx)
 		teams, err := view.Teams(ctx)
 		if err != nil {
 			return privacy.Denyf("getting team names: %w", err)
 		}
-		switch q := q.(type) {
-		case *ent.UserQuery:
-			q.Where(user.HasTeamsWith(team.NameIn(teams...)))
-		case *ent.TaskQuery:
-			q.Where(task.HasTeamsWith(team.NameIn(teams...)))
-		default:
-			return privacy.Denyf("unexpected query type %T", q)
+		tf, ok := f.(TeamsFilter)
+		if !ok {
+			return privacy.Denyf("unexpected filter type %T", f)
 		}
+		tf.WhereHasTeamsWith(team.NameIn(teams...))
 		return privacy.Skip
 	})
 }
