@@ -672,7 +672,7 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 		return 0, nil
 	}
 	// update := u.builder.Update(u.Node.Table).Where(matchID(u.Node.ID.Column, ids))
-	update := u.builder.Update(u.Node.Table).Where(selector.P())
+	update := u.builder.Update(u.Node.Table).Where(selector.Clone().P())
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return 0, err
 	}
