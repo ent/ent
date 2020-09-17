@@ -84,23 +84,23 @@ func (gq *GalaxyQuery) QueryPlanets() *PlanetQuery {
 
 // First returns the first Galaxy entity in the query. Returns *NotFoundError when no galaxy was found.
 func (gq *GalaxyQuery) First(ctx context.Context) (*Galaxy, error) {
-	gas, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(gas) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{galaxy.Label}
 	}
-	return gas[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (gq *GalaxyQuery) FirstX(ctx context.Context) *Galaxy {
-	ga, err := gq.First(ctx)
+	node, err := gq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return ga
+	return node
 }
 
 // FirstID returns the first Galaxy id in the query. Returns *NotFoundError when no id was found.
@@ -127,13 +127,13 @@ func (gq *GalaxyQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Galaxy entity in the query, returns an error if not exactly one entity was returned.
 func (gq *GalaxyQuery) Only(ctx context.Context) (*Galaxy, error) {
-	gas, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(gas) {
+	switch len(nodes) {
 	case 1:
-		return gas[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{galaxy.Label}
 	default:
@@ -143,11 +143,11 @@ func (gq *GalaxyQuery) Only(ctx context.Context) (*Galaxy, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (gq *GalaxyQuery) OnlyX(ctx context.Context) *Galaxy {
-	ga, err := gq.Only(ctx)
+	node, err := gq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ga
+	return node
 }
 
 // OnlyID returns the only Galaxy id in the query, returns an error if not exactly one id was returned.
@@ -186,11 +186,11 @@ func (gq *GalaxyQuery) All(ctx context.Context) ([]*Galaxy, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (gq *GalaxyQuery) AllX(ctx context.Context) []*Galaxy {
-	gas, err := gq.All(ctx)
+	nodes, err := gq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gas
+	return nodes
 }
 
 // IDs executes the query and returns a list of Galaxy ids.

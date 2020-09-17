@@ -322,11 +322,11 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (giuo *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
-	gi, err := giuo.Save(ctx)
+	node, err := giuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // Exec executes the query on the entity.

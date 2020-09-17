@@ -110,7 +110,7 @@ func (tc *TaskCreate) check() error {
 }
 
 func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
-	t, _spec := tc.createSpec()
+	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -118,13 +118,13 @@ func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	t.ID = int(id)
-	return t, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	var (
-		t     = &Task{config: tc.config}
+		_node = &Task{config: tc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: task.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -139,9 +139,9 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: task.FieldPriority,
 		})
-		t.Priority = value
+		_node.Priority = value
 	}
-	return t, _spec
+	return _node, _spec
 }
 
 // TaskCreateBulk is the builder for creating a bulk of Task entities.

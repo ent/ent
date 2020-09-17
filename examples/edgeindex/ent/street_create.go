@@ -107,7 +107,7 @@ func (sc *StreetCreate) check() error {
 }
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
-	s, _spec := sc.createSpec()
+	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -115,13 +115,13 @@ func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	s.ID = int(id)
-	return s, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 	var (
-		s     = &Street{config: sc.config}
+		_node = &Street{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: street.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -136,7 +136,7 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: street.FieldName,
 		})
-		s.Name = value
+		_node.Name = value
 	}
 	if nodes := sc.mutation.CityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -157,7 +157,7 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return s, _spec
+	return _node, _spec
 }
 
 // StreetCreateBulk is the builder for creating a bulk of Street entities.

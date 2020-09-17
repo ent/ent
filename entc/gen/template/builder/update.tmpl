@@ -179,11 +179,11 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 
 // SaveX is like Save, but panics if an error occurs.
 func ({{ $receiver }} *{{ $onebuilder }}) SaveX(ctx context.Context) *{{ $.Name }} {
-	{{ $.Receiver }}, err := {{ $receiver }}.Save(ctx)
+	node, err := {{ $receiver }}.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return {{ $.Receiver }}
+	return node
 }
 
 // Exec executes the query on the entity.

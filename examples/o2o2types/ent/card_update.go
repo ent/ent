@@ -289,11 +289,11 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CardUpdateOne) SaveX(ctx context.Context) *Card {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -317,7 +317,7 @@ func (cuo *CardUpdateOne) check() error {
 	return nil
 }
 
-func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
+func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   card.Table,
@@ -382,9 +382,9 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	c = &Card{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &Card{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
@@ -393,5 +393,5 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (c *Card, err error) {
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

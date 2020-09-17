@@ -155,11 +155,11 @@ func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (iuo *ItemUpdateOne) SaveX(ctx context.Context) *Item {
-	i, err := iuo.Save(ctx)
+	node, err := iuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return node
 }
 
 // Exec executes the query on the entity.

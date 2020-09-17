@@ -402,11 +402,11 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CardUpdateOne) SaveX(ctx context.Context) *Card {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.

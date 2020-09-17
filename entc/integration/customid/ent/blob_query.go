@@ -108,23 +108,23 @@ func (bq *BlobQuery) QueryLinks() *BlobQuery {
 
 // First returns the first Blob entity in the query. Returns *NotFoundError when no blob was found.
 func (bq *BlobQuery) First(ctx context.Context) (*Blob, error) {
-	bs, err := bq.Limit(1).All(ctx)
+	nodes, err := bq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(bs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{blob.Label}
 	}
-	return bs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (bq *BlobQuery) FirstX(ctx context.Context) *Blob {
-	b, err := bq.First(ctx)
+	node, err := bq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return b
+	return node
 }
 
 // FirstID returns the first Blob id in the query. Returns *NotFoundError when no id was found.
@@ -151,13 +151,13 @@ func (bq *BlobQuery) FirstXID(ctx context.Context) uuid.UUID {
 
 // Only returns the only Blob entity in the query, returns an error if not exactly one entity was returned.
 func (bq *BlobQuery) Only(ctx context.Context) (*Blob, error) {
-	bs, err := bq.Limit(2).All(ctx)
+	nodes, err := bq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(bs) {
+	switch len(nodes) {
 	case 1:
-		return bs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{blob.Label}
 	default:
@@ -167,11 +167,11 @@ func (bq *BlobQuery) Only(ctx context.Context) (*Blob, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (bq *BlobQuery) OnlyX(ctx context.Context) *Blob {
-	b, err := bq.Only(ctx)
+	node, err := bq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return b
+	return node
 }
 
 // OnlyID returns the only Blob id in the query, returns an error if not exactly one id was returned.
@@ -210,11 +210,11 @@ func (bq *BlobQuery) All(ctx context.Context) ([]*Blob, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (bq *BlobQuery) AllX(ctx context.Context) []*Blob {
-	bs, err := bq.All(ctx)
+	nodes, err := bq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return bs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Blob ids.

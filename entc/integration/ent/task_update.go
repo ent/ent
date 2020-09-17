@@ -238,11 +238,11 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	t, err := tuo.Save(ctx)
+	node, err := tuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return t
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -268,7 +268,7 @@ func (tuo *TaskUpdateOne) check() error {
 	return nil
 }
 
-func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (t *Task, err error) {
+func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   task.Table,
@@ -298,9 +298,9 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (t *Task, err error) {
 			Column: task.FieldPriority,
 		})
 	}
-	t = &Task{config: tuo.config}
-	_spec.Assign = t.assignValues
-	_spec.ScanValues = t.scanValues()
+	_node = &Task{config: tuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
@@ -309,5 +309,5 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (t *Task, err error) {
 		}
 		return nil, err
 	}
-	return t, nil
+	return _node, nil
 }

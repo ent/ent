@@ -25,6 +25,9 @@ type File func(*dsl.Traversal)
 // FileType is the predicate function for filetype builders.
 type FileType func(*dsl.Traversal)
 
+// Goods is the predicate function for goods builders.
+type Goods func(*dsl.Traversal)
+
 // Group is the predicate function for group builders.
 type Group func(*dsl.Traversal)
 

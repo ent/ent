@@ -158,19 +158,19 @@ func (pc *PetCreate) check() error {
 }
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
-	pe, _spec := pc.createSpec()
+	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	return pe, nil
+	return _node, nil
 }
 
 func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
-		pe    = &Pet{config: pc.config}
+		_node = &Pet{config: pc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: pet.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -180,7 +180,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 	)
 	if id, ok := pc.mutation.ID(); ok {
-		pe.ID = id
+		_node.ID = id
 		_spec.ID.Value = id
 	}
 	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {
@@ -259,7 +259,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return pe, _spec
+	return _node, _spec
 }
 
 // PetCreateBulk is the builder for creating a bulk of Pet entities.

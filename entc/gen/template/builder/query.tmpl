@@ -91,23 +91,23 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...OrderFunc) *{{ $builder }} {
 
 // First returns the first {{ $.Name }} entity in the query. Returns *NotFoundError when no {{ lower $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
-	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(1).All(ctx)
+	nodes, err := {{ $receiver }}.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len({{ plural $.Receiver }}) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{ {{ $.Package }}.Label}
 	}
-	return {{ plural $.Receiver }}[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }} {
-	{{ $.Receiver }}, err := {{ $receiver }}.First(ctx)
+	node, err := {{ $receiver }}.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return {{ $.Receiver }}
+	return node
 }
 
 // FirstID returns the first {{ $.Name }} id in the query. Returns *NotFoundError when no id was found.
@@ -134,13 +134,13 @@ func ({{ $receiver }} *{{ $builder }}) FirstXID(ctx context.Context) {{ $.ID.Typ
 
 // Only returns the only {{ $.Name }} entity in the query, returns an error if not exactly one entity was returned.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
-	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(2).All(ctx)
+	nodes, err := {{ $receiver }}.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len({{ plural $.Receiver }}) {
+	switch len(nodes) {
 	case 1:
-		return {{ plural $.Receiver }}[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{ {{ $.Package }}.Label}
 	default:
@@ -150,11 +150,11 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 
 // OnlyX is like Only, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} {
-	{{ $.Receiver }}, err := {{ $receiver }}.Only(ctx)
+	node, err := {{ $receiver }}.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return {{ $.Receiver }}
+	return node
 }
 
 // OnlyID returns the only {{ $.Name }} id in the query, returns an error if not exactly one id was returned.
@@ -193,11 +193,11 @@ func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}
 
 // AllX is like All, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }} {
-	{{ plural $.Receiver }}, err := {{ $receiver }}.All(ctx)
+	nodes, err := {{ $receiver }}.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return {{ plural $.Receiver }}
+	return nodes
 }
 
 // IDs executes the query and returns a list of {{ $.Name }} ids.

@@ -366,11 +366,11 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (ftuo *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
-	ft, err := ftuo.Save(ctx)
+	node, err := ftuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // Exec executes the query on the entity.

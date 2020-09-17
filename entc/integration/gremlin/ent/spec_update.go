@@ -238,11 +238,11 @@ func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (suo *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
-	s, err := suo.Save(ctx)
+	node, err := suo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // Exec executes the query on the entity.

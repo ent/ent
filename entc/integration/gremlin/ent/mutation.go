@@ -47,6 +47,7 @@ const (
 	TypeFieldType = "FieldType"
 	TypeFile      = "File"
 	TypeFileType  = "FileType"
+	TypeGoods     = "Goods"
 	TypeGroup     = "Group"
 	TypeGroupInfo = "GroupInfo"
 	TypeItem      = "Item"
@@ -6969,6 +6970,236 @@ func (m *FileTypeMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown FileType edge %s", name)
+}
+
+// GoodsMutation represents an operation that mutate the GoodsSlice
+// nodes in the graph.
+type GoodsMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Goods, error)
+}
+
+var _ ent.Mutation = (*GoodsMutation)(nil)
+
+// goodsOption allows to manage the mutation configuration using functional options.
+type goodsOption func(*GoodsMutation)
+
+// newGoodsMutation creates new mutation for $n.Name.
+func newGoodsMutation(c config, op Op, opts ...goodsOption) *GoodsMutation {
+	m := &GoodsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGoods,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGoodsID sets the id field of the mutation.
+func withGoodsID(id string) goodsOption {
+	return func(m *GoodsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Goods
+		)
+		m.oldValue = func(ctx context.Context) (*Goods, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Goods.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGoods sets the old Goods of the mutation.
+func withGoods(node *Goods) goodsOption {
+	return func(m *GoodsMutation) {
+		m.oldValue = func(context.Context) (*Goods, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GoodsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GoodsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *GoodsMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// Op returns the operation name.
+func (m *GoodsMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Goods).
+func (m *GoodsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *GoodsMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *GoodsMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *GoodsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown Goods field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *GoodsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Goods field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *GoodsMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *GoodsMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *GoodsMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown Goods numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *GoodsMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *GoodsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GoodsMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Goods nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *GoodsMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown Goods field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *GoodsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *GoodsMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *GoodsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *GoodsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *GoodsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *GoodsMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *GoodsMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Goods unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *GoodsMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Goods edge %s", name)
 }
 
 // GroupMutation represents an operation that mutate the Groups

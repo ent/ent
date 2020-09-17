@@ -129,7 +129,7 @@ func (gic *GroupInfoCreate) check() error {
 }
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
-	gi, _spec := gic.createSpec()
+	_node, _spec := gic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -137,13 +137,13 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	gi.ID = int(id)
-	return gi, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	var (
-		gi    = &GroupInfo{config: gic.config}
+		_node = &GroupInfo{config: gic.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: groupinfo.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -158,7 +158,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: groupinfo.FieldDesc,
 		})
-		gi.Desc = value
+		_node.Desc = value
 	}
 	if value, ok := gic.mutation.MaxUsers(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -166,7 +166,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: groupinfo.FieldMaxUsers,
 		})
-		gi.MaxUsers = value
+		_node.MaxUsers = value
 	}
 	if nodes := gic.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -187,7 +187,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return gi, _spec
+	return _node, _spec
 }
 
 // GroupInfoCreateBulk is the builder for creating a bulk of GroupInfo entities.

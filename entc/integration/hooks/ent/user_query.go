@@ -131,23 +131,23 @@ func (uq *UserQuery) QueryBestFriend() *UserQuery {
 
 // First returns the first User entity in the query. Returns *NotFoundError when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	us, err := uq.Limit(1).All(ctx)
+	nodes, err := uq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(us) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{user.Label}
 	}
-	return us[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (uq *UserQuery) FirstX(ctx context.Context) *User {
-	u, err := uq.First(ctx)
+	node, err := uq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return u
+	return node
 }
 
 // FirstID returns the first User id in the query. Returns *NotFoundError when no id was found.
@@ -174,13 +174,13 @@ func (uq *UserQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only User entity in the query, returns an error if not exactly one entity was returned.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	us, err := uq.Limit(2).All(ctx)
+	nodes, err := uq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(us) {
+	switch len(nodes) {
 	case 1:
-		return us[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{user.Label}
 	default:
@@ -190,11 +190,11 @@ func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (uq *UserQuery) OnlyX(ctx context.Context) *User {
-	u, err := uq.Only(ctx)
+	node, err := uq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return node
 }
 
 // OnlyID returns the only User id in the query, returns an error if not exactly one id was returned.
@@ -233,11 +233,11 @@ func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (uq *UserQuery) AllX(ctx context.Context) []*User {
-	us, err := uq.All(ctx)
+	nodes, err := uq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return us
+	return nodes
 }
 
 // IDs executes the query and returns a list of User ids.

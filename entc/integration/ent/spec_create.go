@@ -93,7 +93,7 @@ func (sc *SpecCreate) check() error {
 }
 
 func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
-	s, _spec := sc.createSpec()
+	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -101,13 +101,13 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	s.ID = int(id)
-	return s, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	var (
-		s     = &Spec{config: sc.config}
+		_node = &Spec{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: spec.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -135,7 +135,7 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return s, _spec
+	return _node, _spec
 }
 
 // SpecCreateBulk is the builder for creating a bulk of Spec entities.

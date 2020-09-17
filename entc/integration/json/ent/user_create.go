@@ -123,7 +123,7 @@ func (uc *UserCreate) check() error {
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	u, _spec := uc.createSpec()
+	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -131,13 +131,13 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	u.ID = int(id)
-	return u, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
-		u     = &User{config: uc.config}
+		_node = &User{config: uc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -152,7 +152,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldT,
 		})
-		u.T = value
+		_node.T = value
 	}
 	if value, ok := uc.mutation.URL(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -160,7 +160,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldURL,
 		})
-		u.URL = value
+		_node.URL = value
 	}
 	if value, ok := uc.mutation.Raw(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -168,7 +168,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldRaw,
 		})
-		u.Raw = value
+		_node.Raw = value
 	}
 	if value, ok := uc.mutation.Dirs(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -176,7 +176,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldDirs,
 		})
-		u.Dirs = value
+		_node.Dirs = value
 	}
 	if value, ok := uc.mutation.Ints(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -184,7 +184,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldInts,
 		})
-		u.Ints = value
+		_node.Ints = value
 	}
 	if value, ok := uc.mutation.Floats(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -192,7 +192,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldFloats,
 		})
-		u.Floats = value
+		_node.Floats = value
 	}
 	if value, ok := uc.mutation.Strings(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -200,9 +200,9 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldStrings,
 		})
-		u.Strings = value
+		_node.Strings = value
 	}
-	return u, _spec
+	return _node, _spec
 }
 
 // UserCreateBulk is the builder for creating a bulk of User entities.

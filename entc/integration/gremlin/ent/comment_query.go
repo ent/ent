@@ -59,23 +59,23 @@ func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 
 // First returns the first Comment entity in the query. Returns *NotFoundError when no comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
-	cs, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(cs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{comment.Label}
 	}
-	return cs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
-	c, err := cq.First(ctx)
+	node, err := cq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // FirstID returns the first Comment id in the query. Returns *NotFoundError when no id was found.
@@ -102,13 +102,13 @@ func (cq *CommentQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Comment entity in the query, returns an error if not exactly one entity was returned.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
-	cs, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(cs) {
+	switch len(nodes) {
 	case 1:
-		return cs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{comment.Label}
 	default:
@@ -118,11 +118,11 @@ func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
-	c, err := cq.Only(ctx)
+	node, err := cq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // OnlyID returns the only Comment id in the query, returns an error if not exactly one id was returned.
@@ -161,11 +161,11 @@ func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
-	cs, err := cq.All(ctx)
+	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return cs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Comment ids.

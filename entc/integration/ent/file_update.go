@@ -714,11 +714,11 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
-	f, err := fuo.Save(ctx)
+	node, err := fuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -744,7 +744,7 @@ func (fuo *FileUpdateOne) check() error {
 	return nil
 }
 
-func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
+func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   file.Table,
@@ -944,9 +944,9 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	f = &File{config: fuo.config}
-	_spec.Assign = f.assignValues
-	_spec.ScanValues = f.scanValues()
+	_node = &File{config: fuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, fuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -955,5 +955,5 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		return nil, err
 	}
-	return f, nil
+	return _node, nil
 }

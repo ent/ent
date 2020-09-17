@@ -309,11 +309,11 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (puo *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	pe, err := puo.Save(ctx)
+	node, err := puo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return node
 }
 
 // Exec executes the query on the entity.

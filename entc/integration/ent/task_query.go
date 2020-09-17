@@ -58,23 +58,23 @@ func (tq *TaskQuery) Order(o ...OrderFunc) *TaskQuery {
 
 // First returns the first Task entity in the query. Returns *NotFoundError when no task was found.
 func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
-	ts, err := tq.Limit(1).All(ctx)
+	nodes, err := tq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(ts) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{task.Label}
 	}
-	return ts[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (tq *TaskQuery) FirstX(ctx context.Context) *Task {
-	t, err := tq.First(ctx)
+	node, err := tq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return t
+	return node
 }
 
 // FirstID returns the first Task id in the query. Returns *NotFoundError when no id was found.
@@ -101,13 +101,13 @@ func (tq *TaskQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Task entity in the query, returns an error if not exactly one entity was returned.
 func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
-	ts, err := tq.Limit(2).All(ctx)
+	nodes, err := tq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(ts) {
+	switch len(nodes) {
 	case 1:
-		return ts[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{task.Label}
 	default:
@@ -117,11 +117,11 @@ func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
-	t, err := tq.Only(ctx)
+	node, err := tq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return t
+	return node
 }
 
 // OnlyID returns the only Task id in the query, returns an error if not exactly one id was returned.
@@ -160,11 +160,11 @@ func (tq *TaskQuery) All(ctx context.Context) ([]*Task, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
-	ts, err := tq.All(ctx)
+	nodes, err := tq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ts
+	return nodes
 }
 
 // IDs executes the query and returns a list of Task ids.

@@ -402,11 +402,11 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (ftuo *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
-	ft, err := ftuo.Save(ctx)
+	node, err := ftuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -437,7 +437,7 @@ func (ftuo *FileTypeUpdateOne) check() error {
 	return nil
 }
 
-func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err error) {
+func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   filetype.Table,
@@ -528,9 +528,9 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	ft = &FileType{config: ftuo.config}
-	_spec.Assign = ft.assignValues
-	_spec.ScanValues = ft.scanValues()
+	_node = &FileType{config: ftuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
@@ -539,5 +539,5 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (ft *FileType, err e
 		}
 		return nil, err
 	}
-	return ft, nil
+	return _node, nil
 }

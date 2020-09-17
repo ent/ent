@@ -601,11 +601,11 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
-	f, err := fuo.Save(ctx)
+	node, err := fuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return node
 }
 
 // Exec executes the query on the entity.

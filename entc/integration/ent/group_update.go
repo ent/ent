@@ -846,11 +846,11 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	gr, err := guo.Save(ctx)
+	node, err := guo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -889,7 +889,7 @@ func (guo *GroupUpdateOne) check() error {
 	return nil
 }
 
-func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
+func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
@@ -1156,9 +1156,9 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	gr = &Group{config: guo.config}
-	_spec.Assign = gr.assignValues
-	_spec.ScanValues = gr.scanValues()
+	_node = &Group{config: guo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
@@ -1167,5 +1167,5 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		return nil, err
 	}
-	return gr, nil
+	return _node, nil
 }

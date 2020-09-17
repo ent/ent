@@ -197,6 +197,17 @@ var (
 		PrimaryKey:  []*schema.Column{FileTypesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// GoodsColumns holds the columns for the "goods" table.
+	GoodsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// GoodsTable holds the schema information for the "goods" table.
+	GoodsTable = &schema.Table{
+		Name:        "goods",
+		Columns:     GoodsColumns,
+		PrimaryKey:  []*schema.Column{GoodsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -486,6 +497,7 @@ var (
 		FieldTypesTable,
 		FilesTable,
 		FileTypesTable,
+		GoodsTable,
 		GroupsTable,
 		GroupInfosTable,
 		ItemsTable,

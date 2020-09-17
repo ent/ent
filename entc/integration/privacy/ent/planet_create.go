@@ -121,7 +121,7 @@ func (pc *PlanetCreate) check() error {
 }
 
 func (pc *PlanetCreate) sqlSave(ctx context.Context) (*Planet, error) {
-	pl, _spec := pc.createSpec()
+	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -129,13 +129,13 @@ func (pc *PlanetCreate) sqlSave(ctx context.Context) (*Planet, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	pl.ID = int(id)
-	return pl, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (pc *PlanetCreate) createSpec() (*Planet, *sqlgraph.CreateSpec) {
 	var (
-		pl    = &Planet{config: pc.config}
+		_node = &Planet{config: pc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: planet.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -150,7 +150,7 @@ func (pc *PlanetCreate) createSpec() (*Planet, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: planet.FieldName,
 		})
-		pl.Name = value
+		_node.Name = value
 	}
 	if value, ok := pc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -158,7 +158,7 @@ func (pc *PlanetCreate) createSpec() (*Planet, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: planet.FieldAge,
 		})
-		pl.Age = value
+		_node.Age = value
 	}
 	if nodes := pc.mutation.NeighborsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -179,7 +179,7 @@ func (pc *PlanetCreate) createSpec() (*Planet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return pl, _spec
+	return _node, _spec
 }
 
 // PlanetCreateBulk is the builder for creating a bulk of Planet entities.

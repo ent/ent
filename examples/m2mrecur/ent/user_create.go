@@ -126,7 +126,7 @@ func (uc *UserCreate) check() error {
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	u, _spec := uc.createSpec()
+	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -134,13 +134,13 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	u.ID = int(id)
-	return u, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
-		u     = &User{config: uc.config}
+		_node = &User{config: uc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -155,7 +155,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldAge,
 		})
-		u.Age = value
+		_node.Age = value
 	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -163,7 +163,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = value
+		_node.Name = value
 	}
 	if nodes := uc.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -203,7 +203,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return u, _spec
+	return _node, _spec
 }
 
 // UserCreateBulk is the builder for creating a bulk of User entities.

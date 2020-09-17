@@ -58,23 +58,23 @@ func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
 
 // First returns the first Group entity in the query. Returns *NotFoundError when no group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	grs, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(grs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{group.Label}
 	}
-	return grs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
-	gr, err := gq.First(ctx)
+	node, err := gq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // FirstID returns the first Group id in the query. Returns *NotFoundError when no id was found.
@@ -101,13 +101,13 @@ func (gq *GroupQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Group entity in the query, returns an error if not exactly one entity was returned.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	grs, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(grs) {
+	switch len(nodes) {
 	case 1:
-		return grs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{group.Label}
 	default:
@@ -117,11 +117,11 @@ func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
-	gr, err := gq.Only(ctx)
+	node, err := gq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // OnlyID returns the only Group id in the query, returns an error if not exactly one id was returned.
@@ -160,11 +160,11 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
-	grs, err := gq.All(ctx)
+	nodes, err := gq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return grs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Group ids.

@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/goods"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/item"
@@ -45,6 +46,8 @@ type Client struct {
 	File *FileClient
 	// FileType is the client for interacting with the FileType builders.
 	FileType *FileTypeClient
+	// Goods is the client for interacting with the Goods builders.
+	Goods *GoodsClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
@@ -78,6 +81,7 @@ func (c *Client) init() {
 	c.FieldType = NewFieldTypeClient(c.config)
 	c.File = NewFileClient(c.config)
 	c.FileType = NewFileTypeClient(c.config)
+	c.Goods = NewGoodsClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.GroupInfo = NewGroupInfoClient(c.config)
 	c.Item = NewItemClient(c.config)
@@ -132,6 +136,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		FieldType: NewFieldTypeClient(cfg),
 		File:      NewFileClient(cfg),
 		FileType:  NewFileTypeClient(cfg),
+		Goods:     NewGoodsClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
 		Item:      NewItemClient(cfg),
@@ -173,6 +178,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.FieldType.Use(hooks...)
 	c.File.Use(hooks...)
 	c.FileType.Use(hooks...)
+	c.Goods.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.GroupInfo.Use(hooks...)
 	c.Item.Use(hooks...)
@@ -687,6 +693,94 @@ func (c *FileTypeClient) QueryFiles(ft *FileType) *FileQuery {
 // Hooks returns the client hooks.
 func (c *FileTypeClient) Hooks() []Hook {
 	return c.hooks.FileType
+}
+
+// GoodsClient is a client for the Goods schema.
+type GoodsClient struct {
+	config
+}
+
+// NewGoodsClient returns a client for the Goods from the given config.
+func NewGoodsClient(c config) *GoodsClient {
+	return &GoodsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `goods.Hooks(f(g(h())))`.
+func (c *GoodsClient) Use(hooks ...Hook) {
+	c.hooks.Goods = append(c.hooks.Goods, hooks...)
+}
+
+// Create returns a create builder for Goods.
+func (c *GoodsClient) Create() *GoodsCreate {
+	mutation := newGoodsMutation(c.config, OpCreate)
+	return &GoodsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Goods entities.
+func (c *GoodsClient) CreateBulk(builders ...*GoodsCreate) *GoodsCreateBulk {
+	return &GoodsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Goods.
+func (c *GoodsClient) Update() *GoodsUpdate {
+	mutation := newGoodsMutation(c.config, OpUpdate)
+	return &GoodsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GoodsClient) UpdateOne(_go *Goods) *GoodsUpdateOne {
+	mutation := newGoodsMutation(c.config, OpUpdateOne, withGoods(_go))
+	return &GoodsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GoodsClient) UpdateOneID(id string) *GoodsUpdateOne {
+	mutation := newGoodsMutation(c.config, OpUpdateOne, withGoodsID(id))
+	return &GoodsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Goods.
+func (c *GoodsClient) Delete() *GoodsDelete {
+	mutation := newGoodsMutation(c.config, OpDelete)
+	return &GoodsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GoodsClient) DeleteOne(_go *Goods) *GoodsDeleteOne {
+	return c.DeleteOneID(_go.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GoodsClient) DeleteOneID(id string) *GoodsDeleteOne {
+	builder := c.Delete().Where(goods.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GoodsDeleteOne{builder}
+}
+
+// Query returns a query builder for Goods.
+func (c *GoodsClient) Query() *GoodsQuery {
+	return &GoodsQuery{config: c.config}
+}
+
+// Get returns a Goods entity by its id.
+func (c *GoodsClient) Get(ctx context.Context, id string) (*Goods, error) {
+	return c.Query().Where(goods.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GoodsClient) GetX(ctx context.Context, id string) *Goods {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GoodsClient) Hooks() []Hook {
+	return c.hooks.Goods
 }
 
 // GroupClient is a client for the Group schema.

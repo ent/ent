@@ -84,23 +84,23 @@ func (pq *PlanetQuery) QueryNeighbors() *PlanetQuery {
 
 // First returns the first Planet entity in the query. Returns *NotFoundError when no planet was found.
 func (pq *PlanetQuery) First(ctx context.Context) (*Planet, error) {
-	pls, err := pq.Limit(1).All(ctx)
+	nodes, err := pq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(pls) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{planet.Label}
 	}
-	return pls[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (pq *PlanetQuery) FirstX(ctx context.Context) *Planet {
-	pl, err := pq.First(ctx)
+	node, err := pq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return pl
+	return node
 }
 
 // FirstID returns the first Planet id in the query. Returns *NotFoundError when no id was found.
@@ -127,13 +127,13 @@ func (pq *PlanetQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Planet entity in the query, returns an error if not exactly one entity was returned.
 func (pq *PlanetQuery) Only(ctx context.Context) (*Planet, error) {
-	pls, err := pq.Limit(2).All(ctx)
+	nodes, err := pq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(pls) {
+	switch len(nodes) {
 	case 1:
-		return pls[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{planet.Label}
 	default:
@@ -143,11 +143,11 @@ func (pq *PlanetQuery) Only(ctx context.Context) (*Planet, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (pq *PlanetQuery) OnlyX(ctx context.Context) *Planet {
-	pl, err := pq.Only(ctx)
+	node, err := pq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pl
+	return node
 }
 
 // OnlyID returns the only Planet id in the query, returns an error if not exactly one id was returned.
@@ -186,11 +186,11 @@ func (pq *PlanetQuery) All(ctx context.Context) ([]*Planet, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (pq *PlanetQuery) AllX(ctx context.Context) []*Planet {
-	pls, err := pq.All(ctx)
+	nodes, err := pq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pls
+	return nodes
 }
 
 // IDs executes the query and returns a list of Planet ids.

@@ -364,11 +364,11 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (nuo *NodeUpdateOne) SaveX(ctx context.Context) *Node {
-	n, err := nuo.Save(ctx)
+	node, err := nuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // Exec executes the query on the entity.

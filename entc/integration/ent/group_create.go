@@ -232,7 +232,7 @@ func (gc *GroupCreate) check() error {
 }
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
-	gr, _spec := gc.createSpec()
+	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -240,13 +240,13 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	gr.ID = int(id)
-	return gr, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
-		gr    = &Group{config: gc.config}
+		_node = &Group{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -261,7 +261,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: group.FieldActive,
 		})
-		gr.Active = value
+		_node.Active = value
 	}
 	if value, ok := gc.mutation.Expire(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -269,7 +269,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: group.FieldExpire,
 		})
-		gr.Expire = value
+		_node.Expire = value
 	}
 	if value, ok := gc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -277,7 +277,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: group.FieldType,
 		})
-		gr.Type = &value
+		_node.Type = &value
 	}
 	if value, ok := gc.mutation.MaxUsers(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -285,7 +285,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
-		gr.MaxUsers = value
+		_node.MaxUsers = value
 	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -293,7 +293,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: group.FieldName,
 		})
-		gr.Name = value
+		_node.Name = value
 	}
 	if nodes := gc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -371,7 +371,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return gr, _spec
+	return _node, _spec
 }
 
 // GroupCreateBulk is the builder for creating a bulk of Group entities.

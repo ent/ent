@@ -107,23 +107,23 @@ func (nq *NodeQuery) QueryChildren() *NodeQuery {
 
 // First returns the first Node entity in the query. Returns *NotFoundError when no node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
-	ns, err := nq.Limit(1).All(ctx)
+	nodes, err := nq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(ns) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{node.Label}
 	}
-	return ns[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
-	n, err := nq.First(ctx)
+	node, err := nq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // FirstID returns the first Node id in the query. Returns *NotFoundError when no id was found.
@@ -150,13 +150,13 @@ func (nq *NodeQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Node entity in the query, returns an error if not exactly one entity was returned.
 func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
-	ns, err := nq.Limit(2).All(ctx)
+	nodes, err := nq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(ns) {
+	switch len(nodes) {
 	case 1:
-		return ns[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{node.Label}
 	default:
@@ -166,11 +166,11 @@ func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
-	n, err := nq.Only(ctx)
+	node, err := nq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // OnlyID returns the only Node id in the query, returns an error if not exactly one id was returned.
@@ -209,11 +209,11 @@ func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
-	ns, err := nq.All(ctx)
+	nodes, err := nq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ns
+	return nodes
 }
 
 // IDs executes the query and returns a list of Node ids.
