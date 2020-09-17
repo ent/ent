@@ -361,11 +361,11 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (giuo *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
-	gi, err := giuo.Save(ctx)
+	node, err := giuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -381,7 +381,7 @@ func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err error) {
+func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
@@ -472,9 +472,9 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	gi = &GroupInfo{config: giuo.config}
-	_spec.Assign = gi.assignValues
-	_spec.ScanValues = gi.scanValues()
+	_node = &GroupInfo{config: giuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, giuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupinfo.Label}
@@ -483,5 +483,5 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (gi *GroupInfo, err
 		}
 		return nil, err
 	}
-	return gi, nil
+	return _node, nil
 }

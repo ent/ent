@@ -59,23 +59,23 @@ func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 
 // First returns the first Item entity in the query. Returns *NotFoundError when no item was found.
 func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
-	is, err := iq.Limit(1).All(ctx)
+	nodes, err := iq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(is) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{item.Label}
 	}
-	return is[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
-	i, err := iq.First(ctx)
+	node, err := iq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return i
+	return node
 }
 
 // FirstID returns the first Item id in the query. Returns *NotFoundError when no id was found.
@@ -102,13 +102,13 @@ func (iq *ItemQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Item entity in the query, returns an error if not exactly one entity was returned.
 func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
-	is, err := iq.Limit(2).All(ctx)
+	nodes, err := iq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(is) {
+	switch len(nodes) {
 	case 1:
-		return is[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{item.Label}
 	default:
@@ -118,11 +118,11 @@ func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
-	i, err := iq.Only(ctx)
+	node, err := iq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return node
 }
 
 // OnlyID returns the only Item id in the query, returns an error if not exactly one id was returned.
@@ -161,11 +161,11 @@ func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
-	is, err := iq.All(ctx)
+	nodes, err := iq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return is
+	return nodes
 }
 
 // IDs executes the query and returns a list of Item ids.

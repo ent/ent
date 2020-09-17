@@ -673,11 +673,11 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	gr, err := guo.Save(ctx)
+	node, err := guo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // Exec executes the query on the entity.

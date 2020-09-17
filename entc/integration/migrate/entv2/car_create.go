@@ -97,7 +97,7 @@ func (cc *CarCreate) check() error {
 }
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
-	c, _spec := cc.createSpec()
+	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -105,13 +105,13 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	var (
-		c     = &Car{config: cc.config}
+		_node = &Car{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: car.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -139,7 +139,7 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return c, _spec
+	return _node, _spec
 }
 
 // CarCreateBulk is the builder for creating a bulk of Car entities.

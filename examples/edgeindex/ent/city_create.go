@@ -103,7 +103,7 @@ func (cc *CityCreate) check() error {
 }
 
 func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
-	c, _spec := cc.createSpec()
+	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -111,13 +111,13 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	var (
-		c     = &City{config: cc.config}
+		_node = &City{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: city.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -132,7 +132,7 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: city.FieldName,
 		})
-		c.Name = value
+		_node.Name = value
 	}
 	if nodes := cc.mutation.StreetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -153,7 +153,7 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return c, _spec
+	return _node, _spec
 }
 
 // CityCreateBulk is the builder for creating a bulk of City entities.

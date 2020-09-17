@@ -359,11 +359,11 @@ func (puo *PlanetUpdateOne) Save(ctx context.Context) (*Planet, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (puo *PlanetUpdateOne) SaveX(ctx context.Context) *Planet {
-	pl, err := puo.Save(ctx)
+	node, err := puo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pl
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -379,7 +379,7 @@ func (puo *PlanetUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (puo *PlanetUpdateOne) sqlSave(ctx context.Context) (pl *Planet, err error) {
+func (puo *PlanetUpdateOne) sqlSave(ctx context.Context) (_node *Planet, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   planet.Table,
@@ -469,9 +469,9 @@ func (puo *PlanetUpdateOne) sqlSave(ctx context.Context) (pl *Planet, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	pl = &Planet{config: puo.config}
-	_spec.Assign = pl.assignValues
-	_spec.ScanValues = pl.scanValues()
+	_node = &Planet{config: puo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{planet.Label}
@@ -480,5 +480,5 @@ func (puo *PlanetUpdateOne) sqlSave(ctx context.Context) (pl *Planet, err error)
 		}
 		return nil, err
 	}
-	return pl, nil
+	return _node, nil
 }

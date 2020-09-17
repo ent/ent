@@ -351,11 +351,11 @@ func (guo *GalaxyUpdateOne) Save(ctx context.Context) (*Galaxy, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (guo *GalaxyUpdateOne) SaveX(ctx context.Context) *Galaxy {
-	ga, err := guo.Save(ctx)
+	node, err := guo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ga
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -386,7 +386,7 @@ func (guo *GalaxyUpdateOne) check() error {
 	return nil
 }
 
-func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (ga *Galaxy, err error) {
+func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (_node *Galaxy, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   galaxy.Table,
@@ -470,9 +470,9 @@ func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (ga *Galaxy, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	ga = &Galaxy{config: guo.config}
-	_spec.Assign = ga.assignValues
-	_spec.ScanValues = ga.scanValues()
+	_node = &Galaxy{config: guo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{galaxy.Label}
@@ -481,5 +481,5 @@ func (guo *GalaxyUpdateOne) sqlSave(ctx context.Context) (ga *Galaxy, err error)
 		}
 		return nil, err
 	}
-	return ga, nil
+	return _node, nil
 }

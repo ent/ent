@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
-	{{ $.Receiver }}, _spec := {{ $receiver }}.createSpec()
+	_node, _spec := {{ $receiver }}.createSpec()
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -21,20 +21,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
-			if {{ $.Receiver }}.ID == 0 {
+			if _node.ID == 0 {
 		{{- end }}
 			id := _spec.ID.Value.(int64)
-			{{ $.Receiver }}.ID = {{ $.ID.Type }}(id)
+			_node.ID = {{ $.ID.Type }}(id)
 		{{- if $.ID.UserDefined }}
 			}
 		{{- end }}
 	{{- end }}
-	return {{ $.Receiver }}, nil
+	return _node, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec) {
 	var (
-		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
+		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: {{ $.Package }}.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -45,7 +45,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	)
 	{{- if $.ID.UserDefined }}
 		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
-			{{ $.Receiver }}.ID = id
+			_node.ID = id
 			_spec.ID.Value = id
 		}
 	{{- end }}
@@ -56,7 +56,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 				Value: value,
 				Column: {{ $.Package }}.{{ $f.Constant }},
 			})
-			{{ $.Receiver }}.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
+			_node.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
 		}
 	{{- end }}
 	{{- range $e := $.Edges }}
@@ -67,7 +67,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			_spec.Edges = append(_spec.Edges, edge)
 		}
 	{{- end }}
-	return {{ $.Receiver }}, _spec
+	return _node, _spec
 }
 
 {{ end }}

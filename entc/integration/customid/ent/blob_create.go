@@ -141,19 +141,19 @@ func (bc *BlobCreate) check() error {
 }
 
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
-	b, _spec := bc.createSpec()
+	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	return b, nil
+	return _node, nil
 }
 
 func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
-		b     = &Blob{config: bc.config}
+		_node = &Blob{config: bc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: blob.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -163,7 +163,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		}
 	)
 	if id, ok := bc.mutation.ID(); ok {
-		b.ID = id
+		_node.ID = id
 		_spec.ID.Value = id
 	}
 	if value, ok := bc.mutation.UUID(); ok {
@@ -172,7 +172,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: blob.FieldUUID,
 		})
-		b.UUID = value
+		_node.UUID = value
 	}
 	if nodes := bc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -212,7 +212,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return b, _spec
+	return _node, _spec
 }
 
 // BlobCreateBulk is the builder for creating a bulk of Blob entities.

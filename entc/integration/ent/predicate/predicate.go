@@ -25,6 +25,9 @@ type File func(*sql.Selector)
 // FileType is the predicate function for filetype builders.
 type FileType func(*sql.Selector)
 
+// Goods is the predicate function for goods builders.
+type Goods func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 

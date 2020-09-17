@@ -324,11 +324,11 @@ func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.

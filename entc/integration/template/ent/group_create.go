@@ -87,7 +87,7 @@ func (gc *GroupCreate) check() error {
 }
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
-	gr, _spec := gc.createSpec()
+	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -95,13 +95,13 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	gr.ID = int(id)
-	return gr, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
-		gr    = &Group{config: gc.config}
+		_node = &Group{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -116,9 +116,9 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
-		gr.MaxUsers = value
+		_node.MaxUsers = value
 	}
-	return gr, _spec
+	return _node, _spec
 }
 
 // GroupCreateBulk is the builder for creating a bulk of Group entities.

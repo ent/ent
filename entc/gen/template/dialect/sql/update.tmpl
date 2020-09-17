@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation" }}
 {{ $one := hasSuffix $builder "One" }}
 {{- $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
-{{- $ret := "n" }}{{ if $one }}{{ $ret = $.Receiver }}{{ end }}
+{{- $ret := "n" }}{{ if $one }}{{ $ret = "_node" }}{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
 	_spec := &sqlgraph.UpdateSpec{

@@ -195,7 +195,7 @@ func (cc *CardCreate) check() error {
 }
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
-	c, _spec := cc.createSpec()
+	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -203,13 +203,13 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	var (
-		c     = &Card{config: cc.config}
+		_node = &Card{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: card.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -224,7 +224,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: card.FieldCreateTime,
 		})
-		c.CreateTime = value
+		_node.CreateTime = value
 	}
 	if value, ok := cc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -232,7 +232,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: card.FieldUpdateTime,
 		})
-		c.UpdateTime = value
+		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.Number(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -240,7 +240,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: card.FieldNumber,
 		})
-		c.Number = value
+		_node.Number = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -248,7 +248,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: card.FieldName,
 		})
-		c.Name = value
+		_node.Name = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -288,7 +288,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return c, _spec
+	return _node, _spec
 }
 
 // CardCreateBulk is the builder for creating a bulk of Card entities.

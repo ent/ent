@@ -76,7 +76,7 @@ type {{ $.Name }}Edges struct {
 
 {{ $receiver := $.Receiver }}
 
-{{ range $_, $e := $.Edges }}
+{{ range $e := $.Edges }}
 	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the {{ $e.Name }} edge of the {{ $.Name }}.
 	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {

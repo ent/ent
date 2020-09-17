@@ -84,23 +84,23 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 
 // First returns the first Street entity in the query. Returns *NotFoundError when no street was found.
 func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
-	sSlice, err := sq.Limit(1).All(ctx)
+	nodes, err := sq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(sSlice) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{street.Label}
 	}
-	return sSlice[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
-	s, err := sq.First(ctx)
+	node, err := sq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // FirstID returns the first Street id in the query. Returns *NotFoundError when no id was found.
@@ -127,13 +127,13 @@ func (sq *StreetQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Street entity in the query, returns an error if not exactly one entity was returned.
 func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
-	sSlice, err := sq.Limit(2).All(ctx)
+	nodes, err := sq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(sSlice) {
+	switch len(nodes) {
 	case 1:
-		return sSlice[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{street.Label}
 	default:
@@ -143,11 +143,11 @@ func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
-	s, err := sq.Only(ctx)
+	node, err := sq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // OnlyID returns the only Street id in the query, returns an error if not exactly one id was returned.
@@ -186,11 +186,11 @@ func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
-	sSlice, err := sq.All(ctx)
+	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return sSlice
+	return nodes
 }
 
 // IDs executes the query and returns a list of Street ids.

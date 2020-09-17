@@ -77,7 +77,7 @@ func (ic *ItemCreate) check() error {
 }
 
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
-	i, _spec := ic.createSpec()
+	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -85,13 +85,13 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	i.ID = int(id)
-	return i, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	var (
-		i     = &Item{config: ic.config}
+		_node = &Item{config: ic.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: item.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -100,7 +100,7 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	return i, _spec
+	return _node, _spec
 }
 
 // ItemCreateBulk is the builder for creating a bulk of Item entities.

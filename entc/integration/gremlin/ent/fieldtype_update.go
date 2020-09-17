@@ -2461,11 +2461,11 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (ftuo *FieldTypeUpdateOne) SaveX(ctx context.Context) *FieldType {
-	ft, err := ftuo.Save(ctx)
+	node, err := ftuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // Exec executes the query on the entity.

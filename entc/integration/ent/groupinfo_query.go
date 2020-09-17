@@ -84,23 +84,23 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 
 // First returns the first GroupInfo entity in the query. Returns *NotFoundError when no groupinfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
-	gis, err := giq.Limit(1).All(ctx)
+	nodes, err := giq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(gis) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{groupinfo.Label}
 	}
-	return gis[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
-	gi, err := giq.First(ctx)
+	node, err := giq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // FirstID returns the first GroupInfo id in the query. Returns *NotFoundError when no id was found.
@@ -127,13 +127,13 @@ func (giq *GroupInfoQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only GroupInfo entity in the query, returns an error if not exactly one entity was returned.
 func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
-	gis, err := giq.Limit(2).All(ctx)
+	nodes, err := giq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(gis) {
+	switch len(nodes) {
 	case 1:
-		return gis[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{groupinfo.Label}
 	default:
@@ -143,11 +143,11 @@ func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
-	gi, err := giq.Only(ctx)
+	node, err := giq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // OnlyID returns the only GroupInfo id in the query, returns an error if not exactly one id was returned.
@@ -186,11 +186,11 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
-	gis, err := giq.All(ctx)
+	nodes, err := giq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gis
+	return nodes
 }
 
 // IDs executes the query and returns a list of GroupInfo ids.

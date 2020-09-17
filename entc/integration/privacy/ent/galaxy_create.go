@@ -122,7 +122,7 @@ func (gc *GalaxyCreate) check() error {
 }
 
 func (gc *GalaxyCreate) sqlSave(ctx context.Context) (*Galaxy, error) {
-	ga, _spec := gc.createSpec()
+	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -130,13 +130,13 @@ func (gc *GalaxyCreate) sqlSave(ctx context.Context) (*Galaxy, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	ga.ID = int(id)
-	return ga, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (gc *GalaxyCreate) createSpec() (*Galaxy, *sqlgraph.CreateSpec) {
 	var (
-		ga    = &Galaxy{config: gc.config}
+		_node = &Galaxy{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: galaxy.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -151,7 +151,7 @@ func (gc *GalaxyCreate) createSpec() (*Galaxy, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: galaxy.FieldName,
 		})
-		ga.Name = value
+		_node.Name = value
 	}
 	if value, ok := gc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -159,7 +159,7 @@ func (gc *GalaxyCreate) createSpec() (*Galaxy, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: galaxy.FieldType,
 		})
-		ga.Type = value
+		_node.Type = value
 	}
 	if nodes := gc.mutation.PlanetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -180,7 +180,7 @@ func (gc *GalaxyCreate) createSpec() (*Galaxy, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return ga, _spec
+	return _node, _spec
 }
 
 // GalaxyCreateBulk is the builder for creating a bulk of Galaxy entities.

@@ -33,6 +33,7 @@ type hooks struct {
 	FieldType []ent.Hook
 	File      []ent.Hook
 	FileType  []ent.Hook
+	Goods     []ent.Hook
 	Group     []ent.Hook
 	GroupInfo []ent.Hook
 	Item      []ent.Hook

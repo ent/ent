@@ -227,11 +227,11 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	t, err := tuo.Save(ctx)
+	node, err := tuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return t
+	return node
 }
 
 // Exec executes the query on the entity.

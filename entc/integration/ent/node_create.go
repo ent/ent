@@ -129,7 +129,7 @@ func (nc *NodeCreate) check() error {
 }
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
-	n, _spec := nc.createSpec()
+	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -137,13 +137,13 @@ func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	n.ID = int(id)
-	return n, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	var (
-		n     = &Node{config: nc.config}
+		_node = &Node{config: nc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: node.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -158,7 +158,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: node.FieldValue,
 		})
-		n.Value = value
+		_node.Value = value
 	}
 	if nodes := nc.mutation.PrevIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -198,7 +198,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return n, _spec
+	return _node, _spec
 }
 
 // NodeCreateBulk is the builder for creating a bulk of Node entities.

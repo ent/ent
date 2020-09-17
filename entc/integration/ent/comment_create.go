@@ -110,7 +110,7 @@ func (cc *CommentCreate) check() error {
 }
 
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
-	c, _spec := cc.createSpec()
+	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -118,13 +118,13 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	var (
-		c     = &Comment{config: cc.config}
+		_node = &Comment{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: comment.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -139,7 +139,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: comment.FieldUniqueInt,
 		})
-		c.UniqueInt = value
+		_node.UniqueInt = value
 	}
 	if value, ok := cc.mutation.UniqueFloat(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -147,7 +147,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: comment.FieldUniqueFloat,
 		})
-		c.UniqueFloat = value
+		_node.UniqueFloat = value
 	}
 	if value, ok := cc.mutation.NillableInt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -155,9 +155,9 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: comment.FieldNillableInt,
 		})
-		c.NillableInt = &value
+		_node.NillableInt = &value
 	}
-	return c, _spec
+	return _node, _spec
 }
 
 // CommentCreateBulk is the builder for creating a bulk of Comment entities.

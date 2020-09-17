@@ -216,7 +216,7 @@ func (fc *FileCreate) check() error {
 }
 
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
-	f, _spec := fc.createSpec()
+	_node, _spec := fc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -224,13 +224,13 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	f.ID = int(id)
-	return f, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	var (
-		f     = &File{config: fc.config}
+		_node = &File{config: fc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: file.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -245,7 +245,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: file.FieldSize,
 		})
-		f.Size = value
+		_node.Size = value
 	}
 	if value, ok := fc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -253,7 +253,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: file.FieldName,
 		})
-		f.Name = value
+		_node.Name = value
 	}
 	if value, ok := fc.mutation.User(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -261,7 +261,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: file.FieldUser,
 		})
-		f.User = &value
+		_node.User = &value
 	}
 	if value, ok := fc.mutation.Group(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -269,7 +269,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: file.FieldGroup,
 		})
-		f.Group = value
+		_node.Group = value
 	}
 	if value, ok := fc.mutation.GetOp(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -277,7 +277,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: file.FieldOp,
 		})
-		f.Op = value
+		_node.Op = value
 	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -336,7 +336,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return f, _spec
+	return _node, _spec
 }
 
 // FileCreateBulk is the builder for creating a bulk of File entities.

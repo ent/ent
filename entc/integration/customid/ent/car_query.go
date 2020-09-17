@@ -84,23 +84,23 @@ func (cq *CarQuery) QueryOwner() *PetQuery {
 
 // First returns the first Car entity in the query. Returns *NotFoundError when no car was found.
 func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
-	cs, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(cs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{car.Label}
 	}
-	return cs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (cq *CarQuery) FirstX(ctx context.Context) *Car {
-	c, err := cq.First(ctx)
+	node, err := cq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // FirstID returns the first Car id in the query. Returns *NotFoundError when no id was found.
@@ -127,13 +127,13 @@ func (cq *CarQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Car entity in the query, returns an error if not exactly one entity was returned.
 func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
-	cs, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(cs) {
+	switch len(nodes) {
 	case 1:
-		return cs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{car.Label}
 	default:
@@ -143,11 +143,11 @@ func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
-	c, err := cq.Only(ctx)
+	node, err := cq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // OnlyID returns the only Car id in the query, returns an error if not exactly one id was returned.
@@ -186,11 +186,11 @@ func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (cq *CarQuery) AllX(ctx context.Context) []*Car {
-	cs, err := cq.All(ctx)
+	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return cs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Car ids.

@@ -160,7 +160,7 @@ func (ftc *FileTypeCreate) check() error {
 }
 
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
-	ft, _spec := ftc.createSpec()
+	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -168,13 +168,13 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	ft.ID = int(id)
-	return ft, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	var (
-		ft    = &FileType{config: ftc.config}
+		_node = &FileType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: filetype.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -189,7 +189,7 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: filetype.FieldName,
 		})
-		ft.Name = value
+		_node.Name = value
 	}
 	if value, ok := ftc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -197,7 +197,7 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: filetype.FieldType,
 		})
-		ft.Type = value
+		_node.Type = value
 	}
 	if value, ok := ftc.mutation.State(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -205,7 +205,7 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: filetype.FieldState,
 		})
-		ft.State = value
+		_node.State = value
 	}
 	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -226,7 +226,7 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return ft, _spec
+	return _node, _spec
 }
 
 // FileTypeCreateBulk is the builder for creating a bulk of FileType entities.

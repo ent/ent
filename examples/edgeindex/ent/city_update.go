@@ -305,11 +305,11 @@ func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CityUpdateOne) SaveX(ctx context.Context) *City {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -325,7 +325,7 @@ func (cuo *CityUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
+func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   city.Table,
@@ -402,9 +402,9 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	c = &City{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &City{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
@@ -413,5 +413,5 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (c *City, err error) {
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

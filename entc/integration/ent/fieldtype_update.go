@@ -2872,11 +2872,11 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (ftuo *FieldTypeUpdateOne) SaveX(ctx context.Context) *FieldType {
-	ft, err := ftuo.Save(ctx)
+	node, err := ftuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -2922,7 +2922,7 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 	return nil
 }
 
-func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err error) {
+func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   fieldtype.Table,
@@ -3690,9 +3690,9 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 			Column: fieldtype.FieldRole,
 		})
 	}
-	ft = &FieldType{config: ftuo.config}
-	_spec.Assign = ft.assignValues
-	_spec.ScanValues = ft.scanValues()
+	_node = &FieldType{config: ftuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fieldtype.Label}
@@ -3701,5 +3701,5 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (ft *FieldType, err
 		}
 		return nil, err
 	}
-	return ft, nil
+	return _node, nil
 }
