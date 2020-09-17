@@ -653,8 +653,6 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 	selector := u.builder.Select(u.Node.ID.Column).
 		From(u.builder.Table(u.Node.Table))
 
-	archivedWherePredicate := selector.Clone().P()
-
 	if pred := u.Predicate; pred != nil {
 		pred(selector)
 	}
@@ -673,13 +671,14 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 	if len(ids) == 0 {
 		return 0, nil
 	}
-	update := u.builder.Update(u.Node.Table).Where(archivedWherePredicate)
+	// update := u.builder.Update(u.Node.Table).Where(matchID(u.Node.ID.Column, ids))
+	update := u.builder.Update(u.Node.Table).Where(selector.P())
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return 0, err
 	}
 	if !update.Empty() {
 		var res sql.Result
-		query, args := update.Query()
+		query, args := update.QueryWithSelectPredicate()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, err
 		}
