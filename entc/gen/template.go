@@ -131,6 +131,13 @@ var (
 			},
 		},
 		{
+			Name:   "entql",
+			Format: "entql.go",
+			Skip: func(g *Graph) bool {
+				return !g.featureEnabled(FeatureEntQL)
+			},
+		},
+		{
 			Name:   "runtime/ent",
 			Format: "runtime.go",
 		},

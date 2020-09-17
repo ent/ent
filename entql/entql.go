@@ -1,3 +1,9 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+// Package entql provides an experimental API for interacting dynamically
+// with ent queries. For more info, search for it in https://entgo.io.
 package entql
 
 import (
@@ -9,50 +15,55 @@ import (
 // An Op represents a predicate operator.
 type Op int
 
+// Builtin operators.
 const (
-	OpAnd          Op = iota // logical and.
-	OpOr                     // logical or.
-	OpNot                    // logical negation.
-	OpEQ                     // =
-	OpNEQ                    // <>
-	OpGT                     // >
-	OpGTE                    // >=
-	OpLT                     // <
-	OpLTE                    // <=
-	OpIn                     // IN
-	OpNotIn                  // NOT IN
-	OpEqualFold              // equals case-insensitive
-	OpContains               // containing
-	OpContainsFold           // containing case-insensitive
-	OpHasPrefix              // startingWith
-	OpHasSuffix              // endingWith
-	OpHasEdge                // HasEdge
+	OpAnd   Op = iota // logical and.
+	OpOr              // logical or.
+	OpNot             // logical negation.
+	OpEQ              // =
+	OpNEQ             // <>
+	OpGT              // >
+	OpGTE             // >=
+	OpLT              // <
+	OpLTE             // <=
+	OpIn              // IN
+	OpNotIn           // NOT IN
 )
 
 var ops = [...]string{
-	OpAnd:          "&&",
-	OpOr:           "||",
-	OpNot:          "!",
-	OpEQ:           "==",
-	OpNEQ:          "!=",
-	OpGT:           ">",
-	OpGTE:          ">=",
-	OpLT:           "<",
-	OpLTE:          "<=",
-	OpIn:           "in",
-	OpNotIn:        "not in",
-	OpEqualFold:    "equal_fold",
-	OpContains:     "contains",
-	OpContainsFold: "contains_fold",
-	OpHasPrefix:    "has_prefix",
-	OpHasSuffix:    "has_suffix",
-	OpHasEdge:      "has_edge",
+	OpAnd:   "&&",
+	OpOr:    "||",
+	OpNot:   "!",
+	OpEQ:    "==",
+	OpNEQ:   "!=",
+	OpGT:    ">",
+	OpGTE:   ">=",
+	OpLT:    "<",
+	OpLTE:   "<=",
+	OpIn:    "in",
+	OpNotIn: "not in",
 }
 
 // String returns the text representation of an operator.
 func (o Op) String() string {
-	return ops[o]
+	if o >= 0 && int(o) < len(ops) {
+		return ops[o]
+	}
+	return "<invalid>"
 }
+
+// A Func represents a function expression.
+type Func string
+
+// Builtin functions.
+const (
+	FuncEqualFold    Func = "equal_fold"    // equals case-insensitive
+	FuncContains     Func = "contains"      // containing
+	FuncContainsFold Func = "contains_fold" // containing case-insensitive
+	FuncHasPrefix    Func = "has_prefix"    // startingWith
+	FuncHasSuffix    Func = "has_suffix"    // endingWith
+	FuncHasEdge      Func = "has_edge"      // HasEdge
+)
 
 type (
 	// Expr represents an entql expression. All expressions implement the Expr interface.
@@ -64,8 +75,6 @@ type (
 	// P represents an expression that returns a boolean value depending on its variables.
 	P interface {
 		Expr
-		Or(P) P
-		And(P) P
 		Negate() P
 	}
 )
@@ -89,9 +98,9 @@ type (
 		Xs []Expr
 	}
 
-	// A CallExpr represents an expression followed by its arguments.
+	// A CallExpr represents a function call with its arguments.
 	CallExpr struct {
-		Op   Op
+		Func Func
 		Args []Expr
 	}
 
@@ -172,12 +181,30 @@ func FieldEQ(name string, v interface{}) P {
 	}
 }
 
+// NEQ returns a predicate to check if the expressions are not equal.
+func NEQ(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpNEQ,
+		X:  x,
+		Y:  y,
+	}
+}
+
 // FieldNEQ returns a predicate to check if a field is not equivalent to a given value.
 func FieldNEQ(name string, v interface{}) P {
 	return &BinaryExpr{
 		Op: OpNEQ,
 		X:  &Field{Name: name},
 		Y:  &Value{V: v},
+	}
+}
+
+// GT returns a predicate to check if the expression x > than expression y.
+func GT(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpGT,
+		X:  x,
+		Y:  y,
 	}
 }
 
@@ -190,6 +217,15 @@ func FieldGT(name string, v interface{}) P {
 	}
 }
 
+// GTE returns a predicate to check if the expression x >= than expression y.
+func GTE(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpGTE,
+		X:  x,
+		Y:  y,
+	}
+}
+
 // FieldGTE returns a predicate to check if a field is >= than the given value.
 func FieldGTE(name string, v interface{}) P {
 	return &BinaryExpr{
@@ -199,12 +235,30 @@ func FieldGTE(name string, v interface{}) P {
 	}
 }
 
+// LT returns a predicate to check if the expression x < than expression y.
+func LT(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpLT,
+		X:  x,
+		Y:  y,
+	}
+}
+
 // FieldLT returns a predicate to check if a field is < than the given value.
 func FieldLT(name string, v interface{}) P {
 	return &BinaryExpr{
 		Op: OpLT,
 		X:  &Field{Name: name},
 		Y:  &Value{V: v},
+	}
+}
+
+// LTE returns a predicate to check if the expression x <= than expression y.
+func LTE(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpLTE,
+		X:  x,
+		Y:  y,
 	}
 }
 
@@ -220,7 +274,7 @@ func FieldLTE(name string, v interface{}) P {
 // FieldContains returns a predicate to check if the field value contains a substr.
 func FieldContains(name, substr string) P {
 	return &CallExpr{
-		Op:   OpContains,
+		Func: FuncContains,
 		Args: []Expr{&Field{Name: name}, &Value{V: substr}},
 	}
 }
@@ -228,7 +282,7 @@ func FieldContains(name, substr string) P {
 // FieldContainsFold returns a predicate to check if the field value contains a substr under case-folding.
 func FieldContainsFold(name, substr string) P {
 	return &CallExpr{
-		Op:   OpContainsFold,
+		Func: FuncContainsFold,
 		Args: []Expr{&Field{Name: name}, &Value{V: substr}},
 	}
 }
@@ -236,7 +290,7 @@ func FieldContainsFold(name, substr string) P {
 // FieldEqualFold returns a predicate to check if the field is equal to the given string under case-folding.
 func FieldEqualFold(name, v string) P {
 	return &CallExpr{
-		Op:   OpEqualFold,
+		Func: FuncEqualFold,
 		Args: []Expr{&Field{Name: name}, &Value{V: v}},
 	}
 }
@@ -244,7 +298,7 @@ func FieldEqualFold(name, v string) P {
 // FieldHasPrefix returns a predicate to check if the field starts with the given prefix.
 func FieldHasPrefix(name, prefix string) P {
 	return &CallExpr{
-		Op:   OpHasPrefix,
+		Func: FuncHasPrefix,
 		Args: []Expr{&Field{Name: name}, &Value{V: prefix}},
 	}
 }
@@ -252,7 +306,7 @@ func FieldHasPrefix(name, prefix string) P {
 // FieldHasSuffix returns a predicate to check if the field ends with the given suffix.
 func FieldHasSuffix(name, suffix string) P {
 	return &CallExpr{
-		Op:   OpHasSuffix,
+		Func: FuncHasSuffix,
 		Args: []Expr{&Field{Name: name}, &Value{V: suffix}},
 	}
 }
@@ -296,7 +350,7 @@ func FieldNotNil(name string) P {
 // HasEdge returns a predicate to check if an edge exists (not null in databases).
 func HasEdge(name string) P {
 	return &CallExpr{
-		Op:   OpHasEdge,
+		Func: FuncHasEdge,
 		Args: []Expr{&Edge{Name: name}},
 	}
 }
@@ -305,19 +359,9 @@ func HasEdge(name string) P {
 // edge returns true on the provided predicate.
 func HasEdgeWith(name string, p ...P) P {
 	return &CallExpr{
-		Op:   OpHasEdge,
+		Func: FuncHasEdge,
 		Args: append([]Expr{&Edge{Name: name}}, p2expr(p)...),
 	}
-}
-
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *BinaryExpr) And(p P) P {
-	return And(e, p)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *BinaryExpr) Or(e1 P) P {
-	return Or(e, e1)
 }
 
 // Negate negates the predicate.
@@ -325,44 +369,14 @@ func (e *BinaryExpr) Negate() P {
 	return Not(e)
 }
 
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *NaryExpr) And(e1 P) P {
-	return And(e, e1)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *NaryExpr) Or(e1 P) P {
-	return Or(e, e1)
-}
-
 // Negate negates the predicate.
 func (e *NaryExpr) Negate() P {
 	return Not(e)
 }
 
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *UnaryExpr) And(e1 P) P {
-	return And(e, e1)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *UnaryExpr) Or(e1 P) P {
-	return Or(e, e1)
-}
-
 // Negate negates the predicate.
 func (e *UnaryExpr) Negate() P {
 	return Not(e)
-}
-
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *CallExpr) And(e1 P) P {
-	return And(e, e1)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *CallExpr) Or(e1 P) P {
-	return Or(e, e1)
 }
 
 // Negate negates the predicate.
@@ -399,7 +413,7 @@ func (e *NaryExpr) String() string {
 // String returns the text representation of a call expression.
 func (e *CallExpr) String() string {
 	var s strings.Builder
-	s.WriteString(e.Op.String())
+	s.WriteString(string(e.Func))
 	s.WriteByte('(')
 	for i, x := range e.Args {
 		if i > 0 {

@@ -1,3 +1,7 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package sqlgraph
 
 import (
@@ -14,7 +18,7 @@ import (
 )
 
 func TestGraph_AddE(t *testing.T) {
-	g := &Graph{
+	g := &Schema{
 		Nodes: []*Node{{Type: "user"}, {Type: "pet"}},
 	}
 	err := g.AddE("pets", &EdgeSpec{Rel: O2M}, "user", "pet")
@@ -26,7 +30,7 @@ func TestGraph_AddE(t *testing.T) {
 }
 
 func TestGraph_EvalP(t *testing.T) {
-	g := &Graph{
+	g := &Schema{
 		Nodes: []*Node{
 			{
 				Type: "user",
@@ -108,6 +112,11 @@ func TestGraph_EvalP(t *testing.T) {
 			wantQuery: `SELECT * FROM "users" WHERE "name" = "last"`,
 		},
 		{
+			s:         sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")),
+			p:         entql.And(entql.FieldNil("name"), entql.FieldNotNil("last")),
+			wantQuery: `SELECT * FROM "users" WHERE "name" IS NULL AND "last" IS NOT NULL`,
+		},
+		{
 			s: sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")).
 				Where(sql.EQ("foo", "bar")),
 			p:         entql.Or(entql.FieldEQ("name", "foo"), entql.FieldEQ("name", "baz")),
@@ -141,6 +150,14 @@ func TestGraph_EvalP(t *testing.T) {
 			p:         entql.And(entql.HasEdge("pets"), entql.HasEdge("groups"), entql.EQ(entql.F("name"), entql.F("uid"))),
 			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND ("users"."uid" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "pets"."owner_id" IS NOT NULL) AND "users"."uid" IN (SELECT "user_groups"."user_id" FROM "user_groups") AND "name" = "uid")`,
 			wantArgs:  []interface{}{true},
+		},
+		{
+			s: sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")).Where(sql.EQ("active", true)),
+			p: entql.HasEdgeWith("pets", entql.FieldEQ("name", "pedro"), WrapFunc(func(s *sql.Selector) {
+				s.Where(sql.EQ("owner_id", 10))
+			})),
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "users"."uid" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2 AND "owner_id" = $3)`,
+			wantArgs:  []interface{}{true, "pedro", 10},
 		},
 	}
 	for i, tt := range tests {

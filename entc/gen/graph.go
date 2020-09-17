@@ -509,9 +509,9 @@ func (Config) ModuleInfo() (m debug.Module) {
 //	{{ end }}
 //
 func (c Config) FeatureEnabled(name string) (bool, error) {
-	for i := range c.Features {
-		if name == c.Features[i].Name {
-			return true, nil
+	for _, f := range AllFeatures {
+		if name == f.Name {
+			return c.featureEnabled(f), nil
 		}
 	}
 	return false, fmt.Errorf("unexpected feature name %q", name)
@@ -519,8 +519,12 @@ func (c Config) FeatureEnabled(name string) (bool, error) {
 
 // featureEnabled reports if the given feature-flag is enabled.
 func (c Config) featureEnabled(f Feature) bool {
-	enabled, _ := c.FeatureEnabled(f.Name)
-	return enabled
+	for i := range c.Features {
+		if f.Name == c.Features[i].Name {
+			return true
+		}
+	}
+	return false
 }
 
 // PrepareEnv makes sure the generated directory (environment)
