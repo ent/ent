@@ -656,6 +656,8 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 	if pred := u.Predicate; pred != nil {
 		pred(selector)
 	}
+
+	// note: selector.P() predicate is contaminated by this function.
 	query, args := selector.Query()
 	rows := &sql.Rows{}
 	if err := u.tx.Query(ctx, query, args, rows); err != nil {
@@ -672,13 +674,20 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 		return 0, nil
 	}
 	// update := u.builder.Update(u.Node.Table).Where(matchID(u.Node.ID.Column, ids))
-	update := u.builder.Update(u.Node.Table).Where(selector.P())
+
+	// remake predicate by creating a new selector.
+	selector2 := u.builder.Select(u.Node.ID.Column).
+		From(u.builder.Table(u.Node.Table))
+	if pred := u.Predicate; pred != nil {
+		pred(selector2)
+	}
+	update := u.builder.Update(u.Node.Table).Where(selector2.P())
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return 0, err
 	}
 	if !update.Empty() {
 		var res sql.Result
-		query, args := update.QueryWithSelectPredicate()
+		query, args := update.Query()
 		if err := tx.Exec(ctx, query, args, &res); err != nil {
 			return 0, err
 		}
