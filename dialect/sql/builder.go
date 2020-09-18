@@ -761,38 +761,6 @@ func (u *UpdateBuilder) Query() (string, []interface{}) {
 	return u.String(), u.args
 }
 
-func (u *UpdateBuilder) QueryWithSelectPredicate() (string, []interface{}) {
-	u.WriteString("UPDATE ")
-	u.Ident(u.table).Pad().WriteString("SET ")
-	for i, c := range u.nulls {
-		if i > 0 {
-			u.Comma()
-		}
-		u.Ident(c).WriteString(" = NULL")
-	}
-	if len(u.nulls) > 0 && len(u.columns) > 0 {
-		u.Comma()
-	}
-	for i, c := range u.columns {
-		if i > 0 {
-			u.Comma()
-		}
-		u.Ident(c).WriteString(" = ")
-		switch v := u.values[i].(type) {
-		case Querier:
-			u.Join(v)
-		default:
-			u.Arg(v)
-		}
-	}
-	if u.where != nil {
-		u.WriteString(" WHERE ")
-		u.WriteString(u.where.String())
-		u.args = append(u.args, u.where.args...)
-	}
-	return u.String(), u.args
-}
-
 // DeleteBuilder is a builder for `DELETE` statement.
 type DeleteBuilder struct {
 	Builder
