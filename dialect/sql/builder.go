@@ -761,6 +761,7 @@ func (u *UpdateBuilder) Query() (string, []interface{}) {
 	return u.String(), u.args
 }
 
+// QueryWithSelectPredicate returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) QueryWithSelectPredicate() (string, []interface{}) {
 	u.WriteString("UPDATE ")
 	u.Ident(u.table).Pad().WriteString("SET ")
@@ -787,6 +788,7 @@ func (u *UpdateBuilder) QueryWithSelectPredicate() (string, []interface{}) {
 	}
 	if u.where != nil {
 		u.WriteString(" WHERE ")
+		// u.Join(u.where)
 		u.WriteString(u.where.String())
 		u.args = append(u.args, u.where.args...)
 	}
