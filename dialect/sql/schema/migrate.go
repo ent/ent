@@ -151,7 +151,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			}
 		default: // !exist
 			// special case: sqllite driver create foreigh keys during table creating period,
-			// we need to set foreigh keys emtpy before it, and get FKS back after Query().
+			// we need to set foreigh keys empty before it, and get FKS back after Query().
 			bks := t.ForeignKeys
 			if _, ok := m.sqlDialect.(*SQLite); ok && !m.withForeighKeys {
 				t.ForeignKeys = nil
