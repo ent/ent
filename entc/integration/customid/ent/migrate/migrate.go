@@ -35,9 +35,9 @@ var (
 	// WithFixture sets the foreign-key renaming option to the migration when upgrading
 	// ent from v0.1.0 (issue-#285). Defaults to true.
 	WithFixture = schema.WithFixture
-	// WithForeighKeysDisable disables creating foreigh-key in ddl. In some case we are
-	// not allowed to use foreigh-key. Defaults to false
-	WithForeighKeysDisable = schema.WithForeighKeysDisable
+	// WithForeighKeys enables creating foreigh-key in ddl. In some case we are
+	// not allowed to use foreigh-key. Defaults to true
+	WithForeighKeys = schema.WithForeighKeys
 )
 
 // Schema is the API for creating, migrating and dropping a schema.
