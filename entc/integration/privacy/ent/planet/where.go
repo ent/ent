@@ -36,8 +36,8 @@ func IDNEQ(id int) predicate.Planet {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Planet {
 	return predicate.Planet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -53,8 +53,8 @@ func IDIn(ids ...int) predicate.Planet {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Planet {
 	return predicate.Planet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -130,8 +130,8 @@ func NameIn(vs ...string) predicate.Planet {
 		v[i] = vs[i]
 	}
 	return predicate.Planet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -147,8 +147,8 @@ func NameNotIn(vs ...string) predicate.Planet {
 		v[i] = vs[i]
 	}
 	return predicate.Planet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -241,8 +241,8 @@ func AgeIn(vs ...uint) predicate.Planet {
 		v[i] = vs[i]
 	}
 	return predicate.Planet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -258,8 +258,8 @@ func AgeNotIn(vs ...uint) predicate.Planet {
 		v[i] = vs[i]
 	}
 	return predicate.Planet(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return

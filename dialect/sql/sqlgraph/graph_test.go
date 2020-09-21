@@ -368,6 +368,43 @@ func TestHasNeighborsWith(t *testing.T) {
 			wantArgs:  []interface{}{"pedro", "mashraki"},
 		},
 		{
+			name: "M2O/merge_predicate_1",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Table("pets")).
+				Where(sql.EQ("name", "pedro")),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("id", 1))
+			},
+			wantQuery: `SELECT * FROM "pets" WHERE "name" = $1 AND "owner_id" = $2`,
+			wantArgs:  []interface{}{"pedro", 1},
+		},
+		{
+			name: "M2O/merge_predicate_2",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Table("pets")).
+				Where(sql.EQ("name", "pedro")),
+			predicate: func(s *sql.Selector) {
+				s.Where(
+					sql.Or(
+						sql.EQ(s.C("id"), 1),
+						sql.In(s.C("id"), 2, 3, 4, 5, 6, 7, 8),
+					),
+				)
+			},
+			wantQuery: `SELECT * FROM "pets" WHERE "name" = $1 AND ("pets"."owner_id" = $2 OR "pets"."owner_id" IN ($3, $4, $5, $6, $7, $8, $9))`,
+			wantArgs:  []interface{}{"pedro", 1, 2, 3, 4, 5, 6, 7, 8},
+		},
+		{
 			name: "M2M",
 			step: NewStep(
 				From("users", "id"),

@@ -36,8 +36,8 @@ func IDNEQ(id int) predicate.Galaxy {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Galaxy {
 	return predicate.Galaxy(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -53,8 +53,8 @@ func IDIn(ids ...int) predicate.Galaxy {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Galaxy {
 	return predicate.Galaxy(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -123,8 +123,8 @@ func NameIn(vs ...string) predicate.Galaxy {
 		v[i] = vs[i]
 	}
 	return predicate.Galaxy(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -140,8 +140,8 @@ func NameNotIn(vs ...string) predicate.Galaxy {
 		v[i] = vs[i]
 	}
 	return predicate.Galaxy(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -234,8 +234,8 @@ func TypeIn(vs ...Type) predicate.Galaxy {
 		v[i] = vs[i]
 	}
 	return predicate.Galaxy(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -251,8 +251,8 @@ func TypeNotIn(vs ...Type) predicate.Galaxy {
 		v[i] = vs[i]
 	}
 	return predicate.Galaxy(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return

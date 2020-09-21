@@ -15,6 +15,7 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -824,8 +825,10 @@ func (d *DeleteBuilder) Query() (string, []interface{}) {
 // Predicate is a where predicate.
 type Predicate struct {
 	Builder
-	depth int
-	fns   []func(*Builder)
+	depth   int
+	idents  map[string]struct{}
+	replace map[string]string
+	fns     []func(*Builder)
 }
 
 // P creates a new predicates.
@@ -842,7 +845,11 @@ func P(fns ...func(*Builder)) *Predicate {
 //
 func Or(preds ...*Predicate) *Predicate {
 	p := P()
+	for i := range preds {
+		p.SetIdents(preds[i].Idents()...)
+	}
 	return p.Append(func(b *Builder) {
+		p.copyReplace(preds...)
 		p.mayWrap(preds, b, "OR")
 	})
 }
@@ -867,7 +874,9 @@ func (p *Predicate) False() *Predicate {
 //	Not(Or(EQ("name", "foo"), EQ("name", "bar")))
 //
 func Not(pred *Predicate) *Predicate {
-	return P().Not().Append(func(b *Builder) {
+	p := P().SetIdents(pred.Idents()...)
+	return p.Not().Append(func(b *Builder) {
+		p.copyReplace(pred)
 		b.Nested(func(b *Builder) {
 			b.Join(pred)
 		})
@@ -884,7 +893,11 @@ func (p *Predicate) Not() *Predicate {
 // And combines all given predicates with AND between them.
 func And(preds ...*Predicate) *Predicate {
 	p := P()
+	for i := range preds {
+		p.SetIdents(preds[i].Idents()...)
+	}
 	return p.Append(func(b *Builder) {
+		p.copyReplace(preds...)
 		p.mayWrap(preds, b, "AND")
 	})
 }
@@ -896,8 +909,9 @@ func EQ(col string, value interface{}) *Predicate {
 
 // EQ appends a "=" predicate.
 func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		p.writeIdent(b, col)
 		b.WriteOp(OpEQ)
 		b.Arg(arg)
 	})
@@ -910,8 +924,9 @@ func NEQ(col string, value interface{}) *Predicate {
 
 // NEQ appends a "<>" predicate.
 func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		p.writeIdent(b, col)
 		b.WriteOp(OpNEQ)
 		b.Arg(arg)
 	})
@@ -924,8 +939,9 @@ func LT(col string, value interface{}) *Predicate {
 
 // LT appends a "<" predicate.
 func (p *Predicate) LT(col string, arg interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		p.writeIdent(b, col)
 		p.WriteOp(OpLT)
 		b.Arg(arg)
 	})
@@ -938,8 +954,9 @@ func LTE(col string, value interface{}) *Predicate {
 
 // LTE appends a "<=" predicate.
 func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		p.writeIdent(b, col)
 		p.WriteOp(OpLTE)
 		b.Arg(arg)
 	})
@@ -952,8 +969,9 @@ func GT(col string, value interface{}) *Predicate {
 
 // GT appends a ">" predicate.
 func (p *Predicate) GT(col string, arg interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		p.writeIdent(b, col)
 		p.WriteOp(OpGT)
 		b.Arg(arg)
 	})
@@ -966,8 +984,9 @@ func GTE(col string, value interface{}) *Predicate {
 
 // GTE appends a ">=" predicate.
 func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		p.writeIdent(b, col)
 		p.WriteOp(OpGTE)
 		b.Arg(arg)
 	})
@@ -980,8 +999,10 @@ func NotNull(col string) *Predicate {
 
 // NotNull appends the `IS NOT NULL` predicate.
 func (p *Predicate) NotNull(col string) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" IS NOT NULL")
+		p.writeIdent(b, col)
+		b.WriteString(" IS NOT NULL")
 	})
 }
 
@@ -992,8 +1013,10 @@ func IsNull(col string) *Predicate {
 
 // IsNull appends the `IS NULL` predicate.
 func (p *Predicate) IsNull(col string) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteString(" IS NULL")
+		p.writeIdent(b, col)
+		b.WriteString(" IS NULL")
 	})
 }
 
@@ -1004,11 +1027,13 @@ func In(col string, args ...interface{}) *Predicate {
 
 // In appends the `IN` predicate.
 func (p *Predicate) In(col string, args ...interface{}) *Predicate {
+	p.SetIdents(col)
 	if len(args) == 0 {
 		return p
 	}
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteOp(OpIn)
+		p.writeIdent(b, col)
+		b.WriteOp(OpIn)
 		b.Nested(func(b *Builder) {
 			if s, ok := args[0].(*Selector); ok {
 				b.Join(s)
@@ -1031,6 +1056,7 @@ func InValues(col string, args ...driver.Value) *Predicate {
 
 // InInts adds the `IN` predicate for ints.
 func (p *Predicate) InInts(col string, args ...int) *Predicate {
+	p.SetIdents(col)
 	iface := make([]interface{}, len(args))
 	for i := range args {
 		iface[i] = args[i]
@@ -1040,6 +1066,7 @@ func (p *Predicate) InInts(col string, args ...int) *Predicate {
 
 // InValues adds the `IN` predicate for slice of driver.Value.
 func (p *Predicate) InValues(col string, args ...driver.Value) *Predicate {
+	p.SetIdents(col)
 	iface := make([]interface{}, len(args))
 	for i := range args {
 		iface[i] = args[i]
@@ -1054,8 +1081,10 @@ func NotIn(col string, args ...interface{}) *Predicate {
 
 // NotIn appends the `Not IN` predicate.
 func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
-		b.Ident(col).WriteOp(OpNotIn)
+		p.writeIdent(b, col)
+		b.WriteOp(OpNotIn)
 		b.Nested(func(b *Builder) {
 			b.Args(args...)
 		})
@@ -1069,6 +1098,7 @@ func Like(col, pattern string) *Predicate {
 
 // Like appends the `LIKE` predicate.
 func (p *Predicate) Like(col, pattern string) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpLike)
 		b.Arg(pattern)
@@ -1098,6 +1128,7 @@ func EqualFold(col, sub string) *Predicate { return P().EqualFold(col, sub) }
 
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
 func (p *Predicate) EqualFold(col, sub string) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
 		f := &Func{}
 		f.SetDialect(b.dialect)
@@ -1121,6 +1152,7 @@ func ContainsFold(col, sub string) *Predicate { return P().ContainsFold(col, sub
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
 func (p *Predicate) ContainsFold(col, sub string) *Predicate {
+	p.SetIdents(col)
 	return p.Append(func(b *Builder) {
 		f := &Func{}
 		f.SetDialect(b.dialect)
@@ -1148,6 +1180,7 @@ func CompositeLT(columns []string, args ...interface{}) *Predicate {
 }
 
 func (p *Predicate) compositeP(operator string, columns []string, args ...interface{}) *Predicate {
+	p.SetIdents(columns...)
 	return p.Append(func(b *Builder) {
 		b.Nested(func(nb *Builder) {
 			nb.IdentComma(columns...)
@@ -1186,12 +1219,63 @@ func (p *Predicate) Query() (string, []interface{}) {
 	return p.String(), p.args
 }
 
+// SetIdents sets the identifiers that are used by this predicate.
+func (p *Predicate) SetIdents(idents ...string) *Predicate {
+	if p.idents == nil {
+		p.idents = make(map[string]struct{}, len(idents))
+	}
+	for i := range idents {
+		p.idents[idents[i]] = struct{}{}
+	}
+	return p
+}
+
+// Idents returns the identifiers used by this predicate.
+func (p *Predicate) Idents() []string {
+	idents := make([]string, 0, len(p.idents))
+	for ident := range p.idents {
+		idents = append(idents, ident)
+	}
+	sort.Strings(idents)
+	return idents
+}
+
+// ReplaceIdents sets a list of old-new identifiers to be replaced.
+func (p *Predicate) ReplaceIdents(oldnew ...string) *Predicate {
+	if len(oldnew)%2 == 1 {
+		panic("sql.Predicate.ReplaceIdents: odd argument count")
+	}
+	if p.replace == nil {
+		p.replace = make(map[string]string, len(oldnew))
+	}
+	for i := 0; i < len(oldnew); i += 2 {
+		p.replace[oldnew[i]] = oldnew[i+1]
+	}
+	return p
+}
+
+// writeIdent writes the given ident to the builder or replace it from the replace-map.
+// It's used by the sqlgraph package for optimizing some queries by editing their predicates.
+func (p *Predicate) writeIdent(b *Builder, ident string) *Predicate {
+	newI, ok := p.replace[ident]
+	if ok {
+		ident = newI
+	}
+	b.Ident(ident)
+	return p
+}
+
 // clone returns a shallow clone of p.
 func (p *Predicate) clone() *Predicate {
 	if p == nil {
 		return p
 	}
-	return &Predicate{fns: append([]func(*Builder){}, p.fns...)}
+	cp := &Predicate{fns: append([]func(*Builder){}, p.fns...)}
+	if p.idents != nil {
+		cp.SetIdents(p.Idents()...)
+	}
+	p.copyReplace(cp)
+	return cp
 }
 
 func (p *Predicate) mayWrap(preds []*Predicate, b *Builder, op string) {
@@ -1217,6 +1301,19 @@ func (p *Predicate) mayWrap(preds []*Predicate, b *Builder, op string) {
 		} else {
 			b.Join(preds[i])
 		}
+	}
+}
+
+func (p *Predicate) copyReplace(preds ...*Predicate) {
+	if p.replace == nil {
+		return
+	}
+	oldnew := make([]string, 0, len(p.replace)*2)
+	for old, ne := range p.replace {
+		oldnew = append(oldnew, old, ne)
+	}
+	for _, p := range preds {
+		p.ReplaceIdents(oldnew...)
 	}
 }
 

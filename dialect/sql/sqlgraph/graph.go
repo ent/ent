@@ -274,7 +274,21 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		matches := builder.Select(to.C(s.To.Column)).
 			From(to)
 		pred(matches)
-		q.Where(sql.In(from.C(s.Edge.Columns[0]), matches))
+		// In cases of M2O or O2O-inverse relations, the FK column reside in the same table of
+		// the root-query (and we may able to avoid querying the "other" table). Therefore, if
+		// the given predicate is applied only on the referenced column (e.g. "users.id"), we
+		// replace it with the FK column (e.g. "pets.owner_id"), and merge it to the root query.
+		p := matches.P()
+		switch idents := p.Idents(); {
+		case len(idents) == 1 && idents[0] == s.To.Column:
+			p.ReplaceIdents(s.To.Column, s.Edge.Columns[0])
+			q.Where(p)
+		case len(idents) == 1 && idents[0] == to.C(s.To.Column):
+			p.ReplaceIdents(to.C(s.To.Column), from.C(s.Edge.Columns[0]))
+			q.Where(p)
+		default:
+			q.Where(sql.In(from.C(s.Edge.Columns[0]), matches))
+		}
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		from := q.Table()
 		to := builder.Table(s.Edge.Table)

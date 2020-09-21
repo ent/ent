@@ -36,8 +36,8 @@ func IDNEQ(id int) predicate.GroupInfo {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.GroupInfo {
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -53,8 +53,8 @@ func IDIn(ids ...int) predicate.GroupInfo {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.GroupInfo {
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -130,8 +130,8 @@ func DescIn(vs ...string) predicate.GroupInfo {
 		v[i] = vs[i]
 	}
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -147,8 +147,8 @@ func DescNotIn(vs ...string) predicate.GroupInfo {
 		v[i] = vs[i]
 	}
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -241,8 +241,8 @@ func MaxUsersIn(vs ...int) predicate.GroupInfo {
 		v[i] = vs[i]
 	}
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -258,8 +258,8 @@ func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
 		v[i] = vs[i]
 	}
 	return predicate.GroupInfo(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return

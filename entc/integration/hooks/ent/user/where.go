@@ -36,8 +36,8 @@ func IDNEQ(id int) predicate.User {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -53,8 +53,8 @@ func IDIn(ids ...int) predicate.User {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -137,8 +137,8 @@ func VersionIn(vs ...int) predicate.User {
 		v[i] = vs[i]
 	}
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -154,8 +154,8 @@ func VersionNotIn(vs ...int) predicate.User {
 		v[i] = vs[i]
 	}
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -213,8 +213,8 @@ func NameIn(vs ...string) predicate.User {
 		v[i] = vs[i]
 	}
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -230,8 +230,8 @@ func NameNotIn(vs ...string) predicate.User {
 		v[i] = vs[i]
 	}
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -324,8 +324,8 @@ func WorthIn(vs ...uint) predicate.User {
 		v[i] = vs[i]
 	}
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -341,8 +341,8 @@ func WorthNotIn(vs ...uint) predicate.User {
 		v[i] = vs[i]
 	}
 	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return

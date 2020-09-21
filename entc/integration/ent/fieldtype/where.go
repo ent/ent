@@ -41,8 +41,8 @@ func IDNEQ(id int) predicate.FieldType {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -58,8 +58,8 @@ func IDIn(ids ...int) predicate.FieldType {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(ids) == 0 {
 			s.Where(sql.False())
 			return
@@ -424,8 +424,8 @@ func IntIn(vs ...int) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -441,8 +441,8 @@ func IntNotIn(vs ...int) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -500,8 +500,8 @@ func Int8In(vs ...int8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -517,8 +517,8 @@ func Int8NotIn(vs ...int8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -576,8 +576,8 @@ func Int16In(vs ...int16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -593,8 +593,8 @@ func Int16NotIn(vs ...int16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -652,8 +652,8 @@ func Int32In(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -669,8 +669,8 @@ func Int32NotIn(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -728,8 +728,8 @@ func Int64In(vs ...int64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -745,8 +745,8 @@ func Int64NotIn(vs ...int64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -804,8 +804,8 @@ func OptionalIntIn(vs ...int) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -821,8 +821,8 @@ func OptionalIntNotIn(vs ...int) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -894,8 +894,8 @@ func OptionalInt8In(vs ...int8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -911,8 +911,8 @@ func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -984,8 +984,8 @@ func OptionalInt16In(vs ...int16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1001,8 +1001,8 @@ func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1074,8 +1074,8 @@ func OptionalInt32In(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1091,8 +1091,8 @@ func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1164,8 +1164,8 @@ func OptionalInt64In(vs ...int64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1181,8 +1181,8 @@ func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1254,8 +1254,8 @@ func NillableIntIn(vs ...int) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1271,8 +1271,8 @@ func NillableIntNotIn(vs ...int) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1344,8 +1344,8 @@ func NillableInt8In(vs ...int8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1361,8 +1361,8 @@ func NillableInt8NotIn(vs ...int8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1434,8 +1434,8 @@ func NillableInt16In(vs ...int16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1451,8 +1451,8 @@ func NillableInt16NotIn(vs ...int16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1524,8 +1524,8 @@ func NillableInt32In(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1541,8 +1541,8 @@ func NillableInt32NotIn(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1614,8 +1614,8 @@ func NillableInt64In(vs ...int64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1631,8 +1631,8 @@ func NillableInt64NotIn(vs ...int64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1704,8 +1704,8 @@ func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1721,8 +1721,8 @@ func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1794,8 +1794,8 @@ func OptionalUintIn(vs ...uint) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1811,8 +1811,8 @@ func OptionalUintNotIn(vs ...uint) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1884,8 +1884,8 @@ func OptionalUint8In(vs ...uint8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1901,8 +1901,8 @@ func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1974,8 +1974,8 @@ func OptionalUint16In(vs ...uint16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -1991,8 +1991,8 @@ func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2064,8 +2064,8 @@ func OptionalUint32In(vs ...uint32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2081,8 +2081,8 @@ func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2154,8 +2154,8 @@ func OptionalUint64In(vs ...uint64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2171,8 +2171,8 @@ func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2244,8 +2244,8 @@ func StateIn(vs ...State) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2261,8 +2261,8 @@ func StateNotIn(vs ...State) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2306,8 +2306,8 @@ func OptionalFloatIn(vs ...float64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2323,8 +2323,8 @@ func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2396,8 +2396,8 @@ func OptionalFloat32In(vs ...float32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2413,8 +2413,8 @@ func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2486,8 +2486,8 @@ func DatetimeIn(vs ...time.Time) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2503,8 +2503,8 @@ func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2576,8 +2576,8 @@ func DecimalIn(vs ...float64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2593,8 +2593,8 @@ func DecimalNotIn(vs ...float64) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2668,8 +2668,8 @@ func DirIn(vs ...http.Dir) predicate.FieldType {
 		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2685,8 +2685,8 @@ func DirNotIn(vs ...http.Dir) predicate.FieldType {
 		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2804,8 +2804,8 @@ func NdirIn(vs ...http.Dir) predicate.FieldType {
 		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2821,8 +2821,8 @@ func NdirNotIn(vs ...http.Dir) predicate.FieldType {
 		v[i] = string(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2940,8 +2940,8 @@ func StrIn(vs ...sql.NullString) predicate.FieldType {
 		v[i] = vs[i].String
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -2957,8 +2957,8 @@ func StrNotIn(vs ...sql.NullString) predicate.FieldType {
 		v[i] = vs[i].String
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3076,8 +3076,8 @@ func NullStrIn(vs ...sql.NullString) predicate.FieldType {
 		v[i] = vs[i].String
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3093,8 +3093,8 @@ func NullStrNotIn(vs ...sql.NullString) predicate.FieldType {
 		v[i] = vs[i].String
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3212,8 +3212,8 @@ func LinkIn(vs ...schema.Link) predicate.FieldType {
 		v[i] = vs[i].String()
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3229,8 +3229,8 @@ func LinkNotIn(vs ...schema.Link) predicate.FieldType {
 		v[i] = vs[i].String()
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3348,8 +3348,8 @@ func NullLinkIn(vs ...schema.Link) predicate.FieldType {
 		v[i] = vs[i].String()
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3365,8 +3365,8 @@ func NullLinkNotIn(vs ...schema.Link) predicate.FieldType {
 		v[i] = vs[i].String()
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3574,8 +3574,8 @@ func DeletedAtIn(vs ...sql.NullTime) predicate.FieldType {
 		v[i] = vs[i].Time
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3591,8 +3591,8 @@ func DeletedAtNotIn(vs ...sql.NullTime) predicate.FieldType {
 		v[i] = vs[i].Time
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3670,8 +3670,8 @@ func IPIn(vs ...net.IP) predicate.FieldType {
 		v[i] = []byte(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3687,8 +3687,8 @@ func IPNotIn(vs ...net.IP) predicate.FieldType {
 		v[i] = []byte(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3780,8 +3780,8 @@ func SchemaIntIn(vs ...schema.Int) predicate.FieldType {
 		v[i] = int(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3797,8 +3797,8 @@ func SchemaIntNotIn(vs ...schema.Int) predicate.FieldType {
 		v[i] = int(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3876,8 +3876,8 @@ func SchemaInt8In(vs ...schema.Int8) predicate.FieldType {
 		v[i] = int8(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3893,8 +3893,8 @@ func SchemaInt8NotIn(vs ...schema.Int8) predicate.FieldType {
 		v[i] = int8(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3972,8 +3972,8 @@ func SchemaInt64In(vs ...schema.Int64) predicate.FieldType {
 		v[i] = int64(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -3989,8 +3989,8 @@ func SchemaInt64NotIn(vs ...schema.Int64) predicate.FieldType {
 		v[i] = int64(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -4068,8 +4068,8 @@ func SchemaFloatIn(vs ...schema.Float64) predicate.FieldType {
 		v[i] = float64(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -4085,8 +4085,8 @@ func SchemaFloatNotIn(vs ...schema.Float64) predicate.FieldType {
 		v[i] = float64(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -4164,8 +4164,8 @@ func SchemaFloat32In(vs ...schema.Float32) predicate.FieldType {
 		v[i] = float32(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -4181,8 +4181,8 @@ func SchemaFloat32NotIn(vs ...schema.Float32) predicate.FieldType {
 		v[i] = float32(vs[i])
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -4274,8 +4274,8 @@ func RoleIn(vs ...role.Role) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return
@@ -4291,8 +4291,8 @@ func RoleNotIn(vs ...role.Role) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
+		// if no arguments were provided, append the FALSE constants to make
+		// the predicate "falsy", because we can't apply `IN` on empty list.
 		if len(v) == 0 {
 			s.Where(sql.False())
 			return

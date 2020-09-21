@@ -1252,3 +1252,44 @@ func TestBuilder_Err(t *testing.T) {
 	b.AddError(fmt.Errorf("unexpected"))
 	require.EqualError(t, b.Err(), "invalid; unexpected")
 }
+
+func TestPredicate_Idents(t *testing.T) {
+	p := EQ("a", "v")
+	require.Equal(t, []string{"a"}, p.Idents())
+	p = Not(EQ("a", "v"))
+	require.Equal(t, []string{"a"}, p.Idents())
+
+	p = Not(
+		And(
+			EQ("a", "v"),
+			EQ("b", "v"),
+		),
+	)
+	require.Equal(t, []string{"a", "b"}, p.Idents())
+
+	p = And(
+		EQ("a", "v"),
+		EQ("b", "v"),
+		Or(
+			NEQ(Table("users").C("id"), 1),
+			IsNull(Table("users").C("owner")),
+		),
+	)
+	require.Equal(t, []string{"`users`.`id`", "`users`.`owner`", "a", "b"}, p.Idents())
+	query, _ := p.clone().Query()
+	require.Equal(t, "`a` = ? AND `b` = ? AND (`users`.`id` <> ? OR `users`.`owner` IS NULL)", query)
+
+	p = Not(
+		And(
+			EQ("a", "v"),
+			EQ("b", "v"),
+			Or(
+				NEQ(Table("users").C("id"), 1),
+				IsNull(Table("users").C("owner")),
+			),
+		),
+	)
+	p.ReplaceIdents("`users`.`id`", "`pets`.`owner`", "a", "c", "d", "e", "`users`.`owner`", "`pets`.`id`")
+	query, _ = p.Query()
+	require.Equal(t, "NOT (`c` = ? AND `b` = ? AND (`pets`.`owner` <> ? OR `pets`.`id` IS NULL))", query)
+}
