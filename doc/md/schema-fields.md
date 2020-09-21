@@ -50,9 +50,10 @@ The following types are currently supported by the framework:
 - `bool`
 - `string`
 - `time.Time`
-- `[]byte` (only supported by SQL dialects).
-- `JSON` (only supported by SQL dialects).
-- `Enum` (only supported by SQL dialects).
+- `[]byte` (SQL only).
+- `JSON` (SQL only).
+- `Enum` (SQL only).
+- `UUID` (SQL only).
 
 <br/>
 
@@ -63,6 +64,7 @@ import (
 	"time"
 	"net/url"
 
+	"github.com/google/uuid"
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/schema/field"
 )
@@ -92,6 +94,8 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
+		field.UUID("uuid", uuid.UUID{}).
+			Default(uuid.New),
 	}
 }
 ```
