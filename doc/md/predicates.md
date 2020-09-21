@@ -90,4 +90,11 @@ pets := client.Pet.
 		s.Where(sql.InInts(pet.OwnerColumn, 1, 2, 3))
 	})).
 	AllX(ctx)
+
+users := client.User.
+	Query().
+	Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sqljson.HasKey(user.FieldURL, sqljson.Path("Scheme")))
+	})).
+	AllX(ctx)
 ```

@@ -4,11 +4,14 @@ title: Quick Introduction
 sidebar_label: Quick Introduction
 ---
 
-`ent` is a simple, yet powerful entity framework for Go built on SQL/Gremlin with the following principles:
-- Easily modeling your data as a graph structure.
-- Defining your schema as code.
+**ent** is a simple, yet powerful entity framework for Go, that makes it easy to build
+and maintain applications with large data-models and sticks with the following principles:
+
+- Easily model database schema as a graph structure.
+- Define schema as a programmatic Go code.
 - Static typing based on code generation.
-- Simplifying graph traversals.
+- Database queries and graph traversals are easy to write.
+- Simple to extend and customize using Go templates.
 
 <br/>
 
