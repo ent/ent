@@ -17,7 +17,7 @@ users, err := client.User.
 
 ## Offset
 
-`Offset` sets the first vertex to return from the query. 
+`Offset` sets the first node to return from the query. 
 
 ```go
 users, err := client.User.
