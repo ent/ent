@@ -1128,6 +1128,16 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Len(a8m.Edges.Pets, 1)
 		require.Equal("pedro", a8m.Edges.Pets[0].Name)
 		require.Equal(nati.Name, a8m.Edges.Pets[0].Edges.Team.Name)
+
+		a8m = client.User.
+			Query().
+			Where(user.ID(a8m.ID)).
+			WithPets(func(q *ent.PetQuery) {
+				q.Where(pet.Name("unknown"))
+			}).
+			OnlyX(ctx)
+		require.Empty(a8m.Edges.Pets)
+		require.NotNil(a8m.Edges.Pets)
 	})
 
 	t.Run("M2M", func(t *testing.T) {

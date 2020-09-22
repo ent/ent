@@ -345,6 +345,7 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Card = []*Card{}
 		}
 		var (
 			edgeids []int

@@ -441,6 +441,7 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Spec = []*Spec{}
 		}
 		var (
 			edgeids []int

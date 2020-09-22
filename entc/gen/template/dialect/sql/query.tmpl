@@ -206,6 +206,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			for _, node := range nodes {
 				ids[node.ID] = node
 				fks = append(fks, node.ID)
+				node.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
 			}
 			var (
 				edgeids []{{ $e.Type.ID.Type }}
@@ -291,6 +292,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			for i := range nodes {
 				fks = append(fks, nodes[i].ID)
 				nodeids[nodes[i].ID] = nodes[i]
+				{{- if $e.O2M }}
+					nodes[i].Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
+				{{- end }}
 			}
 			query.withFKs = true
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {

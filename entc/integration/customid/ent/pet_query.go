@@ -487,6 +487,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Cars = []*Car{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Car(func(s *sql.Selector) {
@@ -515,6 +516,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Friends = []*Pet{}
 		}
 		var (
 			edgeids []string

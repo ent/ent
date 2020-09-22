@@ -379,6 +379,7 @@ func (pq *PlanetQuery) sqlAll(ctx context.Context) ([]*Planet, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Neighbors = []*Planet{}
 		}
 		var (
 			edgeids []int

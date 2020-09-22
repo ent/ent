@@ -502,6 +502,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Field = []*FieldType{}
 		}
 		query.withFKs = true
 		query.Where(predicate.FieldType(func(s *sql.Selector) {
