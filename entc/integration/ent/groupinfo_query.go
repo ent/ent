@@ -369,6 +369,7 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Groups = []*Group{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Group(func(s *sql.Selector) {

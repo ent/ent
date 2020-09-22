@@ -372,6 +372,7 @@ func (gq *GalaxyQuery) sqlAll(ctx context.Context) ([]*Galaxy, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Planets = []*Planet{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Planet(func(s *sql.Selector) {

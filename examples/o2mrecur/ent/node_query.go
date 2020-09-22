@@ -439,6 +439,7 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Children = []*Node{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Node(func(s *sql.Selector) {

@@ -440,6 +440,7 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Links = []*Blob{}
 		}
 		var (
 			edgeids []uuid.UUID

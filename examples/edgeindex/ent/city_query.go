@@ -369,6 +369,7 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Streets = []*Street{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Street(func(s *sql.Selector) {
