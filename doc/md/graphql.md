@@ -22,10 +22,9 @@ package main
 import (
 	"log"
 
-	"github.com/facebookincubator/ent-contrib/entgql"
-
 	"github.com/facebook/ent/entc"
 	"github.com/facebook/ent/entc/gen"
+	"github.com/facebookincubator/ent-contrib/entgql"
 )
 
 func main() {
