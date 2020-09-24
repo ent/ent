@@ -101,6 +101,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, 2, lnk.QueryLinks().CountX(ctx))
 	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
 	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
+	require.Len(t, client.Blob.Query().IDsX(ctx), 3)
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
 	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))

@@ -119,9 +119,7 @@ func (r *rowScan) values() []interface{} {
 // scanType returns rowScan for the given reflect.Type.
 func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 	switch k := typ.Kind(); {
-	case k == reflect.Interface && typ.NumMethod() == 0:
-		fallthrough // interface{}
-	case k == reflect.String || k >= reflect.Bool && k <= reflect.Float64:
+	case assignable(typ):
 		return &rowScan{
 			columns: []reflect.Type{typ},
 			value: func(v ...interface{}) reflect.Value {
@@ -135,6 +133,21 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 	default:
 		return nil, fmt.Errorf("sql/scan: unsupported type ([]%s)", k)
 	}
+}
+
+var scannerType = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
+
+// assignable reports if the given type can be assigned directly by `Rows.Scan`.
+func assignable(typ reflect.Type) bool {
+	switch k := typ.Kind(); {
+	case typ.Implements(scannerType):
+	case k == reflect.Interface && typ.NumMethod() == 0:
+	case k == reflect.String || k >= reflect.Bool && k <= reflect.Float64:
+	case (k == reflect.Slice || k == reflect.Array) && typ.Elem().Kind() == reflect.Uint8:
+	default:
+		return false
+	}
+	return true
 }
 
 // scanStruct returns the a configuration for scanning an sql.Row into a struct.
