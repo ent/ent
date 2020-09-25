@@ -89,7 +89,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-Run `entc generate` from the root directory of the project, or use `go generate`:
+Run `go generate` from the root directory of the project as follows:
 
 ```go
 go generate ./ent
