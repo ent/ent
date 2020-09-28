@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,18 +8,17 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/spec"
 )
 
 // Spec is the model entity for the Spec schema.
 type Spec struct {
 	config
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SpecQuery when eager-loading is set.
 	Edges SpecEdges `json:"edges"`
@@ -60,7 +59,7 @@ func (s *Spec) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	s.ID = strconv.FormatInt(value.Int64, 10)
+	s.ID = int(value.Int64)
 	values = values[1:]
 	return nil
 }
@@ -95,12 +94,6 @@ func (s *Spec) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (s *Spec) id() int {
-	id, _ := strconv.Atoi(s.ID)
-	return id
 }
 
 // Specs is a parsable slice of Spec.

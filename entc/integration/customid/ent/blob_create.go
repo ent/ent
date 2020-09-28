@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,39 +8,107 @@ package ent
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
 )
 
 // BlobCreate is the builder for creating a Blob entity.
 type BlobCreate struct {
 	config
-	id   *uuid.UUID
-	uuid *uuid.UUID
+	mutation *BlobMutation
+	hooks    []Hook
 }
 
 // SetUUID sets the uuid field.
 func (bc *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
-	bc.uuid = &u
+	bc.mutation.SetUUID(u)
 	return bc
 }
 
 // SetID sets the id field.
 func (bc *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
-	bc.id = &u
+	bc.mutation.SetID(u)
 	return bc
+}
+
+// SetParentID sets the parent edge to Blob by id.
+func (bc *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
+	bc.mutation.SetParentID(id)
+	return bc
+}
+
+// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+func (bc *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
+	if id != nil {
+		bc = bc.SetParentID(*id)
+	}
+	return bc
+}
+
+// SetParent sets the parent edge to Blob.
+func (bc *BlobCreate) SetParent(b *Blob) *BlobCreate {
+	return bc.SetParentID(b.ID)
+}
+
+// AddLinkIDs adds the links edge to Blob by ids.
+func (bc *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
+	bc.mutation.AddLinkIDs(ids...)
+	return bc
+}
+
+// AddLinks adds the links edges to Blob.
+func (bc *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bc.AddLinkIDs(ids...)
+}
+
+// Mutation returns the BlobMutation object of the builder.
+func (bc *BlobCreate) Mutation() *BlobMutation {
+	return bc.mutation
 }
 
 // Save creates the Blob in the database.
 func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
-	if bc.uuid == nil {
-		v := blob.DefaultUUID()
-		bc.uuid = &v
+	var (
+		err  error
+		node *Blob
+	)
+	bc.defaults()
+	if len(bc.hooks) == 0 {
+		if err = bc.check(); err != nil {
+			return nil, err
+		}
+		node, err = bc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*BlobMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = bc.check(); err != nil {
+				return nil, err
+			}
+			bc.mutation = mutation
+			node, err = bc.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(bc.hooks) - 1; i >= 0; i-- {
+			mut = bc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return bc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -52,9 +120,40 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (bc *BlobCreate) defaults() {
+	if _, ok := bc.mutation.UUID(); !ok {
+		v := blob.DefaultUUID()
+		bc.mutation.SetUUID(v)
+	}
+	if _, ok := bc.mutation.ID(); !ok {
+		v := blob.DefaultID()
+		bc.mutation.SetID(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (bc *BlobCreate) check() error {
+	if _, ok := bc.mutation.UUID(); !ok {
+		return &ValidationError{Name: "uuid", err: errors.New("ent: missing required field \"uuid\"")}
+	}
+	return nil
+}
+
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
+	_node, _spec := bc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	return _node, nil
+}
+
+func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
-		b     = &Blob{config: bc.config}
+		_node = &Blob{config: bc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: blob.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -63,23 +162,120 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 			},
 		}
 	)
-	if value := bc.id; value != nil {
-		b.ID = *value
-		_spec.ID.Value = *value
+	if id, ok := bc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
-	if value := bc.uuid; value != nil {
+	if value, ok := bc.mutation.UUID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Value:  *value,
+			Value:  value,
 			Column: blob.FieldUUID,
 		})
-		b.UUID = *value
+		_node.UUID = value
 	}
-	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+	if nodes := bc.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   blob.ParentTable,
+			Columns: []string{blob.ParentColumn},
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
 		}
-		return nil, err
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return b, nil
+	if nodes := bc.mutation.LinksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	return _node, _spec
+}
+
+// BlobCreateBulk is the builder for creating a bulk of Blob entities.
+type BlobCreateBulk struct {
+	config
+	builders []*BlobCreate
+}
+
+// Save creates the Blob entities in the database.
+func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
+	nodes := make([]*Blob, len(bcb.builders))
+	mutators := make([]Mutator, len(bcb.builders))
+	for i := range bcb.builders {
+		func(i int, root context.Context) {
+			builder := bcb.builders[i]
+			builder.defaults()
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*BlobMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, bcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
+	v, err := bcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

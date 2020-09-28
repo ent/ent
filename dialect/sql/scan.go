@@ -12,11 +12,12 @@ import (
 )
 
 // ColumnScanner is the interface that wraps the
-// three sql.Rows methods used for scanning.
+// four sql.Rows methods used for scanning.
 type ColumnScanner interface {
 	Next() bool
 	Scan(...interface{}) error
 	Columns() ([]string, error)
+	Err() error
 }
 
 // ScanOne scans one row to the given value. It fails if the rows holds more than 1 row.
@@ -29,6 +30,9 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
 	}
 	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return err
+		}
 		return sql.ErrNoRows
 	}
 	if err := rows.Scan(v); err != nil {
@@ -37,7 +41,7 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 	if rows.Next() {
 		return fmt.Errorf("sql/scan: expect exactly one row in result set")
 	}
-	return nil
+	return rows.Err()
 }
 
 // ScanInt64 scans and returns an int64 from the rows columns.
@@ -92,7 +96,7 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 		vv := reflect.Append(rv, scan.value(values...))
 		rv.Set(vv)
 	}
-	return nil
+	return rows.Err()
 }
 
 // rowScan is the configuration for scanning one sql.Row.
@@ -115,9 +119,7 @@ func (r *rowScan) values() []interface{} {
 // scanType returns rowScan for the given reflect.Type.
 func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 	switch k := typ.Kind(); {
-	case k == reflect.Interface && typ.NumMethod() == 0:
-		fallthrough // interface{}
-	case k == reflect.String || k >= reflect.Bool && k <= reflect.Float64:
+	case assignable(typ):
 		return &rowScan{
 			columns: []reflect.Type{typ},
 			value: func(v ...interface{}) reflect.Value {
@@ -131,6 +133,21 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 	default:
 		return nil, fmt.Errorf("sql/scan: unsupported type ([]%s)", k)
 	}
+}
+
+var scannerType = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
+
+// assignable reports if the given type can be assigned directly by `Rows.Scan`.
+func assignable(typ reflect.Type) bool {
+	switch k := typ.Kind(); {
+	case typ.Implements(scannerType):
+	case k == reflect.Interface && typ.NumMethod() == 0:
+	case k == reflect.String || k >= reflect.Bool && k <= reflect.Float64:
+	case (k == reflect.Slice || k == reflect.Array) && typ.Elem().Kind() == reflect.Uint8:
+	default:
+		return false
+	}
+	return true
 }
 
 // scanStruct returns the a configuration for scanning an sql.Row into a struct.

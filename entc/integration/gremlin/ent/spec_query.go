@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,14 +9,15 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecQuery is the builder for querying Spec entities.
@@ -24,13 +25,14 @@ type SpecQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
 	withCard *CardQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -52,7 +54,7 @@ func (sq *SpecQuery) Offset(offset int) *SpecQuery {
 }
 
 // Order adds an order step to the query.
-func (sq *SpecQuery) Order(o ...Order) *SpecQuery {
+func (sq *SpecQuery) Order(o ...OrderFunc) *SpecQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -60,30 +62,36 @@ func (sq *SpecQuery) Order(o ...Order) *SpecQuery {
 // QueryCard chains the current query on the card edge.
 func (sq *SpecQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: sq.config}
-	gremlin := sq.gremlinQuery()
-	query.gremlin = gremlin.OutE(spec.CardLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := sq.gremlinQuery()
+		fromU = gremlin.OutE(spec.CardLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first Spec entity in the query. Returns *NotFoundError when no spec was found.
 func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
-	sSlice, err := sq.Limit(1).All(ctx)
+	nodes, err := sq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(sSlice) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{spec.Label}
 	}
-	return sSlice[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
-	s, err := sq.First(ctx)
+	node, err := sq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // FirstID returns the first Spec id in the query. Returns *NotFoundError when no id was found.
@@ -110,13 +118,13 @@ func (sq *SpecQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Spec entity in the query, returns an error if not exactly one entity was returned.
 func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
-	sSlice, err := sq.Limit(2).All(ctx)
+	nodes, err := sq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(sSlice) {
+	switch len(nodes) {
 	case 1:
-		return sSlice[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{spec.Label}
 	default:
@@ -126,11 +134,11 @@ func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
-	s, err := sq.Only(ctx)
+	node, err := sq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // OnlyID returns the only Spec id in the query, returns an error if not exactly one id was returned.
@@ -150,8 +158,8 @@ func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (sq *SpecQuery) OnlyIDX(ctx context.Context) string {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -161,16 +169,19 @@ func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Specs.
 func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
+	if err := sq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return sq.gremlinAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
-	sSlice, err := sq.All(ctx)
+	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return sSlice
+	return nodes
 }
 
 // IDs executes the query and returns a list of Spec ids.
@@ -193,6 +204,9 @@ func (sq *SpecQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (sq *SpecQuery) Count(ctx context.Context) (int, error) {
+	if err := sq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return sq.gremlinCount(ctx)
 }
 
@@ -207,6 +221,9 @@ func (sq *SpecQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
+	if err := sq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return sq.gremlinExist(ctx)
 }
 
@@ -226,11 +243,12 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		config:     sq.config,
 		limit:      sq.limit,
 		offset:     sq.offset,
-		order:      append([]Order{}, sq.order...),
+		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		// clone intermediate query.
 		gremlin: sq.gremlin.Clone(),
+		path:    sq.path,
 	}
 }
 
@@ -250,7 +268,12 @@ func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
 func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 	group := &SpecGroupBy{config: sq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = sq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return sq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -258,8 +281,24 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 	selector := &SpecSelect{config: sq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = sq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return sq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
+	if sq.path != nil {
+		prev, err := sq.path(ctx)
+		if err != nil {
+			return err
+		}
+		sq.gremlin = prev
+	}
+	return nil
 }
 
 func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {
@@ -326,19 +365,25 @@ func (sq *SpecQuery) gremlinQuery() *dsl.Traversal {
 type SpecGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sgb *SpecGroupBy) Aggregate(fns ...Aggregate) *SpecGroupBy {
+func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 	sgb.fns = append(sgb.fns, fns...)
 	return sgb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := sgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	sgb.gremlin = query
 	return sgb.gremlinScan(ctx, v)
 }
 
@@ -370,6 +415,32 @@ func (sgb *SpecGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = sgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (sgb *SpecGroupBy) StringX(ctx context.Context) string {
+	v, err := sgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (sgb *SpecGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(sgb.fields) > 1 {
@@ -385,6 +456,32 @@ func (sgb *SpecGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (sgb *SpecGroupBy) IntsX(ctx context.Context) []int {
 	v, err := sgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = sgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (sgb *SpecGroupBy) IntX(ctx context.Context) int {
+	v, err := sgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -412,6 +509,32 @@ func (sgb *SpecGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = sgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (sgb *SpecGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := sgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (sgb *SpecGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(sgb.fields) > 1 {
@@ -427,6 +550,32 @@ func (sgb *SpecGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (sgb *SpecGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := sgb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = sgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (sgb *SpecGroupBy) BoolX(ctx context.Context) bool {
+	v, err := sgb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -474,12 +623,18 @@ func (sgb *SpecGroupBy) gremlinQuery() *dsl.Traversal {
 type SpecSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ss.path(ctx)
+	if err != nil {
+		return err
+	}
+	ss.gremlin = query
 	return ss.gremlinScan(ctx, v)
 }
 
@@ -511,6 +666,32 @@ func (ss *SpecSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ss.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ss *SpecSelect) StringX(ctx context.Context) string {
+	v, err := ss.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ss.fields) > 1 {
@@ -526,6 +707,32 @@ func (ss *SpecSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ss *SpecSelect) IntsX(ctx context.Context) []int {
 	v, err := ss.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ss.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ss *SpecSelect) IntX(ctx context.Context) int {
+	v, err := ss.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -553,6 +760,32 @@ func (ss *SpecSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ss.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ss *SpecSelect) Float64X(ctx context.Context) float64 {
+	v, err := ss.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ss.fields) > 1 {
@@ -568,6 +801,32 @@ func (ss *SpecSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ss *SpecSelect) BoolsX(ctx context.Context) []bool {
 	v, err := ss.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ss.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ss *SpecSelect) BoolX(ctx context.Context) bool {
+	v, err := ss.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

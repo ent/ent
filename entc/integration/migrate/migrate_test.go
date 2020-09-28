@@ -10,14 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1"
-	migratev1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/migrate"
-	userv1 "github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2"
-	migratev2 "github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/migrate/entv1"
+	migratev1 "github.com/facebook/ent/entc/integration/migrate/entv1/migrate"
+	userv1 "github.com/facebook/ent/entc/integration/migrate/entv1/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2"
+	migratev2 "github.com/facebook/ent/entc/integration/migrate/entv2/migrate"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -78,7 +78,7 @@ func TestSQLite(t *testing.T) {
 
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
-	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)))
+	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), migratev2.WithDropIndex(true))
 
 	SanityV2(t, client)
 	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)

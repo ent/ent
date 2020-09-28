@@ -4,7 +4,11 @@
 
 package field
 
-import "strings"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+)
 
 // A Type represents a field type.
 type Type uint8
@@ -72,6 +76,7 @@ type TypeInfo struct {
 	Ident    string
 	PkgPath  string
 	Nillable bool // slices or pointers.
+	RType    *RType
 }
 
 // String returns the string representation of a type.
@@ -99,6 +104,28 @@ func (t TypeInfo) Numeric() bool {
 // ConstName returns the const name of the info type.
 func (t TypeInfo) ConstName() string {
 	return t.Type.ConstName()
+}
+
+// ValueScanner indicates if this type implements the ValueScanner interface.
+func (t TypeInfo) ValueScanner() bool {
+	return t.RType.implements(valueScannerType)
+}
+
+// Comparable reports whether values of this type are comparable.
+func (t TypeInfo) Comparable() bool {
+	switch t.Type {
+	case TypeBool, TypeTime, TypeUUID, TypeEnum, TypeString:
+		return true
+	default:
+		return t.Numeric()
+	}
+}
+
+var stringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+
+// Stringer indicates if this type implements the Stringer interface.
+func (t TypeInfo) Stringer() bool {
+	return t.RType.implements(stringerType)
 }
 
 var (
@@ -132,3 +159,45 @@ var (
 		TypeBytes: "TypeBytes",
 	}
 )
+
+// RType holds a serializable reflect.Type information of
+// Go object. Used by the entc package.
+type RType struct {
+	Name    string
+	Kind    reflect.Kind
+	PkgPath string
+	Methods map[string]struct{ In, Out []*RType }
+}
+
+// TypeEqual tests if the RType is equal to given reflect.Type.
+func (r *RType) TypeEqual(t reflect.Type) bool {
+	t = indirect(t)
+	return r.Name == t.Name() && r.Kind == t.Kind() && r.PkgPath == t.PkgPath()
+}
+
+func (r *RType) implements(typ reflect.Type) bool {
+	if r == nil {
+		return false
+	}
+	n := typ.NumMethod()
+	for i := 0; i < n; i++ {
+		m0 := typ.Method(i)
+		m1, ok := r.Methods[m0.Name]
+		if !ok || len(m1.In) != m0.Type.NumIn() || len(m1.Out) != m0.Type.NumOut() {
+			return false
+		}
+		in := m0.Type.NumIn()
+		for j := 0; j < in; j++ {
+			if !m1.In[j].TypeEqual(m0.Type.In(j)) {
+				return false
+			}
+		}
+		out := m0.Type.NumOut()
+		for j := 0; j < out; j++ {
+			if !m1.Out[j].TypeEqual(m0.Type.Out(j)) {
+				return false
+			}
+		}
+	}
+	return true
+}

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,14 +9,15 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // NodeQuery is the builder for querying Node entities.
@@ -24,14 +25,15 @@ type NodeQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Node
 	// eager-loading edges.
 	withPrev *NodeQuery
 	withNext *NodeQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -53,7 +55,7 @@ func (nq *NodeQuery) Offset(offset int) *NodeQuery {
 }
 
 // Order adds an order step to the query.
-func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
+func (nq *NodeQuery) Order(o ...OrderFunc) *NodeQuery {
 	nq.order = append(nq.order, o...)
 	return nq
 }
@@ -61,38 +63,50 @@ func (nq *NodeQuery) Order(o ...Order) *NodeQuery {
 // QueryPrev chains the current query on the prev edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	gremlin := nq.gremlinQuery()
-	query.gremlin = gremlin.InE(node.NextLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := nq.gremlinQuery()
+		fromU = gremlin.InE(node.NextLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryNext chains the current query on the next edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
-	gremlin := nq.gremlinQuery()
-	query.gremlin = gremlin.OutE(node.NextLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := nq.gremlinQuery()
+		fromU = gremlin.OutE(node.NextLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first Node entity in the query. Returns *NotFoundError when no node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
-	ns, err := nq.Limit(1).All(ctx)
+	nodes, err := nq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(ns) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{node.Label}
 	}
-	return ns[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
-	n, err := nq.First(ctx)
+	node, err := nq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // FirstID returns the first Node id in the query. Returns *NotFoundError when no id was found.
@@ -119,13 +133,13 @@ func (nq *NodeQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Node entity in the query, returns an error if not exactly one entity was returned.
 func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
-	ns, err := nq.Limit(2).All(ctx)
+	nodes, err := nq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(ns) {
+	switch len(nodes) {
 	case 1:
-		return ns[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{node.Label}
 	default:
@@ -135,11 +149,11 @@ func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
-	n, err := nq.Only(ctx)
+	node, err := nq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // OnlyID returns the only Node id in the query, returns an error if not exactly one id was returned.
@@ -159,8 +173,8 @@ func (nq *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (nq *NodeQuery) OnlyIDX(ctx context.Context) string {
 	id, err := nq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -170,16 +184,19 @@ func (nq *NodeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Nodes.
 func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return nq.gremlinAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
-	ns, err := nq.All(ctx)
+	nodes, err := nq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ns
+	return nodes
 }
 
 // IDs executes the query and returns a list of Node ids.
@@ -202,6 +219,9 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return nq.gremlinCount(ctx)
 }
 
@@ -216,6 +236,9 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
+	if err := nq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return nq.gremlinExist(ctx)
 }
 
@@ -235,11 +258,12 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		config:     nq.config,
 		limit:      nq.limit,
 		offset:     nq.offset,
-		order:      append([]Order{}, nq.order...),
+		order:      append([]OrderFunc{}, nq.order...),
 		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
 		// clone intermediate query.
 		gremlin: nq.gremlin.Clone(),
+		path:    nq.path,
 	}
 }
 
@@ -283,7 +307,12 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 	group := &NodeGroupBy{config: nq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = nq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return nq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -302,8 +331,24 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
 	selector := &NodeSelect{config: nq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = nq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := nq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return nq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
+	if nq.path != nil {
+		prev, err := nq.path(ctx)
+		if err != nil {
+			return err
+		}
+		nq.gremlin = prev
+	}
+	return nil
 }
 
 func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
@@ -370,19 +415,25 @@ func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
 type NodeGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ngb *NodeGroupBy) Aggregate(fns ...Aggregate) *NodeGroupBy {
+func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 	ngb.fns = append(ngb.fns, fns...)
 	return ngb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ngb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ngb.gremlin = query
 	return ngb.gremlinScan(ctx, v)
 }
 
@@ -414,6 +465,32 @@ func (ngb *NodeGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ngb *NodeGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ngb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ngb *NodeGroupBy) StringX(ctx context.Context) string {
+	v, err := ngb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ngb *NodeGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ngb.fields) > 1 {
@@ -429,6 +506,32 @@ func (ngb *NodeGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ngb *NodeGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ngb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ngb *NodeGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ngb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ngb *NodeGroupBy) IntX(ctx context.Context) int {
+	v, err := ngb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -456,6 +559,32 @@ func (ngb *NodeGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ngb *NodeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ngb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ngb *NodeGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ngb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ngb *NodeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ngb.fields) > 1 {
@@ -471,6 +600,32 @@ func (ngb *NodeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ngb *NodeGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := ngb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ngb *NodeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ngb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ngb *NodeGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ngb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -518,12 +673,18 @@ func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 type NodeSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ns.path(ctx)
+	if err != nil {
+		return err
+	}
+	ns.gremlin = query
 	return ns.gremlinScan(ctx, v)
 }
 
@@ -555,6 +716,32 @@ func (ns *NodeSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ns.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ns *NodeSelect) StringX(ctx context.Context) string {
+	v, err := ns.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ns.fields) > 1 {
@@ -570,6 +757,32 @@ func (ns *NodeSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ns *NodeSelect) IntsX(ctx context.Context) []int {
 	v, err := ns.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ns.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ns *NodeSelect) IntX(ctx context.Context) int {
+	v, err := ns.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -597,6 +810,32 @@ func (ns *NodeSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ns.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ns *NodeSelect) Float64X(ctx context.Context) float64 {
+	v, err := ns.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ns.fields) > 1 {
@@ -612,6 +851,32 @@ func (ns *NodeSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ns *NodeSelect) BoolsX(ctx context.Context) []bool {
 	v, err := ns.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (ns *NodeSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ns.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{node.Label}
+	default:
+		err = fmt.Errorf("ent: NodeSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ns *NodeSelect) BoolX(ctx context.Context) bool {
+	v, err := ns.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

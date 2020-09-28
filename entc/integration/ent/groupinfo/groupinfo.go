@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -6,19 +6,18 @@
 
 package groupinfo
 
-import (
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-)
-
 const (
 	// Label holds the string label denoting the groupinfo type in the database.
 	Label = "group_info"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldDesc holds the string denoting the desc vertex property in the database.
+	// FieldDesc holds the string denoting the desc field in the database.
 	FieldDesc = "desc"
-	// FieldMaxUsers holds the string denoting the max_users vertex property in the database.
+	// FieldMaxUsers holds the string denoting the max_users field in the database.
 	FieldMaxUsers = "max_users"
+
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
 
 	// Table holds the table name of the groupinfo in the database.
 	Table = "group_infos"
@@ -38,11 +37,19 @@ var Columns = []string{
 	FieldMaxUsers,
 }
 
-var (
-	fields = schema.GroupInfo{}.Fields()
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
 
-	// descMaxUsers is the schema descriptor for max_users field.
-	descMaxUsers = fields[1].Descriptor()
+var (
 	// DefaultMaxUsers holds the default value on creation for the max_users field.
-	DefaultMaxUsers = descMaxUsers.Default.(int)
+	DefaultMaxUsers int
 )
+
+// comment from another template.

@@ -5,11 +5,14 @@
 
 package field
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 //go:generate go run gen/gen.go
 
-{{ range $_, $t := $.Ints }}
+{{ range $t := $.Ints }}
 	{{ $title := title $t.String }}
 	// {{ $title }} returns a new Field with type {{ $t }}.
 	func {{ $title }}(name string) *{{ $t }}Builder { return &{{ $t }}Builder{&Descriptor{
@@ -33,7 +36,7 @@ func Float32(name string) *float32Builder { return &float32Builder{&Descriptor{
 	}}
 }
 
-{{ range $_, $t := $.Ints }}
+{{ range $t := $.Ints }}
 {{ $builder := printf "%sBuilder" $t }}
 
 // {{ $builder }} is the builder for {{ $t }} field.
@@ -147,6 +150,43 @@ func (b *{{ $builder }}) StorageKey(key string) *{{ $builder }} {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for {{ $t.String }}.
+//
+//	field.{{ title $t.String }}("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
+	b.desc.SchemaType = types
+	return b
+}
+
+{{ $tt := title $t.String }}
+// GoType overrides the default Go type with a custom one.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		GoType(pkg.{{ $tt }}(0))
+//
+func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
+	b.desc.goType(typ, {{ $t }}Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *{{ $builder }}) Annotations(annotations ...Annotation) *{{ $builder }} {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	return b.desc
@@ -154,7 +194,13 @@ func (b *{{ $builder }}) Descriptor() *Descriptor {
 
 {{ end }}
 
-{{ range $_, $t := $.Floats }}
+var (
+	{{- range $t := $.Ints }}
+		{{ $t }}Type = reflect.TypeOf({{ $t }}(0))
+	{{- end }}
+)
+
+{{ range $t := $.Floats }}
 {{ $builder := printf "%sBuilder" $t }}
 
 // {{ $builder }} is the builder for float fields.
@@ -262,10 +308,54 @@ func (b *{{ $builder }}) StorageKey(key string) *{{ $builder }} {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for {{ $t.String }}.
+//
+//	field.{{ title $t.String }}("amount").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"decimal(5, 2)",
+//			dialect.Postgres: 	"numeric(5, 2)",
+//		})
+//
+func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
+	b.desc.SchemaType = types
+	return b
+}
+
+{{ $tt := title $t.String }}
+// GoType overrides the default Go type with a custom one.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		GoType(pkg.{{ $tt }}(0))
+//
+func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
+	b.desc.goType(typ, {{ $t }}Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.{{ $tt }}("{{ $t }}").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *{{ $builder }}) Annotations(annotations ...Annotation) *{{ $builder }} {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
 	return b.desc
 }
 {{ end }}
+
+var (
+{{- range $t := $.Floats }}
+    {{ $t }}Type = reflect.TypeOf({{ $t }}(0))
+{{- end }}
+)
 
 {{ end }}

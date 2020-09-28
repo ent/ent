@@ -5,31 +5,16 @@
 package field
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"fmt"
 	"math"
 	"reflect"
 	"regexp"
+	"sort"
 	"time"
 )
-
-// A Descriptor for field configuration.
-type Descriptor struct {
-	Tag           string        // struct tag.
-	Size          int           // varchar size.
-	Name          string        // field name.
-	Info          *TypeInfo     // field type info.
-	Unique        bool          // unique index of field.
-	Nillable      bool          // nillable struct field.
-	Optional      bool          // nullable field in database.
-	Immutable     bool          // create-only field.
-	Default       interface{}   // default value on create.
-	UpdateDefault interface{}   // default value on update.
-	Validators    []interface{} // validator functions.
-	StorageKey    string        // sql column or gremlin property.
-	Enums         []string      // enum values.
-	Sensitive     bool          // sensitive info string field.
-}
 
 // String returns a new Field with type string.
 func String(name string) *stringBuilder {
@@ -94,6 +79,7 @@ func JSON(name string, typ interface{}) *jsonBuilder {
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		info.Nillable = true
+		info.PkgPath = pkgPath(t)
 	}
 	return &jsonBuilder{&Descriptor{
 		Name: name,
@@ -241,7 +227,7 @@ func (b *stringBuilder) Immutable() *stringBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *stringBuilder) Comment(c string) *stringBuilder {
+func (b *stringBuilder) Comment(string) *stringBuilder {
 	return b
 }
 
@@ -255,6 +241,43 @@ func (b *stringBuilder) StructTag(s string) *stringBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *stringBuilder) StorageKey(key string) *stringBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for string.
+//
+//	field.String("name").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		})
+//
+func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.String("dir").
+//		GoType(http.Dir("dir"))
+//
+func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
+	b.desc.goType(typ, stringType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.String("dir").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *stringBuilder) Annotations(annotations ...Annotation) *stringBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -329,9 +352,46 @@ func (b *timeBuilder) StorageKey(key string) *timeBuilder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Time("deleted_at").
+//		GoType(&sql.NullTime{})
+//
+func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
+	b.desc.goType(typ, timeType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Time("deleted_at").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *timeBuilder) Annotations(annotations ...Annotation) *timeBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for time.
+//
+//	field.Time("created_at").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "datetime",
+//			dialect.Postgres: "time with time zone",
+//		})
+//
+func (b *timeBuilder) SchemaType(types map[string]string) *timeBuilder {
+	b.desc.SchemaType = types
+	return b
 }
 
 // boolBuilder is the builder for boolean fields.
@@ -383,6 +443,29 @@ func (b *boolBuilder) StorageKey(key string) *boolBuilder {
 	return b
 }
 
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Bool("deleted").
+//		GoType(&sql.NullBool{})
+//
+func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
+	b.desc.goType(typ, boolType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Bool("deleted").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *boolBuilder) Annotations(annotations ...Annotation) *boolBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *boolBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -420,7 +503,7 @@ func (b *bytesBuilder) Immutable() *bytesBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *bytesBuilder) Comment(c string) *bytesBuilder {
+func (b *bytesBuilder) Comment(string) *bytesBuilder {
 	return b
 }
 
@@ -442,6 +525,43 @@ func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Bytes("ip").
+//		GoType(net.IP("127.0.0.1"))
+//
+func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
+	b.desc.goType(typ, bytesType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Bytes("ip").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *bytesBuilder) Annotations(annotations ...Annotation) *bytesBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for bytes.
+//
+//	field.Bytes("blob").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:	"tinyblob",
+//			dialect.SQLite:	"tinyblob",
+//		})
+//
+func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
+	b.desc.SchemaType = types
 	return b
 }
 
@@ -486,6 +606,33 @@ func (b *jsonBuilder) StructTag(s string) *jsonBuilder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for json.
+//
+//	field.JSON("json").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"json",
+//			dialect.Postgres:	"jsonb",
+//		})
+//
+func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.JSON("json").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *jsonBuilder) Annotations(annotations ...Annotation) *jsonBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *jsonBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -496,9 +643,59 @@ type enumBuilder struct {
 	desc *Descriptor
 }
 
-// Value sets the numeric value of the enum. Defaults to its index in the declaration.
+// Values adds given values to the enum values.
+//
+//	field.Enum("priority").
+//		Values("low", "mid", "high")
+//
 func (b *enumBuilder) Values(values ...string) *enumBuilder {
-	b.desc.Enums = values
+	for _, v := range values {
+		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: v, V: v})
+	}
+	return b
+}
+
+// NamedValues adds the given name, value pairs to the enum value.
+// The "name" defines the Go identifier of the enum, and the value
+// defines the actual value in the database.
+//
+// NamedValues returns an error if given an odd number of arguments.
+//
+//	field.Enum("priority").
+//		NamedValues(
+//			"LOW", "low",
+//			"MID", "mid",
+//			"HIGH", "high",
+//		)
+//
+func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
+	if len(namevalue)%2 == 1 {
+		b.desc.err = fmt.Errorf("Enum.NamedValues: odd argument count")
+		return b
+	}
+	for i := 0; i < len(namevalue); i += 2 {
+		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: namevalue[i], V: namevalue[i+1]})
+	}
+	return b
+}
+
+// ValueMap adds the given values in the map to the enum value.
+// The key in the map is the Go identifier and the value in the
+// map is the actual enum value.
+//
+// If keys in not titled, ent codegen will change it to be exported.
+//
+// Deprecated: the ValueMap method predates the NamedValues method and it
+// is planned be removed in v0.5.0. New code should use NamedValues instead.
+func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
+	enums := make([]struct{ N, V string }, 0, len(values))
+	for k, v := range values {
+		enums = append(enums, struct{ N, V string }{N: k, V: v})
+	}
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].V < enums[j].V
+	})
+	b.desc.Enums = append(b.desc.Enums, enums...)
 	return b
 }
 
@@ -546,6 +743,48 @@ func (b *enumBuilder) StructTag(s string) *enumBuilder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for enum.
+//
+//	field.Enum("enum").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "EnumType",
+//		})
+//
+func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Enum("enum").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *enumBuilder) Annotations(annotations ...Annotation) *enumBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// EnumValues defines the interface for getting the enum values.
+type EnumValues interface {
+	Values() []string
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Enum("enum").
+//		GoType(role.Enum("role"))
+//
+func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
+	b.Values(ev.Values()...)
+	b.desc.goType(ev, stringType)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -567,6 +806,12 @@ func (b *uuidBuilder) StorageKey(key string) *uuidBuilder {
 // Unlike edges, fields are required by default.
 func (b *uuidBuilder) Optional() *uuidBuilder {
 	b.desc.Optional = true
+	return b
+}
+
+// Unique makes the field unique within all vertices of this type.
+func (b *uuidBuilder) Unique() *uuidBuilder {
+	b.desc.Unique = true
 	return b
 }
 
@@ -595,11 +840,151 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 //		Default(uuid.New)
 //
 func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
+	typ := reflect.TypeOf(fn)
+	if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String() {
+		b.desc.err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
+	}
 	b.desc.Default = fn
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uuid.
+//
+//	field.UUID("id", uuid.New()).
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomUUID",
+//		})
+//
+func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.UUID("id", uuid.New()).
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uuidBuilder) Annotations(annotations ...Annotation) *uuidBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
+}
+
+// Annotation is used to attach arbitrary metadata to the field object in codegen.
+// The object must be serializable to JSON raw value (e.g. struct, map or slice).
+// Template extensions can retrieve this metadata and use it inside their templates.
+type Annotation interface {
+	// Name defines the name of the annotation to be retrieved by the codegen.
+	Name() string
+}
+
+// A Descriptor for field configuration.
+type Descriptor struct {
+	Tag           string                  // struct tag.
+	Size          int                     // varchar size.
+	Name          string                  // field name.
+	Info          *TypeInfo               // field type info.
+	Unique        bool                    // unique index of field.
+	Nillable      bool                    // nillable struct field.
+	Optional      bool                    // nullable field in database.
+	Immutable     bool                    // create-only field.
+	Default       interface{}             // default value on create.
+	UpdateDefault interface{}             // default value on update.
+	Validators    []interface{}           // validator functions.
+	StorageKey    string                  // sql column or gremlin property.
+	Enums         []struct{ N, V string } // enum values.
+	Sensitive     bool                    // sensitive info string field.
+	SchemaType    map[string]string       // override the schema type.
+	Annotations   []Annotation            // field annotations.
+	err           error
+}
+
+// Err returns the error, if any, that was added by the field builder.
+func (d *Descriptor) Err() error {
+	return d.err
+}
+
+func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
+	t := reflect.TypeOf(typ)
+	tv := indirect(t)
+	info := &TypeInfo{
+		Type:    d.Info.Type,
+		Ident:   tv.String(),
+		PkgPath: tv.PkgPath(),
+		RType: &RType{
+			Name:    tv.Name(),
+			Kind:    tv.Kind(),
+			PkgPath: tv.PkgPath(),
+			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
+		},
+	}
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		info.Nillable = true
+	}
+	switch {
+	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	case t.Implements(valueScannerType):
+		n := t.NumMethod()
+		for i := 0; i < n; i++ {
+			m := t.Method(i)
+			in := make([]*RType, m.Type.NumIn()-1)
+			for j := range in {
+				arg := m.Type.In(j + 1)
+				in[j] = &RType{Name: arg.Name(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
+			}
+			out := make([]*RType, m.Type.NumOut())
+			for j := range out {
+				ret := m.Type.Out(j)
+				out[j] = &RType{Name: ret.Name(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
+			}
+			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
+		}
+	default:
+		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
+	}
+	d.Info = info
+}
+
+var (
+	boolType         = reflect.TypeOf(false)
+	bytesType        = reflect.TypeOf([]byte(nil))
+	timeType         = reflect.TypeOf(time.Time{})
+	stringType       = reflect.TypeOf("")
+	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
+)
+
+// ValueScanner is the interface that groups the Value and the Scan methods.
+type ValueScanner interface {
+	driver.Valuer
+	sql.Scanner
+}
+
+// indirect returns the type at the end of indirection.
+func indirect(t reflect.Type) reflect.Type {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
+}
+
+func pkgPath(t reflect.Type) string {
+	pkg := t.PkgPath()
+	if pkg != "" {
+		return pkg
+	}
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		return pkgPath(t.Elem())
+	}
+	return pkg
 }

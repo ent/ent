@@ -44,7 +44,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			{{ $receiver }}.ID = {{ if $.ID.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $.ID.Type }}(value.Int64){{ end }}
+			{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
 		{{- end }}
 		values = values[1:]
 		{{- range $i, $f := $.Fields }}
@@ -53,12 +53,14 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 			{{- end }}
 		{{- end }}
 		{{- with $.ForeignKeys }}
-			values = values[{{ len $.Fields }}:]
+			{{- with $.Fields }}
+				values = values[{{ len . }}:]
+			{{- end }}
 			if len(values) == len({{ $.Package }}.ForeignKeys) {
 				{{- range $i, $fk := . }}
 					{{- $f := $fk.Field }}
 					{{- if and $f.UserDefined (or $f.IsString $f.IsUUID) }}
-						{{- with extend $ "Idx" 0 "Field" $f "Rec" $receiver "StructField" $f.Name }}
+						{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver "StructField" $f.Name }}
 							{{ template "dialect/sql/decode/field" . }}
 						{{- end }}
 					{{- else }}
@@ -66,7 +68,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 						} else if value.Valid {
 							{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
-							*{{ $receiver }}.{{ $f.Name }} = {{ if $f.IsString }}strconv.FormatInt(value.Int64, 10){{ else }}{{ $f.Type }}(value.Int64){{ end }}
+							*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
 						}
 					{{- end }}
 				{{- end }}
@@ -93,7 +95,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 		{{- $nulltype := $f.NullType -}}
 		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
-		{{- if hasPrefix $nulltype "sql" }}
+		{{- if and (not $f.Type.ValueScanner) (hasPrefix $nulltype "sql") }}
 			} else if value.Valid {
 				{{- if $f.Nillable }}
 					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
@@ -103,7 +105,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 				{{- end }}
 		{{- else }}
 			} else if value != nil {
-				{{ $ret }}.{{ $field }} = *value
+				{{ $ret }}.{{ $field }} = {{ if not $f.Nillable }}*{{ end }}value
 		{{- end }}
 		}
 	{{- end }}

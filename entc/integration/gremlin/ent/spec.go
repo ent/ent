@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,10 +8,9 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin"
 )
 
 // Spec is the model entity for the Spec schema.
@@ -88,12 +87,6 @@ func (s *Spec) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (s *Spec) id() int {
-	id, _ := strconv.Atoi(s.ID)
-	return id
 }
 
 // Specs is a parsable slice of Spec.

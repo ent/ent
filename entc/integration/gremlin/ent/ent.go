@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,22 +7,35 @@
 package ent
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"golang.org/x/xerrors"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 )
 
-// Order applies an ordering on either graph traversal or sql selector.
-type Order func(*dsl.Traversal)
+// ent aliases to avoid import conflict in user's code.
+type (
+	Op         = ent.Op
+	Hook       = ent.Hook
+	Value      = ent.Value
+	Query      = ent.Query
+	Policy     = ent.Policy
+	Mutator    = ent.Mutator
+	Mutation   = ent.Mutation
+	MutateFunc = ent.MutateFunc
+)
+
+// OrderFunc applies an ordering on the graph traversal.
+type OrderFunc func(*dsl.Traversal)
 
 // Asc applies the given fields in ASC order.
-func Asc(fields ...string) Order {
+func Asc(fields ...string) OrderFunc {
 	return func(tr *dsl.Traversal) {
 		for _, f := range fields {
 			tr.By(f, dsl.Incr)
@@ -31,7 +44,7 @@ func Asc(fields ...string) Order {
 }
 
 // Desc applies the given fields in DESC order.
-func Desc(fields ...string) Order {
+func Desc(fields ...string) OrderFunc {
 	return func(tr *dsl.Traversal) {
 		for _, f := range fields {
 			tr.By(f, dsl.Decr)
@@ -39,10 +52,10 @@ func Desc(fields ...string) Order {
 	}
 }
 
-// Aggregate applies an aggregation step on the group-by traversal/selector.
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
 // It gets two labels as parameters. The first used in the `As` step for the predicate,
 // and the second is an optional name for the next predicates (or for later usage).
-type Aggregate func(string, string) (string, *dsl.Traversal)
+type AggregateFunc func(string, string) (string, *dsl.Traversal)
 
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
@@ -50,7 +63,7 @@ type Aggregate func(string, string) (string, *dsl.Traversal)
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn Aggregate, end string) Aggregate {
+func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(start, _ string) (string, *dsl.Traversal) {
 		return fn(start, end)
 	}
@@ -63,7 +76,7 @@ func As(fn Aggregate, end string) Aggregate {
 const DefaultCountLabel = "count"
 
 // Count applies the "count" aggregation function on each group.
-func Count() Aggregate {
+func Count() AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultCountLabel
@@ -79,7 +92,7 @@ func Count() Aggregate {
 const DefaultMaxLabel = "max"
 
 // Max applies the "max" aggregation function on the given field of each group.
-func Max(field string) Aggregate {
+func Max(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultMaxLabel
@@ -95,7 +108,7 @@ func Max(field string) Aggregate {
 const DefaultMeanLabel = "mean"
 
 // Mean applies the "mean" aggregation function on the given field of each group.
-func Mean(field string) Aggregate {
+func Mean(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultMeanLabel
@@ -111,7 +124,7 @@ func Mean(field string) Aggregate {
 const DefaultMinLabel = "min"
 
 // Min applies the "min" aggregation function on the given field of each group.
-func Min(field string) Aggregate {
+func Min(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultMinLabel
@@ -127,13 +140,38 @@ func Min(field string) Aggregate {
 const DefaultSumLabel = "sum"
 
 // Sum applies the "sum" aggregation function on the given field of each group.
-func Sum(field string) Aggregate {
+func Sum(field string) AggregateFunc {
 	return func(start, end string) (string, *dsl.Traversal) {
 		if end == "" {
 			end = DefaultSumLabel
 		}
 		return end, __.As(start).Unfold().Values(field).Sum().As(end)
 	}
+}
+
+// ValidationError returns when validating a field fails.
+type ValidationError struct {
+	Name string // Field or edge name.
+	err  error
+}
+
+// Error implements the error interface.
+func (e *ValidationError) Error() string {
+	return e.err.Error()
+}
+
+// Unwrap implements the errors.Wrapper interface.
+func (e *ValidationError) Unwrap() error {
+	return e.err
+}
+
+// IsValidationError returns a boolean indicating whether the error is a validaton error.
+func IsValidationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	var e *ValidationError
+	return errors.As(err, &e)
 }
 
 // NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
@@ -152,7 +190,7 @@ func IsNotFound(err error) bool {
 		return false
 	}
 	var e *NotFoundError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // MaskNotFound masks nor found error.
@@ -179,7 +217,7 @@ func IsNotSingular(err error) bool {
 		return false
 	}
 	var e *NotSingularError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // NotLoadedError returns when trying to get a node that was not loaded by the query.
@@ -198,7 +236,7 @@ func IsNotLoaded(err error) bool {
 		return false
 	}
 	var e *NotLoadedError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // ConstraintError returns when trying to create/update one or more entities and
@@ -225,7 +263,7 @@ func IsConstraintError(err error) bool {
 		return false
 	}
 	var e *ConstraintError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // Code implements the dsl.Node interface.
@@ -268,13 +306,4 @@ func isConstantError(r *gremlin.Response) (*ConstraintError, bool) {
 		return nil, false
 	}
 	return e, true
-}
-
-// keys returns the keys/ids from the edge map.
-func keys(m map[string]struct{}) []string {
-	s := make([]string, 0, len(m))
-	for id := range m {
-		s = append(s, id)
-	}
-	return s
 }

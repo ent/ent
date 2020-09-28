@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,17 +11,19 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldURL holds the string denoting the url vertex property in the database.
+	// FieldT holds the string denoting the t field in the database.
+	FieldT = "t"
+	// FieldURL holds the string denoting the url field in the database.
 	FieldURL = "url"
-	// FieldRaw holds the string denoting the raw vertex property in the database.
+	// FieldRaw holds the string denoting the raw field in the database.
 	FieldRaw = "raw"
-	// FieldDirs holds the string denoting the dirs vertex property in the database.
+	// FieldDirs holds the string denoting the dirs field in the database.
 	FieldDirs = "dirs"
-	// FieldInts holds the string denoting the ints vertex property in the database.
+	// FieldInts holds the string denoting the ints field in the database.
 	FieldInts = "ints"
-	// FieldFloats holds the string denoting the floats vertex property in the database.
+	// FieldFloats holds the string denoting the floats field in the database.
 	FieldFloats = "floats"
-	// FieldStrings holds the string denoting the strings vertex property in the database.
+	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
 
 	// Table holds the table name of the user in the database.
@@ -31,10 +33,21 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldT,
 	FieldURL,
 	FieldRaw,
 	FieldDirs,
 	FieldInts,
 	FieldFloats,
 	FieldStrings,
+}
+
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
 }

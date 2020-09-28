@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,44 +10,26 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	optional_int *int
-	age          *int
-	name         *string
-	last         *string
-	nickname     *string
-	phone        *string
-	password     *string
-	role         *user.Role
-	card         map[string]struct{}
-	pets         map[string]struct{}
-	files        map[string]struct{}
-	groups       map[string]struct{}
-	friends      map[string]struct{}
-	followers    map[string]struct{}
-	following    map[string]struct{}
-	team         map[string]struct{}
-	spouse       map[string]struct{}
-	children     map[string]struct{}
-	parent       map[string]struct{}
+	mutation *UserMutation
+	hooks    []Hook
 }
 
 // SetOptionalInt sets the optional_int field.
 func (uc *UserCreate) SetOptionalInt(i int) *UserCreate {
-	uc.optional_int = &i
+	uc.mutation.SetOptionalInt(i)
 	return uc
 }
 
@@ -61,19 +43,19 @@ func (uc *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
 
 // SetAge sets the age field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
-	uc.age = &i
+	uc.mutation.SetAge(i)
 	return uc
 }
 
 // SetName sets the name field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.name = &s
+	uc.mutation.SetName(s)
 	return uc
 }
 
 // SetLast sets the last field.
 func (uc *UserCreate) SetLast(s string) *UserCreate {
-	uc.last = &s
+	uc.mutation.SetLast(s)
 	return uc
 }
 
@@ -87,7 +69,7 @@ func (uc *UserCreate) SetNillableLast(s *string) *UserCreate {
 
 // SetNickname sets the nickname field.
 func (uc *UserCreate) SetNickname(s string) *UserCreate {
-	uc.nickname = &s
+	uc.mutation.SetNickname(s)
 	return uc
 }
 
@@ -101,7 +83,7 @@ func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
 
 // SetPhone sets the phone field.
 func (uc *UserCreate) SetPhone(s string) *UserCreate {
-	uc.phone = &s
+	uc.mutation.SetPhone(s)
 	return uc
 }
 
@@ -115,7 +97,7 @@ func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 
 // SetPassword sets the password field.
 func (uc *UserCreate) SetPassword(s string) *UserCreate {
-	uc.password = &s
+	uc.mutation.SetPassword(s)
 	return uc
 }
 
@@ -129,7 +111,7 @@ func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 
 // SetRole sets the role field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
-	uc.role = &u
+	uc.mutation.SetRole(u)
 	return uc
 }
 
@@ -141,17 +123,28 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	return uc
 }
 
-// SetCardID sets the card edge to Card by id.
-func (uc *UserCreate) SetCardID(id string) *UserCreate {
-	if uc.card == nil {
-		uc.card = make(map[string]struct{})
+// SetSSOCert sets the SSOCert field.
+func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
+	uc.mutation.SetSSOCert(s)
+	return uc
+}
+
+// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
+	if s != nil {
+		uc.SetSSOCert(*s)
 	}
-	uc.card[id] = struct{}{}
+	return uc
+}
+
+// SetCardID sets the card edge to Card by id.
+func (uc *UserCreate) SetCardID(id int) *UserCreate {
+	uc.mutation.SetCardID(id)
 	return uc
 }
 
 // SetNillableCardID sets the card edge to Card by id if the given value is not nil.
-func (uc *UserCreate) SetNillableCardID(id *string) *UserCreate {
+func (uc *UserCreate) SetNillableCardID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetCardID(*id)
 	}
@@ -164,19 +157,14 @@ func (uc *UserCreate) SetCard(c *Card) *UserCreate {
 }
 
 // AddPetIDs adds the pets edge to Pet by ids.
-func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	if uc.pets == nil {
-		uc.pets = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.pets[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddPetIDs(ids ...int) *UserCreate {
+	uc.mutation.AddPetIDs(ids...)
 	return uc
 }
 
 // AddPets adds the pets edges to Pet.
 func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -184,19 +172,14 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (uc *UserCreate) AddFileIDs(ids ...string) *UserCreate {
-	if uc.files == nil {
-		uc.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.files[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddFileIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFileIDs(ids...)
 	return uc
 }
 
 // AddFiles adds the files edges to File.
 func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -204,19 +187,14 @@ func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
 }
 
 // AddGroupIDs adds the groups edge to Group by ids.
-func (uc *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
-	if uc.groups == nil {
-		uc.groups = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.groups[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
+	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
 // AddGroups adds the groups edges to Group.
 func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
-	ids := make([]string, len(g))
+	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
@@ -224,19 +202,14 @@ func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 }
 
 // AddFriendIDs adds the friends edge to User by ids.
-func (uc *UserCreate) AddFriendIDs(ids ...string) *UserCreate {
-	if uc.friends == nil {
-		uc.friends = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.friends[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFriendIDs(ids...)
 	return uc
 }
 
 // AddFriends adds the friends edges to User.
 func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -244,19 +217,14 @@ func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 }
 
 // AddFollowerIDs adds the followers edge to User by ids.
-func (uc *UserCreate) AddFollowerIDs(ids ...string) *UserCreate {
-	if uc.followers == nil {
-		uc.followers = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.followers[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddFollowerIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFollowerIDs(ids...)
 	return uc
 }
 
 // AddFollowers adds the followers edges to User.
 func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -264,19 +232,14 @@ func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 }
 
 // AddFollowingIDs adds the following edge to User by ids.
-func (uc *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
-	if uc.following == nil {
-		uc.following = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.following[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddFollowingIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFollowingIDs(ids...)
 	return uc
 }
 
 // AddFollowing adds the following edges to User.
 func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -284,16 +247,13 @@ func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 }
 
 // SetTeamID sets the team edge to Pet by id.
-func (uc *UserCreate) SetTeamID(id string) *UserCreate {
-	if uc.team == nil {
-		uc.team = make(map[string]struct{})
-	}
-	uc.team[id] = struct{}{}
+func (uc *UserCreate) SetTeamID(id int) *UserCreate {
+	uc.mutation.SetTeamID(id)
 	return uc
 }
 
 // SetNillableTeamID sets the team edge to Pet by id if the given value is not nil.
-func (uc *UserCreate) SetNillableTeamID(id *string) *UserCreate {
+func (uc *UserCreate) SetNillableTeamID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetTeamID(*id)
 	}
@@ -306,16 +266,13 @@ func (uc *UserCreate) SetTeam(p *Pet) *UserCreate {
 }
 
 // SetSpouseID sets the spouse edge to User by id.
-func (uc *UserCreate) SetSpouseID(id string) *UserCreate {
-	if uc.spouse == nil {
-		uc.spouse = make(map[string]struct{})
-	}
-	uc.spouse[id] = struct{}{}
+func (uc *UserCreate) SetSpouseID(id int) *UserCreate {
+	uc.mutation.SetSpouseID(id)
 	return uc
 }
 
 // SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
-func (uc *UserCreate) SetNillableSpouseID(id *string) *UserCreate {
+func (uc *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetSpouseID(*id)
 	}
@@ -328,19 +285,14 @@ func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
 }
 
 // AddChildIDs adds the children edge to User by ids.
-func (uc *UserCreate) AddChildIDs(ids ...string) *UserCreate {
-	if uc.children == nil {
-		uc.children = make(map[string]struct{})
-	}
-	for i := range ids {
-		uc.children[ids[i]] = struct{}{}
-	}
+func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
+	uc.mutation.AddChildIDs(ids...)
 	return uc
 }
 
 // AddChildren adds the children edges to User.
 func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -348,16 +300,13 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 }
 
 // SetParentID sets the parent edge to User by id.
-func (uc *UserCreate) SetParentID(id string) *UserCreate {
-	if uc.parent == nil {
-		uc.parent = make(map[string]struct{})
-	}
-	uc.parent[id] = struct{}{}
+func (uc *UserCreate) SetParentID(id int) *UserCreate {
+	uc.mutation.SetParentID(id)
 	return uc
 }
 
 // SetNillableParentID sets the parent edge to User by id if the given value is not nil.
-func (uc *UserCreate) SetNillableParentID(id *string) *UserCreate {
+func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetParentID(*id)
 	}
@@ -369,43 +318,45 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
 }
 
+// Mutation returns the UserMutation object of the builder.
+func (uc *UserCreate) Mutation() *UserMutation {
+	return uc.mutation
+}
+
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	if uc.optional_int != nil {
-		if err := user.OptionalIntValidator(*uc.optional_int); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"optional_int\": %v", err)
+	var (
+		err  error
+		node *User
+	)
+	uc.defaults()
+	if len(uc.hooks) == 0 {
+		if err = uc.check(); err != nil {
+			return nil, err
+		}
+		node, err = uc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = uc.check(); err != nil {
+				return nil, err
+			}
+			uc.mutation = mutation
+			node, err = uc.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			mut = uc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+			return nil, err
 		}
 	}
-	if uc.age == nil {
-		return nil, errors.New("ent: missing required field \"age\"")
-	}
-	if uc.name == nil {
-		return nil, errors.New("ent: missing required field \"name\"")
-	}
-	if uc.last == nil {
-		v := user.DefaultLast
-		uc.last = &v
-	}
-	if uc.role == nil {
-		v := user.DefaultRole
-		uc.role = &v
-	}
-	if err := user.RoleValidator(*uc.role); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"role\": %v", err)
-	}
-	if len(uc.card) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"card\"")
-	}
-	if len(uc.team) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
-	}
-	if len(uc.spouse) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"spouse\"")
-	}
-	if len(uc.parent) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"parent\"")
-	}
-	return uc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -417,82 +368,142 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.Last(); !ok {
+		v := user.DefaultLast
+		uc.mutation.SetLast(v)
+	}
+	if _, ok := uc.mutation.Role(); !ok {
+		v := user.DefaultRole
+		uc.mutation.SetRole(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (uc *UserCreate) check() error {
+	if v, ok := uc.mutation.OptionalInt(); ok {
+		if err := user.OptionalIntValidator(v); err != nil {
+			return &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
+		}
+	}
+	if _, ok := uc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+	}
+	if _, ok := uc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := uc.mutation.Last(); !ok {
+		return &ValidationError{Name: "last", err: errors.New("ent: missing required field \"last\"")}
+	}
+	if _, ok := uc.mutation.Role(); !ok {
+		return &ValidationError{Name: "role", err: errors.New("ent: missing required field \"role\"")}
+	}
+	if v, ok := uc.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+	_node, _spec := uc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
+	return _node, nil
+}
+
+func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
-		u     = &User{config: uc.config}
+		_node = &User{config: uc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		}
 	)
-	if value := uc.optional_int; value != nil {
+	if value, ok := uc.mutation.OptionalInt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldOptionalInt,
 		})
-		u.OptionalInt = *value
+		_node.OptionalInt = value
 	}
-	if value := uc.age; value != nil {
+	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldAge,
 		})
-		u.Age = *value
+		_node.Age = value
 	}
-	if value := uc.name; value != nil {
+	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldName,
 		})
-		u.Name = *value
+		_node.Name = value
 	}
-	if value := uc.last; value != nil {
+	if value, ok := uc.mutation.Last(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldLast,
 		})
-		u.Last = *value
+		_node.Last = value
 	}
-	if value := uc.nickname; value != nil {
+	if value, ok := uc.mutation.Nickname(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldNickname,
 		})
-		u.Nickname = *value
+		_node.Nickname = value
 	}
-	if value := uc.phone; value != nil {
+	if value, ok := uc.mutation.Phone(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldPhone,
 		})
-		u.Phone = *value
+		_node.Phone = value
 	}
-	if value := uc.password; value != nil {
+	if value, ok := uc.mutation.Password(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldPassword,
 		})
-		u.Password = *value
+		_node.Password = value
 	}
-	if value := uc.role; value != nil {
+	if value, ok := uc.mutation.Role(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
-			Value:  *value,
+			Value:  value,
 			Column: user.FieldRole,
 		})
-		u.Role = *value
+		_node.Role = value
 	}
-	if nodes := uc.card; len(nodes) > 0 {
+	if value, ok := uc.mutation.SSOCert(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldSSOCert,
+		})
+		_node.SSOCert = value
+	}
+	if nodes := uc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -501,21 +512,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.pets; len(nodes) > 0 {
+	if nodes := uc.mutation.PetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -524,21 +531,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.files; len(nodes) > 0 {
+	if nodes := uc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -547,21 +550,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.groups; len(nodes) > 0 {
+	if nodes := uc.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -570,21 +569,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: group.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.friends; len(nodes) > 0 {
+	if nodes := uc.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -593,21 +588,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.followers; len(nodes) > 0 {
+	if nodes := uc.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -616,21 +607,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.following; len(nodes) > 0 {
+	if nodes := uc.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -639,21 +626,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.team; len(nodes) > 0 {
+	if nodes := uc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -662,21 +645,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: pet.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.spouse; len(nodes) > 0 {
+	if nodes := uc.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -685,21 +664,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    true,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.children; len(nodes) > 0 {
+	if nodes := uc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -708,21 +683,17 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.parent; len(nodes) > 0 {
+	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -731,27 +702,82 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return _node, _spec
+}
+
+// UserCreateBulk is the builder for creating a bulk of User entities.
+type UserCreateBulk struct {
+	config
+	builders []*UserCreate
+}
+
+// Save creates the User entities in the database.
+func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
+	nodes := make([]*User, len(ucb.builders))
+	mutators := make([]Mutator, len(ucb.builders))
+	for i := range ucb.builders {
+		func(i int, root context.Context) {
+			builder := ucb.builders[i]
+			builder.defaults()
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*UserMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	u.ID = strconv.FormatInt(id, 10)
-	return u, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ucb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
+	v, err := ucb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

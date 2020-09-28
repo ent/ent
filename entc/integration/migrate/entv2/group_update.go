@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,17 +8,20 @@ package entv2
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
+	hooks      []Hook
+	mutation   *GroupMutation
 	predicates []predicate.Group
 }
 
@@ -28,9 +31,38 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gu *GroupUpdate) Mutation() *GroupMutation {
+	return gu.mutation
+}
+
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	return gu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(gu.hooks) == 0 {
+		affected, err = gu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			gu.mutation = mutation
+			affected, err = gu.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(gu.hooks) - 1; i >= 0; i-- {
+			mut = gu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -87,21 +119,51 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
-	id int
+	hooks    []Hook
+	mutation *GroupMutation
+}
+
+// Mutation returns the GroupMutation object of the builder.
+func (guo *GroupUpdateOne) Mutation() *GroupMutation {
+	return guo.mutation
 }
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	return guo.sqlSave(ctx)
+	var (
+		err  error
+		node *Group
+	)
+	if len(guo.hooks) == 0 {
+		node, err = guo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			guo.mutation = mutation
+			node, err = guo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(guo.hooks) - 1; i >= 0; i-- {
+			mut = guo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	gr, err := guo.Save(ctx)
+	node, err := guo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -117,21 +179,25 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
+func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  guo.id,
 				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
 	}
-	gr = &Group{config: guo.config}
-	_spec.Assign = gr.assignValues
-	_spec.ScanValues = gr.scanValues()
+	id, ok := guo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	_node = &Group{config: guo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
@@ -140,5 +206,5 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		return nil, err
 	}
-	return gr, nil
+	return _node, nil
 }

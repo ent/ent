@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,20 +8,19 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/user"
 )
 
 // File is the model entity for the File schema.
 type File struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Size holds the value of the "size" field.
 	Size int `json:"size,omitempty"`
 	// Name holds the value of the "name" field.
@@ -30,12 +29,14 @@ type File struct {
 	User *string `json:"user,omitempty"`
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
+	// Op holds the value of the "op" field.
+	Op bool `json:"op,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges           FileEdges `json:"edges"`
-	file_type_files *string
-	group_files     *string
-	user_files      *string
+	file_type_files *int
+	group_files     *int
+	user_files      *int
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -44,9 +45,11 @@ type FileEdges struct {
 	Owner *User
 	// Type holds the value of the type edge.
 	Type *FileType
+	// Field holds the value of the field edge.
+	Field []*FieldType
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -77,6 +80,15 @@ func (e FileEdges) TypeOrErr() (*FileType, error) {
 	return nil, &NotLoadedError{edge: "type"}
 }
 
+// FieldOrErr returns the Field value or an error if the edge
+// was not loaded in eager-loading.
+func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
+	if e.loadedTypes[2] {
+		return e.Field, nil
+	}
+	return nil, &NotLoadedError{edge: "field"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*File) scanValues() []interface{} {
 	return []interface{}{
@@ -85,6 +97,7 @@ func (*File) scanValues() []interface{} {
 		&sql.NullString{}, // name
 		&sql.NullString{}, // user
 		&sql.NullString{}, // group
+		&sql.NullBool{},   // op
 	}
 }
 
@@ -107,7 +120,7 @@ func (f *File) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	f.ID = strconv.FormatInt(value.Int64, 10)
+	f.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field size", values[0])
@@ -130,25 +143,30 @@ func (f *File) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		f.Group = value.String
 	}
-	values = values[4:]
+	if value, ok := values[4].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field op", values[4])
+	} else if value.Valid {
+		f.Op = value.Bool
+	}
+	values = values[5:]
 	if len(values) == len(file.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
 		} else if value.Valid {
-			f.file_type_files = new(string)
-			*f.file_type_files = strconv.FormatInt(value.Int64, 10)
+			f.file_type_files = new(int)
+			*f.file_type_files = int(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field group_files", value)
 		} else if value.Valid {
-			f.group_files = new(string)
-			*f.group_files = strconv.FormatInt(value.Int64, 10)
+			f.group_files = new(int)
+			*f.group_files = int(value.Int64)
 		}
 		if value, ok := values[2].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_files", value)
 		} else if value.Valid {
-			f.user_files = new(string)
-			*f.user_files = strconv.FormatInt(value.Int64, 10)
+			f.user_files = new(int)
+			*f.user_files = int(value.Int64)
 		}
 	}
 	return nil
@@ -162,6 +180,11 @@ func (f *File) QueryOwner() *UserQuery {
 // QueryType queries the type edge of the File.
 func (f *File) QueryType() *FileTypeQuery {
 	return (&FileClient{config: f.config}).QueryType(f)
+}
+
+// QueryField queries the field edge of the File.
+func (f *File) QueryField() *FieldTypeQuery {
+	return (&FileClient{config: f.config}).QueryField(f)
 }
 
 // Update returns a builder for updating this File.
@@ -197,14 +220,10 @@ func (f *File) String() string {
 	}
 	builder.WriteString(", group=")
 	builder.WriteString(f.Group)
+	builder.WriteString(", op=")
+	builder.WriteString(fmt.Sprintf("%v", f.Op))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (f *File) id() int {
-	id, _ := strconv.Atoi(f.ID)
-	return id
 }
 
 // Files is a parsable slice of File.

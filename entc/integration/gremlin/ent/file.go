@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,12 +8,11 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // File is the model entity for the File schema.
@@ -29,6 +28,8 @@ type File struct {
 	User *string `json:"user,omitempty"`
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
+	// Op holds the value of the "op" field.
+	Op bool `json:"op,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges FileEdges `json:"edges"`
@@ -40,9 +41,11 @@ type FileEdges struct {
 	Owner *User
 	// Type holds the value of the type edge.
 	Type *FileType
+	// Field holds the value of the field edge.
+	Field []*FieldType
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -73,6 +76,15 @@ func (e FileEdges) TypeOrErr() (*FileType, error) {
 	return nil, &NotLoadedError{edge: "type"}
 }
 
+// FieldOrErr returns the Field value or an error if the edge
+// was not loaded in eager-loading.
+func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
+	if e.loadedTypes[2] {
+		return e.Field, nil
+	}
+	return nil, &NotLoadedError{edge: "field"}
+}
+
 // FromResponse scans the gremlin response data into File.
 func (f *File) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -85,6 +97,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
+		Op    bool    `json:"op,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
@@ -94,6 +107,7 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 	f.Name = scanf.Name
 	f.User = scanf.User
 	f.Group = scanf.Group
+	f.Op = scanf.Op
 	return nil
 }
 
@@ -105,6 +119,11 @@ func (f *File) QueryOwner() *UserQuery {
 // QueryType queries the type edge of the File.
 func (f *File) QueryType() *FileTypeQuery {
 	return (&FileClient{config: f.config}).QueryType(f)
+}
+
+// QueryField queries the field edge of the File.
+func (f *File) QueryField() *FieldTypeQuery {
+	return (&FileClient{config: f.config}).QueryField(f)
 }
 
 // Update returns a builder for updating this File.
@@ -140,14 +159,10 @@ func (f *File) String() string {
 	}
 	builder.WriteString(", group=")
 	builder.WriteString(f.Group)
+	builder.WriteString(", op=")
+	builder.WriteString(fmt.Sprintf("%v", f.Op))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (f *File) id() int {
-	id, _ := strconv.Atoi(f.ID)
-	return id
 }
 
 // Files is a parsable slice of File.
@@ -165,6 +180,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		Name  string  `json:"name,omitempty"`
 		User  *string `json:"user,omitempty"`
 		Group string  `json:"group,omitempty"`
+		Op    bool    `json:"op,omitempty"`
 	}
 	if err := vmap.Decode(&scanf); err != nil {
 		return err
@@ -176,6 +192,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 			Name:  v.Name,
 			User:  v.User,
 			Group: v.Group,
+			Op:    v.Op,
 		})
 	}
 	return nil

@@ -6,10 +6,13 @@ package schema
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
@@ -20,19 +23,19 @@ func TestSQLite_Create(t *testing.T) {
 		name    string
 		tables  []*Table
 		options []MigrateOption
-		before  func(sqlmock.Sqlmock)
+		before  func(sqliteMock)
 		wantErr bool
 	}{
 		{
 			name: "tx failed",
-			before: func(mock sqlmock.Sqlmock) {
+			before: func(mock sqliteMock) {
 				mock.ExpectBegin().WillReturnError(sqlmock.ErrCancelled)
 			},
 			wantErr: true,
 		},
 		{
 			name: "fk disabled",
-			before: func(mock sqlmock.Sqlmock) {
+			before: func(mock sqliteMock) {
 				mock.ExpectBegin()
 				mock.ExpectQuery("PRAGMA foreign_keys").
 					WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(0))
@@ -42,10 +45,8 @@ func TestSQLite_Create(t *testing.T) {
 		},
 		{
 			name: "no tables",
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery("PRAGMA foreign_keys").
-					WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
+			before: func(mock sqliteMock) {
+				mock.start()
 				mock.ExpectCommit()
 			},
 		},
@@ -63,17 +64,14 @@ func TestSQLite_Create(t *testing.T) {
 						{Name: "age", Type: field.TypeInt},
 						{Name: "doc", Type: field.TypeJSON, Nullable: true},
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+						{Name: "decimal", Type: field.TypeFloat32, SchemaType: map[string]string{dialect.SQLite: "decimal(6,2)"}},
 					},
 				},
 			},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery("PRAGMA foreign_keys").
-					WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
-				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL, `doc` json NULL, `uuid` uuid NULL)")).
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `age` integer NOT NULL, `doc` json NULL, `uuid` uuid NULL, `decimal` decimal(6,2) NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -114,19 +112,195 @@ func TestSQLite_Create(t *testing.T) {
 				)
 				return []*Table{t1, t2}
 			}(),
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery("PRAGMA foreign_keys").
-					WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` datetime NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "pets").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` integer NULL, FOREIGN KEY(`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE)")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add column to table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
+						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+						{Name: "age", Type: field.TypeInt, Default: 0},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('users') ORDER BY `pk`")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+						AddRow("name", "varchar(255)", 0, nil, 0).
+						AddRow("text", "text", 0, "NULL", 0).
+						AddRow("uuid", "uuid", 0, "Null", 0).
+						AddRow("id", "integer", 1, "NULL", 1))
+				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` integer NOT NULL DEFAULT 0")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "datetime and timestamp",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "created_at", Type: field.TypeTime, Nullable: true},
+						{Name: "updated_at", Type: field.TypeTime, Nullable: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('users') ORDER BY `pk`")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+						AddRow("created_at", "datetime", 0, nil, 0).
+						AddRow("id", "integer", 1, "NULL", 1))
+				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `updated_at` datetime NULL")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add blob columns",
+			tables: []*Table{
+				{
+					Name: "blobs",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "old_tiny", Type: field.TypeBytes, Size: 100},
+						{Name: "old_blob", Type: field.TypeBytes, Size: 1e3},
+						{Name: "old_medium", Type: field.TypeBytes, Size: 1e5},
+						{Name: "old_long", Type: field.TypeBytes, Size: 1e8},
+						{Name: "new_tiny", Type: field.TypeBytes, Size: 100},
+						{Name: "new_blob", Type: field.TypeBytes, Size: 1e3},
+						{Name: "new_medium", Type: field.TypeBytes, Size: 1e5},
+						{Name: "new_long", Type: field.TypeBytes, Size: 1e8},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("blobs", true)
+				mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('blobs') ORDER BY `pk`")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+						AddRow("old_tiny", "blob", 1, nil, 0).
+						AddRow("old_blob", "blob", 1, nil, 0).
+						AddRow("old_medium", "blob", 1, nil, 0).
+						AddRow("old_long", "blob", 1, nil, 0).
+						AddRow("id", "integer", 1, "NULL", 1))
+				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('blobs')")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
+				for _, c := range []string{"tiny", "blob", "medium", "long"} {
+					mock.ExpectExec(escape(fmt.Sprintf("ALTER TABLE `blobs` ADD COLUMN `new_%s` blob NOT NULL", c))).
+						WillReturnResult(sqlmock.NewResult(0, 1))
+				}
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add columns with default values",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Default: "unknown"},
+						{Name: "active", Type: field.TypeBool, Default: false},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('users') ORDER BY `pk`")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+						AddRow("id", "integer", 1, "NULL", 1))
+				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `name` varchar(255) NOT NULL DEFAULT 'unknown'")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `active` bool NOT NULL DEFAULT false")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add edge to table",
+			tables: func() []*Table {
+				var (
+					c1 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "spouse_id", Type: field.TypeInt, Nullable: true},
+					}
+					t1 = &Table{
+						Name:       "users",
+						Columns:    c1,
+						PrimaryKey: c1[0:1],
+						ForeignKeys: []*ForeignKey{
+							{
+								Symbol:     "user_spouse",
+								Columns:    c1[2:],
+								RefColumns: c1[0:1],
+								OnDelete:   Cascade,
+							},
+						},
+					}
+				)
+				t1.ForeignKeys[0].RefTable = t1
+				return []*Table{t1}
+			}(),
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('users') ORDER BY `pk`")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+						AddRow("name", "varchar(255)", 1, "NULL", 0).
+						AddRow("id", "integer", 1, "NULL", 1))
+				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
+					WithArgs().
+					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `spouse_id` integer NULL CONSTRAINT user_spouse REFERENCES `users`(`id`) ON DELETE CASCADE")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -138,19 +312,13 @@ func TestSQLite_Create(t *testing.T) {
 				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
 			},
 			options: []MigrateOption{WithGlobalUniqueID(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery("PRAGMA foreign_keys").
-					WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
+			before: func(mock sqliteMock) {
+				mock.start()
 				// creating ent_types table.
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "ent_types").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("ent_types", false)
 				mock.ExpectExec(escape("CREATE TABLE `ent_types`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `type` varchar(255) UNIQUE NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range.
@@ -163,9 +331,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectExec(escape("INSERT INTO `sqlite_sequence` (`name`, `seq`) VALUES (?, ?)")).
 					WithArgs("users", 0).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "groups").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("groups", false)
 				mock.ExpectExec(escape("CREATE TABLE `groups`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
@@ -188,19 +354,13 @@ func TestSQLite_Create(t *testing.T) {
 				NewTable("groups").AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}),
 			},
 			options: []MigrateOption{WithGlobalUniqueID(true)},
-			before: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
-				mock.ExpectQuery("PRAGMA foreign_keys").
-					WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
+			before: func(mock sqliteMock) {
+				mock.start()
 				// query ent_types table.
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "ent_types").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+				mock.tableExists("ent_types", true)
 				mock.ExpectQuery(escape("SELECT `type` FROM `ent_types` ORDER BY `id` ASC")).
 					WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow("users"))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "users").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set users id range (without inserting to ent_types).
@@ -210,9 +370,7 @@ func TestSQLite_Create(t *testing.T) {
 				mock.ExpectExec(escape("UPDATE `sqlite_sequence` SET `seq` = ? WHERE `name` = ?")).
 					WithArgs(0, "users").
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
-					WithArgs("table", "groups").
-					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+				mock.tableExists("groups", false)
 				mock.ExpectExec(escape("CREATE TABLE `groups`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// set groups id range.
@@ -233,11 +391,31 @@ func TestSQLite_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
-			tt.before(mock)
+			tt.before(sqliteMock{mock})
 			migrate, err := NewMigrate(sql.OpenDB("sqlite3", db), tt.options...)
 			require.NoError(t, err)
 			err = migrate.Create(context.Background(), tt.tables...)
 			require.Equal(t, tt.wantErr, err != nil, err)
 		})
 	}
+}
+
+type sqliteMock struct {
+	sqlmock.Sqlmock
+}
+
+func (m sqliteMock) start() {
+	m.ExpectBegin()
+	m.ExpectQuery("PRAGMA foreign_keys").
+		WillReturnRows(sqlmock.NewRows([]string{"foreign_keys"}).AddRow(1))
+}
+
+func (m sqliteMock) tableExists(table string, exists bool) {
+	count := 0
+	if exists {
+		count = 1
+	}
+	m.ExpectQuery(escape("SELECT COUNT(*) FROM `sqlite_master` WHERE `type` = ? AND `name` = ?")).
+		WithArgs("table", table).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(count))
 }

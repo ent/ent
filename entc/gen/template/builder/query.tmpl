@@ -11,6 +11,13 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+import (
+	{{- range $path := $.SiblingImports }}
+		"{{ $path }}"
+	{{- end }}
+)
+
+
 {{ $builder := $.QueryName }}
 {{ $receiver := receiver $builder }}
 
@@ -19,7 +26,7 @@ type {{ $builder }} struct {
 	config
 	limit		*int
 	offset		*int
-	order		[]Order
+	order		[]OrderFunc
 	unique		[]string
 	predicates 	[]predicate.{{ $.Name }}
 	{{- with $.Edges }}
@@ -33,8 +40,9 @@ type {{ $builder }} struct {
 	{{- if hasTemplate $tmpl }}
 		{{- xtemplate $tmpl . }}
 	{{- end }}
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
+	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -56,7 +64,7 @@ func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
 }
 
 // Order adds an order step to the query.
-func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
+func ({{ $receiver }} *{{ $builder }}) Order(o ...OrderFunc) *{{ $builder }} {
 	{{ $receiver }}.order = append({{ $receiver }}.order, o...)
 	return {{ $receiver }}
 }
@@ -67,33 +75,39 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...Order) *{{ $builder }} {
 	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
 		query := &{{ $edge_builder }}{config: {{ $receiver }}.config}
-		{{- with extend $ "Receiver" $receiver "Edge" $e -}}
-			{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
-			{{- xtemplate $tmpl . }}
-		{{- end -}}
+		query.path = func(ctx context.Context) (fromU {{ $.Storage.Builder }}, err error) {
+			if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+				return nil, err
+			}
+			{{- with extend $ "Receiver" $receiver "Edge" $e "Ident" "fromU" -}}
+				{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
+				{{- xtemplate $tmpl . }}
+			{{- end -}}
+			return fromU, nil
+		}
 		return query
 	}
 {{ end }}
 
 // First returns the first {{ $.Name }} entity in the query. Returns *NotFoundError when no {{ lower $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
-	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(1).All(ctx)
+	nodes, err := {{ $receiver }}.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len({{ plural $.Receiver }}) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{ {{ $.Package }}.Label}
 	}
-	return {{ plural $.Receiver }}[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }} {
-	{{ $.Receiver }}, err := {{ $receiver }}.First(ctx)
+	node, err := {{ $receiver }}.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return {{ $.Receiver }}
+	return node
 }
 
 // FirstID returns the first {{ $.Name }} id in the query. Returns *NotFoundError when no id was found.
@@ -120,13 +134,13 @@ func ({{ $receiver }} *{{ $builder }}) FirstXID(ctx context.Context) {{ $.ID.Typ
 
 // Only returns the only {{ $.Name }} entity in the query, returns an error if not exactly one entity was returned.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
-	{{ plural $.Receiver }}, err := {{ $receiver }}.Limit(2).All(ctx)
+	nodes, err := {{ $receiver }}.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len({{ plural $.Receiver }}) {
+	switch len(nodes) {
 	case 1:
-		return {{ plural $.Receiver }}[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{ {{ $.Package }}.Label}
 	default:
@@ -136,11 +150,11 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 
 // OnlyX is like Only, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} {
-	{{ $.Receiver }}, err := {{ $receiver }}.Only(ctx)
+	node, err := {{ $receiver }}.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return {{ $.Receiver }}
+	return node
 }
 
 // OnlyID returns the only {{ $.Name }} id in the query, returns an error if not exactly one id was returned.
@@ -160,8 +174,8 @@ func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.T
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type }} {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
 	id, err := {{ $receiver }}.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -171,16 +185,19 @@ func ({{ $receiver }} *{{ $builder }}) OnlyXID(ctx context.Context) {{ $.ID.Type
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
+	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return {{ $receiver }}.{{ $.Storage }}All(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }} {
-	{{ plural $.Receiver }}, err := {{ $receiver }}.All(ctx)
+	nodes, err := {{ $receiver }}.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return {{ plural $.Receiver }}
+	return nodes
 }
 
 // IDs executes the query and returns a list of {{ $.Name }} ids.
@@ -203,6 +220,9 @@ func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type 
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
+	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return {{ $receiver }}.{{ $.Storage }}Count(ctx)
 }
 
@@ -217,6 +237,9 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
+	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return {{ $receiver }}.{{ $.Storage }}Exist(ctx)
 }
 
@@ -236,11 +259,12 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		config: 	{{ $receiver }}.config,
 		limit: 		{{ $receiver }}.limit,
 		offset: 	{{ $receiver }}.offset,
-		order: 		append([]Order{}, {{ $receiver }}.order...),
+		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
 		unique: 	append([]string{}, {{ $receiver }}.unique...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
+		path: {{ $receiver }}.path,
 	}
 }
 
@@ -281,7 +305,12 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
 	group := &{{ $groupBuilder }}{config: {{ $receiver }}.config}
 	group.fields = append([]string{field}, fields...)
-	group.{{ $.Storage }} = {{ $receiver }}.{{ $.Storage }}Query()
+	group.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
+		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return {{ $receiver }}.{{ $.Storage }}Query(), nil
+	}
 	return group
 }
 
@@ -305,8 +334,29 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
 	selector := &{{ $selectBuilder }}{config: {{ $receiver }}.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.{{ $.Storage }} = {{ $receiver }}.{{ $.Storage }}Query()
+	selector.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
+		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return {{ $receiver }}.{{ $.Storage }}Query(), nil
+	}
 	return selector
+}
+
+func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
+	if {{ $receiver }}.path != nil {
+		prev, err := {{ $receiver }}.path(ctx)
+		if err != nil {
+			return err
+		}
+		{{ $receiver }}.{{ $.Storage }} = prev
+	}
+	{{- if $.HasPolicy }}
+		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
+			return err
+		}
+	{{- end }}
+	return nil
 }
 
 {{ with extend $ "Builder" $builder "Package" $pkg }}
@@ -322,19 +372,25 @@ func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{
 type {{ $groupBuilder }} struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
-	{{ $.Storage }} {{ $.Storage.Builder}}
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
+	{{ $.Storage }} {{ $.Storage.Builder }}
+	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...Aggregate) *{{ $groupBuilder }} {
+func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc) *{{ $groupBuilder }} {
 	{{ $groupReceiver }}.fns = append({{ $groupReceiver }}.fns, fns...)
 	return {{ $groupReceiver }}
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	query, err := {{ $groupReceiver }}.path(ctx)
+	if err != nil {
+		return err
+	}
+	{{ $groupReceiver }}.{{ $.Storage }} = query
 	return {{ $groupReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
@@ -346,11 +402,11 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 }
 
 {{ range $_, $t := primitives }}
-	{{ $f := pascal $t | plural }}
-	// {{ $f }} returns list of {{ plural $t }} from group-by. It is only allowed when querying group-by with one field.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $f }}(ctx context.Context) ([]{{ $t }}, error) {
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from group-by. It is only allowed when querying group-by with one field.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
 		if len({{ $groupReceiver }}.fields) > 1 {
-			return nil, errors.New("{{ $pkg }}: {{ $groupBuilder }}.{{ $f }} is not achievable when grouping more than 1 field")
+			return nil, errors.New("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} is not achievable when grouping more than 1 field")
 		}
 		var v []{{ $t }}
 		if err := {{ $groupReceiver }}.Scan(ctx, &v); err != nil {
@@ -359,9 +415,36 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 		return v, nil
 	}
 
-	// {{ $f }}X is like {{ $f }}, but panics if an error occurs.
-	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $f }}X(ctx context.Context) []{{ $t }} {
-		v, err := {{ $groupReceiver }}.{{ $f }}(ctx)
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := {{ $groupReceiver }}.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from group-by. It is only allowed when querying group-by with one field.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = {{ $groupReceiver }}.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{ {{ $.Package }}.Label}
+		default:
+			err = fmt.Errorf("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := {{ $groupReceiver }}.{{ $singular }}(ctx)
 		if err != nil {
 			panic(err)
 		}
@@ -382,13 +465,19 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 type {{ $selectBuilder }} struct {
 	config
 	fields []string
-	// intermediate queries.
-	{{ $.Storage }} {{ $.Storage.Builder}}
+	// intermediate query (i.e. traversal path).
+	{{ $.Storage }} {{ $.Storage.Builder }}
+	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 
 // Scan applies the selector query and scan the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
+	query, err := {{ $selectReceiver }}.path(ctx)
+	if err != nil {
+		return err
+	}
+	{{ $selectReceiver }}.{{ $.Storage }} = query
 	return {{ $selectReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
@@ -400,11 +489,11 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 }
 
 {{ range $_, $t := primitives }}
-	{{ $f := pascal $t | plural }}
-	// {{ $f }} returns list of {{ plural $t }} from selector. It is only allowed when selecting one field.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $f }}(ctx context.Context) ([]{{ $t }}, error) {
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from selector. It is only allowed when selecting one field.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
 		if len({{ $selectReceiver }}.fields) > 1 {
-			return nil, errors.New("{{ $pkg }}: {{ $selectBuilder }}.{{ $f }} is not achievable when selecting more than 1 field")
+			return nil, errors.New("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} is not achievable when selecting more than 1 field")
 		}
 		var v []{{ $t }}
 		if err := {{ $selectReceiver }}.Scan(ctx, &v); err != nil {
@@ -413,9 +502,36 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 		return v, nil
 	}
 
-	// {{ $f }}X is like {{ $f }}, but panics if an error occurs.
-	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $f }}X(ctx context.Context) []{{ $t }} {
-		v, err := {{ $selectReceiver }}.{{ $f }}(ctx)
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := {{ $selectReceiver }}.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from selector. It is only allowed when selecting one field.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = {{ $selectReceiver }}.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{ {{ $.Package }}.Label}
+		default:
+			err = fmt.Errorf("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := {{ $selectReceiver }}.{{ $singular }}(ctx)
 		if err != nil {
 			panic(err)
 		}

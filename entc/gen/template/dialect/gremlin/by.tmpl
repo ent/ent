@@ -4,7 +4,12 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
-{{ define "dialect/gremlin/order" -}}
+{{ define "dialect/gremlin/order/signature" -}}
+	// OrderFunc applies an ordering on the graph traversal.
+	type OrderFunc func(*dsl.Traversal)
+{{- end }}
+
+{{ define "dialect/gremlin/order/func" -}}
 	{{- $order := $.Scope.Order -}}
 	func(tr *dsl.Traversal) {
 		for _, f := range fields {
@@ -17,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/gremlin/group/signature" -}}
 	// It gets two labels as parameters. The first used in the `As` step for the predicate,
 	// and the second is an optional name for the next predicates (or for later usage).
-	type Aggregate func(string, string) (string, *dsl.Traversal)
+	type AggregateFunc func(string, string) (string, *dsl.Traversal)
 {{- end }}
 
 {{ define "dialect/gremlin/group/as" -}}

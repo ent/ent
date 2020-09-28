@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,17 +8,20 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/entcpkg/ent/predicate"
-	"github.com/facebookincubator/ent/examples/entcpkg/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/entcpkg/ent/predicate"
+	"github.com/facebook/ent/examples/entcpkg/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // UserDelete is the builder for deleting a User entity.
 type UserDelete struct {
 	config
+	hooks      []Hook
+	mutation   *UserMutation
 	predicates []predicate.User
 }
 
@@ -30,7 +33,31 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
-	return ud.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(ud.hooks) == 0 {
+		affected, err = ud.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*UserMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			ud.mutation = mutation
+			affected, err = ud.sqlExec(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(ud.hooks) - 1; i >= 0; i-- {
+			mut = ud.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, ud.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

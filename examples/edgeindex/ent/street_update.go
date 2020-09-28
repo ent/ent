@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,23 +8,22 @@ package ent
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/schema/field"
 )
 
 // StreetUpdate is the builder for updating Street entities.
 type StreetUpdate struct {
 	config
-	name        *string
-	city        map[int]struct{}
-	clearedCity bool
-	predicates  []predicate.Street
+	hooks      []Hook
+	mutation   *StreetMutation
+	predicates []predicate.Street
 }
 
 // Where adds a new predicate for the builder.
@@ -35,16 +34,13 @@ func (su *StreetUpdate) Where(ps ...predicate.Street) *StreetUpdate {
 
 // SetName sets the name field.
 func (su *StreetUpdate) SetName(s string) *StreetUpdate {
-	su.name = &s
+	su.mutation.SetName(s)
 	return su
 }
 
 // SetCityID sets the city edge to City by id.
 func (su *StreetUpdate) SetCityID(id int) *StreetUpdate {
-	if su.city == nil {
-		su.city = make(map[int]struct{})
-	}
-	su.city[id] = struct{}{}
+	su.mutation.SetCityID(id)
 	return su
 }
 
@@ -61,18 +57,44 @@ func (su *StreetUpdate) SetCity(c *City) *StreetUpdate {
 	return su.SetCityID(c.ID)
 }
 
-// ClearCity clears the city edge to City.
+// Mutation returns the StreetMutation object of the builder.
+func (su *StreetUpdate) Mutation() *StreetMutation {
+	return su.mutation
+}
+
+// ClearCity clears the "city" edge to type City.
 func (su *StreetUpdate) ClearCity() *StreetUpdate {
-	su.clearedCity = true
+	su.mutation.ClearCity()
 	return su
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *StreetUpdate) Save(ctx context.Context) (int, error) {
-	if len(su.city) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"city\"")
+	var (
+		err      error
+		affected int
+	)
+	if len(su.hooks) == 0 {
+		affected, err = su.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*StreetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			su.mutation = mutation
+			affected, err = su.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(su.hooks) - 1; i >= 0; i-- {
+			mut = su.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
+			return 0, err
+		}
 	}
-	return su.sqlSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -115,14 +137,14 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := su.name; value != nil {
+	if value, ok := su.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: street.FieldName,
 		})
 	}
-	if su.clearedCity {
+	if su.mutation.CityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -138,7 +160,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.city; len(nodes) > 0 {
+	if nodes := su.mutation.CityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -152,7 +174,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -171,24 +193,19 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // StreetUpdateOne is the builder for updating a single Street entity.
 type StreetUpdateOne struct {
 	config
-	id          int
-	name        *string
-	city        map[int]struct{}
-	clearedCity bool
+	hooks    []Hook
+	mutation *StreetMutation
 }
 
 // SetName sets the name field.
 func (suo *StreetUpdateOne) SetName(s string) *StreetUpdateOne {
-	suo.name = &s
+	suo.mutation.SetName(s)
 	return suo
 }
 
 // SetCityID sets the city edge to City by id.
 func (suo *StreetUpdateOne) SetCityID(id int) *StreetUpdateOne {
-	if suo.city == nil {
-		suo.city = make(map[int]struct{})
-	}
-	suo.city[id] = struct{}{}
+	suo.mutation.SetCityID(id)
 	return suo
 }
 
@@ -205,27 +222,53 @@ func (suo *StreetUpdateOne) SetCity(c *City) *StreetUpdateOne {
 	return suo.SetCityID(c.ID)
 }
 
-// ClearCity clears the city edge to City.
+// Mutation returns the StreetMutation object of the builder.
+func (suo *StreetUpdateOne) Mutation() *StreetMutation {
+	return suo.mutation
+}
+
+// ClearCity clears the "city" edge to type City.
 func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
-	suo.clearedCity = true
+	suo.mutation.ClearCity()
 	return suo
 }
 
 // Save executes the query and returns the updated entity.
 func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
-	if len(suo.city) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"city\"")
+	var (
+		err  error
+		node *Street
+	)
+	if len(suo.hooks) == 0 {
+		node, err = suo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*StreetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			suo.mutation = mutation
+			node, err = suo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(suo.hooks) - 1; i >= 0; i-- {
+			mut = suo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, suo.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return suo.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (suo *StreetUpdateOne) SaveX(ctx context.Context) *Street {
-	s, err := suo.Save(ctx)
+	node, err := suo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -241,26 +284,30 @@ func (suo *StreetUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) {
+func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   street.Table,
 			Columns: street.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  suo.id,
 				Type:   field.TypeInt,
 				Column: street.FieldID,
 			},
 		},
 	}
-	if value := suo.name; value != nil {
+	id, ok := suo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Street.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := suo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: street.FieldName,
 		})
 	}
-	if suo.clearedCity {
+	if suo.mutation.CityCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -276,7 +323,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.city; len(nodes) > 0 {
+	if nodes := suo.mutation.CityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -290,14 +337,14 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	s = &Street{config: suo.config}
-	_spec.Assign = s.assignValues
-	_spec.ScanValues = s.scanValues()
+	_node = &Street{config: suo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{street.Label}
@@ -306,5 +353,5 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		}
 		return nil, err
 	}
-	return s, nil
+	return _node, nil
 }

@@ -5,14 +5,22 @@
 package schema
 
 import (
-	"errors"
 	"regexp"
 	"strings"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
 )
+
+// CheckError is returned by the validators.
+type CheckError struct {
+	msg string
+}
+
+func (c CheckError) Error() string {
+	return c.msg
+}
 
 // Group holds the schema for the group entity.
 type Group struct {
@@ -39,7 +47,7 @@ func (Group) Fields() []ent.Field {
 			Match(regexp.MustCompile("[a-zA-Z_]+$")).
 			Validate(func(s string) error {
 				if strings.ToLower(s) == s {
-					return errors.New("last name must begin with uppercase")
+					return CheckError{msg: "last name must begin with uppercase"}
 				}
 				return nil
 			}),

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,39 +10,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
-	active         *bool
-	expire         *time.Time
-	_type          *string
-	clear_type     bool
-	max_users      *int
-	addmax_users   *int
-	clearmax_users bool
-	name           *string
-	files          map[string]struct{}
-	blocked        map[string]struct{}
-	users          map[string]struct{}
-	info           map[string]struct{}
-	removedFiles   map[string]struct{}
-	removedBlocked map[string]struct{}
-	removedUsers   map[string]struct{}
-	clearedInfo    bool
-	predicates     []predicate.Group
+	hooks      []Hook
+	mutation   *GroupMutation
+	predicates []predicate.Group
 }
 
 // Where adds a new predicate for the builder.
@@ -53,7 +38,7 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 
 // SetActive sets the active field.
 func (gu *GroupUpdate) SetActive(b bool) *GroupUpdate {
-	gu.active = &b
+	gu.mutation.SetActive(b)
 	return gu
 }
 
@@ -67,13 +52,13 @@ func (gu *GroupUpdate) SetNillableActive(b *bool) *GroupUpdate {
 
 // SetExpire sets the expire field.
 func (gu *GroupUpdate) SetExpire(t time.Time) *GroupUpdate {
-	gu.expire = &t
+	gu.mutation.SetExpire(t)
 	return gu
 }
 
 // SetType sets the type field.
 func (gu *GroupUpdate) SetType(s string) *GroupUpdate {
-	gu._type = &s
+	gu.mutation.SetType(s)
 	return gu
 }
 
@@ -87,15 +72,14 @@ func (gu *GroupUpdate) SetNillableType(s *string) *GroupUpdate {
 
 // ClearType clears the value of type.
 func (gu *GroupUpdate) ClearType() *GroupUpdate {
-	gu._type = nil
-	gu.clear_type = true
+	gu.mutation.ClearType()
 	return gu
 }
 
 // SetMaxUsers sets the max_users field.
 func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
-	gu.max_users = &i
-	gu.addmax_users = nil
+	gu.mutation.ResetMaxUsers()
+	gu.mutation.SetMaxUsers(i)
 	return gu
 }
 
@@ -109,41 +93,31 @@ func (gu *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
 
 // AddMaxUsers adds i to max_users.
 func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
-	if gu.addmax_users == nil {
-		gu.addmax_users = &i
-	} else {
-		*gu.addmax_users += i
-	}
+	gu.mutation.AddMaxUsers(i)
 	return gu
 }
 
 // ClearMaxUsers clears the value of max_users.
 func (gu *GroupUpdate) ClearMaxUsers() *GroupUpdate {
-	gu.max_users = nil
-	gu.clearmax_users = true
+	gu.mutation.ClearMaxUsers()
 	return gu
 }
 
 // SetName sets the name field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
-	gu.name = &s
+	gu.mutation.SetName(s)
 	return gu
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (gu *GroupUpdate) AddFileIDs(ids ...string) *GroupUpdate {
-	if gu.files == nil {
-		gu.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		gu.files[ids[i]] = struct{}{}
-	}
+func (gu *GroupUpdate) AddFileIDs(ids ...int) *GroupUpdate {
+	gu.mutation.AddFileIDs(ids...)
 	return gu
 }
 
 // AddFiles adds the files edges to File.
 func (gu *GroupUpdate) AddFiles(f ...*File) *GroupUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -151,19 +125,14 @@ func (gu *GroupUpdate) AddFiles(f ...*File) *GroupUpdate {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (gu *GroupUpdate) AddBlockedIDs(ids ...string) *GroupUpdate {
-	if gu.blocked == nil {
-		gu.blocked = make(map[string]struct{})
-	}
-	for i := range ids {
-		gu.blocked[ids[i]] = struct{}{}
-	}
+func (gu *GroupUpdate) AddBlockedIDs(ids ...int) *GroupUpdate {
+	gu.mutation.AddBlockedIDs(ids...)
 	return gu
 }
 
 // AddBlocked adds the blocked edges to User.
 func (gu *GroupUpdate) AddBlocked(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -171,19 +140,14 @@ func (gu *GroupUpdate) AddBlocked(u ...*User) *GroupUpdate {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (gu *GroupUpdate) AddUserIDs(ids ...string) *GroupUpdate {
-	if gu.users == nil {
-		gu.users = make(map[string]struct{})
-	}
-	for i := range ids {
-		gu.users[ids[i]] = struct{}{}
-	}
+func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
+	gu.mutation.AddUserIDs(ids...)
 	return gu
 }
 
 // AddUsers adds the users edges to User.
 func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -191,11 +155,8 @@ func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (gu *GroupUpdate) SetInfoID(id string) *GroupUpdate {
-	if gu.info == nil {
-		gu.info = make(map[string]struct{})
-	}
-	gu.info[id] = struct{}{}
+func (gu *GroupUpdate) SetInfoID(id int) *GroupUpdate {
+	gu.mutation.SetInfoID(id)
 	return gu
 }
 
@@ -204,96 +165,113 @@ func (gu *GroupUpdate) SetInfo(g *GroupInfo) *GroupUpdate {
 	return gu.SetInfoID(g.ID)
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gu *GroupUpdate) Mutation() *GroupMutation {
+	return gu.mutation
+}
+
+// ClearFiles clears all "files" edges to type File.
+func (gu *GroupUpdate) ClearFiles() *GroupUpdate {
+	gu.mutation.ClearFiles()
+	return gu
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
-func (gu *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
-	if gu.removedFiles == nil {
-		gu.removedFiles = make(map[string]struct{})
-	}
-	for i := range ids {
-		gu.removedFiles[ids[i]] = struct{}{}
-	}
+func (gu *GroupUpdate) RemoveFileIDs(ids ...int) *GroupUpdate {
+	gu.mutation.RemoveFileIDs(ids...)
 	return gu
 }
 
 // RemoveFiles removes files edges to File.
 func (gu *GroupUpdate) RemoveFiles(f ...*File) *GroupUpdate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
 	return gu.RemoveFileIDs(ids...)
 }
 
+// ClearBlocked clears all "blocked" edges to type User.
+func (gu *GroupUpdate) ClearBlocked() *GroupUpdate {
+	gu.mutation.ClearBlocked()
+	return gu
+}
+
 // RemoveBlockedIDs removes the blocked edge to User by ids.
-func (gu *GroupUpdate) RemoveBlockedIDs(ids ...string) *GroupUpdate {
-	if gu.removedBlocked == nil {
-		gu.removedBlocked = make(map[string]struct{})
-	}
-	for i := range ids {
-		gu.removedBlocked[ids[i]] = struct{}{}
-	}
+func (gu *GroupUpdate) RemoveBlockedIDs(ids ...int) *GroupUpdate {
+	gu.mutation.RemoveBlockedIDs(ids...)
 	return gu
 }
 
 // RemoveBlocked removes blocked edges to User.
 func (gu *GroupUpdate) RemoveBlocked(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
 	return gu.RemoveBlockedIDs(ids...)
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
+	gu.mutation.ClearUsers()
+	return gu
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
-func (gu *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
-	if gu.removedUsers == nil {
-		gu.removedUsers = make(map[string]struct{})
-	}
-	for i := range ids {
-		gu.removedUsers[ids[i]] = struct{}{}
-	}
+func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
+	gu.mutation.RemoveUserIDs(ids...)
 	return gu
 }
 
 // RemoveUsers removes users edges to User.
 func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
 	return gu.RemoveUserIDs(ids...)
 }
 
-// ClearInfo clears the info edge to GroupInfo.
+// ClearInfo clears the "info" edge to type GroupInfo.
 func (gu *GroupUpdate) ClearInfo() *GroupUpdate {
-	gu.clearedInfo = true
+	gu.mutation.ClearInfo()
 	return gu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	if gu._type != nil {
-		if err := group.TypeValidator(*gu._type); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"type\": %v", err)
+	var (
+		err      error
+		affected int
+	)
+	if len(gu.hooks) == 0 {
+		if err = gu.check(); err != nil {
+			return 0, err
+		}
+		affected, err = gu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gu.check(); err != nil {
+				return 0, err
+			}
+			gu.mutation = mutation
+			affected, err = gu.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(gu.hooks) - 1; i >= 0; i-- {
+			mut = gu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
+			return 0, err
 		}
 	}
-	if gu.max_users != nil {
-		if err := group.MaxUsersValidator(*gu.max_users); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"max_users\": %v", err)
-		}
-	}
-	if gu.name != nil {
-		if err := group.NameValidator(*gu.name); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
-		}
-	}
-	if len(gu.info) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"info\"")
-	}
-	if gu.clearedInfo && gu.info == nil {
-		return 0, errors.New("ent: clearing a unique edge \"info\"")
-	}
-	return gu.sqlSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -318,13 +296,36 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (gu *GroupUpdate) check() error {
+	if v, ok := gu.mutation.GetType(); ok {
+		if err := group.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := gu.mutation.MaxUsers(); ok {
+		if err := group.MaxUsersValidator(v); err != nil {
+			return &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
+		}
+	}
+	if v, ok := gu.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if _, ok := gu.mutation.InfoID(); gu.mutation.InfoCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"info\"")
+	}
+	return nil
+}
+
 func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
@@ -336,61 +337,61 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := gu.active; value != nil {
+	if value, ok := gu.mutation.Active(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldActive,
 		})
 	}
-	if value := gu.expire; value != nil {
+	if value, ok := gu.mutation.Expire(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldExpire,
 		})
 	}
-	if value := gu._type; value != nil {
+	if value, ok := gu.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldType,
 		})
 	}
-	if gu.clear_type {
+	if gu.mutation.TypeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: group.FieldType,
 		})
 	}
-	if value := gu.max_users; value != nil {
+	if value, ok := gu.mutation.MaxUsers(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if value := gu.addmax_users; value != nil {
+	if value, ok := gu.mutation.AddedMaxUsers(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if gu.clearmax_users {
+	if gu.mutation.MaxUsersCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if value := gu.name; value != nil {
+	if value, ok := gu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldName,
 		})
 	}
-	if nodes := gu.removedFiles; len(nodes) > 0 {
+	if gu.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -399,21 +400,14 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.files; len(nodes) > 0 {
+	if nodes := gu.mutation.RemovedFilesIDs(); len(nodes) > 0 && !gu.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -422,21 +416,36 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.FilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := gu.removedBlocked; len(nodes) > 0 {
+	if gu.mutation.BlockedCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -445,21 +454,14 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.blocked; len(nodes) > 0 {
+	if nodes := gu.mutation.RemovedBlockedIDs(); len(nodes) > 0 && !gu.mutation.BlockedCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -468,21 +470,36 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.BlockedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := gu.removedUsers; len(nodes) > 0 {
+	if gu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -491,21 +508,14 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.users; len(nodes) > 0 {
+	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !gu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -514,21 +524,36 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gu.clearedInfo {
+	if gu.mutation.InfoCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -537,14 +562,14 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.info; len(nodes) > 0 {
+	if nodes := gu.mutation.InfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -553,16 +578,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -581,28 +602,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
-	id             string
-	active         *bool
-	expire         *time.Time
-	_type          *string
-	clear_type     bool
-	max_users      *int
-	addmax_users   *int
-	clearmax_users bool
-	name           *string
-	files          map[string]struct{}
-	blocked        map[string]struct{}
-	users          map[string]struct{}
-	info           map[string]struct{}
-	removedFiles   map[string]struct{}
-	removedBlocked map[string]struct{}
-	removedUsers   map[string]struct{}
-	clearedInfo    bool
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // SetActive sets the active field.
 func (guo *GroupUpdateOne) SetActive(b bool) *GroupUpdateOne {
-	guo.active = &b
+	guo.mutation.SetActive(b)
 	return guo
 }
 
@@ -616,13 +622,13 @@ func (guo *GroupUpdateOne) SetNillableActive(b *bool) *GroupUpdateOne {
 
 // SetExpire sets the expire field.
 func (guo *GroupUpdateOne) SetExpire(t time.Time) *GroupUpdateOne {
-	guo.expire = &t
+	guo.mutation.SetExpire(t)
 	return guo
 }
 
 // SetType sets the type field.
 func (guo *GroupUpdateOne) SetType(s string) *GroupUpdateOne {
-	guo._type = &s
+	guo.mutation.SetType(s)
 	return guo
 }
 
@@ -636,15 +642,14 @@ func (guo *GroupUpdateOne) SetNillableType(s *string) *GroupUpdateOne {
 
 // ClearType clears the value of type.
 func (guo *GroupUpdateOne) ClearType() *GroupUpdateOne {
-	guo._type = nil
-	guo.clear_type = true
+	guo.mutation.ClearType()
 	return guo
 }
 
 // SetMaxUsers sets the max_users field.
 func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
-	guo.max_users = &i
-	guo.addmax_users = nil
+	guo.mutation.ResetMaxUsers()
+	guo.mutation.SetMaxUsers(i)
 	return guo
 }
 
@@ -658,41 +663,31 @@ func (guo *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
 
 // AddMaxUsers adds i to max_users.
 func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
-	if guo.addmax_users == nil {
-		guo.addmax_users = &i
-	} else {
-		*guo.addmax_users += i
-	}
+	guo.mutation.AddMaxUsers(i)
 	return guo
 }
 
 // ClearMaxUsers clears the value of max_users.
 func (guo *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
-	guo.max_users = nil
-	guo.clearmax_users = true
+	guo.mutation.ClearMaxUsers()
 	return guo
 }
 
 // SetName sets the name field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
-	guo.name = &s
+	guo.mutation.SetName(s)
 	return guo
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (guo *GroupUpdateOne) AddFileIDs(ids ...string) *GroupUpdateOne {
-	if guo.files == nil {
-		guo.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		guo.files[ids[i]] = struct{}{}
-	}
+func (guo *GroupUpdateOne) AddFileIDs(ids ...int) *GroupUpdateOne {
+	guo.mutation.AddFileIDs(ids...)
 	return guo
 }
 
 // AddFiles adds the files edges to File.
 func (guo *GroupUpdateOne) AddFiles(f ...*File) *GroupUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -700,19 +695,14 @@ func (guo *GroupUpdateOne) AddFiles(f ...*File) *GroupUpdateOne {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (guo *GroupUpdateOne) AddBlockedIDs(ids ...string) *GroupUpdateOne {
-	if guo.blocked == nil {
-		guo.blocked = make(map[string]struct{})
-	}
-	for i := range ids {
-		guo.blocked[ids[i]] = struct{}{}
-	}
+func (guo *GroupUpdateOne) AddBlockedIDs(ids ...int) *GroupUpdateOne {
+	guo.mutation.AddBlockedIDs(ids...)
 	return guo
 }
 
 // AddBlocked adds the blocked edges to User.
 func (guo *GroupUpdateOne) AddBlocked(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -720,19 +710,14 @@ func (guo *GroupUpdateOne) AddBlocked(u ...*User) *GroupUpdateOne {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (guo *GroupUpdateOne) AddUserIDs(ids ...string) *GroupUpdateOne {
-	if guo.users == nil {
-		guo.users = make(map[string]struct{})
-	}
-	for i := range ids {
-		guo.users[ids[i]] = struct{}{}
-	}
+func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
+	guo.mutation.AddUserIDs(ids...)
 	return guo
 }
 
 // AddUsers adds the users edges to User.
 func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -740,11 +725,8 @@ func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (guo *GroupUpdateOne) SetInfoID(id string) *GroupUpdateOne {
-	if guo.info == nil {
-		guo.info = make(map[string]struct{})
-	}
-	guo.info[id] = struct{}{}
+func (guo *GroupUpdateOne) SetInfoID(id int) *GroupUpdateOne {
+	guo.mutation.SetInfoID(id)
 	return guo
 }
 
@@ -753,105 +735,122 @@ func (guo *GroupUpdateOne) SetInfo(g *GroupInfo) *GroupUpdateOne {
 	return guo.SetInfoID(g.ID)
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (guo *GroupUpdateOne) Mutation() *GroupMutation {
+	return guo.mutation
+}
+
+// ClearFiles clears all "files" edges to type File.
+func (guo *GroupUpdateOne) ClearFiles() *GroupUpdateOne {
+	guo.mutation.ClearFiles()
+	return guo
+}
+
 // RemoveFileIDs removes the files edge to File by ids.
-func (guo *GroupUpdateOne) RemoveFileIDs(ids ...string) *GroupUpdateOne {
-	if guo.removedFiles == nil {
-		guo.removedFiles = make(map[string]struct{})
-	}
-	for i := range ids {
-		guo.removedFiles[ids[i]] = struct{}{}
-	}
+func (guo *GroupUpdateOne) RemoveFileIDs(ids ...int) *GroupUpdateOne {
+	guo.mutation.RemoveFileIDs(ids...)
 	return guo
 }
 
 // RemoveFiles removes files edges to File.
 func (guo *GroupUpdateOne) RemoveFiles(f ...*File) *GroupUpdateOne {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
 	return guo.RemoveFileIDs(ids...)
 }
 
+// ClearBlocked clears all "blocked" edges to type User.
+func (guo *GroupUpdateOne) ClearBlocked() *GroupUpdateOne {
+	guo.mutation.ClearBlocked()
+	return guo
+}
+
 // RemoveBlockedIDs removes the blocked edge to User by ids.
-func (guo *GroupUpdateOne) RemoveBlockedIDs(ids ...string) *GroupUpdateOne {
-	if guo.removedBlocked == nil {
-		guo.removedBlocked = make(map[string]struct{})
-	}
-	for i := range ids {
-		guo.removedBlocked[ids[i]] = struct{}{}
-	}
+func (guo *GroupUpdateOne) RemoveBlockedIDs(ids ...int) *GroupUpdateOne {
+	guo.mutation.RemoveBlockedIDs(ids...)
 	return guo
 }
 
 // RemoveBlocked removes blocked edges to User.
 func (guo *GroupUpdateOne) RemoveBlocked(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
 	return guo.RemoveBlockedIDs(ids...)
 }
 
+// ClearUsers clears all "users" edges to type User.
+func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
+	guo.mutation.ClearUsers()
+	return guo
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
-func (guo *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
-	if guo.removedUsers == nil {
-		guo.removedUsers = make(map[string]struct{})
-	}
-	for i := range ids {
-		guo.removedUsers[ids[i]] = struct{}{}
-	}
+func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
+	guo.mutation.RemoveUserIDs(ids...)
 	return guo
 }
 
 // RemoveUsers removes users edges to User.
 func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
 	return guo.RemoveUserIDs(ids...)
 }
 
-// ClearInfo clears the info edge to GroupInfo.
+// ClearInfo clears the "info" edge to type GroupInfo.
 func (guo *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
-	guo.clearedInfo = true
+	guo.mutation.ClearInfo()
 	return guo
 }
 
 // Save executes the query and returns the updated entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	if guo._type != nil {
-		if err := group.TypeValidator(*guo._type); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %v", err)
+	var (
+		err  error
+		node *Group
+	)
+	if len(guo.hooks) == 0 {
+		if err = guo.check(); err != nil {
+			return nil, err
+		}
+		node, err = guo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = guo.check(); err != nil {
+				return nil, err
+			}
+			guo.mutation = mutation
+			node, err = guo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(guo.hooks) - 1; i >= 0; i-- {
+			mut = guo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
+			return nil, err
 		}
 	}
-	if guo.max_users != nil {
-		if err := group.MaxUsersValidator(*guo.max_users); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"max_users\": %v", err)
-		}
-	}
-	if guo.name != nil {
-		if err := group.NameValidator(*guo.name); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
-		}
-	}
-	if len(guo.info) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"info\"")
-	}
-	if guo.clearedInfo && guo.info == nil {
-		return nil, errors.New("ent: clearing a unique edge \"info\"")
-	}
-	return guo.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	gr, err := guo.Save(ctx)
+	node, err := guo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -867,73 +866,100 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
+// check runs all checks and user-defined validators on the builder.
+func (guo *GroupUpdateOne) check() error {
+	if v, ok := guo.mutation.GetType(); ok {
+		if err := group.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := guo.mutation.MaxUsers(); ok {
+		if err := group.MaxUsersValidator(v); err != nil {
+			return &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
+		}
+	}
+	if v, ok := guo.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if _, ok := guo.mutation.InfoID(); guo.mutation.InfoCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"info\"")
+	}
+	return nil
+}
+
+func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  guo.id,
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		},
 	}
-	if value := guo.active; value != nil {
+	id, ok := guo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := guo.mutation.Active(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldActive,
 		})
 	}
-	if value := guo.expire; value != nil {
+	if value, ok := guo.mutation.Expire(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldExpire,
 		})
 	}
-	if value := guo._type; value != nil {
+	if value, ok := guo.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldType,
 		})
 	}
-	if guo.clear_type {
+	if guo.mutation.TypeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: group.FieldType,
 		})
 	}
-	if value := guo.max_users; value != nil {
+	if value, ok := guo.mutation.MaxUsers(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if value := guo.addmax_users; value != nil {
+	if value, ok := guo.mutation.AddedMaxUsers(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if guo.clearmax_users {
+	if guo.mutation.MaxUsersCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: group.FieldMaxUsers,
 		})
 	}
-	if value := guo.name; value != nil {
+	if value, ok := guo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldName,
 		})
 	}
-	if nodes := guo.removedFiles; len(nodes) > 0 {
+	if guo.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -942,21 +968,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.files; len(nodes) > 0 {
+	if nodes := guo.mutation.RemovedFilesIDs(); len(nodes) > 0 && !guo.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -965,21 +984,36 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.FilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.FilesTable,
+			Columns: []string{group.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := guo.removedBlocked; len(nodes) > 0 {
+	if guo.mutation.BlockedCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -988,21 +1022,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.blocked; len(nodes) > 0 {
+	if nodes := guo.mutation.RemovedBlockedIDs(); len(nodes) > 0 && !guo.mutation.BlockedCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1011,21 +1038,36 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.BlockedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.BlockedTable,
+			Columns: []string{group.BlockedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := guo.removedUsers; len(nodes) > 0 {
+	if guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1034,21 +1076,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.users; len(nodes) > 0 {
+	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1057,21 +1092,36 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if guo.clearedInfo {
+	if guo.mutation.InfoCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1080,14 +1130,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.info; len(nodes) > 0 {
+	if nodes := guo.mutation.InfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1096,23 +1146,19 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	gr = &Group{config: guo.config}
-	_spec.Assign = gr.assignValues
-	_spec.ScanValues = gr.scanValues()
+	_node = &Group{config: guo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
@@ -1121,5 +1167,5 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		return nil, err
 	}
-	return gr, nil
+	return _node, nil
 }

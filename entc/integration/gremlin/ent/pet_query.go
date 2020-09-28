@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,15 +9,16 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // PetQuery is the builder for querying Pet entities.
@@ -25,14 +26,15 @@ type PetQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withTeam  *UserQuery
 	withOwner *UserQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -54,7 +56,7 @@ func (pq *PetQuery) Offset(offset int) *PetQuery {
 }
 
 // Order adds an order step to the query.
-func (pq *PetQuery) Order(o ...Order) *PetQuery {
+func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -62,38 +64,50 @@ func (pq *PetQuery) Order(o ...Order) *PetQuery {
 // QueryTeam chains the current query on the team edge.
 func (pq *PetQuery) QueryTeam() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	gremlin := pq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.TeamLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := pq.gremlinQuery()
+		fromU = gremlin.InE(user.TeamLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryOwner chains the current query on the owner edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
-	gremlin := pq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.PetsLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := pq.gremlinQuery()
+		fromU = gremlin.InE(user.PetsLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first Pet entity in the query. Returns *NotFoundError when no pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
-	pes, err := pq.Limit(1).All(ctx)
+	nodes, err := pq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(pes) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{pet.Label}
 	}
-	return pes[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
-	pe, err := pq.First(ctx)
+	node, err := pq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return pe
+	return node
 }
 
 // FirstID returns the first Pet id in the query. Returns *NotFoundError when no id was found.
@@ -120,13 +134,13 @@ func (pq *PetQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Pet entity in the query, returns an error if not exactly one entity was returned.
 func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
-	pes, err := pq.Limit(2).All(ctx)
+	nodes, err := pq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(pes) {
+	switch len(nodes) {
 	case 1:
-		return pes[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{pet.Label}
 	default:
@@ -136,11 +150,11 @@ func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
-	pe, err := pq.Only(ctx)
+	node, err := pq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return node
 }
 
 // OnlyID returns the only Pet id in the query, returns an error if not exactly one id was returned.
@@ -160,8 +174,8 @@ func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (pq *PetQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (pq *PetQuery) OnlyIDX(ctx context.Context) string {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -171,16 +185,19 @@ func (pq *PetQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Pets.
 func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+	if err := pq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return pq.gremlinAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
-	pes, err := pq.All(ctx)
+	nodes, err := pq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pes
+	return nodes
 }
 
 // IDs executes the query and returns a list of Pet ids.
@@ -203,6 +220,9 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (pq *PetQuery) Count(ctx context.Context) (int, error) {
+	if err := pq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return pq.gremlinCount(ctx)
 }
 
@@ -217,6 +237,9 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
+	if err := pq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return pq.gremlinExist(ctx)
 }
 
@@ -236,11 +259,12 @@ func (pq *PetQuery) Clone() *PetQuery {
 		config:     pq.config,
 		limit:      pq.limit,
 		offset:     pq.offset,
-		order:      append([]Order{}, pq.order...),
+		order:      append([]OrderFunc{}, pq.order...),
 		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		// clone intermediate query.
 		gremlin: pq.gremlin.Clone(),
+		path:    pq.path,
 	}
 }
 
@@ -284,7 +308,12 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	group := &PetGroupBy{config: pq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = pq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return pq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -303,8 +332,24 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	selector := &PetSelect{config: pq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = pq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return pq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (pq *PetQuery) prepareQuery(ctx context.Context) error {
+	if pq.path != nil {
+		prev, err := pq.path(ctx)
+		if err != nil {
+			return err
+		}
+		pq.gremlin = prev
+	}
+	return nil
 }
 
 func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
@@ -371,19 +416,25 @@ func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
 type PetGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *PetGroupBy) Aggregate(fns ...Aggregate) *PetGroupBy {
+func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 	pgb.fns = append(pgb.fns, fns...)
 	return pgb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := pgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	pgb.gremlin = query
 	return pgb.gremlinScan(ctx, v)
 }
 
@@ -415,6 +466,32 @@ func (pgb *PetGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (pgb *PetGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = pgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (pgb *PetGroupBy) StringX(ctx context.Context) string {
+	v, err := pgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (pgb *PetGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(pgb.fields) > 1 {
@@ -430,6 +507,32 @@ func (pgb *PetGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (pgb *PetGroupBy) IntsX(ctx context.Context) []int {
 	v, err := pgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (pgb *PetGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = pgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (pgb *PetGroupBy) IntX(ctx context.Context) int {
+	v, err := pgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -457,6 +560,32 @@ func (pgb *PetGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (pgb *PetGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = pgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (pgb *PetGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := pgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (pgb *PetGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(pgb.fields) > 1 {
@@ -472,6 +601,32 @@ func (pgb *PetGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (pgb *PetGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := pgb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (pgb *PetGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = pgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (pgb *PetGroupBy) BoolX(ctx context.Context) bool {
+	v, err := pgb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -519,12 +674,18 @@ func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 type PetSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ps.path(ctx)
+	if err != nil {
+		return err
+	}
+	ps.gremlin = query
 	return ps.gremlinScan(ctx, v)
 }
 
@@ -556,6 +717,32 @@ func (ps *PetSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ps.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ps *PetSelect) StringX(ctx context.Context) string {
+	v, err := ps.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ps.fields) > 1 {
@@ -571,6 +758,32 @@ func (ps *PetSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ps *PetSelect) IntsX(ctx context.Context) []int {
 	v, err := ps.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ps.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ps *PetSelect) IntX(ctx context.Context) int {
+	v, err := ps.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -598,6 +811,32 @@ func (ps *PetSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ps.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ps *PetSelect) Float64X(ctx context.Context) float64 {
+	v, err := ps.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ps.fields) > 1 {
@@ -613,6 +852,32 @@ func (ps *PetSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ps *PetSelect) BoolsX(ctx context.Context) []bool {
 	v, err := ps.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (ps *PetSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ps.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{pet.Label}
+	default:
+		err = fmt.Errorf("ent: PetSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ps *PetSelect) BoolX(ctx context.Context) bool {
+	v, err := ps.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

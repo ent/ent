@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,17 +12,16 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -30,7 +29,7 @@ type UserQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
@@ -46,8 +45,9 @@ type UserQuery struct {
 	withChildren  *UserQuery
 	withParent    *UserQuery
 	withFKs       bool
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -69,7 +69,7 @@ func (uq *UserQuery) Offset(offset int) *UserQuery {
 }
 
 // Order adds an order step to the query.
-func (uq *UserQuery) Order(o ...Order) *UserQuery {
+func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
@@ -77,159 +77,269 @@ func (uq *UserQuery) Order(o ...Order) *UserQuery {
 // QueryCard chains the current query on the card edge.
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryPets chains the current query on the pets edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(pet.Table, pet.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFiles chains the current query on the files edge.
 func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(file.Table, file.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryGroups chains the current query on the groups edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(group.Table, group.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFriends chains the current query on the friends edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFollowers chains the current query on the followers edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryFollowing chains the current query on the following edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryTeam chains the current query on the team edge.
 func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(pet.Table, pet.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, user.TeamTable, user.TeamColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.TeamTable, user.TeamColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QuerySpouse chains the current query on the spouse edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryChildren chains the current query on the children edge.
 func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, user.ChildrenTable, user.ChildrenColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ChildrenTable, user.ChildrenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryParent chains the current query on the parent edge.
 func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(user.Table, user.FieldID, uq.sqlQuery()),
-		sqlgraph.To(user.Table, user.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first User entity in the query. Returns *NotFoundError when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	us, err := uq.Limit(1).All(ctx)
+	nodes, err := uq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(us) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{user.Label}
 	}
-	return us[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (uq *UserQuery) FirstX(ctx context.Context) *User {
-	u, err := uq.First(ctx)
+	node, err := uq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return u
+	return node
 }
 
 // FirstID returns the first User id in the query. Returns *NotFoundError when no id was found.
-func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -241,7 +351,7 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstXID(ctx context.Context) string {
+func (uq *UserQuery) FirstXID(ctx context.Context) int {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -251,13 +361,13 @@ func (uq *UserQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only User entity in the query, returns an error if not exactly one entity was returned.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	us, err := uq.Limit(2).All(ctx)
+	nodes, err := uq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(us) {
+	switch len(nodes) {
 	case 1:
-		return us[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{user.Label}
 	default:
@@ -267,16 +377,16 @@ func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (uq *UserQuery) OnlyX(ctx context.Context) *User {
-	u, err := uq.Only(ctx)
+	node, err := uq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return node
 }
 
 // OnlyID returns the only User id in the query, returns an error if not exactly one id was returned.
-func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = uq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -291,8 +401,8 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
 	id, err := uq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -302,21 +412,24 @@ func (uq *UserQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
+	if err := uq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return uq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (uq *UserQuery) AllX(ctx context.Context) []*User {
-	us, err := uq.All(ctx)
+	nodes, err := uq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return us
+	return nodes
 }
 
 // IDs executes the query and returns a list of User ids.
-func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (uq *UserQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -324,7 +437,7 @@ func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (uq *UserQuery) IDsX(ctx context.Context) []string {
+func (uq *UserQuery) IDsX(ctx context.Context) []int {
 	ids, err := uq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -334,6 +447,9 @@ func (uq *UserQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
+	if err := uq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return uq.sqlCount(ctx)
 }
 
@@ -348,6 +464,9 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
+	if err := uq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return uq.sqlExist(ctx)
 }
 
@@ -367,11 +486,12 @@ func (uq *UserQuery) Clone() *UserQuery {
 		config:     uq.config,
 		limit:      uq.limit,
 		offset:     uq.offset,
-		order:      append([]Order{}, uq.order...),
+		order:      append([]OrderFunc{}, uq.order...),
 		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate query.
-		sql: uq.sql.Clone(),
+		sql:  uq.sql.Clone(),
+		path: uq.path,
 	}
 }
 
@@ -514,7 +634,12 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	group := &UserGroupBy{config: uq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = uq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return uq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -533,8 +658,24 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
 	selector := &UserSelect{config: uq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = uq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return uq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (uq *UserQuery) prepareQuery(ctx context.Context) error {
+	if uq.path != nil {
+		prev, err := uq.path(ctx)
+		if err != nil {
+			return err
+		}
+		uq.sql = prev
+	}
+	return nil
 }
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
@@ -588,13 +729,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withCard; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -620,14 +757,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withPets; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Pets = []*Pet{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Pet(func(s *sql.Selector) {
@@ -652,14 +786,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Files = []*File{}
 		}
 		query.withFKs = true
 		query.Where(predicate.File(func(s *sql.Selector) {
@@ -684,14 +815,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Groups = []*Group{}
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -715,8 +847,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -747,14 +879,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFriends; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Friends = []*User{}
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -778,8 +911,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -810,14 +943,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFollowers; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Followers = []*User{}
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -841,8 +975,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -873,14 +1007,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFollowing; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*User, len(nodes))
+		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Following = []*User{}
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*User)
+			edgeids []int
+			edges   = make(map[int][]*User)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -904,8 +1039,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -936,13 +1071,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withTeam; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 		}
 		query.withFKs = true
@@ -967,8 +1098,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withSpouse; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*User)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
 		for i := range nodes {
 			if fk := nodes[i].user_spouse; fk != nil {
 				ids = append(ids, *fk)
@@ -993,14 +1124,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withChildren; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*User)
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Children = []*User{}
 		}
 		query.withFKs = true
 		query.Where(predicate.User(func(s *sql.Selector) {
@@ -1024,8 +1152,8 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withParent; query != nil {
-		ids := make([]string, 0, len(nodes))
-		nodeids := make(map[string][]*User)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
 		for i := range nodes {
 			if fk := nodes[i].user_parent; fk != nil {
 				ids = append(ids, *fk)
@@ -1070,7 +1198,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -1093,7 +1221,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := uq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, user.ValidColumn)
 			}
 		}
 	}
@@ -1112,7 +1240,7 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p(selector)
+		p(selector, user.ValidColumn)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -1129,19 +1257,25 @@ func (uq *UserQuery) sqlQuery() *sql.Selector {
 type UserGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ugb *UserGroupBy) Aggregate(fns ...Aggregate) *UserGroupBy {
+func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 	ugb.fns = append(ugb.fns, fns...)
 	return ugb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ugb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ugb.sql = query
 	return ugb.sqlScan(ctx, v)
 }
 
@@ -1173,6 +1307,32 @@ func (ugb *UserGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ugb *UserGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ugb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ugb *UserGroupBy) StringX(ctx context.Context) string {
+	v, err := ugb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ugb *UserGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ugb.fields) > 1 {
@@ -1188,6 +1348,32 @@ func (ugb *UserGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ugb *UserGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ugb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ugb *UserGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ugb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ugb *UserGroupBy) IntX(ctx context.Context) int {
+	v, err := ugb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1215,6 +1401,32 @@ func (ugb *UserGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ugb *UserGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ugb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ugb *UserGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ugb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ugb *UserGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ugb.fields) > 1 {
@@ -1236,9 +1448,44 @@ func (ugb *UserGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ugb *UserGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ugb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ugb *UserGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ugb.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ugb.fields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := ugb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ugb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ugb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -1251,7 +1498,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, user.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }
@@ -1260,12 +1507,18 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 type UserSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := us.path(ctx)
+	if err != nil {
+		return err
+	}
+	us.sql = query
 	return us.sqlScan(ctx, v)
 }
 
@@ -1297,6 +1550,32 @@ func (us *UserSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (us *UserSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = us.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (us *UserSelect) StringX(ctx context.Context) string {
+	v, err := us.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (us *UserSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(us.fields) > 1 {
@@ -1312,6 +1591,32 @@ func (us *UserSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (us *UserSelect) IntsX(ctx context.Context) []int {
 	v, err := us.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = us.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (us *UserSelect) IntX(ctx context.Context) int {
+	v, err := us.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1339,6 +1644,32 @@ func (us *UserSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = us.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (us *UserSelect) Float64X(ctx context.Context) float64 {
+	v, err := us.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (us *UserSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(us.fields) > 1 {
@@ -1360,7 +1691,38 @@ func (us *UserSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (us *UserSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = us.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{user.Label}
+	default:
+		err = fmt.Errorf("ent: UserSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (us *UserSelect) BoolX(ctx context.Context) bool {
+	v, err := us.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range us.fields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := us.sqlQuery().Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {

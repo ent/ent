@@ -8,41 +8,60 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"text/template"
 	"text/template/parse"
 
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"golang.org/x/tools/imports"
 )
 
 type (
-	// Config for global generator configuration that similar for all nodes.
+	// Config for global codegen to be shared between all nodes.
 	Config struct {
-		// Schema is the package path for the schema directory.
+		// Schema is the package path for the schema package.
 		Schema string
-		// Target is the path for the directory that holding the generated code.
+		// Target is the filepath for the directory that holds the generated code.
 		Target string
-		// Package name for the targeted directory that holds the generated code.
+		// Package path for the targeted directory that holds the generated code.
 		Package string
 		// Header is an optional header signature for generated files.
 		Header string
 		// Storage to support in codegen.
 		Storage *Storage
+
 		// IDType specifies the type of the id field in the codegen.
 		// The supported types are string and int, which also the default.
 		IDType *field.TypeInfo
-		// Template specifies an alternative template to execute or to override
-		// the default. If nil, the default template is used.
+
+		// Template specifies an alternative template to execute or
+		// to override the default. If nil, the default template is used.
+		//
+		// Deprecated: the Template option predates the Templates option and it
+		// is planned be removed in v0.5.0. New code should use Templates instead.
+		Template *template.Template
+
+		// Templates specifies a list of alternative templates to execute or
+		// to override the default. If nil, the default template is used.
 		//
 		// Note that, additional templates are executed on the Graph object and
 		// the execution output is stored in a file derived by the template name.
-		Template *template.Template
+		Templates []*template.Template
+
+		// Funcs specifies external functions to add to the template execution.
+		//
+		// Templates that use custom functions and override (or extend) the default
+		// templates will need to provide the same FuncMap that was used for parsing
+		// the template.
+		Funcs template.FuncMap
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -60,20 +79,20 @@ type (
 func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
 	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
-	for _, schema := range schemas {
-		g.addNode(schema)
+	for i := range schemas {
+		g.addNode(schemas[i])
 	}
-	for _, schema := range schemas {
-		g.addEdges(schema)
+	for i := range schemas {
+		g.addEdges(schemas[i])
 	}
 	for _, t := range g.Nodes {
 		check(resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
-		t.resolveFKs()
+		check(t.resolveFKs(), "set %q foreign-keys", t.Name)
 	}
-	for _, schema := range schemas {
-		g.addIndexes(schema)
+	for i := range schemas {
+		g.addIndexes(schemas[i])
 	}
 	return
 }
@@ -82,9 +101,10 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 func (g *Graph) Gen() (err error) {
 	defer catch(&err)
 	var (
-		written             []string
-		templates, external = g.templates()
+		written  []string
+		external []GraphTemplate
 	)
+	templates, external = g.templates()
 	for _, n := range g.Nodes {
 		path := filepath.Join(g.Config.Target, n.Package())
 		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
@@ -141,24 +161,28 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		// Assoc only.
 		case !e.Inverse:
 			t.Edges = append(t.Edges, &Edge{
-				Type:      typ,
-				Name:      e.Name,
-				Owner:     t,
-				Unique:    e.Unique,
-				Optional:  !e.Required,
-				StructTag: e.Tag,
+				def:         e,
+				Type:        typ,
+				Name:        e.Name,
+				Owner:       t,
+				Unique:      e.Unique,
+				Optional:    !e.Required,
+				StructTag:   e.Tag,
+				Annotations: e.Annotations,
 			})
 		// Inverse only.
 		case e.Inverse && e.Ref == nil:
 			expect(e.RefName != "", "missing reference name for inverse edge: %s.%s", t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
-				Type:      typ,
-				Name:      e.Name,
-				Owner:     typ,
-				Inverse:   e.RefName,
-				Unique:    e.Unique,
-				Optional:  !e.Required,
-				StructTag: e.Tag,
+				def:         e,
+				Type:        typ,
+				Name:        e.Name,
+				Owner:       typ,
+				Inverse:     e.RefName,
+				Unique:      e.Unique,
+				Optional:    !e.Required,
+				StructTag:   e.Tag,
+				Annotations: e.Annotations,
 			})
 		// Inverse and assoc.
 		case e.Inverse:
@@ -166,20 +190,24 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			expect(e.RefName == "", "reference name is derived from the assoc name: %s.%s <-> %s.%s", t.Name, ref.Name, t.Name, e.Name)
 			expect(ref.Type == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
 			t.Edges = append(t.Edges, &Edge{
-				Type:      typ,
-				Name:      e.Name,
-				Owner:     t,
-				Inverse:   ref.Name,
-				Unique:    e.Unique,
-				Optional:  !e.Required,
-				StructTag: e.Tag,
+				def:         e,
+				Type:        typ,
+				Name:        e.Name,
+				Owner:       t,
+				Inverse:     ref.Name,
+				Unique:      e.Unique,
+				Optional:    !e.Required,
+				StructTag:   e.Tag,
+				Annotations: e.Annotations,
 			}, &Edge{
-				Type:      typ,
-				Owner:     t,
-				Name:      ref.Name,
-				Unique:    ref.Unique,
-				Optional:  !ref.Required,
-				StructTag: ref.Tag,
+				def:         e,
+				Type:        typ,
+				Owner:       t,
+				Name:        ref.Name,
+				Unique:      ref.Unique,
+				Optional:    !ref.Required,
+				StructTag:   ref.Tag,
+				Annotations: ref.Annotations,
 			})
 		default:
 			panic(graphError{"edge must be either an assoc or inverse edge"})
@@ -215,7 +243,7 @@ func resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf("edge is missing for inverse edge: %s.%s", e.Type.Name, e.Name)
+				return fmt.Errorf("edge %q is missing for inverse edge: %s.%s", e.Inverse, e.Type.Name, e.Name)
 			}
 			if !e.Optional && !ref.Optional {
 				return fmt.Errorf("edges cannot be required in both directions: %s.%s <-> %s.%s", t.Name, e.Name, e.Type.Name, ref.Name)
@@ -306,7 +334,8 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				// "owner" is the table that owns the relations (we set the foreign-key on)
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
-				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Unique: e.Rel.Type == O2O, Nullable: true}
+				pk := ref.PrimaryKey[0]
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
 				owner.AddColumn(column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -317,7 +346,8 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
-				column := &schema.Column{Name: e.Rel.Column(), Type: field.TypeInt, Nullable: true}
+				pk := ref.PrimaryKey[0]
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Nullable: true}
 				owner.AddColumn(column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -331,10 +361,12 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
+					c1.Size = ref.size()
 				}
 				c2 := &schema.Column{Name: e.Rel.Columns[1], Type: field.TypeInt}
 				if ref := e.Type.ID; ref.UserDefined {
 					c2.Type = ref.Type.Type
+					c2.Size = ref.size()
 				}
 				all = append(all, &schema.Table{
 					Name:       e.Rel.Table,
@@ -387,24 +419,68 @@ func (g *Graph) typ(name string) (*Type, bool) {
 // templates returns the template.Template for the code and external templates
 // to execute on the Graph object if provided.
 func (g *Graph) templates() (*template.Template, []GraphTemplate) {
-	templates = template.Must(templates.Clone())
-	if g.Template == nil {
-		return templates, nil
+	if g.Template != nil {
+		g.Templates = append(g.Templates, g.Template)
 	}
-	external := make([]GraphTemplate, 0)
-	for _, tmpl := range g.Template.Templates() {
-		name := tmpl.Name()
-		// Check that is not defined in the default templates
-		// if it's not the root.
-		if templates.Lookup(name) == nil && !parse.IsEmptyTree(tmpl.Root) {
-			external = append(external, GraphTemplate{
-				Name:   name,
-				Format: snake(name) + ".go",
-			})
+	templates.Funcs(g.Funcs)
+	external := make([]GraphTemplate, 0, len(g.Templates))
+	for _, rootT := range g.Templates {
+		rootT.Funcs(Funcs)
+		rootT.Funcs(g.Funcs)
+		for _, tmpl := range rootT.Templates() {
+			if parse.IsEmptyTree(tmpl.Root) {
+				continue
+			}
+			name := tmpl.Name()
+			// If this template doesn't override or extend one of the
+			// default templates, generate it in a new file.
+			if templates.Lookup(name) == nil && !extendExisting(name) {
+				external = append(external, GraphTemplate{
+					Name:   name,
+					Format: snake(name) + ".go",
+				})
+			}
+			templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 		}
-		templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
 	}
 	return templates, external
+}
+
+// ModuleInfo returns the entc binary module version.
+func (Config) ModuleInfo() (m debug.Module) {
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		m = info.Main
+	}
+	return
+}
+
+// PrepareEnv makes sure the generated directory (environment)
+// is suitable for loading the `ent` package (avoid cyclic imports).
+func PrepareEnv(c *Config) (undo func() error, err error) {
+	var (
+		nop  = func() error { return nil }
+		path = filepath.Join(c.Target, "runtime.go")
+	)
+	out, err := ioutil.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nop, nil
+		}
+		return nil, err
+	}
+	fi, err := parser.ParseFile(token.NewFileSet(), path, out, parser.ImportsOnly)
+	if err != nil {
+		return nil, err
+	}
+	// Targeted package doesn't import the schema.
+	if len(fi.Imports) == 0 {
+		return nop, nil
+	}
+	if err := ioutil.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+		return nil, err
+	}
+	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
 }
 
 // formatFiles runs "goimports" on given paths.
@@ -454,4 +530,13 @@ func catch(err *error) {
 		}
 		*err = gerr
 	}
+}
+
+func extendExisting(name string) bool {
+	for _, t := range Templates {
+		if t.Match(name) {
+			return true
+		}
+	}
+	return false
 }

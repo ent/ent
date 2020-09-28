@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,20 +8,19 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/user"
 )
 
 // Card is the model entity for the Card schema.
 type Card struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
@@ -33,7 +32,7 @@ type Card struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
 	Edges     CardEdges `json:"edges"`
-	user_card *string
+	user_card *int
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`
@@ -101,7 +100,7 @@ func (c *Card) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	c.ID = strconv.FormatInt(value.Int64, 10)
+	c.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field create_time", values[0])
@@ -128,8 +127,8 @@ func (c *Card) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_card", value)
 		} else if value.Valid {
-			c.user_card = new(string)
-			*c.user_card = strconv.FormatInt(value.Int64, 10)
+			c.user_card = new(int)
+			*c.user_card = int(value.Int64)
 		}
 	}
 	return nil
@@ -178,12 +177,6 @@ func (c *Card) String() string {
 	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (c *Card) id() int {
-	id, _ := strconv.Atoi(c.ID)
-	return id
 }
 
 // Cards is a parsable slice of Card.

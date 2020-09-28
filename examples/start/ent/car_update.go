@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,25 +8,23 @@ package ent
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/start/ent/car"
-	"github.com/facebookincubator/ent/examples/start/ent/predicate"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/start/ent/car"
+	"github.com/facebook/ent/examples/start/ent/predicate"
+	"github.com/facebook/ent/examples/start/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	config
-	model         *string
-	registered_at *time.Time
-	owner         map[int]struct{}
-	clearedOwner  bool
-	predicates    []predicate.Car
+	hooks      []Hook
+	mutation   *CarMutation
+	predicates []predicate.Car
 }
 
 // Where adds a new predicate for the builder.
@@ -37,22 +35,19 @@ func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 
 // SetModel sets the model field.
 func (cu *CarUpdate) SetModel(s string) *CarUpdate {
-	cu.model = &s
+	cu.mutation.SetModel(s)
 	return cu
 }
 
 // SetRegisteredAt sets the registered_at field.
 func (cu *CarUpdate) SetRegisteredAt(t time.Time) *CarUpdate {
-	cu.registered_at = &t
+	cu.mutation.SetRegisteredAt(t)
 	return cu
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (cu *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	if cu.owner == nil {
-		cu.owner = make(map[int]struct{})
-	}
-	cu.owner[id] = struct{}{}
+	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
@@ -69,18 +64,44 @@ func (cu *CarUpdate) SetOwner(u *User) *CarUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
-// ClearOwner clears the owner edge to User.
+// Mutation returns the CarMutation object of the builder.
+func (cu *CarUpdate) Mutation() *CarMutation {
+	return cu.mutation
+}
+
+// ClearOwner clears the "owner" edge to type User.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
-	cu.clearedOwner = true
+	cu.mutation.ClearOwner()
 	return cu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	if len(cu.owner) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	var (
+		err      error
+		affected int
+	)
+	if len(cu.hooks) == 0 {
+		affected, err = cu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CarMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cu.mutation = mutation
+			affected, err = cu.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			mut = cu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
+			return 0, err
+		}
 	}
-	return cu.sqlSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -123,21 +144,21 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := cu.model; value != nil {
+	if value, ok := cu.mutation.Model(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: car.FieldModel,
 		})
 	}
-	if value := cu.registered_at; value != nil {
+	if value, ok := cu.mutation.RegisteredAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: car.FieldRegisteredAt,
 		})
 	}
-	if cu.clearedOwner {
+	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -153,7 +174,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.owner; len(nodes) > 0 {
+	if nodes := cu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -167,7 +188,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -186,31 +207,25 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CarUpdateOne is the builder for updating a single Car entity.
 type CarUpdateOne struct {
 	config
-	id            int
-	model         *string
-	registered_at *time.Time
-	owner         map[int]struct{}
-	clearedOwner  bool
+	hooks    []Hook
+	mutation *CarMutation
 }
 
 // SetModel sets the model field.
 func (cuo *CarUpdateOne) SetModel(s string) *CarUpdateOne {
-	cuo.model = &s
+	cuo.mutation.SetModel(s)
 	return cuo
 }
 
 // SetRegisteredAt sets the registered_at field.
 func (cuo *CarUpdateOne) SetRegisteredAt(t time.Time) *CarUpdateOne {
-	cuo.registered_at = &t
+	cuo.mutation.SetRegisteredAt(t)
 	return cuo
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (cuo *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	if cuo.owner == nil {
-		cuo.owner = make(map[int]struct{})
-	}
-	cuo.owner[id] = struct{}{}
+	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
@@ -227,27 +242,53 @@ func (cuo *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
 
-// ClearOwner clears the owner edge to User.
+// Mutation returns the CarMutation object of the builder.
+func (cuo *CarUpdateOne) Mutation() *CarMutation {
+	return cuo.mutation
+}
+
+// ClearOwner clears the "owner" edge to type User.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	cuo.clearedOwner = true
+	cuo.mutation.ClearOwner()
 	return cuo
 }
 
 // Save executes the query and returns the updated entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	if len(cuo.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	var (
+		err  error
+		node *Car
+	)
+	if len(cuo.hooks) == 0 {
+		node, err = cuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CarMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cuo.mutation = mutation
+			node, err = cuo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			mut = cuo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return cuo.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CarUpdateOne) SaveX(ctx context.Context) *Car {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -263,33 +304,37 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
+func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   car.Table,
 			Columns: car.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  cuo.id,
 				Type:   field.TypeInt,
 				Column: car.FieldID,
 			},
 		},
 	}
-	if value := cuo.model; value != nil {
+	id, ok := cuo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Car.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := cuo.mutation.Model(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: car.FieldModel,
 		})
 	}
-	if value := cuo.registered_at; value != nil {
+	if value, ok := cuo.mutation.RegisteredAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: car.FieldRegisteredAt,
 		})
 	}
-	if cuo.clearedOwner {
+	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -305,7 +350,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.owner; len(nodes) > 0 {
+	if nodes := cuo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -319,14 +364,14 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	c = &Car{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &Car{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
@@ -335,5 +380,5 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

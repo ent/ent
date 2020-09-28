@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,27 +8,21 @@ package ent
 
 import (
 	"context"
-	"errors"
-	"strconv"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/node"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // NodeUpdate is the builder for updating Node entities.
 type NodeUpdate struct {
 	config
-	value       *int
-	addvalue    *int
-	clearvalue  bool
-	prev        map[string]struct{}
-	next        map[string]struct{}
-	clearedPrev bool
-	clearedNext bool
-	predicates  []predicate.Node
+	hooks      []Hook
+	mutation   *NodeMutation
+	predicates []predicate.Node
 }
 
 // Where adds a new predicate for the builder.
@@ -39,8 +33,8 @@ func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 
 // SetValue sets the value field.
 func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
-	nu.value = &i
-	nu.addvalue = nil
+	nu.mutation.ResetValue()
+	nu.mutation.SetValue(i)
 	return nu
 }
 
@@ -54,32 +48,24 @@ func (nu *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
 
 // AddValue adds i to value.
 func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
-	if nu.addvalue == nil {
-		nu.addvalue = &i
-	} else {
-		*nu.addvalue += i
-	}
+	nu.mutation.AddValue(i)
 	return nu
 }
 
 // ClearValue clears the value of value.
 func (nu *NodeUpdate) ClearValue() *NodeUpdate {
-	nu.value = nil
-	nu.clearvalue = true
+	nu.mutation.ClearValue()
 	return nu
 }
 
 // SetPrevID sets the prev edge to Node by id.
-func (nu *NodeUpdate) SetPrevID(id string) *NodeUpdate {
-	if nu.prev == nil {
-		nu.prev = make(map[string]struct{})
-	}
-	nu.prev[id] = struct{}{}
+func (nu *NodeUpdate) SetPrevID(id int) *NodeUpdate {
+	nu.mutation.SetPrevID(id)
 	return nu
 }
 
 // SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
-func (nu *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
+func (nu *NodeUpdate) SetNillablePrevID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetPrevID(*id)
 	}
@@ -92,16 +78,13 @@ func (nu *NodeUpdate) SetPrev(n *Node) *NodeUpdate {
 }
 
 // SetNextID sets the next edge to Node by id.
-func (nu *NodeUpdate) SetNextID(id string) *NodeUpdate {
-	if nu.next == nil {
-		nu.next = make(map[string]struct{})
-	}
-	nu.next[id] = struct{}{}
+func (nu *NodeUpdate) SetNextID(id int) *NodeUpdate {
+	nu.mutation.SetNextID(id)
 	return nu
 }
 
 // SetNillableNextID sets the next edge to Node by id if the given value is not nil.
-func (nu *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
+func (nu *NodeUpdate) SetNillableNextID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetNextID(*id)
 	}
@@ -113,27 +96,50 @@ func (nu *NodeUpdate) SetNext(n *Node) *NodeUpdate {
 	return nu.SetNextID(n.ID)
 }
 
-// ClearPrev clears the prev edge to Node.
+// Mutation returns the NodeMutation object of the builder.
+func (nu *NodeUpdate) Mutation() *NodeMutation {
+	return nu.mutation
+}
+
+// ClearPrev clears the "prev" edge to type Node.
 func (nu *NodeUpdate) ClearPrev() *NodeUpdate {
-	nu.clearedPrev = true
+	nu.mutation.ClearPrev()
 	return nu
 }
 
-// ClearNext clears the next edge to Node.
+// ClearNext clears the "next" edge to type Node.
 func (nu *NodeUpdate) ClearNext() *NodeUpdate {
-	nu.clearedNext = true
+	nu.mutation.ClearNext()
 	return nu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-	if len(nu.prev) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"prev\"")
+	var (
+		err      error
+		affected int
+	)
+	if len(nu.hooks) == 0 {
+		affected, err = nu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nu.mutation = mutation
+			affected, err = nu.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(nu.hooks) - 1; i >= 0; i-- {
+			mut = nu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
+			return 0, err
+		}
 	}
-	if len(nu.next) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"next\"")
-	}
-	return nu.sqlSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -164,7 +170,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   node.Table,
 			Columns: node.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: node.FieldID,
 			},
 		},
@@ -176,27 +182,27 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := nu.value; value != nil {
+	if value, ok := nu.mutation.Value(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: node.FieldValue,
 		})
 	}
-	if value := nu.addvalue; value != nil {
+	if value, ok := nu.mutation.AddedValue(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: node.FieldValue,
 		})
 	}
-	if nu.clearvalue {
+	if nu.mutation.ValueCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: node.FieldValue,
 		})
 	}
-	if nu.clearedPrev {
+	if nu.mutation.PrevCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -205,14 +211,14 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nu.prev; len(nodes) > 0 {
+	if nodes := nu.mutation.PrevIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -221,21 +227,17 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nu.clearedNext {
+	if nu.mutation.NextCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -244,14 +246,14 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nu.next; len(nodes) > 0 {
+	if nodes := nu.mutation.NextIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -260,16 +262,12 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return 0, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -288,20 +286,14 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // NodeUpdateOne is the builder for updating a single Node entity.
 type NodeUpdateOne struct {
 	config
-	id          string
-	value       *int
-	addvalue    *int
-	clearvalue  bool
-	prev        map[string]struct{}
-	next        map[string]struct{}
-	clearedPrev bool
-	clearedNext bool
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
 // SetValue sets the value field.
 func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
-	nuo.value = &i
-	nuo.addvalue = nil
+	nuo.mutation.ResetValue()
+	nuo.mutation.SetValue(i)
 	return nuo
 }
 
@@ -315,32 +307,24 @@ func (nuo *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
 
 // AddValue adds i to value.
 func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
-	if nuo.addvalue == nil {
-		nuo.addvalue = &i
-	} else {
-		*nuo.addvalue += i
-	}
+	nuo.mutation.AddValue(i)
 	return nuo
 }
 
 // ClearValue clears the value of value.
 func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
-	nuo.value = nil
-	nuo.clearvalue = true
+	nuo.mutation.ClearValue()
 	return nuo
 }
 
 // SetPrevID sets the prev edge to Node by id.
-func (nuo *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
-	if nuo.prev == nil {
-		nuo.prev = make(map[string]struct{})
-	}
-	nuo.prev[id] = struct{}{}
+func (nuo *NodeUpdateOne) SetPrevID(id int) *NodeUpdateOne {
+	nuo.mutation.SetPrevID(id)
 	return nuo
 }
 
 // SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
+func (nuo *NodeUpdateOne) SetNillablePrevID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetPrevID(*id)
 	}
@@ -353,16 +337,13 @@ func (nuo *NodeUpdateOne) SetPrev(n *Node) *NodeUpdateOne {
 }
 
 // SetNextID sets the next edge to Node by id.
-func (nuo *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne {
-	if nuo.next == nil {
-		nuo.next = make(map[string]struct{})
-	}
-	nuo.next[id] = struct{}{}
+func (nuo *NodeUpdateOne) SetNextID(id int) *NodeUpdateOne {
+	nuo.mutation.SetNextID(id)
 	return nuo
 }
 
 // SetNillableNextID sets the next edge to Node by id if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
+func (nuo *NodeUpdateOne) SetNillableNextID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetNextID(*id)
 	}
@@ -374,36 +355,59 @@ func (nuo *NodeUpdateOne) SetNext(n *Node) *NodeUpdateOne {
 	return nuo.SetNextID(n.ID)
 }
 
-// ClearPrev clears the prev edge to Node.
+// Mutation returns the NodeMutation object of the builder.
+func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
+	return nuo.mutation
+}
+
+// ClearPrev clears the "prev" edge to type Node.
 func (nuo *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
-	nuo.clearedPrev = true
+	nuo.mutation.ClearPrev()
 	return nuo
 }
 
-// ClearNext clears the next edge to Node.
+// ClearNext clears the "next" edge to type Node.
 func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
-	nuo.clearedNext = true
+	nuo.mutation.ClearNext()
 	return nuo
 }
 
 // Save executes the query and returns the updated entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	if len(nuo.prev) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"prev\"")
+	var (
+		err  error
+		node *Node
+	)
+	if len(nuo.hooks) == 0 {
+		node, err = nuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*NodeMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			nuo.mutation = mutation
+			node, err = nuo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(nuo.hooks) - 1; i >= 0; i-- {
+			mut = nuo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, nuo.mutation); err != nil {
+			return nil, err
+		}
 	}
-	if len(nuo.next) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"next\"")
-	}
-	return nuo.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (nuo *NodeUpdateOne) SaveX(ctx context.Context) *Node {
-	n, err := nuo.Save(ctx)
+	node, err := nuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -419,39 +423,43 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
+func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   node.Table,
 			Columns: node.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  nuo.id,
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: node.FieldID,
 			},
 		},
 	}
-	if value := nuo.value; value != nil {
+	id, ok := nuo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Node.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := nuo.mutation.Value(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: node.FieldValue,
 		})
 	}
-	if value := nuo.addvalue; value != nil {
+	if value, ok := nuo.mutation.AddedValue(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: node.FieldValue,
 		})
 	}
-	if nuo.clearvalue {
+	if nuo.mutation.ValueCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: node.FieldValue,
 		})
 	}
-	if nuo.clearedPrev {
+	if nuo.mutation.PrevCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -460,14 +468,14 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nuo.prev; len(nodes) > 0 {
+	if nodes := nuo.mutation.PrevIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -476,21 +484,17 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nuo.clearedNext {
+	if nuo.mutation.NextCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -499,14 +503,14 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nuo.next; len(nodes) > 0 {
+	if nodes := nuo.mutation.NextIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -515,23 +519,19 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: node.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	n = &Node{config: nuo.config}
-	_spec.Assign = n.assignValues
-	_spec.ScanValues = n.scanValues()
+	_node = &Node{config: nuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{node.Label}
@@ -540,5 +540,5 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		}
 		return nil, err
 	}
-	return n, nil
+	return _node, nil
 }

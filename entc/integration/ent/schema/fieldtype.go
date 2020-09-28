@@ -5,8 +5,17 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"database/sql/driver"
+	"fmt"
+	"net"
+	"net/http"
+	"net/url"
+
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FieldType holds the schema definition for the FieldType entity.
@@ -44,5 +53,117 @@ func (FieldType) Fields() []ent.Field {
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
+		field.Float("optional_float").Optional(),
+		field.Float32("optional_float32").Optional(),
+		field.Time("datetime").
+			Optional().
+			SchemaType(map[string]string{
+				dialect.MySQL:    "datetime",
+				dialect.Postgres: "date",
+			}),
+		field.Float("decimal").
+			Optional().
+			SchemaType(map[string]string{
+				dialect.MySQL:    "decimal(6,2)",
+				dialect.Postgres: "numeric",
+			}),
+		field.String("dir").
+			Optional().
+			GoType(http.Dir("dir")),
+		field.String("ndir").
+			Optional().
+			Nillable().
+			NotEmpty().
+			GoType(http.Dir("ndir")),
+		field.String("str").
+			Optional().
+			GoType(&sql.NullString{}),
+		field.String("null_str").
+			Optional().
+			Nillable().
+			GoType(&sql.NullString{}),
+		field.String("link").
+			Optional().
+			NotEmpty().
+			GoType(&Link{}),
+		field.String("null_link").
+			Optional().
+			Nillable().
+			GoType(&Link{}),
+		field.Bool("active").
+			Optional().
+			GoType(Status(false)),
+		field.Bool("null_active").
+			Optional().
+			Nillable().
+			GoType(Status(false)),
+		field.Bool("deleted").
+			Optional().
+			GoType(&sql.NullBool{}),
+		field.Time("deleted_at").
+			Optional().
+			GoType(&sql.NullTime{}),
+		field.Bytes("ip").
+			Optional().
+			GoType(net.IP("127.0.0.1")),
+		field.Int("null_int64").
+			Optional().
+			GoType(&sql.NullInt64{}),
+		field.Int("schema_int").
+			Optional().
+			GoType(Int(0)),
+		field.Int8("schema_int8").
+			Optional().
+			GoType(Int8(0)),
+		field.Int64("schema_int64").
+			Optional().
+			GoType(Int64(0)),
+		field.Float("schema_float").
+			Optional().
+			GoType(Float64(0)),
+		field.Float32("schema_float32").
+			Optional().
+			GoType(Float32(0)),
+		field.Float("null_float").
+			Optional().
+			GoType(&sql.NullFloat64{}),
+		field.Enum("role").
+			Default(string(role.Read)).
+			GoType(role.Role("role")),
 	}
+}
+
+type (
+	Int     int
+	Int8    int8
+	Int64   int64
+	Status  bool
+	Float64 float64
+	Float32 float32
+)
+
+type Link struct {
+	*url.URL
+}
+
+// Scan implements the Scanner interface.
+func (l *Link) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case []byte:
+		l.URL, err = url.Parse(string(v))
+	case string:
+		l.URL, err = url.Parse(v)
+	default:
+		err = fmt.Errorf("unexpcted type %T", v)
+	}
+	return
+}
+
+// Value implements the driver Valuer interface.
+func (l Link) Value() (driver.Value, error) {
+	if l.URL == nil {
+		return nil, nil
+	}
+	return l.String(), nil
 }

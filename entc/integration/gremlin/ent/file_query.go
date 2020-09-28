@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,16 +9,17 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // FileQuery is the builder for querying File entities.
@@ -26,14 +27,16 @@ type FileQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.File
 	// eager-loading edges.
 	withOwner *UserQuery
 	withType  *FileTypeQuery
-	// intermediate query.
+	withField *FieldTypeQuery
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -55,7 +58,7 @@ func (fq *FileQuery) Offset(offset int) *FileQuery {
 }
 
 // Order adds an order step to the query.
-func (fq *FileQuery) Order(o ...Order) *FileQuery {
+func (fq *FileQuery) Order(o ...OrderFunc) *FileQuery {
 	fq.order = append(fq.order, o...)
 	return fq
 }
@@ -63,38 +66,64 @@ func (fq *FileQuery) Order(o ...Order) *FileQuery {
 // QueryOwner chains the current query on the owner edge.
 func (fq *FileQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: fq.config}
-	gremlin := fq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.FilesLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := fq.gremlinQuery()
+		fromU = gremlin.InE(user.FilesLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryType chains the current query on the type edge.
 func (fq *FileQuery) QueryType() *FileTypeQuery {
 	query := &FileTypeQuery{config: fq.config}
-	gremlin := fq.gremlinQuery()
-	query.gremlin = gremlin.InE(filetype.FilesLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := fq.gremlinQuery()
+		fromU = gremlin.InE(filetype.FilesLabel).OutV()
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryField chains the current query on the field edge.
+func (fq *FileQuery) QueryField() *FieldTypeQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := fq.gremlinQuery()
+		fromU = gremlin.OutE(file.FieldLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first File entity in the query. Returns *NotFoundError when no file was found.
 func (fq *FileQuery) First(ctx context.Context) (*File, error) {
-	fs, err := fq.Limit(1).All(ctx)
+	nodes, err := fq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(fs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{file.Label}
 	}
-	return fs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (fq *FileQuery) FirstX(ctx context.Context) *File {
-	f, err := fq.First(ctx)
+	node, err := fq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return f
+	return node
 }
 
 // FirstID returns the first File id in the query. Returns *NotFoundError when no id was found.
@@ -121,13 +150,13 @@ func (fq *FileQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only File entity in the query, returns an error if not exactly one entity was returned.
 func (fq *FileQuery) Only(ctx context.Context) (*File, error) {
-	fs, err := fq.Limit(2).All(ctx)
+	nodes, err := fq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(fs) {
+	switch len(nodes) {
 	case 1:
-		return fs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{file.Label}
 	default:
@@ -137,11 +166,11 @@ func (fq *FileQuery) Only(ctx context.Context) (*File, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (fq *FileQuery) OnlyX(ctx context.Context) *File {
-	f, err := fq.Only(ctx)
+	node, err := fq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return node
 }
 
 // OnlyID returns the only File id in the query, returns an error if not exactly one id was returned.
@@ -161,8 +190,8 @@ func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (fq *FileQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (fq *FileQuery) OnlyIDX(ctx context.Context) string {
 	id, err := fq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -172,16 +201,19 @@ func (fq *FileQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Files.
 func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
+	if err := fq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return fq.gremlinAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (fq *FileQuery) AllX(ctx context.Context) []*File {
-	fs, err := fq.All(ctx)
+	nodes, err := fq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return fs
+	return nodes
 }
 
 // IDs executes the query and returns a list of File ids.
@@ -204,6 +236,9 @@ func (fq *FileQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (fq *FileQuery) Count(ctx context.Context) (int, error) {
+	if err := fq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return fq.gremlinCount(ctx)
 }
 
@@ -218,6 +253,9 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
+	if err := fq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return fq.gremlinExist(ctx)
 }
 
@@ -237,11 +275,12 @@ func (fq *FileQuery) Clone() *FileQuery {
 		config:     fq.config,
 		limit:      fq.limit,
 		offset:     fq.offset,
-		order:      append([]Order{}, fq.order...),
+		order:      append([]OrderFunc{}, fq.order...),
 		unique:     append([]string{}, fq.unique...),
 		predicates: append([]predicate.File{}, fq.predicates...),
 		// clone intermediate query.
 		gremlin: fq.gremlin.Clone(),
+		path:    fq.path,
 	}
 }
 
@@ -267,6 +306,17 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 	return fq
 }
 
+//  WithField tells the query-builder to eager-loads the nodes that are connected to
+// the "field" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := &FieldTypeQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withField = query
+	return fq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -285,7 +335,12 @@ func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 	group := &FileGroupBy{config: fq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = fq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return fq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -304,8 +359,24 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
 	selector := &FileSelect{config: fq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = fq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return fq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (fq *FileQuery) prepareQuery(ctx context.Context) error {
+	if fq.path != nil {
+		prev, err := fq.path(ctx)
+		if err != nil {
+			return err
+		}
+		fq.gremlin = prev
+	}
+	return nil
 }
 
 func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {
@@ -372,19 +443,25 @@ func (fq *FileQuery) gremlinQuery() *dsl.Traversal {
 type FileGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (fgb *FileGroupBy) Aggregate(fns ...Aggregate) *FileGroupBy {
+func (fgb *FileGroupBy) Aggregate(fns ...AggregateFunc) *FileGroupBy {
 	fgb.fns = append(fgb.fns, fns...)
 	return fgb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := fgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	fgb.gremlin = query
 	return fgb.gremlinScan(ctx, v)
 }
 
@@ -416,6 +493,32 @@ func (fgb *FileGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (fgb *FileGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = fgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (fgb *FileGroupBy) StringX(ctx context.Context) string {
+	v, err := fgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (fgb *FileGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(fgb.fields) > 1 {
@@ -431,6 +534,32 @@ func (fgb *FileGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (fgb *FileGroupBy) IntsX(ctx context.Context) []int {
 	v, err := fgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (fgb *FileGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = fgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (fgb *FileGroupBy) IntX(ctx context.Context) int {
+	v, err := fgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -458,6 +587,32 @@ func (fgb *FileGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (fgb *FileGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = fgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (fgb *FileGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := fgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (fgb *FileGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(fgb.fields) > 1 {
@@ -473,6 +628,32 @@ func (fgb *FileGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (fgb *FileGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := fgb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (fgb *FileGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = fgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (fgb *FileGroupBy) BoolX(ctx context.Context) bool {
+	v, err := fgb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -520,12 +701,18 @@ func (fgb *FileGroupBy) gremlinQuery() *dsl.Traversal {
 type FileSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := fs.path(ctx)
+	if err != nil {
+		return err
+	}
+	fs.gremlin = query
 	return fs.gremlinScan(ctx, v)
 }
 
@@ -557,6 +744,32 @@ func (fs *FileSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = fs.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (fs *FileSelect) StringX(ctx context.Context) string {
+	v, err := fs.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (fs *FileSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(fs.fields) > 1 {
@@ -572,6 +785,32 @@ func (fs *FileSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (fs *FileSelect) IntsX(ctx context.Context) []int {
 	v, err := fs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = fs.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (fs *FileSelect) IntX(ctx context.Context) int {
+	v, err := fs.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -599,6 +838,32 @@ func (fs *FileSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = fs.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (fs *FileSelect) Float64X(ctx context.Context) float64 {
+	v, err := fs.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (fs *FileSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(fs.fields) > 1 {
@@ -614,6 +879,32 @@ func (fs *FileSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (fs *FileSelect) BoolsX(ctx context.Context) []bool {
 	v, err := fs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (fs *FileSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = fs.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{file.Label}
+	default:
+		err = fmt.Errorf("ent: FileSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (fs *FileSelect) BoolX(ctx context.Context) bool {
+	v, err := fs.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

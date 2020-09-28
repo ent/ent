@@ -6,7 +6,9 @@ package gen
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"go/token"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -15,7 +17,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/go-openapi/inflect"
 )
@@ -24,50 +26,56 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":         ops,
-		"add":         add,
-		"append":      reflect.Append,
-		"appends":     reflect.AppendSlice,
-		"order":       order,
-		"snake":       snake,
-		"pascal":      pascal,
-		"extend":      extend,
-		"xrange":      xrange,
-		"receiver":    receiver,
-		"plural":      plural,
-		"aggregate":   aggregate,
-		"primitives":  primitives,
-		"singular":    rules.Singularize,
-		"quote":       strconv.Quote,
-		"base":        filepath.Base,
-		"keys":        keys,
-		"join":        join,
-		"lower":       strings.ToLower,
-		"upper":       strings.ToUpper,
-		"hasField":    hasField,
-		"indirect":    indirect,
-		"hasPrefix":   strings.HasPrefix,
-		"hasSuffix":   strings.HasSuffix,
-		"trimPackage": trimPackage,
-		"xtemplate":   xtemplate,
-		"hasTemplate": hasTemplate,
-		"split":       strings.Split,
-		"tagLookup":   tagLookup,
-		"toString":    toString,
-		"dict":        dict,
-		"get":         get,
-		"set":         set,
-		"unset":       unset,
-		"hasKey":      hasKey,
-		"list":        list,
+		"ops":           ops,
+		"add":           add,
+		"append":        reflect.Append,
+		"appends":       reflect.AppendSlice,
+		"order":         order,
+		"camel":         camel,
+		"snake":         snake,
+		"pascal":        pascal,
+		"extend":        extend,
+		"xrange":        xrange,
+		"receiver":      receiver,
+		"plural":        plural,
+		"aggregate":     aggregate,
+		"primitives":    primitives,
+		"singular":      rules.Singularize,
+		"quote":         strconv.Quote,
+		"base":          filepath.Base,
+		"keys":          keys,
+		"join":          join,
+		"lower":         strings.ToLower,
+		"upper":         strings.ToUpper,
+		"hasField":      hasField,
+		"hasImport":     hasImport,
+		"indirect":      indirect,
+		"hasPrefix":     strings.HasPrefix,
+		"hasSuffix":     strings.HasSuffix,
+		"trimPackage":   trimPackage,
+		"xtemplate":     xtemplate,
+		"hasTemplate":   hasTemplate,
+		"matchTemplate": matchTemplate,
+		"split":         strings.Split,
+		"tagLookup":     tagLookup,
+		"toString":      toString,
+		"dict":          dict,
+		"get":           get,
+		"set":           set,
+		"unset":         unset,
+		"hasKey":        hasKey,
+		"list":          list,
+		"fail":          fail,
+		"replace":       strings.ReplaceAll,
 	}
-	rules   = ruleset()
-	acronym = make(map[string]bool)
+	rules    = ruleset()
+	acronyms = make(map[string]struct{})
 )
 
 // ops returns all operations for given field.
 func ops(f *Field) (op []Op) {
 	switch t := f.Type.Type; {
+	case f.HasGoType() && !f.ConvertedToBasic():
 	case t == field.TypeJSON:
 	case t == field.TypeBool:
 		op = boolOps
@@ -101,23 +109,47 @@ func plural(name string) string {
 	return p
 }
 
-// pascal converts the given column name into a PascalCase.
-//
-//	user_info => UserInfo
-//	full_name => FullName
-//  user_id   => UserID
-//
-func pascal(s string) string {
-	words := strings.Split(s, "_")
+func isSeparator(r rune) bool {
+	return r == '_' || r == '-'
+}
+
+func pascalWords(words []string) string {
 	for i, w := range words {
 		upper := strings.ToUpper(w)
-		if acronym[upper] {
+		if _, ok := acronyms[upper]; ok {
 			words[i] = upper
 		} else {
 			words[i] = rules.Capitalize(w)
 		}
 	}
 	return strings.Join(words, "")
+}
+
+// pascal converts the given name into a PascalCase.
+//
+//	user_info 	=> UserInfo
+//	full_name 	=> FullName
+//	user_id   	=> UserID
+//	full-admin	=> FullAdmin
+//
+func pascal(s string) string {
+	words := strings.FieldsFunc(s, isSeparator)
+	return pascalWords(words)
+}
+
+// camel converts the given name into a camelCase.
+//
+//	user_info  => userInfo
+//	full_name  => fullName
+//	user_id    => userID
+//	full-admin => fullAdmin
+//
+func camel(s string) string {
+	words := strings.FieldsFunc(s, isSeparator)
+	if len(words) == 1 {
+		return strings.ToLower(words[0])
+	}
+	return strings.ToLower(words[0]) + pascalWords(words[1:])
 }
 
 // snake converts the given struct or field name into a snake_case.
@@ -127,16 +159,21 @@ func pascal(s string) string {
 //	HTTPCode => http_code
 //
 func snake(s string) string {
-	var b strings.Builder
+	var (
+		j int
+		b strings.Builder
+	)
 	for i := 0; i < len(s); i++ {
 		r := rune(s[i])
-		// Put '_' if it is not a start or end of a word, current letter is an uppercase letter,
-		// and previous letter is a lowercase letter (cases like: "UserInfo"), or next letter is
-		// also a lowercase letter and previous letter is not "_".
-		if i > 0 && i < len(s)-1 && unicode.IsUpper(r) &&
-			(unicode.IsLower(rune(s[i-1])) ||
-				unicode.IsLower(rune(s[i+1])) && unicode.IsLetter(rune(s[i-1]))) {
-			b.WriteString("_")
+		// Put '_' if it is not a start or end of a word, current letter is uppercase,
+		// and previous is lowercase (cases like: "UserInfo"), or next letter is also
+		// a lowercase and previous letter is not "_".
+		if i > 0 && i < len(s)-1 && unicode.IsUpper(r) {
+			if unicode.IsLower(rune(s[i-1])) ||
+				j != i-1 && unicode.IsLower(rune(s[i+1])) && unicode.IsLetter(rune(s[i-1])) {
+				j = i
+				b.WriteString("_")
+			}
 		}
 		b.WriteRune(unicode.ToLower(r))
 	}
@@ -151,7 +188,7 @@ func snake(s string) string {
 //	UserQuery => uq
 //
 func receiver(s string) (r string) {
-	// trim invalid tokens for identifier prefix.
+	// Trim invalid tokens for identifier prefix.
 	s = strings.Trim(s, "[]*&0123456789")
 	parts := strings.Split(snake(s), "_")
 	min := len(parts[0])
@@ -166,10 +203,15 @@ func receiver(s string) (r string) {
 			r += w[:i]
 		}
 		if _, ok := importPkg[r]; !ok {
-			return r
+			s = r
+			break
 		}
 	}
-	return strings.ToLower(s)
+	name := strings.ToLower(s)
+	if token.Lookup(name).IsKeyword() {
+		name = "_" + name
+	}
+	return name
 }
 
 // typeScope wraps the Type object with extended scope.
@@ -208,6 +250,11 @@ func extend(v interface{}, kv ...interface{}) (interface{}, error) {
 			scope[k] = v.Scope[k]
 		}
 		return &typeScope{Type: v.Type, Scope: scope}, nil
+	case *graphScope:
+		for k := range v.Scope {
+			scope[k] = v.Scope[k]
+		}
+		return &graphScope{Graph: v.Graph, Scope: scope}, nil
 	default:
 		return nil, fmt.Errorf("invalid type for extend: %T", v)
 	}
@@ -223,14 +270,15 @@ func add(xs ...int) (n int) {
 
 func ruleset() *inflect.Ruleset {
 	rules := inflect.NewDefaultRuleset()
-	// add common initialisms. copied from golint.
+	// Add common initialisms from golint and more.
 	for _, w := range []string{
-		"API", "ASCII", "CPU", "CSS", "DNS", "GUID", "UID", "UI",
-		"RHS", "RPC", "SLA", "SMTP", "SSH", "TLS", "TTL", "HTML",
-		"HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM",
-		"UUID", "URI", "URL", "UTF8", "VM", "XML", "XSRF", "XSS",
+		"ACL", "API", "ASCII", "AWS", "CPU", "CSS", "DNS", "EOF", "GB", "GUID",
+		"HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "KB", "LHS", "MAC", "MB",
+		"QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "SSO", "TCP",
+		"TLS", "TTL", "UDP", "UI", "UID", "URI", "URL", "UTF8", "UUID", "VM",
+		"XML", "XMPP", "XSRF", "XSS",
 	} {
-		acronym[w] = true
+		acronyms[w] = struct{}{}
 		rules.AddAcronym(w)
 	}
 	return rules
@@ -259,12 +307,13 @@ func aggregate() map[string]bool {
 // keys returns the given map keys.
 func keys(v reflect.Value) ([]string, error) {
 	if k := v.Type().Kind(); k != reflect.Map {
-		return nil, fmt.Errorf("expect map for keys, got: %v", k)
+		return nil, fmt.Errorf("expect map for keys, got: %s", k)
 	}
 	keys := make([]string, v.Len())
 	for i, v := range v.MapKeys() {
 		keys[i] = v.String()
 	}
+	sort.Strings(keys)
 	return keys, nil
 }
 
@@ -298,10 +347,28 @@ func hasTemplate(name string) bool {
 	return false
 }
 
+// matchTemplate returns all template names that match the given pattern.
+func matchTemplate(pattern string) []string {
+	var names []string
+	for _, t := range templates.Templates() {
+		if match, _ := filepath.Match(pattern, t.Name()); match {
+			names = append(names, t.Name())
+		}
+	}
+	sort.Strings(names)
+	return names
+}
+
 // hasField determines if a struct has a field with the given name.
 func hasField(v interface{}, name string) bool {
 	vr := reflect.Indirect(reflect.ValueOf(v))
 	return vr.FieldByName(name).IsValid()
+}
+
+// hasImport reports if the package name exists in the predefined import packages.
+func hasImport(name string) bool {
+	_, ok := importPkg[name]
+	return ok
 }
 
 // trimPackage trims the package name from the given identifier.
@@ -382,4 +449,9 @@ func hasKey(d map[string]interface{}, key string) bool {
 // list creates a list from values.
 func list(v ...interface{}) []interface{} {
 	return v
+}
+
+// fail unconditionally returns an empty string and an error with the specified text.
+func fail(msg string) (string, error) {
+	return "", errors.New(msg)
 }

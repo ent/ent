@@ -5,8 +5,9 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/google/uuid"
 )
@@ -19,8 +20,19 @@ type Blob struct {
 // Fields of the Blob.
 func (Blob) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}),
-		field.UUID("uuid", uuid.UUID{}).
+		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
+		field.UUID("uuid", uuid.UUID{}).
+			Default(uuid.New).
+			Unique(),
+	}
+}
+
+// Edges of the Blob.
+func (Blob) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("parent", Blob.Type).
+			Unique(),
+		edge.To("links", Blob.Type),
 	}
 }

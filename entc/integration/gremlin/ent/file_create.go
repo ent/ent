@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,28 +11,26 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	config
-	size  *int
-	name  *string
-	user  *string
-	group *string
-	owner map[string]struct{}
-	_type map[string]struct{}
+	mutation *FileMutation
+	hooks    []Hook
 }
 
 // SetSize sets the size field.
 func (fc *FileCreate) SetSize(i int) *FileCreate {
-	fc.size = &i
+	fc.mutation.SetSize(i)
 	return fc
 }
 
@@ -46,13 +44,13 @@ func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
 
 // SetName sets the name field.
 func (fc *FileCreate) SetName(s string) *FileCreate {
-	fc.name = &s
+	fc.mutation.SetName(s)
 	return fc
 }
 
 // SetUser sets the user field.
 func (fc *FileCreate) SetUser(s string) *FileCreate {
-	fc.user = &s
+	fc.mutation.SetUser(s)
 	return fc
 }
 
@@ -66,7 +64,7 @@ func (fc *FileCreate) SetNillableUser(s *string) *FileCreate {
 
 // SetGroup sets the group field.
 func (fc *FileCreate) SetGroup(s string) *FileCreate {
-	fc.group = &s
+	fc.mutation.SetGroup(s)
 	return fc
 }
 
@@ -78,12 +76,23 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	return fc
 }
 
+// SetOp sets the op field.
+func (fc *FileCreate) SetOp(b bool) *FileCreate {
+	fc.mutation.SetOp(b)
+	return fc
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
+	if b != nil {
+		fc.SetOp(*b)
+	}
+	return fc
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (fc *FileCreate) SetOwnerID(id string) *FileCreate {
-	if fc.owner == nil {
-		fc.owner = make(map[string]struct{})
-	}
-	fc.owner[id] = struct{}{}
+	fc.mutation.SetOwnerID(id)
 	return fc
 }
 
@@ -102,10 +111,7 @@ func (fc *FileCreate) SetOwner(u *User) *FileCreate {
 
 // SetTypeID sets the type edge to FileType by id.
 func (fc *FileCreate) SetTypeID(id string) *FileCreate {
-	if fc._type == nil {
-		fc._type = make(map[string]struct{})
-	}
-	fc._type[id] = struct{}{}
+	fc.mutation.SetTypeID(id)
 	return fc
 }
 
@@ -122,25 +128,60 @@ func (fc *FileCreate) SetType(f *FileType) *FileCreate {
 	return fc.SetTypeID(f.ID)
 }
 
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fc *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
+	fc.mutation.AddFieldIDs(ids...)
+	return fc
+}
+
+// AddField adds the field edges to FieldType.
+func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fc.AddFieldIDs(ids...)
+}
+
+// Mutation returns the FileMutation object of the builder.
+func (fc *FileCreate) Mutation() *FileMutation {
+	return fc.mutation
+}
+
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	if fc.size == nil {
-		v := file.DefaultSize
-		fc.size = &v
+	var (
+		err  error
+		node *File
+	)
+	fc.defaults()
+	if len(fc.hooks) == 0 {
+		if err = fc.check(); err != nil {
+			return nil, err
+		}
+		node, err = fc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fc.check(); err != nil {
+				return nil, err
+			}
+			fc.mutation = mutation
+			node, err = fc.gremlinSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(fc.hooks) - 1; i >= 0; i-- {
+			mut = fc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, fc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	if err := file.SizeValidator(*fc.size); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
-	}
-	if fc.name == nil {
-		return nil, errors.New("ent: missing required field \"name\"")
-	}
-	if len(fc.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if len(fc._type) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
-	}
-	return fc.gremlinSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -150,6 +191,30 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 		panic(err)
 	}
 	return v
+}
+
+// defaults sets the default values of the builder before save.
+func (fc *FileCreate) defaults() {
+	if _, ok := fc.mutation.Size(); !ok {
+		v := file.DefaultSize
+		fc.mutation.SetSize(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fc *FileCreate) check() error {
+	if _, ok := fc.mutation.Size(); !ok {
+		return &ValidationError{Name: "size", err: errors.New("ent: missing required field \"size\"")}
+	}
+	if v, ok := fc.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	if _, ok := fc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	return nil
 }
 
 func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
@@ -169,24 +234,52 @@ func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
 }
 
 func (fc *FileCreate) gremlin() *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(file.Label)
-	if fc.size != nil {
-		v.Property(dsl.Single, file.FieldSize, *fc.size)
+	if value, ok := fc.mutation.Size(); ok {
+		v.Property(dsl.Single, file.FieldSize, value)
 	}
-	if fc.name != nil {
-		v.Property(dsl.Single, file.FieldName, *fc.name)
+	if value, ok := fc.mutation.Name(); ok {
+		v.Property(dsl.Single, file.FieldName, value)
 	}
-	if fc.user != nil {
-		v.Property(dsl.Single, file.FieldUser, *fc.user)
+	if value, ok := fc.mutation.User(); ok {
+		v.Property(dsl.Single, file.FieldUser, value)
 	}
-	if fc.group != nil {
-		v.Property(dsl.Single, file.FieldGroup, *fc.group)
+	if value, ok := fc.mutation.Group(); ok {
+		v.Property(dsl.Single, file.FieldGroup, value)
 	}
-	for id := range fc.owner {
+	if value, ok := fc.mutation.GetOp(); ok {
+		v.Property(dsl.Single, file.FieldOp, value)
+	}
+	for _, id := range fc.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
-	for id := range fc._type {
+	for _, id := range fc.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
-	return v.ValueMap(true)
+	for _, id := range fc.mutation.FieldIDs() {
+		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
+		})
+	}
+	if len(constraints) == 0 {
+		return v.ValueMap(true)
+	}
+	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
+	for _, cr := range constraints[1:] {
+		tr = cr.pred.Coalesce(cr.test, tr)
+	}
+	return tr
+}
+
+// FileCreateBulk is the builder for creating a bulk of File entities.
+type FileCreateBulk struct {
+	config
+	builders []*FileCreate
 }

@@ -1,3 +1,7 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package main
 
 import (
@@ -7,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/entc/gen"
+	"github.com/facebook/ent/entc/gen"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -18,7 +22,7 @@ type printer struct {
 }
 
 // Print prints a table description of the graph to the given writer.
-func (p *printer) Print(g *gen.Graph) {
+func (p printer) Print(g *gen.Graph) {
 	for _, n := range g.Nodes {
 		p.node(n)
 	}
@@ -31,7 +35,7 @@ func (p *printer) Print(g *gen.Graph) {
 //
 //			<Edges Table>
 //
-func (p *printer) node(t *gen.Type) {
+func (p printer) node(t *gen.Type) {
 	var (
 		b      strings.Builder
 		table  = tablewriter.NewWriter(&b)

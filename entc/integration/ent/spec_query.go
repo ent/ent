@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,14 +12,13 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/schema/field"
 )
 
 // SpecQuery is the builder for querying Spec entities.
@@ -27,13 +26,14 @@ type SpecQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
 	withCard *CardQuery
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -55,7 +55,7 @@ func (sq *SpecQuery) Offset(offset int) *SpecQuery {
 }
 
 // Order adds an order step to the query.
-func (sq *SpecQuery) Order(o ...Order) *SpecQuery {
+func (sq *SpecQuery) Order(o ...OrderFunc) *SpecQuery {
 	sq.order = append(sq.order, o...)
 	return sq
 }
@@ -63,39 +63,49 @@ func (sq *SpecQuery) Order(o ...Order) *SpecQuery {
 // QueryCard chains the current query on the card edge.
 func (sq *SpecQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: sq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(spec.Table, spec.FieldID, sq.sqlQuery()),
-		sqlgraph.To(card.Table, card.FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
-	)
-	query.sql = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(spec.Table, spec.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first Spec entity in the query. Returns *NotFoundError when no spec was found.
 func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
-	sSlice, err := sq.Limit(1).All(ctx)
+	nodes, err := sq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(sSlice) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{spec.Label}
 	}
-	return sSlice[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
-	s, err := sq.First(ctx)
+	node, err := sq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // FirstID returns the first Spec id in the query. Returns *NotFoundError when no id was found.
-func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -107,7 +117,7 @@ func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (sq *SpecQuery) FirstXID(ctx context.Context) string {
+func (sq *SpecQuery) FirstXID(ctx context.Context) int {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -117,13 +127,13 @@ func (sq *SpecQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Spec entity in the query, returns an error if not exactly one entity was returned.
 func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
-	sSlice, err := sq.Limit(2).All(ctx)
+	nodes, err := sq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(sSlice) {
+	switch len(nodes) {
 	case 1:
-		return sSlice[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{spec.Label}
 	default:
@@ -133,16 +143,16 @@ func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
-	s, err := sq.Only(ctx)
+	node, err := sq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // OnlyID returns the only Spec id in the query, returns an error if not exactly one id was returned.
-func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -157,8 +167,8 @@ func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (sq *SpecQuery) OnlyIDX(ctx context.Context) int {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -168,21 +178,24 @@ func (sq *SpecQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Specs.
 func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
+	if err := sq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return sq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
-	sSlice, err := sq.All(ctx)
+	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return sSlice
+	return nodes
 }
 
 // IDs executes the query and returns a list of Spec ids.
-func (sq *SpecQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (sq *SpecQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +203,7 @@ func (sq *SpecQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SpecQuery) IDsX(ctx context.Context) []string {
+func (sq *SpecQuery) IDsX(ctx context.Context) []int {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -200,6 +213,9 @@ func (sq *SpecQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (sq *SpecQuery) Count(ctx context.Context) (int, error) {
+	if err := sq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return sq.sqlCount(ctx)
 }
 
@@ -214,6 +230,9 @@ func (sq *SpecQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
+	if err := sq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return sq.sqlExist(ctx)
 }
 
@@ -233,11 +252,12 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		config:     sq.config,
 		limit:      sq.limit,
 		offset:     sq.offset,
-		order:      append([]Order{}, sq.order...),
+		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		// clone intermediate query.
-		sql: sq.sql.Clone(),
+		sql:  sq.sql.Clone(),
+		path: sq.path,
 	}
 }
 
@@ -257,7 +277,12 @@ func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
 func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 	group := &SpecGroupBy{config: sq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = sq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return sq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -265,8 +290,24 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 	selector := &SpecSelect{config: sq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = sq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return sq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
+	if sq.path != nil {
+		prev, err := sq.path(ctx)
+		if err != nil {
+			return err
+		}
+		sq.sql = prev
+	}
+	return nil
 }
 
 func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
@@ -300,14 +341,15 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 
 	if query := sq.withCard; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*Spec, len(nodes))
+		ids := make(map[int]*Spec, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Card = []*Card{}
 		}
 		var (
-			edgeids []string
-			edges   = make(map[string][]*Spec)
+			edgeids []int
+			edges   = make(map[int][]*Spec)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -331,8 +373,8 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := strconv.FormatInt(eout.Int64, 10)
-				inValue := strconv.FormatInt(ein.Int64, 10)
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -383,7 +425,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   spec.Table,
 			Columns: spec.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: spec.FieldID,
 			},
 		},
@@ -406,7 +448,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := sq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, spec.ValidColumn)
 			}
 		}
 	}
@@ -425,7 +467,7 @@ func (sq *SpecQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range sq.order {
-		p(selector)
+		p(selector, spec.ValidColumn)
 	}
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -442,19 +484,25 @@ func (sq *SpecQuery) sqlQuery() *sql.Selector {
 type SpecGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sgb *SpecGroupBy) Aggregate(fns ...Aggregate) *SpecGroupBy {
+func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 	sgb.fns = append(sgb.fns, fns...)
 	return sgb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := sgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	sgb.sql = query
 	return sgb.sqlScan(ctx, v)
 }
 
@@ -486,6 +534,32 @@ func (sgb *SpecGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = sgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (sgb *SpecGroupBy) StringX(ctx context.Context) string {
+	v, err := sgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (sgb *SpecGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(sgb.fields) > 1 {
@@ -501,6 +575,32 @@ func (sgb *SpecGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (sgb *SpecGroupBy) IntsX(ctx context.Context) []int {
 	v, err := sgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = sgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (sgb *SpecGroupBy) IntX(ctx context.Context) int {
+	v, err := sgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -528,6 +628,32 @@ func (sgb *SpecGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = sgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (sgb *SpecGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := sgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (sgb *SpecGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(sgb.fields) > 1 {
@@ -549,9 +675,44 @@ func (sgb *SpecGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (sgb *SpecGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = sgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (sgb *SpecGroupBy) BoolX(ctx context.Context) bool {
+	v, err := sgb.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (sgb *SpecGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range sgb.fields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := sgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := sgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := sgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -564,7 +725,7 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, spec.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }
@@ -573,12 +734,18 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 type SpecSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := ss.path(ctx)
+	if err != nil {
+		return err
+	}
+	ss.sql = query
 	return ss.sqlScan(ctx, v)
 }
 
@@ -610,6 +777,32 @@ func (ss *SpecSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ss.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ss *SpecSelect) StringX(ctx context.Context) string {
+	v, err := ss.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ss.fields) > 1 {
@@ -625,6 +818,32 @@ func (ss *SpecSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ss *SpecSelect) IntsX(ctx context.Context) []int {
 	v, err := ss.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ss.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ss *SpecSelect) IntX(ctx context.Context) int {
+	v, err := ss.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -652,6 +871,32 @@ func (ss *SpecSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ss.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ss *SpecSelect) Float64X(ctx context.Context) float64 {
+	v, err := ss.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ss.fields) > 1 {
@@ -673,7 +918,38 @@ func (ss *SpecSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (ss *SpecSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ss.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{spec.Label}
+	default:
+		err = fmt.Errorf("ent: SpecSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ss *SpecSelect) BoolX(ctx context.Context) bool {
+	v, err := ss.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (ss *SpecSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ss.fields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ss.sqlQuery().Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

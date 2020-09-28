@@ -9,7 +9,7 @@ title: Introduction
 `entc` run the following command:
 
 ```bash
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ``` 
 
 ## Initialize A New Schema
@@ -27,10 +27,12 @@ is to have an `ent` directory under the root directory of the project.
 ## Generate Assets
 
 After adding a few [fields](schema-fields.md) and [edges](schema-edges.md), you want to generate
-the assets for working with your entities. Run the following command:
+the assets for working with your entities. Run `entc generate` from the root directory of the project,
+or use `go generate`:
+
 
 ```bash
-entc generate ./ent/schema
+go generate ./ent
 ```
 
 The `generate` command generates the following assets for the schemas:
@@ -57,7 +59,7 @@ go mod init <project>
 And then, re-run the following command in order to add `ent` to your `go.mod` file:
 
 ```console
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ```
 
 Add a `generate.go` file to your project under `<project>/ent`:
@@ -65,7 +67,7 @@ Add a `generate.go` file to your project under `<project>/ent`:
 ```go
 package ent
 
-//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema
+//go:generate go run github.com/facebook/ent/cmd/entc generate ./schema
 ```
 
 Finally, you can run `go generate ./ent` from the root directory of your project
@@ -102,10 +104,14 @@ Flags:
 
 `entc` accepts external Go templates to execute. If the template name is already defined by
 `entc`, it will override the existing one. Otherwise, it will write the execution output to
-a file with the same name as the template.
+a file with the same name as the template. The flag format supports  `file`, `dir` and `glob`
+as follows:
 
-Example of a custom template provides a `Node` API for GraphQL - 
-[Github](https://github.com/facebookincubator/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+```console
+entc generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
+```
+
+More information and examples can be found in the [external templates doc](templates.md).
 
 ## Use `entc` As A Package
 
@@ -117,9 +123,9 @@ package main
 import (
 	"log"
 
-	"github.com/facebookincubator/ent/entc"
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/schema/field"
 )
 
 func main() {
@@ -133,7 +139,7 @@ func main() {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/entcpkg).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/entcpkg).
 
 
 ## Schema Description

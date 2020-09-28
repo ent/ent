@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,36 +9,33 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	name  *string
-	team  map[string]struct{}
-	owner map[string]struct{}
+	mutation *PetMutation
+	hooks    []Hook
 }
 
 // SetName sets the name field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
-	pc.name = &s
+	pc.mutation.SetName(s)
 	return pc
 }
 
 // SetTeamID sets the team edge to User by id.
 func (pc *PetCreate) SetTeamID(id string) *PetCreate {
-	if pc.team == nil {
-		pc.team = make(map[string]struct{})
-	}
-	pc.team[id] = struct{}{}
+	pc.mutation.SetTeamID(id)
 	return pc
 }
 
@@ -57,10 +54,7 @@ func (pc *PetCreate) SetTeam(u *User) *PetCreate {
 
 // SetOwnerID sets the owner edge to User by id.
 func (pc *PetCreate) SetOwnerID(id string) *PetCreate {
-	if pc.owner == nil {
-		pc.owner = make(map[string]struct{})
-	}
-	pc.owner[id] = struct{}{}
+	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
@@ -77,18 +71,44 @@ func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
 
+// Mutation returns the PetMutation object of the builder.
+func (pc *PetCreate) Mutation() *PetMutation {
+	return pc.mutation
+}
+
 // Save creates the Pet in the database.
 func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	if pc.name == nil {
-		return nil, errors.New("ent: missing required field \"name\"")
+	var (
+		err  error
+		node *Pet
+	)
+	if len(pc.hooks) == 0 {
+		if err = pc.check(); err != nil {
+			return nil, err
+		}
+		node, err = pc.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = pc.check(); err != nil {
+				return nil, err
+			}
+			pc.mutation = mutation
+			node, err = pc.gremlinSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(pc.hooks) - 1; i >= 0; i-- {
+			mut = pc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	if len(pc.team) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
-	}
-	if len(pc.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	return pc.gremlinSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -98,6 +118,14 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 		panic(err)
 	}
 	return v
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (pc *PetCreate) check() error {
+	if _, ok := pc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	return nil
 }
 
 func (pc *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
@@ -123,17 +151,17 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(pet.Label)
-	if pc.name != nil {
-		v.Property(dsl.Single, pet.FieldName, *pc.name)
+	if value, ok := pc.mutation.Name(); ok {
+		v.Property(dsl.Single, pet.FieldName, value)
 	}
-	for id := range pc.team {
+	for _, id := range pc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
 		})
 	}
-	for id := range pc.owner {
+	for _, id := range pc.mutation.OwnerIDs() {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {
@@ -144,4 +172,10 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// PetCreateBulk is the builder for creating a bulk of Pet entities.
+type PetCreateBulk struct {
+	config
+	builders []*PetCreate
 }

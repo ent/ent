@@ -6,9 +6,15 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* constants needed for sql dialects. */}}
 {{ define "dialect/sql/meta/constants" }}
+	{{- range $t := $.RelatedTypes }}
+		{{- if ne $t.ID.StorageKey $.ID.StorageKey }}
+			// {{ $t.Name }}FieldID holds the string denoting the id field of the {{ $t.Name }}.
+			{{ $t.Name }}FieldID = "{{ $t.ID.StorageKey }}"
+		{{- end }}
+	{{- end }}
 	// Table holds the table name of the {{ lower $.Name }} in the database.
 	Table = "{{ $.Table }}"
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		// {{ $e.TableConstant }} is the table the holds the {{ $e.Name }} relation/edge.
 		{{- if $e.M2M }} The primary key declared below.{{ end }}
 		{{ $e.TableConstant }} = "{{ $e.Rel.Table }}"
@@ -54,4 +60,24 @@ in the LICENSE file in the root directory of this source tree.
 			{{- end }}
 		)
 	{{ end }}
+{{ end }}
+
+{{/* functions needed for sql dialects. */}}
+{{ define "dialect/sql/meta/functions" }}
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	{{- with $.ForeignKeys }}
+		for i := range ForeignKeys {
+			if column == ForeignKeys[i] {
+				return true
+			}
+		}
+	{{- end }}
+	return false
+}
 {{ end }}

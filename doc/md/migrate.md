@@ -72,7 +72,7 @@ if err != nil {
 ## Universal IDs
 
 By default, SQL primary-keys start from 1 for each table; which means that multiple entities of different types
-can share the same ID. Unlike AWS Neptune, where vertex IDs are UUIDs.
+can share the same ID. Unlike AWS Neptune, where node IDs are UUIDs.
 
 This does not work well if you work with [GraphQL](https://graphql.org/learn/schema/#scalar-types), which requires
 the object ID to be unique.
@@ -143,7 +143,7 @@ func main() {
 }
 ```
 
-**Write changes to file**
+**Write changes to a file**
 ```go
 package main
 

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,24 +8,23 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/node"
 )
 
 // Node is the model entity for the Node schema.
 type Node struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Value holds the value of the "value" field.
 	Value int `json:"value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NodeQuery when eager-loading is set.
 	Edges     NodeEdges `json:"edges"`
-	node_next *string
+	node_next *int
 }
 
 // NodeEdges holds the relations/edges for other nodes in the graph.
@@ -92,7 +91,7 @@ func (n *Node) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	n.ID = strconv.FormatInt(value.Int64, 10)
+	n.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field value", values[0])
@@ -104,8 +103,8 @@ func (n *Node) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field node_next", value)
 		} else if value.Valid {
-			n.node_next = new(string)
-			*n.node_next = strconv.FormatInt(value.Int64, 10)
+			n.node_next = new(int)
+			*n.node_next = int(value.Int64)
 		}
 	}
 	return nil
@@ -148,12 +147,6 @@ func (n *Node) String() string {
 	builder.WriteString(fmt.Sprintf("%v", n.Value))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (n *Node) id() int {
-	id, _ := strconv.Atoi(n.ID)
-	return id
 }
 
 // Nodes is a parsable slice of Node.

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,20 +8,23 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
 )
 
 // FileType is the model entity for the FileType schema.
 type FileType struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Type holds the value of the "type" field.
+	Type filetype.Type `json:"type,omitempty"`
+	// State holds the value of the "state" field.
+	State filetype.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileTypeQuery when eager-loading is set.
 	Edges FileTypeEdges `json:"edges"`
@@ -50,6 +53,8 @@ func (*FileType) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
+		&sql.NullString{}, // type
+		&sql.NullString{}, // state
 	}
 }
 
@@ -63,12 +68,22 @@ func (ft *FileType) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	ft.ID = strconv.FormatInt(value.Int64, 10)
+	ft.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
 	} else if value.Valid {
 		ft.Name = value.String
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field type", values[1])
+	} else if value.Valid {
+		ft.Type = filetype.Type(value.String)
+	}
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field state", values[2])
+	} else if value.Valid {
+		ft.State = filetype.State(value.String)
 	}
 	return nil
 }
@@ -103,14 +118,12 @@ func (ft *FileType) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(ft.Name)
+	builder.WriteString(", type=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Type))
+	builder.WriteString(", state=")
+	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (ft *FileType) id() int {
-	id, _ := strconv.Atoi(ft.ID)
-	return id
 }
 
 // FileTypes is a parsable slice of FileType.

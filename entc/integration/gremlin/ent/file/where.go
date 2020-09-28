@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,10 +7,10 @@
 package file
 
 import (
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
@@ -109,6 +109,13 @@ func User(v string) predicate.File {
 func Group(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldGroup, p.EQ(v))
+	})
+}
+
+// Op applies equality check predicate on the "op" field. It's identical to OpEQ.
+func Op(v bool) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.EQ(v))
 	})
 }
 
@@ -459,6 +466,34 @@ func GroupNotNil() predicate.File {
 	})
 }
 
+// OpEQ applies the EQ predicate on the "op" field.
+func OpEQ(v bool) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.EQ(v))
+	})
+}
+
+// OpNEQ applies the NEQ predicate on the "op" field.
+func OpNEQ(v bool) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.NEQ(v))
+	})
+}
+
+// OpIsNil applies the IsNil predicate on the "op" field.
+func OpIsNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldOp)
+	})
+}
+
+// OpNotNil applies the NotNil predicate on the "op" field.
+func OpNotNil() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldOp)
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
@@ -492,6 +527,24 @@ func HasTypeWith(preds ...predicate.FileType) predicate.File {
 			p(tr)
 		}
 		t.InE(TypeInverseLabel).Where(tr).InV()
+	})
+}
+
+// HasField applies the HasEdge predicate on the "field" edge.
+func HasField() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.OutE(FieldLabel).OutV()
+	})
+}
+
+// HasFieldWith applies the HasEdge predicate on the "field" edge with a given conditions (other predicates).
+func HasFieldWith(preds ...predicate.FieldType) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		tr := __.InV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.OutE(FieldLabel).Where(tr).OutV()
 	})
 }
 

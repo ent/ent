@@ -8,9 +8,10 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 {{ $one := hasSuffix $builder "One" }}
 {{- $zero := 0 }}{{ if $one }}{{ $zero = "nil" }}{{ end }}
-{{- $ret := "n" }}{{ if $one }}{{ $ret = $.Receiver }}{{ end }}
+{{- $ret := "n" }}{{ if $one }}{{ $ret = "_node" }}{{ end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} {{ if $one }}*{{ $.Name }}{{ else }}int{{ end }}, err error) {
 	_spec := &sqlgraph.UpdateSpec{
@@ -18,15 +19,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			Table: {{ $.Package }}.Table,
 			Columns: {{ $.Package }}.Columns,
 			ID: &sqlgraph.FieldSpec{
-				{{- if $one }}
-					Value: {{ $receiver }}.id,
-				{{- end }}
 				Type: field.{{ $.ID.Type.ConstName }},
 				Column: {{ $.Package }}.{{ $.ID.Constant }},
 			},
 		},
 	}
-	{{- if not $one }}
+	{{- if $one }}
+		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
+		if !ok {
+			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
+		}
+		_spec.Node.ID.Value = id
+	{{- else }}
 		if ps := {{ $receiver }}.predicates; len(ps) > 0 {
 			_spec.Predicate = func(selector *sql.Selector) {
 				for i := range ps {
@@ -35,27 +39,27 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			}
 		}
 	{{- end }}
-	{{- range $_, $f := $.Fields }}
+	{{- range $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
-				if value := {{ $receiver }}.{{ $f.BuilderField }}; value != nil {
+				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 						Type: field.{{ $f.Type.ConstName }},
-						Value: *value,
+						Value: value,
 						Column: {{ $.Package }}.{{ $f.Constant }},
 					})
 				}
-				{{- if $f.Type.Numeric }}
-					if value := {{ $receiver }}.add{{ $f.BuilderField }}; value != nil {
+				{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},
-							Value: *value,
+							Value: value,
 							Column: {{ $.Package }}.{{ $f.Constant }},
 						})
 					}
 				{{- end }}
 			{{- end }}
 			{{- if $f.Optional }}
-				if {{ $receiver }}.clear{{ $f.BuilderField }} {
+				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
 					_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 						Type: field.{{ $f.Type.ConstName }},
 						Column: {{ $.Package }}.{{ $f.Constant }},
@@ -64,22 +68,21 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			{{- end }}
 	{{- end }}
 	{{- range $_, $e := $.Edges }}
-		{{- if $e.Unique }}
-			if {{ $receiver }}.cleared{{ $e.StructField }} {
-				{{- with extend $ "Edge" $e }}
-					{{ template "dialect/sql/defedge" . }}
-				{{- end }}
-				_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-			}
-		{{- else }}
-			if nodes := {{ $receiver }}.removed{{ $e.StructField }}; len(nodes) > 0 {
+		if {{ $mutation }}.{{ $e.MutationCleared }}() {
+			{{- with extend $ "Edge" $e }}
+				{{ template "dialect/sql/defedge" . }}
+			{{- end }}
+			_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+		}
+		{{- if not $e.Unique }}
+			if nodes := {{ $mutation }}.Removed{{ $e.StructField }}IDs(); len(nodes) > 0 && !{{ $mutation }}.{{ $e.MutationCleared }}() {
 				{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
 					{{ template "dialect/sql/defedge" . }}
 				{{- end }}
 				_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 			}
 		{{- end }}
-		if nodes := {{ $receiver }}.{{ $e.BuilderField }}; len(nodes) > 0 {
+		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
 				{{ template "dialect/sql/defedge" . }}
 			{{- end }}
@@ -123,15 +126,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		},
 	}
 	{{- with $.Scope.Nodes }}
-		for k, _ := range nodes {
-			{{- $id := $e.Type.ID -}}
-			{{- /* Convert string-ids that are stored as int in the database */ -}}
-			{{- if and (not $id.UserDefined) $id.IsString }}
-				k, err := strconv.Atoi(k)
-				if err != nil {
-					return {{ $.Scope.Zero }}, err
-				}
-			{{- end }}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 	{{- end }}

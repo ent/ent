@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,15 +9,16 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // GroupQuery is the builder for querying Group entities.
@@ -25,7 +26,7 @@ type GroupQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.Group
 	// eager-loading edges.
@@ -33,8 +34,9 @@ type GroupQuery struct {
 	withBlocked *UserQuery
 	withUsers   *UserQuery
 	withInfo    *GroupInfoQuery
-	// intermediate query.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -56,7 +58,7 @@ func (gq *GroupQuery) Offset(offset int) *GroupQuery {
 }
 
 // Order adds an order step to the query.
-func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
+func (gq *GroupQuery) Order(o ...OrderFunc) *GroupQuery {
 	gq.order = append(gq.order, o...)
 	return gq
 }
@@ -64,54 +66,78 @@ func (gq *GroupQuery) Order(o ...Order) *GroupQuery {
 // QueryFiles chains the current query on the files edge.
 func (gq *GroupQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.OutE(group.FilesLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.OutE(group.FilesLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryBlocked chains the current query on the blocked edge.
 func (gq *GroupQuery) QueryBlocked() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.OutE(group.BlockedLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.OutE(group.BlockedLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryUsers chains the current query on the users edge.
 func (gq *GroupQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.InE(user.GroupsLabel).OutV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.InE(user.GroupsLabel).OutV()
+		return fromU, nil
+	}
 	return query
 }
 
 // QueryInfo chains the current query on the info edge.
 func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 	query := &GroupInfoQuery{config: gq.config}
-	gremlin := gq.gremlinQuery()
-	query.gremlin = gremlin.OutE(group.InfoLabel).InV()
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := gq.gremlinQuery()
+		fromU = gremlin.OutE(group.InfoLabel).InV()
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first Group entity in the query. Returns *NotFoundError when no group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	grs, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(grs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{group.Label}
 	}
-	return grs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
-	gr, err := gq.First(ctx)
+	node, err := gq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // FirstID returns the first Group id in the query. Returns *NotFoundError when no id was found.
@@ -138,13 +164,13 @@ func (gq *GroupQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Group entity in the query, returns an error if not exactly one entity was returned.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	grs, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(grs) {
+	switch len(nodes) {
 	case 1:
-		return grs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{group.Label}
 	default:
@@ -154,11 +180,11 @@ func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
-	gr, err := gq.Only(ctx)
+	node, err := gq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // OnlyID returns the only Group id in the query, returns an error if not exactly one id was returned.
@@ -178,8 +204,8 @@ func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (gq *GroupQuery) OnlyIDX(ctx context.Context) string {
 	id, err := gq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -189,16 +215,19 @@ func (gq *GroupQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of Groups.
 func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return gq.gremlinAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
-	grs, err := gq.All(ctx)
+	nodes, err := gq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return grs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Group ids.
@@ -221,6 +250,9 @@ func (gq *GroupQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (gq *GroupQuery) Count(ctx context.Context) (int, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return gq.gremlinCount(ctx)
 }
 
@@ -235,6 +267,9 @@ func (gq *GroupQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gq *GroupQuery) Exist(ctx context.Context) (bool, error) {
+	if err := gq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return gq.gremlinExist(ctx)
 }
 
@@ -254,11 +289,12 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		config:     gq.config,
 		limit:      gq.limit,
 		offset:     gq.offset,
-		order:      append([]Order{}, gq.order...),
+		order:      append([]OrderFunc{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
+		path:    gq.path,
 	}
 }
 
@@ -324,7 +360,12 @@ func (gq *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 	group := &GroupGroupBy{config: gq.config}
 	group.fields = append([]string{field}, fields...)
-	group.gremlin = gq.gremlinQuery()
+	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return gq.gremlinQuery(), nil
+	}
 	return group
 }
 
@@ -343,8 +384,24 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
 	selector := &GroupSelect{config: gq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.gremlin = gq.gremlinQuery()
+	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+		if err := gq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return gq.gremlinQuery(), nil
+	}
 	return selector
+}
+
+func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
+	if gq.path != nil {
+		prev, err := gq.path(ctx)
+		if err != nil {
+			return err
+		}
+		gq.gremlin = prev
+	}
+	return nil
 }
 
 func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
@@ -411,19 +468,25 @@ func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
 type GroupGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ggb *GroupGroupBy) Aggregate(fns ...Aggregate) *GroupGroupBy {
+func (ggb *GroupGroupBy) Aggregate(fns ...AggregateFunc) *GroupGroupBy {
 	ggb.fns = append(ggb.fns, fns...)
 	return ggb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ggb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ggb.gremlin = query
 	return ggb.gremlinScan(ctx, v)
 }
 
@@ -455,6 +518,32 @@ func (ggb *GroupGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ggb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ggb *GroupGroupBy) StringX(ctx context.Context) string {
+	v, err := ggb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ggb *GroupGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ggb.fields) > 1 {
@@ -470,6 +559,32 @@ func (ggb *GroupGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ggb *GroupGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ggb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ggb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ggb *GroupGroupBy) IntX(ctx context.Context) int {
+	v, err := ggb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -497,6 +612,32 @@ func (ggb *GroupGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ggb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ggb *GroupGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ggb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ggb *GroupGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ggb.fields) > 1 {
@@ -512,6 +653,32 @@ func (ggb *GroupGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ggb *GroupGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := ggb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ggb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ggb *GroupGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ggb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -559,12 +726,18 @@ func (ggb *GroupGroupBy) gremlinQuery() *dsl.Traversal {
 type GroupSelect struct {
 	config
 	fields []string
-	// intermediate queries.
+	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
+	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := gs.path(ctx)
+	if err != nil {
+		return err
+	}
+	gs.gremlin = query
 	return gs.gremlinScan(ctx, v)
 }
 
@@ -596,6 +769,32 @@ func (gs *GroupSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = gs.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (gs *GroupSelect) StringX(ctx context.Context) string {
+	v, err := gs.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (gs *GroupSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(gs.fields) > 1 {
@@ -611,6 +810,32 @@ func (gs *GroupSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (gs *GroupSelect) IntsX(ctx context.Context) []int {
 	v, err := gs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = gs.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (gs *GroupSelect) IntX(ctx context.Context) int {
+	v, err := gs.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -638,6 +863,32 @@ func (gs *GroupSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = gs.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (gs *GroupSelect) Float64X(ctx context.Context) float64 {
+	v, err := gs.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (gs *GroupSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(gs.fields) > 1 {
@@ -653,6 +904,32 @@ func (gs *GroupSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (gs *GroupSelect) BoolsX(ctx context.Context) []bool {
 	v, err := gs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = gs.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (gs *GroupSelect) BoolX(ctx context.Context) bool {
+	v, err := gs.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,18 +8,17 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
 )
 
 // GroupInfo is the model entity for the GroupInfo schema.
 type GroupInfo struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Desc holds the value of the "desc" field.
 	Desc string `json:"desc,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.
@@ -66,7 +65,7 @@ func (gi *GroupInfo) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	gi.ID = strconv.FormatInt(value.Int64, 10)
+	gi.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field desc", values[0])
@@ -115,12 +114,6 @@ func (gi *GroupInfo) String() string {
 	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (gi *GroupInfo) id() int {
-	id, _ := strconv.Atoi(gi.ID)
-	return id
 }
 
 // GroupInfos is a parsable slice of GroupInfo.

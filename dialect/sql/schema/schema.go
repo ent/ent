@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 const (
@@ -98,7 +98,6 @@ func (t *Table) column(name string) (*Column, bool) {
 }
 
 // index returns a table index by its name.
-// faster than map lookup for most cases.
 func (t *Table) index(name string) (*Index, bool) {
 	for _, idx := range t.Indexes {
 		if idx.Name == name {
@@ -138,18 +137,20 @@ func (t *Table) fk(symbol string) (*ForeignKey, bool) {
 
 // Column schema definition for SQL dialects.
 type Column struct {
-	Name      string      // column name.
-	Type      field.Type  // column type.
-	typ       string      // row column type (used for Rows.Scan).
-	Attr      string      // extra attributes.
-	Size      int64       // max size parameter for string, blob, etc.
-	Key       string      // key definition (PRI, UNI or MUL).
-	Unique    bool        // column with unique constraint.
-	Increment bool        // auto increment attribute.
-	Nullable  bool        // null or not null attribute.
-	Default   interface{} // default value.
-	Enums     []string    // enum values.
-	indexes   Indexes     // linked indexes.
+	Name       string            // column name.
+	Type       field.Type        // column type.
+	SchemaType map[string]string // optional schema type per dialect.
+	Attr       string            // extra attributes.
+	Size       int64             // max size parameter for string, blob, etc.
+	Key        string            // key definition (PRI, UNI or MUL).
+	Unique     bool              // column with unique constraint.
+	Increment  bool              // auto increment attribute.
+	Nullable   bool              // null or not null attribute.
+	Default    interface{}       // default value.
+	Enums      []string          // enum values.
+	typ        string            // row column type (used for Rows.Scan).
+	indexes    Indexes           // linked indexes.
+	foreign    *ForeignKey       // linked foreign-key.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
@@ -170,6 +171,9 @@ func (c *Column) ConvertibleTo(d *Column) bool {
 	case c.UintType() && d.IntType():
 		// uintX can not be converted to intY, when X > Y.
 		return c.Type-field.TypeUint8 <= d.Type-field.TypeInt8
+	case c.Type == field.TypeString && d.Type == field.TypeEnum ||
+		c.Type == field.TypeEnum && d.Type == field.TypeString:
+		return true
 	}
 	return c.FloatType() && d.FloatType()
 }
@@ -184,9 +188,9 @@ func (c Column) UintType() bool { return c.Type >= field.TypeUint8 && c.Type <= 
 func (c Column) FloatType() bool { return c.Type == field.TypeFloat32 || c.Type == field.TypeFloat64 }
 
 // ScanDefault scans the default value string to its interface type.
-func (c *Column) ScanDefault(value string) (err error) {
+func (c *Column) ScanDefault(value string) error {
 	switch {
-	case value == Null: // ignore.
+	case strings.ToUpper(value) == Null: // ignore.
 	case c.IntType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
@@ -211,14 +215,20 @@ func (c *Column) ScanDefault(value string) (err error) {
 			return fmt.Errorf("scanning bool value for column %q: %v", c.Name, err)
 		}
 		c.Default = v.Bool
-	case c.Type == field.TypeString:
+	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
 			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
 		}
 		c.Default = v.String
+	case c.Type == field.TypeJSON:
+		v := &sql.NullString{}
+		if err := v.Scan(value); err != nil {
+			return fmt.Errorf("scanning json value for column %q: %v", c.Name, err)
+		}
+		c.Default = v.String
 	default:
-		return fmt.Errorf("unsupported type: %v", c.Type)
+		return fmt.Errorf("unsupported default type: %v", c.Type)
 	}
 	return nil
 }
@@ -234,7 +244,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 		case bool:
 			attr += strconv.FormatBool(v)
 		case string:
-			// escape single quote by replacing each with 2.
+			// Escape single quote by replacing each with 2.
 			attr += fmt.Sprintf("'%s'", strings.Replace(v, "'", "''", -1))
 		default:
 			attr += fmt.Sprint(v)
@@ -246,7 +256,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 // supportDefault reports if the column type supports default value.
 func (c Column) supportDefault() bool {
 	switch {
-	case c.Type == field.TypeString:
+	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		return c.Size < 1<<16 // not a text.
 	case c.Type.Numeric(), c.Type == field.TypeBool:
 		return true
@@ -288,6 +298,14 @@ func (c *Column) defaultSize(version string) int64 {
 		size = 191
 	}
 	return size
+}
+
+// scanTypeOr returns the scanning type or the given value.
+func (c *Column) scanTypeOr(t string) string {
+	if c.typ != "" {
+		return strings.ToLower(c.typ)
+	}
+	return t
 }
 
 // ForeignKey definition for creation.
@@ -382,6 +400,18 @@ func (i *Index) sameAs(idx *Index) bool {
 		}
 	}
 	return true
+}
+
+// columnNames returns the names of the columns of the index.
+func (i *Index) columnNames() []string {
+	if len(i.columns) > 0 {
+		return i.columns
+	}
+	columns := make([]string, 0, len(i.Columns))
+	for _, c := range i.Columns {
+		columns = append(columns, c.Name)
+	}
+	return columns
 }
 
 // Indexes used for scanning all sql.Rows into a list of indexes, because

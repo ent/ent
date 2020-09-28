@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,25 +8,21 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/comment"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	unique_int        *int
-	addunique_int     *int
-	unique_float      *float64
-	addunique_float   *float64
-	nillable_int      *int
-	addnillable_int   *int
-	clearnillable_int bool
-	predicates        []predicate.Comment
+	hooks      []Hook
+	mutation   *CommentMutation
+	predicates []predicate.Comment
 }
 
 // Where adds a new predicate for the builder.
@@ -37,42 +33,34 @@ func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 
 // SetUniqueInt sets the unique_int field.
 func (cu *CommentUpdate) SetUniqueInt(i int) *CommentUpdate {
-	cu.unique_int = &i
-	cu.addunique_int = nil
+	cu.mutation.ResetUniqueInt()
+	cu.mutation.SetUniqueInt(i)
 	return cu
 }
 
 // AddUniqueInt adds i to unique_int.
 func (cu *CommentUpdate) AddUniqueInt(i int) *CommentUpdate {
-	if cu.addunique_int == nil {
-		cu.addunique_int = &i
-	} else {
-		*cu.addunique_int += i
-	}
+	cu.mutation.AddUniqueInt(i)
 	return cu
 }
 
 // SetUniqueFloat sets the unique_float field.
 func (cu *CommentUpdate) SetUniqueFloat(f float64) *CommentUpdate {
-	cu.unique_float = &f
-	cu.addunique_float = nil
+	cu.mutation.ResetUniqueFloat()
+	cu.mutation.SetUniqueFloat(f)
 	return cu
 }
 
 // AddUniqueFloat adds f to unique_float.
 func (cu *CommentUpdate) AddUniqueFloat(f float64) *CommentUpdate {
-	if cu.addunique_float == nil {
-		cu.addunique_float = &f
-	} else {
-		*cu.addunique_float += f
-	}
+	cu.mutation.AddUniqueFloat(f)
 	return cu
 }
 
 // SetNillableInt sets the nillable_int field.
 func (cu *CommentUpdate) SetNillableInt(i int) *CommentUpdate {
-	cu.nillable_int = &i
-	cu.addnillable_int = nil
+	cu.mutation.ResetNillableInt()
+	cu.mutation.SetNillableInt(i)
 	return cu
 }
 
@@ -86,24 +74,48 @@ func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
 
 // AddNillableInt adds i to nillable_int.
 func (cu *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
-	if cu.addnillable_int == nil {
-		cu.addnillable_int = &i
-	} else {
-		*cu.addnillable_int += i
-	}
+	cu.mutation.AddNillableInt(i)
 	return cu
 }
 
 // ClearNillableInt clears the value of nillable_int.
 func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
-	cu.nillable_int = nil
-	cu.clearnillable_int = true
+	cu.mutation.ClearNillableInt()
 	return cu
+}
+
+// Mutation returns the CommentMutation object of the builder.
+func (cu *CommentUpdate) Mutation() *CommentMutation {
+	return cu.mutation
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
-	return cu.sqlSave(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(cu.hooks) == 0 {
+		affected, err = cu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CommentMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cu.mutation = mutation
+			affected, err = cu.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			mut = cu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -134,7 +146,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   comment.Table,
 			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: comment.FieldID,
 			},
 		},
@@ -146,49 +158,49 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := cu.unique_int; value != nil {
+	if value, ok := cu.mutation.UniqueInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueInt,
 		})
 	}
-	if value := cu.addunique_int; value != nil {
+	if value, ok := cu.mutation.AddedUniqueInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueInt,
 		})
 	}
-	if value := cu.unique_float; value != nil {
+	if value, ok := cu.mutation.UniqueFloat(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueFloat,
 		})
 	}
-	if value := cu.addunique_float; value != nil {
+	if value, ok := cu.mutation.AddedUniqueFloat(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueFloat,
 		})
 	}
-	if value := cu.nillable_int; value != nil {
+	if value, ok := cu.mutation.NillableInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldNillableInt,
 		})
 	}
-	if value := cu.addnillable_int; value != nil {
+	if value, ok := cu.mutation.AddedNillableInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldNillableInt,
 		})
 	}
-	if cu.clearnillable_int {
+	if cu.mutation.NillableIntCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: comment.FieldNillableInt,
@@ -208,54 +220,40 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
-	id                string
-	unique_int        *int
-	addunique_int     *int
-	unique_float      *float64
-	addunique_float   *float64
-	nillable_int      *int
-	addnillable_int   *int
-	clearnillable_int bool
+	hooks    []Hook
+	mutation *CommentMutation
 }
 
 // SetUniqueInt sets the unique_int field.
 func (cuo *CommentUpdateOne) SetUniqueInt(i int) *CommentUpdateOne {
-	cuo.unique_int = &i
-	cuo.addunique_int = nil
+	cuo.mutation.ResetUniqueInt()
+	cuo.mutation.SetUniqueInt(i)
 	return cuo
 }
 
 // AddUniqueInt adds i to unique_int.
 func (cuo *CommentUpdateOne) AddUniqueInt(i int) *CommentUpdateOne {
-	if cuo.addunique_int == nil {
-		cuo.addunique_int = &i
-	} else {
-		*cuo.addunique_int += i
-	}
+	cuo.mutation.AddUniqueInt(i)
 	return cuo
 }
 
 // SetUniqueFloat sets the unique_float field.
 func (cuo *CommentUpdateOne) SetUniqueFloat(f float64) *CommentUpdateOne {
-	cuo.unique_float = &f
-	cuo.addunique_float = nil
+	cuo.mutation.ResetUniqueFloat()
+	cuo.mutation.SetUniqueFloat(f)
 	return cuo
 }
 
 // AddUniqueFloat adds f to unique_float.
 func (cuo *CommentUpdateOne) AddUniqueFloat(f float64) *CommentUpdateOne {
-	if cuo.addunique_float == nil {
-		cuo.addunique_float = &f
-	} else {
-		*cuo.addunique_float += f
-	}
+	cuo.mutation.AddUniqueFloat(f)
 	return cuo
 }
 
 // SetNillableInt sets the nillable_int field.
 func (cuo *CommentUpdateOne) SetNillableInt(i int) *CommentUpdateOne {
-	cuo.nillable_int = &i
-	cuo.addnillable_int = nil
+	cuo.mutation.ResetNillableInt()
+	cuo.mutation.SetNillableInt(i)
 	return cuo
 }
 
@@ -269,33 +267,57 @@ func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
 
 // AddNillableInt adds i to nillable_int.
 func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
-	if cuo.addnillable_int == nil {
-		cuo.addnillable_int = &i
-	} else {
-		*cuo.addnillable_int += i
-	}
+	cuo.mutation.AddNillableInt(i)
 	return cuo
 }
 
 // ClearNillableInt clears the value of nillable_int.
 func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
-	cuo.nillable_int = nil
-	cuo.clearnillable_int = true
+	cuo.mutation.ClearNillableInt()
 	return cuo
+}
+
+// Mutation returns the CommentMutation object of the builder.
+func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
+	return cuo.mutation
 }
 
 // Save executes the query and returns the updated entity.
 func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
-	return cuo.sqlSave(ctx)
+	var (
+		err  error
+		node *Comment
+	)
+	if len(cuo.hooks) == 0 {
+		node, err = cuo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CommentMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			cuo.mutation = mutation
+			node, err = cuo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			mut = cuo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -311,69 +333,73 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error) {
+func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   comment.Table,
 			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  cuo.id,
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: comment.FieldID,
 			},
 		},
 	}
-	if value := cuo.unique_int; value != nil {
+	id, ok := cuo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Comment.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := cuo.mutation.UniqueInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueInt,
 		})
 	}
-	if value := cuo.addunique_int; value != nil {
+	if value, ok := cuo.mutation.AddedUniqueInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueInt,
 		})
 	}
-	if value := cuo.unique_float; value != nil {
+	if value, ok := cuo.mutation.UniqueFloat(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueFloat,
 		})
 	}
-	if value := cuo.addunique_float; value != nil {
+	if value, ok := cuo.mutation.AddedUniqueFloat(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldUniqueFloat,
 		})
 	}
-	if value := cuo.nillable_int; value != nil {
+	if value, ok := cuo.mutation.NillableInt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldNillableInt,
 		})
 	}
-	if value := cuo.addnillable_int; value != nil {
+	if value, ok := cuo.mutation.AddedNillableInt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: comment.FieldNillableInt,
 		})
 	}
-	if cuo.clearnillable_int {
+	if cuo.mutation.NillableIntCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: comment.FieldNillableInt,
 		})
 	}
-	c = &Comment{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &Comment{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -382,5 +408,5 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

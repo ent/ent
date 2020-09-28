@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/entc/integration/customid/ent"
+	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/entc/integration/customid/ent/user"
 	"github.com/go-sql-driver/mysql"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -50,7 +50,7 @@ func TestMySQL(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433} {
 		t.Run(version, func(t *testing.T) {
 			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
 			db, err := sql.Open(dialect.Postgres, dsn)
@@ -91,10 +91,45 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, 3, hub.ID)
 	require.Equal(t, []int{1, 5}, hub.QueryUsers().Order(ent.Asc(user.FieldID)).IDsX(ctx))
 
-	b := client.Blob.Create().SetID(uuid.New()).SaveX(ctx)
-	require.NotEmpty(t, b.ID)
+	blb := client.Blob.Create().SaveX(ctx)
+	require.NotEmpty(t, blb.ID, "use default value")
+	id := uuid.New()
+	chd := client.Blob.Create().SetID(id).SetParent(blb).SaveX(ctx)
+	require.Equal(t, id, chd.ID, "use provided id")
+	require.Equal(t, blb.ID, chd.QueryParent().OnlyX(ctx).ID)
+	lnk := client.Blob.Create().SetID(uuid.New()).AddLinks(chd, blb).SaveX(ctx)
+	require.Equal(t, 2, lnk.QueryLinks().CountX(ctx))
+	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
+	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
+	require.Len(t, client.Blob.Query().IDsX(ctx), 3)
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
-	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyXID(ctx))
-	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyXID(ctx))
+	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyIDX(ctx))
+	xabi := client.Pet.Create().SetID("xabi").AddFriends(pedro).SetBestFriend(pedro).SaveX(ctx)
+	require.Equal(t, "xabi", xabi.ID)
+	pedro = client.Pet.Query().Where(pet.HasOwnerWith(user.ID(a8m.ID))).OnlyX(ctx)
+	require.Equal(t, "pedro", pedro.ID)
+
+	pets := client.Pet.Query().WithFriends().WithBestFriend().Order(ent.Asc(pet.FieldID)).AllX(ctx)
+	require.Len(t, pets, 2)
+
+	require.Equal(t, pedro.ID, pets[0].ID)
+	require.NotNil(t, pets[0].Edges.BestFriend)
+	require.Equal(t, xabi.ID, pets[0].Edges.BestFriend.ID)
+	require.Len(t, pets[0].Edges.Friends, 1)
+	require.Equal(t, xabi.ID, pets[0].Edges.Friends[0].ID)
+
+	require.Equal(t, xabi.ID, pets[1].ID)
+	require.NotNil(t, pets[1].Edges.BestFriend)
+	require.Equal(t, pedro.ID, pets[1].Edges.BestFriend.ID)
+	require.Len(t, pets[1].Edges.Friends, 1)
+	require.Equal(t, pedro.ID, pets[1].Edges.Friends[0].ID)
+
+	bee := client.Car.Create().SetModel("Chevrolet Camaro").SetOwner(pedro).SaveX(ctx)
+	require.NotNil(t, bee)
+	bee = client.Car.Query().WithOwner().OnlyX(ctx)
+	require.Equal(t, "Chevrolet Camaro", bee.Model)
+	require.NotNil(t, bee.Edges.Owner)
+	require.Equal(t, pedro.ID, bee.Edges.Owner.ID)
 }

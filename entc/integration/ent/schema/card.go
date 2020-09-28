@@ -5,10 +5,11 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/schemautil"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/entc/integration/ent/template"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/mixin"
 )
 
 // Card holds the schema definition for the CreditCard entity.
@@ -18,7 +19,7 @@ type Card struct {
 
 func (Card) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		schemautil.TimeMixin{},
+		mixin.Time{},
 	}
 }
 
@@ -27,11 +28,17 @@ func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("number").
 			Immutable().
-			NotEmpty(),
+			NotEmpty().
+			Annotations(&template.Extension{
+				Type: "string",
+			}),
 		field.String("name").
 			Optional().
 			Comment("Exact name written on card").
-			NotEmpty(),
+			NotEmpty().
+			Annotations(&template.Extension{
+				Type: "string",
+			}),
 	}
 }
 
@@ -43,6 +50,9 @@ func (Card) Edges() []ent.Edge {
 			Ref("card").
 			Unique(),
 		edge.From("spec", Spec.Type).
-			Ref("card"),
+			Ref("card").
+			Annotations(&template.Extension{
+				Type: "int",
+			}),
 	}
 }

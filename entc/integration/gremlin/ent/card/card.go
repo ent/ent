@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,9 +8,6 @@ package card
 
 import (
 	"time"
-
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -18,14 +15,19 @@ const (
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreateTime holds the string denoting the create_time vertex property in the database.
+	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
-	// FieldUpdateTime holds the string denoting the update_time vertex property in the database.
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
-	// FieldNumber holds the string denoting the number vertex property in the database.
+	// FieldNumber holds the string denoting the number field in the database.
 	FieldNumber = "number"
-	// FieldName holds the string denoting the name vertex property in the database.
+	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
+	// EdgeSpec holds the string denoting the spec edge name in mutations.
+	EdgeSpec = "spec"
 
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
 	OwnerInverseLabel = "user_card"
@@ -34,31 +36,16 @@ const (
 )
 
 var (
-	mixin       = schema.Card{}.Mixin()
-	mixinFields = [...][]ent.Field{
-		mixin[0].Fields(),
-	}
-	fields = schema.Card{}.Fields()
-
-	// descCreateTime is the schema descriptor for create_time field.
-	descCreateTime = mixinFields[0][0].Descriptor()
 	// DefaultCreateTime holds the default value on creation for the create_time field.
-	DefaultCreateTime = descCreateTime.Default.(func() time.Time)
-
-	// descUpdateTime is the schema descriptor for update_time field.
-	descUpdateTime = mixinFields[0][1].Descriptor()
+	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the update_time field.
-	DefaultUpdateTime = descUpdateTime.Default.(func() time.Time)
+	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	UpdateDefaultUpdateTime = descUpdateTime.UpdateDefault.(func() time.Time)
-
-	// descNumber is the schema descriptor for number field.
-	descNumber = fields[0].Descriptor()
+	UpdateDefaultUpdateTime func() time.Time
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.
-	NumberValidator = descNumber.Validators[0].(func(string) error)
-
-	// descName is the schema descriptor for name field.
-	descName = fields[1].Descriptor()
+	NumberValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
+	NameValidator func(string) error
 )
+
+// comment from another template.

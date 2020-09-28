@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,27 +8,24 @@ package ent
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	name         *string
-	team         map[string]struct{}
-	owner        map[string]struct{}
-	clearedTeam  bool
-	clearedOwner bool
-	predicates   []predicate.Pet
+	hooks      []Hook
+	mutation   *PetMutation
+	predicates []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
@@ -39,16 +36,13 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 
 // SetName sets the name field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
-	pu.name = &s
+	pu.mutation.SetName(s)
 	return pu
 }
 
 // SetTeamID sets the team edge to User by id.
 func (pu *PetUpdate) SetTeamID(id string) *PetUpdate {
-	if pu.team == nil {
-		pu.team = make(map[string]struct{})
-	}
-	pu.team[id] = struct{}{}
+	pu.mutation.SetTeamID(id)
 	return pu
 }
 
@@ -67,10 +61,7 @@ func (pu *PetUpdate) SetTeam(u *User) *PetUpdate {
 
 // SetOwnerID sets the owner edge to User by id.
 func (pu *PetUpdate) SetOwnerID(id string) *PetUpdate {
-	if pu.owner == nil {
-		pu.owner = make(map[string]struct{})
-	}
-	pu.owner[id] = struct{}{}
+	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
@@ -87,27 +78,50 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
-// ClearTeam clears the team edge to User.
+// Mutation returns the PetMutation object of the builder.
+func (pu *PetUpdate) Mutation() *PetMutation {
+	return pu.mutation
+}
+
+// ClearTeam clears the "team" edge to type User.
 func (pu *PetUpdate) ClearTeam() *PetUpdate {
-	pu.clearedTeam = true
+	pu.mutation.ClearTeam()
 	return pu
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
-	pu.clearedOwner = true
+	pu.mutation.ClearOwner()
 	return pu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	if len(pu.team) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"team\"")
+	var (
+		err      error
+		affected int
+	)
+	if len(pu.hooks) == 0 {
+		affected, err = pu.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pu.mutation = mutation
+			affected, err = pu.gremlinSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(pu.hooks) - 1; i >= 0; i-- {
+			mut = pu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
+			return 0, err
+		}
 	}
-	if len(pu.owner) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	return pu.gremlinSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -160,25 +174,25 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := pu.name; value != nil {
-		v.Property(dsl.Single, pet.FieldName, *value)
+	if value, ok := pu.mutation.Name(); ok {
+		v.Property(dsl.Single, pet.FieldName, value)
 	}
-	if pu.clearedTeam {
+	if pu.mutation.TeamCleared() {
 		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range pu.team {
+	for _, id := range pu.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
 		})
 	}
-	if pu.clearedOwner {
+	if pu.mutation.OwnerCleared() {
 		tr := rv.Clone().InE(user.PetsLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range pu.owner {
+	for _, id := range pu.mutation.OwnerIDs() {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	v.Count()
@@ -199,26 +213,19 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id           string
-	name         *string
-	team         map[string]struct{}
-	owner        map[string]struct{}
-	clearedTeam  bool
-	clearedOwner bool
+	hooks    []Hook
+	mutation *PetMutation
 }
 
 // SetName sets the name field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
-	puo.name = &s
+	puo.mutation.SetName(s)
 	return puo
 }
 
 // SetTeamID sets the team edge to User by id.
 func (puo *PetUpdateOne) SetTeamID(id string) *PetUpdateOne {
-	if puo.team == nil {
-		puo.team = make(map[string]struct{})
-	}
-	puo.team[id] = struct{}{}
+	puo.mutation.SetTeamID(id)
 	return puo
 }
 
@@ -237,10 +244,7 @@ func (puo *PetUpdateOne) SetTeam(u *User) *PetUpdateOne {
 
 // SetOwnerID sets the owner edge to User by id.
 func (puo *PetUpdateOne) SetOwnerID(id string) *PetUpdateOne {
-	if puo.owner == nil {
-		puo.owner = make(map[string]struct{})
-	}
-	puo.owner[id] = struct{}{}
+	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
@@ -257,36 +261,59 @@ func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
 
-// ClearTeam clears the team edge to User.
+// Mutation returns the PetMutation object of the builder.
+func (puo *PetUpdateOne) Mutation() *PetMutation {
+	return puo.mutation
+}
+
+// ClearTeam clears the "team" edge to type User.
 func (puo *PetUpdateOne) ClearTeam() *PetUpdateOne {
-	puo.clearedTeam = true
+	puo.mutation.ClearTeam()
 	return puo
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	puo.clearedOwner = true
+	puo.mutation.ClearOwner()
 	return puo
 }
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	if len(puo.team) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"team\"")
+	var (
+		err  error
+		node *Pet
+	)
+	if len(puo.hooks) == 0 {
+		node, err = puo.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			puo.mutation = mutation
+			node, err = puo.gremlinSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(puo.hooks) - 1; i >= 0; i-- {
+			mut = puo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
+			return nil, err
+		}
 	}
-	if len(puo.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	return puo.gremlinSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (puo *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	pe, err := puo.Save(ctx)
+	node, err := puo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -304,7 +331,11 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 
 func (puo *PetUpdateOne) gremlinSave(ctx context.Context) (*Pet, error) {
 	res := &gremlin.Response{}
-	query, bindings := puo.gremlin(puo.id).Query()
+	id, ok := puo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
+	}
+	query, bindings := puo.gremlin(id).Query()
 	if err := puo.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -331,25 +362,25 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := puo.name; value != nil {
-		v.Property(dsl.Single, pet.FieldName, *value)
+	if value, ok := puo.mutation.Name(); ok {
+		v.Property(dsl.Single, pet.FieldName, value)
 	}
-	if puo.clearedTeam {
+	if puo.mutation.TeamCleared() {
 		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range puo.team {
+	for _, id := range puo.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
 		})
 	}
-	if puo.clearedOwner {
+	if puo.mutation.OwnerCleared() {
 		tr := rv.Clone().InE(user.PetsLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range puo.owner {
+	for _, id := range puo.mutation.OwnerIDs() {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)

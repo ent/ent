@@ -58,7 +58,7 @@ func rollback(tx *ent.Tx, err error) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
 
 ## Transactional Client
 
@@ -88,7 +88,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
 
 ## Best Practices
 
@@ -129,5 +129,41 @@ func Do(ctx context.Context, client *ent.Client) {
 	}); err != nil {
 		log.Fatal(err)
 	}
+}
+```
+
+## Hooks
+
+Same as [schema hooks](hooks.md#schema-hooks) and [runtime hooks](hooks.md#runtime-hooks), hooks can be registered on
+active transactions, and will be executed on `Tx.Commit` or `Tx.Rollback`:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+    tx, err := client.Tx(ctx)
+    if err != nil {
+        return err
+    }
+    // Add a hook on Tx.Commit.
+    tx.OnCommit(func(next ent.Committer) ent.Committer {
+        return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
+            // Code before the actual commit.
+            err := next.Commit(ctx, tx)
+            // Code after the transaction was committed.
+            return err
+        })
+    })
+    // Add a hook on Tx.Rollback.
+    tx.OnRollback(func(next ent.Rollbacker) ent.Rollbacker {
+        return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
+            // Code before the actual rollback.
+            err := next.Rollback(ctx, tx)
+            // Code after the transaction was rolled back.
+            return err
+        })
+    })
+    //
+    // <Code goes here>
+    //
+    return err
 }
 ```

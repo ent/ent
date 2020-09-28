@@ -6,7 +6,6 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/id" -}}
 	func(s *sql.Selector) {
-		{{- if and $.ID.IsString (not $.ID.UserDefined) }}id, _ := strconv.Atoi(id){{- end }}
 		s.Where(sql.EQ(s.C({{ $.ID.Constant }}), id))
 	}
 {{- end }}
@@ -15,7 +14,6 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $op := $.Scope.Op -}}
 	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
-	{{- $convid := and $.ID.IsString (not $.ID.UserDefined) -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
 			// if not arguments were provided, append the FALSE constants,
@@ -26,10 +24,8 @@ in the LICENSE file in the root directory of this source tree.
 			}
 			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
-				{{- if $convid }}v[i], _ = strconv.Atoi({{ $arg }}[i]){{ else }}v[i] = {{ $arg }}[i]{{ end }}
+				v[i] = {{ $arg }}[i]
 			}
-		{{- else if $convid }}
-			id, _ := strconv.Atoi({{ $arg }})
 		{{- end }}
 		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
 	}
@@ -37,8 +33,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/field" -}}
 	{{- $f := $.Scope.Field -}}
+	{{- $arg := $.Scope.Arg -}}
 	func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C({{ $f.Constant }}), v))
+		s.Where(sql.EQ(s.C({{ $f.Constant }}), {{ $arg }}))
 	}
 {{- end }}
 
@@ -56,16 +53,17 @@ in the LICENSE file in the root directory of this source tree.
 				return
 			}
 		{{- end }}
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, v{{ if $op.Variadic }}...{{ end }}{{ end }}))
+		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $f.Constant }}){{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }}))
 	}
 {{- end }}
 
 {{ define "dialect/sql/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, {{ $.ID.Constant }}),
-			sqlgraph.To({{ $e.TableConstant }}, {{ $.ID.Constant }}),
+			sqlgraph.To({{ $e.TableConstant }}, {{ $refid }}),
 			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
 					{{ $e.PKConstant }}...
@@ -80,10 +78,11 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, {{ $.ID.Constant }}),
-			sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $.ID.Constant }}),
+			sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $refid }}),
 			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
 					{{ $e.PKConstant }}...

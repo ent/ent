@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,27 +8,23 @@ package ent
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/predicate"
+	"github.com/facebook/ent/entc/integration/template/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	age              *int
-	addage           *int
-	licensed_at      *time.Time
-	clearlicensed_at bool
-	owner            map[int]struct{}
-	clearedOwner     bool
-	predicates       []predicate.Pet
+	hooks      []Hook
+	mutation   *PetMutation
+	predicates []predicate.Pet
 }
 
 // Where adds a new predicate for the builder.
@@ -39,24 +35,20 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 
 // SetAge sets the age field.
 func (pu *PetUpdate) SetAge(i int) *PetUpdate {
-	pu.age = &i
-	pu.addage = nil
+	pu.mutation.ResetAge()
+	pu.mutation.SetAge(i)
 	return pu
 }
 
 // AddAge adds i to age.
 func (pu *PetUpdate) AddAge(i int) *PetUpdate {
-	if pu.addage == nil {
-		pu.addage = &i
-	} else {
-		*pu.addage += i
-	}
+	pu.mutation.AddAge(i)
 	return pu
 }
 
 // SetLicensedAt sets the licensed_at field.
 func (pu *PetUpdate) SetLicensedAt(t time.Time) *PetUpdate {
-	pu.licensed_at = &t
+	pu.mutation.SetLicensedAt(t)
 	return pu
 }
 
@@ -70,17 +62,13 @@ func (pu *PetUpdate) SetNillableLicensedAt(t *time.Time) *PetUpdate {
 
 // ClearLicensedAt clears the value of licensed_at.
 func (pu *PetUpdate) ClearLicensedAt() *PetUpdate {
-	pu.licensed_at = nil
-	pu.clearlicensed_at = true
+	pu.mutation.ClearLicensedAt()
 	return pu
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	if pu.owner == nil {
-		pu.owner = make(map[int]struct{})
-	}
-	pu.owner[id] = struct{}{}
+	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
@@ -97,18 +85,44 @@ func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
-// ClearOwner clears the owner edge to User.
+// Mutation returns the PetMutation object of the builder.
+func (pu *PetUpdate) Mutation() *PetMutation {
+	return pu.mutation
+}
+
+// ClearOwner clears the "owner" edge to type User.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
-	pu.clearedOwner = true
+	pu.mutation.ClearOwner()
 	return pu
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	if len(pu.owner) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	var (
+		err      error
+		affected int
+	)
+	if len(pu.hooks) == 0 {
+		affected, err = pu.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			pu.mutation = mutation
+			affected, err = pu.sqlSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(pu.hooks) - 1; i >= 0; i-- {
+			mut = pu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
+			return 0, err
+		}
 	}
-	return pu.sqlSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -151,34 +165,34 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value := pu.age; value != nil {
+	if value, ok := pu.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldAge,
 		})
 	}
-	if value := pu.addage; value != nil {
+	if value, ok := pu.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldAge,
 		})
 	}
-	if value := pu.licensed_at; value != nil {
+	if value, ok := pu.mutation.LicensedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldLicensedAt,
 		})
 	}
-	if pu.clearlicensed_at {
+	if pu.mutation.LicensedAtCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Column: pet.FieldLicensedAt,
 		})
 	}
-	if pu.clearedOwner {
+	if pu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -194,7 +208,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.owner; len(nodes) > 0 {
+	if nodes := pu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -208,7 +222,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
@@ -227,35 +241,26 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
-	id               int
-	age              *int
-	addage           *int
-	licensed_at      *time.Time
-	clearlicensed_at bool
-	owner            map[int]struct{}
-	clearedOwner     bool
+	hooks    []Hook
+	mutation *PetMutation
 }
 
 // SetAge sets the age field.
 func (puo *PetUpdateOne) SetAge(i int) *PetUpdateOne {
-	puo.age = &i
-	puo.addage = nil
+	puo.mutation.ResetAge()
+	puo.mutation.SetAge(i)
 	return puo
 }
 
 // AddAge adds i to age.
 func (puo *PetUpdateOne) AddAge(i int) *PetUpdateOne {
-	if puo.addage == nil {
-		puo.addage = &i
-	} else {
-		*puo.addage += i
-	}
+	puo.mutation.AddAge(i)
 	return puo
 }
 
 // SetLicensedAt sets the licensed_at field.
 func (puo *PetUpdateOne) SetLicensedAt(t time.Time) *PetUpdateOne {
-	puo.licensed_at = &t
+	puo.mutation.SetLicensedAt(t)
 	return puo
 }
 
@@ -269,17 +274,13 @@ func (puo *PetUpdateOne) SetNillableLicensedAt(t *time.Time) *PetUpdateOne {
 
 // ClearLicensedAt clears the value of licensed_at.
 func (puo *PetUpdateOne) ClearLicensedAt() *PetUpdateOne {
-	puo.licensed_at = nil
-	puo.clearlicensed_at = true
+	puo.mutation.ClearLicensedAt()
 	return puo
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	if puo.owner == nil {
-		puo.owner = make(map[int]struct{})
-	}
-	puo.owner[id] = struct{}{}
+	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
@@ -296,27 +297,53 @@ func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
 
-// ClearOwner clears the owner edge to User.
+// Mutation returns the PetMutation object of the builder.
+func (puo *PetUpdateOne) Mutation() *PetMutation {
+	return puo.mutation
+}
+
+// ClearOwner clears the "owner" edge to type User.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	puo.clearedOwner = true
+	puo.mutation.ClearOwner()
 	return puo
 }
 
 // Save executes the query and returns the updated entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	if len(puo.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
+	var (
+		err  error
+		node *Pet
+	)
+	if len(puo.hooks) == 0 {
+		node, err = puo.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*PetMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			puo.mutation = mutation
+			node, err = puo.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(puo.hooks) - 1; i >= 0; i-- {
+			mut = puo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
+			return nil, err
+		}
 	}
-	return puo.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (puo *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	pe, err := puo.Save(ctx)
+	node, err := puo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -332,46 +359,50 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
+func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   pet.Table,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  puo.id,
 				Type:   field.TypeInt,
 				Column: pet.FieldID,
 			},
 		},
 	}
-	if value := puo.age; value != nil {
+	id, ok := puo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
+	}
+	_spec.Node.ID.Value = id
+	if value, ok := puo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldAge,
 		})
 	}
-	if value := puo.addage; value != nil {
+	if value, ok := puo.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldAge,
 		})
 	}
-	if value := puo.licensed_at; value != nil {
+	if value, ok := puo.mutation.LicensedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: pet.FieldLicensedAt,
 		})
 	}
-	if puo.clearlicensed_at {
+	if puo.mutation.LicensedAtCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Column: pet.FieldLicensedAt,
 		})
 	}
-	if puo.clearedOwner {
+	if puo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -387,7 +418,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.owner; len(nodes) > 0 {
+	if nodes := puo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -401,14 +432,14 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	pe = &Pet{config: puo.config}
-	_spec.Assign = pe.assignValues
-	_spec.ScanValues = pe.scanValues()
+	_node = &Pet{config: puo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
@@ -417,5 +448,5 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (pe *Pet, err error) {
 		}
 		return nil, err
 	}
-	return pe, nil
+	return _node, nil
 }

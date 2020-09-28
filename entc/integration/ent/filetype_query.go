@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,14 +12,13 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileTypeQuery is the builder for querying FileType entities.
@@ -27,13 +26,14 @@ type FileTypeQuery struct {
 	config
 	limit      *int
 	offset     *int
-	order      []Order
+	order      []OrderFunc
 	unique     []string
 	predicates []predicate.FileType
 	// eager-loading edges.
 	withFiles *FileQuery
-	// intermediate query.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the builder.
@@ -55,7 +55,7 @@ func (ftq *FileTypeQuery) Offset(offset int) *FileTypeQuery {
 }
 
 // Order adds an order step to the query.
-func (ftq *FileTypeQuery) Order(o ...Order) *FileTypeQuery {
+func (ftq *FileTypeQuery) Order(o ...OrderFunc) *FileTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
 }
@@ -63,39 +63,49 @@ func (ftq *FileTypeQuery) Order(o ...Order) *FileTypeQuery {
 // QueryFiles chains the current query on the files edge.
 func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: ftq.config}
-	step := sqlgraph.NewStep(
-		sqlgraph.From(filetype.Table, filetype.FieldID, ftq.sqlQuery()),
-		sqlgraph.To(file.Table, file.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
-	)
-	query.sql = sqlgraph.SetNeighbors(ftq.driver.Dialect(), step)
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ftq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filetype.Table, filetype.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ftq.driver.Dialect(), step)
+		return fromU, nil
+	}
 	return query
 }
 
 // First returns the first FileType entity in the query. Returns *NotFoundError when no filetype was found.
 func (ftq *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
-	fts, err := ftq.Limit(1).All(ctx)
+	nodes, err := ftq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(fts) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{filetype.Label}
 	}
-	return fts[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (ftq *FileTypeQuery) FirstX(ctx context.Context) *FileType {
-	ft, err := ftq.First(ctx)
+	node, err := ftq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // FirstID returns the first FileType id in the query. Returns *NotFoundError when no id was found.
-func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = ftq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -107,7 +117,7 @@ func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstXID is like FirstID, but panics if an error occurs.
-func (ftq *FileTypeQuery) FirstXID(ctx context.Context) string {
+func (ftq *FileTypeQuery) FirstXID(ctx context.Context) int {
 	id, err := ftq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -117,13 +127,13 @@ func (ftq *FileTypeQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only FileType entity in the query, returns an error if not exactly one entity was returned.
 func (ftq *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
-	fts, err := ftq.Limit(2).All(ctx)
+	nodes, err := ftq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(fts) {
+	switch len(nodes) {
 	case 1:
-		return fts[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{filetype.Label}
 	default:
@@ -133,16 +143,16 @@ func (ftq *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (ftq *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
-	ft, err := ftq.Only(ctx)
+	node, err := ftq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // OnlyID returns the only FileType id in the query, returns an error if not exactly one id was returned.
-func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = ftq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -157,8 +167,8 @@ func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (ftq *FileTypeQuery) OnlyIDX(ctx context.Context) int {
 	id, err := ftq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -168,21 +178,24 @@ func (ftq *FileTypeQuery) OnlyXID(ctx context.Context) string {
 
 // All executes the query and returns a list of FileTypes.
 func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return nil, err
+	}
 	return ftq.sqlAll(ctx)
 }
 
 // AllX is like All, but panics if an error occurs.
 func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
-	fts, err := ftq.All(ctx)
+	nodes, err := ftq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return fts
+	return nodes
 }
 
 // IDs executes the query and returns a list of FileType ids.
-func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
-	var ids []string
+func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := ftq.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +203,7 @@ func (ftq *FileTypeQuery) IDs(ctx context.Context) ([]string, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
+func (ftq *FileTypeQuery) IDsX(ctx context.Context) []int {
 	ids, err := ftq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -200,6 +213,9 @@ func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (ftq *FileTypeQuery) Count(ctx context.Context) (int, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return 0, err
+	}
 	return ftq.sqlCount(ctx)
 }
 
@@ -214,6 +230,9 @@ func (ftq *FileTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
+	if err := ftq.prepareQuery(ctx); err != nil {
+		return false, err
+	}
 	return ftq.sqlExist(ctx)
 }
 
@@ -233,11 +252,12 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		config:     ftq.config,
 		limit:      ftq.limit,
 		offset:     ftq.offset,
-		order:      append([]Order{}, ftq.order...),
+		order:      append([]OrderFunc{}, ftq.order...),
 		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FileType{}, ftq.predicates...),
 		// clone intermediate query.
-		sql: ftq.sql.Clone(),
+		sql:  ftq.sql.Clone(),
+		path: ftq.path,
 	}
 }
 
@@ -270,7 +290,12 @@ func (ftq *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
 func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroupBy {
 	group := &FileTypeGroupBy{config: ftq.config}
 	group.fields = append([]string{field}, fields...)
-	group.sql = ftq.sqlQuery()
+	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return ftq.sqlQuery(), nil
+	}
 	return group
 }
 
@@ -289,8 +314,24 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect {
 	selector := &FileTypeSelect{config: ftq.config}
 	selector.fields = append([]string{field}, fields...)
-	selector.sql = ftq.sqlQuery()
+	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		return ftq.sqlQuery(), nil
+	}
 	return selector
+}
+
+func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
+	if ftq.path != nil {
+		prev, err := ftq.path(ctx)
+		if err != nil {
+			return err
+		}
+		ftq.sql = prev
+	}
+	return nil
 }
 
 func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
@@ -324,14 +365,11 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 
 	if query := ftq.withFiles; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[string]*FileType)
+		nodeids := make(map[int]*FileType)
 		for i := range nodes {
-			id, err := strconv.Atoi(nodes[i].ID)
-			if err != nil {
-				return nil, err
-			}
-			fks = append(fks, id)
+			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Files = []*File{}
 		}
 		query.withFKs = true
 		query.Where(predicate.File(func(s *sql.Selector) {
@@ -376,7 +414,7 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: filetype.FieldID,
 			},
 		},
@@ -399,7 +437,7 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := ftq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, filetype.ValidColumn)
 			}
 		}
 	}
@@ -418,7 +456,7 @@ func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ftq.order {
-		p(selector)
+		p(selector, filetype.ValidColumn)
 	}
 	if offset := ftq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -435,19 +473,25 @@ func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
 type FileTypeGroupBy struct {
 	config
 	fields []string
-	fns    []Aggregate
-	// intermediate query.
-	sql *sql.Selector
+	fns    []AggregateFunc
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ftgb *FileTypeGroupBy) Aggregate(fns ...Aggregate) *FileTypeGroupBy {
+func (ftgb *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
 	ftgb.fns = append(ftgb.fns, fns...)
 	return ftgb
 }
 
 // Scan applies the group-by query and scan the result into the given value.
 func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
+	query, err := ftgb.path(ctx)
+	if err != nil {
+		return err
+	}
+	ftgb.sql = query
 	return ftgb.sqlScan(ctx, v)
 }
 
@@ -479,6 +523,32 @@ func (ftgb *FileTypeGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ftgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) StringX(ctx context.Context) string {
+	v, err := ftgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ftgb *FileTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ftgb.fields) > 1 {
@@ -494,6 +564,32 @@ func (ftgb *FileTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ftgb *FileTypeGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ftgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ftgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) IntX(ctx context.Context) int {
+	v, err := ftgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -521,6 +617,32 @@ func (ftgb *FileTypeGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ftgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ftgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ftgb *FileTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ftgb.fields) > 1 {
@@ -542,9 +664,44 @@ func (ftgb *FileTypeGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FileTypeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ftgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ftgb *FileTypeGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ftgb.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ftgb.fields {
+		if !filetype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := ftgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ftgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ftgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -557,7 +714,7 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 	columns = append(columns, ftgb.fields...)
 	for _, fn := range ftgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, filetype.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ftgb.fields...)
 }
@@ -566,12 +723,18 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 type FileTypeSelect struct {
 	config
 	fields []string
-	// intermediate queries.
-	sql *sql.Selector
+	// intermediate query (i.e. traversal path).
+	sql  *sql.Selector
+	path func(context.Context) (*sql.Selector, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
+	query, err := fts.path(ctx)
+	if err != nil {
+		return err
+	}
+	fts.sql = query
 	return fts.sqlScan(ctx, v)
 }
 
@@ -603,6 +766,32 @@ func (fts *FileTypeSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = fts.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (fts *FileTypeSelect) StringX(ctx context.Context) string {
+	v, err := fts.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (fts *FileTypeSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(fts.fields) > 1 {
@@ -618,6 +807,32 @@ func (fts *FileTypeSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (fts *FileTypeSelect) IntsX(ctx context.Context) []int {
 	v, err := fts.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = fts.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (fts *FileTypeSelect) IntX(ctx context.Context) int {
+	v, err := fts.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -645,6 +860,32 @@ func (fts *FileTypeSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = fts.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (fts *FileTypeSelect) Float64X(ctx context.Context) float64 {
+	v, err := fts.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (fts *FileTypeSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(fts.fields) > 1 {
@@ -666,7 +907,38 @@ func (fts *FileTypeSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (fts *FileTypeSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = fts.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{filetype.Label}
+	default:
+		err = fmt.Errorf("ent: FileTypeSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (fts *FileTypeSelect) BoolX(ctx context.Context) bool {
+	v, err := fts.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range fts.fields {
+		if !filetype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := fts.sqlQuery().Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

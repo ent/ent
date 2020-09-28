@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,34 +10,26 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	active    *bool
-	expire    *time.Time
-	_type     *string
-	max_users *int
-	name      *string
-	files     map[string]struct{}
-	blocked   map[string]struct{}
-	users     map[string]struct{}
-	info      map[string]struct{}
+	mutation *GroupMutation
+	hooks    []Hook
 }
 
 // SetActive sets the active field.
 func (gc *GroupCreate) SetActive(b bool) *GroupCreate {
-	gc.active = &b
+	gc.mutation.SetActive(b)
 	return gc
 }
 
@@ -51,13 +43,13 @@ func (gc *GroupCreate) SetNillableActive(b *bool) *GroupCreate {
 
 // SetExpire sets the expire field.
 func (gc *GroupCreate) SetExpire(t time.Time) *GroupCreate {
-	gc.expire = &t
+	gc.mutation.SetExpire(t)
 	return gc
 }
 
 // SetType sets the type field.
 func (gc *GroupCreate) SetType(s string) *GroupCreate {
-	gc._type = &s
+	gc.mutation.SetType(s)
 	return gc
 }
 
@@ -71,7 +63,7 @@ func (gc *GroupCreate) SetNillableType(s *string) *GroupCreate {
 
 // SetMaxUsers sets the max_users field.
 func (gc *GroupCreate) SetMaxUsers(i int) *GroupCreate {
-	gc.max_users = &i
+	gc.mutation.SetMaxUsers(i)
 	return gc
 }
 
@@ -85,24 +77,19 @@ func (gc *GroupCreate) SetNillableMaxUsers(i *int) *GroupCreate {
 
 // SetName sets the name field.
 func (gc *GroupCreate) SetName(s string) *GroupCreate {
-	gc.name = &s
+	gc.mutation.SetName(s)
 	return gc
 }
 
 // AddFileIDs adds the files edge to File by ids.
-func (gc *GroupCreate) AddFileIDs(ids ...string) *GroupCreate {
-	if gc.files == nil {
-		gc.files = make(map[string]struct{})
-	}
-	for i := range ids {
-		gc.files[ids[i]] = struct{}{}
-	}
+func (gc *GroupCreate) AddFileIDs(ids ...int) *GroupCreate {
+	gc.mutation.AddFileIDs(ids...)
 	return gc
 }
 
 // AddFiles adds the files edges to File.
 func (gc *GroupCreate) AddFiles(f ...*File) *GroupCreate {
-	ids := make([]string, len(f))
+	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -110,19 +97,14 @@ func (gc *GroupCreate) AddFiles(f ...*File) *GroupCreate {
 }
 
 // AddBlockedIDs adds the blocked edge to User by ids.
-func (gc *GroupCreate) AddBlockedIDs(ids ...string) *GroupCreate {
-	if gc.blocked == nil {
-		gc.blocked = make(map[string]struct{})
-	}
-	for i := range ids {
-		gc.blocked[ids[i]] = struct{}{}
-	}
+func (gc *GroupCreate) AddBlockedIDs(ids ...int) *GroupCreate {
+	gc.mutation.AddBlockedIDs(ids...)
 	return gc
 }
 
 // AddBlocked adds the blocked edges to User.
 func (gc *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -130,19 +112,14 @@ func (gc *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (gc *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
-	if gc.users == nil {
-		gc.users = make(map[string]struct{})
-	}
-	for i := range ids {
-		gc.users[ids[i]] = struct{}{}
-	}
+func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
+	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
 // AddUsers adds the users edges to User.
 func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]string, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -150,11 +127,8 @@ func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 }
 
 // SetInfoID sets the info edge to GroupInfo by id.
-func (gc *GroupCreate) SetInfoID(id string) *GroupCreate {
-	if gc.info == nil {
-		gc.info = make(map[string]struct{})
-	}
-	gc.info[id] = struct{}{}
+func (gc *GroupCreate) SetInfoID(id int) *GroupCreate {
+	gc.mutation.SetInfoID(id)
 	return gc
 }
 
@@ -163,40 +137,45 @@ func (gc *GroupCreate) SetInfo(g *GroupInfo) *GroupCreate {
 	return gc.SetInfoID(g.ID)
 }
 
+// Mutation returns the GroupMutation object of the builder.
+func (gc *GroupCreate) Mutation() *GroupMutation {
+	return gc.mutation
+}
+
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if gc.active == nil {
-		v := group.DefaultActive
-		gc.active = &v
-	}
-	if gc.expire == nil {
-		return nil, errors.New("ent: missing required field \"expire\"")
-	}
-	if gc._type != nil {
-		if err := group.TypeValidator(*gc._type); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"type\": %v", err)
+	var (
+		err  error
+		node *Group
+	)
+	gc.defaults()
+	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
+			return nil, err
+		}
+		node, err = gc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*GroupMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gc.check(); err != nil {
+				return nil, err
+			}
+			gc.mutation = mutation
+			node, err = gc.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(gc.hooks) - 1; i >= 0; i-- {
+			mut = gc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
+			return nil, err
 		}
 	}
-	if gc.max_users == nil {
-		v := group.DefaultMaxUsers
-		gc.max_users = &v
-	}
-	if err := group.MaxUsersValidator(*gc.max_users); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"max_users\": %v", err)
-	}
-	if gc.name == nil {
-		return nil, errors.New("ent: missing required field \"name\"")
-	}
-	if err := group.NameValidator(*gc.name); err != nil {
-		return nil, fmt.Errorf("ent: validator failed for field \"name\": %v", err)
-	}
-	if len(gc.info) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"info\"")
-	}
-	if gc.info == nil {
-		return nil, errors.New("ent: missing required edge \"info\"")
-	}
-	return gc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -208,58 +187,115 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (gc *GroupCreate) defaults() {
+	if _, ok := gc.mutation.Active(); !ok {
+		v := group.DefaultActive
+		gc.mutation.SetActive(v)
+	}
+	if _, ok := gc.mutation.MaxUsers(); !ok {
+		v := group.DefaultMaxUsers
+		gc.mutation.SetMaxUsers(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New("ent: missing required field \"active\"")}
+	}
+	if _, ok := gc.mutation.Expire(); !ok {
+		return &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
+	}
+	if v, ok := gc.mutation.GetType(); ok {
+		if err := group.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := gc.mutation.MaxUsers(); ok {
+		if err := group.MaxUsersValidator(v); err != nil {
+			return &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if v, ok := gc.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.InfoID(); !ok {
+		return &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
+	}
+	return nil
+}
+
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
+	_node, _spec := gc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
+	return _node, nil
+}
+
+func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
-		gr    = &Group{config: gc.config}
+		_node = &Group{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: group.FieldID,
 			},
 		}
 	)
-	if value := gc.active; value != nil {
+	if value, ok := gc.mutation.Active(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldActive,
 		})
-		gr.Active = *value
+		_node.Active = value
 	}
-	if value := gc.expire; value != nil {
+	if value, ok := gc.mutation.Expire(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldExpire,
 		})
-		gr.Expire = *value
+		_node.Expire = value
 	}
-	if value := gc._type; value != nil {
+	if value, ok := gc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldType,
 		})
-		gr.Type = value
+		_node.Type = &value
 	}
-	if value := gc.max_users; value != nil {
+	if value, ok := gc.mutation.MaxUsers(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
-		gr.MaxUsers = *value
+		_node.MaxUsers = value
 	}
-	if value := gc.name; value != nil {
+	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: group.FieldName,
 		})
-		gr.Name = *value
+		_node.Name = value
 	}
-	if nodes := gc.files; len(nodes) > 0 {
+	if nodes := gc.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -268,21 +304,17 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: file.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.blocked; len(nodes) > 0 {
+	if nodes := gc.mutation.BlockedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -291,21 +323,17 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.users; len(nodes) > 0 {
+	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -314,21 +342,17 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.info; len(nodes) > 0 {
+	if nodes := gc.mutation.InfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -337,27 +361,82 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: groupinfo.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return _node, _spec
+}
+
+// GroupCreateBulk is the builder for creating a bulk of Group entities.
+type GroupCreateBulk struct {
+	config
+	builders []*GroupCreate
+}
+
+// Save creates the Group entities in the database.
+func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))
+	nodes := make([]*Group, len(gcb.builders))
+	mutators := make([]Mutator, len(gcb.builders))
+	for i := range gcb.builders {
+		func(i int, root context.Context) {
+			builder := gcb.builders[i]
+			builder.defaults()
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*GroupMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, gcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	gr.ID = strconv.FormatInt(id, 10)
-	return gr, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, gcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
+	v, err := gcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

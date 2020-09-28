@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,13 +8,12 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -38,6 +37,8 @@ type User struct {
 	Password string `graphql:"-" json:"-"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+	// SSOCert holds the value of the "SSOCert" field.
+	SSOCert string `json:"SSOCert,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -207,6 +208,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
+		SSOCert     string    `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -220,6 +222,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
 	u.Role = scanu.Role
+	u.SSOCert = scanu.SSOCert
 	return nil
 }
 
@@ -316,14 +319,10 @@ func (u *User) String() string {
 	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(", SSOCert=")
+	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (u *User) id() int {
-	id, _ := strconv.Atoi(u.ID)
-	return id
 }
 
 // Users is a parsable slice of User.
@@ -345,6 +344,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
+		SSOCert     string    `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -360,6 +360,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Phone:       v.Phone,
 			Password:    v.Password,
 			Role:        v.Role,
+			SSOCert:     v.SSOCert,
 		})
 	}
 	return nil

@@ -1,5 +1,5 @@
 run:
-  timeout: 2m
+  timeout: 3m
 
 linters-settings:
   errcheck:
@@ -7,8 +7,13 @@ linters-settings:
   dupl:
     threshold: 100
   funlen:
-    lines: 100
+    lines: 110
     statements: 80
+  goheader:
+    template: |-
+      Copyright 2019-present Facebook Inc. All rights reserved.
+      This source code is licensed under the Apache 2.0 license found
+      in the LICENSE file in the root directory of this source tree.
 
 linters:
   disable-all: true
@@ -22,6 +27,7 @@ linters:
     - funlen
     - gocritic
     - gofmt
+    - goheader
     - gosec
     - gosimple
     - govet
@@ -57,11 +63,14 @@ issues:
       text: "SQL string concatenation"
       linters:
         - gosec
-    - path: dialect/sql/schema/migrate.go
-      text: "weak cryptographic primitive"
+    - path: dialect/sql/schema
       linters:
+        - dupl
         - gosec
     - path: entc/load/load.go
       text: "packages.LoadSyntax is deprecated"
       linters:
         - staticcheck
+    - text: "Expect WriteFile permissions to be 0600 or less"
+      linters:
+        - gosec

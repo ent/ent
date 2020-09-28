@@ -27,32 +27,34 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/predicate/field" -}}
 	{{- $f := $.Scope.Field -}}
+	{{- $arg := $.Scope.Arg -}}
 	func(t *dsl.Traversal) {
-		t.Has(Label, {{ $f.Constant }}, p.EQ(v))
+		t.Has(Label, {{ $f.Constant }}, p.EQ({{ $arg }}))
 	}
 {{- end }}
 
 {{ define "dialect/gremlin/predicate/field/ops" -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $op := $.Scope.Op -}}
+	{{- $arg := $.Scope.Arg -}}
 	{{- $storage := $.Scope.Storage -}}
 	func(t *dsl.Traversal) {
 		{{- if not $op.Niladic }}
-		t.Has(Label, {{ $f.Constant }}, p.{{ call $storage.OpCode $op }}(v{{ if $op.Variadic }}...{{ end }}))
+			t.Has(Label, {{ $f.Constant }}, p.{{ call $storage.OpCode $op }}({{ $arg }}{{ if $op.Variadic }}...{{ end }}))
 		{{- else }}
-		t.HasLabel(Label).{{ call $storage.OpCode $op }}({{ $f.Constant }})
+			t.HasLabel(Label).{{ call $storage.OpCode $op }}({{ $f.Constant }})
 		{{- end }}
 	}
 {{- end }}
 
 {{ define "dialect/gremlin/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
-	{{- $label := $e.Constant -}}
+	{{- $label := $e.LabelConstant -}}
 	{{- $direction := "Out" -}}
 	{{- if $e.IsInverse -}}
 		{{- $direction = "In" -}}
 		{{/* avoid circular dependecies */}}
-		{{- $label = $e.InverseConstant -}}
+		{{- $label = $e.InverseLabelConstant -}}
 	{{- end -}}
 	func(t *dsl.Traversal) {
 		{{- /* if it's an edge with self-reference, take the two vertices */}}
@@ -66,14 +68,14 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/gremlin/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
-	{{- $label := $e.Constant -}}
+	{{- $label := $e.LabelConstant -}}
 	{{- $direction := "Out" -}}
 	{{- $inverse_direction := "In" -}}
 	{{- if $e.IsInverse -}}
 		{{- $direction = "In" -}}
 		{{- $inverse_direction = "Out" -}}
 		{{/* avoid circular dependecies */}}
-		{{- $label = $e.InverseConstant -}}
+		{{- $label = $e.InverseLabelConstant -}}
 	{{- end -}}
 	func(t *dsl.Traversal) {
 		{{- if $e.Bidi }}{{/* selfref means it should be true in one of the directions */}}

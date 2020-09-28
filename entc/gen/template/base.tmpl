@@ -11,22 +11,34 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
-// Order applies an ordering on either graph traversal or sql selector.
-type Order func({{ $.Storage.Builder }})
+// ent aliases to avoid import conflict in user's code.
+type (
+	Op         = ent.Op
+	Hook       = ent.Hook
+	Value      = ent.Value
+	Query      = ent.Query
+	Policy     = ent.Policy
+	Mutator    = ent.Mutator
+	Mutation   = ent.Mutation
+	MutateFunc = ent.MutateFunc
+)
+
+{{ $tmpl := printf "dialect/%s/order/signature" $.Storage }}
+{{ xtemplate $tmpl . }}
 
 {{ range $f, $order := order }}
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
-	func {{ $f }}(fields ...string) Order {
+	func {{ $f }}(fields ...string) OrderFunc {
 		{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
-			{{ $tmpl := printf "dialect/%s/order" $.Storage }}
+			{{ $tmpl := printf "dialect/%s/order/func" $.Storage }}
 			return {{ xtemplate $tmpl . }}
 		{{ end -}}
 	}
 {{ end }}
 
-{{ $tmpl := printf "dialect/%s/group/signature" $.Storage }}
-// Aggregate applies an aggregation step on the group-by traversal/selector.
+{{ $tmpl = printf "dialect/%s/group/signature" $.Storage }}
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
 {{ xtemplate $tmpl . }}
 
 
@@ -36,7 +48,7 @@ type Order func({{ $.Storage.Builder }})
 //	Aggregate({{ $pkg }}.As({{ $pkg }}.Sum(field1), "sum_field1"), ({{ $pkg }}.As({{ $pkg }}.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn Aggregate, end string) Aggregate {
+func As(fn AggregateFunc, end string) AggregateFunc {
 	{{- $tmpl = printf "dialect/%s/group/as" $.Storage }}
 	return {{ xtemplate $tmpl . }}
 }
@@ -51,13 +63,38 @@ func As(fn Aggregate, end string) Aggregate {
 	{{ end }}
 
 	// {{ $fn }} applies the {{ quote $name }} aggregation function on {{ if $withField }}the given field of {{ end }}each group.
-	func {{ $fn }}({{ if $withField }}field string{{ end }}) Aggregate {
+	func {{ $fn }}({{ if $withField }}field string{{ end }}) AggregateFunc {
 		{{- with extend (index $.Nodes 0) "Func" $fn "WithField" $withField -}}
 			{{ $tmpl := printf "dialect/%s/group/func" $.Storage }}
 			return {{ xtemplate $tmpl . }}
 		{{ end -}}
 	}
 {{ end }}
+
+// ValidationError returns when validating a field fails.
+type ValidationError struct {
+    Name string // Field or edge name.
+    err error
+}
+
+// Error implements the error interface.
+func (e *ValidationError) Error() string {
+    return e.err.Error()
+}
+
+// Unwrap implements the errors.Wrapper interface.
+func (e *ValidationError) Unwrap() error {
+    return e.err
+}
+
+// IsValidationError returns a boolean indicating whether the error is a validaton error.
+func IsValidationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	var e *ValidationError
+	return errors.As(err, &e)
+}
 
 // NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
 type NotFoundError struct {
@@ -75,7 +112,7 @@ func IsNotFound(err error) bool {
 		return false
 	}
 	var e *NotFoundError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // MaskNotFound masks nor found error.
@@ -102,7 +139,7 @@ func IsNotSingular(err error) bool {
 		return false
 	}
 	var e *NotSingularError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // NotLoadedError returns when trying to get a node that was not loaded by the query.
@@ -121,7 +158,7 @@ func IsNotLoaded(err error) bool {
 		return false
 	}
 	var e *NotLoadedError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 // ConstraintError returns when trying to create/update one or more entities and
@@ -148,7 +185,7 @@ func IsConstraintError(err error) bool {
 		return false
 	}
 	var e *ConstraintError
-	return xerrors.As(err, &e)
+	return errors.As(err, &e)
 }
 
 {{/* expand error types and global helpers. */}}
@@ -162,13 +199,4 @@ func IsConstraintError(err error) bool {
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
-{{ $id := (index $.Nodes 0).ID.Type }}
-// keys returns the keys/ids from the edge map.
-func keys(m map[{{ $id }}]struct{}) []{{ $id }} {
-	s := make([]{{ $id }}, 0, len(m))
-	for id := range m {
-		s = append(s, id)
-	}
-	return s
-}
 {{ end }}

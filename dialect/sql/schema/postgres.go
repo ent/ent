@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 // Postgres is a postgres migration driver.
@@ -29,6 +29,9 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 	}
 	defer rows.Close()
 	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return err
+		}
 		return fmt.Errorf("server_version_num variable was not found")
 	}
 	var version string
@@ -49,7 +52,10 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("table_name", name)).Query()
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("table_name", name),
+		)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
@@ -57,7 +63,11 @@ func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (
 func (d *Postgres) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("constraint_type", "FOREIGN KEY").And().EQ("constraint_name", name)).Query()
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("constraint_type", "FOREIGN KEY"),
+			sql.EQ("constraint_name", name),
+		)).Query()
 	return exist(ctx, tx, query, args...)
 }
 
@@ -79,11 +89,14 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	query, args := sql.Dialect(dialect.Postgres).
 		Select("column_name", "data_type", "is_nullable", "column_default").
 		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("table_name", name)).Query()
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("table_name", name),
+		)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("postgres: reading table description %v", err)
 	}
-	// call `Close` in cases of failures (`Close` is idempotent).
+	// Call `Close` in cases of failures (`Close` is idempotent).
 	defer rows.Close()
 	t := NewTable(name)
 	for rows.Next() {
@@ -92,6 +105,9 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 			return nil, err
 		}
 		t.AddColumn(c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	if err := rows.Close(); err != nil {
 		return nil, fmt.Errorf("closing rows %v", err)
@@ -184,6 +200,9 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 		}
 		idx.columns = append(idx.columns, column)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	return idxs, nil
 }
 
@@ -213,14 +232,14 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeInt64
 	case "real":
 		c.Type = field.TypeFloat32
-	case "double precision":
+	case "numeric", "decimal", "double precision":
 		c.Type = field.TypeFloat64
 	case "text":
 		c.Type = field.TypeString
 		c.Size = maxCharSize + 1
 	case "character", "character varying":
 		c.Type = field.TypeString
-	case "timestamp with time zone":
+	case "date", "time", "timestamp", "timestamp with time zone":
 		c.Type = field.TypeTime
 	case "bytea":
 		c.Type = field.TypeBytes
@@ -230,7 +249,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeUUID
 	}
 	switch {
-	case !defaults.Valid:
+	case !defaults.Valid || c.Type == field.TypeTime:
 		return nil
 	case strings.Contains(defaults.String, "::"):
 		parts := strings.Split(defaults.String, "::")
@@ -256,6 +275,9 @@ func (d *Postgres) tBuilder(t *Table) *sql.TableBuilder {
 
 // cType returns the PostgreSQL string type for this column.
 func (d *Postgres) cType(c *Column) (t string) {
+	if c.SchemaType != nil && c.SchemaType[dialect.Postgres] != "" {
+		return c.SchemaType[dialect.Postgres]
+	}
 	switch c.Type {
 	case field.TypeBool:
 		t = "boolean"
@@ -266,9 +288,9 @@ func (d *Postgres) cType(c *Column) (t string) {
 	case field.TypeInt, field.TypeUint, field.TypeInt64, field.TypeUint64:
 		t = "bigint"
 	case field.TypeFloat32:
-		t = "real"
+		t = c.scanTypeOr("real")
 	case field.TypeFloat64:
-		t = "double precision"
+		t = c.scanTypeOr("double precision")
 	case field.TypeBytes:
 		t = "bytea"
 	case field.TypeJSON:
@@ -281,7 +303,7 @@ func (d *Postgres) cType(c *Column) (t string) {
 			t = "text"
 		}
 	case field.TypeTime:
-		t = "timestamp with time zone"
+		t = c.scanTypeOr("timestamp with time zone")
 	case field.TypeEnum:
 		// Currently, the support for enums is weak (application level only.
 		// like SQLite). Dialect needs to create and maintain its enum type.
@@ -317,11 +339,30 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	return ops
 }
 
+// hasUniqueName reports if the index has a unique name in the schema.
+func hasUniqueName(i *Index) bool {
+	name := i.Name
+	// The "_key" suffix is added by Postgres for implicit indexes.
+	if strings.HasSuffix(name, "_key") {
+		name = strings.TrimSuffix(name, "_key")
+	}
+	suffix := strings.Join(i.columnNames(), "_")
+	if !strings.HasSuffix(name, suffix) {
+		return true // Assume it has a custom storage-key.
+	}
+	// The codegen prefixes by default indexes with the type name.
+	// For example, an index "users"("name"), will named as "user_name".
+	return name != suffix
+}
+
 // addIndex returns the querying for adding an index to PostgreSQL.
 func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
-	// Since index name should be unique in pg_class for schema,
-	// we prefix it with the table name and remove on read.
-	name := fmt.Sprintf("%s_%s", table, i.Name)
+	name := i.Name
+	if !hasUniqueName(i) {
+		// Since index name should be unique in pg_class for schema,
+		// we prefix it with the table name and remove on read.
+		name = fmt.Sprintf("%s_%s", table, i.Name)
+	}
 	idx := sql.Dialect(dialect.Postgres).
 		CreateIndex(name).Table(table)
 	if i.Unique {
@@ -337,12 +378,16 @@ func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, table string) error {
 	name := idx.Name
 	build := sql.Dialect(dialect.Postgres)
-	if prefix := table + "_"; !strings.HasPrefix(name, prefix) {
+	if prefix := table + "_"; !strings.HasPrefix(name, prefix) && !hasUniqueName(idx) {
 		name = prefix + name
 	}
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
-		Where(sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")).And().EQ("constraint_type", "UNIQUE").And().EQ("constraint_name", name)).
+		Where(sql.And(
+			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			sql.EQ("constraint_type", "UNIQUE"),
+			sql.EQ("constraint_name", name),
+		)).
 		Query()
 	exists, err := exist(ctx, tx, query, args...)
 	if err != nil {
@@ -381,4 +426,22 @@ func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
 // tableSchema returns the query for getting the table schema.
 func (d *Postgres) tableSchema() sql.Querier {
 	return sql.Raw("(CURRENT_SCHEMA())")
+}
+
+// alterColumns returns the queries for applying the columns change-set.
+func (d *Postgres) alterColumns(table string, add, modify, drop []*Column) sql.Queries {
+	b := sql.Dialect(dialect.Postgres).AlterTable(table)
+	for _, c := range add {
+		b.AddColumn(d.addColumn(c))
+	}
+	for _, c := range modify {
+		b.ModifyColumns(d.alterColumn(c)...)
+	}
+	for _, c := range drop {
+		b.DropColumn(sql.Dialect(dialect.Postgres).Column(c.Name))
+	}
+	if len(b.Queries) == 0 {
+		return nil
+	}
+	return sql.Queries{b}
 }

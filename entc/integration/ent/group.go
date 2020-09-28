@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,20 +8,19 @@ package ent
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
 )
 
 // Group is the model entity for the Group schema.
 type Group struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// Expire holds the value of the "expire" field.
@@ -35,7 +34,7 @@ type Group struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
 	Edges      GroupEdges `json:"edges"`
-	group_info *string
+	group_info *int
 }
 
 // GroupEdges holds the relations/edges for other nodes in the graph.
@@ -123,7 +122,7 @@ func (gr *Group) assignValues(values ...interface{}) error {
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	gr.ID = strconv.FormatInt(value.Int64, 10)
+	gr.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullBool); !ok {
 		return fmt.Errorf("unexpected type %T for field active", values[0])
@@ -156,8 +155,8 @@ func (gr *Group) assignValues(values ...interface{}) error {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field group_info", value)
 		} else if value.Valid {
-			gr.group_info = new(string)
-			*gr.group_info = strconv.FormatInt(value.Int64, 10)
+			gr.group_info = new(int)
+			*gr.group_info = int(value.Int64)
 		}
 	}
 	return nil
@@ -220,12 +219,6 @@ func (gr *Group) String() string {
 	builder.WriteString(gr.Name)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (gr *Group) id() int {
-	id, _ := strconv.Atoi(gr.ID)
-	return id
 }
 
 // Groups is a parsable slice of Group.

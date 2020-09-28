@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/migrate"
+	"github.com/facebook/ent/examples/o2mrecur/ent/migrate"
 
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
+	"github.com/facebook/ent/examples/o2mrecur/ent/node"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -31,17 +31,20 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	c := config{log: log.Println}
-	c.options(opts...)
-	return &Client{
-		config: c,
-		Schema: migrate.NewSchema(c.driver),
-		Node:   NewNodeClient(c),
-	}
+	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg.options(opts...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
-// Open opens a connection to the database specified by the driver name and a
-// driver-specific data source name, and returns a new client attached to it.
+func (c *Client) init() {
+	c.Schema = migrate.NewSchema(c.driver)
+	c.Node = NewNodeClient(c.config)
+}
+
+// Open opens a database/sql.DB specified by the driver name and
+// the data source name, and returns a new client attached to it.
 // Optional parameters can be added for configuring the client.
 func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
 	switch driverName {
@@ -56,7 +59,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
@@ -65,7 +69,24 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug}
+	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	return &Tx{
+		ctx:    ctx,
+		config: cfg,
+		Node:   NewNodeClient(cfg),
+	}, nil
+}
+
+// BeginTx returns a transactional client with options.
+func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
+	if _, ok := c.driver.(*txDriver); ok {
+		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+	}
+	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+	}
+	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config: cfg,
 		Node:   NewNodeClient(cfg),
@@ -83,17 +104,21 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
-	return &Client{
-		config: cfg,
-		Schema: migrate.NewSchema(cfg.driver),
-		Node:   NewNodeClient(cfg),
-	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	client := &Client{config: cfg}
+	client.init()
+	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
+}
+
+// Use adds the mutation hooks to all the entity clients.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+func (c *Client) Use(hooks ...Hook) {
+	c.Node.Use(hooks...)
 }
 
 // NodeClient is a client for the Node schema.
@@ -106,29 +131,45 @@ func NewNodeClient(c config) *NodeClient {
 	return &NodeClient{config: c}
 }
 
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `node.Hooks(f(g(h())))`.
+func (c *NodeClient) Use(hooks ...Hook) {
+	c.hooks.Node = append(c.hooks.Node, hooks...)
+}
+
 // Create returns a create builder for Node.
 func (c *NodeClient) Create() *NodeCreate {
-	return &NodeCreate{config: c.config}
+	mutation := newNodeMutation(c.config, OpCreate)
+	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Node entities.
+func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
+	return &NodeCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Node.
 func (c *NodeClient) Update() *NodeUpdate {
-	return &NodeUpdate{config: c.config}
+	mutation := newNodeMutation(c.config, OpUpdate)
+	return &NodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
 func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
-	return c.UpdateOneID(n.ID)
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNode(n))
+	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *NodeClient) UpdateOneID(id int) *NodeUpdateOne {
-	return &NodeUpdateOne{config: c.config, id: id}
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNodeID(id))
+	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Node.
 func (c *NodeClient) Delete() *NodeDelete {
-	return &NodeDelete{config: c.config}
+	mutation := newNodeMutation(c.config, OpDelete)
+	return &NodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
@@ -138,10 +179,13 @@ func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
-	return &NodeDeleteOne{c.Delete().Where(node.ID(id))}
+	builder := c.Delete().Where(node.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NodeDeleteOne{builder}
 }
 
-// Create returns a query builder for Node.
+// Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
 }
@@ -153,37 +197,46 @@ func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
-	n, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return obj
 }
 
 // QueryParent queries the parent edge of a Node.
 func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	id := n.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(node.Table, node.FieldID, id),
-		sqlgraph.To(node.Table, node.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, node.ParentTable, node.ParentColumn),
-	)
-	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, id),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, node.ParentTable, node.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
 // QueryChildren queries the children edge of a Node.
 func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
 	query := &NodeQuery{config: c.config}
-	id := n.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(node.Table, node.FieldID, id),
-		sqlgraph.To(node.Table, node.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, node.ChildrenTable, node.ChildrenColumn),
-	)
-	query.sql = sqlgraph.Neighbors(n.driver.Dialect(), step)
-
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, id),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, node.ChildrenTable, node.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
 	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NodeClient) Hooks() []Hook {
+	return c.hooks.Node
 }

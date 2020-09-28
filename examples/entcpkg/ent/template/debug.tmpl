@@ -1,0 +1,22 @@
+{{ define "debug" }}
+
+{{/* A template that will be generated to a file named "debug.go" and
+     add the functionality for running each client <T> in debug mode */}}
+
+{{/* Add the base header for the generated file */}}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+{{/* Loop over all nodes and add option the "Debug()" method */}}
+{{ range $n := $.Nodes }}
+	{{ $client := print $n.Name "Client" }}
+	func (c *{{ $client }}) Debug() *{{ $client }} {
+		if c.debug {
+			return c
+		}
+		cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+		return &{{ $client }}{config: cfg}
+	}
+{{ end }}
+
+{{ end }}

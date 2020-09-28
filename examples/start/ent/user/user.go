@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -6,19 +6,20 @@
 
 package user
 
-import (
-	"github.com/facebookincubator/ent/examples/start/ent/schema"
-)
-
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAge holds the string denoting the age vertex property in the database.
+	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
+	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+
+	// EdgeCars holds the string denoting the cars edge name in mutations.
+	EdgeCars = "cars"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -49,16 +50,19 @@ var (
 	GroupsPrimaryKey = []string{"group_id", "user_id"}
 )
 
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
+
 var (
-	fields = schema.User{}.Fields()
-
-	// descAge is the schema descriptor for age field.
-	descAge = fields[0].Descriptor()
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	AgeValidator = descAge.Validators[0].(func(int) error)
-
-	// descName is the schema descriptor for name field.
-	descName = fields[1].Descriptor()
+	AgeValidator func(int) error
 	// DefaultName holds the default value on creation for the name field.
-	DefaultName = descName.Default.(string)
+	DefaultName string
 )

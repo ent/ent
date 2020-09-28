@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,9 +8,6 @@ package user
 
 import (
 	"fmt"
-
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -18,22 +15,47 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldOptionalInt holds the string denoting the optional_int vertex property in the database.
+	// FieldOptionalInt holds the string denoting the optional_int field in the database.
 	FieldOptionalInt = "optional_int"
-	// FieldAge holds the string denoting the age vertex property in the database.
+	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
+	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldLast holds the string denoting the last vertex property in the database.
+	// FieldLast holds the string denoting the last field in the database.
 	FieldLast = "last"
-	// FieldNickname holds the string denoting the nickname vertex property in the database.
+	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
-	// FieldPhone holds the string denoting the phone vertex property in the database.
+	// FieldPhone holds the string denoting the phone field in the database.
 	FieldPhone = "phone"
-	// FieldPassword holds the string denoting the password vertex property in the database.
+	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
-	// FieldRole holds the string denoting the role vertex property in the database.
+	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldSSOCert holds the string denoting the ssocert field in the database.
+	FieldSSOCert = "sso_cert"
+
+	// EdgeCard holds the string denoting the card edge name in mutations.
+	EdgeCard = "card"
+	// EdgePets holds the string denoting the pets edge name in mutations.
+	EdgePets = "pets"
+	// EdgeFiles holds the string denoting the files edge name in mutations.
+	EdgeFiles = "files"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
+	// EdgeFriends holds the string denoting the friends edge name in mutations.
+	EdgeFriends = "friends"
+	// EdgeFollowers holds the string denoting the followers edge name in mutations.
+	EdgeFollowers = "followers"
+	// EdgeFollowing holds the string denoting the following edge name in mutations.
+	EdgeFollowing = "following"
+	// EdgeTeam holds the string denoting the team edge name in mutations.
+	EdgeTeam = "team"
+	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
+	EdgeSpouse = "spouse"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
 
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "user_card"
@@ -60,21 +82,10 @@ const (
 )
 
 var (
-	mixin       = schema.User{}.Mixin()
-	mixinFields = [...][]ent.Field{
-		mixin[0].Fields(),
-	}
-	fields = schema.User{}.Fields()
-
-	// descOptionalInt is the schema descriptor for optional_int field.
-	descOptionalInt = mixinFields[0][0].Descriptor()
 	// OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.
-	OptionalIntValidator = descOptionalInt.Validators[0].(func(int) error)
-
-	// descLast is the schema descriptor for last field.
-	descLast = fields[2].Descriptor()
+	OptionalIntValidator func(int) error
 	// DefaultLast holds the default value on creation for the last field.
-	DefaultLast = descLast.Default.(string)
+	DefaultLast string
 )
 
 // Role defines the type for the role enum field.
@@ -85,20 +96,28 @@ const DefaultRole = RoleUser
 
 // Role values.
 const (
-	RoleUser  Role = "user"
-	RoleAdmin Role = "admin"
+	RoleUser     Role = "user"
+	RoleAdmin    Role = "admin"
+	RoleFreeUser Role = "free-user"
 )
 
-func (s Role) String() string {
-	return string(s)
+func (r Role) String() string {
+	return string(r)
 }
 
-// RoleValidator is a validator for the "r" field enum values. It is called by the builders before save.
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
 func RoleValidator(r Role) error {
 	switch r {
-	case RoleUser, RoleAdmin:
+	case RoleUser, RoleAdmin, RoleFreeUser:
 		return nil
 	default:
 		return fmt.Errorf("user: invalid enum value for role field: %q", r)
 	}
 }
+
+// Ptr returns a new pointer to the enum value.
+func (r Role) Ptr() *Role {
+	return &r
+}
+
+// comment from another template.

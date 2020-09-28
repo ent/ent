@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,10 +11,13 @@ const (
 	Label = "car"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldModel holds the string denoting the model vertex property in the database.
+	// FieldModel holds the string denoting the model field in the database.
 	FieldModel = "model"
-	// FieldRegisteredAt holds the string denoting the registered_at vertex property in the database.
+	// FieldRegisteredAt holds the string denoting the registered_at field in the database.
 	FieldRegisteredAt = "registered_at"
+
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 
 	// Table holds the table name of the car in the database.
 	Table = "cars"
@@ -37,4 +40,19 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the Car type.
 var ForeignKeys = []string{
 	"user_cars",
+}
+
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
 }

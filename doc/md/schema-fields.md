@@ -5,7 +5,7 @@ title: Fields
 
 ## Quick Summary
 
-Fields (or properties) in the schema are the attributes of the vertex. For example, a `User`
+Fields (or properties) in the schema are the attributes of the node. For example, a `User`
 with 4 fields: `age`, `name`, `username` and `created_at`:
 
 ![re-fields-properties](https://entgo.io/assets/er_fields_properties.png)
@@ -18,8 +18,8 @@ package schema
 import (
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User schema.
@@ -50,9 +50,10 @@ The following types are currently supported by the framework:
 - `bool`
 - `string`
 - `time.Time`
-- `[]byte` (only supported by SQL dialects).
-- `JSON` (only supported by SQL dialects) - **experimental**.
-- `Enum` (only supported by SQL dialects).
+- `[]byte` (SQL only).
+- `JSON` (SQL only).
+- `Enum` (SQL only).
+- `UUID` (SQL only).
 
 <br/>
 
@@ -63,8 +64,9 @@ import (
 	"time"
 	"net/url"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User schema.
@@ -92,6 +94,8 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
+		field.UUID("uuid", uuid.UUID{}).
+			Default(uuid.New),
 	}
 }
 ```
@@ -139,9 +143,82 @@ func (Pet) Fields() []ent.Field {
 }
 ```
 
+## Database Type
+
+Each database dialect has its own mapping from Go type to database type. For example,
+the MySQL dialect creates `float64` fields as `double` columns in the database. However,
+there is an option to override the default behavior using the `SchemaType` method.
+
+```go
+package schema
+
+import (
+    "github.com/facebook/ent"
+    "github.com/facebook/ent/dialect"
+    "github.com/facebook/ent/schema/field"
+)
+
+// Card schema.
+type Card struct {
+    ent.Schema
+}
+
+// Fields of the Card.
+func (Card) Fields() []ent.Field {
+	return []ent.Field{
+		field.Float("amount").
+			SchemaType(map[string]string{
+				dialect.MySQL:    "decimal(6,2)",   // Override MySQL. 
+				dialect.Postgres: "numeric",        // Override Postgres.
+			}),
+	}
+}
+```
+
+## Go Type
+The default type for fields are the basic Go types. For example, for string fields, the type is `string`,
+and for time fields, the type is `time.Time`. The `GoType` method provides an option to override the
+default ent type with a custom one.
+
+The custom type must be either a type that is convertible to the Go basic type, or a type that implements the
+[ValueScanner](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#ValueScanner) interface.
+
+
+```go
+package schema
+
+import (
+    "database/sql"
+
+    "github.com/facebook/ent"
+    "github.com/facebook/ent/dialect"
+    "github.com/facebook/ent/schema/field"
+)
+
+// Amount is a custom Go type that's convertible to the basic float64 type.
+type Amount float64
+
+// Card schema.
+type Card struct {
+    ent.Schema
+}
+
+// Fields of the Card.
+func (Card) Fields() []ent.Field {
+	return []ent.Field{
+		field.Float("amount").
+			GoType(Amount(0)),
+		field.String("name").
+			Optional().
+			// A ValueScanner type.
+			GoType(&sql.NullString{}),
+	}
+}
+```
+
 ## Default Values
 
-**Non-unique** fields support default values using the `.Default` and `.UpdateDefault` methods.
+**Non-unique** fields support default values using the `Default` and `UpdateDefault` methods.
 
 ```go
 // Fields of the User.
@@ -173,8 +250,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 
@@ -214,6 +291,7 @@ The framework provides a few built-in validators for each type:
   - `MinLen(i)`
   - `MaxLen(i)`
   - `Match(regexp.Regexp)`
+  - `NotEmpty`
 
 ## Optional
 
@@ -423,3 +501,29 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+## Annotations
+
+`Annotations` is used to attach arbitrary metadata to the field object in code generation.
+Template extensions can retrieve this metadata and use it inside their templates.
+
+Note that the metadata object must be serializable to a JSON raw value (e.g. struct, map or slice).
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("creation_date").
+			Annotations(entgql.Annotation{
+				OrderField: "CREATED_AT",
+			}),
+	}
+}
+```
+
+Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).

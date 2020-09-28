@@ -20,7 +20,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	)
 }
 
-{{ range $_, $op := ops $.ID }}
+{{ range $op := ops $.ID }}
 	{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
 	{{ $func := printf "ID%s" $op.Name }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
@@ -34,14 +34,21 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	}
 {{ end }}
 
-{{ range $_, $f := $.Fields }}
+{{ range $f := $.Fields }}
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
-	{{- if not (or $f.IsJSON $f.IsEnum) }}
+	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
+	{{ $comparable := $f.ConvertedToBasic }}
+	{{- if and $hasP $comparable }}
+        {{ $arg := "v" }}
 		{{ $func := $f.StructField }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
-		func {{ $func }}(v {{ $f.Type }}) predicate.{{ $.Name }} {
+		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
+			{{- if $f.HasGoType }}
+				vc := {{ $f.BasicType "v" }}
+                {{- $arg = "vc" }}
+            {{- end }}
 			return predicate.{{ $.Name }}(
-				{{- with extend $ "Field" $f -}}
+				{{- with extend $ "Arg" $arg "Field" $f -}}
 					{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
 					{{- xtemplate $tmpl . }}
 				{{- end -}}
@@ -50,12 +57,12 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{- end }}
 {{ end }}
 
-{{ range $_, $f := $.Fields }}
+{{ range $f := $.Fields }}
 	{{ $ops := ops $f }}
 	{{ with $.Storage.Ops }}
 		{{ $ops = appends $ops (call $.Storage.Ops $f) }}
 	{{ end }}
-	{{ range $_, $op := $ops }}
+	{{ range $op := $ops }}
 	{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 	{{ $func := print $f.StructField $op.Name }}
 	{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
@@ -64,8 +71,16 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		{{- if $op.Variadic }}
 			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
-				v[i] = {{ $arg }}[i]
+            			{{- with $f.BasicType (printf "%s[i]" $arg) }}
+					v[i] = {{ . }}
+				{{- else }}
+					v[i] = {{ $arg }}[i]
+				{{- end }}
 			}
+			{{- $arg = "v" }}
+		{{- else if and (not $op.Niladic) $f.HasGoType }}
+			vc := {{ $f.BasicType "v" }}
+			{{- $arg = "vc" }}
 		{{- end }}
 		return predicate.{{ $.Name }}(
 			{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
@@ -77,7 +92,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ end }}
 {{ end }}
 
-{{ range $_, $e := $.Edges }}
+{{ range $e := $.Edges }}
 	{{ $func := print "Has" $e.StructField }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
 	func {{ $func }}() predicate.{{ $.Name }} {
@@ -124,4 +139,15 @@ func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	)
 }
 
+{{ template "where/additional" $ }}
+
+{{ with $tmpls := matchTemplate "where/additional/*" }}
+	{{ range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{ end }}
 {{ end }}
+
+{{ end }}
+
+{{/* A template that can be overridden in order to add additional code for the type package. */}}
+{{ define "where/additional" }}{{ end }}

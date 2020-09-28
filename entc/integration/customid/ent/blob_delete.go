@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,17 +8,20 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // BlobDelete is the builder for deleting a Blob entity.
 type BlobDelete struct {
 	config
+	hooks      []Hook
+	mutation   *BlobMutation
 	predicates []predicate.Blob
 }
 
@@ -30,7 +33,31 @@ func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
-	return bd.sqlExec(ctx)
+	var (
+		err      error
+		affected int
+	)
+	if len(bd.hooks) == 0 {
+		affected, err = bd.sqlExec(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*BlobMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			bd.mutation = mutation
+			affected, err = bd.sqlExec(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(bd.hooks) - 1; i >= 0; i-- {
+			mut = bd.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, bd.mutation); err != nil {
+			return 0, err
+		}
+	}
+	return affected, err
 }
 
 // ExecX is like Exec, but panics if an error occurs.

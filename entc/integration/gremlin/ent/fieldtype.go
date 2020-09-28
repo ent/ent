@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,12 +7,17 @@
 package ent
 
 import (
+	"database/sql"
 	"fmt"
-	"strconv"
+	"net"
+	"net/http"
 	"strings"
+	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -64,6 +69,52 @@ type FieldType struct {
 	OptionalUint64 uint64 `json:"optional_uint64,omitempty"`
 	// State holds the value of the "state" field.
 	State fieldtype.State `json:"state,omitempty"`
+	// OptionalFloat holds the value of the "optional_float" field.
+	OptionalFloat float64 `json:"optional_float,omitempty"`
+	// OptionalFloat32 holds the value of the "optional_float32" field.
+	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
+	// Datetime holds the value of the "datetime" field.
+	Datetime time.Time `json:"datetime,omitempty"`
+	// Decimal holds the value of the "decimal" field.
+	Decimal float64 `json:"decimal,omitempty"`
+	// Dir holds the value of the "dir" field.
+	Dir http.Dir `json:"dir,omitempty"`
+	// Ndir holds the value of the "ndir" field.
+	Ndir *http.Dir `json:"ndir,omitempty"`
+	// Str holds the value of the "str" field.
+	Str sql.NullString `json:"str,omitempty"`
+	// NullStr holds the value of the "null_str" field.
+	NullStr *sql.NullString `json:"null_str,omitempty"`
+	// Link holds the value of the "link" field.
+	Link schema.Link `json:"link,omitempty"`
+	// NullLink holds the value of the "null_link" field.
+	NullLink *schema.Link `json:"null_link,omitempty"`
+	// Active holds the value of the "active" field.
+	Active schema.Status `json:"active,omitempty"`
+	// NullActive holds the value of the "null_active" field.
+	NullActive *schema.Status `json:"null_active,omitempty"`
+	// Deleted holds the value of the "deleted" field.
+	Deleted sql.NullBool `json:"deleted,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt sql.NullTime `json:"deleted_at,omitempty"`
+	// IP holds the value of the "ip" field.
+	IP net.IP `json:"ip,omitempty"`
+	// NullInt64 holds the value of the "null_int64" field.
+	NullInt64 sql.NullInt64 `json:"null_int64,omitempty"`
+	// SchemaInt holds the value of the "schema_int" field.
+	SchemaInt schema.Int `json:"schema_int,omitempty"`
+	// SchemaInt8 holds the value of the "schema_int8" field.
+	SchemaInt8 schema.Int8 `json:"schema_int8,omitempty"`
+	// SchemaInt64 holds the value of the "schema_int64" field.
+	SchemaInt64 schema.Int64 `json:"schema_int64,omitempty"`
+	// SchemaFloat holds the value of the "schema_float" field.
+	SchemaFloat schema.Float64 `json:"schema_float,omitempty"`
+	// SchemaFloat32 holds the value of the "schema_float32" field.
+	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
+	// NullFloat holds the value of the "null_float" field.
+	NullFloat sql.NullFloat64 `json:"null_float,omitempty"`
+	// Role holds the value of the "role" field.
+	Role role.Role `json:"role,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -96,6 +147,29 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
 		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
+		OptionalFloat         float64         `json:"optional_float,omitempty"`
+		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
+		Datetime              int64           `json:"datetime,omitempty"`
+		Decimal               float64         `json:"decimal,omitempty"`
+		Dir                   http.Dir        `json:"dir,omitempty"`
+		Ndir                  *http.Dir       `json:"ndir,omitempty"`
+		Str                   sql.NullString  `json:"str,omitempty"`
+		NullStr               *sql.NullString `json:"null_str,omitempty"`
+		Link                  schema.Link     `json:"link,omitempty"`
+		NullLink              *schema.Link    `json:"null_link,omitempty"`
+		Active                schema.Status   `json:"active,omitempty"`
+		NullActive            *schema.Status  `json:"null_active,omitempty"`
+		Deleted               sql.NullBool    `json:"deleted,omitempty"`
+		DeletedAt             sql.NullTime    `json:"deleted_at,omitempty"`
+		IP                    net.IP          `json:"ip,omitempty"`
+		NullInt64             sql.NullInt64   `json:"null_int64,omitempty"`
+		SchemaInt             schema.Int      `json:"schema_int,omitempty"`
+		SchemaInt8            schema.Int8     `json:"schema_int8,omitempty"`
+		SchemaInt64           schema.Int64    `json:"schema_int64,omitempty"`
+		SchemaFloat           schema.Float64  `json:"schema_float,omitempty"`
+		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
+		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
+		Role                  role.Role       `json:"role,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -123,6 +197,29 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.OptionalUint32 = scanft.OptionalUint32
 	ft.OptionalUint64 = scanft.OptionalUint64
 	ft.State = scanft.State
+	ft.OptionalFloat = scanft.OptionalFloat
+	ft.OptionalFloat32 = scanft.OptionalFloat32
+	ft.Datetime = time.Unix(0, scanft.Datetime)
+	ft.Decimal = scanft.Decimal
+	ft.Dir = scanft.Dir
+	ft.Ndir = scanft.Ndir
+	ft.Str = scanft.Str
+	ft.NullStr = scanft.NullStr
+	ft.Link = scanft.Link
+	ft.NullLink = scanft.NullLink
+	ft.Active = scanft.Active
+	ft.NullActive = scanft.NullActive
+	ft.Deleted = scanft.Deleted
+	ft.DeletedAt = scanft.DeletedAt
+	ft.IP = scanft.IP
+	ft.NullInt64 = scanft.NullInt64
+	ft.SchemaInt = scanft.SchemaInt
+	ft.SchemaInt8 = scanft.SchemaInt8
+	ft.SchemaInt64 = scanft.SchemaInt64
+	ft.SchemaFloat = scanft.SchemaFloat
+	ft.SchemaFloat32 = scanft.SchemaFloat32
+	ft.NullFloat = scanft.NullFloat
+	ft.Role = scanft.Role
 	return nil
 }
 
@@ -203,14 +300,62 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteString(", optional_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
+	builder.WriteString(", optional_float32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(", datetime=")
+	builder.WriteString(ft.Datetime.Format(time.ANSIC))
+	builder.WriteString(", decimal=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
+	builder.WriteString(", dir=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
+	if v := ft.Ndir; v != nil {
+		builder.WriteString(", ndir=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", str=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Str))
+	if v := ft.NullStr; v != nil {
+		builder.WriteString(", null_str=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", link=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Link))
+	if v := ft.NullLink; v != nil {
+		builder.WriteString(", null_link=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", active=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Active))
+	if v := ft.NullActive; v != nil {
+		builder.WriteString(", null_active=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", deleted=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
+	builder.WriteString(", deleted_at=")
+	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
+	builder.WriteString(", ip=")
+	builder.WriteString(fmt.Sprintf("%v", ft.IP))
+	builder.WriteString(", null_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.NullInt64))
+	builder.WriteString(", schema_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt))
+	builder.WriteString(", schema_int8=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
+	builder.WriteString(", schema_int64=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
+	builder.WriteString(", schema_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat))
+	builder.WriteString(", schema_float32=")
+	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
+	builder.WriteString(", null_float=")
+	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// id returns the int representation of the ID field.
-func (ft *FieldType) id() int {
-	id, _ := strconv.Atoi(ft.ID)
-	return id
 }
 
 // FieldTypes is a parsable slice of FieldType.
@@ -246,6 +391,29 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
 		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
+		OptionalFloat         float64         `json:"optional_float,omitempty"`
+		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
+		Datetime              int64           `json:"datetime,omitempty"`
+		Decimal               float64         `json:"decimal,omitempty"`
+		Dir                   http.Dir        `json:"dir,omitempty"`
+		Ndir                  *http.Dir       `json:"ndir,omitempty"`
+		Str                   sql.NullString  `json:"str,omitempty"`
+		NullStr               *sql.NullString `json:"null_str,omitempty"`
+		Link                  schema.Link     `json:"link,omitempty"`
+		NullLink              *schema.Link    `json:"null_link,omitempty"`
+		Active                schema.Status   `json:"active,omitempty"`
+		NullActive            *schema.Status  `json:"null_active,omitempty"`
+		Deleted               sql.NullBool    `json:"deleted,omitempty"`
+		DeletedAt             sql.NullTime    `json:"deleted_at,omitempty"`
+		IP                    net.IP          `json:"ip,omitempty"`
+		NullInt64             sql.NullInt64   `json:"null_int64,omitempty"`
+		SchemaInt             schema.Int      `json:"schema_int,omitempty"`
+		SchemaInt8            schema.Int8     `json:"schema_int8,omitempty"`
+		SchemaInt64           schema.Int64    `json:"schema_int64,omitempty"`
+		SchemaFloat           schema.Float64  `json:"schema_float,omitempty"`
+		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
+		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
+		Role                  role.Role       `json:"role,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -275,6 +443,29 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			OptionalUint32:        v.OptionalUint32,
 			OptionalUint64:        v.OptionalUint64,
 			State:                 v.State,
+			OptionalFloat:         v.OptionalFloat,
+			OptionalFloat32:       v.OptionalFloat32,
+			Datetime:              time.Unix(0, v.Datetime),
+			Decimal:               v.Decimal,
+			Dir:                   v.Dir,
+			Ndir:                  v.Ndir,
+			Str:                   v.Str,
+			NullStr:               v.NullStr,
+			Link:                  v.Link,
+			NullLink:              v.NullLink,
+			Active:                v.Active,
+			NullActive:            v.NullActive,
+			Deleted:               v.Deleted,
+			DeletedAt:             v.DeletedAt,
+			IP:                    v.IP,
+			NullInt64:             v.NullInt64,
+			SchemaInt:             v.SchemaInt,
+			SchemaInt8:            v.SchemaInt8,
+			SchemaInt64:           v.SchemaInt64,
+			SchemaFloat:           v.SchemaFloat,
+			SchemaFloat32:         v.SchemaFloat32,
+			NullFloat:             v.NullFloat,
+			Role:                  v.Role,
 		})
 	}
 	return nil

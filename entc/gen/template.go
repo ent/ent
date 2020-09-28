@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/facebookincubator/ent/entc/gen/internal"
+	"github.com/facebook/ent/entc/gen/internal"
 )
 
 //go:generate go run github.com/go-bindata/go-bindata/go-bindata -o=internal/bindata.go -pkg=internal -modtime=1 ./template/...
@@ -22,15 +22,16 @@ type (
 	// TypeTemplate specifies a template that is executed with
 	// each Type object of the graph.
 	TypeTemplate struct {
-		Name   string             // template name.
-		Format func(*Type) string // file name format.
+		Name          string             // template name.
+		Format        func(*Type) string // file name format.
+		ExtendPattern string             // extend pattern.
 	}
 	// GraphTemplate specifies a template that is executed with
 	// the Graph object.
 	GraphTemplate struct {
 		Name   string            // template name.
-		Format string            // file name format.
 		Skip   func(*Graph) bool // skip condition.
+		Format string            // file name format.
 	}
 )
 
@@ -58,14 +59,16 @@ var (
 			Format: pkgf("%s.go"),
 		},
 		{
-			Name:   "where",
-			Format: pkgf("%s/where.go"),
+			Name:          "where",
+			Format:        pkgf("%s/where.go"),
+			ExtendPattern: "where/additional/*",
 		},
 		{
 			Name: "meta",
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/%s.go", t.Package(), t.Package())
 			},
+			ExtendPattern: "meta/additional/*",
 		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
@@ -91,6 +94,10 @@ var (
 			Format: "config.go",
 		},
 		{
+			Name:   "mutation",
+			Format: "mutation.go",
+		},
+		{
 			Name:   "migrate",
 			Format: "migrate/migrate.go",
 			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
@@ -103,6 +110,26 @@ var (
 		{
 			Name:   "predicate",
 			Format: "predicate/predicate.go",
+		},
+		{
+			Name:   "hook",
+			Format: "hook/hook.go",
+		},
+		{
+			Name:   "privacy",
+			Format: "privacy/privacy.go",
+		},
+		{
+			Name:   "runtime/ent",
+			Format: "runtime.go",
+		},
+		{
+			Name:   "enttest",
+			Format: "enttest/enttest.go",
+		},
+		{
+			Name:   "runtime/pkg",
+			Format: "runtime/runtime.go",
 		},
 	}
 	// templates holds the Go templates for the code generation.
@@ -136,4 +163,13 @@ func init() {
 
 func pkgf(s string) func(t *Type) string {
 	return func(t *Type) string { return fmt.Sprintf(s, t.Package()) }
+}
+
+// Match reports if the given name matches the extended pattern.
+func (t TypeTemplate) Match(name string) bool {
+	if t.ExtendPattern == "" {
+		return false
+	}
+	matched, _ := filepath.Match(t.ExtendPattern, name)
+	return matched
 }

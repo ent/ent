@@ -12,7 +12,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"

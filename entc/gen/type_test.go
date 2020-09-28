@@ -7,8 +7,8 @@ package gen
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -49,7 +49,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{V: "v"}, {V: "v"}}},
 		},
 	})
 	require.Error(err, "duplicate enums")
@@ -57,7 +57,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{}}},
 		},
 	})
 	require.Error(err, "empty value for enums")
@@ -69,6 +69,13 @@ func TestType(t *testing.T) {
 		},
 	})
 	require.Error(err, "empty field name")
+
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Type"})
+	require.EqualError(err, "schema lowercase name conflicts with Go keyword \"type\"")
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Int"})
+	require.EqualError(err, "schema lowercase name conflicts with Go predeclared identifier \"int\"")
+	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Value"})
+	require.EqualError(err, "schema name conflicts with ent predeclared identifier \"Value\"")
 }
 
 func TestType_Label(t *testing.T) {
@@ -81,6 +88,7 @@ func TestType_Label(t *testing.T) {
 		{"PHBOrg", "phb_org"},
 		{"UserID", "user_id"},
 		{"HTTPCode", "http_code"},
+		{"UserIDs", "user_ids"},
 	}
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name}
@@ -120,6 +128,7 @@ func TestType_Receiver(t *testing.T) {
 		{"DomainSpecificLang", "dospla"},
 		{"[]byte", "b"},
 		{"[16]byte", "b"},
+		{"UserPKey", "up"},
 	}
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name, Config: &Config{Package: "entc/gen"}}
@@ -127,19 +136,34 @@ func TestType_Receiver(t *testing.T) {
 	}
 }
 
-func TestType_MixedInWithDefaultOrValidator(t *testing.T) {
-	position := &load.Position{
-		MixedIn: true,
+func TestField_EnumName(t *testing.T) {
+	tests := []struct {
+		name string
+		enum string
+	}{
+		{"GIF", "TypeGIF"},
+		{"SVG", "TypeSVG"},
+		{"PNG", "TypePNG"},
+		{"MP4", "TypeMP4"},
+		{"unknown", "TypeUnknown"},
+		{"user_data", "TypeUserData"},
 	}
+	for _, tt := range tests {
+		require.Equal(t, tt.enum, Field{Name: "Type"}.EnumName(tt.name))
+	}
+}
+
+func TestType_WithRuntimeMixin(t *testing.T) {
+	position := &load.Position{MixedIn: true}
 	typ := &Type{
+		ID: &Field{},
 		Fields: []*Field{
 			{Default: true, Position: position},
 			{UpdateDefault: true, Position: position},
 			{Validators: 1, Position: position},
 		},
 	}
-	fields := typ.MixedInWithDefaultOrValidator()
-	require.Equal(t, 3, len(fields))
+	require.True(t, typ.RuntimeMixin())
 }
 
 func TestType_TagTypes(t *testing.T) {
@@ -254,6 +278,7 @@ func TestBuilderField(t *testing.T) {
 		{"active", "active"},
 		{"type", "_type"},
 		{"config", "_config"},
+		{"SSOCert", "_SSOCert"},
 	}
 	for _, tt := range tests {
 		require.Equal(t, tt.field, Edge{Name: tt.name}.BuilderField())
@@ -269,10 +294,10 @@ func TestEdge(t *testing.T) {
 	require.True(t, users.IsInverse())
 	require.False(t, groups.IsInverse())
 
-	require.Equal(t, "GroupsLabel", users.Constant())
-	require.Equal(t, "GroupsLabel", groups.Constant())
+	require.Equal(t, "GroupsLabel", users.LabelConstant())
+	require.Equal(t, "GroupsLabel", groups.LabelConstant())
 
-	require.Equal(t, "UsersInverseLabel", users.InverseConstant())
+	require.Equal(t, "UsersInverseLabel", users.InverseLabelConstant())
 	require.Equal(t, "user_groups", users.Label())
 	require.Equal(t, "user_groups", groups.Label())
 }

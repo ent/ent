@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,9 +8,9 @@ package ent
 
 import (
 	"context"
+	"sync"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/migrate"
+	"github.com/facebook/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -18,25 +18,142 @@ type Tx struct {
 	config
 	// Node is the client for interacting with the Node builders.
 	Node *NodeClient
+
+	// lazily loaded.
+	client     *Client
+	clientOnce sync.Once
+
+	// completion callbacks.
+	mu         sync.Mutex
+	onCommit   []CommitHook
+	onRollback []RollbackHook
+
+	// ctx lives for the life of the transaction. It is
+	// the same context used by the underlying connection.
+	ctx context.Context
+}
+
+type (
+	// Committer is the interface that wraps the Committer method.
+	Committer interface {
+		Commit(context.Context, *Tx) error
+	}
+
+	// The CommitFunc type is an adapter to allow the use of ordinary
+	// function as a Committer. If f is a function with the appropriate
+	// signature, CommitFunc(f) is a Committer that calls f.
+	CommitFunc func(context.Context, *Tx) error
+
+	// CommitHook defines the "commit middleware". A function that gets a Committer
+	// and returns a Committer. For example:
+	//
+	//	hook := func(next ent.Committer) ent.Committer {
+	//		return ent.CommitFunc(func(context.Context, tx *ent.Tx) error {
+	//			// Do some stuff before.
+	//			if err := next.Commit(ctx, tx); err != nil {
+	//				return err
+	//			}
+	//			// Do some stuff after.
+	//			return nil
+	//		})
+	//	}
+	//
+	CommitHook func(Committer) Committer
+)
+
+// Commit calls f(ctx, m).
+func (f CommitFunc) Commit(ctx context.Context, tx *Tx) error {
+	return f(ctx, tx)
 }
 
 // Commit commits the transaction.
 func (tx *Tx) Commit() error {
-	return tx.config.driver.(*txDriver).tx.Commit()
+	txDriver := tx.config.driver.(*txDriver)
+	var fn Committer = CommitFunc(func(context.Context, *Tx) error {
+		return txDriver.tx.Commit()
+	})
+	tx.mu.Lock()
+	hooks := append([]CommitHook(nil), tx.onCommit...)
+	tx.mu.Unlock()
+	for i := len(hooks) - 1; i >= 0; i-- {
+		fn = hooks[i](fn)
+	}
+	return fn.Commit(tx.ctx, tx)
+}
+
+// OnCommit adds a hook to call on commit.
+func (tx *Tx) OnCommit(f CommitHook) {
+	tx.mu.Lock()
+	defer tx.mu.Unlock()
+	tx.onCommit = append(tx.onCommit, f)
+}
+
+type (
+	// Rollbacker is the interface that wraps the Rollbacker method.
+	Rollbacker interface {
+		Rollback(context.Context, *Tx) error
+	}
+
+	// The RollbackFunc type is an adapter to allow the use of ordinary
+	// function as a Rollbacker. If f is a function with the appropriate
+	// signature, RollbackFunc(f) is a Rollbacker that calls f.
+	RollbackFunc func(context.Context, *Tx) error
+
+	// RollbackHook defines the "rollback middleware". A function that gets a Rollbacker
+	// and returns a Rollbacker. For example:
+	//
+	//	hook := func(next ent.Rollbacker) ent.Rollbacker {
+	//		return ent.RollbackFunc(func(context.Context, tx *ent.Tx) error {
+	//			// Do some stuff before.
+	//			if err := next.Rollback(ctx, tx); err != nil {
+	//				return err
+	//			}
+	//			// Do some stuff after.
+	//			return nil
+	//		})
+	//	}
+	//
+	RollbackHook func(Rollbacker) Rollbacker
+)
+
+// Rollback calls f(ctx, m).
+func (f RollbackFunc) Rollback(ctx context.Context, tx *Tx) error {
+	return f(ctx, tx)
 }
 
 // Rollback rollbacks the transaction.
 func (tx *Tx) Rollback() error {
-	return tx.config.driver.(*txDriver).tx.Rollback()
+	txDriver := tx.config.driver.(*txDriver)
+	var fn Rollbacker = RollbackFunc(func(context.Context, *Tx) error {
+		return txDriver.tx.Rollback()
+	})
+	tx.mu.Lock()
+	hooks := append([]RollbackHook(nil), tx.onRollback...)
+	tx.mu.Unlock()
+	for i := len(hooks) - 1; i >= 0; i-- {
+		fn = hooks[i](fn)
+	}
+	return fn.Rollback(tx.ctx, tx)
+}
+
+// OnRollback adds a hook to call on rollback.
+func (tx *Tx) OnRollback(f RollbackHook) {
+	tx.mu.Lock()
+	defer tx.mu.Unlock()
+	tx.onRollback = append(tx.onRollback, f)
 }
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config: tx.config,
-		Schema: migrate.NewSchema(tx.driver),
-		Node:   NewNodeClient(tx.config),
-	}
+	tx.clientOnce.Do(func() {
+		tx.client = &Client{config: tx.config}
+		tx.client.init()
+	})
+	return tx.client
+}
+
+func (tx *Tx) init() {
+	tx.Node = NewNodeClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

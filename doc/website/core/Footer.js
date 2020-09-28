@@ -41,6 +41,10 @@ class Footer extends React.Component {
             <a href={this.docUrl('migrate')}>
              Schema Migration
             </a>
+            <br/>
+            <h5>Legal</h5>
+            <a href="https://opensource.facebook.com/legal/privacy/" target="_blank" rel="noreferrer noopener">Privacy</a>
+            <a href="https://opensource.facebook.com/legal/terms/" target="_blank" rel="noreferrer noopener">Terms</a>
           </div>
           <div>
             <h5>Credit</h5>

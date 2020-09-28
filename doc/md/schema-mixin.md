@@ -9,7 +9,15 @@ The `ent.Mixin` interface is as follows:
 
 ```go
 type Mixin interface {
-	Fields() []ent.Field
+	// Fields returns a slice of fields to add to the schema.
+	Fields() []Field
+	// Edges returns a slice of edges to add to the schema.
+	Edges() []Edge
+	// Indexes returns a slice of indexes to add to the schema.
+	Indexes() []Index
+	// Hooks returns a slice of hooks to add to the schema.
+	// Note that mixin hooks are executed before schema hooks.
+	Hooks() []Hook
 }
 ```
 
@@ -18,12 +26,26 @@ type Mixin interface {
 A common use case for `Mixin` is to mix-in a list of common fields to your schema.
 
 ```go
+package schema
+
+import (
+	"time"
+
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/mixin"
+)
+
 // -------------------------------------------------
 // Mixin definition
 
 // TimeMixin implements the ent.Mixin for sharing
 // time fields with package schemas.
-type TimeMixin struct{}
+type TimeMixin struct{
+	// We embed the `mixin.Schema` to avoid
+	// implementing the rest of the methods.
+	mixin.Schema
+}
 
 func (TimeMixin) Fields() []ent.Field {
 	return []ent.Field{
@@ -38,7 +60,11 @@ func (TimeMixin) Fields() []ent.Field {
 
 // DetailsMixin implements the ent.Mixin for sharing
 // entity details fields with package schemas.
-type DetailsMixin struct{}
+type DetailsMixin struct{
+	// We embed the `mixin.Schema` to avoid
+	// implementing the rest of the methods.
+	mixin.Schema
+}
 
 func (DetailsMixin) Fields() []ent.Field {
 	return []ent.Field{
@@ -87,6 +113,33 @@ func (Pet) Mixin() []ent.Mixin {
 func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("weight"),
+	}
+}
+```
+
+## Builtin Mixin
+
+Package `mixin` provides a few builtin mixins that can be used
+for adding the `create_time` and `update_time` fields to the schema.
+
+In order to use them, add the `mixin.Time` mixin to your schema as follows:
+```go
+package schema
+
+import (
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/mixin"
+)
+
+type Pet struct {
+	ent.Schema
+}
+
+func (Pet) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.Time{},
+		// Or, mixin.CreateTime only for create_time
+		// and mixin.UpdateTime only for update_time.
 	}
 }
 ```

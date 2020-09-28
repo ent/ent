@@ -5,9 +5,10 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/mixin"
 )
 
 // User holds the schema for the user entity.
@@ -40,8 +41,10 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Sensitive(),
 		field.Enum("role").
-			Values("user", "admin").
+			Values("user", "admin", "free-user").
 			Default("user"),
+		field.String("SSOCert").
+			Optional(),
 	}
 }
 
@@ -61,7 +64,9 @@ func (User) Edges() []ent.Edge {
 }
 
 // UserMixin composes create/update time mixin.
-type UserMixin struct{}
+type UserMixin struct {
+	mixin.Schema
+}
 
 // Fields of the time mixin.
 func (UserMixin) Fields() []ent.Field {

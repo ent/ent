@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -6,13 +6,24 @@
 
 package filetype
 
+import (
+	"fmt"
+)
+
 const (
 	// Label holds the string label denoting the filetype type in the database.
 	Label = "file_type"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldName holds the string denoting the name vertex property in the database.
+	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldState holds the string denoting the state field in the database.
+	FieldState = "state"
+
+	// EdgeFiles holds the string denoting the files edge name in mutations.
+	EdgeFiles = "files"
 
 	// Table holds the table name of the filetype in the database.
 	Table = "file_types"
@@ -29,4 +40,81 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldType,
+	FieldState,
 }
+
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
+
+// Type defines the type for the type enum field.
+type Type string
+
+// TypePNG is the default Type.
+const DefaultType = TypePNG
+
+// Type values.
+const (
+	TypePNG Type = "png"
+	TypeSVG Type = "svg"
+	TypeJPG Type = "jpg"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypePNG, TypeSVG, TypeJPG:
+		return nil
+	default:
+		return fmt.Errorf("filetype: invalid enum value for type field: %q", _type)
+	}
+}
+
+// State defines the type for the state enum field.
+type State string
+
+// StateOn is the default State.
+const DefaultState = StateOn
+
+// State values.
+const (
+	StateOn  State = "ON"
+	StateOff State = "OFF"
+)
+
+func (s State) String() string {
+	return string(s)
+}
+
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
+func StateValidator(s State) error {
+	switch s {
+	case StateOn, StateOff:
+		return nil
+	default:
+		return fmt.Errorf("filetype: invalid enum value for state field: %q", s)
+	}
+}
+
+// Ptr returns a new pointer to the enum value.
+func (_type Type) Ptr() *Type {
+	return &_type
+}
+
+// Ptr returns a new pointer to the enum value.
+func (s State) Ptr() *State {
+	return &s
+}
+
+// comment from another template.

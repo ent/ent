@@ -1,0 +1,185 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "hook" }}
+
+{{ with extend $ "Package" "hook" }}
+	{{ template "header" . }}
+{{ end }}
+
+import "{{ $.Config.Package }}"
+
+{{ $pkg := base $.Config.Package }}
+
+{{ range $n := $.Nodes }}
+	{{ $name := print $n.Name "Func" }}
+	{{ $type := printf "*%s.%s" $pkg $n.MutationName }}
+
+	// The {{ $name }} type is an adapter to allow the use of ordinary
+	// function as {{ $n.Name }} mutator.
+	type {{ $name }} func(context.Context, {{ $type }}) ({{ $pkg }}.Value, error)
+
+	// Mutate calls f(ctx, m).
+	func (f {{ $name }}) Mutate(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
+		mv, ok := m.({{ $type }})
+		if !ok {
+			return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
+		}
+		return f(ctx, mv)
+	}
+{{ end }}
+
+// Condition is a hook condition function.
+type Condition func(context.Context, {{ $pkg }}.Mutation) bool
+
+// And groups conditions with the AND operator.
+func And(first, second Condition, rest ...Condition) Condition {
+	return func(ctx context.Context, m {{ $pkg }}.Mutation) bool {
+		if !first(ctx, m) || !second(ctx, m) {
+			return false
+		}
+		for _, cond := range rest {
+			if !cond(ctx, m) {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+// Or groups conditions with the OR operator.
+func Or(first, second Condition, rest ...Condition) Condition {
+	return func(ctx context.Context, m {{ $pkg }}.Mutation) bool {
+		if first(ctx, m) || second(ctx, m) {
+			return true
+		}
+		for _, cond := range rest {
+			if cond(ctx, m) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// Not negates a given condition.
+func Not(cond Condition) Condition {
+	return func(ctx context.Context, m {{ $pkg }}.Mutation) bool {
+		return !cond(ctx, m)
+	}
+}
+
+// HasOp is a condition testing mutation operation.
+func HasOp(op {{ $pkg }}.Op) Condition {
+	return func(_ context.Context, m {{ $pkg }}.Mutation) bool {
+		return m.Op().Is(op)
+	}
+}
+
+{{ $conds := dict "HasFields" "Field" "HasAddedFields" "AddedField" "HasClearedFields" "FieldCleared" -}}
+{{- range $cond := keys $conds }}
+	{{ $method := get $conds $cond -}}
+	// {{ $cond }} is a condition validating `.{{ $method }}` on fields.
+	func {{ $cond }}(field string, fields ...string) Condition {
+		return func(_ context.Context, m {{ $pkg }}.Mutation) bool {
+			if {{ if ne $method "FieldCleared" }}_, {{ end }}exists := m.{{ $method }}(field); !exists {
+				return false
+			}
+			for _, field := range fields {
+				if {{ if ne $method "FieldCleared" }}_, {{ end }}exists := m.{{ $method }}(field); !exists {
+					return false
+				}
+			}
+			return true
+		}
+	}
+{{- end }}
+
+// If executes the given hook under condition.
+//
+//	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
+//
+func If(hk {{ $pkg }}.Hook, cond Condition) {{ $pkg }}.Hook {
+	return func(next {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		return {{ $pkg }}.MutateFunc(func(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
+			if cond(ctx, m) {
+				return hk(next).Mutate(ctx, m)
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+}
+
+// On executes the given hook only for the given operation.
+//
+//	hook.On(Log, {{ $pkg }}.Delete|{{ $pkg }}.Create)
+//
+func On(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+	return If(hk, HasOp(op))
+}
+
+// Unless skips the given hook only for the given operation.
+//
+//	hook.Unless(Log, {{ $pkg }}.Update|{{ $pkg }}.UpdateOne)
+//
+func Unless(hk {{ $pkg }}.Hook, op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+	return If(hk, Not(HasOp(op)))
+}
+
+// Reject returns a hook that rejects all operations that match op.
+//
+//	func (T) Hooks() []{{ $pkg }}.Hook {
+//		return []{{ $pkg }}.Hook{
+//			Reject({{ $pkg }}.Delete|{{ $pkg }}.Update),
+//		}
+//	}
+//
+func Reject(op {{ $pkg }}.Op) {{ $pkg }}.Hook {
+	hk := func({{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		return {{ $pkg }}.MutateFunc(func(_ context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
+			return nil, fmt.Errorf("%s operation is not allowed", m.Op())
+		})
+	}
+	return On(hk, op)
+}
+
+// Chain acts as a list of hooks and is effectively immutable.
+// Once created, it will always hold the same set of hooks in the same order.
+type Chain struct {
+	hooks []{{ $pkg }}.Hook
+}
+
+// NewChain creates a new chain of hooks.
+func NewChain(hooks ...{{ $pkg }}.Hook) Chain {
+	return Chain{append([]{{ $pkg }}.Hook(nil), hooks...)}
+}
+
+// Hook chains the list of hooks and returns the final hook.
+func (c Chain) Hook() {{ $pkg }}.Hook {
+	return func(mutator {{ $pkg }}.Mutator) {{ $pkg }}.Mutator {
+		for i := len(c.hooks) - 1; i >= 0; i-- {
+			mutator = c.hooks[i](mutator)
+		}
+		return mutator
+	}
+}
+
+// Append extends a chain, adding the specified hook
+// as the last ones in the mutation flow.
+func (c Chain) Append(hooks ...{{ $pkg }}.Hook) Chain {
+	newHooks := make([]{{ $pkg }}.Hook, 0, len(c.hooks)+len(hooks))
+	newHooks = append(newHooks, c.hooks...)
+	newHooks = append(newHooks, hooks...)
+	return Chain{newHooks}
+}
+
+// Extend extends a chain, adding the specified chain
+// as the last ones in the mutation flow.
+func (c Chain) Extend(chain Chain) Chain {
+	return c.Append(chain.hooks...)
+}
+
+{{ end }}

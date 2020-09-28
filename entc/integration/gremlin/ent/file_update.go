@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,34 +8,25 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // FileUpdate is the builder for updating File entities.
 type FileUpdate struct {
 	config
-	size         *int
-	addsize      *int
-	name         *string
-	user         *string
-	clearuser    bool
-	group        *string
-	cleargroup   bool
-	owner        map[string]struct{}
-	_type        map[string]struct{}
-	clearedOwner bool
-	clearedType  bool
-	predicates   []predicate.File
+	hooks      []Hook
+	mutation   *FileMutation
+	predicates []predicate.File
 }
 
 // Where adds a new predicate for the builder.
@@ -46,8 +37,8 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 
 // SetSize sets the size field.
 func (fu *FileUpdate) SetSize(i int) *FileUpdate {
-	fu.size = &i
-	fu.addsize = nil
+	fu.mutation.ResetSize()
+	fu.mutation.SetSize(i)
 	return fu
 }
 
@@ -61,23 +52,19 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 
 // AddSize adds i to size.
 func (fu *FileUpdate) AddSize(i int) *FileUpdate {
-	if fu.addsize == nil {
-		fu.addsize = &i
-	} else {
-		*fu.addsize += i
-	}
+	fu.mutation.AddSize(i)
 	return fu
 }
 
 // SetName sets the name field.
 func (fu *FileUpdate) SetName(s string) *FileUpdate {
-	fu.name = &s
+	fu.mutation.SetName(s)
 	return fu
 }
 
 // SetUser sets the user field.
 func (fu *FileUpdate) SetUser(s string) *FileUpdate {
-	fu.user = &s
+	fu.mutation.SetUser(s)
 	return fu
 }
 
@@ -91,14 +78,13 @@ func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
 
 // ClearUser clears the value of user.
 func (fu *FileUpdate) ClearUser() *FileUpdate {
-	fu.user = nil
-	fu.clearuser = true
+	fu.mutation.ClearUser()
 	return fu
 }
 
 // SetGroup sets the group field.
 func (fu *FileUpdate) SetGroup(s string) *FileUpdate {
-	fu.group = &s
+	fu.mutation.SetGroup(s)
 	return fu
 }
 
@@ -112,17 +98,33 @@ func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 
 // ClearGroup clears the value of group.
 func (fu *FileUpdate) ClearGroup() *FileUpdate {
-	fu.group = nil
-	fu.cleargroup = true
+	fu.mutation.ClearGroup()
+	return fu
+}
+
+// SetOp sets the op field.
+func (fu *FileUpdate) SetOp(b bool) *FileUpdate {
+	fu.mutation.SetOp(b)
+	return fu
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
+	if b != nil {
+		fu.SetOp(*b)
+	}
+	return fu
+}
+
+// ClearOp clears the value of op.
+func (fu *FileUpdate) ClearOp() *FileUpdate {
+	fu.mutation.ClearOp()
 	return fu
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
-	if fu.owner == nil {
-		fu.owner = make(map[string]struct{})
-	}
-	fu.owner[id] = struct{}{}
+	fu.mutation.SetOwnerID(id)
 	return fu
 }
 
@@ -141,10 +143,7 @@ func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
 
 // SetTypeID sets the type edge to FileType by id.
 func (fu *FileUpdate) SetTypeID(id string) *FileUpdate {
-	if fu._type == nil {
-		fu._type = make(map[string]struct{})
-	}
-	fu._type[id] = struct{}{}
+	fu.mutation.SetTypeID(id)
 	return fu
 }
 
@@ -161,32 +160,92 @@ func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
 	return fu.SetTypeID(f.ID)
 }
 
-// ClearOwner clears the owner edge to User.
-func (fu *FileUpdate) ClearOwner() *FileUpdate {
-	fu.clearedOwner = true
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fu *FileUpdate) AddFieldIDs(ids ...string) *FileUpdate {
+	fu.mutation.AddFieldIDs(ids...)
 	return fu
 }
 
-// ClearType clears the type edge to FileType.
-func (fu *FileUpdate) ClearType() *FileUpdate {
-	fu.clearedType = true
+// AddField adds the field edges to FieldType.
+func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.AddFieldIDs(ids...)
+}
+
+// Mutation returns the FileMutation object of the builder.
+func (fu *FileUpdate) Mutation() *FileMutation {
+	return fu.mutation
+}
+
+// ClearOwner clears the "owner" edge to type User.
+func (fu *FileUpdate) ClearOwner() *FileUpdate {
+	fu.mutation.ClearOwner()
 	return fu
+}
+
+// ClearType clears the "type" edge to type FileType.
+func (fu *FileUpdate) ClearType() *FileUpdate {
+	fu.mutation.ClearType()
+	return fu
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fu *FileUpdate) ClearFieldEdge() *FileUpdate {
+	fu.mutation.ClearFieldEdge()
+	return fu
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (fu *FileUpdate) RemoveFieldIDs(ids ...string) *FileUpdate {
+	fu.mutation.RemoveFieldIDs(ids...)
+	return fu
+}
+
+// RemoveField removes field edges to FieldType.
+func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
-	if fu.size != nil {
-		if err := file.SizeValidator(*fu.size); err != nil {
-			return 0, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
+	var (
+		err      error
+		affected int
+	)
+	if len(fu.hooks) == 0 {
+		if err = fu.check(); err != nil {
+			return 0, err
+		}
+		affected, err = fu.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fu.check(); err != nil {
+				return 0, err
+			}
+			fu.mutation = mutation
+			affected, err = fu.gremlinSave(ctx)
+			mutation.done = true
+			return affected, err
+		})
+		for i := len(fu.hooks) - 1; i >= 0; i-- {
+			mut = fu.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, fu.mutation); err != nil {
+			return 0, err
 		}
 	}
-	if len(fu.owner) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if len(fu._type) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"type\"")
-	}
-	return fu.gremlinSave(ctx)
+	return affected, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -211,6 +270,16 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fu *FileUpdate) check() error {
+	if v, ok := fu.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := fu.gremlin().Query()
@@ -224,6 +293,11 @@ func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
 }
 
 func (fu *FileUpdate) gremlin() *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(file.Label)
 	for _, p := range fu.predicates {
 		p(v)
@@ -234,46 +308,73 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := fu.size; value != nil {
-		v.Property(dsl.Single, file.FieldSize, *value)
+	if value, ok := fu.mutation.Size(); ok {
+		v.Property(dsl.Single, file.FieldSize, value)
 	}
-	if value := fu.addsize; value != nil {
-		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(*value)).Sum())
+	if value, ok := fu.mutation.AddedSize(); ok {
+		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(value)).Sum())
 	}
-	if value := fu.name; value != nil {
-		v.Property(dsl.Single, file.FieldName, *value)
+	if value, ok := fu.mutation.Name(); ok {
+		v.Property(dsl.Single, file.FieldName, value)
 	}
-	if value := fu.user; value != nil {
-		v.Property(dsl.Single, file.FieldUser, *value)
+	if value, ok := fu.mutation.User(); ok {
+		v.Property(dsl.Single, file.FieldUser, value)
 	}
-	if value := fu.group; value != nil {
-		v.Property(dsl.Single, file.FieldGroup, *value)
+	if value, ok := fu.mutation.Group(); ok {
+		v.Property(dsl.Single, file.FieldGroup, value)
+	}
+	if value, ok := fu.mutation.GetOp(); ok {
+		v.Property(dsl.Single, file.FieldOp, value)
 	}
 	var properties []interface{}
-	if fu.clearuser {
+	if fu.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
-	if fu.cleargroup {
+	if fu.mutation.GroupCleared() {
 		properties = append(properties, file.FieldGroup)
+	}
+	if fu.mutation.OpCleared() {
+		properties = append(properties, file.FieldOp)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if fu.clearedOwner {
+	if fu.mutation.OwnerCleared() {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range fu.owner {
+	for _, id := range fu.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
-	if fu.clearedType {
+	if fu.mutation.TypeCleared() {
 		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range fu._type {
+	for _, id := range fu.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
+	for _, id := range fu.mutation.RemovedFieldIDs() {
+		tr := rv.Clone().OutE(file.FieldLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range fu.mutation.FieldIDs() {
+		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
+		})
+	}
 	v.Count()
+	if len(constraints) > 0 {
+		constraints = append(constraints, &constraint{
+			pred: rv.Count(),
+			test: __.Is(p.GT(1)).Constant(&ConstraintError{msg: "update traversal contains more than one vertex"}),
+		})
+		v = constraints[0].pred.Coalesce(constraints[0].test, v)
+		for _, cr := range constraints[1:] {
+			v = cr.pred.Coalesce(cr.test, v)
+		}
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }
@@ -281,24 +382,14 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 // FileUpdateOne is the builder for updating a single File entity.
 type FileUpdateOne struct {
 	config
-	id           string
-	size         *int
-	addsize      *int
-	name         *string
-	user         *string
-	clearuser    bool
-	group        *string
-	cleargroup   bool
-	owner        map[string]struct{}
-	_type        map[string]struct{}
-	clearedOwner bool
-	clearedType  bool
+	hooks    []Hook
+	mutation *FileMutation
 }
 
 // SetSize sets the size field.
 func (fuo *FileUpdateOne) SetSize(i int) *FileUpdateOne {
-	fuo.size = &i
-	fuo.addsize = nil
+	fuo.mutation.ResetSize()
+	fuo.mutation.SetSize(i)
 	return fuo
 }
 
@@ -312,23 +403,19 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 
 // AddSize adds i to size.
 func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
-	if fuo.addsize == nil {
-		fuo.addsize = &i
-	} else {
-		*fuo.addsize += i
-	}
+	fuo.mutation.AddSize(i)
 	return fuo
 }
 
 // SetName sets the name field.
 func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
-	fuo.name = &s
+	fuo.mutation.SetName(s)
 	return fuo
 }
 
 // SetUser sets the user field.
 func (fuo *FileUpdateOne) SetUser(s string) *FileUpdateOne {
-	fuo.user = &s
+	fuo.mutation.SetUser(s)
 	return fuo
 }
 
@@ -342,14 +429,13 @@ func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
 
 // ClearUser clears the value of user.
 func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
-	fuo.user = nil
-	fuo.clearuser = true
+	fuo.mutation.ClearUser()
 	return fuo
 }
 
 // SetGroup sets the group field.
 func (fuo *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
-	fuo.group = &s
+	fuo.mutation.SetGroup(s)
 	return fuo
 }
 
@@ -363,17 +449,33 @@ func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 
 // ClearGroup clears the value of group.
 func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
-	fuo.group = nil
-	fuo.cleargroup = true
+	fuo.mutation.ClearGroup()
+	return fuo
+}
+
+// SetOp sets the op field.
+func (fuo *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
+	fuo.mutation.SetOp(b)
+	return fuo
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
+	if b != nil {
+		fuo.SetOp(*b)
+	}
+	return fuo
+}
+
+// ClearOp clears the value of op.
+func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
+	fuo.mutation.ClearOp()
 	return fuo
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (fuo *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
-	if fuo.owner == nil {
-		fuo.owner = make(map[string]struct{})
-	}
-	fuo.owner[id] = struct{}{}
+	fuo.mutation.SetOwnerID(id)
 	return fuo
 }
 
@@ -392,10 +494,7 @@ func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
 
 // SetTypeID sets the type edge to FileType by id.
 func (fuo *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
-	if fuo._type == nil {
-		fuo._type = make(map[string]struct{})
-	}
-	fuo._type[id] = struct{}{}
+	fuo.mutation.SetTypeID(id)
 	return fuo
 }
 
@@ -412,41 +511,101 @@ func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
 	return fuo.SetTypeID(f.ID)
 }
 
-// ClearOwner clears the owner edge to User.
-func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
-	fuo.clearedOwner = true
+// AddFieldIDs adds the field edge to FieldType by ids.
+func (fuo *FileUpdateOne) AddFieldIDs(ids ...string) *FileUpdateOne {
+	fuo.mutation.AddFieldIDs(ids...)
 	return fuo
 }
 
-// ClearType clears the type edge to FileType.
-func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
-	fuo.clearedType = true
+// AddField adds the field edges to FieldType.
+func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.AddFieldIDs(ids...)
+}
+
+// Mutation returns the FileMutation object of the builder.
+func (fuo *FileUpdateOne) Mutation() *FileMutation {
+	return fuo.mutation
+}
+
+// ClearOwner clears the "owner" edge to type User.
+func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
+	fuo.mutation.ClearOwner()
 	return fuo
+}
+
+// ClearType clears the "type" edge to type FileType.
+func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
+	fuo.mutation.ClearType()
+	return fuo
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fuo *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
+	fuo.mutation.ClearFieldEdge()
+	return fuo
+}
+
+// RemoveFieldIDs removes the field edge to FieldType by ids.
+func (fuo *FileUpdateOne) RemoveFieldIDs(ids ...string) *FileUpdateOne {
+	fuo.mutation.RemoveFieldIDs(ids...)
+	return fuo
+}
+
+// RemoveField removes field edges to FieldType.
+func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
-	if fuo.size != nil {
-		if err := file.SizeValidator(*fuo.size); err != nil {
-			return nil, fmt.Errorf("ent: validator failed for field \"size\": %v", err)
+	var (
+		err  error
+		node *File
+	)
+	if len(fuo.hooks) == 0 {
+		if err = fuo.check(); err != nil {
+			return nil, err
+		}
+		node, err = fuo.gremlinSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*FileMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fuo.check(); err != nil {
+				return nil, err
+			}
+			fuo.mutation = mutation
+			node, err = fuo.gremlinSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(fuo.hooks) - 1; i >= 0; i-- {
+			mut = fuo.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, fuo.mutation); err != nil {
+			return nil, err
 		}
 	}
-	if len(fuo.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if len(fuo._type) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"type\"")
-	}
-	return fuo.gremlinSave(ctx)
+	return node, err
 }
 
 // SaveX is like Save, but panics if an error occurs.
 func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
-	f, err := fuo.Save(ctx)
+	node, err := fuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -462,9 +621,23 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fuo *FileUpdateOne) check() error {
+	if v, ok := fuo.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 	res := &gremlin.Response{}
-	query, bindings := fuo.gremlin(fuo.id).Query()
+	id, ok := fuo.mutation.ID()
+	if !ok {
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing File.ID for update")}
+	}
+	query, bindings := fuo.gremlin(id).Query()
 	if err := fuo.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -479,6 +652,11 @@ func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 }
 
 func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -486,46 +664,69 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value := fuo.size; value != nil {
-		v.Property(dsl.Single, file.FieldSize, *value)
+	if value, ok := fuo.mutation.Size(); ok {
+		v.Property(dsl.Single, file.FieldSize, value)
 	}
-	if value := fuo.addsize; value != nil {
-		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(*value)).Sum())
+	if value, ok := fuo.mutation.AddedSize(); ok {
+		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(value)).Sum())
 	}
-	if value := fuo.name; value != nil {
-		v.Property(dsl.Single, file.FieldName, *value)
+	if value, ok := fuo.mutation.Name(); ok {
+		v.Property(dsl.Single, file.FieldName, value)
 	}
-	if value := fuo.user; value != nil {
-		v.Property(dsl.Single, file.FieldUser, *value)
+	if value, ok := fuo.mutation.User(); ok {
+		v.Property(dsl.Single, file.FieldUser, value)
 	}
-	if value := fuo.group; value != nil {
-		v.Property(dsl.Single, file.FieldGroup, *value)
+	if value, ok := fuo.mutation.Group(); ok {
+		v.Property(dsl.Single, file.FieldGroup, value)
+	}
+	if value, ok := fuo.mutation.GetOp(); ok {
+		v.Property(dsl.Single, file.FieldOp, value)
 	}
 	var properties []interface{}
-	if fuo.clearuser {
+	if fuo.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
-	if fuo.cleargroup {
+	if fuo.mutation.GroupCleared() {
 		properties = append(properties, file.FieldGroup)
+	}
+	if fuo.mutation.OpCleared() {
+		properties = append(properties, file.FieldOp)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if fuo.clearedOwner {
+	if fuo.mutation.OwnerCleared() {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range fuo.owner {
+	for _, id := range fuo.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
-	if fuo.clearedType {
+	if fuo.mutation.TypeCleared() {
 		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for id := range fuo._type {
+	for _, id := range fuo.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
+	for _, id := range fuo.mutation.RemovedFieldIDs() {
+		tr := rv.Clone().OutE(file.FieldLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range fuo.mutation.FieldIDs() {
+		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
+		constraints = append(constraints, &constraint{
+			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
+		})
+	}
 	v.ValueMap(true)
+	if len(constraints) > 0 {
+		v = constraints[0].pred.Coalesce(constraints[0].test, v)
+		for _, cr := range constraints[1:] {
+			v = cr.pred.Coalesce(cr.test, v)
+		}
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

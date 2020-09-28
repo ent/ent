@@ -118,7 +118,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	if ps := {{ $receiver }}.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, {{ $.Package }}.ValidColumn)
 			}
 		}
 	}
@@ -137,7 +137,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range {{ $receiver }}.order {
-		p(selector)
+		p(selector, {{ $.Package }}.ValidColumn)
 	}
 	if offset := {{ $receiver }}.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -155,9 +155,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 {{ define "dialect/sql/query/path" }}
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
+	selector := {{ $receiver }}.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return nil, err
+	}
 	step := sqlgraph.NewStep(
-		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, {{ $receiver }}.sqlQuery()),
+		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, selector),
 		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
 		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}
@@ -167,15 +172,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
-	query.sql = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{/* query/from defines the query generation for an edge query from a given node. */}}
 {{ define "dialect/sql/query/from" }}
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver -}}
-	id := {{ $receiver }}.{{ if and $.ID.IsString (not $.ID.UserDefined) }}id(){{ else }}ID{{ end }}
+	id := {{ $receiver }}.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
 		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
@@ -187,7 +193,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
-	query.sql = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{ define "dialect/sql/query/eagerloading" }}
@@ -200,6 +206,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			for _, node := range nodes {
 				ids[node.ID] = node
 				fks = append(fks, node.ID)
+				node.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
 			}
 			var (
 				edgeids []{{ $e.Type.ID.Type }}
@@ -283,17 +290,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			fks := make([]driver.Value, 0, len(nodes))
 			nodeids := make(map[{{ $.ID.Type }}]*{{ $.Name }})
 			for i := range nodes {
-				{{- /* Convert string-ids that are stored as int in the database */ -}}
-				{{- if and (not $.ID.UserDefined) $.ID.IsString }}
-					id, err := strconv.Atoi(nodes[i].ID)
-					if err != nil {
-						return nil, err
-					}
-					fks = append(fks, id)
-				{{- else }}
-					fks = append(fks, nodes[i].ID)
-				{{- end }}
+				fks = append(fks, nodes[i].ID)
 				nodeids[nodes[i].ID] = nodes[i]
+				{{- if $e.O2M }}
+					nodes[i].Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
+				{{- end }}
 			}
 			query.withFKs = true
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
@@ -318,16 +319,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	}
 {{ end }}
 
-{{- /* Convert string-ids that are stored as int in the database */ -}}
 {{ define "dialect/sql/query/eagerloading/m2massign" }}
 	{{- $arg := $.Scope.Arg }}
 	{{- $field := $.Scope.Field }}
 	{{- $nulltype := $.Scope.NullType }}
-	{{- if and (not $field.UserDefined) $field.IsString -}}
-		strconv.FormatInt({{ $arg }}.Int64, 10)
-	{{- else  if hasPrefix $nulltype "sql" -}}
+	{{- if hasPrefix $nulltype "sql" -}}
 		{{ $field.NullTypeField $arg -}}
 	{{- else -}}
-		{{ $arg }}
+		{{ if not $field.Nillable }}*{{ end }}{{ $arg }}
 	{{- end }}
 {{- end }}

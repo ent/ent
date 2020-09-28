@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,8 +8,6 @@ package user
 
 import (
 	"fmt"
-
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/schema"
 )
 
 const (
@@ -17,21 +15,34 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "oid"
-	// FieldAge holds the string denoting the age vertex property in the database.
+	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
-	// FieldName holds the string denoting the name vertex property in the database.
+	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldNickname holds the string denoting the nickname vertex property in the database.
+	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
-	// FieldAddress holds the string denoting the address vertex property in the database.
+	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
-	// FieldRenamed holds the string denoting the renamed vertex property in the database.
+	// FieldRenamed holds the string denoting the renamed field in the database.
 	FieldRenamed = "renamed"
-	// FieldBlob holds the string denoting the blob vertex property in the database.
+	// FieldBlob holds the string denoting the blob field in the database.
 	FieldBlob = "blob"
-	// FieldState holds the string denoting the state vertex property in the database.
+	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
+	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
+	EdgeSpouse = "spouse"
+	// EdgeCar holds the string denoting the car edge name in mutations.
+	EdgeCar = "car"
+
+	// CarFieldID holds the string denoting the id field of the Car.
+	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ParentTable is the table the holds the parent relation/edge.
@@ -65,6 +76,7 @@ var Columns = []string{
 	FieldRenamed,
 	FieldBlob,
 	FieldState,
+	FieldStatus,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
@@ -73,13 +85,24 @@ var ForeignKeys = []string{
 	"user_spouse",
 }
 
-var (
-	fields = schema.User{}.Fields()
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
+}
 
-	// descName is the schema descriptor for name field.
-	descName = fields[2].Descriptor()
+var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator = descName.Validators[0].(func(string) error)
+	NameValidator func(string) error
 )
 
 // State defines the type for the state enum field.
@@ -95,7 +118,7 @@ func (s State) String() string {
 	return string(s)
 }
 
-// StateValidator is a validator for the "s" field enum values. It is called by the builders before save.
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
 	case StateLoggedIn, StateLoggedOut:

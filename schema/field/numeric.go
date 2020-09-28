@@ -4,7 +4,10 @@
 
 package field
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 //go:generate go run gen/gen.go
 
@@ -213,6 +216,42 @@ func (b *intBuilder) StorageKey(key string) *intBuilder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int.
+//
+//	field.Int("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int("int").
+//		GoType(pkg.Int(0))
+//
+func (b *intBuilder) GoType(typ interface{}) *intBuilder {
+	b.desc.goType(typ, intType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int("int").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *intBuilder) Annotations(annotations ...Annotation) *intBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -314,6 +353,42 @@ func (b *uintBuilder) Validate(fn func(uint) error) *uintBuilder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uintBuilder) StorageKey(key string) *uintBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint.
+//
+//	field.Uint("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint("uint").
+//		GoType(pkg.Uint(0))
+//
+func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
+	b.desc.goType(typ, uintType)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint("uint").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uintBuilder) Annotations(annotations ...Annotation) *uintBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -431,6 +506,42 @@ func (b *int8Builder) StorageKey(key string) *int8Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int8.
+//
+//	field.Int8("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int8("int8").
+//		GoType(pkg.Int8(0))
+//
+func (b *int8Builder) GoType(typ interface{}) *int8Builder {
+	b.desc.goType(typ, int8Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int8("int8").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int8Builder) Annotations(annotations ...Annotation) *int8Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -542,6 +653,42 @@ func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *int16Builder) StorageKey(key string) *int16Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int16.
+//
+//	field.Int16("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int16("int16").
+//		GoType(pkg.Int16(0))
+//
+func (b *int16Builder) GoType(typ interface{}) *int16Builder {
+	b.desc.goType(typ, int16Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int16("int16").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int16Builder) Annotations(annotations ...Annotation) *int16Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -659,6 +806,42 @@ func (b *int32Builder) StorageKey(key string) *int32Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int32.
+//
+//	field.Int32("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int32("int32").
+//		GoType(pkg.Int32(0))
+//
+func (b *int32Builder) GoType(typ interface{}) *int32Builder {
+	b.desc.goType(typ, int32Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int32("int32").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int32Builder) Annotations(annotations ...Annotation) *int32Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -773,6 +956,42 @@ func (b *int64Builder) StorageKey(key string) *int64Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for int64.
+//
+//	field.Int64("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Int64("int64").
+//		GoType(pkg.Int64(0))
+//
+func (b *int64Builder) GoType(typ interface{}) *int64Builder {
+	b.desc.goType(typ, int64Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Int64("int64").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *int64Builder) Annotations(annotations ...Annotation) *int64Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -874,6 +1093,42 @@ func (b *uint8Builder) Validate(fn func(uint8) error) *uint8Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint8Builder) StorageKey(key string) *uint8Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint8.
+//
+//	field.Uint8("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint8("uint8").
+//		GoType(pkg.Uint8(0))
+//
+func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
+	b.desc.goType(typ, uint8Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint8("uint8").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint8Builder) Annotations(annotations ...Annotation) *uint8Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -981,6 +1236,42 @@ func (b *uint16Builder) StorageKey(key string) *uint16Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint16.
+//
+//	field.Uint16("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint16("uint16").
+//		GoType(pkg.Uint16(0))
+//
+func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
+	b.desc.goType(typ, uint16Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint16("uint16").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint16Builder) Annotations(annotations ...Annotation) *uint16Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
 	return b.desc
@@ -1082,6 +1373,42 @@ func (b *uint32Builder) Validate(fn func(uint32) error) *uint32Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint32Builder) StorageKey(key string) *uint32Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint32.
+//
+//	field.Uint32("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint32("uint32").
+//		GoType(pkg.Uint32(0))
+//
+func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
+	b.desc.goType(typ, uint32Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint32("uint32").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint32Builder) Annotations(annotations ...Annotation) *uint32Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -1189,10 +1516,59 @@ func (b *uint64Builder) StorageKey(key string) *uint64Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for uint64.
+//
+//	field.Uint64("oid").
+//		SchemaType(map[string]string{
+//			dialect.Postgres: "CustomType",
+//		})
+//
+func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Uint64("uint64").
+//		GoType(pkg.Uint64(0))
+//
+func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
+	b.desc.goType(typ, uint64Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Uint64("uint64").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uint64Builder) Annotations(annotations ...Annotation) *uint64Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint64Builder) Descriptor() *Descriptor {
 	return b.desc
 }
+
+var (
+	intType    = reflect.TypeOf(int(0))
+	uintType   = reflect.TypeOf(uint(0))
+	int8Type   = reflect.TypeOf(int8(0))
+	int16Type  = reflect.TypeOf(int16(0))
+	int32Type  = reflect.TypeOf(int32(0))
+	int64Type  = reflect.TypeOf(int64(0))
+	uint8Type  = reflect.TypeOf(uint8(0))
+	uint16Type = reflect.TypeOf(uint16(0))
+	uint32Type = reflect.TypeOf(uint32(0))
+	uint64Type = reflect.TypeOf(uint64(0))
+)
 
 // float64Builder is the builder for float fields.
 type float64Builder struct {
@@ -1295,6 +1671,43 @@ func (b *float64Builder) Validate(fn func(float64) error) *float64Builder {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *float64Builder) StorageKey(key string) *float64Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for float64.
+//
+//	field.Float64("amount").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"decimal(5, 2)",
+//			dialect.Postgres: 	"numeric(5, 2)",
+//		})
+//
+func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Float64("float64").
+//		GoType(pkg.Float64(0))
+//
+func (b *float64Builder) GoType(typ interface{}) *float64Builder {
+	b.desc.goType(typ, float64Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Float64("float64").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *float64Builder) Annotations(annotations ...Annotation) *float64Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
@@ -1407,7 +1820,49 @@ func (b *float32Builder) StorageKey(key string) *float32Builder {
 	return b
 }
 
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for float32.
+//
+//	field.Float32("amount").
+//		SchemaType(map[string]string{
+//			dialect.MySQL:		"decimal(5, 2)",
+//			dialect.Postgres: 	"numeric(5, 2)",
+//		})
+//
+func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Float32("float32").
+//		GoType(pkg.Float32(0))
+//
+func (b *float32Builder) GoType(typ interface{}) *float32Builder {
+	b.desc.goType(typ, float32Type)
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Float32("float32").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *float32Builder) Annotations(annotations ...Annotation) *float32Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *float32Builder) Descriptor() *Descriptor {
 	return b.desc
 }
+
+var (
+	float64Type = reflect.TypeOf(float64(0))
+	float32Type = reflect.TypeOf(float32(0))
+)

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,40 +9,37 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/o2o2types/ent/card"
+	"github.com/facebook/ent/examples/o2o2types/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	expired *time.Time
-	number  *string
-	owner   map[int]struct{}
+	mutation *CardMutation
+	hooks    []Hook
 }
 
 // SetExpired sets the expired field.
 func (cc *CardCreate) SetExpired(t time.Time) *CardCreate {
-	cc.expired = &t
+	cc.mutation.SetExpired(t)
 	return cc
 }
 
 // SetNumber sets the number field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
-	cc.number = &s
+	cc.mutation.SetNumber(s)
 	return cc
 }
 
 // SetOwnerID sets the owner edge to User by id.
 func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
-	if cc.owner == nil {
-		cc.owner = make(map[int]struct{})
-	}
-	cc.owner[id] = struct{}{}
+	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
@@ -51,21 +48,44 @@ func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
 }
 
+// Mutation returns the CardMutation object of the builder.
+func (cc *CardCreate) Mutation() *CardMutation {
+	return cc.mutation
+}
+
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if cc.expired == nil {
-		return nil, errors.New("ent: missing required field \"expired\"")
+	var (
+		err  error
+		node *Card
+	)
+	if len(cc.hooks) == 0 {
+		if err = cc.check(); err != nil {
+			return nil, err
+		}
+		node, err = cc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*CardMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cc.check(); err != nil {
+				return nil, err
+			}
+			cc.mutation = mutation
+			node, err = cc.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			mut = cc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
+			return nil, err
+		}
 	}
-	if cc.number == nil {
-		return nil, errors.New("ent: missing required field \"number\"")
-	}
-	if len(cc.owner) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"owner\"")
-	}
-	if cc.owner == nil {
-		return nil, errors.New("ent: missing required edge \"owner\"")
-	}
-	return cc.sqlSave(ctx)
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -77,9 +97,36 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 	return v
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (cc *CardCreate) check() error {
+	if _, ok := cc.mutation.Expired(); !ok {
+		return &ValidationError{Name: "expired", err: errors.New("ent: missing required field \"expired\"")}
+	}
+	if _, ok := cc.mutation.Number(); !ok {
+		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+	}
+	if _, ok := cc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New("ent: missing required edge \"owner\"")}
+	}
+	return nil
+}
+
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
+	_node, _spec := cc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
+	return _node, nil
+}
+
+func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	var (
-		c     = &Card{config: cc.config}
+		_node = &Card{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: card.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -88,23 +135,23 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 			},
 		}
 	)
-	if value := cc.expired; value != nil {
+	if value, ok := cc.mutation.Expired(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Value:  *value,
+			Value:  value,
 			Column: card.FieldExpired,
 		})
-		c.Expired = *value
+		_node.Expired = value
 	}
-	if value := cc.number; value != nil {
+	if value, ok := cc.mutation.Number(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Value:  *value,
+			Value:  value,
 			Column: card.FieldNumber,
 		})
-		c.Number = *value
+		_node.Number = value
 	}
-	if nodes := cc.owner; len(nodes) > 0 {
+	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -118,18 +165,76 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 				},
 			},
 		}
-		for k, _ := range nodes {
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return _node, _spec
+}
+
+// CardCreateBulk is the builder for creating a bulk of Card entities.
+type CardCreateBulk struct {
+	config
+	builders []*CardCreate
+}
+
+// Save creates the Card entities in the database.
+func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
+	nodes := make([]*Card, len(ccb.builders))
+	mutators := make([]Mutator, len(ccb.builders))
+	for i := range ccb.builders {
+		func(i int, root context.Context) {
+			builder := ccb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*CardMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
+	v, err := ccb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,43 +8,74 @@ package ent
 
 import (
 	"context"
-	"strconv"
+	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/schema/field"
 )
 
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	config
-	card map[string]struct{}
+	mutation *SpecMutation
+	hooks    []Hook
 }
 
 // AddCardIDs adds the card edge to Card by ids.
-func (sc *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
-	if sc.card == nil {
-		sc.card = make(map[string]struct{})
-	}
-	for i := range ids {
-		sc.card[ids[i]] = struct{}{}
-	}
+func (sc *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
+	sc.mutation.AddCardIDs(ids...)
 	return sc
 }
 
 // AddCard adds the card edges to Card.
 func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
-	ids := make([]string, len(c))
+	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
 	return sc.AddCardIDs(ids...)
 }
 
+// Mutation returns the SpecMutation object of the builder.
+func (sc *SpecCreate) Mutation() *SpecMutation {
+	return sc.mutation
+}
+
 // Save creates the Spec in the database.
 func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	return sc.sqlSave(ctx)
+	var (
+		err  error
+		node *Spec
+	)
+	if len(sc.hooks) == 0 {
+		if err = sc.check(); err != nil {
+			return nil, err
+		}
+		node, err = sc.sqlSave(ctx)
+	} else {
+		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+			mutation, ok := m.(*SpecMutation)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = sc.check(); err != nil {
+				return nil, err
+			}
+			sc.mutation = mutation
+			node, err = sc.sqlSave(ctx)
+			mutation.done = true
+			return node, err
+		})
+		for i := len(sc.hooks) - 1; i >= 0; i-- {
+			mut = sc.hooks[i](mut)
+		}
+		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -56,18 +87,36 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 	return v
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (sc *SpecCreate) check() error {
+	return nil
+}
+
 func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
+	_node, _spec := sc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
+	return _node, nil
+}
+
+func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	var (
-		s     = &Spec{config: sc.config}
+		_node = &Spec{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: spec.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeInt,
 				Column: spec.FieldID,
 			},
 		}
 	)
-	if nodes := sc.card; len(nodes) > 0 {
+	if nodes := sc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -76,27 +125,81 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeInt,
 					Column: card.FieldID,
 				},
 			},
 		}
-		for k, _ := range nodes {
-			k, err := strconv.Atoi(k)
-			if err != nil {
-				return nil, err
-			}
+		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return _node, _spec
+}
+
+// SpecCreateBulk is the builder for creating a bulk of Spec entities.
+type SpecCreateBulk struct {
+	config
+	builders []*SpecCreate
+}
+
+// Save creates the Spec entities in the database.
+func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
+	nodes := make([]*Spec, len(scb.builders))
+	mutators := make([]Mutator, len(scb.builders))
+	for i := range scb.builders {
+		func(i int, root context.Context) {
+			builder := scb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*SpecMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	s.ID = strconv.FormatInt(id, 10)
-	return s, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, scb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
+	v, err := scb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

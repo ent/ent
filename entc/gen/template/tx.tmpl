@@ -12,7 +12,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebook/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -22,29 +22,94 @@ type Tx struct {
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
 	{{ end }}
+
+	// lazily loaded.
+	client     *Client
+	clientOnce sync.Once
+
+	// completion callbacks.
+	mu         sync.Mutex
+	onCommit   []CommitHook
+	onRollback []RollbackHook
+
+	// ctx lives for the life of the transaction. It is
+	// the same context used by the underlying connection.
+	ctx context.Context
 }
 
-// Commit commits the transaction.
-func (tx *Tx) Commit() error {
-	return tx.config.driver.(*txDriver).tx.Commit()
-}
+{{ $funcs := dict "Commit" "Committer" "Rollback" "Rollbacker" }}
+{{ range $func := keys $funcs }}
+	{{ $iface := get $funcs $func }}
+	type (
+		// {{ $iface }} is the interface that wraps the {{ $iface }} method.
+		{{ $iface }} interface {
+			{{ $func }}(context.Context, *Tx) error
+		}
 
-// Rollback rollbacks the transaction.
-func (tx *Tx) Rollback() error {
-	return tx.config.driver.(*txDriver).tx.Rollback()
-}
+		// The {{ $func }}Func type is an adapter to allow the use of ordinary
+		// function as a {{ $iface }}. If f is a function with the appropriate
+		// signature, {{ $func }}Func(f) is a {{ $iface }} that calls f.
+		{{ $func }}Func func(context.Context, *Tx) error
+
+		// {{ $func }}Hook defines the "{{ lower $func }} middleware". A function that gets a {{ $iface }}
+		// and returns a {{ $iface }}. For example:
+		//
+		//	hook := func(next ent.{{ $iface }}) ent.{{ $iface }} {
+		//		return ent.{{ $func }}Func(func(context.Context, tx *ent.Tx) error {
+		//			// Do some stuff before.
+		//			if err := next.{{ $func }}(ctx, tx); err != nil {
+		//				return err
+		//			}
+		//			// Do some stuff after.
+		//			return nil
+		//		})
+		//	}
+		//
+		{{ $func }}Hook func({{ $iface }} ) {{ $iface }}
+	)
+
+	// {{ $func }} calls f(ctx, m).
+	func (f {{ $func }}Func) {{ $func }}(ctx context.Context, tx *Tx) error {
+		return f(ctx, tx)
+	}
+
+	{{- $onFuncs := print "on" $func }}
+	// {{ $func }} {{ lower $func }}s the transaction.
+	func (tx *Tx) {{ $func }}() error {
+		txDriver := tx.config.driver.(*txDriver)
+		var fn {{ $iface }} = {{ $func }}Func(func(context.Context, *Tx) error {
+			return txDriver.tx.{{ $func }}()
+		})
+		tx.mu.Lock()
+		hooks := append([]{{ $func }}Hook(nil), tx.{{ $onFuncs }}...)
+		tx.mu.Unlock()
+		for i := len(hooks) - 1; i >= 0; i-- {
+			fn = hooks[i](fn)
+		}
+		return fn.{{ $func }}(tx.ctx, tx)
+	}
+
+	// On{{ $func }} adds a hook to call on {{ lower $func }}.
+	func (tx *Tx) On{{ $func }}(f {{ $func }}Hook) {
+		tx.mu.Lock()
+		defer tx.mu.Unlock()
+		tx.{{ $onFuncs }} = append(tx.{{ $onFuncs }}, f)
+	}
+{{- end }}
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config: tx.config,
-		{{- if $.SupportMigrate }}
-			Schema: migrate.NewSchema(tx.driver),
-		{{- end }}
-		{{ range $_, $n := $.Nodes -}}
-			{{ $n.Name }}: New{{ $n.Name }}Client(tx.config),
-		{{ end -}}
-	}
+	tx.clientOnce.Do(func() {
+		tx.client = &Client{config: tx.config}
+		tx.client.init()
+	})
+	return tx.client
+}
+
+func (tx *Tx) init() {
+	{{ range $_, $n := $.Nodes -}}
+    	tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
+	{{ end -}}
 }
 
 {{/* first node for doc example */}}

@@ -11,8 +11,8 @@ aliases:
       path: ~/test-results
 
 orbs:
-  aws-cli: circleci/aws-cli@0.1.13
-  go: circleci/go@0.2.0
+  aws-cli: circleci/aws-cli@1.0.0
+  go: circleci/go@1.1.1
 
 commands:
   getmods:
@@ -24,7 +24,7 @@ commands:
 jobs:
   lint:
     docker:
-    - image: golangci/golangci-lint
+    - image: golangci/golangci-lint:v1.28-alpine
     steps:
       - checkout
       - *mktestdir
@@ -33,7 +33,9 @@ jobs:
           command: golangci-lint run --out-format junit-xml > ~/test-results/lint.xml
       - *storetestdir
   unit:
-    executor: go/default
+    executor:
+      name: go/default
+      tag: '1.15'
     steps:
     - checkout
     - *mktestdir
@@ -81,11 +83,11 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         command: -p 5431
-      - image: circleci/postgres:12.1
+      - image: circleci/postgres:12.3
         environment:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
-        command: -p 5432
+        command: -p 5433
       - image: entgo/gremlin-server
         entrypoint: /opt/gremlin-server/bin/gremlin-server.sh
         command: conf/gremlin-server.yaml
@@ -94,13 +96,13 @@ jobs:
       - run: &integration-wait
           name: Wait for databases
           command: >-
-            dockerize -timeout 1m
+            dockerize -timeout 2m
             -wait tcp://localhost:3306
             -wait tcp://localhost:3307
             -wait tcp://localhost:3308
             -wait tcp://localhost:5430
             -wait tcp://localhost:5431
-            -wait tcp://localhost:5432
+            -wait tcp://localhost:5433
             -wait tcp://localhost:8182
       - *mktestdir
       - getmods
@@ -136,7 +138,7 @@ jobs:
       - run:
           name: Run integration tests
           working_directory: entc/integration
-          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race -count=2 ./...
+          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race -count=2 -tags='json1' ./...
       - *storetestdir
 
   migration:
@@ -182,8 +184,7 @@ jobs:
         name: Build Docs
         working_directory: ~/project/doc/website
         command: yarn build
-    - aws-cli/install
-    - aws-cli/configure
+    - aws-cli/setup
     - run:
         name: Deploy Docs
         working_directory: ~/project/doc/website/build/ent

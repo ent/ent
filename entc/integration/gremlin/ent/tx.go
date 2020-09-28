@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,8 +8,9 @@ package ent
 
 import (
 	"context"
+	"sync"
 
-	"github.com/facebookincubator/ent/dialect"
+	"github.com/facebook/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -25,6 +26,8 @@ type Tx struct {
 	File *FileClient
 	// FileType is the client for interacting with the FileType builders.
 	FileType *FileTypeClient
+	// Goods is the client for interacting with the Goods builders.
+	Goods *GoodsClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
@@ -37,37 +40,159 @@ type Tx struct {
 	Pet *PetClient
 	// Spec is the client for interacting with the Spec builders.
 	Spec *SpecClient
+	// Task is the client for interacting with the Task builders.
+	Task *TaskClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+
+	// lazily loaded.
+	client     *Client
+	clientOnce sync.Once
+
+	// completion callbacks.
+	mu         sync.Mutex
+	onCommit   []CommitHook
+	onRollback []RollbackHook
+
+	// ctx lives for the life of the transaction. It is
+	// the same context used by the underlying connection.
+	ctx context.Context
+}
+
+type (
+	// Committer is the interface that wraps the Committer method.
+	Committer interface {
+		Commit(context.Context, *Tx) error
+	}
+
+	// The CommitFunc type is an adapter to allow the use of ordinary
+	// function as a Committer. If f is a function with the appropriate
+	// signature, CommitFunc(f) is a Committer that calls f.
+	CommitFunc func(context.Context, *Tx) error
+
+	// CommitHook defines the "commit middleware". A function that gets a Committer
+	// and returns a Committer. For example:
+	//
+	//	hook := func(next ent.Committer) ent.Committer {
+	//		return ent.CommitFunc(func(context.Context, tx *ent.Tx) error {
+	//			// Do some stuff before.
+	//			if err := next.Commit(ctx, tx); err != nil {
+	//				return err
+	//			}
+	//			// Do some stuff after.
+	//			return nil
+	//		})
+	//	}
+	//
+	CommitHook func(Committer) Committer
+)
+
+// Commit calls f(ctx, m).
+func (f CommitFunc) Commit(ctx context.Context, tx *Tx) error {
+	return f(ctx, tx)
 }
 
 // Commit commits the transaction.
 func (tx *Tx) Commit() error {
-	return tx.config.driver.(*txDriver).tx.Commit()
+	txDriver := tx.config.driver.(*txDriver)
+	var fn Committer = CommitFunc(func(context.Context, *Tx) error {
+		return txDriver.tx.Commit()
+	})
+	tx.mu.Lock()
+	hooks := append([]CommitHook(nil), tx.onCommit...)
+	tx.mu.Unlock()
+	for i := len(hooks) - 1; i >= 0; i-- {
+		fn = hooks[i](fn)
+	}
+	return fn.Commit(tx.ctx, tx)
+}
+
+// OnCommit adds a hook to call on commit.
+func (tx *Tx) OnCommit(f CommitHook) {
+	tx.mu.Lock()
+	defer tx.mu.Unlock()
+	tx.onCommit = append(tx.onCommit, f)
+}
+
+type (
+	// Rollbacker is the interface that wraps the Rollbacker method.
+	Rollbacker interface {
+		Rollback(context.Context, *Tx) error
+	}
+
+	// The RollbackFunc type is an adapter to allow the use of ordinary
+	// function as a Rollbacker. If f is a function with the appropriate
+	// signature, RollbackFunc(f) is a Rollbacker that calls f.
+	RollbackFunc func(context.Context, *Tx) error
+
+	// RollbackHook defines the "rollback middleware". A function that gets a Rollbacker
+	// and returns a Rollbacker. For example:
+	//
+	//	hook := func(next ent.Rollbacker) ent.Rollbacker {
+	//		return ent.RollbackFunc(func(context.Context, tx *ent.Tx) error {
+	//			// Do some stuff before.
+	//			if err := next.Rollback(ctx, tx); err != nil {
+	//				return err
+	//			}
+	//			// Do some stuff after.
+	//			return nil
+	//		})
+	//	}
+	//
+	RollbackHook func(Rollbacker) Rollbacker
+)
+
+// Rollback calls f(ctx, m).
+func (f RollbackFunc) Rollback(ctx context.Context, tx *Tx) error {
+	return f(ctx, tx)
 }
 
 // Rollback rollbacks the transaction.
 func (tx *Tx) Rollback() error {
-	return tx.config.driver.(*txDriver).tx.Rollback()
+	txDriver := tx.config.driver.(*txDriver)
+	var fn Rollbacker = RollbackFunc(func(context.Context, *Tx) error {
+		return txDriver.tx.Rollback()
+	})
+	tx.mu.Lock()
+	hooks := append([]RollbackHook(nil), tx.onRollback...)
+	tx.mu.Unlock()
+	for i := len(hooks) - 1; i >= 0; i-- {
+		fn = hooks[i](fn)
+	}
+	return fn.Rollback(tx.ctx, tx)
+}
+
+// OnRollback adds a hook to call on rollback.
+func (tx *Tx) OnRollback(f RollbackHook) {
+	tx.mu.Lock()
+	defer tx.mu.Unlock()
+	tx.onRollback = append(tx.onRollback, f)
 }
 
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
-	return &Client{
-		config:    tx.config,
-		Card:      NewCardClient(tx.config),
-		Comment:   NewCommentClient(tx.config),
-		FieldType: NewFieldTypeClient(tx.config),
-		File:      NewFileClient(tx.config),
-		FileType:  NewFileTypeClient(tx.config),
-		Group:     NewGroupClient(tx.config),
-		GroupInfo: NewGroupInfoClient(tx.config),
-		Item:      NewItemClient(tx.config),
-		Node:      NewNodeClient(tx.config),
-		Pet:       NewPetClient(tx.config),
-		Spec:      NewSpecClient(tx.config),
-		User:      NewUserClient(tx.config),
-	}
+	tx.clientOnce.Do(func() {
+		tx.client = &Client{config: tx.config}
+		tx.client.init()
+	})
+	return tx.client
+}
+
+func (tx *Tx) init() {
+	tx.Card = NewCardClient(tx.config)
+	tx.Comment = NewCommentClient(tx.config)
+	tx.FieldType = NewFieldTypeClient(tx.config)
+	tx.File = NewFileClient(tx.config)
+	tx.FileType = NewFileTypeClient(tx.config)
+	tx.Goods = NewGoodsClient(tx.config)
+	tx.Group = NewGroupClient(tx.config)
+	tx.GroupInfo = NewGroupInfoClient(tx.config)
+	tx.Item = NewItemClient(tx.config)
+	tx.Node = NewNodeClient(tx.config)
+	tx.Pet = NewPetClient(tx.config)
+	tx.Spec = NewSpecClient(tx.config)
+	tx.Task = NewTaskClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

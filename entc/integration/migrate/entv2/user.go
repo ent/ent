@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 )
 
 // User is the model entity for the User schema.
@@ -20,6 +20,10 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// MixedString holds the value of the "mixed_string" field.
+	MixedString string `json:"mixed_string,omitempty"`
+	// MixedEnum holds the value of the "mixed_enum" field.
+	MixedEnum user.MixedEnum `json:"mixed_enum,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
@@ -38,10 +42,11 @@ type User struct {
 	Blob []byte `json:"blob,omitempty"`
 	// State holds the value of the "state" field.
 	State user.State `json:"state,omitempty"`
+	// Status holds the value of the "status" field.
+	Status user.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges     UserEdges `json:"edges"`
-	user_pets *int
+	Edges UserEdges `json:"edges"`
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -50,9 +55,11 @@ type UserEdges struct {
 	Car []*Car
 	// Pets holds the value of the pets edge.
 	Pets *Pet
+	// Friends holds the value of the friends edge.
+	Friends []*User
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // CarOrErr returns the Car value or an error if the edge
@@ -78,10 +85,21 @@ func (e UserEdges) PetsOrErr() (*Pet, error) {
 	return nil, &NotLoadedError{edge: "pets"}
 }
 
+// FriendsOrErr returns the Friends value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FriendsOrErr() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.Friends, nil
+	}
+	return nil, &NotLoadedError{edge: "friends"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
+		&sql.NullString{}, // mixed_string
+		&sql.NullString{}, // mixed_enum
 		&sql.NullInt64{},  // age
 		&sql.NullString{}, // name
 		&sql.NullString{}, // nickname
@@ -91,13 +109,7 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // new_name
 		&[]byte{},         // blob
 		&sql.NullString{}, // state
-	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*User) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_pets
+		&sql.NullString{}, // status
 	}
 }
 
@@ -113,59 +125,65 @@ func (u *User) assignValues(values ...interface{}) error {
 	}
 	u.ID = int(value.Int64)
 	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field age", values[0])
+	if value, ok := values[0].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field mixed_string", values[0])
+	} else if value.Valid {
+		u.MixedString = value.String
+	}
+	if value, ok := values[1].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field mixed_enum", values[1])
+	} else if value.Valid {
+		u.MixedEnum = user.MixedEnum(value.String)
+	}
+	if value, ok := values[2].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field age", values[2])
 	} else if value.Valid {
 		u.Age = int(value.Int64)
 	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[1])
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[3])
 	} else if value.Valid {
 		u.Name = value.String
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field nickname", values[2])
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field nickname", values[4])
 	} else if value.Valid {
 		u.Nickname = value.String
 	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field phone", values[3])
+	if value, ok := values[5].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field phone", values[5])
 	} else if value.Valid {
 		u.Phone = value.String
 	}
-	if value, ok := values[4].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field buffer", values[4])
+	if value, ok := values[6].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field buffer", values[6])
 	} else if value != nil {
 		u.Buffer = *value
 	}
-	if value, ok := values[5].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field title", values[5])
+	if value, ok := values[7].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field title", values[7])
 	} else if value.Valid {
 		u.Title = value.String
 	}
-	if value, ok := values[6].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field new_name", values[6])
+	if value, ok := values[8].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field new_name", values[8])
 	} else if value.Valid {
 		u.NewName = value.String
 	}
-	if value, ok := values[7].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field blob", values[7])
+	if value, ok := values[9].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field blob", values[9])
 	} else if value != nil {
 		u.Blob = *value
 	}
-	if value, ok := values[8].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field state", values[8])
+	if value, ok := values[10].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field state", values[10])
 	} else if value.Valid {
 		u.State = user.State(value.String)
 	}
-	values = values[9:]
-	if len(values) == len(user.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
-		} else if value.Valid {
-			u.user_pets = new(int)
-			*u.user_pets = int(value.Int64)
-		}
+	if value, ok := values[11].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field status", values[11])
+	} else if value.Valid {
+		u.Status = user.Status(value.String)
 	}
 	return nil
 }
@@ -178,6 +196,11 @@ func (u *User) QueryCar() *CarQuery {
 // QueryPets queries the pets edge of the User.
 func (u *User) QueryPets() *PetQuery {
 	return (&UserClient{config: u.config}).QueryPets(u)
+}
+
+// QueryFriends queries the friends edge of the User.
+func (u *User) QueryFriends() *UserQuery {
+	return (&UserClient{config: u.config}).QueryFriends(u)
 }
 
 // Update returns a builder for updating this User.
@@ -203,6 +226,10 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", mixed_string=")
+	builder.WriteString(u.MixedString)
+	builder.WriteString(", mixed_enum=")
+	builder.WriteString(fmt.Sprintf("%v", u.MixedEnum))
 	builder.WriteString(", age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteString(", name=")
@@ -221,6 +248,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Blob))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", u.State))
+	builder.WriteString(", status=")
+	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }
