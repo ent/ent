@@ -119,6 +119,20 @@ func Storage(typ string) Option {
 	}
 }
 
+// FeatureNames enables sets of features by their names.
+func FeatureNames(names ...string) Option {
+	return func(cfg *gen.Config) error {
+		for _, name := range names {
+			for _, feat := range gen.AllFeatures {
+				if name == feat.Name {
+					cfg.Features = append(cfg.Features, feat)
+				}
+			}
+		}
+		return nil
+	}
+}
+
 // Funcs specifies external functions to add to the template execution.
 func Funcs(funcMap template.FuncMap) Option {
 	return func(cfg *gen.Config) error {
