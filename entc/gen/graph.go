@@ -62,6 +62,10 @@ type (
 		// templates will need to provide the same FuncMap that was used for parsing
 		// the template.
 		Funcs template.FuncMap
+
+		// Features defines a list of additional features to add to the codegen phase.
+		// For example, the PrivacyFeature.
+		Features []Feature
 	}
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
@@ -129,6 +133,13 @@ func (g *Graph) Gen() (err error) {
 		target := filepath.Join(g.Config.Target, tmpl.Format)
 		check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
 		written = append(written, target)
+	}
+	for _, f := range AllFeatures {
+		if f.cleanup == nil || g.featureEnabled(f) {
+			continue
+		}
+		err := f.cleanup(g.Config)
+		check(err, "cleanup %q feature assets", f.Name)
 	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it's
@@ -453,6 +464,16 @@ func (Config) ModuleInfo() (m debug.Module) {
 		m = info.Main
 	}
 	return
+}
+
+// featureEnabled indicates if the given feature-flag is enabled.
+func (c Config) featureEnabled(f Feature) bool {
+	for i := range c.Features {
+		if f.Name == c.Features[i].Name {
+			return true
+		}
+	}
+	return false
 }
 
 // PrepareEnv makes sure the generated directory (environment)

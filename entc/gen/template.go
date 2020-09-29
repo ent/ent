@@ -30,7 +30,7 @@ type (
 	// the Graph object.
 	GraphTemplate struct {
 		Name   string            // template name.
-		Skip   func(*Graph) bool // skip condition.
+		Skip   func(*Graph) bool // skip condition (storage constraints or gated by a feature-flag).
 		Format string            // file name format.
 	}
 )
@@ -118,6 +118,9 @@ var (
 		{
 			Name:   "privacy",
 			Format: "privacy/privacy.go",
+			Skip: func(g *Graph) bool {
+				return !g.featureEnabled(FeaturePrivacy)
+			},
 		},
 		{
 			Name:   "runtime/ent",
