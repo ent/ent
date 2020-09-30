@@ -226,8 +226,41 @@ query {
 
 ## Fields Collection
 
-The collection template adds support for automatic fields collection using auto eager-loading ent edges.
-More info about it can be found in [Relay website](https://spec.graphql.org/June2018/#sec-Field-Collection).
+The collection template adds support for automatic fields collection from GraphQL requests using eager-loading
+the ent-edges. In order to configure this option to specific edges, use the `entgql.Annotation` as follows:
+
+```go
+func (Todo) Edges() []ent.Edge {
+    return []ent.Edge{
+        edge.To("children", Todo.Type).
+            Annotations(entgql.Bind()).
+            From("parent").
+            // Bind implies the edge name in graphql schema is
+            // equivalent to the name used in ent schema.
+            Annotations(entgql.Bind()).
+            Unique(),
+        edge.From("owner", User.Type).
+            Ref("tasks").
+            // Map edge names as defined in graphql schema.
+            Annotations(entgql.MapsTo("taskOwner")),
+    }
+}
+```
+
+Then, in the resolver, use it as follows:
+
+```go
+func (r *todoResolver) Parent(ctx context.Context, t *ent.Todo) (*ent.Todo, error) {
+	parent, err := t.Edges.ParentOrErr()
+	return parent, ent.MaskNotFound(err)
+}
+
+func (r *todoResolver) Children(ctx context.Context, obj *ent.Todo) ([]*ent.Todo, error) {
+	return obj.Edges.ChildrenOrErr()
+}
+```
+
+More info about fields-collection can be found in [Relay website](https://spec.graphql.org/June2018/#sec-Field-Collection).
 
 ## Enum Implementation
 
