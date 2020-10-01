@@ -680,7 +680,7 @@ func TestBuilder(t *testing.T) {
 					From(t1).
 					LeftJoin(t2).
 					Ons(EQCol(t1.C("id"), t2.C("user_id"))).
-					GroupBy(t1.C("id"))
+					GroupBy(t1.C("id")).Clone()
 			}(),
 			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",
 		},
