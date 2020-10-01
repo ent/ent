@@ -679,7 +679,9 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
 					From(t1).
 					LeftJoin(t2).
-					Ons(EQCol(t1.C("id"), t2.C("user_id"))).
+					OnP(P(func(builder *Builder) {
+						builder.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("user_id"))
+					})).
 					GroupBy(t1.C("id")).Clone()
 			}(),
 			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",

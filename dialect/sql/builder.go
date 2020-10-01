@@ -894,12 +894,6 @@ func EQ(col string, value interface{}) *Predicate {
 	return P().EQ(col, value)
 }
 
-// EQCol returns a "=" predicate for "col=col", omit Raw.
-// example: EQ(`created_at`, Raw(`updated_at`)) <=> EQCol(`created_at`, `updated_at`)
-func EQCol(col string, col2 string) *Predicate {
-	return P().EQ(col, Raw(col2))
-}
-
 // EQ appends a "=" predicate.
 func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
@@ -912,12 +906,6 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 // NEQ returns a "<>" predicate.
 func NEQ(col string, value interface{}) *Predicate {
 	return P().NEQ(col, value)
-}
-
-// EQCol returns a "=" predicate for "col<>col", omit Raw.
-// example: NEQ(`created_at`, Raw(`updated_at`)) <=> NEQCol(`created_at`, `updated_at`)
-func NEQCol(col string, col2 string) *Predicate {
-	return P().NEQ(col, Raw(col2))
 }
 
 // NEQ appends a "<>" predicate.
@@ -1633,24 +1621,17 @@ func (s *Selector) Columns(columns ...string) []string {
 }
 
 // Ons sets or appends the given predicate to the statement.
-func (s *Selector) Ons(p *Predicate) *Selector {
+func (s *Selector) OnP(p *Predicate) *Selector {
 	if len(s.joins) > 0 {
-		join := &s.joins[len(s.joins)-1]
-
-		switch {
-		case join.on == nil:
-			join.on = p
-		default:
-			join.on = And(join.on, p)
-		}
+		s.joins[len(s.joins)-1].on = p
 	}
 	return s
 }
 
 // On sets the `ON` clause for the `JOIN` operation.
 func (s *Selector) On(c1, c2 string) *Selector {
-	s.Ons(P().Append(func(builder *Builder) {
-		builder.WriteString(c1).WriteOp(OpEQ).WriteString(c2)
+	s.OnP(P(func(builder *Builder) {
+		builder.Ident(c1).WriteOp(OpEQ).Ident(c2)
 	}))
 	return s
 }
