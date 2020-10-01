@@ -1620,10 +1620,17 @@ func (s *Selector) Columns(columns ...string) []string {
 	return names
 }
 
-// Ons sets or appends the given predicate to the statement.
+// OnP sets or appends the given predicate for the `ON` clause of the statement.
 func (s *Selector) OnP(p *Predicate) *Selector {
 	if len(s.joins) > 0 {
-		s.joins[len(s.joins)-1].on = p
+		join := &s.joins[len(s.joins)-1]
+
+		switch {
+		case join.on == nil:
+			join.on = p
+		default:
+			join.on = And(join.on, p)
+		}
 	}
 	return s
 }
@@ -2079,7 +2086,7 @@ func (b *Builder) JoinComma(qs ...Querier) *Builder {
 	return b.join(qs, ", ")
 }
 
-// join joins a list of Queries to the builder with a given separator.
+// join adds a join table to the selector with the given kind.
 func (b *Builder) join(qs []Querier, sep string) *Builder {
 	for i, q := range qs {
 		if i > 0 {
