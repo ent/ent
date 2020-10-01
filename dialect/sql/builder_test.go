@@ -663,6 +663,44 @@ func TestBuilder(t *testing.T) {
 		{
 			input: func() Querier {
 				t1 := Table("users").As("u")
+				t2 := Table("user_groups").As("ug")
+				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
+					From(t1).
+					LeftJoin(t2).
+					On(t1.C("id"), t2.C("user_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
+				t2 := Table("user_groups").As("ug")
+				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
+					From(t1).
+					LeftJoin(t2).
+					OnP(P(func(builder *Builder) {
+						builder.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("user_id"))
+					})).
+					GroupBy(t1.C("id")).Clone()
+			}(),
+			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",
+		},
+		{
+			input: func() Querier {
+				t1 := Table("groups").As("g")
+				t2 := Table("user_groups").As("ug")
+				return Select(t1.C("id"), As(Count("`*`"), "user_count")).
+					From(t1).
+					RightJoin(t2).
+					On(t1.C("id"), t2.C("group_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` RIGHT JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
 				return Select(t1.Columns("name", "age")...).From(t1)
 			}(),
 			wantQuery: "SELECT `u`.`name`, `u`.`age` FROM `users` AS `u`",
