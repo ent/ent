@@ -617,7 +617,7 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), t2.C("name")).
 					From(t1).
 					Join(t2).
-					On(EQCol(t1.C("id"), t2.C("user_id")))
+					On(t1.C("id"), t2.C("user_id"))
 			}(),
 			wantQuery: "SELECT `u`.`id`, `g`.`name` FROM `users` AS `u` JOIN `groups` AS `g` ON `u`.`id` = `g`.`user_id`",
 		},
@@ -629,7 +629,7 @@ func TestBuilder(t *testing.T) {
 					Select(t1.C("id"), t2.C("name")).
 					From(t1).
 					Join(t2).
-					On(EQCol(t1.C("id"), t2.C("user_id")))
+					On(t1.C("id"), t2.C("user_id"))
 			}(),
 			wantQuery: `SELECT "u"."id", "g"."name" FROM "users" AS "u" JOIN "groups" AS "g" ON "u"."id" = "g"."user_id"`,
 		},
@@ -640,10 +640,24 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), t2.C("name")).
 					From(t1).
 					Join(t2).
-					On(EQCol(t1.C("id"), t2.C("user_id"))).
+					On(t1.C("id"), t2.C("user_id")).
 					Where(And(EQ(t1.C("name"), "bar"), NotNull(t2.C("name"))))
 			}(),
 			wantQuery: "SELECT `u`.`id`, `g`.`name` FROM `users` AS `u` JOIN `groups` AS `g` ON `u`.`id` = `g`.`user_id` WHERE `u`.`name` = ? AND `g`.`name` IS NOT NULL",
+			wantArgs:  []interface{}{"bar"},
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
+				t2 := Table("groups").As("g")
+				return Dialect(dialect.Postgres).
+					Select(t1.C("id"), t2.C("name")).
+					From(t1).
+					Join(t2).
+					On(t1.C("id"), t2.C("user_id")).
+					Where(And(EQ(t1.C("name"), "bar"), NotNull(t2.C("name"))))
+			}(),
+			wantQuery: `SELECT "u"."id", "g"."name" FROM "users" AS "u" JOIN "groups" AS "g" ON "u"."id" = "g"."user_id" WHERE "u"."name" = $1 AND "g"."name" IS NOT NULL`,
 			wantArgs:  []interface{}{"bar"},
 		},
 		{
@@ -653,7 +667,19 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
 					From(t1).
 					LeftJoin(t2).
-					On(And(EQCol(t1.C("id"), t2.C("user_id")))).
+					On(t1.C("id"), t2.C("user_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
+				t2 := Table("user_groups").As("ug")
+				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
+					From(t1).
+					LeftJoin(t2).
+					Ons(EQCol(t1.C("id"), t2.C("user_id"))).
 					GroupBy(t1.C("id"))
 			}(),
 			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",
@@ -665,24 +691,10 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), As(Count("`*`"), "user_count")).
 					From(t1).
 					RightJoin(t2).
-					On(And(EQCol(t1.C("id"), t2.C("group_id")))).
+					On(t1.C("id"), t2.C("group_id")).
 					GroupBy(t1.C("id"))
 			}(),
 			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` RIGHT JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
-		},
-		{
-			input: func() Querier {
-				t1 := Table("users").As("u")
-				t2 := Table("groups").As("g")
-				return Dialect(dialect.Postgres).
-					Select(t1.C("id"), t2.C("name")).
-					From(t1).
-					Join(t2).
-					On(EQCol(t1.C("id"), t2.C("user_id"))).
-					Where(And(EQ(t1.C("name"), "bar"), NotNull(t2.C("name"))))
-			}(),
-			wantQuery: `SELECT "u"."id", "g"."name" FROM "users" AS "u" JOIN "groups" AS "g" ON "u"."id" = "g"."user_id" WHERE "u"."name" = $1 AND "g"."name" IS NOT NULL`,
-			wantArgs:  []interface{}{"bar"},
 		},
 		{
 			input: func() Querier {
@@ -715,7 +727,7 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), t2.C("name")).
 					From(t1).
 					Join(t2).
-					On(EQCol(t1.C("id"), t2.C("user_id")))
+					On(t1.C("id"), t2.C("user_id"))
 			}(),
 			wantQuery: "SELECT `u`.`id`, `g`.`name` FROM `users` AS `u` JOIN (SELECT * FROM `groups` WHERE `user_id` = ?) AS `g` ON `u`.`id` = `g`.`user_id`",
 			wantArgs:  []interface{}{10},
@@ -728,8 +740,7 @@ func TestBuilder(t *testing.T) {
 				return d.Select(t1.C("id"), t2.C("name")).
 					From(t1).
 					Join(t2).
-					On(EQCol(t1.C("id"), t2.C("user_id")))
-
+					On(t1.C("id"), t2.C("user_id"))
 			}(),
 			wantQuery: `SELECT "u"."id", "g"."name" FROM "users" AS "u" JOIN (SELECT * FROM "groups" WHERE "user_id" = $1) AS "g" ON "u"."id" = "g"."user_id"`,
 			wantArgs:  []interface{}{10},
@@ -954,7 +965,7 @@ func TestBuilder(t *testing.T) {
 			input: func() Querier {
 				t1 := Table("users")
 				t2 := Select().From(Table("groups"))
-				t3 := Select().Count().From(t1).Join(t1).On(EQCol(t2.C("id"), t1.C("blocked_id")))
+				t3 := Select().Count().From(t1).Join(t1).On(t2.C("id"), t1.C("blocked_id"))
 				return t3.Count(Distinct(t3.Columns("id", "name")...))
 			}(),
 			wantQuery: "SELECT COUNT(DISTINCT `t0`.`id`, `t0`.`name`) FROM `users` AS `t0` JOIN `users` AS `t0` ON `groups`.`id` = `t0`.`blocked_id`",
@@ -964,7 +975,7 @@ func TestBuilder(t *testing.T) {
 				d := Dialect(dialect.Postgres)
 				t1 := d.Table("users")
 				t2 := d.Select().From(Table("groups"))
-				t3 := d.Select().Count().From(t1).Join(t1).On(EQCol(t2.C("id"), t1.C("blocked_id")))
+				t3 := d.Select().Count().From(t1).Join(t1).On(t2.C("id"), t1.C("blocked_id"))
 				return t3.Count(Distinct(t3.Columns("id", "name")...))
 			}(),
 			wantQuery: `SELECT COUNT(DISTINCT "t0"."id", "t0"."name") FROM "users" AS "t0" JOIN "users" AS "t0" ON "groups"."id" = "t0"."blocked_id"`,
@@ -1110,12 +1121,12 @@ func TestBuilder(t *testing.T) {
 				t4 := builder.Select(t3.C("id")).
 					From(t3).
 					Join(t2).
-					On(EQCol(t3.C("id"), t2.C("id2"))).
+					On(t3.C("id"), t2.C("id2")).
 					Where(EQ(t2.C("id"), "baz"))
 				return builder.Select().
 					From(t1).
 					Join(t4).
-					On(EQCol(t1.C("id"), t4.C("id"))).Limit(1)
+					On(t1.C("id"), t4.C("id")).Limit(1)
 			}(),
 			wantQuery: `SELECT * FROM "groups" JOIN (SELECT "user_groups"."id" FROM "user_groups" JOIN "users" AS "t0" ON "user_groups"."id" = "t0"."id2" WHERE "t0"."id" = $1) AS "t1" ON "groups"."id" = "t1"."id" LIMIT $2`,
 			wantArgs:  []interface{}{"baz", 1},

@@ -895,7 +895,7 @@ func EQ(col string, value interface{}) *Predicate {
 }
 
 // EQCol returns a "=" predicate for "col=col", omit Raw.
-// example: EQ(field1, Raw(field2)) <=> EQCol(field1, field2)
+// example: EQ(`created_at`, Raw(`updated_at`)) <=> EQCol(`created_at`, `updated_at`)
 func EQCol(col string, col2 string) *Predicate {
 	return P().EQ(col, Raw(col2))
 }
@@ -915,6 +915,7 @@ func NEQ(col string, value interface{}) *Predicate {
 }
 
 // EQCol returns a "=" predicate for "col<>col", omit Raw.
+// example: NEQ(`created_at`, Raw(`updated_at`)) <=> NEQCol(`created_at`, `updated_at`)
 func NEQCol(col string, col2 string) *Predicate {
 	return P().NEQ(col, Raw(col2))
 }
@@ -1435,8 +1436,6 @@ func (*SelectTable) view() {}
 // join table option.
 type join struct {
 	on    *Predicate
-	or       bool
-	not      bool
 	kind  string
 	table TableView
 }
@@ -1633,24 +1632,26 @@ func (s *Selector) Columns(columns ...string) []string {
 	return names
 }
 
-// On sets or appends the given predicate to the statement.
-func (s *Selector) On(p *Predicate) *Selector {
+// Ons sets or appends the given predicate to the statement.
+func (s *Selector) Ons(p *Predicate) *Selector {
 	if len(s.joins) > 0 {
 		join := &s.joins[len(s.joins)-1]
-		if join.not {
-			p = Not(p)
-			join.not = false
-		}
+
 		switch {
 		case join.on == nil:
 			join.on = p
-		case join.on != nil && join.or:
-			join.on = Or(join.on, p)
-			join.or = false
 		default:
 			join.on = And(join.on, p)
 		}
 	}
+	return s
+}
+
+// On sets the `ON` clause for the `JOIN` operation.
+func (s *Selector) On(c1, c2 string) *Selector {
+	s.Ons(P().Append(func(builder *Builder) {
+		builder.WriteString(c1).WriteOp(OpEQ).WriteString(c2)
+	}))
 	return s
 }
 
