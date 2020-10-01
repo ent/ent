@@ -1577,7 +1577,7 @@ func (s *Selector) RightJoin(t TableView) *Selector {
 	return s.join("RIGHT JOIN", t)
 }
 
-// join
+// join adds a join table to the selector with the given kind.
 func (s *Selector) join(kind string, t TableView) *Selector {
 	s.joins = append(s.joins, join{
 		kind:  kind,
@@ -1624,7 +1624,6 @@ func (s *Selector) Columns(columns ...string) []string {
 func (s *Selector) OnP(p *Predicate) *Selector {
 	if len(s.joins) > 0 {
 		join := &s.joins[len(s.joins)-1]
-
 		switch {
 		case join.on == nil:
 			join.on = p
@@ -2086,7 +2085,7 @@ func (b *Builder) JoinComma(qs ...Querier) *Builder {
 	return b.join(qs, ", ")
 }
 
-// join adds a join table to the selector with the given kind.
+// join joins a list of Queries to the builder with a given separator.
 func (b *Builder) join(qs []Querier, sep string) *Builder {
 	for i, q := range qs {
 		if i > 0 {
