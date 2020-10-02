@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -82,18 +82,18 @@ func (Time) Fields() []ent.Field {
 var _ ent.Mixin = (*Time)(nil)
 
 // AnnotateFields adds field annotations to underlying mixin fields.
-func AnnotateFields(m ent.Mixin, annotations ...field.Annotation) ent.Mixin {
+func AnnotateFields(m ent.Mixin, annotations ...schema.Annotation) ent.Mixin {
 	return fieldAnnotator{Mixin: m, annotations: annotations}
 }
 
 // AnnotateEdges adds edge annotations to underlying mixin edges.
-func AnnotateEdges(m ent.Mixin, annotations ...edge.Annotation) ent.Mixin {
+func AnnotateEdges(m ent.Mixin, annotations ...schema.Annotation) ent.Mixin {
 	return edgeAnnotator{Mixin: m, annotations: annotations}
 }
 
 type fieldAnnotator struct {
 	ent.Mixin
-	annotations []field.Annotation
+	annotations []schema.Annotation
 }
 
 func (a fieldAnnotator) Fields() []ent.Field {
@@ -107,7 +107,7 @@ func (a fieldAnnotator) Fields() []ent.Field {
 
 type edgeAnnotator struct {
 	ent.Mixin
-	annotations []edge.Annotation
+	annotations []schema.Annotation
 }
 
 func (a edgeAnnotator) Edges() []ent.Edge {

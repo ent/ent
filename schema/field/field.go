@@ -14,6 +14,8 @@ import (
 	"regexp"
 	"sort"
 	"time"
+
+	"github.com/facebook/ent/schema"
 )
 
 // String returns a new Field with type string.
@@ -276,7 +278,7 @@ func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *stringBuilder) Annotations(annotations ...Annotation) *stringBuilder {
+func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -370,7 +372,7 @@ func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *timeBuilder) Annotations(annotations ...Annotation) *timeBuilder {
+func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -461,7 +463,7 @@ func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *boolBuilder) Annotations(annotations ...Annotation) *boolBuilder {
+func (b *boolBuilder) Annotations(annotations ...schema.Annotation) *boolBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -546,7 +548,7 @@ func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *bytesBuilder) Annotations(annotations ...Annotation) *bytesBuilder {
+func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -628,7 +630,7 @@ func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *jsonBuilder) Annotations(annotations ...Annotation) *jsonBuilder {
+func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -764,7 +766,7 @@ func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *enumBuilder) Annotations(annotations ...Annotation) *enumBuilder {
+func (b *enumBuilder) Annotations(annotations ...schema.Annotation) *enumBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -869,7 +871,7 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *uuidBuilder) Annotations(annotations ...Annotation) *uuidBuilder {
+func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -877,14 +879,6 @@ func (b *uuidBuilder) Annotations(annotations ...Annotation) *uuidBuilder {
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
-}
-
-// Annotation is used to attach arbitrary metadata to the field object in codegen.
-// The object must be serializable to JSON raw value (e.g. struct, map or slice).
-// Template extensions can retrieve this metadata and use it inside their templates.
-type Annotation interface {
-	// Name defines the name of the annotation to be retrieved by the codegen.
-	Name() string
 }
 
 // A Descriptor for field configuration.
@@ -904,7 +898,7 @@ type Descriptor struct {
 	Enums         []struct{ N, V string } // enum values.
 	Sensitive     bool                    // sensitive info string field.
 	SchemaType    map[string]string       // override the schema type.
-	Annotations   []Annotation            // field annotations.
+	Annotations   []schema.Annotation     // field annotations.
 	err           error
 }
 

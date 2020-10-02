@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	buf, err := ioutil.ReadFile("gen/numeric.tmpl")
+	buf, err := ioutil.ReadFile("internal/numeric.tmpl")
 	if err != nil {
 		log.Fatal("reading template file:", err)
 	}

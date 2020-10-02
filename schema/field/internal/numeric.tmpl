@@ -8,9 +8,11 @@ package field
 import (
 	"errors"
 	"reflect"
+
+	"github.com/facebook/ent/schema"
 )
 
-//go:generate go run gen/gen.go
+//go:generate go run internal/gen.go
 
 {{ range $t := $.Ints }}
 	{{ $title := title $t.String }}
@@ -182,7 +184,7 @@ func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 //			Ordered: true,
 //		})
 //
-func (b *{{ $builder }}) Annotations(annotations ...Annotation) *{{ $builder }} {
+func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $builder }} {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -341,7 +343,7 @@ func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 //			Ordered: true,
 //		})
 //
-func (b *{{ $builder }}) Annotations(annotations ...Annotation) *{{ $builder }} {
+func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $builder }} {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
