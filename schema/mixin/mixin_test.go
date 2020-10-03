@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/mixin"
 
 	"github.com/stretchr/testify/assert"
@@ -51,7 +51,7 @@ type annotation string
 func (annotation) Name() string { return "" }
 
 func TestAnnotateFields(t *testing.T) {
-	annotations := []field.Annotation{
+	annotations := []schema.Annotation{
 		annotation("foo"),
 		annotation("bar"),
 		annotation("baz"),
@@ -82,7 +82,7 @@ func (TestSchema) Edges() []ent.Edge {
 }
 
 func TestAnnotateEdges(t *testing.T) {
-	annotations := []edge.Annotation{
+	annotations := []schema.Annotation{
 		annotation("foo"),
 		annotation("bar"),
 		annotation("baz"),

@@ -7,9 +7,11 @@ package field
 import (
 	"errors"
 	"reflect"
+
+	"github.com/facebook/ent/schema"
 )
 
-//go:generate go run gen/gen.go
+//go:generate go run internal/gen.go
 
 // Int returns a new Field with type int.
 func Int(name string) *intBuilder {
@@ -247,7 +249,7 @@ func (b *intBuilder) GoType(typ interface{}) *intBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *intBuilder) Annotations(annotations ...Annotation) *intBuilder {
+func (b *intBuilder) Annotations(annotations ...schema.Annotation) *intBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -387,7 +389,7 @@ func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
 //			Ordered: true,
 //		})
 //
-func (b *uintBuilder) Annotations(annotations ...Annotation) *uintBuilder {
+func (b *uintBuilder) Annotations(annotations ...schema.Annotation) *uintBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -537,7 +539,7 @@ func (b *int8Builder) GoType(typ interface{}) *int8Builder {
 //			Ordered: true,
 //		})
 //
-func (b *int8Builder) Annotations(annotations ...Annotation) *int8Builder {
+func (b *int8Builder) Annotations(annotations ...schema.Annotation) *int8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -687,7 +689,7 @@ func (b *int16Builder) GoType(typ interface{}) *int16Builder {
 //			Ordered: true,
 //		})
 //
-func (b *int16Builder) Annotations(annotations ...Annotation) *int16Builder {
+func (b *int16Builder) Annotations(annotations ...schema.Annotation) *int16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -837,7 +839,7 @@ func (b *int32Builder) GoType(typ interface{}) *int32Builder {
 //			Ordered: true,
 //		})
 //
-func (b *int32Builder) Annotations(annotations ...Annotation) *int32Builder {
+func (b *int32Builder) Annotations(annotations ...schema.Annotation) *int32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -987,7 +989,7 @@ func (b *int64Builder) GoType(typ interface{}) *int64Builder {
 //			Ordered: true,
 //		})
 //
-func (b *int64Builder) Annotations(annotations ...Annotation) *int64Builder {
+func (b *int64Builder) Annotations(annotations ...schema.Annotation) *int64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -1127,7 +1129,7 @@ func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
 //			Ordered: true,
 //		})
 //
-func (b *uint8Builder) Annotations(annotations ...Annotation) *uint8Builder {
+func (b *uint8Builder) Annotations(annotations ...schema.Annotation) *uint8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -1267,7 +1269,7 @@ func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
 //			Ordered: true,
 //		})
 //
-func (b *uint16Builder) Annotations(annotations ...Annotation) *uint16Builder {
+func (b *uint16Builder) Annotations(annotations ...schema.Annotation) *uint16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -1407,7 +1409,7 @@ func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
 //			Ordered: true,
 //		})
 //
-func (b *uint32Builder) Annotations(annotations ...Annotation) *uint32Builder {
+func (b *uint32Builder) Annotations(annotations ...schema.Annotation) *uint32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -1547,7 +1549,7 @@ func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
 //			Ordered: true,
 //		})
 //
-func (b *uint64Builder) Annotations(annotations ...Annotation) *uint64Builder {
+func (b *uint64Builder) Annotations(annotations ...schema.Annotation) *uint64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -1706,7 +1708,7 @@ func (b *float64Builder) GoType(typ interface{}) *float64Builder {
 //			Ordered: true,
 //		})
 //
-func (b *float64Builder) Annotations(annotations ...Annotation) *float64Builder {
+func (b *float64Builder) Annotations(annotations ...schema.Annotation) *float64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -1852,7 +1854,7 @@ func (b *float32Builder) GoType(typ interface{}) *float32Builder {
 //			Ordered: true,
 //		})
 //
-func (b *float32Builder) Annotations(annotations ...Annotation) *float32Builder {
+func (b *float32Builder) Annotations(annotations ...schema.Annotation) *float32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
