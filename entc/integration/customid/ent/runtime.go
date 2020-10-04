@@ -14,8 +14,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
 	blobFields := schema.Blob{}.Fields()

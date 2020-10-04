@@ -12,12 +12,21 @@ import (
 	"github.com/facebook/ent/schema/field"
 )
 
-// Planet defines the schema of a planet.
-type Planet struct {
+// User defines the schema of a user.
+type User struct {
 	ent.Schema
 }
 
-func (Planet) Fields() []ent.Field {
+// Mixin list of schemas to the user.
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+		TeamMixin{},
+	}
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
 			Immutable().
@@ -28,27 +37,21 @@ func (Planet) Fields() []ent.Field {
 	}
 }
 
-func (Planet) Edges() []ent.Edge {
+// Edges of the user.
+func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("neighbors", Planet.Type),
+		edge.To("tasks", Task.Type),
 	}
 }
 
-func (Planet) Hooks() []ent.Hook {
-	return []ent.Hook{
-		rule.LogPlanetMutationHook(),
-	}
-}
-
-func (Planet) Policy() ent.Policy {
+// Policy of the user.
+func (User) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
-			rule.DenyUpdateRule(),
-			rule.DenyPlanetSelfLinkRule(),
-			privacy.AlwaysAllowRule(),
+			rule.AllowUserCreateIfAdmin(),
+			privacy.AlwaysDenyRule(),
 		},
 		Query: privacy.QueryPolicy{
-			rule.FilterZeroAgePlanetRule(),
 			privacy.AlwaysAllowRule(),
 		},
 	}

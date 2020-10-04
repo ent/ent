@@ -6,51 +6,165 @@ package rule
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/facebook/ent/entc/integration/privacy/ent"
-	"github.com/facebook/ent/entc/integration/privacy/ent/galaxy"
 	"github.com/facebook/ent/entc/integration/privacy/ent/hook"
-	"github.com/facebook/ent/entc/integration/privacy/ent/planet"
 	"github.com/facebook/ent/entc/integration/privacy/ent/privacy"
+	"github.com/facebook/ent/entc/integration/privacy/ent/task"
+	"github.com/facebook/ent/entc/integration/privacy/ent/team"
+	"github.com/facebook/ent/entc/integration/privacy/ent/user"
+	"github.com/facebook/ent/entc/integration/privacy/viewer"
 )
 
-// DenyUpdateRule is a mutation rule that denies update many operations.
+// DenyUpdateRule is a mutation rule that denies the update-many operation.
 func DenyUpdateRule() privacy.MutationRule {
 	return privacy.DenyMutationOperationRule(ent.OpUpdate)
 }
 
-// DenyPlanetSelfLinkRule is a mutation rule rule that prevents rule self link via neighbor edge.
-func DenyPlanetSelfLinkRule() privacy.MutationRule {
-	rule := privacy.PlanetMutationRuleFunc(func(ctx context.Context, m *ent.PlanetMutation) error {
-		id, exists := m.ID()
-		if !exists {
-			return privacy.Denyf("ent/privacy: rule id not provided")
+// DenyIfNoViewer is a rule that returns deny decision if the viewer is missing in the context.
+func DenyIfNoViewer() privacy.QueryMutationRule {
+	return privacy.ContextQueryMutationRule(func(ctx context.Context) error {
+		view := viewer.FromContext(ctx)
+		if view == nil {
+			return privacy.Denyf("viewer-context is missing")
 		}
-		for _, neighbor := range m.NeighborsIDs() {
-			if id == neighbor {
-				return privacy.Denyf("ent/privacy: planet %d cannot have itself as a neighbor", id)
-			}
-		}
-		return privacy.Skip
-	})
-	return privacy.OnMutationOperation(rule, ent.OpUpdateOne)
-}
-
-// FilterZeroPlanetAgeRule is a query rule that filters out planet with age equal to zero.
-func FilterZeroAgePlanetRule() privacy.QueryRule {
-	return privacy.PlanetQueryRuleFunc(func(ctx context.Context, q *ent.PlanetQuery) error {
-		q.Where(planet.AgeNEQ(0))
 		return privacy.Skip
 	})
 }
 
-// FilterIrregularGalaxyRule is a query rule that filters out irregular galaxies.
-func FilterIrregularGalaxyRule() privacy.QueryRule {
-	return privacy.GalaxyQueryRuleFunc(func(ctx context.Context, q *ent.GalaxyQuery) error {
-		q.Where(galaxy.TypeNEQ(galaxy.TypeIrregular))
+// DenyIfNotAdmin is a rule that returns deny decision if the viewer not admin.
+func DenyIfNotAdmin() privacy.QueryMutationRule {
+	return privacy.ContextQueryMutationRule(func(ctx context.Context) error {
+		view := viewer.FromContext(ctx)
+		if !view.Admin() {
+			return privacy.Denyf("viewer-context is not admin")
+		}
 		return privacy.Skip
 	})
+}
+
+// AllowIfAdmin is a rule that returns allow decision if the viewer is admin.
+func AllowIfAdmin() privacy.QueryMutationRule {
+	return privacy.ContextQueryMutationRule(func(ctx context.Context) error {
+		view := viewer.FromContext(ctx)
+		if view.Admin() {
+			return privacy.Allow
+		}
+		return privacy.Skip
+	})
+}
+
+// AllowUserCreateIfAdmin is a rule that allows user creation only if the viewer is admin.
+func AllowUserCreateIfAdmin() privacy.MutationRule {
+	rule := privacy.UserMutationRuleFunc(func(ctx context.Context, _ *ent.UserMutation) error {
+		view := viewer.FromContext(ctx)
+		if view.Admin() {
+			return privacy.Allow
+		}
+		// Skip to the next privacy rule, that may accept or reject this operation.
+		return privacy.Skip
+	})
+	return privacy.OnMutationOperation(rule, ent.OpCreate)
+}
+
+// AllowTaskCreateIfOwner is a rule that allows creating task only if the creator is also the user.
+func AllowTaskCreateIfOwner() privacy.MutationRule {
+	rule := privacy.TaskMutationRuleFunc(func(ctx context.Context, m *ent.TaskMutation) error {
+		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
+		if !ok {
+			return privacy.Skip
+		}
+		id, exists := m.OwnerID()
+		if exists && view.User.ID == id {
+			return privacy.Allow
+		}
+		// Skip to the next privacy rule, that may accept or reject this operation.
+		return privacy.Skip
+	})
+	return privacy.OnMutationOperation(rule, ent.OpCreate)
+}
+
+// FilterTeamRule is a query rule that filters out tasks and users that are not in the team.
+func FilterTeamRule() privacy.QueryRule {
+	return privacy.QueryRuleFunc(func(ctx context.Context, q ent.Query) error {
+		view := viewer.FromContext(ctx)
+		teams, err := view.Teams(ctx)
+		if err != nil {
+			return privacy.Denyf("getting team names: %w", err)
+		}
+		switch q := q.(type) {
+		case *ent.UserQuery:
+			q.Where(user.HasTeamsWith(team.NameIn(teams...)))
+		case *ent.TaskQuery:
+			q.Where(task.HasTeamsWith(team.NameIn(teams...)))
+		default:
+			return privacy.Denyf("unexpected query type %T", q)
+		}
+		return privacy.Skip
+	})
+}
+
+// DenyIfStatusChangedByOther is a mutation rule that returns a deny decision if the
+// task status was changed by someone that is not the owner of the task, or an admin.
+func DenyIfStatusChangedByOther() privacy.MutationRule {
+	policy := privacy.TaskMutationRuleFunc(func(ctx context.Context, m *ent.TaskMutation) error {
+		// Skip if the mutation does not change the task status.
+		if _, exists := m.Status(); !exists {
+			return privacy.Skip
+		}
+		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
+		// Skip if the the viewer is an admin (or an app).
+		if !ok || view.Admin() {
+			return privacy.Skip
+		}
+		id, ok := m.ID()
+		if !ok {
+			return fmt.Errorf("missing task id")
+		}
+		owner, err := m.Client().User.Query().Where(user.HasTasksWith(task.ID(id))).Only(ctx)
+		if err != nil {
+			return err
+		}
+		// Deny the mutation, if the viewer is not the owner.
+		if owner.ID != view.User.ID {
+			return privacy.Denyf("viewer %d is not allowed to change the task status", view.User.ID)
+		}
+		return privacy.Skip
+	})
+	return privacy.OnMutationOperation(policy, ent.OpUpdateOne)
+}
+
+// AllowIfViewerInTheSameTeam returns allow decision if viewer on the same team as the task.
+func AllowIfViewerInTheSameTeam() privacy.MutationRule {
+	policy := privacy.TaskMutationRuleFunc(func(ctx context.Context, m *ent.TaskMutation) error {
+		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
+		// Skip if the the viewer is an admin (or an app).
+		if !ok || view.Admin() {
+			return privacy.Skip
+		}
+		teams, err := view.Teams(ctx)
+		if err != nil {
+			return privacy.Denyf("getting team names: %w", err)
+		}
+		id, ok := m.ID()
+		if !ok {
+			return fmt.Errorf("missing task id")
+		}
+		// Query should return an error if the viewer
+		// does not belong to the task namespace/team.
+		if _, err = m.Client().Task.Query().
+			Where(
+				task.ID(id),
+				task.HasTeamsWith(team.NameIn(teams...)),
+			).
+			Only(ctx); err != nil {
+			return err
+		}
+		return privacy.Allow
+	})
+	return privacy.OnMutationOperation(policy, ent.OpUpdateOne)
 }
 
 var logger = struct {
@@ -70,13 +184,13 @@ func SetMutationLogFunc(f func(string, ...interface{})) func(string, ...interfac
 }
 
 // LogPlanetMutationHook returns a hook logging planet mutations.
-func LogPlanetMutationHook() ent.Hook {
+func LogTaskMutationHook() ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
-		return hook.PlanetFunc(func(ctx context.Context, m *ent.PlanetMutation) (ent.Value, error) {
+		return hook.TaskFunc(func(ctx context.Context, m *ent.TaskMutation) (ent.Value, error) {
 			value, err := next.Mutate(ctx, m)
 			logger.RLock()
 			defer logger.RUnlock()
-			logger.logf("planet mutation: type %s, value %v, err %v", m.Op(), value, err)
+			logger.logf("task mutation: type %s, value %v, err %v", m.Op(), value, err)
 			return value, err
 		})
 	}

@@ -351,9 +351,11 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		}
 		{{ $receiver }}.{{ $.Storage }} = prev
 	}
-	{{- if $.HasPolicy }}
-		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
-			return err
+	{{- if $.NumPolicy }}
+		for _, policy := range {{ $.Package }}.Policy {
+			if err := policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
+				return err
+			}
 		}
 	{{- end }}
 	return nil
