@@ -63,7 +63,8 @@ type Client struct {
 	// Task is the client for interacting with the Task builders.
 	Task *TaskClient
 	// User is the client for interacting with the User builders.
-	User *UserClient
+	User          *UserClient
+	TemplateField struct{}
 }
 
 // NewClient creates a new client configured with the given options.

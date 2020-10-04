@@ -34,7 +34,12 @@ type Client struct {
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
 	{{- end }}
-	{{ template "client/fields/additional" $ }}
+	{{- template "client/fields/additional" $ }}
+	{{- with $tmpls := matchTemplate "client/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 }
 
 // NewClient creates a new client configured with the given options.

@@ -33,7 +33,6 @@ type Client struct {
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
-
 	// additional fields for node api
 	tables tables
 }
