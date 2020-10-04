@@ -1311,14 +1311,14 @@ func TestDeleteNodes(t *testing.T) {
 func TestQueryNodes(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
-	mock.ExpectQuery(escape("SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name`, `users`.`fk1`, `users`.`fk2` FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT ? OFFSET ?")).
-		WithArgs(40, 3, 4).
+	mock.ExpectQuery(escape("SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name`, `users`.`fk1`, `users`.`fk2` FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4")).
+		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name", "fk1", "fk2"}).
 			AddRow(1, 10, nil, nil, nil).
 			AddRow(2, 20, "", 0, 0).
 			AddRow(3, 30, "a8m", 1, 1))
-	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`id`) FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT ? OFFSET ?")).
-		WithArgs(40, 3, 4).
+	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`id`) FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4")).
+		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
 			AddRow(3))
 

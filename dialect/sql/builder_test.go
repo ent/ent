@@ -1017,16 +1017,14 @@ func TestBuilder(t *testing.T) {
 			input: Select("*").
 				From(Table("users")).
 				Limit(1),
-			wantQuery: "SELECT * FROM `users` LIMIT ?",
-			wantArgs:  []interface{}{1},
+			wantQuery: "SELECT * FROM `users` LIMIT 1",
 		},
 		{
 			input: Dialect(dialect.Postgres).
 				Select("*").
 				From(Table("users")).
 				Limit(1),
-			wantQuery: `SELECT * FROM "users" LIMIT $1`,
-			wantArgs:  []interface{}{1},
+			wantQuery: `SELECT * FROM "users" LIMIT 1`,
 		},
 		{
 			input:     Select("age").Distinct().From(Table("users")),
@@ -1092,8 +1090,8 @@ func TestBuilder(t *testing.T) {
 					Join(t4).
 					On(t1.C("id"), t4.C("id")).Limit(1)
 			}(),
-			wantQuery: `SELECT * FROM "groups" JOIN (SELECT "user_groups"."id" FROM "user_groups" JOIN "users" AS "t0" ON "user_groups"."id" = "t0"."id2" WHERE "t0"."id" = $1) AS "t1" ON "groups"."id" = "t1"."id" LIMIT $2`,
-			wantArgs:  []interface{}{"baz", 1},
+			wantQuery: `SELECT * FROM "groups" JOIN (SELECT "user_groups"."id" FROM "user_groups" JOIN "users" AS "t0" ON "user_groups"."id" = "t0"."id2" WHERE "t0"."id" = $1) AS "t1" ON "groups"."id" = "t1"."id" LIMIT 1`,
+			wantArgs:  []interface{}{"baz"},
 		},
 		{
 			input: func() Querier {

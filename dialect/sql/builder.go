@@ -1752,11 +1752,11 @@ func (s *Selector) Query() (string, []interface{}) {
 	}
 	if s.limit != nil {
 		b.WriteString(" LIMIT ")
-		b.Arg(*s.limit)
+		b.WriteString(strconv.Itoa(*s.limit))
 	}
 	if s.offset != nil {
 		b.WriteString(" OFFSET ")
-		b.Arg(*s.offset)
+		b.WriteString(strconv.Itoa(*s.offset))
 	}
 	s.total = b.total
 	return b.String(), b.args
@@ -2080,9 +2080,9 @@ func (b *Builder) join(qs []Querier, sep string) *Builder {
 // Nested gets a callback, and wraps its result with parentheses.
 func (b *Builder) Nested(f func(*Builder)) *Builder {
 	nb := &Builder{dialect: b.dialect, total: b.total}
-	nb.WriteString("(")
+	nb.WriteByte('(')
 	f(nb)
-	nb.WriteString(")")
+	nb.WriteByte(')')
 	nb.WriteTo(b)
 	b.args = append(b.args, nb.args...)
 	b.total = nb.total
