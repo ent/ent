@@ -292,6 +292,7 @@ field.String("name").
 	Validate(MaxRuneCount(10))
 field.String("nickname").
 	Validate(MaxRuneCount(20))
+```
 
 ## Built-in Validators
 
