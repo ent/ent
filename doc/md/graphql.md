@@ -62,17 +62,27 @@ After running codegen, the following add-ons will be added to your project.
 A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/docs/en/graphql-server-specification.html#object-identification).
 
 In order to use the new generated `ent.Noder` interface in the [GraphQL resolver](https://gqlgen.com/reference/resolvers/),
-add the `Node` method to the query resolver, and see the [configuration](#gql-configuration) section to understand
+add the `Node` method to the query resolver, and look at the [configuration](#gql-configuration) section to understand
 how to use it.
+
+If you are using the [Universal IDs](migrate.md#universal-ids) option in the schema migration, the NodeType is derived
+from the id value and can be used as follows:
 
 ```go
 func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
 	return r.client.Noder(ctx, id)
 }
 ```
- 
-Note that schema migration must be configured with the [Universal IDs](migrate.md#universal-ids) option if you want
-ent to resolve the "type from id" for you.
+
+However, if you use a custom format for the global unique identifiers, you can control the NodeType as follows:
+
+```go
+func (r *queryResolver) Node(ctx context.Context, guid string) (ent.Noder, error) {
+	typ, id := parseGUID(guid)
+	return r.client.Noder(ctx, id, ent.WithNodeType(typ))
+}
+```
+
 
 ## GQL Configuration
 
