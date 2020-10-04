@@ -275,6 +275,25 @@ func (Group) Fields() []ent.Field {
 }
 ```
 
+Here is another example for writing a reusable validator:
+
+```go
+// MaxRuneCount validates the rune length of a string by using the unicode/utf8 package.
+func MaxRuneCount(maxLen int) func(s string) error {
+	return func(s string) error {
+		if utf8.RuneCountInString(s) > maxLen {
+			return errors.New("value is more than the max length")
+		}
+		return nil
+	}
+}
+
+field.String("name").
+	Validate(MaxRuneCount(10))
+field.String("nickname").
+	Validate(MaxRuneCount(20))
+```
+
 ## Built-in Validators
 
 The framework provides a few built-in validators for each type:
