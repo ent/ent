@@ -587,7 +587,12 @@ func catch(err *error) {
 
 func extendExisting(name string) bool {
 	for _, t := range Templates {
-		if t.Match(name) {
+		if match(t.ExtendPatterns, name) {
+			return true
+		}
+	}
+	for _, t := range GraphTemplates {
+		if match(t.ExtendPatterns, name) {
 			return true
 		}
 	}
