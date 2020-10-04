@@ -102,22 +102,23 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 }
 
 // Gen generates the artifacts for the graph.
-func (g *Graph) Gen() (err error) {
-	defer catch(&err)
+func (g *Graph) Gen() error {
 	var (
-		written  []string
+		assets   assets
 		external []GraphTemplate
 	)
 	templates, external = g.templates()
 	for _, n := range g.Nodes {
-		path := filepath.Join(g.Config.Target, n.Package())
-		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
+		assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, n.Package()))
 		for _, tmpl := range Templates {
 			b := bytes.NewBuffer(nil)
-			check(templates.ExecuteTemplate(b, tmpl.Name, n), "execute template %q", tmpl.Name)
-			target := filepath.Join(g.Config.Target, tmpl.Format(n))
-			check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
-			written = append(written, target)
+			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
+				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+			}
+			assets.files = append(assets.files, file{
+				path:    filepath.Join(g.Config.Target, tmpl.Format(n)),
+				content: b.Bytes(),
+			})
 		}
 	}
 	for _, tmpl := range append(GraphTemplates, external...) {
@@ -125,26 +126,34 @@ func (g *Graph) Gen() (err error) {
 			continue
 		}
 		if dir := filepath.Dir(tmpl.Format); dir != "." {
-			path := filepath.Join(g.Config.Target, dir)
-			check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
+			assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, dir))
 		}
 		b := bytes.NewBuffer(nil)
-		check(templates.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
-		target := filepath.Join(g.Config.Target, tmpl.Format)
-		check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
-		written = append(written, target)
+		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
+			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+		}
+		assets.files = append(assets.files, file{
+			path:    filepath.Join(g.Config.Target, tmpl.Format),
+			content: b.Bytes(),
+		})
 	}
 	for _, f := range AllFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
 			continue
 		}
-		err := f.cleanup(g.Config)
-		check(err, "cleanup %q feature assets", f.Name)
+		if err := f.cleanup(g.Config); err != nil {
+			return fmt.Errorf("cleanup %q feature assets: %w", f.Name, err)
+		}
+	}
+	// Write and format assets only if template execution
+	// finished successfully.
+	if err := assets.write(); err != nil {
+		return err
 	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it's
 	// suspended to the end of the writing.
-	return formatFiles(written)
+	return assets.format()
 }
 
 // addNode creates a new Type/Node/Ent to the graph.
@@ -504,14 +513,37 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
 }
 
-// formatFiles runs "goimports" on given paths.
-func formatFiles(paths []string) error {
-	for _, path := range paths {
-		buf, err := ioutil.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("read file %s: %v", path, err)
+type (
+	file struct {
+		path    string
+		content []byte
+	}
+	assets struct {
+		dirs  []string
+		files []file
+	}
+)
+
+// write files and dirs in the assets.
+func (a assets) write() error {
+	for _, dir := range a.dirs {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return fmt.Errorf("create dir %q: %w", dir, err)
 		}
-		src, err := imports.Process(path, buf, nil)
+	}
+	for _, file := range a.files {
+		if err := ioutil.WriteFile(file.path, file.content, 0644); err != nil {
+			return fmt.Errorf("write file %q: %w", file.path, err)
+		}
+	}
+	return nil
+}
+
+// format runs "goimports" on all assets.
+func (a assets) format() error {
+	for _, file := range a.files {
+		path := file.path
+		src, err := imports.Process(path, file.content, nil)
 		if err != nil {
 			return fmt.Errorf("format file %s: %v", path, err)
 		}
