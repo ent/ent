@@ -160,11 +160,15 @@ type (
 
 // NewType creates a new type and its fields from the given schema.
 func NewType(c *Config, schema *load.Schema) (*Type, error) {
+	idType := c.IDType
+	if idType == nil {
+		idType = defaultIDType
+	}
 	typ := &Type{
 		Config: c,
 		ID: &Field{
 			Name:      "id",
-			Type:      c.IDType,
+			Type:      idType,
 			StructTag: structTag("id", ""),
 		},
 		schema:      schema,

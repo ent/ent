@@ -98,7 +98,33 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
+	g.defaults()
 	return
+}
+
+// defaultIDType holds the default value for IDType.
+var defaultIDType = &field.TypeInfo{Type: field.TypeInt}
+
+// defaults sets the default value of the IDType. The IDType field is used
+// by multiple templates. If the IDType wasn't provided, it will fallback to
+// int, or the one used in the schema (if all schemas share the same IDType).
+func (g *Graph) defaults() {
+	if g.IDType != nil {
+		return
+	}
+	if len(g.Nodes) == 0 {
+		g.IDType = defaultIDType
+		return
+	}
+	// Check that all nodes have the same type for the ID field.
+	for i := 0; i < len(g.Nodes)-1; i++ {
+		cid, nid := g.Nodes[i].ID.Type, g.Nodes[i+1].ID.Type
+		if cid.Type != nid.Type {
+			g.IDType = defaultIDType
+			return
+		}
+	}
+	g.IDType = g.Nodes[0].ID.Type
 }
 
 // Gen generates the artifacts for the graph.
