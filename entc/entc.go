@@ -17,7 +17,6 @@ import (
 
 	"github.com/facebook/ent/entc/gen"
 	"github.com/facebook/ent/entc/load"
-	"github.com/facebook/ent/schema/field"
 )
 
 // LoadGraph loads the schema package from the given schema path,
@@ -57,9 +56,6 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error)
 		// default target-path for codegen is one dir above
 		// the schema.
 		cfg.Target = filepath.Dir(abs)
-	}
-	if cfg.IDType == nil {
-		cfg.IDType = &field.TypeInfo{Type: field.TypeInt}
 	}
 	for _, opt := range options {
 		if err := opt(cfg); err != nil {
