@@ -66,7 +66,7 @@ const (
 			Hooks [{{ $numHooks }}]ent.Hook
 		{{- end }}
 		{{- if $.NumPolicy }}
-			Policy [{{ $.NumPolicy }}]ent.Policy
+			Policy ent.Policy
 		{{- end }}
 		{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
 		{{- range $f := $fields }}

@@ -366,10 +366,8 @@ func (tq *TeamQuery) prepareQuery(ctx context.Context) error {
 		}
 		tq.sql = prev
 	}
-	for _, policy := range team.Policy {
-		if err := policy.EvalQuery(ctx, tq); err != nil {
-			return err
-		}
+	if err := team.Policy.EvalQuery(ctx, tq); err != nil {
+		return err
 	}
 	return nil
 }

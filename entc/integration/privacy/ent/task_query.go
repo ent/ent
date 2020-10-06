@@ -367,10 +367,8 @@ func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 		}
 		tq.sql = prev
 	}
-	for _, policy := range task.Policy {
-		if err := policy.EvalQuery(ctx, tq); err != nil {
-			return err
-		}
+	if err := task.Policy.EvalQuery(ctx, tq); err != nil {
+		return err
 	}
 	return nil
 }
