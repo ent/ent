@@ -214,50 +214,74 @@ func DenyMutationOperationRule(op ent.Op) MutationRule {
 	return OnMutationOperation(rule, op)
 }
 
-// The GalaxyQueryRuleFunc type is an adapter to allow the use of ordinary
+// The TaskQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
-type GalaxyQueryRuleFunc func(context.Context, *ent.GalaxyQuery) error
+type TaskQueryRuleFunc func(context.Context, *ent.TaskQuery) error
 
 // EvalQuery return f(ctx, q).
-func (f GalaxyQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.GalaxyQuery); ok {
+func (f TaskQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.TaskQuery); ok {
 		return f(ctx, q)
 	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.GalaxyQuery", q)
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.TaskQuery", q)
 }
 
-// The GalaxyMutationRuleFunc type is an adapter to allow the use of ordinary
+// The TaskMutationRuleFunc type is an adapter to allow the use of ordinary
 // functions as a mutation rule.
-type GalaxyMutationRuleFunc func(context.Context, *ent.GalaxyMutation) error
+type TaskMutationRuleFunc func(context.Context, *ent.TaskMutation) error
 
 // EvalMutation calls f(ctx, m).
-func (f GalaxyMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.GalaxyMutation); ok {
+func (f TaskMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.TaskMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.GalaxyMutation", m)
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.TaskMutation", m)
 }
 
-// The PlanetQueryRuleFunc type is an adapter to allow the use of ordinary
+// The TeamQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
-type PlanetQueryRuleFunc func(context.Context, *ent.PlanetQuery) error
+type TeamQueryRuleFunc func(context.Context, *ent.TeamQuery) error
 
 // EvalQuery return f(ctx, q).
-func (f PlanetQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.PlanetQuery); ok {
+func (f TeamQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.TeamQuery); ok {
 		return f(ctx, q)
 	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.PlanetQuery", q)
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.TeamQuery", q)
 }
 
-// The PlanetMutationRuleFunc type is an adapter to allow the use of ordinary
+// The TeamMutationRuleFunc type is an adapter to allow the use of ordinary
 // functions as a mutation rule.
-type PlanetMutationRuleFunc func(context.Context, *ent.PlanetMutation) error
+type TeamMutationRuleFunc func(context.Context, *ent.TeamMutation) error
 
 // EvalMutation calls f(ctx, m).
-func (f PlanetMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.PlanetMutation); ok {
+func (f TeamMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.TeamMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.PlanetMutation", m)
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.TeamMutation", m)
+}
+
+// The UserQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type UserQueryRuleFunc func(context.Context, *ent.UserQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f UserQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.UserQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.UserQuery", q)
+}
+
+// The UserMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type UserMutationRuleFunc func(context.Context, *ent.UserMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f UserMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.UserMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserMutation", m)
 }

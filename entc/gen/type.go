@@ -328,7 +328,7 @@ func (t Type) FKEdges() (edges []*Edge) {
 // RuntimeMixin returns schema mixin that needs to be loaded at
 // runtime. For example, for default values, validators or hooks.
 func (t Type) RuntimeMixin() bool {
-	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0
+	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0 || len(t.MixedInPolicies()) > 0
 }
 
 // MixedInFields returns the indices of mixin holds runtime code.
@@ -353,6 +353,20 @@ func (t Type) MixedInHooks() []int {
 	}
 	idx := make(map[int]struct{})
 	for _, h := range t.schema.Hooks {
+		if h.MixedIn {
+			idx[h.MixinIndex] = struct{}{}
+		}
+	}
+	return sortedKeys(idx)
+}
+
+// MixedInPolicies returns the indices of mixin with policies.
+func (t Type) MixedInPolicies() []int {
+	if t.schema == nil {
+		return nil
+	}
+	idx := make(map[int]struct{})
+	for _, h := range t.schema.Policy {
 		if h.MixedIn {
 			idx[h.MixinIndex] = struct{}{}
 		}
@@ -604,12 +618,20 @@ func (t Type) HookPositions() []*load.Position {
 	return nil
 }
 
-// HasPolicy returns whether a privacy policy was declared in the type schema.
-func (t Type) HasPolicy() bool {
+// NumHooks returns the number of privacy-policy declared in the type schema.
+func (t Type) NumPolicy() int {
+	if t.schema != nil {
+		return len(t.schema.Policy)
+	}
+	return 0
+}
+
+// PolicyPositions returns the position information of privacy policy declared in the type schema.
+func (t Type) PolicyPositions() []*load.Position {
 	if t.schema != nil {
 		return t.schema.Policy
 	}
-	return false
+	return nil
 }
 
 // RelatedTypes returns all the types (nodes) that

@@ -33,6 +33,9 @@ func (Schema) Indexes() []ent.Index { return nil }
 // Hooks of the mixin.
 func (Schema) Hooks() []ent.Hook { return nil }
 
+// Policy of the mixin.
+func (Schema) Policy() ent.Policy { return nil }
+
 // time mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*Schema)(nil)
 

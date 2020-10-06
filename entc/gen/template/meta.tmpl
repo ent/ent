@@ -48,9 +48,9 @@ const (
 {{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
 
 {{/* Generate global variables for hooks, validators and policy checkers */}}
-{{ if or $hasDefault $.HasValidators $.NumHooks $.HasPolicy }}
+{{ if or $hasDefault $.HasValidators $.NumHooks $.NumPolicy }}
     {{- $numHooks := $.NumHooks }}
-    {{- if $.HasPolicy }}
+    {{- if $.NumPolicy }}
         {{- $numHooks = add $numHooks 1 }}
     {{- end }}
 	{{- if $numHooks }}
@@ -65,8 +65,8 @@ const (
 		{{- if $numHooks }}
 			Hooks [{{ $numHooks }}]ent.Hook
 		{{- end }}
-		{{- if $.HasPolicy }}
-			Policy ent.Policy
+		{{- if $.NumPolicy }}
+			Policy [{{ $.NumPolicy }}]ent.Policy
 		{{- end }}
 		{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
 		{{- range $f := $fields }}

@@ -11,8 +11,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/entc/integration/privacy/ent/galaxy"
-	"github.com/facebook/ent/entc/integration/privacy/ent/planet"
+	"github.com/facebook/ent/entc/integration/privacy/ent/task"
+	"github.com/facebook/ent/entc/integration/privacy/ent/team"
+	"github.com/facebook/ent/entc/integration/privacy/ent/user"
 
 	"github.com/facebook/ent"
 )
@@ -26,38 +27,42 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeGalaxy = "Galaxy"
-	TypePlanet = "Planet"
+	TypeTask = "Task"
+	TypeTeam = "Team"
+	TypeUser = "User"
 )
 
-// GalaxyMutation represents an operation that mutate the Galaxies
+// TaskMutation represents an operation that mutate the Tasks
 // nodes in the graph.
-type GalaxyMutation struct {
+type TaskMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	name           *string
-	_type          *galaxy.Type
-	clearedFields  map[string]struct{}
-	planets        map[int]struct{}
-	removedplanets map[int]struct{}
-	clearedplanets bool
-	done           bool
-	oldValue       func(context.Context) (*Galaxy, error)
+	op            Op
+	typ           string
+	id            *int
+	title         *string
+	description   *string
+	status        *task.Status
+	clearedFields map[string]struct{}
+	teams         map[int]struct{}
+	removedteams  map[int]struct{}
+	clearedteams  bool
+	owner         *int
+	clearedowner  bool
+	done          bool
+	oldValue      func(context.Context) (*Task, error)
 }
 
-var _ ent.Mutation = (*GalaxyMutation)(nil)
+var _ ent.Mutation = (*TaskMutation)(nil)
 
-// galaxyOption allows to manage the mutation configuration using functional options.
-type galaxyOption func(*GalaxyMutation)
+// taskOption allows to manage the mutation configuration using functional options.
+type taskOption func(*TaskMutation)
 
-// newGalaxyMutation creates new mutation for $n.Name.
-func newGalaxyMutation(c config, op Op, opts ...galaxyOption) *GalaxyMutation {
-	m := &GalaxyMutation{
+// newTaskMutation creates new mutation for $n.Name.
+func newTaskMutation(c config, op Op, opts ...taskOption) *TaskMutation {
+	m := &TaskMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeGalaxy,
+		typ:           TypeTask,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -66,20 +71,20 @@ func newGalaxyMutation(c config, op Op, opts ...galaxyOption) *GalaxyMutation {
 	return m
 }
 
-// withGalaxyID sets the id field of the mutation.
-func withGalaxyID(id int) galaxyOption {
-	return func(m *GalaxyMutation) {
+// withTaskID sets the id field of the mutation.
+func withTaskID(id int) taskOption {
+	return func(m *TaskMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Galaxy
+			value *Task
 		)
-		m.oldValue = func(ctx context.Context) (*Galaxy, error) {
+		m.oldValue = func(ctx context.Context) (*Task, error) {
 			once.Do(func() {
 				if m.done {
 					err = fmt.Errorf("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Galaxy.Get(ctx, id)
+					value, err = m.Client().Task.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -88,10 +93,10 @@ func withGalaxyID(id int) galaxyOption {
 	}
 }
 
-// withGalaxy sets the old Galaxy of the mutation.
-func withGalaxy(node *Galaxy) galaxyOption {
-	return func(m *GalaxyMutation) {
-		m.oldValue = func(context.Context) (*Galaxy, error) {
+// withTask sets the old Task of the mutation.
+func withTask(node *Task) taskOption {
+	return func(m *TaskMutation) {
+		m.oldValue = func(context.Context) (*Task, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -100,7 +105,7 @@ func withGalaxy(node *Galaxy) galaxyOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m GalaxyMutation) Client() *Client {
+func (m TaskMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -108,7 +113,7 @@ func (m GalaxyMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m GalaxyMutation) Tx() (*Tx, error) {
+func (m TaskMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
 	}
@@ -119,160 +124,252 @@ func (m GalaxyMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *GalaxyMutation) ID() (id int, exists bool) {
+func (m *TaskMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
 }
 
-// SetName sets the name field.
-func (m *GalaxyMutation) SetName(s string) {
-	m.name = &s
+// SetTitle sets the title field.
+func (m *TaskMutation) SetTitle(s string) {
+	m.title = &s
 }
 
-// Name returns the name value in the mutation.
-func (m *GalaxyMutation) Name() (r string, exists bool) {
-	v := m.name
+// Title returns the title value in the mutation.
+func (m *TaskMutation) Title() (r string, exists bool) {
+	v := m.title
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old name value of the Galaxy.
-// If the Galaxy object wasn't provided to the builder, the object is fetched
+// OldTitle returns the old title value of the Task.
+// If the Task object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *GalaxyMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *TaskMutation) OldTitle(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldTitle is allowed only on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Title, nil
 }
 
-// ResetName reset all changes of the "name" field.
-func (m *GalaxyMutation) ResetName() {
-	m.name = nil
+// ResetTitle reset all changes of the "title" field.
+func (m *TaskMutation) ResetTitle() {
+	m.title = nil
 }
 
-// SetType sets the type field.
-func (m *GalaxyMutation) SetType(ga galaxy.Type) {
-	m._type = &ga
+// SetDescription sets the description field.
+func (m *TaskMutation) SetDescription(s string) {
+	m.description = &s
 }
 
-// GetType returns the type value in the mutation.
-func (m *GalaxyMutation) GetType() (r galaxy.Type, exists bool) {
-	v := m._type
+// Description returns the description value in the mutation.
+func (m *TaskMutation) Description() (r string, exists bool) {
+	v := m.description
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldType returns the old type value of the Galaxy.
-// If the Galaxy object wasn't provided to the builder, the object is fetched
+// OldDescription returns the old description value of the Task.
+// If the Task object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *GalaxyMutation) OldType(ctx context.Context) (v galaxy.Type, err error) {
+func (m *TaskMutation) OldDescription(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldType is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldDescription is allowed only on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldType requires an ID field in the mutation")
+		return v, fmt.Errorf("OldDescription requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
 	}
-	return oldValue.Type, nil
+	return oldValue.Description, nil
 }
 
-// ResetType reset all changes of the "type" field.
-func (m *GalaxyMutation) ResetType() {
-	m._type = nil
+// ClearDescription clears the value of description.
+func (m *TaskMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[task.FieldDescription] = struct{}{}
 }
 
-// AddPlanetIDs adds the planets edge to Planet by ids.
-func (m *GalaxyMutation) AddPlanetIDs(ids ...int) {
-	if m.planets == nil {
-		m.planets = make(map[int]struct{})
+// DescriptionCleared returns if the field description was cleared in this mutation.
+func (m *TaskMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[task.FieldDescription]
+	return ok
+}
+
+// ResetDescription reset all changes of the "description" field.
+func (m *TaskMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, task.FieldDescription)
+}
+
+// SetStatus sets the status field.
+func (m *TaskMutation) SetStatus(t task.Status) {
+	m.status = &t
+}
+
+// Status returns the status value in the mutation.
+func (m *TaskMutation) Status() (r task.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old status value of the Task.
+// If the Task object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *TaskMutation) OldStatus(ctx context.Context) (v task.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus reset all changes of the "status" field.
+func (m *TaskMutation) ResetStatus() {
+	m.status = nil
+}
+
+// AddTeamIDs adds the teams edge to Team by ids.
+func (m *TaskMutation) AddTeamIDs(ids ...int) {
+	if m.teams == nil {
+		m.teams = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.planets[ids[i]] = struct{}{}
+		m.teams[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPlanets clears the planets edge to Planet.
-func (m *GalaxyMutation) ClearPlanets() {
-	m.clearedplanets = true
+// ClearTeams clears the teams edge to Team.
+func (m *TaskMutation) ClearTeams() {
+	m.clearedteams = true
 }
 
-// PlanetsCleared returns if the edge planets was cleared.
-func (m *GalaxyMutation) PlanetsCleared() bool {
-	return m.clearedplanets
+// TeamsCleared returns if the edge teams was cleared.
+func (m *TaskMutation) TeamsCleared() bool {
+	return m.clearedteams
 }
 
-// RemovePlanetIDs removes the planets edge to Planet by ids.
-func (m *GalaxyMutation) RemovePlanetIDs(ids ...int) {
-	if m.removedplanets == nil {
-		m.removedplanets = make(map[int]struct{})
+// RemoveTeamIDs removes the teams edge to Team by ids.
+func (m *TaskMutation) RemoveTeamIDs(ids ...int) {
+	if m.removedteams == nil {
+		m.removedteams = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.removedplanets[ids[i]] = struct{}{}
+		m.removedteams[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPlanets returns the removed ids of planets.
-func (m *GalaxyMutation) RemovedPlanetsIDs() (ids []int) {
-	for id := range m.removedplanets {
+// RemovedTeams returns the removed ids of teams.
+func (m *TaskMutation) RemovedTeamsIDs() (ids []int) {
+	for id := range m.removedteams {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// PlanetsIDs returns the planets ids in the mutation.
-func (m *GalaxyMutation) PlanetsIDs() (ids []int) {
-	for id := range m.planets {
+// TeamsIDs returns the teams ids in the mutation.
+func (m *TaskMutation) TeamsIDs() (ids []int) {
+	for id := range m.teams {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlanets reset all changes of the "planets" edge.
-func (m *GalaxyMutation) ResetPlanets() {
-	m.planets = nil
-	m.clearedplanets = false
-	m.removedplanets = nil
+// ResetTeams reset all changes of the "teams" edge.
+func (m *TaskMutation) ResetTeams() {
+	m.teams = nil
+	m.clearedteams = false
+	m.removedteams = nil
+}
+
+// SetOwnerID sets the owner edge to User by id.
+func (m *TaskMutation) SetOwnerID(id int) {
+	m.owner = &id
+}
+
+// ClearOwner clears the owner edge to User.
+func (m *TaskMutation) ClearOwner() {
+	m.clearedowner = true
+}
+
+// OwnerCleared returns if the edge owner was cleared.
+func (m *TaskMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the owner id in the mutation.
+func (m *TaskMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the owner ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *TaskMutation) OwnerIDs() (ids []int) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner reset all changes of the "owner" edge.
+func (m *TaskMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
 }
 
 // Op returns the operation name.
-func (m *GalaxyMutation) Op() Op {
+func (m *TaskMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Galaxy).
-func (m *GalaxyMutation) Type() string {
+// Type returns the node type of this mutation (Task).
+func (m *TaskMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
-func (m *GalaxyMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.name != nil {
-		fields = append(fields, galaxy.FieldName)
+func (m *TaskMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.title != nil {
+		fields = append(fields, task.FieldTitle)
 	}
-	if m._type != nil {
-		fields = append(fields, galaxy.FieldType)
+	if m.description != nil {
+		fields = append(fields, task.FieldDescription)
+	}
+	if m.status != nil {
+		fields = append(fields, task.FieldStatus)
 	}
 	return fields
 }
@@ -280,12 +377,14 @@ func (m *GalaxyMutation) Fields() []string {
 // Field returns the value of a field with the given name.
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
-func (m *GalaxyMutation) Field(name string) (ent.Value, bool) {
+func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case galaxy.FieldName:
-		return m.Name()
-	case galaxy.FieldType:
-		return m.GetType()
+	case task.FieldTitle:
+		return m.Title()
+	case task.FieldDescription:
+		return m.Description()
+	case task.FieldStatus:
+		return m.Status()
 	}
 	return nil, false
 }
@@ -293,136 +392,164 @@ func (m *GalaxyMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database.
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
-func (m *GalaxyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case galaxy.FieldName:
-		return m.OldName(ctx)
-	case galaxy.FieldType:
-		return m.OldType(ctx)
+	case task.FieldTitle:
+		return m.OldTitle(ctx)
+	case task.FieldDescription:
+		return m.OldDescription(ctx)
+	case task.FieldStatus:
+		return m.OldStatus(ctx)
 	}
-	return nil, fmt.Errorf("unknown Galaxy field %s", name)
+	return nil, fmt.Errorf("unknown Task field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *GalaxyMutation) SetField(name string, value ent.Value) error {
+func (m *TaskMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case galaxy.FieldName:
+	case task.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetTitle(v)
 		return nil
-	case galaxy.FieldType:
-		v, ok := value.(galaxy.Type)
+	case task.FieldDescription:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetType(v)
+		m.SetDescription(v)
+		return nil
+	case task.FieldStatus:
+		v, ok := value.(task.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Galaxy field %s", name)
+	return fmt.Errorf("unknown Task field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented
 // or decremented during this mutation.
-func (m *GalaxyMutation) AddedFields() []string {
+func (m *TaskMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was in/decremented
 // from a field with the given name. The second value indicates
 // that this field was not set, or was not define in the schema.
-func (m *GalaxyMutation) AddedField(name string) (ent.Value, bool) {
+func (m *TaskMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *GalaxyMutation) AddField(name string, value ent.Value) error {
+func (m *TaskMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Galaxy numeric field %s", name)
+	return fmt.Errorf("unknown Task numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
-func (m *GalaxyMutation) ClearedFields() []string {
-	return nil
+func (m *TaskMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(task.FieldDescription) {
+		fields = append(fields, task.FieldDescription)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
-func (m *GalaxyMutation) FieldCleared(name string) bool {
+func (m *TaskMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *GalaxyMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Galaxy nullable field %s", name)
+func (m *TaskMutation) ClearField(name string) error {
+	switch name {
+	case task.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
+	return fmt.Errorf("unknown Task nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation regarding the
 // given field name. It returns an error if the field is not
 // defined in the schema.
-func (m *GalaxyMutation) ResetField(name string) error {
+func (m *TaskMutation) ResetField(name string) error {
 	switch name {
-	case galaxy.FieldName:
-		m.ResetName()
+	case task.FieldTitle:
+		m.ResetTitle()
 		return nil
-	case galaxy.FieldType:
-		m.ResetType()
+	case task.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case task.FieldStatus:
+		m.ResetStatus()
 		return nil
 	}
-	return fmt.Errorf("unknown Galaxy field %s", name)
+	return fmt.Errorf("unknown Task field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
-func (m *GalaxyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.planets != nil {
-		edges = append(edges, galaxy.EdgePlanets)
+func (m *TaskMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.teams != nil {
+		edges = append(edges, task.EdgeTeams)
+	}
+	if m.owner != nil {
+		edges = append(edges, task.EdgeOwner)
 	}
 	return edges
 }
 
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
-func (m *GalaxyMutation) AddedIDs(name string) []ent.Value {
+func (m *TaskMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case galaxy.EdgePlanets:
-		ids := make([]ent.Value, 0, len(m.planets))
-		for id := range m.planets {
+	case task.EdgeTeams:
+		ids := make([]ent.Value, 0, len(m.teams))
+		for id := range m.teams {
 			ids = append(ids, id)
 		}
 		return ids
+	case task.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
-func (m *GalaxyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedplanets != nil {
-		edges = append(edges, galaxy.EdgePlanets)
+func (m *TaskMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedteams != nil {
+		edges = append(edges, task.EdgeTeams)
 	}
 	return edges
 }
 
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
-func (m *GalaxyMutation) RemovedIDs(name string) []ent.Value {
+func (m *TaskMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case galaxy.EdgePlanets:
-		ids := make([]ent.Value, 0, len(m.removedplanets))
-		for id := range m.removedplanets {
+	case task.EdgeTeams:
+		ids := make([]ent.Value, 0, len(m.removedteams))
+		for id := range m.removedteams {
 			ids = append(ids, id)
 		}
 		return ids
@@ -432,73 +559,85 @@ func (m *GalaxyMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
-func (m *GalaxyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedplanets {
-		edges = append(edges, galaxy.EdgePlanets)
+func (m *TaskMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedteams {
+		edges = append(edges, task.EdgeTeams)
+	}
+	if m.clearedowner {
+		edges = append(edges, task.EdgeOwner)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
-func (m *GalaxyMutation) EdgeCleared(name string) bool {
+func (m *TaskMutation) EdgeCleared(name string) bool {
 	switch name {
-	case galaxy.EdgePlanets:
-		return m.clearedplanets
+	case task.EdgeTeams:
+		return m.clearedteams
+	case task.EdgeOwner:
+		return m.clearedowner
 	}
 	return false
 }
 
 // ClearEdge clears the value for the given name. It returns an
 // error if the edge name is not defined in the schema.
-func (m *GalaxyMutation) ClearEdge(name string) error {
+func (m *TaskMutation) ClearEdge(name string) error {
 	switch name {
+	case task.EdgeOwner:
+		m.ClearOwner()
+		return nil
 	}
-	return fmt.Errorf("unknown Galaxy unique edge %s", name)
+	return fmt.Errorf("unknown Task unique edge %s", name)
 }
 
 // ResetEdge resets all changes in the mutation regarding the
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
-func (m *GalaxyMutation) ResetEdge(name string) error {
+func (m *TaskMutation) ResetEdge(name string) error {
 	switch name {
-	case galaxy.EdgePlanets:
-		m.ResetPlanets()
+	case task.EdgeTeams:
+		m.ResetTeams()
+		return nil
+	case task.EdgeOwner:
+		m.ResetOwner()
 		return nil
 	}
-	return fmt.Errorf("unknown Galaxy edge %s", name)
+	return fmt.Errorf("unknown Task edge %s", name)
 }
 
-// PlanetMutation represents an operation that mutate the Planets
+// TeamMutation represents an operation that mutate the Teams
 // nodes in the graph.
-type PlanetMutation struct {
+type TeamMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	name             *string
-	age              *uint
-	addage           *uint
-	clearedFields    map[string]struct{}
-	neighbors        map[int]struct{}
-	removedneighbors map[int]struct{}
-	clearedneighbors bool
-	done             bool
-	oldValue         func(context.Context) (*Planet, error)
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	clearedFields map[string]struct{}
+	tasks         map[int]struct{}
+	removedtasks  map[int]struct{}
+	clearedtasks  bool
+	users         map[int]struct{}
+	removedusers  map[int]struct{}
+	clearedusers  bool
+	done          bool
+	oldValue      func(context.Context) (*Team, error)
 }
 
-var _ ent.Mutation = (*PlanetMutation)(nil)
+var _ ent.Mutation = (*TeamMutation)(nil)
 
-// planetOption allows to manage the mutation configuration using functional options.
-type planetOption func(*PlanetMutation)
+// teamOption allows to manage the mutation configuration using functional options.
+type teamOption func(*TeamMutation)
 
-// newPlanetMutation creates new mutation for $n.Name.
-func newPlanetMutation(c config, op Op, opts ...planetOption) *PlanetMutation {
-	m := &PlanetMutation{
+// newTeamMutation creates new mutation for $n.Name.
+func newTeamMutation(c config, op Op, opts ...teamOption) *TeamMutation {
+	m := &TeamMutation{
 		config:        c,
 		op:            op,
-		typ:           TypePlanet,
+		typ:           TypeTeam,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -507,20 +646,20 @@ func newPlanetMutation(c config, op Op, opts ...planetOption) *PlanetMutation {
 	return m
 }
 
-// withPlanetID sets the id field of the mutation.
-func withPlanetID(id int) planetOption {
-	return func(m *PlanetMutation) {
+// withTeamID sets the id field of the mutation.
+func withTeamID(id int) teamOption {
+	return func(m *TeamMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Planet
+			value *Team
 		)
-		m.oldValue = func(ctx context.Context) (*Planet, error) {
+		m.oldValue = func(ctx context.Context) (*Team, error) {
 			once.Do(func() {
 				if m.done {
 					err = fmt.Errorf("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Planet.Get(ctx, id)
+					value, err = m.Client().Team.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -529,10 +668,10 @@ func withPlanetID(id int) planetOption {
 	}
 }
 
-// withPlanet sets the old Planet of the mutation.
-func withPlanet(node *Planet) planetOption {
-	return func(m *PlanetMutation) {
-		m.oldValue = func(context.Context) (*Planet, error) {
+// withTeam sets the old Team of the mutation.
+func withTeam(node *Team) teamOption {
+	return func(m *TeamMutation) {
+		m.oldValue = func(context.Context) (*Team, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -541,7 +680,7 @@ func withPlanet(node *Planet) planetOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m PlanetMutation) Client() *Client {
+func (m TeamMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -549,7 +688,7 @@ func (m PlanetMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m PlanetMutation) Tx() (*Tx, error) {
+func (m TeamMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
 	}
@@ -560,7 +699,7 @@ func (m PlanetMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *PlanetMutation) ID() (id int, exists bool) {
+func (m *TeamMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -568,12 +707,12 @@ func (m *PlanetMutation) ID() (id int, exists bool) {
 }
 
 // SetName sets the name field.
-func (m *PlanetMutation) SetName(s string) {
+func (m *TeamMutation) SetName(s string) {
 	m.name = &s
 }
 
 // Name returns the name value in the mutation.
-func (m *PlanetMutation) Name() (r string, exists bool) {
+func (m *TeamMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -581,11 +720,11 @@ func (m *PlanetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value of the Planet.
-// If the Planet object wasn't provided to the builder, the object is fetched
+// OldName returns the old name value of the Team.
+// If the Team object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *PlanetMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *TeamMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
 	}
@@ -600,18 +739,487 @@ func (m *PlanetMutation) OldName(ctx context.Context) (v string, err error) {
 }
 
 // ResetName reset all changes of the "name" field.
-func (m *PlanetMutation) ResetName() {
+func (m *TeamMutation) ResetName() {
+	m.name = nil
+}
+
+// AddTaskIDs adds the tasks edge to Task by ids.
+func (m *TeamMutation) AddTaskIDs(ids ...int) {
+	if m.tasks == nil {
+		m.tasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tasks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTasks clears the tasks edge to Task.
+func (m *TeamMutation) ClearTasks() {
+	m.clearedtasks = true
+}
+
+// TasksCleared returns if the edge tasks was cleared.
+func (m *TeamMutation) TasksCleared() bool {
+	return m.clearedtasks
+}
+
+// RemoveTaskIDs removes the tasks edge to Task by ids.
+func (m *TeamMutation) RemoveTaskIDs(ids ...int) {
+	if m.removedtasks == nil {
+		m.removedtasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedtasks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTasks returns the removed ids of tasks.
+func (m *TeamMutation) RemovedTasksIDs() (ids []int) {
+	for id := range m.removedtasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TasksIDs returns the tasks ids in the mutation.
+func (m *TeamMutation) TasksIDs() (ids []int) {
+	for id := range m.tasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTasks reset all changes of the "tasks" edge.
+func (m *TeamMutation) ResetTasks() {
+	m.tasks = nil
+	m.clearedtasks = false
+	m.removedtasks = nil
+}
+
+// AddUserIDs adds the users edge to User by ids.
+func (m *TeamMutation) AddUserIDs(ids ...int) {
+	if m.users == nil {
+		m.users = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.users[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUsers clears the users edge to User.
+func (m *TeamMutation) ClearUsers() {
+	m.clearedusers = true
+}
+
+// UsersCleared returns if the edge users was cleared.
+func (m *TeamMutation) UsersCleared() bool {
+	return m.clearedusers
+}
+
+// RemoveUserIDs removes the users edge to User by ids.
+func (m *TeamMutation) RemoveUserIDs(ids ...int) {
+	if m.removedusers == nil {
+		m.removedusers = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedusers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsers returns the removed ids of users.
+func (m *TeamMutation) RemovedUsersIDs() (ids []int) {
+	for id := range m.removedusers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsersIDs returns the users ids in the mutation.
+func (m *TeamMutation) UsersIDs() (ids []int) {
+	for id := range m.users {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsers reset all changes of the "users" edge.
+func (m *TeamMutation) ResetUsers() {
+	m.users = nil
+	m.clearedusers = false
+	m.removedusers = nil
+}
+
+// Op returns the operation name.
+func (m *TeamMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Team).
+func (m *TeamMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *TeamMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, team.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *TeamMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case team.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *TeamMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case team.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Team field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *TeamMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case team.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Team field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *TeamMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *TeamMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *TeamMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Team numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *TeamMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *TeamMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TeamMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Team nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *TeamMutation) ResetField(name string) error {
+	switch name {
+	case team.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Team field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *TeamMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.tasks != nil {
+		edges = append(edges, team.EdgeTasks)
+	}
+	if m.users != nil {
+		edges = append(edges, team.EdgeUsers)
+	}
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *TeamMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case team.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.tasks))
+		for id := range m.tasks {
+			ids = append(ids, id)
+		}
+		return ids
+	case team.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.users))
+		for id := range m.users {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *TeamMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedtasks != nil {
+		edges = append(edges, team.EdgeTasks)
+	}
+	if m.removedusers != nil {
+		edges = append(edges, team.EdgeUsers)
+	}
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case team.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.removedtasks))
+		for id := range m.removedtasks {
+			ids = append(ids, id)
+		}
+		return ids
+	case team.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.removedusers))
+		for id := range m.removedusers {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *TeamMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedtasks {
+		edges = append(edges, team.EdgeTasks)
+	}
+	if m.clearedusers {
+		edges = append(edges, team.EdgeUsers)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *TeamMutation) EdgeCleared(name string) bool {
+	switch name {
+	case team.EdgeTasks:
+		return m.clearedtasks
+	case team.EdgeUsers:
+		return m.clearedusers
+	}
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *TeamMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Team unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *TeamMutation) ResetEdge(name string) error {
+	switch name {
+	case team.EdgeTasks:
+		m.ResetTasks()
+		return nil
+	case team.EdgeUsers:
+		m.ResetUsers()
+		return nil
+	}
+	return fmt.Errorf("unknown Team edge %s", name)
+}
+
+// UserMutation represents an operation that mutate the Users
+// nodes in the graph.
+type UserMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	age           *uint
+	addage        *uint
+	clearedFields map[string]struct{}
+	teams         map[int]struct{}
+	removedteams  map[int]struct{}
+	clearedteams  bool
+	tasks         map[int]struct{}
+	removedtasks  map[int]struct{}
+	clearedtasks  bool
+	done          bool
+	oldValue      func(context.Context) (*User, error)
+}
+
+var _ ent.Mutation = (*UserMutation)(nil)
+
+// userOption allows to manage the mutation configuration using functional options.
+type userOption func(*UserMutation)
+
+// newUserMutation creates new mutation for $n.Name.
+func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
+	m := &UserMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUser,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUserID sets the id field of the mutation.
+func withUserID(id int) userOption {
+	return func(m *UserMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *User
+		)
+		m.oldValue = func(ctx context.Context) (*User, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().User.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUser sets the old User of the mutation.
+func withUser(node *User) userOption {
+	return func(m *UserMutation) {
+		m.oldValue = func(context.Context) (*User, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UserMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UserMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *UserMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetName sets the name field.
+func (m *UserMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the name value in the mutation.
+func (m *UserMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old name value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName reset all changes of the "name" field.
+func (m *UserMutation) ResetName() {
 	m.name = nil
 }
 
 // SetAge sets the age field.
-func (m *PlanetMutation) SetAge(u uint) {
+func (m *UserMutation) SetAge(u uint) {
 	m.age = &u
 	m.addage = nil
 }
 
 // Age returns the age value in the mutation.
-func (m *PlanetMutation) Age() (r uint, exists bool) {
+func (m *UserMutation) Age() (r uint, exists bool) {
 	v := m.age
 	if v == nil {
 		return
@@ -619,11 +1227,11 @@ func (m *PlanetMutation) Age() (r uint, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old age value of the Planet.
-// If the Planet object wasn't provided to the builder, the object is fetched
+// OldAge returns the old age value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *PlanetMutation) OldAge(ctx context.Context) (v uint, err error) {
+func (m *UserMutation) OldAge(ctx context.Context) (v uint, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldAge is allowed only on UpdateOne operations")
 	}
@@ -638,7 +1246,7 @@ func (m *PlanetMutation) OldAge(ctx context.Context) (v uint, err error) {
 }
 
 // AddAge adds u to age.
-func (m *PlanetMutation) AddAge(u uint) {
+func (m *UserMutation) AddAge(u uint) {
 	if m.addage != nil {
 		*m.addage += u
 	} else {
@@ -647,7 +1255,7 @@ func (m *PlanetMutation) AddAge(u uint) {
 }
 
 // AddedAge returns the value that was added to the age field in this mutation.
-func (m *PlanetMutation) AddedAge() (r uint, exists bool) {
+func (m *UserMutation) AddedAge() (r uint, exists bool) {
 	v := m.addage
 	if v == nil {
 		return
@@ -656,98 +1264,151 @@ func (m *PlanetMutation) AddedAge() (r uint, exists bool) {
 }
 
 // ClearAge clears the value of age.
-func (m *PlanetMutation) ClearAge() {
+func (m *UserMutation) ClearAge() {
 	m.age = nil
 	m.addage = nil
-	m.clearedFields[planet.FieldAge] = struct{}{}
+	m.clearedFields[user.FieldAge] = struct{}{}
 }
 
 // AgeCleared returns if the field age was cleared in this mutation.
-func (m *PlanetMutation) AgeCleared() bool {
-	_, ok := m.clearedFields[planet.FieldAge]
+func (m *UserMutation) AgeCleared() bool {
+	_, ok := m.clearedFields[user.FieldAge]
 	return ok
 }
 
 // ResetAge reset all changes of the "age" field.
-func (m *PlanetMutation) ResetAge() {
+func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
-	delete(m.clearedFields, planet.FieldAge)
+	delete(m.clearedFields, user.FieldAge)
 }
 
-// AddNeighborIDs adds the neighbors edge to Planet by ids.
-func (m *PlanetMutation) AddNeighborIDs(ids ...int) {
-	if m.neighbors == nil {
-		m.neighbors = make(map[int]struct{})
+// AddTeamIDs adds the teams edge to Team by ids.
+func (m *UserMutation) AddTeamIDs(ids ...int) {
+	if m.teams == nil {
+		m.teams = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.neighbors[ids[i]] = struct{}{}
+		m.teams[ids[i]] = struct{}{}
 	}
 }
 
-// ClearNeighbors clears the neighbors edge to Planet.
-func (m *PlanetMutation) ClearNeighbors() {
-	m.clearedneighbors = true
+// ClearTeams clears the teams edge to Team.
+func (m *UserMutation) ClearTeams() {
+	m.clearedteams = true
 }
 
-// NeighborsCleared returns if the edge neighbors was cleared.
-func (m *PlanetMutation) NeighborsCleared() bool {
-	return m.clearedneighbors
+// TeamsCleared returns if the edge teams was cleared.
+func (m *UserMutation) TeamsCleared() bool {
+	return m.clearedteams
 }
 
-// RemoveNeighborIDs removes the neighbors edge to Planet by ids.
-func (m *PlanetMutation) RemoveNeighborIDs(ids ...int) {
-	if m.removedneighbors == nil {
-		m.removedneighbors = make(map[int]struct{})
+// RemoveTeamIDs removes the teams edge to Team by ids.
+func (m *UserMutation) RemoveTeamIDs(ids ...int) {
+	if m.removedteams == nil {
+		m.removedteams = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.removedneighbors[ids[i]] = struct{}{}
+		m.removedteams[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedNeighbors returns the removed ids of neighbors.
-func (m *PlanetMutation) RemovedNeighborsIDs() (ids []int) {
-	for id := range m.removedneighbors {
+// RemovedTeams returns the removed ids of teams.
+func (m *UserMutation) RemovedTeamsIDs() (ids []int) {
+	for id := range m.removedteams {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// NeighborsIDs returns the neighbors ids in the mutation.
-func (m *PlanetMutation) NeighborsIDs() (ids []int) {
-	for id := range m.neighbors {
+// TeamsIDs returns the teams ids in the mutation.
+func (m *UserMutation) TeamsIDs() (ids []int) {
+	for id := range m.teams {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetNeighbors reset all changes of the "neighbors" edge.
-func (m *PlanetMutation) ResetNeighbors() {
-	m.neighbors = nil
-	m.clearedneighbors = false
-	m.removedneighbors = nil
+// ResetTeams reset all changes of the "teams" edge.
+func (m *UserMutation) ResetTeams() {
+	m.teams = nil
+	m.clearedteams = false
+	m.removedteams = nil
+}
+
+// AddTaskIDs adds the tasks edge to Task by ids.
+func (m *UserMutation) AddTaskIDs(ids ...int) {
+	if m.tasks == nil {
+		m.tasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tasks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTasks clears the tasks edge to Task.
+func (m *UserMutation) ClearTasks() {
+	m.clearedtasks = true
+}
+
+// TasksCleared returns if the edge tasks was cleared.
+func (m *UserMutation) TasksCleared() bool {
+	return m.clearedtasks
+}
+
+// RemoveTaskIDs removes the tasks edge to Task by ids.
+func (m *UserMutation) RemoveTaskIDs(ids ...int) {
+	if m.removedtasks == nil {
+		m.removedtasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedtasks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTasks returns the removed ids of tasks.
+func (m *UserMutation) RemovedTasksIDs() (ids []int) {
+	for id := range m.removedtasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TasksIDs returns the tasks ids in the mutation.
+func (m *UserMutation) TasksIDs() (ids []int) {
+	for id := range m.tasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTasks reset all changes of the "tasks" edge.
+func (m *UserMutation) ResetTasks() {
+	m.tasks = nil
+	m.clearedtasks = false
+	m.removedtasks = nil
 }
 
 // Op returns the operation name.
-func (m *PlanetMutation) Op() Op {
+func (m *UserMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Planet).
-func (m *PlanetMutation) Type() string {
+// Type returns the node type of this mutation (User).
+func (m *UserMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
-func (m *PlanetMutation) Fields() []string {
+func (m *UserMutation) Fields() []string {
 	fields := make([]string, 0, 2)
 	if m.name != nil {
-		fields = append(fields, planet.FieldName)
+		fields = append(fields, user.FieldName)
 	}
 	if m.age != nil {
-		fields = append(fields, planet.FieldAge)
+		fields = append(fields, user.FieldAge)
 	}
 	return fields
 }
@@ -755,11 +1416,11 @@ func (m *PlanetMutation) Fields() []string {
 // Field returns the value of a field with the given name.
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
-func (m *PlanetMutation) Field(name string) (ent.Value, bool) {
+func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case planet.FieldName:
+	case user.FieldName:
 		return m.Name()
-	case planet.FieldAge:
+	case user.FieldAge:
 		return m.Age()
 	}
 	return nil, false
@@ -768,29 +1429,29 @@ func (m *PlanetMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database.
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
-func (m *PlanetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case planet.FieldName:
+	case user.FieldName:
 		return m.OldName(ctx)
-	case planet.FieldAge:
+	case user.FieldAge:
 		return m.OldAge(ctx)
 	}
-	return nil, fmt.Errorf("unknown Planet field %s", name)
+	return nil, fmt.Errorf("unknown User field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *PlanetMutation) SetField(name string, value ent.Value) error {
+func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case planet.FieldName:
+	case user.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
 		return nil
-	case planet.FieldAge:
+	case user.FieldAge:
 		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -798,15 +1459,15 @@ func (m *PlanetMutation) SetField(name string, value ent.Value) error {
 		m.SetAge(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Planet field %s", name)
+	return fmt.Errorf("unknown User field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented
 // or decremented during this mutation.
-func (m *PlanetMutation) AddedFields() []string {
+func (m *UserMutation) AddedFields() []string {
 	var fields []string
 	if m.addage != nil {
-		fields = append(fields, planet.FieldAge)
+		fields = append(fields, user.FieldAge)
 	}
 	return fields
 }
@@ -814,9 +1475,9 @@ func (m *PlanetMutation) AddedFields() []string {
 // AddedField returns the numeric value that was in/decremented
 // from a field with the given name. The second value indicates
 // that this field was not set, or was not define in the schema.
-func (m *PlanetMutation) AddedField(name string) (ent.Value, bool) {
+func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case planet.FieldAge:
+	case user.FieldAge:
 		return m.AddedAge()
 	}
 	return nil, false
@@ -825,9 +1486,9 @@ func (m *PlanetMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *PlanetMutation) AddField(name string, value ent.Value) error {
+func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case planet.FieldAge:
+	case user.FieldAge:
 		v, ok := value.(uint)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -835,69 +1496,78 @@ func (m *PlanetMutation) AddField(name string, value ent.Value) error {
 		m.AddAge(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Planet numeric field %s", name)
+	return fmt.Errorf("unknown User numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
-func (m *PlanetMutation) ClearedFields() []string {
+func (m *UserMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(planet.FieldAge) {
-		fields = append(fields, planet.FieldAge)
+	if m.FieldCleared(user.FieldAge) {
+		fields = append(fields, user.FieldAge)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
-func (m *PlanetMutation) FieldCleared(name string) bool {
+func (m *UserMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *PlanetMutation) ClearField(name string) error {
+func (m *UserMutation) ClearField(name string) error {
 	switch name {
-	case planet.FieldAge:
+	case user.FieldAge:
 		m.ClearAge()
 		return nil
 	}
-	return fmt.Errorf("unknown Planet nullable field %s", name)
+	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation regarding the
 // given field name. It returns an error if the field is not
 // defined in the schema.
-func (m *PlanetMutation) ResetField(name string) error {
+func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case planet.FieldName:
+	case user.FieldName:
 		m.ResetName()
 		return nil
-	case planet.FieldAge:
+	case user.FieldAge:
 		m.ResetAge()
 		return nil
 	}
-	return fmt.Errorf("unknown Planet field %s", name)
+	return fmt.Errorf("unknown User field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
-func (m *PlanetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.neighbors != nil {
-		edges = append(edges, planet.EdgeNeighbors)
+func (m *UserMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.teams != nil {
+		edges = append(edges, user.EdgeTeams)
+	}
+	if m.tasks != nil {
+		edges = append(edges, user.EdgeTasks)
 	}
 	return edges
 }
 
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
-func (m *PlanetMutation) AddedIDs(name string) []ent.Value {
+func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case planet.EdgeNeighbors:
-		ids := make([]ent.Value, 0, len(m.neighbors))
-		for id := range m.neighbors {
+	case user.EdgeTeams:
+		ids := make([]ent.Value, 0, len(m.teams))
+		for id := range m.teams {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.tasks))
+		for id := range m.tasks {
 			ids = append(ids, id)
 		}
 		return ids
@@ -907,21 +1577,30 @@ func (m *PlanetMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
-func (m *PlanetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedneighbors != nil {
-		edges = append(edges, planet.EdgeNeighbors)
+func (m *UserMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedteams != nil {
+		edges = append(edges, user.EdgeTeams)
+	}
+	if m.removedtasks != nil {
+		edges = append(edges, user.EdgeTasks)
 	}
 	return edges
 }
 
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
-func (m *PlanetMutation) RemovedIDs(name string) []ent.Value {
+func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case planet.EdgeNeighbors:
-		ids := make([]ent.Value, 0, len(m.removedneighbors))
-		for id := range m.removedneighbors {
+	case user.EdgeTeams:
+		ids := make([]ent.Value, 0, len(m.removedteams))
+		for id := range m.removedteams {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.removedtasks))
+		for id := range m.removedtasks {
 			ids = append(ids, id)
 		}
 		return ids
@@ -931,40 +1610,48 @@ func (m *PlanetMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
-func (m *PlanetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedneighbors {
-		edges = append(edges, planet.EdgeNeighbors)
+func (m *UserMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedteams {
+		edges = append(edges, user.EdgeTeams)
+	}
+	if m.clearedtasks {
+		edges = append(edges, user.EdgeTasks)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
-func (m *PlanetMutation) EdgeCleared(name string) bool {
+func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case planet.EdgeNeighbors:
-		return m.clearedneighbors
+	case user.EdgeTeams:
+		return m.clearedteams
+	case user.EdgeTasks:
+		return m.clearedtasks
 	}
 	return false
 }
 
 // ClearEdge clears the value for the given name. It returns an
 // error if the edge name is not defined in the schema.
-func (m *PlanetMutation) ClearEdge(name string) error {
+func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Planet unique edge %s", name)
+	return fmt.Errorf("unknown User unique edge %s", name)
 }
 
 // ResetEdge resets all changes in the mutation regarding the
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
-func (m *PlanetMutation) ResetEdge(name string) error {
+func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case planet.EdgeNeighbors:
-		m.ResetNeighbors()
+	case user.EdgeTeams:
+		m.ResetTeams()
+		return nil
+	case user.EdgeTasks:
+		m.ResetTasks()
 		return nil
 	}
-	return fmt.Errorf("unknown Planet edge %s", name)
+	return fmt.Errorf("unknown User edge %s", name)
 }

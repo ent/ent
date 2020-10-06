@@ -12,78 +12,122 @@ import (
 )
 
 var (
-	// GalaxiesColumns holds the columns for the "galaxies" table.
-	GalaxiesColumns = []*schema.Column{
+	// TasksColumns holds the columns for the "tasks" table.
+	TasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"spiral", "barred_spiral", "elliptical", "irregular"}},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"planned", "in_progress", "closed"}, Default: "planned"},
+		{Name: "user_tasks", Type: field.TypeInt, Nullable: true},
 	}
-	// GalaxiesTable holds the schema information for the "galaxies" table.
-	GalaxiesTable = &schema.Table{
-		Name:        "galaxies",
-		Columns:     GalaxiesColumns,
-		PrimaryKey:  []*schema.Column{GalaxiesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// PlanetsColumns holds the columns for the "planets" table.
-	PlanetsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "age", Type: field.TypeUint, Nullable: true},
-		{Name: "galaxy_planets", Type: field.TypeInt, Nullable: true},
-	}
-	// PlanetsTable holds the schema information for the "planets" table.
-	PlanetsTable = &schema.Table{
-		Name:       "planets",
-		Columns:    PlanetsColumns,
-		PrimaryKey: []*schema.Column{PlanetsColumns[0]},
+	// TasksTable holds the schema information for the "tasks" table.
+	TasksTable = &schema.Table{
+		Name:       "tasks",
+		Columns:    TasksColumns,
+		PrimaryKey: []*schema.Column{TasksColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "planets_galaxies_planets",
-				Columns: []*schema.Column{PlanetsColumns[3]},
+				Symbol:  "tasks_users_tasks",
+				Columns: []*schema.Column{TasksColumns[4]},
 
-				RefColumns: []*schema.Column{GalaxiesColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// PlanetNeighborsColumns holds the columns for the "planet_neighbors" table.
-	PlanetNeighborsColumns = []*schema.Column{
-		{Name: "planet_id", Type: field.TypeInt},
-		{Name: "neighbor_id", Type: field.TypeInt},
+	// TeamsColumns holds the columns for the "teams" table.
+	TeamsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
 	}
-	// PlanetNeighborsTable holds the schema information for the "planet_neighbors" table.
-	PlanetNeighborsTable = &schema.Table{
-		Name:       "planet_neighbors",
-		Columns:    PlanetNeighborsColumns,
-		PrimaryKey: []*schema.Column{PlanetNeighborsColumns[0], PlanetNeighborsColumns[1]},
+	// TeamsTable holds the schema information for the "teams" table.
+	TeamsTable = &schema.Table{
+		Name:        "teams",
+		Columns:     TeamsColumns,
+		PrimaryKey:  []*schema.Column{TeamsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "age", Type: field.TypeUint, Nullable: true},
+	}
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:        "users",
+		Columns:     UsersColumns,
+		PrimaryKey:  []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// TaskTeamsColumns holds the columns for the "task_teams" table.
+	TaskTeamsColumns = []*schema.Column{
+		{Name: "task_id", Type: field.TypeInt},
+		{Name: "team_id", Type: field.TypeInt},
+	}
+	// TaskTeamsTable holds the schema information for the "task_teams" table.
+	TaskTeamsTable = &schema.Table{
+		Name:       "task_teams",
+		Columns:    TaskTeamsColumns,
+		PrimaryKey: []*schema.Column{TaskTeamsColumns[0], TaskTeamsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "planet_neighbors_planet_id",
-				Columns: []*schema.Column{PlanetNeighborsColumns[0]},
+				Symbol:  "task_teams_task_id",
+				Columns: []*schema.Column{TaskTeamsColumns[0]},
 
-				RefColumns: []*schema.Column{PlanetsColumns[0]},
+				RefColumns: []*schema.Column{TasksColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "planet_neighbors_neighbor_id",
-				Columns: []*schema.Column{PlanetNeighborsColumns[1]},
+				Symbol:  "task_teams_team_id",
+				Columns: []*schema.Column{TaskTeamsColumns[1]},
 
-				RefColumns: []*schema.Column{PlanetsColumns[0]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// UserTeamsColumns holds the columns for the "user_teams" table.
+	UserTeamsColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "team_id", Type: field.TypeInt},
+	}
+	// UserTeamsTable holds the schema information for the "user_teams" table.
+	UserTeamsTable = &schema.Table{
+		Name:       "user_teams",
+		Columns:    UserTeamsColumns,
+		PrimaryKey: []*schema.Column{UserTeamsColumns[0], UserTeamsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "user_teams_user_id",
+				Columns: []*schema.Column{UserTeamsColumns[0]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:  "user_teams_team_id",
+				Columns: []*schema.Column{UserTeamsColumns[1]},
+
+				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		GalaxiesTable,
-		PlanetsTable,
-		PlanetNeighborsTable,
+		TasksTable,
+		TeamsTable,
+		UsersTable,
+		TaskTeamsTable,
+		UserTeamsTable,
 	}
 )
 
 func init() {
-	PlanetsTable.ForeignKeys[0].RefTable = GalaxiesTable
-	PlanetNeighborsTable.ForeignKeys[0].RefTable = PlanetsTable
-	PlanetNeighborsTable.ForeignKeys[1].RefTable = PlanetsTable
+	TasksTable.ForeignKeys[0].RefTable = UsersTable
+	TaskTeamsTable.ForeignKeys[0].RefTable = TasksTable
+	TaskTeamsTable.ForeignKeys[1].RefTable = TeamsTable
+	UserTeamsTable.ForeignKeys[0].RefTable = UsersTable
+	UserTeamsTable.ForeignKeys[1].RefTable = TeamsTable
 }

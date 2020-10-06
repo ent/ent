@@ -13,28 +13,41 @@ import (
 	"github.com/facebook/ent/entc/integration/privacy/ent"
 )
 
-// The GalaxyFunc type is an adapter to allow the use of ordinary
-// function as Galaxy mutator.
-type GalaxyFunc func(context.Context, *ent.GalaxyMutation) (ent.Value, error)
+// The TaskFunc type is an adapter to allow the use of ordinary
+// function as Task mutator.
+type TaskFunc func(context.Context, *ent.TaskMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f GalaxyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GalaxyMutation)
+func (f TaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TaskMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GalaxyMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TaskMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The PlanetFunc type is an adapter to allow the use of ordinary
-// function as Planet mutator.
-type PlanetFunc func(context.Context, *ent.PlanetMutation) (ent.Value, error)
+// The TeamFunc type is an adapter to allow the use of ordinary
+// function as Team mutator.
+type TeamFunc func(context.Context, *ent.TeamMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PlanetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.PlanetMutation)
+func (f TeamFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TeamMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlanetMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TeamMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The UserFunc type is an adapter to allow the use of ordinary
+// function as User mutator.
+type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UserMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 	}
 	return f(ctx, mv)
 }

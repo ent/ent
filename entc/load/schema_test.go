@@ -5,6 +5,7 @@
 package load
 
 import (
+	"context"
 	"encoding/json"
 	"math"
 	"testing"
@@ -297,6 +298,19 @@ func (HooksMixin) Hooks() []ent.Hook {
 	}
 }
 
+type BoringPolicy struct{}
+
+func (BoringPolicy) EvalMutation(context.Context, ent.Mutation) error { return nil }
+func (BoringPolicy) EvalQuery(context.Context, ent.Query) error       { return nil }
+
+type PrivacyMixin struct {
+	mixin.Schema
+}
+
+func (PrivacyMixin) Policy() ent.Policy {
+	return BoringPolicy{}
+}
+
 type WithMixin struct {
 	ent.Schema
 }
@@ -305,6 +319,7 @@ func (WithMixin) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
 		HooksMixin{},
+		PrivacyMixin{},
 	}
 }
 
@@ -332,6 +347,10 @@ func (WithMixin) Hooks() []ent.Hook {
 	return []ent.Hook{
 		func(ent.Mutator) ent.Mutator { return nil },
 	}
+}
+
+func (WithMixin) Policy() ent.Policy {
+	return BoringPolicy{}
 }
 
 func TestMarshalMixin(t *testing.T) {
@@ -405,5 +424,11 @@ func TestMarshalMixin(t *testing.T) {
 		require.Equal(t, []string{"field"}, schema.Indexes[1].Fields)
 		require.Equal(t, []string{"owner"}, schema.Indexes[1].Edges)
 		require.True(t, schema.Indexes[1].Unique)
+	})
+
+	t.Run("Policy", func(t *testing.T) {
+		require.Len(t, schema.Policy, 2)
+		require.True(t, schema.Policy[0].MixedIn)
+		require.False(t, schema.Policy[1].MixedIn)
 	})
 }

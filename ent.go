@@ -146,6 +146,9 @@ type (
 		// Hooks returns a slice of hooks to add to the schema.
 		// Note that mixin hooks are executed before schema hooks.
 		Hooks() []Hook
+		// Policy returns a privacy policy to add to the schema.
+		// Note that mixin policy are executed before schema policy.
+		Policy() Policy
 	}
 
 	// The Policy type defines the write privacy policy of an entity.
