@@ -22,13 +22,11 @@ import (
 // to their package variables.
 func init() {
 	taskMixin := schema.Task{}.Mixin()
-	setPolicies(task.Policy[:], taskMixin[0], taskMixin[1], schema.Task{})
+	task.Policy = newPolicy(taskMixin[0], taskMixin[1], schema.Task{})
 	task.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			for _, policy := range task.Policy {
-				if err := policy.EvalMutation(ctx, m); err != nil {
-					return nil, err
-				}
+			if err := task.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
@@ -43,13 +41,11 @@ func init() {
 	// task.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	task.TitleValidator = taskDescTitle.Validators[0].(func(string) error)
 	teamMixin := schema.Team{}.Mixin()
-	setPolicies(team.Policy[:], teamMixin[0], schema.Team{})
+	team.Policy = newPolicy(teamMixin[0], schema.Team{})
 	team.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			for _, policy := range team.Policy {
-				if err := policy.EvalMutation(ctx, m); err != nil {
-					return nil, err
-				}
+			if err := team.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
@@ -61,13 +57,11 @@ func init() {
 	// team.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	team.NameValidator = teamDescName.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
-	setPolicies(user.Policy[:], userMixin[0], userMixin[1], schema.User{})
+	user.Policy = newPolicy(userMixin[0], userMixin[1], schema.User{})
 	user.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			for _, policy := range user.Policy {
-				if err := policy.EvalMutation(ctx, m); err != nil {
-					return nil, err
-				}
+			if err := user.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
@@ -80,15 +74,35 @@ func init() {
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
 }
 
-// setPolicies sets the policies from the given mixin and ent.Schema.
-func setPolicies(policies []ent.Policy, ps ...interface{ Policy() ent.Policy }) {
-	var i int
+type policies []ent.Policy
+
+// newPolicy creates a policy from list of mixin and ent.Schema.
+func newPolicy(ps ...interface{ Policy() ent.Policy }) ent.Policy {
+	pocs := make(policies, 0, len(ps))
 	for _, p := range ps {
 		if policy := p.Policy(); policy != nil {
-			policies[i] = policy
-			i++
+			pocs = append(pocs, policy)
 		}
 	}
+	return pocs
+}
+
+func (p policies) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	for i := range p {
+		if err := p[i].EvalMutation(ctx, m); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p policies) EvalQuery(ctx context.Context, q ent.Query) error {
+	for i := range p {
+		if err := p[i].EvalQuery(ctx, q); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 const (

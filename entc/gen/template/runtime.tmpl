@@ -90,14 +90,12 @@ func init() {
 		{{ $pkg }}Mixin := {{ $schema }}.{{ $n.Name }}{}.Mixin()
 	{{- end }}
 	{{- with $policies := $n.PolicyPositions }}
-        {{- /* policies defined in schema and mixins. */}}
-		setPolicies({{ $pkg }}.Policy[:], {{ range $idx := $n.MixedInPolicies }}{{ $pkg }}Mixin[{{ $idx }}],{{ end }}{{ $schema }}.{{ $n.Name }}{})
+		{{- /* policies defined in schema and mixins. */}}
+		{{ $pkg }}.Policy = newPolicy({{ range $idx := $n.MixedInPolicies }}{{ $pkg }}Mixin[{{ $idx }}],{{ end }}{{ $schema }}.{{ $n.Name }}{})
 		{{ $pkg }}.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				for _, policy := range {{ $pkg }}.Policy {
-					if err := policy.EvalMutation(ctx, m); err != nil {
-						return nil, err
-					}
+				if err := {{ $pkg }}.Policy.EvalMutation(ctx, m); err != nil {
+					return nil, err
 				}
 				return next.Mutate(ctx, m)
 			})
@@ -195,15 +193,35 @@ func init() {
 
 {{ $hasPolicy := false }}{{ range $n := $.Nodes }}{{ if $n.NumPolicy }}{{ $hasPolicy = true }}{{ end }}{{ end }}
 {{ if $hasPolicy }}
-	// setPolicies sets the policies from the given mixin and ent.Schema.
-	func setPolicies(policies []ent.Policy, ps ...interface{ Policy() ent.Policy }) {
-		var i int
+	type policies []ent.Policy
+
+	// newPolicy creates a policy from list of mixin and ent.Schema.
+	func newPolicy(ps ...interface{ Policy() ent.Policy }) ent.Policy {
+		pocs := make(policies, 0, len(ps))
 		for _, p := range ps {
 			if policy := p.Policy(); policy != nil {
-				policies[i] = policy
-				i++
+				pocs = append(pocs, policy)
 			}
 		}
+		return pocs
+	}
+
+	func (p policies) EvalMutation(ctx context.Context, m ent.Mutation) error {
+		for i := range p {
+			if err := p[i].EvalMutation(ctx, m); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	func (p policies) EvalQuery(ctx context.Context, q ent.Query) error {
+		for i := range p {
+			if err := p[i].EvalQuery(ctx, q); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 {{ end }}
 
