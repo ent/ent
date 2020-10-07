@@ -501,14 +501,26 @@ func (Config) ModuleInfo() (m debug.Module) {
 	return
 }
 
-// featureEnabled indicates if the given feature-flag is enabled.
-func (c Config) featureEnabled(f Feature) bool {
+// FeatureEnabled reports if the given feature name is enabled.
+// It's exported to be used by the template engine as follows:
+//
+//	{{ with $.FeatureEnabled "privacy" }}
+//		...
+//	{{ end }}
+//
+func (c Config) FeatureEnabled(name string) (bool, error) {
 	for i := range c.Features {
-		if f.Name == c.Features[i].Name {
-			return true
+		if name == c.Features[i].Name {
+			return true, nil
 		}
 	}
-	return false
+	return false, fmt.Errorf("unexpected feature name %q", name)
+}
+
+// featureEnabled reports if the given feature-flag is enabled.
+func (c Config) featureEnabled(f Feature) bool {
+	enabled, _ := c.FeatureEnabled(f.Name)
+	return enabled
 }
 
 // PrepareEnv makes sure the generated directory (environment)
