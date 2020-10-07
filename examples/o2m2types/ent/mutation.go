@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/examples/o2m2types/ent/pet"
+	"github.com/facebook/ent/examples/o2m2types/ent/predicate"
 	"github.com/facebook/ent/examples/o2m2types/ent/user"
 
 	"github.com/facebook/ent"
@@ -43,6 +44,7 @@ type PetMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Pet, error)
+	predicates    []predicate.Pet
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -408,6 +410,7 @@ type UserMutation struct {
 	clearedpets   bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

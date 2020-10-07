@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/examples/m2m2types/ent/group"
+	"github.com/facebook/ent/examples/m2m2types/ent/predicate"
 	"github.com/facebook/ent/examples/m2m2types/ent/user"
 
 	"github.com/facebook/ent"
@@ -44,6 +45,7 @@ type GroupMutation struct {
 	clearedusers  bool
 	done          bool
 	oldValue      func(context.Context) (*Group, error)
+	predicates    []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -431,6 +433,7 @@ type UserMutation struct {
 	clearedgroups bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

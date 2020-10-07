@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/examples/o2orecur/ent/node"
+	"github.com/facebook/ent/examples/o2orecur/ent/predicate"
 
 	"github.com/facebook/ent"
 )
@@ -44,6 +45,7 @@ type NodeMutation struct {
 	clearednext   bool
 	done          bool
 	oldValue      func(context.Context) (*Node, error)
+	predicates    []predicate.Node
 }
 
 var _ ent.Mutation = (*NodeMutation)(nil)

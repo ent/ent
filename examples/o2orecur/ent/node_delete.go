@@ -20,14 +20,13 @@ import (
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.predicates = append(nd.predicates, ps...)
+	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
 	return nd
 }
 
@@ -79,7 +78,7 @@ func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := nd.predicates; len(ps) > 0 {
+	if ps := nd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

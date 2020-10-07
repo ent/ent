@@ -20,14 +20,13 @@ import (
 // ItemUpdate is the builder for updating Item entities.
 type ItemUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
 // Where adds a new predicate for the builder.
 func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	iu.predicates = append(iu.predicates, ps...)
+	iu.mutation.predicates = append(iu.mutation.predicates, ps...)
 	return iu
 }
 
@@ -98,7 +97,7 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := iu.predicates; len(ps) > 0 {
+	if ps := iu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

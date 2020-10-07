@@ -20,14 +20,13 @@ import (
 // CityDelete is the builder for deleting a City entity.
 type CityDelete struct {
 	config
-	hooks      []Hook
-	mutation   *CityMutation
-	predicates []predicate.City
+	hooks    []Hook
+	mutation *CityMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (cd *CityDelete) Where(ps ...predicate.City) *CityDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd
 }
 
@@ -79,7 +78,7 @@ func (cd *CityDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := cd.predicates; len(ps) > 0 {
+	if ps := cd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

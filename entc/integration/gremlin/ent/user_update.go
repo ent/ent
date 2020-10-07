@@ -22,14 +22,13 @@ import (
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // Where adds a new predicate for the builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.predicates = append(uu.predicates, ps...)
+	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
@@ -635,7 +634,7 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 8)
 	v := g.V().HasLabel(user.Label)
-	for _, p := range uu.predicates {
+	for _, p := range uu.mutation.predicates {
 		p(v)
 	}
 	var (

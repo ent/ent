@@ -7,6 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/gremlin/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
@@ -20,7 +21,7 @@ func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, err
 
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel({{ $.Package }}.Label)
-	for _, p := range {{ $receiver }}.predicates {
+	for _, p := range {{ $mutation }}.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

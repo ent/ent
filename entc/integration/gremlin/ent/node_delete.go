@@ -21,14 +21,13 @@ import (
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.predicates = append(nd.predicates, ps...)
+	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
 	return nd
 }
 
@@ -81,7 +80,7 @@ func (nd *NodeDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (nd *NodeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(node.Label)
-	for _, p := range nd.predicates {
+	for _, p := range nd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

@@ -21,14 +21,13 @@ import (
 // TaskDelete is the builder for deleting a Task entity.
 type TaskDelete struct {
 	config
-	hooks      []Hook
-	mutation   *TaskMutation
-	predicates []predicate.Task
+	hooks    []Hook
+	mutation *TaskMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
-	td.predicates = append(td.predicates, ps...)
+	td.mutation.predicates = append(td.mutation.predicates, ps...)
 	return td
 }
 
@@ -81,7 +80,7 @@ func (td *TaskDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (td *TaskDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(task.Label)
-	for _, p := range td.predicates {
+	for _, p := range td.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

@@ -20,14 +20,13 @@ import (
 // GoodsUpdate is the builder for updating Goods entities.
 type GoodsUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GoodsMutation
-	predicates []predicate.Goods
+	hooks    []Hook
+	mutation *GoodsMutation
 }
 
 // Where adds a new predicate for the builder.
 func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	gu.predicates = append(gu.predicates, ps...)
+	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
 }
 
@@ -101,7 +100,7 @@ func (gu *GoodsUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (gu *GoodsUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(goods.Label)
-	for _, p := range gu.predicates {
+	for _, p := range gu.mutation.predicates {
 		p(v)
 	}
 	var (

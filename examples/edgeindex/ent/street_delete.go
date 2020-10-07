@@ -20,14 +20,13 @@ import (
 // StreetDelete is the builder for deleting a Street entity.
 type StreetDelete struct {
 	config
-	hooks      []Hook
-	mutation   *StreetMutation
-	predicates []predicate.Street
+	hooks    []Hook
+	mutation *StreetMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
-	sd.predicates = append(sd.predicates, ps...)
+	sd.mutation.predicates = append(sd.mutation.predicates, ps...)
 	return sd
 }
 
@@ -79,7 +78,7 @@ func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := sd.predicates; len(ps) > 0 {
+	if ps := sd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

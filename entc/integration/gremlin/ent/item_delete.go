@@ -21,14 +21,13 @@ import (
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.predicates = append(id.predicates, ps...)
+	id.mutation.predicates = append(id.mutation.predicates, ps...)
 	return id
 }
 
@@ -81,7 +80,7 @@ func (id *ItemDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (id *ItemDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(item.Label)
-	for _, p := range id.predicates {
+	for _, p := range id.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

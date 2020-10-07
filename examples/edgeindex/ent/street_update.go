@@ -21,14 +21,13 @@ import (
 // StreetUpdate is the builder for updating Street entities.
 type StreetUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *StreetMutation
-	predicates []predicate.Street
+	hooks    []Hook
+	mutation *StreetMutation
 }
 
 // Where adds a new predicate for the builder.
 func (su *StreetUpdate) Where(ps ...predicate.Street) *StreetUpdate {
-	su.predicates = append(su.predicates, ps...)
+	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
@@ -130,7 +129,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := su.predicates; len(ps) > 0 {
+	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

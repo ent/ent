@@ -26,12 +26,11 @@ import (
 type {{ $builder }} struct {
 	config
 	{{- template "update/fields" $ -}}
-	predicates []predicate.{{ $.Name }}
 }
 
 // Where adds a new predicate for the builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
+	{{ $mutation }}.predicates = append({{ $mutation }}.predicates, ps...)
 	return {{ $receiver }}
 }
 

@@ -21,14 +21,13 @@ import (
 // UserDelete is the builder for deleting a User entity.
 type UserDelete struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
-	ud.predicates = append(ud.predicates, ps...)
+	ud.mutation.predicates = append(ud.mutation.predicates, ps...)
 	return ud
 }
 
@@ -81,7 +80,7 @@ func (ud *UserDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (ud *UserDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(user.Label)
-	for _, p := range ud.predicates {
+	for _, p := range ud.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

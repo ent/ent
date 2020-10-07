@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/facebook/ent/entc/integration/json/ent/predicate"
 	"github.com/facebook/ent/entc/integration/json/ent/schema"
 	"github.com/facebook/ent/entc/integration/json/ent/user"
 
@@ -49,6 +50,7 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

@@ -20,14 +20,13 @@ import (
 // BlobDelete is the builder for deleting a Blob entity.
 type BlobDelete struct {
 	config
-	hooks      []Hook
-	mutation   *BlobMutation
-	predicates []predicate.Blob
+	hooks    []Hook
+	mutation *BlobMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
-	bd.predicates = append(bd.predicates, ps...)
+	bd.mutation.predicates = append(bd.mutation.predicates, ps...)
 	return bd
 }
 
@@ -79,7 +78,7 @@ func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := bd.predicates; len(ps) > 0 {
+	if ps := bd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

@@ -20,14 +20,13 @@ import (
 // GoodsUpdate is the builder for updating Goods entities.
 type GoodsUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GoodsMutation
-	predicates []predicate.Goods
+	hooks    []Hook
+	mutation *GoodsMutation
 }
 
 // Where adds a new predicate for the builder.
 func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	gu.predicates = append(gu.predicates, ps...)
+	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
 }
 
@@ -98,7 +97,7 @@ func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := gu.predicates; len(ps) > 0 {
+	if ps := gu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

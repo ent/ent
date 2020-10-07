@@ -54,7 +54,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- /* general update for N vertices */}}
 	{{- else }}
 		v := g.V().HasLabel({{ $.Package }}.Label)
-		for _, p := range {{ $receiver }}.predicates {
+		for _, p := range {{ $mutation }}.predicates {
 			p(v)
 		}
 	{{- end }}

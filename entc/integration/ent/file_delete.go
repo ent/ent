@@ -20,14 +20,13 @@ import (
 // FileDelete is the builder for deleting a File entity.
 type FileDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FileMutation
-	predicates []predicate.File
+	hooks    []Hook
+	mutation *FileMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	fd.predicates = append(fd.predicates, ps...)
+	fd.mutation.predicates = append(fd.mutation.predicates, ps...)
 	return fd
 }
 
@@ -79,7 +78,7 @@ func (fd *FileDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := fd.predicates; len(ps) > 0 {
+	if ps := fd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

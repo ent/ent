@@ -22,14 +22,13 @@ import (
 // NodeUpdate is the builder for updating Node entities.
 type NodeUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
 // Where adds a new predicate for the builder.
 func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	nu.predicates = append(nu.predicates, ps...)
+	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
 	return nu
 }
 
@@ -185,7 +184,7 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(node.Label)
-	for _, p := range nu.predicates {
+	for _, p := range nu.mutation.predicates {
 		p(v)
 	}
 	var (

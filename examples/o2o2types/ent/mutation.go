@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/facebook/ent/examples/o2o2types/ent/card"
+	"github.com/facebook/ent/examples/o2o2types/ent/predicate"
 	"github.com/facebook/ent/examples/o2o2types/ent/user"
 
 	"github.com/facebook/ent"
@@ -45,6 +46,7 @@ type CardMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Card, error)
+	predicates    []predicate.Card
 }
 
 var _ ent.Mutation = (*CardMutation)(nil)
@@ -463,6 +465,7 @@ type UserMutation struct {
 	clearedcard   bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

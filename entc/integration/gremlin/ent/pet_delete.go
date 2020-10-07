@@ -21,14 +21,13 @@ import (
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
-	hooks      []Hook
-	mutation   *PetMutation
-	predicates []predicate.Pet
+	hooks    []Hook
+	mutation *PetMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	pd.predicates = append(pd.predicates, ps...)
+	pd.mutation.predicates = append(pd.mutation.predicates, ps...)
 	return pd
 }
 
@@ -81,7 +80,7 @@ func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (pd *PetDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(pet.Label)
-	for _, p := range pd.predicates {
+	for _, p := range pd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

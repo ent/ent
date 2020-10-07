@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/facebook/ent/examples/m2mbidi/ent/predicate"
 	"github.com/facebook/ent/examples/m2mbidi/ent/user"
 
 	"github.com/facebook/ent"
@@ -44,6 +45,7 @@ type UserMutation struct {
 	clearedfriends bool
 	done           bool
 	oldValue       func(context.Context) (*User, error)
+	predicates     []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

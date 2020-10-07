@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/predicate"
 	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
 
 	"github.com/facebook/ent"
@@ -42,6 +43,7 @@ type CarMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Car, error)
+	predicates    []predicate.Car
 }
 
 var _ ent.Mutation = (*CarMutation)(nil)
@@ -357,6 +359,7 @@ type UserMutation struct {
 	clearedcar      bool
 	done            bool
 	oldValue        func(context.Context) (*User, error)
+	predicates      []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

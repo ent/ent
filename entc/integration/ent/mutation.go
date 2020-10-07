@@ -24,6 +24,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/groupinfo"
 	"github.com/facebook/ent/entc/integration/ent/node"
 	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/ent/spec"
@@ -77,6 +78,7 @@ type CardMutation struct {
 	clearedspec   bool
 	done          bool
 	oldValue      func(context.Context) (*Card, error)
+	predicates    []predicate.Card
 }
 
 var _ ent.Mutation = (*CardMutation)(nil)
@@ -705,6 +707,7 @@ type CommentMutation struct {
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*Comment, error)
+	predicates      []predicate.Comment
 }
 
 var _ ent.Mutation = (*CommentMutation)(nil)
@@ -1301,6 +1304,7 @@ type FieldTypeMutation struct {
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
+	predicates                 []predicate.FieldType
 }
 
 var _ ent.Mutation = (*FieldTypeMutation)(nil)
@@ -5681,6 +5685,7 @@ type FileMutation struct {
 	clearedfield  bool
 	done          bool
 	oldValue      func(context.Context) (*File, error)
+	predicates    []predicate.File
 }
 
 var _ ent.Mutation = (*FileMutation)(nil)
@@ -6493,6 +6498,7 @@ type FileTypeMutation struct {
 	clearedfiles  bool
 	done          bool
 	oldValue      func(context.Context) (*FileType, error)
+	predicates    []predicate.FileType
 }
 
 var _ ent.Mutation = (*FileTypeMutation)(nil)
@@ -6982,6 +6988,7 @@ type GoodsMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Goods, error)
+	predicates    []predicate.Goods
 }
 
 var _ ent.Mutation = (*GoodsMutation)(nil)
@@ -7229,6 +7236,7 @@ type GroupMutation struct {
 	clearedinfo    bool
 	done           bool
 	oldValue       func(context.Context) (*Group, error)
+	predicates     []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -8124,6 +8132,7 @@ type GroupInfoMutation struct {
 	clearedgroups bool
 	done          bool
 	oldValue      func(context.Context) (*GroupInfo, error)
+	predicates    []predicate.GroupInfo
 }
 
 var _ ent.Mutation = (*GroupInfoMutation)(nil)
@@ -8594,6 +8603,7 @@ type ItemMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Item, error)
+	predicates    []predicate.Item
 }
 
 var _ ent.Mutation = (*ItemMutation)(nil)
@@ -8830,6 +8840,7 @@ type NodeMutation struct {
 	clearednext   bool
 	done          bool
 	oldValue      func(context.Context) (*Node, error)
+	predicates    []predicate.Node
 }
 
 var _ ent.Mutation = (*NodeMutation)(nil)
@@ -9309,6 +9320,7 @@ type PetMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Pet, error)
+	predicates    []predicate.Pet
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -9728,6 +9740,7 @@ type SpecMutation struct {
 	clearedcard   bool
 	done          bool
 	oldValue      func(context.Context) (*Spec, error)
+	predicates    []predicate.Spec
 }
 
 var _ ent.Mutation = (*SpecMutation)(nil)
@@ -10049,6 +10062,7 @@ type TaskMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Task, error)
+	predicates    []predicate.Task
 }
 
 var _ ent.Mutation = (*TaskMutation)(nil)
@@ -10416,6 +10430,7 @@ type UserMutation struct {
 	clearedparent    bool
 	done             bool
 	oldValue         func(context.Context) (*User, error)
+	predicates       []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
